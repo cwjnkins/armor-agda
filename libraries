@@ -1,0 +1,2 @@
+-- Copy this to "~/.agda." and replace ${PWD} with the current directory
+${PWD}/agda-stdlib/standard-library.agda
