@@ -21,3 +21,7 @@ open import Data.Sum     public
 
 open import Data.Vec     public
   hiding (map ; zip)
+
+open import Relation.Binary.PropositionalEquality public
+  hiding ([_] ; decSetoid)
+module Reveal = Reveal_·_is_

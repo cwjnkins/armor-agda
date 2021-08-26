@@ -1,7 +1,7 @@
 open import Aeres.Prelude
 
 open import Data.Fin.Properties
-  renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans)
+  renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
 open import Data.Nat.Induction
 open import Data.Nat.Properties
 open import Induction.WellFounded
@@ -12,6 +12,14 @@ Binary = Vec Bool
 
 pattern #0 = false
 pattern #1 = true
+
+bitToℕ : Bool → ℕ
+bitToℕ #0 = 0
+bitToℕ #1 = 1
+
+infixl 6 _b+_
+_b+_ : Bool → ℕ → ℕ
+b b+ n = bitToℕ b + n
 
 divmod2 : ℕ → ℕ × Bool
 divmod2 0 = 0 , #0
@@ -25,6 +33,58 @@ divmod2-≤ (suc (suc n))
   with divmod2-≤ n
 ...| pf = ≤-trans (s≤s pf) (s≤s (n≤1+n n))
 
+1≤2^n : ∀ n → 1 ≤ 2 ^ n
+1≤2^n zero = ≤-refl
+1≤2^n (suc n) = ≤-stepsʳ ((2 ^ n) + zero) (1≤2^n n)
+
+divmod2-*2 : ∀ n → proj₂ (divmod2 n) b+ 2 * proj₁ (divmod2 n) ≡ n
+divmod2-*2 zero = refl
+divmod2-*2 (suc zero) = refl
+divmod2-*2 (suc (suc n))
+  with divmod2-*2 n
+...| ih
+  with divmod2 n
+...| q , r = begin
+  r b+ ((1 + q) + (1 + (q + 0))) ≡⟨ cong (r b+_) (+-suc (1 + q) (q + 0)) ⟩
+  r b+ (2 + 2 * q) ≡⟨ sym (+-assoc (bitToℕ r) 2 (2 * q)) ⟩
+  (r b+ 2) + 2 * q ≡⟨ cong (_+ 2 * q) (+-comm (bitToℕ r) 2) ⟩
+  (2 + (bitToℕ r)) + 2 * q ≡⟨ +-assoc 2 (bitToℕ r) (2 * q) ⟩
+  2 + (r b+ 2 * q) ≡⟨ cong (2 +_) ih ⟩
+  2 + n ∎
+  where open ≡-Reasoning
+
+divmod2-2^ : ∀ n → proj₁ (divmod2 (2 ^ (1 + n))) ≡ 2 ^ n
+divmod2-2^ n
+  with divmod2-*2 (2 ^ (1 + n))
+...| pf
+  with help (2 ^ n)
+  where
+  help : ∀ n → proj₂ (divmod2 (2 * n)) ≡ #0
+  help zero = refl
+  help (suc n) rewrite +-suc n (n + 0) = help n
+...| pf₂ rewrite pf₂ = *-injective (proj₁ (divmod2 (2 * 2 ^ n))) (2 ^ n) pf
+  where
+  *-injective : ∀ a b → 2 * a ≡ 2 * b → a ≡ b
+  *-injective zero zero eq = refl
+  *-injective (suc a) (suc b) eq
+    rewrite +-suc a (a + 0)
+    |       +-suc b (b + 0)
+    = cong suc (*-injective a b (suc-injective (suc-injective eq)))
+
+divmod2-<-^ : ∀ i n → 2 + i < 2 ^ (1 + n) → 1 + proj₁ (divmod2 i) < 2 ^ n
+divmod2-<-^ i n i<
+  with divmod2-*2 (2 + i)
+...| pf = {!!}
+
+-- divmod2-<-^ i 0 (s≤s (s≤s ()))
+-- divmod2-<-^ zero (suc n) i< = *-monoʳ-≤ 2 (1≤2^n n)
+-- divmod2-<-^ 1 (suc n) i< = *-monoʳ-≤ 2 (1≤2^n n)
+-- divmod2-<-^ (suc (suc i)) (suc zero) (s≤s (s≤s (s≤s (s≤s ()))))
+-- divmod2-<-^ (suc (suc i)) (suc (suc n)) i<
+--   with divmod2-<-^ i (suc n) {!!}
+-- ...| xxx = {!!}
+
+
 toBinary : ∀ {n} → Fin.Fin (2 ^ n) → Binary n
 toBinary{n} i = help n (Fin.toℕ i) (toℕ<n i) (<-wellFounded (Fin.toℕ i))
   where
@@ -33,10 +93,14 @@ toBinary{n} i = help n (Fin.toℕ i) (toℕ<n i) (<-wellFounded (Fin.toℕ i))
   help (suc n) 0 i< (acc rs) = replicate #0
   help (suc n) 1 i< (acc rs) = #1 ∷ replicate #0
   help (suc n) i@(suc (suc i')) i< (acc rs)
-    with divmod2-≤ i'
+     with divmod2-≤ i'
   ...| q≤i'
      with divmod2 i'
-  ...| (q , r) = r ∷ help n (suc q) {!!} (rs (suc q) (s≤s (s≤s q≤i')))
+     |    inspect divmod2 i'
+  ...| (q , r) | Reveal.[ eq ] = r ∷ help n (suc q) pf (rs (suc q) (s≤s (s≤s q≤i')))
+    where
+    pf : 1 + q < 2 ^ n
+    pf rewrite sym (cong proj₁ eq) = divmod2-<-^ i' n i<
 
 module Base256 where
   Dig = Binary 8
