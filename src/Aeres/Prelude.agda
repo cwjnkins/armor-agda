@@ -22,6 +22,9 @@ module Fin where
 
 Fin = Fin.Fin
 
+infix 10 #_
+#_ = Fin.#_
+
 open import Data.List    public
 
 open import Data.List.Relation.Unary.Any public
@@ -37,6 +40,8 @@ open import Data.Maybe public
 
 open import Data.Nat     public
   hiding (_≟_)
+open import Agda.Builtin.Nat public
+  using (_-_)
 
 open import Data.Product public
   hiding (map ; zip)
@@ -59,6 +64,9 @@ open import Relation.Binary.PropositionalEquality public
 module Reveal = Reveal_·_is_
 
 open import Relation.Nullary public
+
+open import Relation.Nullary.Decidable public
+  hiding (map)
 
 -- Typeclasses
 
@@ -90,3 +98,8 @@ instance
 
   CharEq : Eq Char
   Eq._≟_ CharEq = Char._≟_
+
+record Sized {ℓ} (A : Set ℓ) : Set ℓ where
+  field
+    sizeOf : A → ℕ
+open Sized ⦃ ... ⦄ public
