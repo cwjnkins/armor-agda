@@ -57,6 +57,10 @@ module Base256 where
   Byte = Binary 8
   Dig  = Fin (2 ^ 8)
 
+module Base128 where
+  Byte = Binary 7
+  Dig  = Fin (2 ^ 7)
+
 module Base64 where
   Byte = Binary 6
   Dig  = Fin (2 ^ 6)

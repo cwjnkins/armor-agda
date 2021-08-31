@@ -22,6 +22,7 @@ data Length : List Dig → Set where
   long  : (lₕ : Dig) → (l>128 : True (128 <? toℕ lₕ))
           → (lₜ : Vec Dig (toℕ lₕ - 128))
           → Length (lₕ ∷ Vec.toList lₜ)
+  -- TODO: ensure least number of bits used (no leading zeros)
 
 getLength : ∀ {ds} → Length ds → ℕ
 getLength {.(l ∷ [])} (short l l<128) = toℕ l
@@ -55,10 +56,38 @@ private
 
 module Generic where
 
-  data OIDField : List Dig → Set where
-    oid1 : (bs : List Dig) (b : Dig)
-           → {!!}
-           → OIDField (bs ++ [ b ])
+  data OIDSubPrefix : ℕ → List Dig → Set where
+    []  : OIDSubPrefix 0 []
+    consOIDSubPrefix
+      : ∀ {n ds} → OIDSubPrefix n ds
+        → (b : Dig) → (b>128 : True (toℕ b >? 128))
+        → OIDSubPrefix (toℕ b - 128 + 128 * n) (ds ∷ʳ b)
+
+  instance
+    SizedOIDSubPrefix : ∀ {n ds} → Sized (OIDSubPrefix n ds)
+    Sized.sizeOf SizedOIDSubPrefix [] = 0
+    Sized.sizeOf SizedOIDSubPrefix (consOIDSubPrefix x b b>128) =
+      1 + Sized.sizeOf SizedOIDSubPrefix x
+
+  data OIDSub : ℕ → List Dig → Set where
+    mkOIDSub : ∀ {n ds} → OIDSubPrefix n ds
+               → (b : Dig) → (b<128 : True (toℕ b <? 128))
+               → OIDSub (toℕ b + 128 * n) (ds ∷ʳ b)
+
+  instance
+    SizedOIDSub : ∀ {n ds} → Sized (OIDSub n ds)
+    Sized.sizeOf SizedOIDSub (mkOIDSub x b b<128) = 1 + sizeOf x
+
+  private
+    test₁ : OIDSub 255 (# 129 ∷ [ # 127 ])
+    test₁ = mkOIDSub (consOIDSubPrefix [] (# 129) _) (# 127) _
+
+  postulate
+    OIDField : List Dig → Set
+  -- data OIDField : List Dig → Set where
+  --   oid1 : (bs : List Dig) (b : Dig)
+  --          → {!!}
+  --          → OIDField (bs ++ [ b ])
 
   postulate
     instance
@@ -116,19 +145,23 @@ module X509 where
     SizedSignAlg : ∀ {sa}  → Sized (SignAlg sa)
     Sized.sizeOf SizedSignAlg (mkSignAlg l sa len≡) = 1 + sizeOf l + getLength l
 
-  data CertField : (tbs sa sig : List Dig) → Set where
+  data CertField : List Dig → Set where
     mkCertField
       : ∀ {tbs sa sig}
         → TBSCert tbs → SignAlg sa → Signature sig
-        → CertField tbs sa sig
+        → CertField (tbs ++ sa ++ sig)
 
   instance
-    SizedCertField : ∀ {tbs sa sig} → Sized (CertField tbs sa sig)
-    Sized.sizeOf (SizedCertField{tbs'}{sa'}{sig'}) (mkCertField tbs sa sig) =
-      -- sizeOf tbs + sizeOf sa + sizeOf sig
-      length tbs' + sizeOf sa + length sig'
+    SizedCertField : ∀ {bs} → Sized (CertField bs)
+    Sized.sizeOf SizedCertField (mkCertField tbs sa sig) =
+      sizeOf tbs + sizeOf sa + sizeOf sig
 
   data Cert : List Dig → Set where
-    mkCert : ∀ {len tbs sa sig} → (l : Length len) → (cf : CertField tbs sa sig)
+    mkCert : ∀ {len cbs} → (l : Length len) → (cf : CertField cbs)
              → (len≡ : LengthIs cf l)
-             → Cert (Tag.Sequence ∷ len ++ tbs ++ sa ++ sig)
+             → Cert (Tag.Sequence ∷ len ++ cbs)
+
+  private
+    test₁ : ¬ Cert []
+    test₁ ()
+

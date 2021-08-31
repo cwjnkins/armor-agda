@@ -20,12 +20,16 @@ module Fin where
   2* suc {suc n} i rewrite +-suc n (suc (n +ℕ 0)) =
     suc (suc (2* i))
 
+  open import Data.Fin.Properties public
+
 Fin = Fin.Fin
 
 infix 10 #_
 #_ = Fin.#_
 
 open import Data.List    public
+
+open import Data.List.Properties public
 
 open import Data.List.Relation.Unary.Any public
   using (here ; there)
@@ -36,7 +40,7 @@ open import Data.List.Membership.Propositional public
   using (_∈_ ; _∉_)
 
 open import Data.Maybe public
-  hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith)
+  hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
 
 open import Data.Nat     public
   hiding (_≟_)
@@ -52,6 +56,9 @@ module String = Data.String
 open import Data.Sum     public
   hiding (map ; map₁ ; map₂ ; swap)
 
+open import Data.Unit    public
+  using (⊤ ; tt)
+
 open import Data.Vec public
   using (_∷_ ; [])
 module Vec = Data.Vec
@@ -59,9 +66,15 @@ Vec = Vec.Vec
 
 open import Function     public
 
+module Level where
+  open import Level public
+
 open import Relation.Binary.PropositionalEquality public
   hiding ([_] ; decSetoid)
 module Reveal = Reveal_·_is_
+
+open import Relation.Binary.Definitions public
+  using (Tri ; tri< ; tri≈ ; tri> )
 
 open import Relation.Nullary public
 
@@ -99,7 +112,20 @@ instance
   CharEq : Eq Char
   Eq._≟_ CharEq = Char._≟_
 
+  FinEq : ∀ {n} → Eq (Fin n)
+  Eq._≟_ FinEq = Fin._≟_
+
 record Sized {ℓ} (A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ
 open Sized ⦃ ... ⦄ public
+
+import Category.Monad
+Monad = Category.Monad.RawMonad
+
+module Monad {ℓ} (M : Set ℓ → Set ℓ) (m : Monad M) where
+  open Category.Monad.RawMonad m public
+    hiding (zip ; zipWith)
+
+open Monad ⦃ ... ⦄ public
+
