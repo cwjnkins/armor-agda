@@ -40,7 +40,9 @@ record _×ₚ_ (A B : List Σ → Set) (xs : List Σ) : Set where
     fstₚ : A prefix
     sndₚ : B suffix
 
-module _ (M : Set → Set) ⦃ m : Monad M ⦄ where
+module _ {M : Set → Set} ⦃ m : Monad M ⦄ where
+
+  
 
   _⟨&⟩_ : ∀ {A B : List Σ → Set}
           → Parser M A → Parser M B → Parser M (A ×ₚ B)
@@ -59,3 +61,16 @@ module _ (M : Set → Set) ⦃ m : Monad M ⦄ where
                       pre₁ ++ (pre₂ ++ s₂)  ≡⟨ cong (pre₁ ++_) split₂ ⟩
                       pre₁ ++ s₁            ≡⟨ split₁ ⟩
                       xs                    ∎)))
+
+module _ {M : Set → Set} ⦃ m : Monad M ⦄ ⦃ mz : MonadZero M ⦄ where
+  parseSingle : ⦃ _ : Eq Σ ⦄ → ∀ a → Parser M (_≡ [ a ])
+  runParser (parseSingle a) [] = ∅
+  runParser (parseSingle a) (x ∷ xs)
+    with x ≟ a
+  ...| yes x≡ = return (mkSuccess [ x ] (cong (_∷ []) x≡) xs refl)
+  ...| no  x≢ = ∅
+
+  -- Doesn't do what I want it to :(
+  -- EOF : Parser M (_≡ [])
+  -- runParser EOF [] = return (mkSuccess [] refl [] refl)
+  -- runParser EOF (_ ∷ _) = ∅

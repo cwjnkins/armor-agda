@@ -122,10 +122,27 @@ open Sized ⦃ ... ⦄ public
 
 import Category.Monad
 Monad = Category.Monad.RawMonad
+MonadZero = Category.Monad.RawMonadZero
 
-module Monad {ℓ} (M : Set ℓ → Set ℓ) (m : Monad M) where
+module Monad {ℓ} {M : Set ℓ → Set ℓ} (m : Monad M) where
   open Category.Monad.RawMonad m public
     hiding (zip ; zipWith)
 
 open Monad ⦃ ... ⦄ public
 
+instance
+  MonadMaybe : ∀ {ℓ} → Monad{ℓ} Maybe
+  MonadMaybe = monad
+    where open import Data.Maybe.Categorical
+
+module MonadZero {ℓ} {M : Set ℓ → Set ℓ} (m : MonadZero M) where
+  import Category.Monad
+
+  ∅ = Category.Monad.RawMonadZero.∅ m
+
+open MonadZero ⦃ ... ⦄ public
+
+instance
+  MonadZeroMaybe : ∀ {ℓ} → MonadZero{ℓ} Maybe
+  MonadZeroMaybe = monadZero
+    where open import Data.Maybe.Categorical
