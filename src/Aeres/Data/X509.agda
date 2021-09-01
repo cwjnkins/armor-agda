@@ -90,6 +90,7 @@ module Generic where
 
   postulate
     OIDField : List Dig → Set
+    Integer : List Dig → Set
   -- data OIDField : List Dig → Set where
   --   oid1 : (bs : List Dig) (b : Dig)
   --          → {!!}
@@ -98,7 +99,8 @@ module Generic where
   postulate
     instance
       SizedOIDField : ∀ {oid} → Sized (OIDField oid)
-
+      SizedInteger : ∀ {x} → Sized (Integer x)
+  
   data OID : List Dig → Set where
     mkOID : ∀ {len} {oid} (l : Length len)
             → (o : OIDField oid)
@@ -108,6 +110,15 @@ module Generic where
   instance
     SizedOID : ∀ {oid} → Sized (OID oid)
     Sized.sizeOf SizedOID (mkOID l o x) = getLength l
+
+  data Int : List Dig → Set where
+    mkInt : ∀ {len value} → (l : Length len) → (val : Integer value)
+                → (len≡ : LengthIs val l)
+                → Int (Tag.Integer ∷ len ++ value)
+
+  instance
+    SizedInt : ∀ {x}  → Sized (Int x)
+    Sized.sizeOf SizedInt (mkInt l x len≡) = 1 + sizeOf l + getLength l
 
 module X509 where
 
@@ -119,7 +130,6 @@ module X509 where
     PublicKey : List Dig → Set
     Uid : List Dig → Set
     Extensions : List Dig → Set
-    Integer : List Dig → Set
 
   data SignOID : List Dig → Set
 
@@ -133,7 +143,6 @@ module X509 where
       SizedPublicKey : ∀ {x} → Sized (PublicKey x)
       SizedUid : ∀ {x} → Sized (Uid x)
       SizedExtensions : ∀ {x} → Sized (Extensions x)
-      SizedInteger : ∀ {x} → Sized (Integer x)
 
   data SignOID where
     mkSignOID : ∀ {len oid} (l : Length len)
@@ -162,17 +171,8 @@ module X509 where
     Sized.sizeOf SizedSignAlg (mkSignAlg l sa len≡) = 1 + sizeOf l + getLength l
 
 --------------------------  TBSCert  -----------------------------------------------------------------
-  data VersionInt : List Dig → Set where
-    mkVersionInt : ∀ {len value} → (l : Length len) → (val : Integer value)
-                → (len≡ : LengthIs val l)
-                → VersionInt (Tag.Integer ∷ len ++ value)
-
-  instance
-    SizedVersionInt : ∀ {x}  → Sized (VersionInt x)
-    Sized.sizeOf SizedVersionInt (mkVersionInt l x len≡) = 1 + sizeOf l + getLength l
-
   data Version : List Dig → Set where
-    mkVersion : ∀ {len vibs} → (l : Length len) → (vf : VersionInt vibs)
+    mkVersion : ∀ {len vibs} → (l : Length len) → (vf : Generic.Int vibs)
                 → (len≡ : LengthIs vf l)
                 → Version (Tag.VersionTag ∷ len ++ vibs)
 
@@ -180,19 +180,10 @@ module X509 where
     SizedVersion : ∀ {x}  → Sized (Version x)
     Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
 
-  data Serial : List Dig → Set where
-    mkSerial : ∀ {len value} → (l : Length len) → (val : Integer value)
-                → (len≡ : LengthIs val l)
-                → Serial (Tag.Integer ∷ len ++ value)
-
-  instance
-    SizedSerial : ∀ {x}  → Sized (Serial x)
-    Sized.sizeOf SizedSerial (mkSerial l x len≡) = 1 + sizeOf l + getLength l
-
   data TBSCertField : List Dig → Set where
     mkTBSCertField
       : ∀ {ver ser satbs iss valid sub pk issuid subuid extns}
-        → Version ver → Serial ser → SignAlg satbs → RDName iss → Validity valid
+        → Version ver → Generic.Int ser → SignAlg satbs → RDName iss → Validity valid
         → RDName sub → PublicKey pk → Uid issuid → Uid subuid → Extensions extns
         → TBSCertField (ver ++ ser ++ satbs ++ iss ++ valid ++ sub ++ pk ++ issuid ++ subuid ++ extns)
 
@@ -201,7 +192,6 @@ module X509 where
     Sized.sizeOf SizedTBSCertField (mkTBSCertField ver ser satbs iss valid sub pk issuid subuid extns) =
       sizeOf ver + sizeOf ser + sizeOf satbs + sizeOf iss + sizeOf valid + sizeOf sub + sizeOf pk
       + sizeOf issuid + sizeOf subuid + sizeOf extns
-
 
   data TBSCert : List Dig → Set where
     mkTBSCert : ∀ {len tbsbs} → (l : Length len) → (tbsf : TBSCertField tbsbs)
