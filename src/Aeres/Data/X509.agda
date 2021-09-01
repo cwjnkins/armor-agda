@@ -15,6 +15,12 @@ module Tag where
   Sequence : Dig
   Sequence = # 48
 
+  VersionTag : Dig
+  VersionTag = # 160
+
+  Integer : Dig
+  Integer = # 2
+
 
 data Length : List Dig → Set where
   short : (l : Dig) → (l<128 : True (toℕ l <? 128))
@@ -106,18 +112,28 @@ module Generic where
 module X509 where
 
   postulate
-    TBSCert : List Dig → Set
     SignParam : List Dig → Set
     Signature : List Dig → Set
+    RDName : List Dig → Set
+    Validity : List Dig → Set
+    PublicKey : List Dig → Set
+    Uid : List Dig → Set
+    Extensions : List Dig → Set
+    Integer : List Dig → Set
 
   data SignOID : List Dig → Set
 
   postulate
     instance
-      SizedTBSCert : ∀ {tbs} → Sized (TBSCert tbs)
       SizedSignature : ∀ {sig} → Sized (Signature sig)
       SizedSignOID : ∀ {oid} → Sized (SignOID oid)
       SizedSignParam : ∀ {param} → Sized (SignParam param)
+      SizedRDName : ∀ {x} → Sized (RDName x)
+      SizedValidity : ∀ {x} → Sized (Validity x)
+      SizedPublicKey : ∀ {x} → Sized (PublicKey x)
+      SizedUid : ∀ {x} → Sized (Uid x)
+      SizedExtensions : ∀ {x} → Sized (Extensions x)
+      SizedInteger : ∀ {x} → Sized (Integer x)
 
   data SignOID where
     mkSignOID : ∀ {len oid} (l : Length len)
@@ -145,6 +161,58 @@ module X509 where
     SizedSignAlg : ∀ {sa}  → Sized (SignAlg sa)
     Sized.sizeOf SizedSignAlg (mkSignAlg l sa len≡) = 1 + sizeOf l + getLength l
 
+--------------------------  TBSCert  -----------------------------------------------------------------
+  data VersionInt : List Dig → Set where
+    mkVersionInt : ∀ {len value} → (l : Length len) → (val : Integer value)
+                → (len≡ : LengthIs val l)
+                → VersionInt (Tag.Integer ∷ len ++ value)
+
+  instance
+    SizedVersionInt : ∀ {x}  → Sized (VersionInt x)
+    Sized.sizeOf SizedVersionInt (mkVersionInt l x len≡) = 1 + sizeOf l + getLength l
+
+  data Version : List Dig → Set where
+    mkVersion : ∀ {len vibs} → (l : Length len) → (vf : VersionInt vibs)
+                → (len≡ : LengthIs vf l)
+                → Version (Tag.VersionTag ∷ len ++ vibs)
+
+  instance
+    SizedVersion : ∀ {x}  → Sized (Version x)
+    Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
+
+  data Serial : List Dig → Set where
+    mkSerial : ∀ {len value} → (l : Length len) → (val : Integer value)
+                → (len≡ : LengthIs val l)
+                → Serial (Tag.Integer ∷ len ++ value)
+
+  instance
+    SizedSerial : ∀ {x}  → Sized (Serial x)
+    Sized.sizeOf SizedSerial (mkSerial l x len≡) = 1 + sizeOf l + getLength l
+
+  data TBSCertField : List Dig → Set where
+    mkTBSCertField
+      : ∀ {ver ser satbs iss valid sub pk issuid subuid extns}
+        → Version ver → Serial ser → SignAlg satbs → RDName iss → Validity valid
+        → RDName sub → PublicKey pk → Uid issuid → Uid subuid → Extensions extns
+        → TBSCertField (ver ++ ser ++ satbs ++ iss ++ valid ++ sub ++ pk ++ issuid ++ subuid ++ extns)
+
+  instance
+    SizedTBSCertField : ∀ {tbsf} → Sized (TBSCertField tbsf)
+    Sized.sizeOf SizedTBSCertField (mkTBSCertField ver ser satbs iss valid sub pk issuid subuid extns) =
+      sizeOf ver + sizeOf ser + sizeOf satbs + sizeOf iss + sizeOf valid + sizeOf sub + sizeOf pk
+      + sizeOf issuid + sizeOf subuid + sizeOf extns
+
+
+  data TBSCert : List Dig → Set where
+    mkTBSCert : ∀ {len tbsbs} → (l : Length len) → (tbsf : TBSCertField tbsbs)
+                → (len≡ : LengthIs tbsf l)
+                → TBSCert(Tag.Sequence ∷ len ++ tbsbs)
+
+  instance
+    SizedTBSCert : ∀ {x}  → Sized (TBSCert x)
+    Sized.sizeOf SizedTBSCert (mkTBSCert l x len≡) = 1 + sizeOf l + getLength l
+
+---------------------------------------------------------------------------------------------
   data CertField : List Dig → Set where
     mkCertField
       : ∀ {tbs sa sig}
