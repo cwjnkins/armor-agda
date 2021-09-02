@@ -20,8 +20,11 @@ module Unambiguous where
 
 module NoNest where
   postulate
-    TBSCert : NoNest X509.TBSCert
+    -- TBSCert : NoNest X509.TBSCert
     SignAlg : NoNest X509.SignAlg
+
+  TBSCert : NoNest X509.TBSCert
+  TBSCert eq (X509.mkTBSCert l₀ tbsf₀ len≡₀) (X509.mkTBSCert l₁ tbsf₁ len≡₁) = {!!}
 
 -- postulate
 --   unambiguous : ∀ {xs} → (c₁ c₂ : X509.Cert xs) → c₁ ≡ c₂

@@ -29,11 +29,8 @@ runParser parseCertField xs = do
   yes sig'@(sig ^S suf₂ [ refl ]S) ← runParser parseSignature suf₁
     where no pf → tell here' >> (return ∘ no $ noSignature tbs sa pf)
   return (yes (X509.mkCertField tbs sa sig ^S suf₂
-                [ prove 4
-                    ((var (# 0) ⊕ var (# 1) ⊕ var (# 2)) ⊕ var (# 3)
-                    , var (# 0) ⊕ var (# 1) ⊕ var (# 2) ⊕ var (# 3))
-                    (Success.prefix tbs' ∷ Success.prefix sa'
-                     ∷ Success.prefix sig' ∷ Vec.[ suf₂ ]) ]S))
+                [ sym $ Lemmas.++-assoc₄
+                    (Success.prefix tbs') (Success.prefix sa') (Success.prefix sig') suf₂ ]S))
   where
   here' = "parseCertField"
 
@@ -44,10 +41,7 @@ runParser parseCertField xs = do
     ¬tbs (tbs ^S saₛ ++ sigₛ ++ suf
       [ begin
         tbsₛ ++ saₛ ++ sigₛ ++ suf
-          ≡⟨ prove 4
-               (var (# 0) ⊕ var (# 1) ⊕ var (# 2) ⊕ var (# 3)
-               , (var (# 0) ⊕ var (# 1) ⊕ var (# 2)) ⊕ var (# 3))
-               (tbsₛ ∷ saₛ ∷ sigₛ ∷ Vec.[ suf ]) ⟩
+          ≡⟨ Lemmas.++-assoc₄ tbsₛ saₛ sigₛ suf ⟩
         (tbsₛ ++ saₛ ++ sigₛ) ++ suf
           ≡⟨ ps≡ ⟩
         xs ∎ ]S)
@@ -64,10 +58,7 @@ runParser parseCertField xs = do
     ps≡' : tbsₛ' ++ saₛ' ++ sigₛ' ++ suf' ≡ tbsₛ ++ suf
     ps≡' = begin
       tbsₛ' ++ saₛ' ++ sigₛ' ++ suf'
-        ≡⟨ prove 4
-            (var (# 0) ⊕ var (# 1) ⊕ var (# 2) ⊕ var (# 3)
-            , (var (# 0) ⊕ var (# 1) ⊕ var (# 2)) ⊕ var (# 3))
-            (tbsₛ' ∷ saₛ' ∷ sigₛ' ∷ Vec.[ suf' ]) ⟩
+        ≡⟨ Lemmas.++-assoc₄ tbsₛ' saₛ' sigₛ' suf' ⟩
       (tbsₛ' ++ saₛ' ++ sigₛ') ++ suf'
         ≡⟨ ps≡ ⟩
       tbsₛ ++ suf
@@ -89,10 +80,7 @@ runParser parseCertField xs = do
     ps≡' : tbsₛ' ++ saₛ' ++ sigₛ' ++ suf' ≡ tbsₛ ++ saₛ ++ suf
     ps≡' = begin
       tbsₛ' ++ saₛ' ++ sigₛ' ++ suf'
-        ≡⟨ prove 4
-             (var (# 0) ⊕ var (# 1) ⊕ var (# 2) ⊕ var (# 3)
-             , (var (# 0) ⊕ var (# 1) ⊕ var (# 2)) ⊕ var (# 3) )
-             (tbsₛ' ∷ saₛ' ∷ sigₛ' ∷ Vec.[ suf' ]) ⟩
+        ≡⟨ Lemmas.++-assoc₄ tbsₛ' saₛ' sigₛ' suf' ⟩
       (tbsₛ' ++ saₛ' ++ sigₛ') ++ suf'
         ≡⟨ ps≡ ⟩
       tbsₛ ++ saₛ ++ suf

@@ -199,7 +199,7 @@ module X509 where
                 → TBSCert(Tag.Sequence ∷ len ++ tbsbs)
 
   instance
-    SizedTBSCert : ∀ {x}  → Sized (TBSCert x)
+    SizedTBSCert : ∀ {x} → Sized (TBSCert x)
     Sized.sizeOf SizedTBSCert (mkTBSCert l x len≡) = 1 + sizeOf l + getLength l
 
 ---------------------------------------------------------------------------------------------

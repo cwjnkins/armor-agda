@@ -66,10 +66,6 @@ Vec = Vec.Vec
 
 open import Function     public
 
-implicit! : ∀ {ℓ₁ ℓ₂} {I : Set ℓ₁} {A : I → Set ℓ₂}
-           → {i : I} → A i → I
-implicit! {i = i} _ = i
-
 module Level where
   open import Level public
 
@@ -172,3 +168,12 @@ instance
 
   WriterLogging : Writer Logging String.String
   Writer.tell WriterLogging w = mkLogged [ w ] (Level.lift tt)
+
+-- Lemmas
+module Lemmas where
+
+  open import Data.List.Solver using (module ++-Solver)
+  open ++-Solver using (_⊕_)
+
+  ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
+  ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
