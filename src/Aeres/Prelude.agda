@@ -66,6 +66,10 @@ Vec = Vec.Vec
 
 open import Function     public
 
+implicit! : ∀ {ℓ₁ ℓ₂} {I : Set ℓ₁} {A : I → Set ℓ₂}
+           → {i : I} → A i → I
+implicit! {i = i} _ = i
+
 module Level where
   open import Level public
 
