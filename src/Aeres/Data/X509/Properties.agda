@@ -21,6 +21,7 @@ module Unambiguous where
 module NoNest where
   postulate
     TBSCert : NoNest X509.TBSCert
+    SignAlg : NoNest X509.SignAlg
 
 -- postulate
 --   unambiguous : ∀ {xs} → (c₁ c₂ : X509.Cert xs) → c₁ ≡ c₂

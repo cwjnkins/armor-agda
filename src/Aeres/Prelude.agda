@@ -150,3 +150,25 @@ instance
   MonadZeroMaybe : ∀ {ℓ} → MonadZero{ℓ} Maybe
   MonadZeroMaybe = monadZero
     where open import Data.Maybe.Categorical
+
+record Writer {ℓ} (M : Set ℓ → Set ℓ) (W : Set ℓ) : Set ℓ where
+  field
+    tell : W → M (Level.Lift _ ⊤)
+
+open Writer ⦃ ... ⦄ public
+
+record Logging {ℓ} (A : Set ℓ) : Set ℓ where
+  constructor mkLogged
+  field
+    log : List String.String
+    val : A
+
+instance
+  MonadLogging : ∀ {ℓ} → Monad{ℓ} Logging
+  Monad.return MonadLogging x = mkLogged [] x
+  Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
+    with f val₁
+  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
+
+  WriterLogging : Writer Logging String.String
+  Writer.tell WriterLogging w = mkLogged [ w ] (Level.lift tt)
