@@ -15,6 +15,9 @@ module Tag where
   Sequence : Dig
   Sequence = # 48
 
+  Sett : Dig
+  Sett = # 49
+
   VersionTag : Dig
   VersionTag = # 160
 
@@ -91,6 +94,7 @@ module Generic where
   postulate
     OIDField : List Dig → Set
     Integer : List Dig → Set
+    StringValue : List Dig → Set
   -- data OIDField : List Dig → Set where
   --   oid1 : (bs : List Dig) (b : Dig)
   --          → {!!}
@@ -100,6 +104,7 @@ module Generic where
     instance
       SizedOIDField : ∀ {oid} → Sized (OIDField oid)
       SizedInteger : ∀ {x} → Sized (Integer x)
+      SizedStringValue : ∀ {x} → Sized (StringValue x)
 
   data OID : List Dig → Set where
     mkOID : ∀ {len} {oid} (l : Length len)
@@ -120,6 +125,7 @@ module Generic where
     SizedInt : ∀ {x}  → Sized (Int x)
     Sized.sizeOf SizedInt (mkInt l x len≡) = 1 + sizeOf l + getLength l
 
+
 module X509 where
 
   postulate
@@ -129,7 +135,6 @@ module X509 where
     PublicKey : List Dig → Set
     Uid : List Dig → Set
     Extensions : List Dig → Set
-    Elem : List Dig → Set
 
   data SignOID : List Dig → Set
 
@@ -142,7 +147,6 @@ module X509 where
       SizedPublicKey : ∀ {x} → Sized (PublicKey x)
       SizedUid : ∀ {x} → Sized (Uid x)
       SizedExtensions : ∀ {x} → Sized (Extensions x)
-      SizedElem : ∀ {x} → Sized (Elem x)
 
   data SignOID where
     mkSignOID : ∀ {len oid} (l : Length len)
@@ -175,14 +179,51 @@ module X509 where
     mkVersion : ∀ {len vibs} → (l : Length len) → (vf : Generic.Int vibs)
                 → (len≡ : LengthIs vf l)
                 → Version (Tag.VersionTag ∷ len ++ vibs)
-
+            
   instance
     SizedVersion : ∀ {x}  → Sized (Version x)
     Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
 
+  data RDNAttrbt : List Dig → Set where
+    mkRDNAttrbt
+      : ∀ {oid value}
+        → Generic.OID oid → Generic.StringValue value
+        → RDNAttrbt (oid ++ value)
+
+  instance
+    postulate
+      SizedRDNAttrbt : ∀ {bs} → Sized (RDNAttrbt bs)
+
+  data RDNSetSeq : List Dig → Set where
+    mkRDNSetSeq : ∀{len attrbt} → (l : Length len) → (rdnattrbt : RDNAttrbt attrbt)
+                → (len≡ : LengthIs rdnattrbt l)
+                → RDNSetSeq(Tag.Sequence ∷ len ++ attrbt)
+
+  instance
+    postulate
+      SizedRDNSetSeq : ∀ {x}  → Sized (RDNSetSeq x)
+
+
+  data RDNSetElems : List Dig → Set where
+    _∷[] : ∀ {x} →  RDNSetSeq x → RDNSetElems x
+    _∷_ : ∀{x y} →  RDNSetSeq x → RDNSetElems y → RDNSetElems (x ++ y)
+
+  instance
+    postulate
+      SizedRDNSetElems : ∀ {x} → Sized (RDNSetElems x)
+
+  data RDNSet : List Dig → Set where
+    mkRDNSet : ∀ {len elems} → (l : Length len) → (rdnsetelems : RDNSetElems elems)
+                → (len≡ : LengthIs rdnsetelems l)
+                → RDNSet(Tag.Sett ∷ len ++ elems)
+
+  instance
+    postulate
+      SizedRDNSet : ∀ {x} → Sized (RDNSet x)
+
   data RDNSeqElems : List Dig → Set where
-    _∷[] : ∀ {x} → Elem x → RDNSeqElems x
-    _∷_ : ∀{x y} → Elem x → RDNSeqElems y → RDNSeqElems (x ++ y)
+    _∷[] : ∀{x} →  RDNSet x → RDNSeqElems x
+    _∷_ : ∀{x y} →  RDNSet x → RDNSeqElems y → RDNSeqElems (x ++ y)
 
   instance
     postulate
