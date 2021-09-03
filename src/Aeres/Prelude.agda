@@ -146,3 +146,40 @@ instance
   MonadZeroMaybe : ∀ {ℓ} → MonadZero{ℓ} Maybe
   MonadZeroMaybe = monadZero
     where open import Data.Maybe.Categorical
+
+record Writer {ℓ} (M : Set ℓ → Set ℓ) (W : Set ℓ) : Set ℓ where
+  field
+    tell : W → M (Level.Lift _ ⊤)
+
+open Writer ⦃ ... ⦄ public
+
+record Logging {ℓ} (A : Set ℓ) : Set ℓ where
+  constructor mkLogged
+  field
+    log : List String.String
+    val : A
+
+instance
+  MonadLogging : ∀ {ℓ} → Monad{ℓ} Logging
+  Monad.return MonadLogging x = mkLogged [] x
+  Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
+    with f val₁
+  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
+
+  WriterLogging : Writer Logging String.String
+  Writer.tell WriterLogging w = mkLogged [ w ] (Level.lift tt)
+
+-- Lemmas
+module Lemmas where
+
+  open import Data.List.Solver using (module ++-Solver)
+  open ++-Solver using (_⊕_)
+
+  ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
+  ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
+
+  length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
+  length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
+  length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
+    with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
+  ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs
