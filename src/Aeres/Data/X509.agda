@@ -125,11 +125,11 @@ module X509 where
   postulate
     SignParam : List Dig → Set
     Signature : List Dig → Set
-    RDName : List Dig → Set
     Validity : List Dig → Set
     PublicKey : List Dig → Set
     Uid : List Dig → Set
     Extensions : List Dig → Set
+    Elem : List Dig → Set
 
   data SignOID : List Dig → Set
 
@@ -138,11 +138,11 @@ module X509 where
       SizedSignature : ∀ {sig} → Sized (Signature sig)
       SizedSignOID : ∀ {oid} → Sized (SignOID oid)
       SizedSignParam : ∀ {param} → Sized (SignParam param)
-      SizedRDName : ∀ {x} → Sized (RDName x)
       SizedValidity : ∀ {x} → Sized (Validity x)
       SizedPublicKey : ∀ {x} → Sized (PublicKey x)
       SizedUid : ∀ {x} → Sized (Uid x)
       SizedExtensions : ∀ {x} → Sized (Extensions x)
+      SizedElem : ∀ {x} → Sized (Elem x)
 
   data SignOID where
     mkSignOID : ∀ {len oid} (l : Length len)
@@ -179,6 +179,24 @@ module X509 where
   instance
     SizedVersion : ∀ {x}  → Sized (Version x)
     Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
+
+  data RDNSeqElems : List Dig → Set where
+    _∷[] : ∀ {x} → Elem x → RDNSeqElems x
+    _∷_ : ∀{x y} → Elem x → RDNSeqElems y → RDNSeqElems (x ++ y)
+
+  instance
+    postulate
+      SizedRDNSeqElems : ∀ {x} → Sized (RDNSeqElems x)
+
+  data RDName : List Dig → Set where
+    mkRDName : ∀ {len seqelems} → (l : Length len) → (elems : RDNSeqElems seqelems)
+                → (len≡ : LengthIs elems l)
+                → RDName(Tag.Sequence ∷ len ++ seqelems)
+
+  instance
+    SizedRDName : ∀ {x}  → Sized (RDName x)
+    Sized.sizeOf SizedRDName (mkRDName l x len≡) = 1 + sizeOf l + getLength l
+
 
   data TBSCertField : List Dig → Set where
     mkTBSCertField
