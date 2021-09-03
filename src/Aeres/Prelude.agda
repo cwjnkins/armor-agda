@@ -177,3 +177,9 @@ module Lemmas where
 
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
+
+  length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
+  length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
+  length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
+    with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
+  ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs

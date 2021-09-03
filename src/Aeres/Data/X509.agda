@@ -100,7 +100,7 @@ module Generic where
     instance
       SizedOIDField : ∀ {oid} → Sized (OIDField oid)
       SizedInteger : ∀ {x} → Sized (Integer x)
-  
+
   data OID : List Dig → Set where
     mkOID : ∀ {len} {oid} (l : Length len)
             → (o : OIDField oid)
@@ -195,7 +195,7 @@ module X509 where
 
   data TBSCert : List Dig → Set where
     mkTBSCert : ∀ {len tbsbs} → (l : Length len) → (tbsf : TBSCertField tbsbs)
-                → (len≡ : LengthIs tbsf l)
+                → (len≡ : True $ length tbsbs ≟ getLength l)
                 → TBSCert(Tag.Sequence ∷ len ++ tbsbs)
 
   instance
