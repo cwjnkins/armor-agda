@@ -70,7 +70,8 @@ module Level where
   open import Level public
 
 open import Relation.Binary.PropositionalEquality public
-  hiding ([_] ; decSetoid)
+  hiding (decSetoid)
+  renaming ([_] to [_]R)
 module Reveal = Reveal_·_is_
 
 open import Relation.Binary.Definitions public
@@ -172,11 +173,16 @@ instance
 -- Lemmas
 module Lemmas where
 
-  open import Data.List.Solver using (module ++-Solver)
-  open ++-Solver using (_⊕_)
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
 
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
-  ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
+  ++-assoc₄{A = A} ws xs ys zs = solve (++-monoid A)
+
+  -- open import Data.List.Solver using (module ++-Solver)
+  -- open ++-Solver using (_⊕_)
+
+  -- ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
+  -- ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
 
   length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
   length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
