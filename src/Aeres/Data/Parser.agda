@@ -1,6 +1,4 @@
 open import Aeres.Prelude
-open import Aeres.Data.Box
-
 
 module Aeres.Data.Parser (Σ : Set) where
 

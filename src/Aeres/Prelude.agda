@@ -31,6 +31,11 @@ open import Data.List    public
 
 open import Data.List.Properties public
 
+open import Data.List.Relation.Unary.All
+  using ([] ; _∷_)
+module All = Data.List.Relation.Unary.All
+All = All.All
+
 open import Data.List.Relation.Unary.Any public
   using (here ; there)
 module Any = Data.List.Relation.Unary.Any
@@ -54,7 +59,7 @@ import Data.String
 module String = Data.String
 
 open import Data.Sum     public
-  hiding (map ; map₁ ; map₂ ; swap)
+  hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
 
 open import Data.Unit    public
   using (⊤ ; tt)

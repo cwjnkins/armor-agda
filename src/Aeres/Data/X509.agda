@@ -6,90 +6,121 @@ open import Aeres.Binary
 open Base256
 
 module Tag where
-  Null : Dig
-  Null = # 5
+  abstract
+    Null : Dig
+    Null = # 5
 
-  ObjectIdentifier : Dig
-  ObjectIdentifier = # 6
+    ObjectIdentifier : Dig
+    ObjectIdentifier = # 6
 
-  Sequence : Dig
-  Sequence = # 48
+    Sequence : Dig
+    Sequence = # 48
 
-  Sett : Dig
-  Sett = # 49
+    Sett : Dig
+    Sett = # 49
 
-  VersionTag : Dig
-  VersionTag = # 160
+    VersionTag : Dig
+    VersionTag = # 160
 
-  Integer : Dig
-  Integer = # 2
+    Integer : Dig
+    Integer = # 2
 
+module Length where
 
-data Length : List Dig → Set where
-  short : (l : Dig) → (l<128 : True (toℕ l <? 128))
-          → Length [ l ]
-  long  : (lₕ : Dig) → (l>128 : True (128 <? toℕ lₕ))
-          → (lₜ : Vec Dig (toℕ lₕ - 128))
-          → Length (lₕ ∷ Vec.toList lₜ)
-  -- TODO: ensure least number of bits used (no leading zeros)
+  record Short (bs : List Dig) : Set where
+    constructor mkShort
+    field
+      l : Dig
+      @0 l<128 : toℕ l < 128
+      @0 bs≡ : bs ≡ [ l ]
 
-getLength : ∀ {ds} → Length ds → ℕ
-getLength {.(l ∷ [])} (short l l<128) = toℕ l
-getLength {.(lₕ ∷ Vec.toList lₜ)} (long lₕ l>128 lₜ) = go (Vec.reverse lₜ)
-  where
-  go : ∀ {n} → Vec Dig n → ℕ
-  go [] = 0
-  go (x ∷ ds) = toℕ x + 256 * go ds
+  record Long (bs : List Dig) : Set where
+    constructor mkLong
+    field
+      l : Dig
+      @0 l>128 : 128 < toℕ l
+      lₕ : Dig
+      @0 lₕ≢0 : toℕ lₕ ≢ 0
+      lₜ : List Dig
+      @0 lₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
+      @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
 
-instance
-  SizedLength : ∀ {@0 len} → Sized (Length len)
-  Sized.sizeOf (SizedLength {.(l ∷ [])}) (short l l<128) = 1
-  Sized.sizeOf (SizedLength {l@.(lₕ ∷ Vec.toList lₜ)}) (long lₕ l>128 lₜ) = length l
+  data Length : List Dig → Set where
+    short : ∀ {@0 bs} → Short bs → Length bs
+    long  : ∀ {@0 bs} → Long  bs → Length bs
 
-LengthIs : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Sized A ⦄ {len} → (a : A) (l : Length len) → Set
-LengthIs a l = True (sizeOf a ≟ getLength l)
+  shortₛ : ∀ l → {@0 _ : True (toℕ l <? 128)} → Length [ l ]
+  shortₛ l {l<128} = short (mkShort l (toWitness l<128) refl)
 
-private
-  module LengthTest where
-    lₛ : Length [ # 38 ]
-    lₛ = short (# 38) _
+  longₛ : ∀ l lₕ lₜ → {@0 _ : True (128 <? toℕ l)} {@0 _ : False (toℕ lₕ ≟ 0)} {@0 _ : True (length (lₕ ∷ lₜ) ≟ (toℕ l - 128))}
+          → Length (l ∷ lₕ ∷ lₜ)
+  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} = long (mkLong l (toWitness l>128) lₕ (toWitnessFalse lₕ≢0) lₜ (toWitness lₜLen) refl)
 
+  getLength : ∀ {@0 bs} → Length bs → ℕ
+  getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
+  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = go (reverse (lₕ ∷ lₜ))
+    where
+    go : List Dig → ℕ
+    go [] = 0
+    go (b ∷ bs') = toℕ b + 256 * go bs'
+
+  instance
+    SizedLength : ∀ {@0 bs} → Sized (Length bs)
+    Sized.sizeOf SizedLength (short _) = 1
+    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = 1 + length lₜ
+
+  private
     lₗ : Length (# 129 ∷ [ # 201 ])
-    lₗ = long (# 129) _ Vec.[ # 201 ]
+    lₗ = longₛ (# 129) (# 201) []
 
-    test₁ : getLength lₛ ≡ 38
-    test₁ = refl
-
-    test₂ : getLength lₗ ≡ 201
-    test₂ = refl
+open Length using (Length ; getLength ; shortₛ ; longₛ)
 
 module Generic where
 
-  data OIDSubPrefix : ℕ → List Dig → Set where
-    []  : OIDSubPrefix 0 []
-    consOIDSubPrefix
-      : ∀ {n ds} → OIDSubPrefix n ds
-        → (b : Dig) → (b>128 : True (toℕ b >? 128))
-        → OIDSubPrefix (toℕ b - 128 + 128 * n) (ds ∷ʳ b)
+  record OIDSub (bs : List Dig) : Set where
+    constructor mkOIDSub
+    field
+      lₚ : List Dig
+      @0 lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
+      lₑ   : Dig
+      @0 l₃<128 : toℕ lₑ < 128
+      @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
+      @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
   instance
-    SizedOIDSubPrefix : ∀ {n ds} → Sized (OIDSubPrefix n ds)
-    Sized.sizeOf SizedOIDSubPrefix [] = 0
-    Sized.sizeOf SizedOIDSubPrefix (consOIDSubPrefix x b b>128) =
-      1 + Sized.sizeOf SizedOIDSubPrefix x
-
-  data OIDSub : ℕ → List Dig → Set where
-    mkOIDSub : ∀ {n ds} → OIDSubPrefix n ds
-               → (b : Dig) → (b<128 : True (toℕ b <? 128))
-               → OIDSub (toℕ b + 128 * n) (ds ∷ʳ b)
-
-  instance
-    SizedOIDSub : ∀ {n ds} → Sized (OIDSub n ds)
-    Sized.sizeOf SizedOIDSub (mkOIDSub x b b<128) = 1 + sizeOf x
+    SizedOIDSub : ∀ {@0 bs} → Sized (OIDSub bs)
+    Sized.sizeOf SizedOIDSub (mkOIDSub lₚ lₚ≥128 lₑ l₃<128 leastDigs bs≡) =
+      length (lₚ ∷ʳ lₑ)
 
   private
-    test₁ : OIDSub 255 (# 129 ∷ [ # 127 ])
-    test₁ = mkOIDSub (consOIDSubPrefix [] (# 129) _) (# 127) _
+    oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
+    oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
+
+  -- data OIDSubPrefix : ℕ → List Dig → Set where
+  --   []  : OIDSubPrefix 0 []
+  --   consOIDSubPrefix
+  --     : ∀ {n ds} → OIDSubPrefix n ds
+  --       → (b : Dig) → (b>128 : True (toℕ b >? 128))
+  --       → OIDSubPrefix (toℕ b - 128 + 128 * n) (ds ∷ʳ b)
+
+--   instance
+--     SizedOIDSubPrefix : ∀ {n ds} → Sized (OIDSubPrefix n ds)
+--     Sized.sizeOf SizedOIDSubPrefix [] = 0
+--     Sized.sizeOf SizedOIDSubPrefix (consOIDSubPrefix x b b>128) =
+--       1 + Sized.sizeOf SizedOIDSubPrefix x
+
+--   data OIDSub : ℕ → List Dig → Set where
+--     mkOIDSub : ∀ {n ds} → OIDSubPrefix n ds
+--                → (b : Dig) → (b<128 : True (toℕ b <? 128))
+--                → OIDSub (toℕ b + 128 * n) (ds ∷ʳ b)
+
+--   instance
+--     SizedOIDSub : ∀ {n ds} → Sized (OIDSub n ds)
+--     Sized.sizeOf SizedOIDSub (mkOIDSub x b b<128) = 1 + sizeOf x
+
+--   private
+--     test₁ : OIDSub 255 (# 129 ∷ [ # 127 ])
+--     test₁ = mkOIDSub (consOIDSubPrefix [] (# 129) _) (# 127) _
 
   postulate
     OIDField : List Dig → Set
@@ -109,7 +140,7 @@ module Generic where
   data OID : List Dig → Set where
     mkOID : ∀ {len} {oid} (l : Length len)
             → (o : OIDField oid)
-            → LengthIs o l
+            → (getLength l ≡ length oid)
             → OID (Tag.ObjectIdentifier ∷ len ++ oid)
 
   instance
@@ -118,7 +149,7 @@ module Generic where
 
   data Int : List Dig → Set where
     mkInt : ∀ {len value} → (l : Length len) → (val : Integer value)
-                → (len≡ : LengthIs val l)
+                → (len≡ : getLength l ≡ length value)
                 → Int (Tag.Integer ∷ len ++ value)
 
   instance
@@ -151,7 +182,7 @@ module X509 where
   data SignOID where
     mkSignOID : ∀ {len oid} (l : Length len)
                 → (o : Generic.OID oid)
-                → LengthIs o l
+                → (getLength l ≡ length oid)
                 → SignOID (Tag.ObjectIdentifier ∷ len ++ oid)
 
   data SignAlgField : (oid param : List Dig) → Set where
@@ -167,7 +198,7 @@ module X509 where
   data SignAlg : List Dig → Set where
     mkSignAlg : ∀ {len oid param} → (l : Length len)
                 → (sa : SignAlgField oid param)
-                → (len≡ : LengthIs sa l)
+                → (len≡ : getLength l ≡ length (oid ++ param))
                 → SignAlg (Tag.Sequence ∷ len ++ oid ++ param)
 
   instance
@@ -177,9 +208,9 @@ module X509 where
 --------------------------  TBSCert  -----------------------------------------------------------------
   data Version : List Dig → Set where
     mkVersion : ∀ {len vibs} → (l : Length len) → (vf : Generic.Int vibs)
-                → (len≡ : LengthIs vf l)
+                → (len≡ : getLength l ≡ length vibs)
                 → Version (Tag.VersionTag ∷ len ++ vibs)
-            
+
   instance
     SizedVersion : ∀ {x}  → Sized (Version x)
     Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
@@ -196,7 +227,7 @@ module X509 where
 
   data RDNSetSeq : List Dig → Set where
     mkRDNSetSeq : ∀{len attrbt} → (l : Length len) → (rdnattrbt : RDNAttrbt attrbt)
-                → (len≡ : LengthIs rdnattrbt l)
+                → (len≡ : getLength l ≡ length attrbt)
                 → RDNSetSeq(Tag.Sequence ∷ len ++ attrbt)
 
   instance
@@ -214,7 +245,7 @@ module X509 where
 
   data RDNSet : List Dig → Set where
     mkRDNSet : ∀ {len elems} → (l : Length len) → (rdnsetelems : RDNSetElems elems)
-                → (len≡ : LengthIs rdnsetelems l)
+                → (len≡ : getLength l ≡ length elems)
                 → RDNSet(Tag.Sett ∷ len ++ elems)
 
   instance
@@ -231,7 +262,7 @@ module X509 where
 
   data RDName : List Dig → Set where
     mkRDName : ∀ {len seqelems} → (l : Length len) → (elems : RDNSeqElems seqelems)
-                → (len≡ : LengthIs elems l)
+                → (len≡ : getLength l ≡ length seqelems)
                 → RDName(Tag.Sequence ∷ len ++ seqelems)
 
   instance
