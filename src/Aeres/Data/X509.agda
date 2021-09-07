@@ -42,9 +42,9 @@ getLength {.(lₕ ∷ Vec.toList lₜ)} (long lₕ l>128 lₜ) = go (Vec.reverse
   go (x ∷ ds) = toℕ x + 256 * go ds
 
 instance
-  SizedLength : ∀ {len} → Sized (Length len)
-  Sized.sizeOf SizedLength (short l l<128) = 1
-  Sized.sizeOf SizedLength (long lₕ l>128 lₜ) = 1 + (toℕ lₕ - 128)
+  SizedLength : ∀ {@0 len} → Sized (Length len)
+  Sized.sizeOf (SizedLength {.(l ∷ [])}) (short l l<128) = 1
+  Sized.sizeOf (SizedLength {l@.(lₕ ∷ Vec.toList lₜ)}) (long lₕ l>128 lₜ) = length l
 
 LengthIs : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Sized A ⦄ {len} → (a : A) (l : Length len) → Set
 LengthIs a l = True (sizeOf a ≟ getLength l)
@@ -269,16 +269,20 @@ module X509 where
         → CertField (tbs ++ sa ++ sig)
 
   instance
-    SizedCertField : ∀ {bs} → Sized (CertField bs)
+    SizedCertField : ∀ {@0 bs} → Sized (CertField bs)
     Sized.sizeOf SizedCertField (mkCertField tbs sa sig) =
       sizeOf tbs + sizeOf sa + sizeOf sig
 
   data Cert : List Dig → Set where
-    mkCert : ∀ {len cbs} → (l : Length len) → (cf : CertField cbs)
-             → (len≡ : LengthIs cf l)
+    mkCert : ∀ {@0 len cbs} → (l : Length len) → (cf : CertField cbs)
+             → (@0 len≡ : length cbs ≡ getLength l)
              → Cert (Tag.Sequence ∷ len ++ cbs)
+
+  instance
+    SizedCert : ∀ {@0 bs} → Sized (Cert bs)
+    Sized.sizeOf (SizedCert {.(Tag.Sequence ∷ len ++ cbs)}) (mkCert{len}{cbs} l cf len≡) =
+      1 + sizeOf l + sizeOf cf
 
   private
     test₁ : ¬ Cert []
     test₁ ()
-

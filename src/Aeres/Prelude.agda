@@ -116,7 +116,7 @@ instance
   FinEq : ∀ {n} → Eq (Fin n)
   Eq._≟_ FinEq = Fin._≟_
 
-record Sized {ℓ} (A : Set ℓ) : Set ℓ where
+record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ
 open Sized ⦃ ... ⦄ public
