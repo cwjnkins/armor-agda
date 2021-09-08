@@ -25,35 +25,35 @@ getLength≡{xs}{.xs} refl l₀ l₁ = cong getLength (Unambiguous.LengthUA l₀
 
 module NoNest where
   postulate
-    -- TBSCert : NoNest X509.TBSCert
+    TBSCert : NoNest X509.TBSCert
     LengthNN  : NoNest Length
     SignAlg : NoNest X509.SignAlg
 
-  TBSCert : NoNest X509.TBSCert
-  TBSCert{ys₁ = ys₀}{ys₂ = ys₁} eq (X509.mkTBSCert{len₀}{tbsbs₀} l₀ tbsf₀ len≡₀) (X509.mkTBSCert{len₁}{tbsbs₁} l₁ tbsf₁ len≡₁) =
-    cong (Tag.Sequence ∷_) (cong₂ _++_ eqₗ eq₃)
-    where
-    open ≡-Reasoning
+  -- TBSCert : NoNest X509.TBSCert
+  -- TBSCert{ys₁ = ys₀}{ys₂ = ys₁} eq (X509.mkTBSCert{len₀}{tbsbs₀} l₀ tbsf₀ len≡₀) (X509.mkTBSCert{len₁}{tbsbs₁} l₁ tbsf₁ len≡₁) =
+  --   cong (Tag.Sequence ∷_) (cong₂ _++_ eqₗ eq₃)
+  --   where
+  --   open ≡-Reasoning
 
-    eq₁ : len₀ ++ tbsbs₀ ++ ys₀ ≡ len₁ ++ tbsbs₁ ++ ys₁
-    eq₁ = ∷-injectiveʳ{x = Tag.Sequence}{y = Tag.Sequence} $ begin
-      Tag.Sequence ∷ len₀ ++ tbsbs₀ ++ ys₀
-        ≡⟨ Lemmas.++-assoc₄ [ Tag.Sequence ] len₀ tbsbs₀ ys₀ ⟩
-      (Tag.Sequence ∷ len₀ ++ tbsbs₀) ++ ys₀
-        ≡⟨ eq ⟩
-      (Tag.Sequence ∷ len₁ ++ tbsbs₁) ++ ys₁
-        ≡⟨ sym $ Lemmas.++-assoc₄ [ Tag.Sequence ] len₁ tbsbs₁ ys₁ ⟩
-      Tag.Sequence ∷ len₁ ++ tbsbs₁ ++ ys₁ ∎
+  --   eq₁ : len₀ ++ tbsbs₀ ++ ys₀ ≡ len₁ ++ tbsbs₁ ++ ys₁
+  --   eq₁ = ∷-injectiveʳ{x = Tag.Sequence}{y = Tag.Sequence} $ begin
+  --     Tag.Sequence ∷ len₀ ++ tbsbs₀ ++ ys₀
+  --       ≡⟨ Lemmas.++-assoc₄ [ Tag.Sequence ] len₀ tbsbs₀ ys₀ ⟩
+  --     (Tag.Sequence ∷ len₀ ++ tbsbs₀) ++ ys₀
+  --       ≡⟨ eq ⟩
+  --     (Tag.Sequence ∷ len₁ ++ tbsbs₁) ++ ys₁
+  --       ≡⟨ sym $ Lemmas.++-assoc₄ [ Tag.Sequence ] len₁ tbsbs₁ ys₁ ⟩
+  --     Tag.Sequence ∷ len₁ ++ tbsbs₁ ++ ys₁ ∎
 
-    eqₗ : len₀ ≡ len₁
-    eqₗ = LengthNN eq₁ l₀ l₁
+  --   eqₗ : len₀ ≡ len₁
+  --   eqₗ = LengthNN eq₁ l₀ l₁
 
-    eq₂ : tbsbs₀ ++ ys₀ ≡ tbsbs₁ ++ ys₁
-    eq₂ = ++-cancelˡ len₁ (subst (λ x → x ++ tbsbs₀ ++ ys₀ ≡ len₁ ++ tbsbs₁ ++ ys₁) eqₗ eq₁)
+  --   eq₂ : tbsbs₀ ++ ys₀ ≡ tbsbs₁ ++ ys₁
+  --   eq₂ = ++-cancelˡ len₁ (subst (λ x → x ++ tbsbs₀ ++ ys₀ ≡ len₁ ++ tbsbs₁ ++ ys₁) eqₗ eq₁)
 
-    eq₃ : tbsbs₀ ≡ tbsbs₁
-    eq₃ = proj₁ ∘ Lemmas.length-++-≡ _ _ _ _ eq₂ $ begin
-      length tbsbs₀ ≡⟨ toWitness len≡₀ ⟩
-      getLength l₀  ≡⟨ getLength≡ eqₗ l₀ l₁ ⟩
-      getLength l₁  ≡⟨ sym $ toWitness len≡₁ ⟩
-      length tbsbs₁ ∎
+  --   eq₃ : tbsbs₀ ≡ tbsbs₁
+  --   eq₃ = proj₁ ∘ Lemmas.length-++-≡ _ _ _ _ eq₂ $ begin
+  --     length tbsbs₀ ≡⟨ toWitness len≡₀ ⟩
+  --     getLength l₀  ≡⟨ getLength≡ eqₗ l₀ l₁ ⟩
+  --     getLength l₁  ≡⟨ sym $ toWitness len≡₁ ⟩
+  --     length tbsbs₁ ∎

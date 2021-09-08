@@ -19,8 +19,8 @@ module Tag where
     Sett : Dig
     Sett = # 49
 
-    VersionTag : Dig
-    VersionTag = # 160
+    Version : Dig
+    Version = # 160
 
     Integer : Dig
     Integer = # 2
@@ -67,13 +67,18 @@ module Length where
   instance
     SizedLength : ∀ {@0 bs} → Sized (Length bs)
     Sized.sizeOf SizedLength (short _) = 1
-    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = 1 + length lₜ
+    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = 2 + length lₜ
 
   private
     lₗ : Length (# 129 ∷ [ # 201 ])
     lₗ = longₛ (# 129) (# 201) []
 
-open Length using (Length ; getLength ; shortₛ ; longₛ)
+open Length public
+  using  (Length ; getLength)
+  hiding (module Length)
+
+-- Length = Length.Length
+-- getLength = Length.getLength
 
 module Generic where
 
@@ -83,7 +88,7 @@ module Generic where
       lₚ : List Dig
       @0 lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
       lₑ   : Dig
-      @0 l₃<128 : toℕ lₑ < 128
+      @0 lₑ<128 : toℕ lₑ < 128
       @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
       @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
@@ -96,65 +101,53 @@ module Generic where
     oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
     oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
 
-  -- data OIDSubPrefix : ℕ → List Dig → Set where
-  --   []  : OIDSubPrefix 0 []
-  --   consOIDSubPrefix
-  --     : ∀ {n ds} → OIDSubPrefix n ds
-  --       → (b : Dig) → (b>128 : True (toℕ b >? 128))
-  --       → OIDSubPrefix (toℕ b - 128 + 128 * n) (ds ∷ʳ b)
-
---   instance
---     SizedOIDSubPrefix : ∀ {n ds} → Sized (OIDSubPrefix n ds)
---     Sized.sizeOf SizedOIDSubPrefix [] = 0
---     Sized.sizeOf SizedOIDSubPrefix (consOIDSubPrefix x b b>128) =
---       1 + Sized.sizeOf SizedOIDSubPrefix x
-
---   data OIDSub : ℕ → List Dig → Set where
---     mkOIDSub : ∀ {n ds} → OIDSubPrefix n ds
---                → (b : Dig) → (b<128 : True (toℕ b <? 128))
---                → OIDSub (toℕ b + 128 * n) (ds ∷ʳ b)
-
---   instance
---     SizedOIDSub : ∀ {n ds} → Sized (OIDSub n ds)
---     Sized.sizeOf SizedOIDSub (mkOIDSub x b b<128) = 1 + sizeOf x
-
---   private
---     test₁ : OIDSub 255 (# 129 ∷ [ # 127 ])
---     test₁ = mkOIDSub (consOIDSubPrefix [] (# 129) _) (# 127) _
-
   postulate
-    OIDField : List Dig → Set
-    Integer : List Dig → Set
+    -- OIDField : List Dig → Set
     StringValue : List Dig → Set
-  -- data OIDField : List Dig → Set where
-  --   oid1 : (bs : List Dig) (b : Dig)
-  --          → {!!}
-  --          → OIDField (bs ++ [ b ])
 
   postulate
     instance
-      SizedOIDField : ∀ {oid} → Sized (OIDField oid)
-      SizedInteger : ∀ {x} → Sized (Integer x)
       SizedStringValue : ∀ {x} → Sized (StringValue x)
 
-  data OID : List Dig → Set where
-    mkOID : ∀ {len} {oid} (l : Length len)
-            → (o : OIDField oid)
-            → (getLength l ≡ length oid)
-            → OID (Tag.ObjectIdentifier ∷ len ++ oid)
+  data OIDField : List Dig → Set
 
-  instance
-    SizedOID : ∀ {oid} → Sized (OID oid)
-    Sized.sizeOf SizedOID (mkOID l o x) = getLength l
+  record OIDFieldₐ (bs : List Dig) : Set where
+    inductive
+    constructor cons
+    field
+      @0 {bs₁} : List Dig
+      @0 {bs₂} : List Dig
+      sub  : OIDSub bs₁
+      rest : OIDField bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data Int : List Dig → Set where
-    mkInt : ∀ {len value} → (l : Length len) → (val : Integer value)
-                → (len≡ : getLength l ≡ length value)
-                → Int (Tag.Integer ∷ len ++ value)
+  data OIDField where
+    [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
+    cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
 
-  instance
-    SizedInt : ∀ {x}  → Sized (Int x)
-    Sized.sizeOf SizedInt (mkInt l x len≡) = 1 + sizeOf l + getLength l
+  record OID (bs : List Dig) : Set where
+    constructor mkOid
+    field
+      @0 {l} : List Dig
+      @0 {o} : List Dig
+      len : Length l
+      oid : OIDField o
+      @0 len≡ : getLength len ≡ length o
+      @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
+
+--------------------------------------------------
+
+  postulate
+    Integer : List Dig → Set
+
+  record Int (bs : List Dig) : Set where
+    constructor mkInt
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Integer v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
 
 
 module X509 where
@@ -164,156 +157,126 @@ module X509 where
     Signature : List Dig → Set
     Validity : List Dig → Set
     PublicKey : List Dig → Set
-    Uid : List Dig → Set
+    UID : List Dig → Set
     Extensions : List Dig → Set
-
-  data SignOID : List Dig → Set
 
   postulate
     instance
       SizedSignature : ∀ {sig} → Sized (Signature sig)
-      SizedSignOID : ∀ {oid} → Sized (SignOID oid)
+      -- SizedSignOID : ∀ {oid} → Sized (SignOID oid)
       SizedSignParam : ∀ {param} → Sized (SignParam param)
       SizedValidity : ∀ {x} → Sized (Validity x)
       SizedPublicKey : ∀ {x} → Sized (PublicKey x)
-      SizedUid : ∀ {x} → Sized (Uid x)
+      SizedUid : ∀ {x} → Sized (UID x)
       SizedExtensions : ∀ {x} → Sized (Extensions x)
 
-  data SignOID where
-    mkSignOID : ∀ {len oid} (l : Length len)
-                → (o : Generic.OID oid)
-                → (getLength l ≡ length oid)
-                → SignOID (Tag.ObjectIdentifier ∷ len ++ oid)
-
-  data SignAlgField : (oid param : List Dig) → Set where
-    mkSignAlgField :
-      ∀ {oid param} → SignOID oid → SignParam param
-      → SignAlgField oid param
-
-  instance
-    SizedSignAlgField : ∀ {oid param} → Sized (SignAlgField oid param)
-    Sized.sizeOf SizedSignAlgField (mkSignAlgField oid param) =
-      sizeOf oid + sizeOf param
-
-  data SignAlg : List Dig → Set where
-    mkSignAlg : ∀ {len oid param} → (l : Length len)
-                → (sa : SignAlgField oid param)
-                → (len≡ : getLength l ≡ length (oid ++ param))
-                → SignAlg (Tag.Sequence ∷ len ++ oid ++ param)
-
-  instance
-    SizedSignAlg : ∀ {sa}  → Sized (SignAlg sa)
-    Sized.sizeOf SizedSignAlg (mkSignAlg l sa len≡) = 1 + sizeOf l + getLength l
+  record SignAlg (bs : List Dig) : Set where
+    constructor mkSignAlg
+    field
+      @0 {l o p} : List Dig
+      len : Length l
+      signOID : Generic.OID o
+      param   : SignParam p
+      @0 len≡ : getLength len ≡ length (o ++ p)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
 --------------------------  TBSCert  -----------------------------------------------------------------
-  data Version : List Dig → Set where
-    mkVersion : ∀ {len vibs} → (l : Length len) → (vf : Generic.Int vibs)
-                → (len≡ : getLength l ≡ length vibs)
-                → Version (Tag.VersionTag ∷ len ++ vibs)
 
-  instance
-    SizedVersion : ∀ {x}  → Sized (Version x)
-    Sized.sizeOf SizedVersion (mkVersion l x len≡) = 1 + sizeOf l + getLength l
+  record Version (bs : List Dig) : Set where
+    constructor mkVersion
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      ver : Generic.Int v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Version ∷ l ++ v
 
-  data RDNAttrbt : List Dig → Set where
-    mkRDNAttrbt
-      : ∀ {oid value}
-        → Generic.OID oid → Generic.StringValue value
-        → RDNAttrbt (oid ++ value)
-
-  instance
-    postulate
-      SizedRDNAttrbt : ∀ {bs} → Sized (RDNAttrbt bs)
-
-  data RDNSetSeq : List Dig → Set where
-    mkRDNSetSeq : ∀{len attrbt} → (l : Length len) → (rdnattrbt : RDNAttrbt attrbt)
-                → (len≡ : getLength l ≡ length attrbt)
-                → RDNSetSeq(Tag.Sequence ∷ len ++ attrbt)
-
-  instance
-    postulate
-      SizedRDNSetSeq : ∀ {x}  → Sized (RDNSetSeq x)
+  record RDNSetSeq (bs : List Dig) : Set where
+    constructor mkRDNSetSeq
+    field
+      @0 {l o v} : List Dig
+      len : Length l
+      oid : Generic.OID o
+      val : Generic.StringValue v
+      @0 len≡ : getLength len ≡ length (o ++ v)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
 
 
-  data RDNSetElems : List Dig → Set where
-    _∷[] : ∀ {x} →  RDNSetSeq x → RDNSetElems x
-    _∷_ : ∀{x y} →  RDNSetSeq x → RDNSetElems y → RDNSetElems (x ++ y)
+  data RDNSetElems : List Dig → Set
 
-  instance
-    postulate
-      SizedRDNSetElems : ∀ {x} → Sized (RDNSetElems x)
+  record RDNSetElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkRDNSetElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      rdnss : RDNSetSeq bs₁
+      rest  : RDNSetElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data RDNSet : List Dig → Set where
-    mkRDNSet : ∀ {len elems} → (l : Length len) → (rdnsetelems : RDNSetElems elems)
-                → (len≡ : getLength l ≡ length elems)
-                → RDNSet(Tag.Sett ∷ len ++ elems)
+  data RDNSetElems where
+    _∷[] : ∀ {x} → RDNSetSeq x → RDNSetElems x
+    cons : ∀ {x} → RDNSetElemsₐ x → RDNSetElems x
 
-  instance
-    postulate
-      SizedRDNSet : ∀ {x} → Sized (RDNSet x)
+  record RDNSet (bs : List Dig) : Set where
+    constructor mkRDNSet
+    field
+      @0 {l e} : List Dig
+      len : Length l
+      rdnSetElems : RDNSetElems e
+      @0 len≡ : getLength len ≡ length e
+      @0 bs≡  : bs ≡ Tag.Sett ∷ l ++ e
 
-  data RDNSeqElems : List Dig → Set where
-    _∷[] : ∀{x} →  RDNSet x → RDNSeqElems x
-    _∷_ : ∀{x y} →  RDNSet x → RDNSeqElems y → RDNSeqElems (x ++ y)
+  data RDNSeqElems : List Dig → Set
 
-  instance
-    postulate
-      SizedRDNSeqElems : ∀ {x} → Sized (RDNSeqElems x)
+  record RDNSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkRDNSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      rdnSet : RDNSet bs₁
+      rest   : RDNSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data RDName : List Dig → Set where
-    mkRDName : ∀ {len seqelems} → (l : Length len) → (elems : RDNSeqElems seqelems)
-                → (len≡ : getLength l ≡ length seqelems)
-                → RDName(Tag.Sequence ∷ len ++ seqelems)
+  data RDNSeqElems where
+    _∷[]  : ∀ {x} → RDNSet x → RDNSeqElems x
+    cons : ∀ {x} → RDNSeqElemsₐ x → RDNSeqElems x
 
-  instance
-    SizedRDName : ∀ {x}  → Sized (RDName x)
-    Sized.sizeOf SizedRDName (mkRDName l x len≡) = 1 + sizeOf l + getLength l
+  record RDName (bs : List Dig) : Set where
+    constructor mkRDName
+    field
+      @0 {l e} : List Dig
+      len : Length l
+      elems : RDNSeqElems e
+      @0 len≡ : getLength len ≡ length e
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ e
 
-
-  data TBSCertField : List Dig → Set where
-    mkTBSCertField
-      : ∀ {ver ser satbs iss valid sub pk issuid subuid extns}
-        → Version ver → Generic.Int ser → SignAlg satbs → RDName iss → Validity valid
-        → RDName sub → PublicKey pk → Uid issuid → Uid subuid → Extensions extns
-        → TBSCertField (ver ++ ser ++ satbs ++ iss ++ valid ++ sub ++ pk ++ issuid ++ subuid ++ extns)
-
-  instance
-    SizedTBSCertField : ∀ {tbsf} → Sized (TBSCertField tbsf)
-    Sized.sizeOf SizedTBSCertField (mkTBSCertField ver ser satbs iss valid sub pk issuid subuid extns) =
-      sizeOf ver + sizeOf ser + sizeOf satbs + sizeOf iss + sizeOf valid + sizeOf sub + sizeOf pk
-      + sizeOf issuid + sizeOf subuid + sizeOf extns
-
-  data TBSCert : List Dig → Set where
-    mkTBSCert : ∀ {len tbsbs} → (l : Length len) → (tbsf : TBSCertField tbsbs)
-                → (len≡ : True $ length tbsbs ≟ getLength l)
-                → TBSCert(Tag.Sequence ∷ len ++ tbsbs)
-
-  instance
-    SizedTBSCert : ∀ {x} → Sized (TBSCert x)
-    Sized.sizeOf SizedTBSCert (mkTBSCert l x len≡) = 1 + sizeOf l + getLength l
+  record TBSCert (bs : List Dig) : Set where
+    constructor mkTBSCert
+    field
+      @0 {l ver ser sa i va u p u₁ u₂ e} : _
+      len : Length l
+      version : Version ver
+      serial  : Generic.Int ser
+      signAlg : SignAlg sa
+      issuer  : RDName i
+      validity : Validity va
+      subject  : RDName u
+      pk       : PublicKey p
+      issuerUID : UID u₁
+      subjectUID : UID u₂
+      extensions : Extensions e
+      @0 len≡ : getLength len ≡ length (ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
 ---------------------------------------------------------------------------------------------
-  data CertField : List Dig → Set where
-    mkCertField
-      : ∀ {tbs sa sig}
-        → TBSCert tbs → SignAlg sa → Signature sig
-        → CertField (tbs ++ sa ++ sig)
 
-  instance
-    SizedCertField : ∀ {@0 bs} → Sized (CertField bs)
-    Sized.sizeOf SizedCertField (mkCertField tbs sa sig) =
-      sizeOf tbs + sizeOf sa + sizeOf sig
-
-  data Cert : List Dig → Set where
-    mkCert : ∀ {@0 len cbs} → (l : Length len) → (cf : CertField cbs)
-             → (@0 len≡ : length cbs ≡ getLength l)
-             → Cert (Tag.Sequence ∷ len ++ cbs)
-
-  instance
-    SizedCert : ∀ {@0 bs} → Sized (Cert bs)
-    Sized.sizeOf (SizedCert {.(Tag.Sequence ∷ len ++ cbs)}) (mkCert{len}{cbs} l cf len≡) =
-      1 + sizeOf l + sizeOf cf
-
-  private
-    test₁ : ¬ Cert []
-    test₁ ()
+  record Cert (bs : List Dig) : Set where
+    constructor mkCert
+    field
+      @0 {l t sa sig} : List Dig
+      len : Length l
+      tbs : TBSCert t
+      signAlg : SignAlg sa
+      signature : Signature sig
+      @0 len≡ : getLength len ≡ length (t ++ sa ++ sig)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ t ++ sa ++ sig
