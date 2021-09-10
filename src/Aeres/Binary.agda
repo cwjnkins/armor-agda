@@ -24,11 +24,11 @@ toBinary{n} i = Vec.reverse $ help n (toℕ i) (toℕ<n i) (<-wellFounded (toℕ
   help (suc n) 0 i< (acc rs) = Vec.replicate #0
   help (suc n) 1 i< (acc rs) = #1 ∷ Vec.replicate #0
   help (suc n) i@(suc (suc i')) i< (acc rs)
-     with divmod2-≤ i'
+    with divmod2-≤ i'
   ...| q≤i'
-     with divmod2 i'
-     |    inspect divmod2 i'
-  ...| (q , r) | Reveal.[ eq ] = r ∷ help n (suc q) pf (rs (suc q) (s≤s (s≤s q≤i')))
+    with divmod2 i'
+    | inspect divmod2 i'
+  ... | q , r | [ eq ]R = r ∷ help n (suc q) pf (rs (suc q) (s≤s (s≤s q≤i')))
     where
     pf : 1 + q < 2 ^ n
     pf rewrite sym (cong proj₁ eq) = divmod2-<-^ i' n i<
@@ -51,7 +51,6 @@ private
 
   test₂ : toBinary (Fin.inject+ _ (Fin.fromℕ 9)) ≡ #1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ]
   test₂ = refl
-
 
 module Base256 where
   Byte = Binary 8

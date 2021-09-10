@@ -31,6 +31,11 @@ open import Data.List    public
 
 open import Data.List.Properties public
 
+open import Data.List.Relation.Unary.All
+  using ([] ; _∷_)
+module All = Data.List.Relation.Unary.All
+All = All.All
+
 open import Data.List.Relation.Unary.Any public
   using (here ; there)
 module Any = Data.List.Relation.Unary.Any
@@ -54,7 +59,7 @@ import Data.String
 module String = Data.String
 
 open import Data.Sum     public
-  hiding (map ; map₁ ; map₂ ; swap)
+  hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
 
 open import Data.Unit    public
   using (⊤ ; tt)
@@ -70,7 +75,8 @@ module Level where
   open import Level public
 
 open import Relation.Binary.PropositionalEquality public
-  hiding ([_] ; decSetoid)
+  hiding (decSetoid)
+  renaming ([_] to [_]R)
 module Reveal = Reveal_·_is_
 
 open import Relation.Binary.Definitions public
@@ -115,7 +121,7 @@ instance
   FinEq : ∀ {n} → Eq (Fin n)
   Eq._≟_ FinEq = Fin._≟_
 
-record Sized {ℓ} (A : Set ℓ) : Set ℓ where
+record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ
 open Sized ⦃ ... ⦄ public
@@ -172,11 +178,16 @@ instance
 -- Lemmas
 module Lemmas where
 
-  open import Data.List.Solver using (module ++-Solver)
-  open ++-Solver using (_⊕_)
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
 
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
-  ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
+  ++-assoc₄{A = A} ws xs ys zs = solve (++-monoid A)
+
+  -- open import Data.List.Solver using (module ++-Solver)
+  -- open ++-Solver using (_⊕_)
+
+  -- ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
+  -- ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
 
   length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
   length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
