@@ -33,6 +33,7 @@ module Length where
       l : Dig
       @0 l<128 : toℕ l < 128
       @0 bs≡ : bs ≡ [ l ]
+  open Short
 
   record Long (bs : List Dig) : Set where
     constructor mkLong
@@ -42,8 +43,10 @@ module Length where
       lₕ : Dig
       @0 lₕ≢0 : toℕ lₕ ≢ 0
       lₜ : List Dig
-      @0 lₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
+      @0 lₕₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
+      @0 lₕₜMinRep : lₜ ≢ [] ⊎ toℕ lₕ ≥ 128
       @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
+  open Long
 
   data Length : List Dig → Set where
     short : ∀ {@0 bs} → Short bs → Length bs
@@ -52,13 +55,21 @@ module Length where
   shortₛ : ∀ l → {@0 _ : True (toℕ l <? 128)} → Length [ l ]
   shortₛ l {l<128} = short (mkShort l (toWitness l<128) refl)
 
-  longₛ : ∀ l lₕ lₜ → {@0 _ : True (128 <? toℕ l)} {@0 _ : False (toℕ lₕ ≟ 0)} {@0 _ : True (length (lₕ ∷ lₜ) ≟ (toℕ l - 128))}
+  longₛ : ∀ l lₕ lₜ →
+          {@0 _ : True (128 <? toℕ l)}
+          {@0 _ : False (toℕ lₕ ≟ 0)}
+          {@0 _ : True (length (lₕ ∷ lₜ) ≟ (toℕ l - 128))}
+          {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
           → Length (l ∷ lₕ ∷ lₜ)
-  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} = long (mkLong l (toWitness l>128) lₕ (toWitnessFalse lₕ≢0) lₜ (toWitness lₜLen) refl)
+  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
+   long (mkLong l
+          (toWitness l>128) lₕ
+          (toWitnessFalse lₕ≢0) lₜ
+          (toWitness lₜLen) (toWitness mr) refl)
 
   getLength : ∀ {@0 bs} → Length bs → ℕ
   getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
-  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = go (reverse (lₕ ∷ lₜ))
+  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = go (reverse (lₕ ∷ lₜ))
     where
     go : List Dig → ℕ
     go [] = 0
@@ -67,7 +78,7 @@ module Length where
   instance
     SizedLength : ∀ {@0 bs} → Sized (Length bs)
     Sized.sizeOf SizedLength (short _) = 1
-    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = 2 + length lₜ
+    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = 2 + length lₜ
 
   private
     lₗ : Length (# 129 ∷ [ # 201 ])
