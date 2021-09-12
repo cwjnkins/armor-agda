@@ -1,10 +1,10 @@
 open import Aeres.Prelude
 
 module Aeres.Data.X509 where
-
 open import Aeres.Binary
 open Base256
 
+-------------------------------------------TAGS---------------------------------------------
 module Tag where
   abstract
     Null : Dig
@@ -24,7 +24,8 @@ module Tag where
 
     Integer : Dig
     Integer = # 2
-
+    
+-----------------------------------------Length------------------------------------------
 module Length where
 
   record Short (bs : List Dig) : Set where
@@ -42,7 +43,7 @@ module Length where
       lₕ : Dig
       @0 lₕ≢0 : toℕ lₕ ≢ 0
       lₜ : List Dig
-      @0 lₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
+      @0 lₕₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
       @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
 
   data Length : List Dig → Set where
@@ -54,34 +55,28 @@ module Length where
 
   longₛ : ∀ l lₕ lₜ → {@0 _ : True (128 <? toℕ l)} {@0 _ : False (toℕ lₕ ≟ 0)} {@0 _ : True (length (lₕ ∷ lₜ) ≟ (toℕ l - 128))}
           → Length (l ∷ lₕ ∷ lₜ)
-  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} = long (mkLong l (toWitness l>128) lₕ (toWitnessFalse lₕ≢0) lₜ (toWitness lₜLen) refl)
+  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₕₜLen} = long (mkLong l (toWitness l>128) lₕ (toWitnessFalse lₕ≢0) lₜ (toWitness lₕₜLen) refl)
 
   getLength : ∀ {@0 bs} → Length bs → ℕ
   getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
-  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = go (reverse (lₕ ∷ lₜ))
+  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₕₜLen bs≡)) = go (reverse (lₕ ∷ lₜ))
     where
     go : List Dig → ℕ
     go [] = 0
     go (b ∷ bs') = toℕ b + 256 * go bs'
 
-  instance
-    SizedLength : ∀ {@0 bs} → Sized (Length bs)
-    Sized.sizeOf SizedLength (short _) = 1
-    Sized.sizeOf SizedLength (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen bs≡)) = 2 + length lₜ
-
-  private
-    lₗ : Length (# 129 ∷ [ # 201 ])
-    lₗ = longₛ (# 129) (# 201) []
-
 open Length public
   using  (Length ; getLength)
   hiding (module Length)
 
--- Length = Length.Length
--- getLength = Length.getLength
-
+-------------------------------------------Generic---------------------------------------
 module Generic where
 
+  postulate
+    StringValue : List Dig → Set
+    IntegerValue : List Dig → Set
+    OctetValue : List Dig → Set
+    
   record OIDSub (bs : List Dig) : Set where
     constructor mkOIDSub
     field
@@ -91,23 +86,6 @@ module Generic where
       @0 lₑ<128 : toℕ lₑ < 128
       @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
       @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
-
-  instance
-    SizedOIDSub : ∀ {@0 bs} → Sized (OIDSub bs)
-    Sized.sizeOf SizedOIDSub (mkOIDSub lₚ lₚ≥128 lₑ l₃<128 leastDigs bs≡) =
-      length (lₚ ∷ʳ lₑ)
-
-  private
-    oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
-    oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
-
-  postulate
-    -- OIDField : List Dig → Set
-    StringValue : List Dig → Set
-
-  postulate
-    instance
-      SizedStringValue : ∀ {x} → Sized (StringValue x)
 
   data OIDField : List Dig → Set
 
@@ -135,21 +113,16 @@ module Generic where
       @0 len≡ : getLength len ≡ length o
       @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
 
---------------------------------------------------
-
-  postulate
-    Integer : List Dig → Set
-
   record Int (bs : List Dig) : Set where
     constructor mkInt
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Integer v
+      val : IntegerValue v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
 
-
+------------------------------X.509-----------------------------------------------------------
 module X509 where
 
   postulate
@@ -157,18 +130,7 @@ module X509 where
     Signature : List Dig → Set
     Validity : List Dig → Set
     PublicKey : List Dig → Set
-    UID : List Dig → Set
     Extensions : List Dig → Set
-
-  postulate
-    instance
-      SizedSignature : ∀ {sig} → Sized (Signature sig)
-      -- SizedSignOID : ∀ {oid} → Sized (SignOID oid)
-      SizedSignParam : ∀ {param} → Sized (SignParam param)
-      SizedValidity : ∀ {x} → Sized (Validity x)
-      SizedPublicKey : ∀ {x} → Sized (PublicKey x)
-      SizedUid : ∀ {x} → Sized (UID x)
-      SizedExtensions : ∀ {x} → Sized (Extensions x)
 
   record SignAlg (bs : List Dig) : Set where
     constructor mkSignAlg
@@ -180,7 +142,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length (o ++ p)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
---------------------------  TBSCert  -----------------------------------------------------------------
+  --------------------------TBSCert-----------------------------------------------------------------
 
   record Version (bs : List Dig) : Set where
     constructor mkVersion
@@ -250,6 +212,16 @@ module X509 where
       @0 len≡ : getLength len ≡ length e
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ e
 
+  record UID (bs : List Dig) : Set where
+    constructor mkUid
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
+
+
   record TBSCert (bs : List Dig) : Set where
     constructor mkTBSCert
     field
@@ -268,7 +240,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length (ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
----------------------------------------------------------------------------------------------
+  ---------------------------------Certificate---------------------------------------------------
 
   record Cert (bs : List Dig) : Set where
     constructor mkCert
