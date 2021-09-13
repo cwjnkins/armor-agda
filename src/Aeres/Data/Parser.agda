@@ -48,3 +48,50 @@ runParser (parseN (suc n)) (x ∷ xs)
       proof₁ (success ys (length ys) refl (ys , refl , suc-injective ysLen) suffix (∷-injectiveʳ ps≡))
 ... | yes (success prefix read read≡ (ys , ys≡ , ysLen) suffix ps≡) =
   yes (success (x ∷ prefix) (1 + read) (cong suc read≡) (x ∷ ys  , cong (x ∷_) ys≡ , cong suc ysLen) suffix (cong (x ∷_) ps≡))
+
+-- Parse while a given guard is true, but it *must* be terminated by a symbol
+-- for which the guard is false (rather than from running out of symbols)
+-- TODO: erasure for prefix, allPrefix should be flipped
+record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
+  constructor mkParseWhile
+  field
+    @0 prefix : List Σ
+    @0 term   : Σ
+    allPrefix : All A prefix
+    ¬term     : ¬ A term
+    @0 ps≡    : prefix ∷ʳ term ≡ xs
+
+parseWhileₜ : ∀ {A : Σ → Set} (p : Decidable A) → Parser Dec (ParseWhileₜ A)
+runParser (parseWhileₜ p) [] = no $ ‼ go
+  where
+  @0 go : ¬ Success (ParseWhileₜ _) []
+  go (success .(prefix₁ ∷ʳ term) _ _ (mkParseWhile prefix₁ term allPrefix ¬term refl) suffix ps≡) =
+    case [ term ] ≡ [] ∋ pf of λ ()
+    where
+    pf : [ term ] ≡ []
+    pf = ++-conicalˡ [ term ] _ (++-conicalʳ prefix₁ _ (++-conicalˡ _ _ ps≡))
+runParser (parseWhileₜ p) (x ∷ xs)
+  with p x
+... | no  pf = yes (success [ x ] _ refl (mkParseWhile [] x All.[] pf refl) xs refl)
+... | yes a
+  with runParser (parseWhileₜ p) xs
+... | no  ¬parse = no $ ‼ go
+  where
+  @0 go : ¬ Success (ParseWhileₜ _) (x ∷ xs)
+  go (success .([] ∷ʳ x) read read≡ (mkParseWhile [] .x allPrefix ¬term refl) suffix refl) =
+    contradiction a ¬term
+  go (success prefix₁@.((x ∷ xs₁) ∷ʳ term) read read≡ (mkParseWhile (x ∷ _) term (All._∷_ {xs = xs₁} px allPrefix) ¬term refl) suffix ps≡) =
+    contradiction
+      (success (xs₁ ∷ʳ term) _ refl
+        (mkParseWhile xs₁ term allPrefix ¬term refl)
+        suffix (∷-injectiveʳ ps≡))
+      ¬parse
+... | yes (success prefix read read≡ (mkParseWhile prefix₁ term allPrefix ¬term ps≡₁) suffix ps≡) =
+  yes (success (x ∷ prefix) (1 + read) (cong suc read≡)
+         (mkParseWhile (x ∷ prefix₁) term (All._∷_ {xs = {!!}} a allPrefix) ¬term (cong (x ∷_) ps≡₁))
+         suffix (cong (x ∷_) ps≡))
+-- runParser (parseWhile p) [] = success [] 0 refl All.[] [] refl
+-- runParser (parseWhile p) (x ∷ xs)
+--   with p x
+-- ... | no  _ = success _ 0 refl All.[] (x ∷ xs) refl
+-- ... | yes a = {!!}

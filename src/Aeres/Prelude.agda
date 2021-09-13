@@ -115,6 +115,9 @@ open import Relation.Nullary.Decidable public
 open import Relation.Nullary.Sum public
   using (_⊎-dec_)
 
+open import Relation.Unary public
+  using (Decidable)
+
 -- Typeclasses
 
 record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
