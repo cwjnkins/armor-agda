@@ -178,6 +178,9 @@ instance
   Irrel≡ : ∀ {ℓ} {A : Set ℓ} {x y : A} → Irrel (x ≡ y)
   Irrel.irrel Irrel≡ = ≡-irrel
 
+  Irrel¬ : ∀ {ℓ} {A : Set ℓ} → Irrel (¬ A)
+  Irrel.irrel Irrel¬ ¬a a = contradiction a ¬a
+
 import Category.Monad
 Monad = Category.Monad.RawMonad
 MonadZero = Category.Monad.RawMonadZero
