@@ -55,10 +55,10 @@ runParser (parseN (suc n)) (x ∷ xs)
 record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
   constructor mkParseWhile
   field
-    @0 prefix : List Σ
-    @0 term   : Σ
-    allPrefix : All A prefix
-    ¬term     : ¬ A term
+    prefix : List Σ
+    term   : Σ
+    @0 allPrefix : All A prefix
+    @0 ¬term     : ¬ A term
     @0 ps≡    : prefix ∷ʳ term ≡ xs
 
 parseWhileₜ : ∀ {A : Σ → Set} (p : Decidable A) → Parser Dec (ParseWhileₜ A)
@@ -88,10 +88,5 @@ runParser (parseWhileₜ p) (x ∷ xs)
       ¬parse
 ... | yes (success prefix read read≡ (mkParseWhile prefix₁ term allPrefix ¬term ps≡₁) suffix ps≡) =
   yes (success (x ∷ prefix) (1 + read) (cong suc read≡)
-         (mkParseWhile (x ∷ prefix₁) term (All._∷_ {xs = {!!}} a allPrefix) ¬term (cong (x ∷_) ps≡₁))
+         (mkParseWhile (x ∷ prefix₁) term (a All.∷ allPrefix) ¬term (cong (x ∷_) ps≡₁))
          suffix (cong (x ∷_) ps≡))
--- runParser (parseWhile p) [] = success [] 0 refl All.[] [] refl
--- runParser (parseWhile p) (x ∷ xs)
---   with p x
--- ... | no  _ = success _ 0 refl All.[] (x ∷ xs) refl
--- ... | yes a = {!!}
