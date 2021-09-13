@@ -65,7 +65,11 @@ open import Data.Product public
   hiding (map ; zip)
 
 import Data.String
-module String = Data.String
+module String where
+  open Data.String public
+  open import Agda.Builtin.String public
+    using ()
+    renaming (primShowNat to showNat)
 
 open import Data.Sum     public
   hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
@@ -98,6 +102,12 @@ open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
 open import Relation.Nullary public
+
+open import Relation.Nullary.Negation public
+  hiding (contradiction)
+
+contradiction : ∀ {ℓ ℓ'} {P : Set ℓ} {A : Set ℓ'} → (@0 _ : P) (@0 _ : ¬ P) → A
+contradiction p ¬p = ⊥-elim (¬p p)
 
 open import Relation.Nullary.Decidable public
   hiding (map)
@@ -212,7 +222,7 @@ instance
   Monad.return MonadLogging x = mkLogged [] x
   Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
     with f val₁
-  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
+  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ [ "\n" ] ++ log₂) val₂
 
   WriterLogging : Writer Logging String.String
   Writer.tell WriterLogging w = mkLogged [ w ] (Level.lift tt)

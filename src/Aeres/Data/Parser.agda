@@ -12,6 +12,9 @@ record Success (A : List Σ → Set) (xs : List Σ) : Set where
     suffix : List Σ
     @0 ps≡    : prefix ++ suffix ≡ xs
 
+mapSuccess : ∀ {A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
+mapSuccess f (value ^S suffix [ ps≡ ]S) = (f value) ^S suffix [ ps≡ ]S
+
 record Parser (M : Set → Set) (A : List Σ → Set) : Set where
   constructor mkParser
   field

@@ -44,7 +44,7 @@ module Length where
       lₕ : Dig
       @0 lₕ≢0 : toℕ lₕ ≢ 0
       lₜ : List Dig
-      @0 lₕₜLen : length (lₕ ∷ lₜ) ≡ toℕ l - 128
+      @0 lₜLen : length lₜ ≡ toℕ l - 129
       @0 lₕₜMinRep : lₜ ≢ [] ⊎ toℕ lₕ ≥ 128
       @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
   open Long
@@ -59,7 +59,7 @@ module Length where
   longₛ : ∀ l lₕ lₜ →
           {@0 _ : True (128 <? toℕ l)}
           {@0 _ : False (toℕ lₕ ≟ 0)}
-          {@0 _ : True (length (lₕ ∷ lₜ) ≟ (toℕ l - 128))}
+          {@0 _ : True (length lₜ ≟ (toℕ l - 129))}
           {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
           → Length (l ∷ lₕ ∷ lₜ)
   longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
