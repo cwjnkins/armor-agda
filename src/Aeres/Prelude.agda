@@ -3,6 +3,15 @@ module Aeres.Prelude where
 open import Data.Bool    public
   hiding (_<_ ; _<?_ ; _≟_ ; _≤_ ; _≤?_)
 
+open import Data.Empty public
+  hiding (⊥-elim)
+
+⊥-elim : ∀ {ℓ} {A : Set ℓ} → (@0 _ : ⊥) → A
+⊥-elim ()
+
+⊥-irrel : (@0 _ : ⊥) → ⊥
+⊥-irrel ()
+
 import Data.Char
 module Char = Data.Char
 Char = Char.Char
@@ -56,7 +65,11 @@ open import Data.Product public
   hiding (map ; zip)
 
 import Data.String
-module String = Data.String
+module String where
+  open Data.String public
+  open import Agda.Builtin.String public
+    using ()
+    renaming (primShowNat to showNat)
 
 open import Data.Sum     public
   hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
@@ -75,17 +88,32 @@ module Level where
   open import Level public
 
 open import Relation.Binary.PropositionalEquality public
-  hiding (decSetoid)
+  hiding (decSetoid ; cong)
   renaming ([_] to [_]R)
 module Reveal = Reveal_·_is_
+
+≡-irrel : ∀ {ℓ} {A : Set ℓ} {x y : A} → (@0 _ : x ≡ y) → x ≡ y
+≡-irrel refl = refl
+
+cong : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {@0 x y : A} → x ≡ y → f x ≡ f y
+cong f refl = refl
 
 open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
 open import Relation.Nullary public
 
+open import Relation.Nullary.Negation public
+  hiding (contradiction)
+
+contradiction : ∀ {ℓ ℓ'} {P : Set ℓ} {A : Set ℓ'} → (@0 _ : P) (@0 _ : ¬ P) → A
+contradiction p ¬p = ⊥-elim (¬p p)
+
 open import Relation.Nullary.Decidable public
   hiding (map)
+
+open import Relation.Nullary.Sum public
+  using (_⊎-dec_)
 
 -- Typeclasses
 
@@ -106,8 +134,15 @@ instance
   Numeric.toℕ FinNumeric = Fin.toℕ
 
 record Eq {ℓ} (A : Set ℓ) : Set ℓ where
+  infix 4 _≟_ _≠_
   field
     _≟_ : (x y : A) → Dec (x ≡ y)
+
+  _≠_ : (x y : A) → Dec (x ≢ y)
+  x ≠ y
+    with x ≟ y
+  ... | no  ≠  = yes ≠
+  ... | yes pf = no (_$ pf)
 
 open Eq ⦃ ... ⦄ public
 
@@ -121,10 +156,27 @@ instance
   FinEq : ∀ {n} → Eq (Fin n)
   Eq._≟_ FinEq = Fin._≟_
 
+  ListEq : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → Eq (List A)
+  Eq._≟_ ListEq = ≡-dec _≟_
+
 record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ
 open Sized ⦃ ... ⦄ public
+
+record Irrel {ℓ} (A : Set ℓ) : Set ℓ where
+  infix 10 ‼_
+  field
+    irrel : (@0 _ : A) → A
+  ‼_ = irrel
+open Irrel ⦃ ... ⦄ public
+
+instance
+  IrrelBot : Irrel ⊥
+  Irrel.irrel IrrelBot = ⊥-irrel
+
+  Irrel≡ : ∀ {ℓ} {A : Set ℓ} {x y : A} → Irrel (x ≡ y)
+  Irrel.irrel Irrel≡ = ≡-irrel
 
 import Category.Monad
 Monad = Category.Monad.RawMonad
@@ -170,7 +222,7 @@ instance
   Monad.return MonadLogging x = mkLogged [] x
   Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
     with f val₁
-  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
+  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ [ "\n" ] ++ log₂) val₂
 
   WriterLogging : Writer Logging String.String
   Writer.tell WriterLogging w = mkLogged [ w ] (Level.lift tt)
