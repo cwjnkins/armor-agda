@@ -7,23 +7,21 @@ open Base256
 -------------------------------------------TAGS---------------------------------------------
 module Tag where
   abstract
+
+    Boolean : Dig
+    Boolean = # 1
+    
+    Integer : Dig
+    Integer = # 2
+
+    Bitstring : Dig
+    Bitstring = # 3
+
     Null : Dig
     Null = # 5
 
     ObjectIdentifier : Dig
     ObjectIdentifier = # 6
-
-    Sequence : Dig
-    Sequence = # 48
-
-    Sett : Dig
-    Sett = # 49
-
-    Version : Dig
-    Version = # 160
-
-    Integer : Dig
-    Integer = # 2
 
     Utctime : Dig
     Utctime = # 23
@@ -31,8 +29,23 @@ module Tag where
     Gentime : Dig
     Gentime = # 24
 
-    Bitstring : Dig
-    Bitstring = # 3
+    Sequence : Dig
+    Sequence = # 48
+    
+    Sett : Dig
+    Sett = # 49
+
+    Version : Dig
+    Version = # 160
+
+    IssUid : Dig
+    IssUid = # 161
+
+    SubUid : Dig
+    SubUid = # 162
+
+    Extensions : Dig
+    Extensions = # 163
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -106,9 +119,9 @@ module Generic where
       @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
       @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
-  private
-    oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
-    oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
+  --private
+  --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
+  --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
 
   data OIDField : List Dig → Set
 
@@ -145,13 +158,16 @@ module Generic where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
 
+  data Option (A : List Dig → Set) : List Dig → Set where
+    none : Option A []
+    some : forall {xs} → A xs → Option A xs
+
 ------------------------------X.509-----------------------------------------------------------
 module X509 where
 
   postulate
     SignParam : List Dig → Set
     PublicKey : List Dig → Set
-    Extensions : List Dig → Set
 
   record SignAlg (bs : List Dig) : Set where
     constructor mkSignAlg
@@ -164,7 +180,6 @@ module X509 where
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
   --------------------------TBSCert-----------------------------------------------------------------
-
   record Version (bs : List Dig) : Set where
     constructor mkVersion
     field
@@ -233,14 +248,23 @@ module X509 where
       @0 len≡ : getLength len ≡ length e
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ e
 
-  record UID (bs : List Dig) : Set where
-    constructor mkUid
+  record IssUID (bs : List Dig) : Set where
+    constructor mkIssUid
     field
       @0 {l v} : List Dig
       len : Length l
       val : Generic.OctetValue v
       @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
+      @0 bs≡  : bs ≡ Tag.IssUid ∷ l ++ v
+
+  record SubUID (bs : List Dig) : Set where
+    constructor mkSubUid
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.SubUid ∷ l ++ v
 
   record UtcTime (bs : List Dig) : Set where
     constructor mkUtcTime
@@ -289,21 +313,66 @@ module X509 where
       @0 len≡ : getLength len ≡ length (nb ++ na)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ nb ++ na
 
+-----------------------------------------Extensions------------------------------------------
+  record Extension (bs : List Dig) : Set where
+    constructor mkExtension
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
+
+  data ExtensionsSeqElems : List Dig → Set
+
+  record ExtensionsSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkExtensionsSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      rdnSet : Extension bs₁
+      rest   : ExtensionsSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data ExtensionsSeqElems where
+    _∷[]  : ∀ {x} → Extension x → ExtensionsSeqElems x
+    cons : ∀ {x} → ExtensionsSeqElemsₐ x → ExtensionsSeqElems x
+
+  record ExtensionsSeq (bs : List Dig) : Set where
+    constructor mkExtensionsSeq
+    field
+      @0 {l exs} : List Dig
+      len : Length l
+      elems :  ExtensionsSeqElems exs
+      @0 len≡ : getLength len ≡ length exs
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ exs
+
+  record Extensions (bs : List Dig) : Set where
+    constructor mkExtensions
+    field
+      @0 {l e} : List Dig
+      len : Length l
+      elem :  ExtensionsSeq e
+      @0 len≡ : getLength len ≡ length e
+      @0 bs≡  : bs ≡ Tag.Extensions ∷ l ++ e
+
+-----------------------------------------------------------------------------------------------
+
   record TBSCert (bs : List Dig) : Set where
     constructor mkTBSCert
     field
       @0 {l ver ser sa i va u p u₁ u₂ e} : _
       len : Length l
-      version_opt : Version ver
+      version : Generic.Option Version ver
       serial  : Generic.Int ser
       signAlg : SignAlg sa
       issuer  : RDName i
       validity : Validity va
       subject  : RDName u
       pk       : PublicKey p
-      issuerUID_opt : UID u₁
-      subjectUID_opt : UID u₂
-      extensions_opt : Extensions e
+      issuerUID : Generic.Option IssUID u₁
+      subjectUID : Generic.Option SubUID u₂
+      extensions : Generic.Option Extensions e
       @0 len≡ : getLength len ≡ length (ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
