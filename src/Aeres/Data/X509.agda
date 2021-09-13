@@ -24,7 +24,16 @@ module Tag where
 
     Integer : Dig
     Integer = # 2
-    
+
+    Utctime : Dig
+    Utctime = # 23
+
+    Gentime : Dig
+    Gentime = # 24
+
+    Bitstring : Dig
+    Bitstring = # 3
+
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -127,8 +136,6 @@ module X509 where
 
   postulate
     SignParam : List Dig → Set
-    Signature : List Dig → Set
-    Validity : List Dig → Set
     PublicKey : List Dig → Set
     Extensions : List Dig → Set
 
@@ -221,13 +228,59 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
 
+  record UtcTime (bs : List Dig) : Set where
+    constructor mkUtcTime
+    field
+      @0 {l} : List Dig
+      @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
+      len : Length l
+      @0 year : (0 ≤ ((toℕ y1 - 48) * 10 + (toℕ y2 - 48))) × (((toℕ y1 - 48) * 10 + (toℕ y2 - 48)) ≤ 99)
+      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
+      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
+      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
+      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
+      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
+      @0 last_byte : toℕ z ≡ 90
+      @0 len≡ : getLength len ≡ length (y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ [])
+      @0 bs≡  : bs ≡ Tag.Utctime ∷ l ++ (y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ [])
+
+  record GenTime (bs : List Dig) : Set where
+    constructor mkGenTime
+    field
+      @0 {l} : List Dig
+      @0 {y1 y2 y3 y4 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
+      len : Length l
+      @0 year : (1 ≤ ((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48))) ×
+        (((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48)) ≤ 9999)
+      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
+      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
+      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
+      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
+      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
+      @0 last_byte : toℕ z ≡ 90
+      @0 len≡ : getLength len ≡ length (y1 ∷ y2 ∷ y3 ∷ y4 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ [])
+      @0 bs≡  : bs ≡ Tag.Utctime ∷ l ++ (y1 ∷ y2 ∷ y3 ∷ y4 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ [])
+
+  data Time : List Dig → Set where
+    utctm : ∀ {@0 bs} → UtcTime bs → Time bs
+    gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
+
+  record Validity (bs : List Dig) : Set where
+    constructor mkValidity
+    field
+      @0 {l nb na} : List Dig
+      len : Length l
+      start : Time nb
+      end : Time na
+      @0 len≡ : getLength len ≡ length (nb ++ na)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ nb ++ na
 
   record TBSCert (bs : List Dig) : Set where
     constructor mkTBSCert
     field
       @0 {l ver ser sa i va u p u₁ u₂ e} : _
       len : Length l
-      version : Version ver
+      version_opt : Version ver
       serial  : Generic.Int ser
       signAlg : SignAlg sa
       issuer  : RDName i
@@ -241,6 +294,14 @@ module X509 where
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
   ---------------------------------Certificate---------------------------------------------------
+  record Signature (bs : List Dig) : Set where
+    constructor mkSig
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Bitstring ∷ l ++ v
 
   record Cert (bs : List Dig) : Set where
     constructor mkCert
