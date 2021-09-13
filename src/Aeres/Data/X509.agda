@@ -287,9 +287,9 @@ module X509 where
       validity : Validity va
       subject  : RDName u
       pk       : PublicKey p
-      issuerUID : UID u₁
-      subjectUID : UID u₂
-      extensions : Extensions e
+      issuerUID_opt : UID u₁
+      subjectUID_opt : UID u₂
+      extensions_opt : Extensions e
       @0 len≡ : getLength len ≡ length (ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
