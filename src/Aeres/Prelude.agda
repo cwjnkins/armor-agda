@@ -84,6 +84,11 @@ Vec = Vec.Vec
 
 open import Function     public
 
+import Induction.WellFounded
+module WellFounded where
+  open Induction.WellFounded public
+Acc = WellFounded.Acc
+
 module Level where
   open import Level public
 

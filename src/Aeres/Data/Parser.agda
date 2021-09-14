@@ -17,11 +17,14 @@ record Success (A : List Σ → Set) (xs : List Σ) : Set where
 mapSuccess : ∀ {A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
 mapSuccess f (success prefix read read≡ value suffix ps≡ ) = success prefix read read≡ (f value) suffix ps≡
 
-record Parser (M : Set → Set) (A : List Σ → Set) : Set where
+record Parserᵢ (M : List Σ → Set → Set) (A : List Σ → Set) : Set where
   constructor mkParser
   field
-    runParser : (xs : List Σ) → M (Success A xs)
-open Parser public
+    runParser : (xs : List Σ) → M xs (Success A xs)
+open Parserᵢ public
+
+Parser : (M : Set → Set) (A : List Σ → Set) → Set
+Parser M = Parserᵢ (const M)
 
 -- parseSingleDec : ⦃ _ : Eq Σ ⦄ → ∀ a → Parser Dec ([ a ] ≡_)
 -- runParser (parseSingleDec a) [] = no λ where (refl ^S suffix [ () ]S)

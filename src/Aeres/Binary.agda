@@ -5,9 +5,9 @@ open import Data.Fin.Properties
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
   hiding   (_≟_)
 open import Data.Nat.Induction
+  hiding (Acc)
 open import Data.Nat.Properties
   hiding (_≟_)
-open import Induction.WellFounded
 
 module Aeres.Binary where
 

@@ -40,3 +40,47 @@ module parseOIDSub where
     return (yes (success (lₚ' ∷ʳ lₑ) _ read≡ (Generic.mkOIDSub lₚ' lₚ≥128 lₑ (≰⇒> ¬lₑ≥128) l>128 refl) suffix refl))
 
 open parseOIDSub public using (parseOIDSub)
+
+module parseOIDField where
+  here' = "parseOIDField"
+
+  open ≡-Reasoning
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  parseOIDField-wf  : Parserᵢ Dig (λ xs A → (@0 _ : Acc _<_ (length xs)) → Logging (Dec A)) Generic.OIDField
+  parseOIDFieldₐ-wf : Parserᵢ Dig (λ xs A → (@0 _ : Acc _<_ (length xs)) → Logging (Dec A)) Generic.OIDFieldₐ
+
+  parseOIDField-wf = {!!}
+
+  runParser parseOIDFieldₐ-wf xs (WellFounded.acc rs) = do
+    yes (success pre₀ r₀ r₀≡ oidₛ suf₀ ps≡₀) ← runParser parseOIDSub xs
+      where no ¬parse → {!!}
+    yes (success pre₁ r₁ r₁≡ oidₑ suf₁ ps≡₁) ← runParser parseOIDField-wf suf₀ (rs _ {!!})
+      where no ¬parse → {!!}
+    return $ yes
+      (success (pre₀ ++ pre₁) (r₀ + r₁) {!!}
+        (Generic.cons oidₛ oidₑ refl)
+        suf₁
+        (begin
+          (pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
+          pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
+          pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
+          xs ∎))
+
+  -- runParser parseOIDFieldₐ xs = do
+  --   yes (success pre₀ r₀ r₀≡ oidₛ suf₀ ps≡₀) ← runParser parseOIDSub xs
+  --     where no ¬parse → do
+  --       tell here'
+  --       return ∘ no $ ‼ λ where
+  --         (success prefix read read≡ (Generic.cons {bs₁}{bs₂} sub rest bs≡) suffix ps≡₀) →
+  --           contradiction
+  --             (success _ (length bs₁) refl sub (bs₂ ++ suffix) (begin
+  --               bs₁ ++ bs₂ ++ suffix   ≡⟨ solve (++-monoid Dig) ⟩
+  --               (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
+  --               prefix ++ suffix       ≡⟨ ps≡₀ ⟩
+  --               xs                     ∎))
+  --             ¬parse
+  --   -- yes (success pre₁ r₁ r₁≡ oidₑ suf₁ ps≡₁) ← runParser parseOIDField suf₀
+  --   --   where no ¬parse → {!!}
+  --   {!!}
+
