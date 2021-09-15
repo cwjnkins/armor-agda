@@ -12,6 +12,13 @@ Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
 NoNest : (A : List Dig → Set) → Set
 NoNest A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
 
+NonEmpty : (A : List Dig → Set) → Set
+NonEmpty A = ∀ {xs} → A xs → xs ≢ []
+
+module NonEmpty where
+  postulate
+    OIDSub : NonEmpty Generic.OIDSub
+
 -- TODO: Prove
 module Unambiguous where
   postulate
@@ -25,9 +32,10 @@ getLength≡{xs}{.xs} refl l₀ l₁ = cong getLength (Unambiguous.LengthUA l₀
 
 module NoNest where
   postulate
-    TBSCert : NoNest X509.TBSCert
-    LengthNN  : NoNest Length
-    SignAlg : NoNest X509.SignAlg
+    OIDSub   : NoNest Generic.OIDSub
+    TBSCert  : NoNest X509.TBSCert
+    LengthNN : NoNest Length
+    SignAlg  : NoNest X509.SignAlg
 
   -- TBSCert : NoNest X509.TBSCert
   -- TBSCert{ys₁ = ys₀}{ys₂ = ys₁} eq (X509.mkTBSCert{len₀}{tbsbs₀} l₀ tbsf₀ len≡₀) (X509.mkTBSCert{len₁}{tbsbs₁} l₁ tbsf₁ len≡₁) =

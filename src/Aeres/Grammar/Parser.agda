@@ -1,8 +1,12 @@
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.Parser (Σ : Set) where
+module Aeres.Grammar.Parser (Σ : Set) where
+
+open import Aeres.Grammar.Definitions Σ
 
 record Success (A : List Σ → Set) (xs : List Σ) : Set where
   constructor success
@@ -26,6 +30,9 @@ open Parserᵢ public
 Parser : (M : Set → Set) (A : List Σ → Set) → Set
 Parser M = Parserᵢ (const M)
 
+ParserWF : (M : Set → Set) (A : List Σ → Set) → Set
+ParserWF M A = Parserᵢ (λ xs X → (@0 _ : Acc _<_ (length xs)) → M X) A
+
 -- parseSingleDec : ⦃ _ : Eq Σ ⦄ → ∀ a → Parser Dec ([ a ] ≡_)
 -- runParser (parseSingleDec a) [] = no λ where (refl ^S suffix [ () ]S)
 -- runParser (parseSingleDec a) (x ∷ xs)
@@ -36,11 +43,11 @@ Parser M = Parserᵢ (const M)
 parseN : (n : ℕ) → Parser Dec λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ n)
 runParser (parseN zero) xs = yes (success [] 0 refl ([] , refl , refl) xs refl)
 runParser (parseN (suc n)) [] = no $ λ where
-  (success prefix read read≡ (ys , refl , len-xs) suffix ps≡) → 0≢1+n $ begin
-    length{A = Σ} [] ≡⟨ cong length (sym (‼ ps≡)) ⟩
-    length (ys ++ suffix) ≡⟨ length-++ ys ⟩
+  (success prefix read read≡ (ys , refl , len-xs) suffix ps≡) → ‼ 0≢1+n $ begin
+    length{A = Σ} []          ≡⟨ cong length (sym (‼ ps≡)) ⟩
+    length (ys ++ suffix)     ≡⟨ length-++ ys ⟩
     length ys + length suffix ≡⟨ cong (_+ length suffix) len-xs ⟩
-    suc (n + length suffix) ∎
+    suc (n + length suffix)   ∎
     where open ≡-Reasoning
 runParser (parseN (suc n)) (x ∷ xs)
   with runParser (parseN n) xs
@@ -51,6 +58,40 @@ runParser (parseN (suc n)) (x ∷ xs)
       proof₁ (success ys (length ys) refl (ys , refl , suc-injective ysLen) suffix (∷-injectiveʳ ps≡))
 ... | yes (success prefix read read≡ (ys , ys≡ , ysLen) suffix ps≡) =
   yes (success (x ∷ prefix) (1 + read) (cong suc read≡) (x ∷ ys  , cong (x ∷_) ys≡ , cong suc ysLen) suffix (cong (x ∷_) ps≡))
+
+-- _×ₚ_ : (A B : List Σ → Set) → List Σ → Set
+-- A ×ₚ B = λ xs → A xs × B xs
+record _×ₚ_ (@0 A B : List Σ → Set) (@0 xs : List Σ) : Set where
+  constructor mk×ₚ
+  field
+    @0 {bs} : List Σ
+    fstₚ : A bs
+    sndₚ : B bs
+    @0 bs≡ : bs ≡ xs
+
+parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
+  Parser (M ∘ Dec) A → NonNesting A → M ⊤ →
+  Parser (M ∘ Dec) (A ×ₚ ((_≤ n) ∘ length))
+runParser (parse≤{A} n p nn m) xs = do
+  (yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)) ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v _ refl) suffix ps≡) →
+          contradiction (success prefix _ read≡ v suffix ps≡) ¬parse
+  case r₀ ≤? n of λ where
+    (no  r₀≰n) → do
+      m
+      return ∘ no $ λ where
+        (success prefix r r≡ (mk×ₚ v r≤n refl) suffix ps≡) →
+          contradiction
+            (begin (r₀           ≡⟨ r₀≡ ⟩
+                   length pre₀   ≡⟨ cong length (nn (trans ps≡₀ (sym ps≡)) v₀ v) ⟩
+                   length prefix ≤⟨ r≤n ⟩
+                   n ∎))
+            r₀≰n
+    (yes r₀≤n) →
+      return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (subst₀ (λ i → i ≤ n) r₀≡ r₀≤n) refl) suf₀ ps≡₀))
+  where open ≤-Reasoning
 
 -- Parse while a given guard is true, but it *must* be terminated by a symbol
 -- for which the guard is false (rather than from running out of symbols)

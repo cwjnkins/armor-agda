@@ -125,9 +125,9 @@ module Generic where
 
   data OIDField : List Dig → Set
 
-  record OIDFieldₐ (bs : List Dig) : Set where
+  record OIDFieldₐ (@0 bs : List Dig) : Set where
     inductive
-    constructor cons
+    constructor mkOIDFieldₐ
     field
       @0 {bs₁} : List Dig
       @0 {bs₂} : List Dig

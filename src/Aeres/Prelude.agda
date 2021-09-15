@@ -103,6 +103,9 @@ module Reveal = Reveal_·_is_
 cong : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {@0 x y : A} → x ≡ y → f x ≡ f y
 cong f refl = refl
 
+subst₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} (@0 P : A → Set ℓ₂) {@0 x y : A} → (@0 _ : x ≡ y) → P x → P y
+subst₀ P refl x = x
+
 open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
@@ -111,7 +114,7 @@ open import Relation.Nullary public
 open import Relation.Nullary.Negation public
   hiding (contradiction)
 
-contradiction : ∀ {ℓ ℓ'} {P : Set ℓ} {A : Set ℓ'} → (@0 _ : P) (@0 _ : ¬ P) → A
+contradiction : ∀ {ℓ ℓ'} {@0 P : Set ℓ} {A : Set ℓ'} → (@0 _ : P) (@0 _ : ¬ P) → A
 contradiction p ¬p = ⊥-elim (¬p p)
 
 open import Relation.Nullary.Decidable public
@@ -242,6 +245,8 @@ instance
 module Lemmas where
 
   open import Tactic.MonoidSolver using (solve ; solve-macro)
+  open import Data.Nat.Properties
+  open import Data.List.Properties
 
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   ++-assoc₄{A = A} ws xs ys zs = solve (++-monoid A)
@@ -257,3 +262,13 @@ module Lemmas where
   length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
     with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
   ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs
+
+  length-++-< : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → xs ≢ [] → length ys < length (xs ++ ys)
+  length-++-< [] ys xs≢[] = contradiction refl xs≢[]
+  length-++-< (x ∷ xs) ys xs≢[] = begin
+    1 +             length ys ≤⟨ s≤s (m≤n+m (length ys) (length xs)) ⟩
+    1 + length xs + length ys ≡⟨ cong suc (sym (length-++ xs)) ⟩
+    1 + length (xs ++ ys)     ≡⟨ refl ⟩
+    length (x ∷ xs ++ ys)     ∎
+    where
+    open ≤-Reasoning
