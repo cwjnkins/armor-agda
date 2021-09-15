@@ -4,10 +4,12 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
+open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Properties
 open import Aeres.Grammar.Parser
 open import Data.Nat.Properties
   hiding (_≟_)
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Decidable.OID where
 
@@ -49,89 +51,116 @@ module parseOIDField where
   here' = "parseOIDField"
 
   open ≡-Reasoning
-  open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-  parseOIDFieldWF : ∀ n → ParserWF Dig (Logging ∘ Dec) (λ xs → Generic.OIDField xs × length xs ≡ n)
-  runParser (parseOIDFieldWF n) xs (WellFounded.acc rs) = {!!}
+  parseOIDFieldWF : ∀ n → ParserWF Dig (Logging ∘ Dec) (_×ₚ_ Dig Generic.OIDField ((_≡ n) ∘ length))
+  runParser (parseOIDFieldWF n) xs (WellFounded.acc rs) = do
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ r₀≤len refl) suf₀ ps≡₀) ← runParser (parse≤ _ n parseOIDSub NonNesting.OIDSub (tell $ here' String.++ ": overflow")) xs
+      where no ¬parse → do
+        return ∘ no $ ‼ λ where
+          (success prefix r r≡ (mk×ₚ Generic.[ sub ]OID r≡n refl) suffix ps≡) →
+            contradiction (success prefix r r≡ (mk×ₚ sub (subst₀ (λ i → i ≤ n) (sym r≡n) ≤-refl) refl) suffix ps≡) ¬parse
+          (success .(bs₁ ++ bs₂) r r≡ (mk×ₚ (Generic.cons (Generic.mkOIDFieldₐ{bs₁}{bs₂} sub rest refl)) r≡n refl) suffix ps≡) →
+            contradiction
+              (success bs₁ (length bs₁) refl (mk×ₚ sub (m+n≤o⇒m≤o _ {length bs₂} (subst (λ i → i ≤ n) (trans (sym r≡n) (length-++ bs₁)) ≤-refl)) refl) (bs₂ ++ suffix)
+                (begin (bs₁ ++ bs₂   ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
+                        (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                        xs                     ∎)))
+              ¬parse
+    case <-cmp r₀ n of λ where
+      (tri> r₀≮n r₀≢n r₀>n) →
+        contradiction (r₀ ≤ n ∋ subst (λ i → i ≤ n) (sym r₀≡) r₀≤len) (<⇒≱ r₀>n)
+      (tri≈ _ r₀≡n _) →
+        return (yes (success pre₀ r₀ r₀≡ (mk×ₚ Generic.[ v₀ ]OID (trans₀ (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
+      (tri< r₀<n _ _) → do
+        let @0 suf₀<xs : length suf₀ < length xs
+            suf₀<xs = subst₀ (λ x → length suf₀ < length x) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (NonEmpty.OIDSub v₀))
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ r₁≡len-pre₁ refl) suf₁ ps≡₁) ← runParser (parseOIDFieldWF (n - r₀)) suf₀ (rs _ suf₀<xs)
+          where no ¬parse → do
+            return ∘ no $ ‼ λ where
+              (success prefix read read≡ (mk×ₚ Generic.[ sub ]OID r≡n refl) suffix ps≡) →
+                <⇒≢ r₀<n (‼ (begin (r₀            ≡⟨ r₀≡ ⟩
+                                    length pre₀   ≡⟨ cong length (NonNesting.OIDSub (trans ps≡₀ (sym ps≡)) v₀ sub) ⟩
+                                    length prefix ≡⟨ r≡n ⟩
+                                    n             ∎)))
+              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkOIDFieldₐ{bs₁}{bs₂} sub rest refl)) r≡n refl) suffix ps≡) → ‼
+                let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
+                    xs≡ = begin (pre₀ ++ suf₀           ≡⟨ ps≡₀ ⟩
+                                 xs                     ≡⟨ sym ps≡ ⟩
+                                 (bs₁ ++ bs₂) ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
+                                 bs₁ ++ bs₂ ++ suffix   ∎)
+                    @0 pre₀≡bs₁ : pre₀ ≡ bs₁
+                    pre₀≡bs₁ = NonNesting.OIDSub xs≡ v₀ sub
+                in contradiction
+                  (success bs₂ (length bs₂) refl
+                    (mk×ₚ rest (+-cancelˡ-≡ r₀
+                                 (begin (r₀ + length bs₂ ≡⟨ cong (_+ length bs₂) r₀≡ ⟩
+                                        length pre₀ + length bs₂ ≡⟨ cong (λ x → length x + length bs₂) pre₀≡bs₁ ⟩
+                                        length bs₁ + length bs₂ ≡⟨ sym (length-++ bs₁) ⟩
+                                        length (bs₁ ++ bs₂) ≡⟨ r≡n ⟩
+                                        n ≡⟨ sym (+-identityʳ _) ⟩
+                                        n + 0 ≡⟨ cong (n +_) (sym (n∸n≡0 r₀)) ⟩
+                                        n + (r₀ - r₀) ≡⟨ sym (+-∸-assoc n {r₀} ≤-refl) ⟩
+                                        (n + r₀) - r₀ ≡⟨ cong (_∸ r₀) (+-comm n _) ⟩
+                                        (r₀ + n) - r₀ ≡⟨ +-∸-assoc r₀ {n} (<⇒≤ r₀<n) ⟩
+                                        r₀ + (n - r₀) ∎)))
+                      refl)
+                    suffix (++-cancelˡ bs₁ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
+                  ¬parse
+        return (yes (success (pre₀ ++ pre₁) (r₀ + r₁)
+                      (begin (r₀ + r₁ ≡⟨ cong (_+ r₁) r₀≡ ⟩
+                             length pre₀ + r₁ ≡⟨ cong (_ +_) r₁≡ ⟩
+                             length pre₀ + length pre₁ ≡⟨ sym (length-++ pre₀) ⟩
+                             length (pre₀ ++ pre₁) ∎))
+                      (mk×ₚ (Generic.cons (Generic.mkOIDFieldₐ v₀ v₁ refl))
+                        (‼ (begin (length (pre₀ ++ pre₁)    ≡⟨ length-++ pre₀ ⟩
+                                  length pre₀ + length pre₁ ≡⟨ cong (_+ _) (sym r₀≡) ⟩
+                                  r₀ + length pre₁          ≡⟨ cong (r₀ +_) r₁≡len-pre₁ ⟩
+                                  r₀ + (n - r₀)             ≡⟨ sym (+-∸-assoc r₀ (<⇒≤ r₀<n)) ⟩
+                                  r₀ + n - r₀               ≡⟨ cong (_∸ r₀) (+-comm r₀ n) ⟩
+                                  n + r₀ - r₀               ≡⟨ +-∸-assoc n {n = r₀} ≤-refl ⟩
+                                  n + (r₀ - r₀)             ≡⟨ cong (n +_) (n∸n≡0 r₀) ⟩
+                                  n + 0                     ≡⟨ +-identityʳ n ⟩
+                                  n                         ∎)))
+                        refl)
+                      suf₁
+                      (begin ((pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
+                             pre₀ ++ pre₁ ++ suf₁    ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
+                             pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
+                             xs                      ∎))))
 
+parseOIDField : ∀ n → Parser Dig (Logging ∘ Dec) (_×ₚ_ Dig Generic.OIDField ((_≡ n) ∘ length))
+runParser (parseOIDField n) xs =
+  runParser (parseOIDField.parseOIDFieldWF n) xs (<-wellFounded (length xs))
+  where
+  open import Data.Nat.Induction
 
-  -- parseOIDField-wf  : ParserWF Dig (Logging ∘ Dec) Generic.OIDField
-  -- parseOIDFieldₐ-wf : ParserWF Dig (Logging ∘ Dec) Generic.OIDFieldₐ
+module parseOID where
+  here' = "parseOID"
 
-  -- runParser parseOIDField-wf xs (WellFounded.acc rs) = do
-  --   yes (success pre₀ r₀ r₀≡ oidₛ suf₀ ps≡₀) ← runParser parseOIDSub xs
-  --     where no ¬parse → do
-  --       tell here'
-  --       return ∘ no $ λ where
-  --         (success prefix read read≡ Generic.[ sub ]OID suffix ps≡) →
-  --           contradiction (success prefix _ read≡ sub suffix ps≡) ¬parse
-  --         (success prefix read read≡ (Generic.cons (Generic.mkOIDFieldₐ{bs₁}{bs₂} sub rest bs≡)) suffix ps≡) →
-  --           ‼ ¬parse (success bs₁ _ refl sub (bs₂ ++ suffix)
-  --               (begin (bs₁ ++ bs₂ ++ suffix  ≡⟨ solve (++-monoid Dig) ⟩
-  --                      (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
-  --                      prefix ++ suffix       ≡⟨ ps≡ ⟩
-  --                      xs                     ∎)))
-  --   case suf₀ ≟ [] of λ where
-  --     (yes suf₀≡[]) →
-  --       return (yes (success pre₀ _ r₀≡ Generic.[ oidₛ ]OID {!!} {!!}))
-  --     (no  suf₀≢[]) → {!!}
+  open ≡-Reasoning
 
-  -- runParser parseOIDFieldₐ-wf xs (WellFounded.acc rs) = do
-  --   yes (success pre₀ r₀ r₀≡ oidₛ suf₀ ps≡₀) ← runParser parseOIDSub xs
-  --     where no ¬parse → do
-  --       tell here'
-  --       return ∘ no $ λ where
-  --         (success prefix read read≡ (Generic.mkOIDFieldₐ {bs₁}{bs₂} sub rest bs≡) suffix ps≡) →
-  --           ‼ ¬parse (success bs₁ (length bs₁) refl sub (bs₂ ++ suffix)
-  --               (begin (bs₁ ++ bs₂ ++ suffix  ≡⟨ solve (++-monoid Dig) ⟩
-  --                      (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
-  --                      prefix ++ suffix       ≡⟨ ps≡ ⟩
-  --                      xs                     ∎)))
-  --   yes (success pre₁ r₁ r₁≡ oidₑ suf₁ ps≡₁) ←
-  --     let @0 wf : _
-  --         wf = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (NonEmpty.OIDSub oidₛ))
-  --     in runParser parseOIDField-wf suf₀ (rs _ wf)
-  --     where no ¬parse → do
-  --       tell here'
-  --       return ∘ no $ λ where
-  --         (success prefix read read≡ (Generic.mkOIDFieldₐ{bs₁}{bs₂} sub rest bs≡) suffix ps≡) →
-  --           ‼ ¬parse (success _ _ refl rest suffix
-  --               (let @0 pf₁ : bs₁ ++ bs₂ ++ suffix ≡ pre₀ ++ suf₀
-  --                    pf₁ = begin (bs₁ ++ bs₂ ++ suffix  ≡⟨ solve (++-monoid Dig) ⟩
-  --                                (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
-  --                                prefix ++ suffix       ≡⟨ ps≡ ⟩
-  --                                xs                     ≡⟨ sym ps≡₀ ⟩
-  --                                pre₀ ++ suf₀           ∎)
-  --               in ++-cancelˡ bs₁ (trans pf₁ (cong (_++ suf₀) (NoNest.OIDSub (sym pf₁) oidₛ sub)))))
-  --   return $ yes
-  --     (success (pre₀ ++ pre₁) (r₀ + r₁)
-  --       (begin
-  --         (r₀ + r₁ ≡⟨ cong (_+ r₁) r₀≡ ⟩
-  --         length pre₀ + r₁ ≡⟨ cong (length pre₀ +_) r₁≡ ⟩
-  --         length pre₀ + length pre₁ ≡⟨ sym (length-++ pre₀) ⟩
-  --         length (pre₀ ++ pre₁) ∎))
-  --       (Generic.mkOIDFieldₐ oidₛ oidₑ refl)
-  --       suf₁
-  --       (begin
-  --         (pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
-  --         pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
-  --         pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
-  --         xs ∎))
-
-  -- -- runParser parseOIDFieldₐ xs = do
-  -- --   yes (success pre₀ r₀ r₀≡ oidₛ suf₀ ps≡₀) ← runParser parseOIDSub xs
-  -- --     where no ¬parse → do
-  -- --       tell here'
-  -- --       return ∘ no $ ‼ λ where
-  -- --         (success prefix read read≡ (Generic.cons {bs₁}{bs₂} sub rest bs≡) suffix ps≡₀) →
-  -- --           contradiction
-  -- --             (success _ (length bs₁) refl sub (bs₂ ++ suffix) (begin
-  -- --               bs₁ ++ bs₂ ++ suffix   ≡⟨ solve (++-monoid Dig) ⟩
-  -- --               (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
-  -- --               prefix ++ suffix       ≡⟨ ps≡₀ ⟩
-  -- --               xs                     ∎))
-  -- --             ¬parse
-  -- --   -- yes (success pre₁ r₁ r₁≡ oidₑ suf₁ ps≡₁) ← runParser parseOIDField suf₀
-  -- --   --   where no ¬parse → {!!}
-  -- --   {!!}
-
+  parseOID : Parser Dig (Logging ∘ Dec) Generic.OID
+  runParser parseOID [] = do
+    tell $ here' String.++ ": underflow"
+    return ∘ no $ λ where
+      (success .(Tag.ObjectIdentifier ∷ l ++ o) read read≡ (Generic.mkOid{l}{o} len oid len≡ refl) suffix ())
+  runParser parseOID (x ∷ xs)
+    with x ≟ Tag.ObjectIdentifier
+  ... | no  x≢ = do
+    tell $ here' String.++ ": tag mismatch"
+    return ∘ no $ λ where
+      (success .(Tag.ObjectIdentifier ∷ l ++ o) read read≡ (Generic.mkOid {l} {o} len oid len≡ refl) suffix ps≡) →
+        contradiction (∷-injectiveˡ (sym ps≡)) x≢
+  ... | yes refl = do
+    yes (success pre₀ r₀ r₀≡ len suf₀ ps≡₀) ← runParser parseLen xs
+      where no ¬parse → {!!}
+    yes (success pre₁ r₁ r₁≡ (mk×ₚ oidₑ ≡n refl) suf₁ ps≡₁) ← runParser (parseOIDField (getLength len)) suf₀
+      where no ¬parse → {!!}
+    return (yes
+      (success (Tag.ObjectIdentifier ∷ pre₀ ++ pre₁) (1 + r₀ + r₁)
+        (cong suc {!!})
+        (Generic.mkOid len oidₑ (sym ≡n) refl) suf₁ (cong (Tag.ObjectIdentifier ∷_)
+          (begin ((pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
+                  pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
+                  pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
+                  xs ∎)))))

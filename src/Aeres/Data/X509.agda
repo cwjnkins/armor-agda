@@ -139,7 +139,7 @@ module Generic where
     [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
     cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
 
-  record OID (bs : List Dig) : Set where
+  record OID (@0 bs : List Dig) : Set where
     constructor mkOid
     field
       @0 {l} : List Dig

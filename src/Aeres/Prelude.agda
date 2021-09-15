@@ -106,6 +106,9 @@ cong f refl = refl
 subst₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} (@0 P : A → Set ℓ₂) {@0 x y : A} → (@0 _ : x ≡ y) → P x → P y
 subst₀ P refl x = x
 
+trans₀ : ∀ {ℓ} {@0 A : Set ℓ} {@0 x y z : A} → (@0 _ : x ≡ y) (@0 _ : y ≡ z) → x ≡ z
+trans₀ refl refl = refl
+
 open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
@@ -175,7 +178,7 @@ record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
     sizeOf : A → ℕ
 open Sized ⦃ ... ⦄ public
 
-record Irrel {ℓ} (A : Set ℓ) : Set ℓ where
+record Irrel {ℓ} (@0 A : Set ℓ) : Set ℓ where
   infix 10 ‼_
   field
     irrel : (@0 _ : A) → A
@@ -186,8 +189,8 @@ instance
   IrrelBot : Irrel ⊥
   Irrel.irrel IrrelBot = ⊥-irrel
 
-  Irrel≡ : ∀ {ℓ} {A : Set ℓ} {x y : A} → Irrel (x ≡ y)
-  Irrel.irrel Irrel≡ = ≡-irrel
+  Irrel≡ : ∀ {ℓ} {@0 A : Set ℓ} {@0 x y : A} → Irrel (x ≡ y)
+  Irrel.irrel Irrel≡ refl = refl
 
   Irrel¬ : ∀ {ℓ} {A : Set ℓ} → Irrel (¬ A)
   Irrel.irrel Irrel¬ ¬a a = contradiction a ¬a

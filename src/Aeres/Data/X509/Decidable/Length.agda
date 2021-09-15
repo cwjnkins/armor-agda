@@ -1,7 +1,9 @@
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Prelude
 
 open import Aeres.Binary
-open import Aeres.Data.Parser
+open import Aeres.Grammar.Parser
 open import Aeres.Data.X509
 
 open import Data.Nat.Properties

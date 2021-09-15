@@ -70,7 +70,7 @@ record _×ₚ_ (@0 A B : List Σ → Set) (@0 xs : List Σ) : Set where
     @0 bs≡ : bs ≡ xs
 
 parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
-  Parser (M ∘ Dec) A → NonNesting A → M ⊤ →
+  Parser (M ∘ Dec) A → NonNesting A → M (Level.Lift _ ⊤) →
   Parser (M ∘ Dec) (A ×ₚ ((_≤ n) ∘ length))
 runParser (parse≤{A} n p nn m) xs = do
   (yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)) ← runParser p xs
