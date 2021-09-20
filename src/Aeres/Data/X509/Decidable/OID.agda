@@ -152,14 +152,58 @@ module parseOID where
       (success .(Tag.ObjectIdentifier ∷ l ++ o) read read≡ (Generic.mkOid {l} {o} len oid len≡ refl) suffix ps≡) →
         contradiction (∷-injectiveˡ (sym ps≡)) x≢
   ... | yes refl = do
-    yes (success pre₀ r₀ r₀≡ len suf₀ ps≡₀) ← runParser parseLen xs
-      where no ¬parse → {!!}
-    yes (success pre₁ r₁ r₁≡ (mk×ₚ oidₑ ≡n refl) suf₁ ps≡₁) ← runParser (parseOIDField (getLength len)) suf₀
-      where no ¬parse → {!!}
+    yes (success pre₀ r₀ r₀≡ len₀ suf₀ ps≡₀) ← runParser parseLen xs
+      where no ¬parse → do
+        tell here'
+        return ∘ no $ λ where
+          (success .(Tag.ObjectIdentifier ∷ l ++ o) read read≡ (Generic.mkOid{l}{o} len oid len≡ refl) suffix ps≡) →
+            contradiction
+              (success l _ refl len (o ++ suffix)
+                (∷-injectiveʳ{x = Tag.ObjectIdentifier}{Tag.ObjectIdentifier}
+                  (begin (Tag.ObjectIdentifier ∷ l ++ o ++ suffix   ≡⟨ cong (Tag.ObjectIdentifier ∷_) (solve (++-monoid Dig)) ⟩
+                          Tag.ObjectIdentifier ∷ (l ++ o) ++ suffix ≡⟨ ps≡ ⟩
+                          Tag.ObjectIdentifier ∷ xs                 ∎))))
+              ¬parse
+    yes (success pre₁ r₁ r₁≡ (mk×ₚ oidₑ ≡n refl) suf₁ ps≡₁) ← runParser (parseOIDField (getLength len₀)) suf₀
+      where no ¬parse → do
+        tell here'
+        return ∘ no $ λ where
+          (success .(Tag.ObjectIdentifier ∷ l ++ o) read read≡ (Generic.mkOid{l}{o} len oid len≡ refl) suffix ps≡) → ‼
+            let @0 l≡ : l ≡ pre₀
+                l≡ = NonNesting.LengthNN
+                       (begin (l ++ (o ++ suffix) ≡⟨ solve (++-monoid Dig) ⟩
+                               (l ++ o) ++ suffix ≡⟨ ∷-injectiveʳ ps≡ ⟩
+                               xs ≡⟨ sym ps≡₀ ⟩
+                               pre₀ ++ suf₀ ∎))
+                       len len₀
+                @0 len₀≡ : getLength len ≡ getLength len₀
+                len₀≡ = (begin (getLength len ≡⟨ sym $
+                                                 ≡-elim (λ {bs'} (eq : l ≡ bs') → (len' : Length l) → getLength (subst Length eq len) ≡ getLength len)
+                                                   (λ _ → refl) l≡ len ⟩
+                               getLength (subst Length l≡ len) ≡⟨ cong getLength (Unambiguous.LengthUA (subst (λ x → Length x) l≡ len) len₀) ⟩
+                               getLength len₀ ∎))
+            in contradiction
+              (success o _ refl
+                (mk×ₚ oid (begin (length o      ≡⟨ sym len≡ ⟩
+                                 getLength len  ≡⟨ len₀≡ ⟩
+                                 getLength len₀ ∎))
+                  refl)
+                suffix
+                (++-cancelˡ (Tag.ObjectIdentifier ∷ pre₀)
+                  (begin (Tag.ObjectIdentifier ∷ pre₀ ++ o ++ suffix ≡⟨ cong (λ i → Tag.ObjectIdentifier ∷ i ++ o ++ suffix) (sym l≡) ⟩
+                         Tag.ObjectIdentifier ∷ l ++ o ++ suffix ≡⟨ cong (Tag.ObjectIdentifier ∷_) (solve (++-monoid Dig)) ⟩
+                         Tag.ObjectIdentifier ∷ (l ++ o) ++ suffix ≡⟨ ps≡ ⟩
+                         Tag.ObjectIdentifier ∷ xs ≡⟨ cong (Tag.ObjectIdentifier ∷_) (sym ps≡₀) ⟩
+                         Tag.ObjectIdentifier ∷ pre₀ ++ suf₀ ∎))))
+              ¬parse
     return (yes
       (success (Tag.ObjectIdentifier ∷ pre₀ ++ pre₁) (1 + r₀ + r₁)
-        (cong suc {!!})
-        (Generic.mkOid len oidₑ (sym ≡n) refl) suf₁ (cong (Tag.ObjectIdentifier ∷_)
+        (cong suc
+          (begin (r₀ + r₁ ≡⟨ cong (_+ r₁) r₀≡ ⟩
+                 length pre₀ + r₁ ≡⟨ cong (_ +_) r₁≡ ⟩
+                 length pre₀ + length pre₁ ≡⟨ (sym $ length-++ pre₀ ) ⟩
+                 length (pre₀ ++ pre₁) ∎)))
+        (Generic.mkOid len₀ oidₑ (sym ≡n) refl) suf₁ (cong (Tag.ObjectIdentifier ∷_)
           (begin ((pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
                   pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                   pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
