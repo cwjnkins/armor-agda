@@ -17,6 +17,9 @@ module Tag where
     Bitstring : Dig
     Bitstring = # 3
 
+    Octetstring : Dig
+    Octetstring = # 4
+
     Null : Dig
     Null = # 5
 
@@ -46,6 +49,15 @@ module Tag where
 
     Extensions : Dig
     Extensions = # 163
+
+    Eighty : Dig
+    Eighty = # 128
+
+    A1 : Dig
+    A1 = # 161
+
+    EightyTwo : Dig
+    EightyTwo = # 130
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -157,6 +169,15 @@ module Generic where
       val : IntegerValue v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
+
+  record Boool (bs : List Dig) : Set where
+    constructor mkBoool
+    field
+      @0 {l} : List Dig
+      len : Length l
+      v : Dig
+      @0 len≡ : getLength len ≡ 1
+      @0 bs≡ : bs ≡  Tag.Boolean ∷ l ++ (v ∷ [])
 
   data Option (A : List Dig → Set) : List Dig → Set where
     none : Option A []
@@ -314,14 +335,126 @@ module X509 where
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ nb ++ na
 
 -----------------------------------------Extensions------------------------------------------
-  record Extension (bs : List Dig) : Set where
-    constructor mkExtension
+  postulate
+     Oidaki  : List Dig → Set
+     Oidski : List Dig → Set
+     Oidku  : List Dig → Set
+     Oideku : List Dig → Set
+     Oidbc : List Dig → Set
+
+     Fieldgex : List Dig → Set
+
+     Akiauthcertiss : List Dig → Set
+
+  record Akikeyid (bs : List Dig) : Set where
+    constructor mkAkikeyid
     field
       @0 {l v} : List Dig
       len : Length l
       val : Generic.OctetValue v
       @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
+      @0 bs≡  : bs ≡ Tag.Eighty ∷ l ++ v
+
+  record Akiauthcertsn (bs : List Dig) : Set where
+    constructor mkAkiauthcertsn
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.IntegerValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
+
+  record Fieldsaki (bs : List Dig) : Set where
+    constructor mkFieldsaki
+    field
+      @0 {l1 l2 akid ci csn} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      akeyid : Generic.Option Akikeyid akid
+      authcertiss : Generic.Option Akiauthcertiss ci
+      authcertsn : Generic.Option Akiauthcertsn csn
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ akid ++ ci ++ csn)
+      @0 len2≡ : getLength len2 ≡ length (akid ++ ci ++ csn)
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ akid ++ ci ++ csn
+
+  record Fieldsski (bs : List Dig) : Set where
+    constructor mkFieldsski
+    field
+      @0 {l1 l2 skid} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      skeyid : Generic.OctetValue skid
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ skid)
+      @0 len2≡ : getLength len2 ≡ length skid
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Octetstring ∷ l2) ++ skid
+
+  record Fieldsku (bs : List Dig) : Set where
+    constructor mkKu
+    field
+      @0 {l1 l2 bits} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      kubits : Generic.OctetValue bits
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ bits)
+      @0 len2≡ : getLength len2 ≡ length bits
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Bitstring ∷ l2) ++ bits
+
+  data EkuSeqElems : List Dig → Set
+
+  record EkuSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkEkuSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      extn : Generic.OID bs₁
+      rest   : EkuSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data EkuSeqElems where
+    _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
+    cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
+
+  record Fieldseku (bs : List Dig) : Set where
+    constructor mkEku
+    field
+      @0 {l1 l2 elems} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      seqelems : EkuSeqElems elems
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
+      @0 len2≡ : getLength len2 ≡ length elems
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+
+  record Fieldsbc (bs : List Dig) : Set where
+    constructor mkFieldsbc
+    field
+      @0 {l1 l2 ca pl} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      bcca : Generic.Boool ca
+      bcpathlen : Generic.Option Generic.Int pl
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ ca ++ pl)
+      @0 len2≡ : getLength len2 ≡ length (ca ++ pl)
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ ca ++ pl
+
+  data Selectextn : List Dig →  List Dig → Set where
+    akiextn : ∀ {@0 bs1 bs2} → Oidaki bs1 → Fieldsaki bs2 → Selectextn bs1 bs2
+    skiextn : ∀ {@0 bs1 bs2} → Oidski bs1 → Fieldsski bs2 → Selectextn bs1 bs2
+    kuextn : ∀ {@0 bs1 bs2} → Oidku bs1 → Fieldsku bs2 → Selectextn bs1 bs2
+    ekuextn : ∀ {@0 bs1 bs2} → Oideku bs1 → Fieldseku bs2 → Selectextn bs1 bs2
+    bcextn : ∀ {@0 bs1 bs2} → Oidbc bs1 → Fieldsbc bs2 → Selectextn bs1 bs2
+    gextn : ∀ {@0 bs1 bs2} → Fieldgex bs2 → Selectextn bs1 bs2
+
+  record Extension (bs : List Dig) : Set where
+    constructor mkExtension
+    field
+      @0 {l oex cex ocex} : List Dig
+      len : Length l
+      oidextn : Generic.OID oex
+      critical : Generic.Option Generic.Boool cex
+      octetextn :  Selectextn oex ocex
+      @0 len≡ : getLength len ≡ length (oex ++ cex ++ ocex)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ oex ++ cex ++ ocex
 
   data ExtensionsSeqElems : List Dig → Set
 
@@ -330,7 +463,7 @@ module X509 where
     constructor mkExtensionsSeqElemsₐ
     field
       @0 {bs₁ bs₂} : List Dig
-      rdnSet : Extension bs₁
+      extn : Extension bs₁
       rest   : ExtensionsSeqElems bs₂
       @0 bs≡ : bs ≡ bs₁ ++ bs₂
 

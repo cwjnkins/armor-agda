@@ -50,28 +50,6 @@ module NonNesting where
       proj₁ $ Lemmas.length-++-≡ _ _ _ _ lₜ++ys₁≡
                 (trans lₜLen (trans (cong (λ x → toℕ x ∸ 129) l≡) (sym lₜLen₁)))
 
--- open Base256
-
--- Unambiguous : (A : List Dig → Set) → Set
--- Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
-
--- NoNest : (A : List Dig → Set) → Set
--- NoNest A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
-
--- NonEmpty : (A : List Dig → Set) → Set
--- NonEmpty A = ∀ {xs} → A xs → xs ≢ []
-
--- module NonEmpty where
---   postulate
---     OIDSub : NonEmpty Generic.OIDSub
-
--- -- TODO: Prove
--- module Unambiguous where
---   postulate
---     LengthUA : Unambiguous Length
---     Cert     : Unambiguous X509.Cert
---     TBSCert  : Unambiguous X509.TBSCert
-
 -- -- corollary of `Unambiguous.LengthUA`
 -- getLength≡ : ∀ {xs ys} → xs ≡ ys → (l₀ : Length xs) (l₁ : Length ys) → getLength l₀ ≡ getLength l₁
 -- getLength≡{xs}{.xs} refl l₀ l₁ = cong getLength (Unambiguous.LengthUA l₀ l₁)
