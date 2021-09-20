@@ -67,6 +67,7 @@ module Tag where
 
     A2 : Dig
     A2 = # 162
+    
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -356,8 +357,8 @@ module X509 where
      Oidcrldist : List Dig → Set
      Oidaia : List Dig → Set
 
-     Fieldsaia : List Dig → Set
-     Fieldsgex : List Dig → Set
+     AIAFields : List Dig → Set
+     UNExtnFields : List Dig → Set
 
      Akiauthcertiss : List Dig → Set
      Othernamegen : List Dig → Set
@@ -391,8 +392,8 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
 
-  record Fieldsaki (bs : List Dig) : Set where
-    constructor mkFieldsaki
+  record AKIFields (bs : List Dig) : Set where
+    constructor mkAKIFields
     field
       @0 {l1 l2 akid ci csn} : List Dig
       len1 : Length l1
@@ -404,8 +405,8 @@ module X509 where
       @0 len2≡ : getLength len2 ≡ length (akid ++ ci ++ csn)
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ akid ++ ci ++ csn
 ------------------------------------------------------------------------------------------
-  record Fieldsski (bs : List Dig) : Set where
-    constructor mkFieldsski
+  record SKIFields (bs : List Dig) : Set where
+    constructor mkSKIFields
     field
       @0 {l1 l2 skid} : List Dig
       len1 : Length l1
@@ -415,7 +416,7 @@ module X509 where
       @0 len2≡ : getLength len2 ≡ length skid
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Octetstring ∷ l2) ++ skid
 
-  record Fieldsku (bs : List Dig) : Set where
+  record KUFields (bs : List Dig) : Set where
     constructor mkKu
     field
       @0 {l1 l2 bits} : List Dig
@@ -442,7 +443,7 @@ module X509 where
     _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
     cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
 
-  record Fieldseku (bs : List Dig) : Set where
+  record EKUFields (bs : List Dig) : Set where
     constructor mkEku
     field
       @0 {l1 l2 elems} : List Dig
@@ -455,8 +456,8 @@ module X509 where
       
 -------------------------------------------------------------------------------
 
-  record Fieldsbc (bs : List Dig) : Set where
-    constructor mkFieldsbc
+  record BCFields (bs : List Dig) : Set where
+    constructor mkBCFields
     field
       @0 {l1 l2 ca pl} : List Dig
       len1 : Length l1
@@ -495,8 +496,8 @@ module X509 where
     _∷[]  : ∀ {x} → Generalname x → Generalnames x
     cons : ∀ {x} → Generalnamesₐ x → Generalnames x
 
-  record Fieldsian (bs : List Dig) : Set where
-    constructor mkFieldsian
+  record IANFields (bs : List Dig) : Set where
+    constructor mkIANFields
     field
       @0 {l iannames} : List Dig
       len : Length l
@@ -504,8 +505,8 @@ module X509 where
       @0 len≡ : getLength len ≡ length iannames
       @0 bs≡  : bs ≡ Tag.Octetstring ∷ l ++ iannames
 
-  record Fieldssan (bs : List Dig) : Set where
-    constructor mkFieldssan
+  record SANFields (bs : List Dig) : Set where
+    constructor mkSANFields
     field
       @0 {l sannames} : List Dig
       len : Length l
@@ -550,8 +551,8 @@ module X509 where
     _∷[]  : ∀ {x} → PolicyInformation x → CertPolSeqElems x
     cons : ∀ {x} → CertPolSeqElemsₐ x → CertPolSeqElems x
 
-  record Fieldscertpol (bs : List Dig) : Set where
-    constructor mkFieldscertpol
+  record CertPolFields (bs : List Dig) : Set where
+    constructor mkCertPolFields
     field
       @0 {l1 l2 elems} : List Dig
       len1 : Length l1
@@ -629,8 +630,8 @@ module X509 where
     _∷[]  : ∀ {x} → Distpoint x → Seqcrldist x
     cons : ∀ {x} → Seqcrldistₐ x → Seqcrldist x
 
-  record Fieldscrldist (bs : List Dig) : Set where
-    constructor mkFieldscrldist
+  record CRLDistFields (bs : List Dig) : Set where
+    constructor mkCRLDistFields
     field
       @0 {l dps} : List Dig
       len : Length l
@@ -640,19 +641,49 @@ module X509 where
 
 --------------------------------Extensions selection----------------------------------------
 
+  module ExtensionOID where
+    AKI : List Dig
+    AKI = # 2 ∷ # 5 ∷ # 29 ∷ [ # 35 ]
+
+    SKI : List Dig
+    SKI = # 2 ∷ # 5 ∷ # 29 ∷ [ # 14 ]
+
+    KU : List Dig
+    KU = # 2 ∷ # 5 ∷ # 29 ∷ [ # 15 ]
+
+    EKU : List Dig
+    EKU = # 2 ∷ # 5 ∷ # 29 ∷ [ # 37 ]
+
+    BC : List Dig
+    BC = # 2 ∷ # 5 ∷ # 29 ∷ [ # 19 ]
+
+    IAN : List Dig
+    IAN = # 2 ∷ # 5 ∷ # 29 ∷ [ # 18 ]
+
+    SAN : List Dig
+    SAN = # 2 ∷ # 5 ∷ # 29 ∷ [ # 17 ]
+
+    CPOL : List Dig
+    CPOL = # 2 ∷ # 5 ∷ # 29 ∷ [ # 32 ]
+
+    CRLDIST : List Dig
+    CRLDIST = # 2 ∷ # 5 ∷ # 29 ∷ [ # 31 ]
+
+    AIA : List Dig
+    AIA = # 1 ∷ # 3 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
+
   data Selectextn : List Dig →  List Dig → Set where
-    -- akiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ (# 1) ∷ (# 2) ∷ (# 3) ∷ [])  → Fieldsaki bs2 → Selectextn bs1 bs2 --- make oid general
-    akiextn : ∀ {@0 bs1 bs2} → Oidaki bs1 → Fieldsaki bs2 → Selectextn bs1 bs2
-    skiextn : ∀ {@0 bs1 bs2} → Oidski bs1 → Fieldsski bs2 → Selectextn bs1 bs2
-    kuextn : ∀ {@0 bs1 bs2} → Oidku bs1 → Fieldsku bs2 → Selectextn bs1 bs2
-    ekuextn : ∀ {@0 bs1 bs2} → Oideku bs1 → Fieldseku bs2 → Selectextn bs1 bs2
-    bcextn : ∀ {@0 bs1 bs2} → Oidbc bs1 → Fieldsbc bs2 → Selectextn bs1 bs2
-    ianextn : ∀ {@0 bs1 bs2} → Oidian bs1 → Fieldsian bs2 → Selectextn bs1 bs2
-    sanextn : ∀ {@0 bs1 bs2} → Oidsan bs1 → Fieldssan bs2 → Selectextn bs1 bs2
-    cpextn : ∀ {@0 bs1 bs2} → Oidcertpol bs1 → Fieldscertpol bs2 → Selectextn bs1 bs2
-    crlextn : ∀ {@0 bs1 bs2} → Oidcrldist bs1 → Fieldscrldist bs2 → Selectextn bs1 bs2
-    aiaextn : ∀ {@0 bs1 bs2} → Oidaia bs1 → Fieldsaia bs2 → Selectextn bs1 bs2
-    gextn : ∀ {@0 bs1 bs2} → Fieldsgex bs2 → Selectextn bs1 bs2
+    akiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI) → AKIFields bs2 → Selectextn bs1 bs2
+    skiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SKI) → SKIFields bs2 → Selectextn bs1 bs2
+    kuextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.KU) → KUFields bs2 → Selectextn bs1 bs2
+    ekuextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.EKU) → EKUFields bs2 → Selectextn bs1 bs2
+    bcextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.BC) → BCFields bs2 → Selectextn bs1 bs2
+    ianextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.IAN) → IANFields bs2 → Selectextn bs1 bs2
+    sanextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SAN) → SANFields bs2 → Selectextn bs1 bs2
+    cpextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → Selectextn bs1 bs2
+    crlextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → Selectextn bs1 bs2
+    aiaextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → Selectextn bs1 bs2
+    unextn : ∀ {@0 bs1 bs2} → UNExtnFields bs2 → Selectextn bs1 bs2
 
   record Extension (bs : List Dig) : Set where
     constructor mkExtension

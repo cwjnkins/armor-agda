@@ -100,6 +100,11 @@ module Reveal = Reveal_·_is_
 ≡-irrel : ∀ {ℓ} {A : Set ℓ} {x y : A} → (@0 _ : x ≡ y) → x ≡ y
 ≡-irrel refl = refl
 
+≡-elim : ∀ {ℓ ℓ₁}{A : Set ℓ}{x : A} →
+         (P : ∀ {y} → x ≡ y → Set ℓ₁) →
+         P refl → ∀ {y} (eq : x ≡ y) → P eq
+≡-elim P pf refl = pf
+
 cong : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {@0 x y : A} → x ≡ y → f x ≡ f y
 cong f refl = refl
 

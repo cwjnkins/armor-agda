@@ -1,53 +1,65 @@
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+open import Data.Nat.Properties
 
 module Aeres.Data.X509.Properties where
 
 open Base256
 open import Aeres.Grammar.Definitions Dig
 
+module NonEmpty where
+
+   OIDSub : NonEmpty Generic.OIDSub
+   OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+   OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+
+   Time : NonEmpty X509.Time
+   Time (X509.utctm ()) refl
+   Time (X509.gentm ()) refl
+
+   Validity : NonEmpty X509.Validity
+   Validity () refl
+
+   Cert : NonEmpty X509.Cert
+   Cert () refl
+
+module Unambiguous where
+  postulate
+    LengthUA : Unambiguous Length
+
 module NonNesting where
   postulate
-    LengthNN : NonNesting Length
     OIDSub   : NonNesting Generic.OIDSub
 
-module NonEmpty where
- -- OIDSub : NonEmpty Generic.OIDSub
- -- OIDSub {.[]} (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
- --OIDSub {.[]} (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+  LengthNN : NonNesting Length
+  LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.short (Length.mkShort l l<128 refl)) (Length.short (Length.mkShort l₁ l<129 refl)) =
+    cong [_] (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
+  LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.short (Length.mkShort l l<128 refl)) (Length.long (Length.mkLong l₁ l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl)) =
+    contradiction l<128 (<⇒≯ (subst (λ i → 128 < toℕ i) (sym $ ∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂) l>128))
+  LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.long (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl)) (Length.short (Length.mkShort l₁ l<128 refl)) =
+    contradiction l<128 (<⇒≯ (subst (λ i → 128 < toℕ i)  (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂) l>128))
+  LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.long (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl)) (Length.long (Length.mkLong l₁ l>129 lₕ₁ lₕ≢1 lₜ₁ lₜLen₁ lₕₜMinRep₁ refl)) =
+    begin (l ∷ lₕ ∷ lₜ   ≡⟨ cong (_∷ lₕ ∷ lₜ) (‼ l≡) ⟩
+          l₁ ∷ lₕ ∷ lₜ   ≡⟨ cong (λ x → l₁ ∷ x ∷ lₜ) (‼ lₕ≡) ⟩
+          l₁ ∷ lₕ₁ ∷ lₜ  ≡⟨ cong (λ x → l₁ ∷ lₕ₁ ∷ x) (‼ lₜ≡) ⟩
+          l₁ ∷ lₕ₁ ∷ lₜ₁ ∎)
+    where
+    open ≡-Reasoning
 
- -- UtcTime : NonEmpty X509.UtcTime
- -- UtcTime {[]} = {![]!}
- -- UtcTime {x ∷ xs} = {!!}
+    @0 l≡ : l ≡ l₁
+    l≡ = ∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂
 
- OIDSub : NonEmpty Generic.OIDSub
- OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
- OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+    @0 lₕ≡ : lₕ ≡ lₕ₁
+    lₕ≡ = ∷-injectiveˡ (∷-injectiveʳ xs₁++ys₁≡xs₂++ys₂)
 
--- try other nodes from x.509 agda
+    @0 lₜ++ys₁≡ : lₜ ++ _ ≡ lₜ₁ ++ _
+    lₜ++ys₁≡ = ∷-injectiveʳ (∷-injectiveʳ xs₁++ys₁≡xs₂++ys₂)
 
--- open Base256
-
--- Unambiguous : (A : List Dig → Set) → Set
--- Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
-
--- NoNest : (A : List Dig → Set) → Set
--- NoNest A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
-
--- NonEmpty : (A : List Dig → Set) → Set
--- NonEmpty A = ∀ {xs} → A xs → xs ≢ []
-
--- module NonEmpty where
---   postulate
---     OIDSub : NonEmpty Generic.OIDSub
-
--- -- TODO: Prove
--- module Unambiguous where
---   postulate
---     LengthUA : Unambiguous Length
---     Cert     : Unambiguous X509.Cert
---     TBSCert  : Unambiguous X509.TBSCert
+    @0 lₜ≡ : lₜ ≡ lₜ₁
+    lₜ≡ =
+      proj₁ $ Lemmas.length-++-≡ _ _ _ _ lₜ++ys₁≡
+                (trans lₜLen (trans (cong (λ x → toℕ x ∸ 129) l≡) (sym lₜLen₁)))
 
 -- -- corollary of `Unambiguous.LengthUA`
 -- getLength≡ : ∀ {xs ys} → xs ≡ ys → (l₀ : Length xs) (l₁ : Length ys) → getLength l₀ ≡ getLength l₁
