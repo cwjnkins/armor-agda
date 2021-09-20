@@ -13,8 +13,21 @@ module NonNesting where
     OIDSub   : NonNesting Generic.OIDSub
 
 module NonEmpty where
-  postulate
-    OIDSub : NonEmpty Generic.OIDSub
+ -- OIDSub : NonEmpty Generic.OIDSub
+ -- OIDSub {.[]} (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+ --OIDSub {.[]} (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+
+ -- UtcTime : NonEmpty X509.UtcTime
+ -- UtcTime {[]} = {![]!}
+ -- UtcTime {x ∷ xs} = {!!}
+
+-- OIDSub : NonEmpty Generic.OIDSub
+-- OIDSub {[]} (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ())
+-- OIDSub {[]} (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ())
+-- OIDSub {x ∷ .[]} (Generic.mkOIDSub [] lₚ≥128 .x lₑ<128 leastDigs refl) = λ x₁ → {!!}
+-- OIDSub {x ∷ xs} (Generic.mkOIDSub (x₁ ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs bs≡) = {!!}
+
+-- try other nodes from x.509 agda
 
 -- open Base256
 
