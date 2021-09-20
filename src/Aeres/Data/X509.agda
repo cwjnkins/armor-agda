@@ -346,17 +346,6 @@ module X509 where
 
 -----------------------------------------Extensions------------------------------------------
   postulate
-     Oidaki  : List Dig → Set
-     Oidski : List Dig → Set
-     Oidku  : List Dig → Set
-     Oideku : List Dig → Set
-     Oidbc : List Dig → Set
-     Oidian  : List Dig → Set
-     Oidsan : List Dig → Set
-     Oidcertpol  : List Dig → Set
-     Oidcrldist : List Dig → Set
-     Oidaia : List Dig → Set
-
      AIAFields : List Dig → Set
      UNExtnFields : List Dig → Set
 
@@ -374,6 +363,7 @@ module X509 where
      Qualifier : List Dig → Set
 
  ----------------------- aki extension -------------------
+ 
   record Akikeyid (bs : List Dig) : Set where
     constructor mkAkikeyid
     field
