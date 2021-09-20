@@ -363,6 +363,7 @@ module X509 where
      Qualifier : List Dig → Set
 
  ----------------------- aki extension -------------------
+ 
   record Akikeyid (bs : List Dig) : Set where
     constructor mkAkikeyid
     field
