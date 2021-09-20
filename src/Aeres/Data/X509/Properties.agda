@@ -9,9 +9,20 @@ open Base256
 open import Aeres.Grammar.Definitions Dig
 
 module NonEmpty where
-  OIDSub : NonEmpty Generic.OIDSub
-  OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs refl) ()
-  OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs refl) ()
+
+   OIDSub : NonEmpty Generic.OIDSub
+   OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+   OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+
+   Time : NonEmpty X509.Time
+   Time (X509.utctm ()) refl
+   Time (X509.gentm ()) refl
+
+   Validity : NonEmpty X509.Validity
+   Validity () refl
+
+   Cert : NonEmpty X509.Cert
+   Cert () refl
 
 module Unambiguous where
   postulate
