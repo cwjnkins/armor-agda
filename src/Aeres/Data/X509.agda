@@ -437,8 +437,12 @@ module X509 where
       @0 len2≡ : getLength len2 ≡ length (ca ++ pl)
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ ca ++ pl
 
+  module ExtensionOID where
+    AKI : List Dig
+    AKI = # 2 ∷ # 5 ∷ # 29 ∷ [ # 35 ]
+
   data Selectextn : List Dig →  List Dig → Set where
-    akiextn : ∀ {@0 bs1 bs2} → Oidaki bs1 → Fieldsaki bs2 → Selectextn bs1 bs2
+    akiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI)  → Fieldsaki bs2 → Selectextn bs1 bs2
     skiextn : ∀ {@0 bs1 bs2} → Oidski bs1 → Fieldsski bs2 → Selectextn bs1 bs2
     kuextn : ∀ {@0 bs1 bs2} → Oidku bs1 → Fieldsku bs2 → Selectextn bs1 bs2
     ekuextn : ∀ {@0 bs1 bs2} → Oideku bs1 → Fieldseku bs2 → Selectextn bs1 bs2
