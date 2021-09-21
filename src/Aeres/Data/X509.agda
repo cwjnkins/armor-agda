@@ -10,7 +10,7 @@ module Tag where
 
     Boolean : Dig
     Boolean = # 1
-    
+
     Integer : Dig
     Integer = # 2
 
@@ -34,7 +34,7 @@ module Tag where
 
     Sequence : Dig
     Sequence = # 48
-    
+
     Sett : Dig
     Sett = # 49
 
