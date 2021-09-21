@@ -40,24 +40,31 @@ ParserWF M A = Parserᵢ (λ xs X → (@0 _ : Acc _<_ (length xs)) → M X) A
 -- ... | yes refl = yes (refl ^S xs [ refl ]S)
 -- ... | no  x≢   = no λ where (refl ^S suffix [ refl ]S) → x≢ refl
 
-parseN : (n : ℕ) → Parser Dec λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ n)
-runParser (parseN zero) xs = yes (success [] 0 refl ([] , refl , refl) xs refl)
-runParser (parseN (suc n)) [] = no $ λ where
-  (success prefix read read≡ (ys , refl , len-xs) suffix ps≡) → ‼ 0≢1+n $ begin
-    length{A = Σ} []          ≡⟨ cong length (sym (‼ ps≡)) ⟩
-    length (ys ++ suffix)     ≡⟨ length-++ ys ⟩
-    length ys + length suffix ≡⟨ cong (_+ length suffix) len-xs ⟩
-    suc (n + length suffix)   ∎
-    where open ≡-Reasoning
-runParser (parseN (suc n)) (x ∷ xs)
-  with runParser (parseN n) xs
-... | no  proof₁ = no $ ‼ go
+parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
+         (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ n)
+runParser (parseN zero m) xs = return (yes (success [] 0 refl ([] , refl , refl) xs refl))
+runParser (parseN (suc n) m) [] = do
+  m
+  return ∘ no $ λ where
+    (success prefix read read≡ (ys , refl , len-xs) suffix ps≡) → ‼ 0≢1+n $ begin
+      length{A = Σ} []          ≡⟨ cong length (sym (‼ ps≡)) ⟩
+      length (ys ++ suffix)     ≡⟨ length-++ ys ⟩
+      length ys + length suffix ≡⟨ cong (_+ length suffix) len-xs ⟩
+      suc (n + length suffix)   ∎
   where
-    @0 go : ¬ Success (λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ 1 + n)) (x ∷ xs)
-    go (success .(x ∷ ys) .(length (x ∷ ys)) refl (x ∷ ys , refl , ysLen) suffix ps≡) =
-      proof₁ (success ys (length ys) refl (ys , refl , suc-injective ysLen) suffix (∷-injectiveʳ ps≡))
-... | yes (success prefix read read≡ (ys , ys≡ , ysLen) suffix ps≡) =
-  yes (success (x ∷ prefix) (1 + read) (cong suc read≡) (x ∷ ys  , cong (x ∷_) ys≡ , cong suc ysLen) suffix (cong (x ∷_) ps≡))
+  open ≡-Reasoning
+runParser (parseN (suc n) m) (x ∷ xs) = do
+  yes (success prefix read read≡ (ys , ys≡ , ysLen) suffix ps≡) ← runParser (parseN n m) xs
+    where no ¬parse → do
+      return ∘ no $ ‼ λ where
+        (success .(x ∷ ys) read read≡ (x ∷ ys , refl , ysLen) suffix ps≡) →
+          contradiction
+            (success ys (length ys) refl (ys , refl , cong pred ysLen) suffix (∷-injectiveʳ ps≡))
+            ¬parse
+  return (yes 
+    (success (x ∷ ys) _ refl
+      (x ∷ ys , refl , trans₀ (sym (cong suc (cong length ys≡))) (cong suc ysLen))
+      suffix (cong (x ∷_) (trans (cong (_++ suffix) (sym ys≡)) ps≡))))
 
 -- _×ₚ_ : (A B : List Σ → Set) → List Σ → Set
 -- A ×ₚ B = λ xs → A xs × B xs

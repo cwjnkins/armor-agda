@@ -60,14 +60,14 @@ module parseLongLen where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction lₕ≢0 lₕ≡0
   ... | yes  lₕ≢0
-    with runParser (parseN Dig (toℕ l - 129)) xs
-  ... | no parseFail = do
+    with runParser (parseN Dig {M = Logging} (toℕ l - 129) (return (Level.lift tt))) xs
+  ... | mkLogged _ (no parseFail) = do
     tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
     return ∘ no $ λ where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction (success lₜ (length lₜ) refl (lₜ , refl , lₜLen) suffix refl)
           parseFail
-  ... | yes (success prefix read read≡ (lₜ , refl , lₜLen) suffix refl)
+  ... | mkLogged _ (yes (success prefix read read≡ (lₜ , refl , lₜLen) suffix refl))
     with lₜ ≟ [] in eq₁
   ... | no  lₜ≢[] =
     return (yes
