@@ -67,7 +67,7 @@ module Tag where
 
     A2 : Dig
     A2 = # 162
-    
+
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -79,16 +79,31 @@ module Length where
       @0 bs≡ : bs ≡ [ l ]
   open Short
 
+  MinRep : Dig → List Dig → Set
+  MinRep lₕ lₜ =
+    if ⌊ lₜ ≟ [] ⌋ then toℕ lₕ ≥ 128 else ⊤
+
+  MinRep-elim
+    : ∀ {ℓ} lₕ lₜ (P : Dig → List Dig → Set ℓ) →
+      (lₜ ≡ [] → toℕ lₕ ≥ 128 → P lₕ lₜ) →
+      (lₜ ≢ [] → P lₕ lₜ) →
+      MinRep lₕ lₜ → P lₕ lₜ
+  MinRep-elim lₕ lₜ P pf₁ pf₂ mr
+    with lₜ ≟ []
+  ... | no  lₜ≢[] = pf₂ lₜ≢[]
+  ... | yes lₜ≡[] = pf₁ lₜ≡[] mr
+
+
   record Long (bs : List Dig) : Set where
     constructor mkLong
     field
       l : Dig
       @0 l>128 : 128 < toℕ l
       lₕ : Dig
-      @0 lₕ≢0 : toℕ lₕ ≢ 0
+      @0 lₕ≢0 : toℕ lₕ > 0
       lₜ : List Dig
       @0 lₜLen : length lₜ ≡ toℕ l - 129
-      @0 lₕₜMinRep : lₜ ≢ [] ⊎ toℕ lₕ ≥ 128
+      @0 lₕₜMinRep : MinRep lₕ lₜ
       @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
   open Long
 
@@ -99,17 +114,38 @@ module Length where
   shortₛ : ∀ l → {@0 _ : True (toℕ l <? 128)} → Length [ l ]
   shortₛ l {l<128} = short (mkShort l (toWitness l<128) refl)
 
-  longₛ : ∀ l lₕ lₜ →
+  mkLongₛ : ∀ l lₕ lₜ →
           {@0 _ : True (128 <? toℕ l)}
-          {@0 _ : False (toℕ lₕ ≟ 0)}
+          {@0 _ : True (toℕ lₕ >? 0)}
           {@0 _ : True (length lₜ ≟ (toℕ l - 129))}
           {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
-          → Length (l ∷ lₕ ∷ lₜ)
-  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
-   long (mkLong l
+          → Long (l ∷ lₕ ∷ lₜ)
+  mkLongₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
+   (mkLong l
           (toWitness l>128) lₕ
-          (toWitnessFalse lₕ≢0) lₜ
-          (toWitness lₜLen) (toWitness mr) refl)
+          (toWitness lₕ≢0) lₜ
+          (toWitness lₜLen) (go mr) {- (toWitness mr) -} refl)
+   where
+   go : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128) → if ⌊ lₜ ≟ [] ⌋ then toℕ lₕ ≥ 128 else ⊤
+   go mr
+     with toWitness mr
+   ... | inj₁ lₜ≢[]
+     with lₜ ≟ []
+   ... | no  _ = tt
+   ... | yes lₜ≡[] = contradiction lₜ≡[] lₜ≢[]
+   go mr | inj₂ y
+     with lₜ ≟ []
+   ... | no _ = tt
+   ... | yes lₜ≡[] = y
+
+  longₛ : ∀ l lₕ lₜ →
+        {@0 _ : True (128 <? toℕ l)}
+        {@0 _ : True (toℕ lₕ >? 0)}
+        {@0 _ : True (length lₜ ≟ (toℕ l - 129))}
+        {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
+            → Length (l ∷ lₕ ∷ lₜ)
+  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
+    long (mkLongₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr})
 
   getLength : ∀ {@0 bs} → Length bs → ℕ
   getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
@@ -130,6 +166,15 @@ module Generic where
     StringValue : List Dig → Set
     IntegerValue : List Dig → Set
     OctetValue : List Dig → Set
+
+  record Bitstring (@0 bs : List Dig) : Set where
+    constructor mkBitString
+    field
+      @0 {l} : List Dig
+      len : Length l
+      val : List Dig
+      @0 len≡ : getLength len ≡ length val
+      @0 bs≡ : bs ≡ Tag.Bitstring ∷ l ++ val
 
   record OIDSub (bs : List Dig) : Set where
     constructor mkOIDSub
@@ -733,6 +778,7 @@ module X509 where
       validity : Validity va
       subject  : RDName u
       pk       : PublicKey p
+      {- TODO: missing constraints that issuer, subject, extensions are present only if version is v2 >= -}
       issuerUID : Generic.Option IssUID u₁
       subjectUID : Generic.Option SubUID u₂
       extensions : Generic.Option Extensions e
@@ -740,14 +786,6 @@ module X509 where
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
   ---------------------------------Certificate---------------------------------------------------
-  record Signature (bs : List Dig) : Set where
-    constructor mkSig
-    field
-      @0 {l v} : List Dig
-      len : Length l
-      val : Generic.OctetValue v
-      @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.Bitstring ∷ l ++ v
 
   record Cert (bs : List Dig) : Set where
     constructor mkCert
@@ -756,6 +794,6 @@ module X509 where
       len : Length l
       tbs : TBSCert t
       signAlg : SignAlg sa
-      signature : Signature sig
+      signature : Generic.Bitstring sig
       @0 len≡ : getLength len ≡ length (t ++ sa ++ sig)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ t ++ sa ++ sig

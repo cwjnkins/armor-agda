@@ -92,6 +92,10 @@ Acc = WellFounded.Acc
 module Level where
   open import Level public
 
+open import Relation.Binary public
+  using ()
+  renaming (Irrelevant to Irrelevant₂)
+
 open import Relation.Binary.PropositionalEquality public
   hiding (decSetoid ; cong)
   renaming ([_] to [_]R)

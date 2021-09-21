@@ -53,13 +53,13 @@ module parseLongLen where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction l>128 l≯128
   ... | yes l>128
-    with toℕ lₕ ≟ 0
-  ... | yes lₕ≡0 = do
+    with toℕ lₕ >? 0
+  ... | no lₕ≡0 = do
     tell $ here' String.++ ": first byte of length sequence must not be zero"
     return ∘ no $ λ where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
-        contradiction lₕ≡0 lₕ≢0
-  ... | no  lₕ≢0
+        contradiction lₕ≢0 lₕ≡0
+  ... | yes  lₕ≢0
     with runParser (parseN Dig (toℕ l - 129)) xs
   ... | no parseFail = do
     tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
@@ -68,10 +68,14 @@ module parseLongLen where
         contradiction (success lₜ (length lₜ) refl (lₜ , refl , lₜLen) suffix refl)
           parseFail
   ... | yes (success prefix read read≡ (lₜ , refl , lₜLen) suffix refl)
-    with lₜ ≟ []
+    with lₜ ≟ [] in eq₁
   ... | no  lₜ≢[] =
-    return (yes (success (l ∷ lₕ ∷ lₜ) (2 + read) (cong (2 +_) read≡)
-                         (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen (inj₁ lₜ≢[]) refl) suffix refl))
+    return (yes
+      (success (l ∷ lₕ ∷ lₜ) (2 + read) (cong (2 +_) read≡)
+        (Length.mkLongₛ l lₕ lₜ
+          {fromWitness l>128} {fromWitness lₕ≢0} {fromWitness lₜLen}
+          {fromWitness (inj₁ lₜ≢[])})
+        suffix refl))
   ... | yes lₜ≡[]
     with toℕ lₕ ≥? 128
   ... | no  lₕ≱128 = do
@@ -80,9 +84,9 @@ module parseLongLen where
     where
     @0 go : ¬ Success Dig Length.Long (l ∷ lₕ ∷ lₜ ++ suffix)
     go (success prefix' read' read≡' (Length.mkLong l' l'>128 lₕ' lₕ'≢0 lₜ' lₜ'Len lₕₜMinRep' refl) suffix' ps≡') =
-      [_,_]
-        (λ lₜ≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ≢[])
-        (λ lₕ≥128 → contradiction lₕ≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
+      Length.MinRep-elim lₕ' lₜ' (λ _ _ → ⊥)
+        (λ lₜ'≡[] lₕ'≥128 → contradiction lₕ'≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
+        (λ lₜ'≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ'≢[])
         lₕₜMinRep'
       where
       open ≡-Reasoning
@@ -100,7 +104,12 @@ module parseLongLen where
         toℕ l - 129  ≡⟨ sym lₜLen ⟩
         length lₜ    ∎
   ... | yes lₕ≥128 =
-    return (yes (success _ _ refl (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen (inj₂ lₕ≥128) refl) suffix refl))
+    return (yes
+      (success _ _ refl
+        (Length.mkLongₛ l lₕ lₜ
+          {fromWitness l>128} {fromWitness lₕ≢0}
+          {fromWitness lₜLen} {fromWitness (inj₂ lₕ≥128)})
+        suffix refl))
 
 open parseLongLen public using (parseLongLen)
 

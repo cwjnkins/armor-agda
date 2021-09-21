@@ -2,6 +2,7 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Data.Nat.Properties
+  hiding (_≟_)
 
 module Aeres.Data.X509.Properties where
 
@@ -26,13 +27,25 @@ module NonEmpty where
 
 
 module Unambiguous where
+  MinRep-irrelevant : Irrelevant₂ Length.MinRep
+  MinRep-irrelevant{lₕ}{lₜ} mr₁ mr₂
+    with lₜ ≟ []
+  ... | yes refl = ≤-irrelevant mr₁ mr₂
+  MinRep-irrelevant {lₕ} {lₜ} tt tt | no lₜ≢[] = refl
 
-  LengthUA : Unambiguous Length
-  LengthUA (Length.short (Length.mkShcfort l l<128 refl)) (Length.short (Length.mkShort .l l<129 refl))
+
+  @0 LengthUA : Unambiguous Length
+  LengthUA (Length.short (Length.mkShort l l<128 refl)) (Length.short (Length.mkShort .l l<129 refl))
     with <-irrelevant l<128 l<129
-  ... | xxx = {!!}
+  ... | refl = refl
   LengthUA (Length.short (Length.mkShort l l<128 refl)) (Length.long (Length.mkLong l₁ l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep ()))
-  LengthUA (Length.long x) a₂ = {!!}
+  LengthUA (Length.long (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl)) (Length.short (Length.mkShort l₁ l<128 ()))
+  LengthUA (Length.long (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl)) (Length.long (Length.mkLong .l l>129 .lₕ lₕ≢1 .lₜ lₜLen₁ lₕₜMinRep₁ refl))
+    with <-irrelevant l>128 l>129
+    |    <-irrelevant lₕ≢0  lₕ≢1
+    |    ≡-irrelevant lₜLen lₜLen₁
+    |    MinRep-irrelevant lₕₜMinRep lₕₜMinRep₁
+  ... | refl | refl | refl | refl = refl
 
 module NonNesting where
   postulate
