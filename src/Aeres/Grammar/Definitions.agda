@@ -9,6 +9,6 @@ NonNesting : (A : List Σ → Set) → Set
 NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
 
 NonEmpty : (A : List Σ → Set) → Set
-NonEmpty A = ∀ {xs} → A xs → xs ≢ []
+NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
 

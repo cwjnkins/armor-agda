@@ -22,11 +22,17 @@ module NonEmpty where
    Validity () refl
 
    Cert : NonEmpty X509.Cert
-   Cert () refl
+   Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
+
 
 module Unambiguous where
-  postulate
-    LengthUA : Unambiguous Length
+
+  LengthUA : Unambiguous Length
+  LengthUA (Length.short (Length.mkShcfort l l<128 refl)) (Length.short (Length.mkShort .l l<129 refl))
+    with <-irrelevant l<128 l<129
+  ... | xxx = {!!}
+  LengthUA (Length.short (Length.mkShort l l<128 refl)) (Length.long (Length.mkLong l₁ l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep ()))
+  LengthUA (Length.long x) a₂ = {!!}
 
 module NonNesting where
   postulate
