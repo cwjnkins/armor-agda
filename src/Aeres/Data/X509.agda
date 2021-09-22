@@ -186,14 +186,21 @@ module Generic where
       val : ℤ
       @0 bs≡ : twosComplement bs ≡ val
 
-  record Bitstring (@0 bs : List Dig) : Set where
-    constructor mkBitString
+  BitstringUnusedBits : Dig → List Dig → Set
+  BitstringUnusedBits bₕ [] = bₕ ≡ # 0
+  BitstringUnusedBits bₕ (_ ∷ _) = ⊤
+
+  record BitstringValue (@0 bs : List Dig) : Set where
+    constructor mkBitstringValue
     field
-      @0 {l} : List Dig
-      len : Length l
-      val : List Dig
-      @0 len≡ : getLength len ≡ length val
-      @0 bs≡ : bs ≡ Tag.Bitstring ∷ l ++ val
+      bₕ : Dig
+      @0 bₕ<8 : toℕ bₕ < 8
+      bₜ : List Dig
+      @0 unusedBits : BitstringUnusedBits bₕ bₜ
+      @0 bs≡ : bs ≡ bₕ ∷ bₜ
+
+  Bitstring : (@0 _ : List Dig) → Set
+  Bitstring xs = TLV Tag.Bitstring BitstringValue xs
 
   record OIDSub (bs : List Dig) : Set where
     constructor mkOIDSub

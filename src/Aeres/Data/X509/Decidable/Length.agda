@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
+open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Aeres.Data.X509
 
@@ -65,16 +66,15 @@ module parseLongLen where
     tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
     return ∘ no $ λ where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
-        contradiction (success lₜ (length lₜ) refl (lₜ , refl , lₜLen) suffix refl)
+        contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) lₜLen refl) suffix refl)
           parseFail
-  ... | mkLogged _ (yes (success prefix read read≡ (lₜ , refl , lₜLen) suffix refl))
+  ... | mkLogged _ (yes (success .lₜ read read≡ (mk×ₚ (singleton lₜ refl) lₜLen refl) suffix refl))
     with lₜ ≟ [] in eq₁
   ... | no  lₜ≢[] =
     return (yes
-      (success (l ∷ lₕ ∷ lₜ) (2 + read) (cong (2 +_) read≡)
+      (success (l ∷ lₕ ∷ lₜ) _ (cong (2 +_) read≡)
         (Length.mkLongₛ l lₕ lₜ
-          {fromWitness l>128} {fromWitness lₕ≢0} {fromWitness lₜLen}
-          {fromWitness (inj₁ lₜ≢[])})
+          {fromWitness l>128} {fromWitness lₕ≢0} {fromWitness lₜLen} {fromWitness (inj₁ lₜ≢[])})
         suffix refl))
   ... | yes lₜ≡[]
     with toℕ lₕ ≥? 128

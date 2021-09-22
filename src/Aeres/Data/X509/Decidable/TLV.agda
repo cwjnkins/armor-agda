@@ -94,3 +94,5 @@ module parseTLV (t : Dig) (tName : String) (A : List Dig → Set) (p : ∀ n →
                   pre₀ ++ pre₁ ++ suf₁   ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                   pre₀ ++ suf₀           ≡⟨ ps≡₀ ⟩
                   xs                      ∎)))))
+
+open parseTLV public using (parseTLV)

@@ -34,30 +34,31 @@ ParserWF : (M : Set → Set) (A : List Σ → Set) → Set
 ParserWF M A = Parserᵢ (λ xs X → (@0 _ : Acc _<_ (length xs)) → M X) A
 
 parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
-         (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ n)
-runParser (parseN zero m) xs = return (yes (success [] 0 refl ([] , refl , refl) xs refl))
+         (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) (ExactLength (Singleton (List Σ)) n)
+runParser (parseN zero _) xs =
+  return (yes (success [] _ refl (mk×ₚ (singleton [] refl) refl refl) xs refl))
 runParser (parseN (suc n) m) [] = do
   m
   return ∘ no $ λ where
-    (success prefix read read≡ (ys , refl , len-xs) suffix ps≡) → ‼ 0≢1+n $ begin
-      length{A = Σ} []          ≡⟨ cong length (sym (‼ ps≡)) ⟩
-      length (ys ++ suffix)     ≡⟨ length-++ ys ⟩
-      length ys + length suffix ≡⟨ cong (_+ length suffix) len-xs ⟩
-      suc (n + length suffix)   ∎
-  where
-  open ≡-Reasoning
+    (success .bs read read≡ (mk×ₚ (singleton bs refl) bsLen refl) suffix ps≡) → ‼
+      (0≢1+n $ begin
+        length{A = Σ} [] ≡⟨ cong length (sym (‼ ps≡)) ⟩
+        length (bs ++ suffix) ≡⟨ length-++ bs ⟩
+        length bs + length suffix ≡⟨ cong (_+ length suffix) bsLen ⟩
+        suc n + length suffix ∎)
+  where open ≡-Reasoning
 runParser (parseN (suc n) m) (x ∷ xs) = do
-  yes (success prefix read read≡ (ys , ys≡ , ysLen) suffix ps≡) ← runParser (parseN n m) xs
+  yes (success .bs r₀ r₀≡ (mk×ₚ (singleton bs refl) bsLen refl) suf₀ ps≡₀) ←
+    runParser (parseN n m) xs
     where no ¬parse → do
-      return ∘ no $ ‼ λ where
-        (success .(x ∷ ys) read read≡ (x ∷ ys , refl , ysLen) suffix ps≡) →
+      return ∘ no $ λ where
+        (success .(x ∷ bs) read read≡ (mk×ₚ (singleton (x ∷ bs) refl) bsLen refl) suffix ps≡) →
           contradiction
-            (success ys (length ys) refl (ys , refl , cong pred ysLen) suffix (∷-injectiveʳ ps≡))
+            (success bs _ refl (mk×ₚ (singleton bs refl) (cong pred bsLen) refl) suffix (∷-injectiveʳ ps≡))
             ¬parse
   return (yes
-    (success (x ∷ ys) _ refl
-      (x ∷ ys , refl , trans₀ (sym (cong suc (cong length ys≡))) (cong suc ysLen))
-      suffix (cong (x ∷_) (trans (cong (_++ suffix) (sym ys≡)) ps≡))))
+    (success _ _ (cong suc r₀≡) (mk×ₚ (singleton (x ∷ bs) refl) (cong suc bsLen) refl) suf₀ (cong (x ∷_) ps≡₀)))
+
 
 parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → NonNesting A → M (Level.Lift _ ⊤) →
