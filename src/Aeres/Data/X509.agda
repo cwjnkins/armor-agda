@@ -1,8 +1,12 @@
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Prelude
 
 module Aeres.Data.X509 where
+
 open import Aeres.Binary
 open Base256
+open import Aeres.Grammar.Definitions Dig
 
 -------------------------------------------TAGS---------------------------------------------
 module Tag where
@@ -240,10 +244,6 @@ module Generic where
       @0 len≡ : getLength len ≡ 1
       @0 bs≡ : bs ≡  Tag.Boolean ∷ l ++ (v ∷ [])
 
-  data Option (A : (@0 _ : List Dig) → Set) : (@0 _ : List Dig) → Set where
-    none : Option A []
-    some : ∀ {xs} → A xs → Option A xs
-
 ------------------------------X.509-----------------------------------------------------------
 module X509 where
 
@@ -439,9 +439,9 @@ module X509 where
       @0 {l1 l2 akid ci csn} : List Dig
       len1 : Length l1
       len2 : Length l2
-      akeyid : Generic.Option Akikeyid akid
-      authcertiss : Generic.Option Akiauthcertiss ci
-      authcertsn : Generic.Option Akiauthcertsn csn
+      akeyid : Option Akikeyid akid
+      authcertiss : Option Akiauthcertiss ci
+      authcertsn : Option Akiauthcertsn csn
       @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ akid ++ ci ++ csn)
       @0 len2≡ : getLength len2 ≡ length (akid ++ ci ++ csn)
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ akid ++ ci ++ csn
@@ -504,7 +504,7 @@ module X509 where
       len1 : Length l1
       len2 : Length l2
       bcca : Generic.Boool ca
-      bcpathlen : Generic.Option Generic.Int pl
+      bcpathlen : Option Generic.Int pl
       @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ ca ++ pl)
       @0 len2≡ : getLength len2 ≡ length (ca ++ pl)
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ ca ++ pl
@@ -573,7 +573,7 @@ module X509 where
       @0 {l pid pql} : List Dig
       len : Length l
       cpid : Generic.OID pid
-      cpql : Generic.Option Polqualinfo pql
+      cpql : Option Polqualinfo pql
       @0 len≡ : getLength len ≡ length (pid ++ pql)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ pid ++ pql
 
@@ -650,9 +650,9 @@ module X509 where
     field
       @0 {l dp rsn issr} : List Dig
       len : Length l
-      crldp : Generic.Option Distpointname dp
-      crldprsn : Generic.Option Reasonsflag rsn
-      crlissr : Generic.Option Crlissuer issr
+      crldp : Option Distpointname dp
+      crldprsn : Option Reasonsflag rsn
+      crlissr : Option Crlissuer issr
       @0 len≡ : getLength len ≡ length (dp ++ rsn ++ issr)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ dp ++ rsn ++ issr
 
@@ -732,7 +732,7 @@ module X509 where
       @0 {l oex cex ocex} : List Dig
       len : Length l
       oidextn : Generic.OID oex
-      critical : Generic.Option Generic.Boool cex
+      critical : Option Generic.Boool cex
       octetextn :  Selectextn oex ocex
       @0 len≡ : getLength len ≡ length (oex ++ cex ++ ocex)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ oex ++ cex ++ ocex
@@ -777,17 +777,16 @@ module X509 where
     field
       @0 {l ver ser sa i va u p u₁ u₂ e} : _
       len : Length l
-      version : Generic.Option Version ver
+      version : Option Version ver
       serial  : Generic.Int ser
       signAlg : SignAlg sa
       issuer  : RDName i
       validity : Validity va
       subject  : RDName u
       pk       : PublicKey p
-      {- TODO: missing constraints that issuer, subject, extensions are present only if version is v2 >= -}
-      issuerUID : Generic.Option IssUID u₁
-      subjectUID : Generic.Option SubUID u₂
-      extensions : Generic.Option Extensions e
+      issuerUID : Option IssUID u₁
+      subjectUID : Option SubUID u₂
+      extensions : Option Extensions e
       @0 len≡ : getLength len ≡ length (ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 

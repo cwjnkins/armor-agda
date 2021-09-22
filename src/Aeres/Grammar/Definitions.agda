@@ -1,3 +1,5 @@
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Prelude
 
 module Aeres.Grammar.Definitions (Σ : Set) where
@@ -11,4 +13,6 @@ NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys�
 NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
-
+data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
+ none : Option A []
+ some : ∀ {@0 xs} → A xs → Option A xs
