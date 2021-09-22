@@ -164,8 +164,14 @@ module Generic where
 
   postulate
     StringValue : List Dig → Set
-    IntegerValue : List Dig → Set
+    -- IntegerValue : List Dig → Set
     OctetValue : List Dig → Set
+
+  record IntegerValue (@0 bs : List Dig) : Set where
+    constructor mkIntegerValue
+    field
+      val : ℤ
+      @0 bs≡ : twosComplement bs ≡ val
 
   record Bitstring (@0 bs : List Dig) : Set where
     constructor mkBitString
@@ -216,7 +222,7 @@ module Generic where
       @0 len≡ : getLength len ≡ length o
       @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
 
-  record Int (bs : List Dig) : Set where
+  record Int (@0 bs : List Dig) : Set where
     constructor mkInt
     field
       @0 {l v} : List Dig
@@ -225,7 +231,7 @@ module Generic where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
 
-  record Boool (bs : List Dig) : Set where
+  record Boool (@0 bs : List Dig) : Set where
     constructor mkBoool
     field
       @0 {l} : List Dig
@@ -234,9 +240,9 @@ module Generic where
       @0 len≡ : getLength len ≡ 1
       @0 bs≡ : bs ≡  Tag.Boolean ∷ l ++ (v ∷ [])
 
-  data Option (A : List Dig → Set) : List Dig → Set where
+  data Option (A : (@0 _ : List Dig) → Set) : (@0 _ : List Dig) → Set where
     none : Option A []
-    some : forall {xs} → A xs → Option A xs
+    some : ∀ {xs} → A xs → Option A xs
 
 ------------------------------X.509-----------------------------------------------------------
 module X509 where
@@ -256,7 +262,7 @@ module X509 where
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
   --------------------------TBSCert-----------------------------------------------------------------
-  record Version (bs : List Dig) : Set where
+  record Version (@0 bs : List Dig) : Set where
     constructor mkVersion
     field
       @0 {l v} : List Dig
@@ -324,7 +330,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length e
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ e
 
-  record IssUID (bs : List Dig) : Set where
+  record IssUID (@0 bs : List Dig) : Set where
     constructor mkIssUid
     field
       @0 {l v} : List Dig
@@ -333,7 +339,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.IssUid ∷ l ++ v
 
-  record SubUID (bs : List Dig) : Set where
+  record SubUID (@0 bs : List Dig) : Set where
     constructor mkSubUid
     field
       @0 {l v} : List Dig
@@ -394,7 +400,7 @@ module X509 where
      AIAFields : List Dig → Set
      UNExtnFields : List Dig → Set
 
-     Akiauthcertiss : List Dig → Set
+     Akiauthcertiss : (@0 _ : List Dig) → Set
      Othernamegen : List Dig → Set
      Rfcnamegen : List Dig → Set
      Dnsnamegen : List Dig → Set
@@ -409,7 +415,7 @@ module X509 where
 
  ----------------------- aki extension -------------------
  
-  record Akikeyid (bs : List Dig) : Set where
+  record Akikeyid (@0 bs : List Dig) : Set where
     constructor mkAkikeyid
     field
       @0 {l v} : List Dig
@@ -418,7 +424,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Eighty ∷ l ++ v
 
-  record Akiauthcertsn (bs : List Dig) : Set where
+  record Akiauthcertsn (@0 bs : List Dig) : Set where
     constructor mkAkiauthcertsn
     field
       @0 {l v} : List Dig
@@ -427,7 +433,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
 
-  record AKIFields (bs : List Dig) : Set where
+  record AKIFields (@0 bs : List Dig) : Set where
     constructor mkAKIFields
     field
       @0 {l1 l2 akid ci csn} : List Dig
@@ -491,7 +497,7 @@ module X509 where
       
 -------------------------------------------------------------------------------
 
-  record BCFields (bs : List Dig) : Set where
+  record BCFields (@0 bs : List Dig) : Set where
     constructor mkBCFields
     field
       @0 {l1 l2 ca pl} : List Dig
@@ -551,7 +557,7 @@ module X509 where
 
 ------------------------- certificate policies -------------------------
 
-  record Polqualinfo (bs : List Dig) : Set where
+  record Polqualinfo (@0 bs : List Dig) : Set where
     constructor mkPolqualinfo
     field
       @0 {l pqlid ql} : List Dig
@@ -599,7 +605,7 @@ module X509 where
 
 ----------------------------- crl dist point extension --------------------------------
 
-  record Crlissuer (bs : List Dig) : Set where
+  record Crlissuer (@0 bs : List Dig) : Set where
     constructor mkCrlissuer
     field
       @0 {l v} : List Dig
@@ -608,7 +614,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A2 ∷ l ++ v
 
-  record Reasonsflag (bs : List Dig) : Set where
+  record Reasonsflag (@0 bs : List Dig) : Set where
     constructor mkReasonsflag
     field
       @0 {l v} : List Dig
@@ -635,7 +641,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A1 ∷ l ++ v
 
-  data Distpointname : List Dig → Set where
+  data Distpointname : (@0 _ : List Dig) → Set where
     fullname : ∀ {@0 bs} → Fullname bs → Distpointname bs
     nameRTCrlissr : ∀ {@0 bs} → NameRTCrlissr bs → Distpointname bs
       
@@ -755,7 +761,7 @@ module X509 where
       @0 len≡ : getLength len ≡ length exs
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ exs
 
-  record Extensions (bs : List Dig) : Set where
+  record Extensions (@0 bs : List Dig) : Set where
     constructor mkExtensions
     field
       @0 {l e} : List Dig

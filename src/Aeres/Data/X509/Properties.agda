@@ -1,3 +1,5 @@
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -24,6 +26,9 @@ module NonEmpty where
 
    Cert : NonEmpty X509.Cert
    Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
+
+   postulate
+     Int : NonEmpty Generic.Int
 
 
 module Unambiguous where

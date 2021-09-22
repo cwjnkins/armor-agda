@@ -36,6 +36,10 @@ Fin = Fin.Fin
 infix 10 #_
 #_ = Fin.#_
 
+import Data.Integer
+module ℤ = Data.Integer
+ℤ = ℤ.ℤ
+
 open import Data.List    public
 
 open import Data.List.Properties public

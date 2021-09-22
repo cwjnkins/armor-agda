@@ -56,6 +56,24 @@ module Base256 where
   Byte = Binary 8
   Dig  = Fin (2 ^ 8)
 
+  twosComplement : List Dig → ℤ
+  twosComplement xs = go (reverse xs) 0 0
+    where
+    go : List Dig → (i sum : ℕ) → ℤ
+    go [] _ _ = ℤ.+ 0
+    go (x ∷ []) i sum =
+      if ⌊ x Fin.<? # 128 ⌋
+      then ℤ.+ (sum + (toℕ x * (2 ^ i)))
+      else (ℤ.+ (sum + ((toℕ x - 128) * (2 ^ i)))) ℤ.- ℤ.+ (2 ^ (i + 7))
+    go (x ∷ x₁ ∷ xs) i sum = go (x₁ ∷ xs) (i + 8) (sum + toℕ x * (2 ^ i))
+
+  private
+    tc₁ : twosComplement ([ # 255 ]) ≡ ℤ.- (ℤ.+ 1)
+    tc₁ = refl
+
+    tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
+    tc₂ = refl
+
 module Base128 where
   Byte = Binary 7
   Dig  = Fin (2 ^ 7)
