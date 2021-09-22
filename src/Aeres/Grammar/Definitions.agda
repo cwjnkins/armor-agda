@@ -16,3 +16,7 @@ NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
+
+isNone : ∀ {@0 A xs} →  Option A xs → Bool
+isNone none = true
+isNone (some _) = false

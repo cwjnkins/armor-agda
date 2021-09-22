@@ -33,13 +33,6 @@ Parser M = Parserᵢ (const M)
 ParserWF : (M : Set → Set) (A : List Σ → Set) → Set
 ParserWF M A = Parserᵢ (λ xs X → (@0 _ : Acc _<_ (length xs)) → M X) A
 
--- parseSingleDec : ⦃ _ : Eq Σ ⦄ → ∀ a → Parser Dec ([ a ] ≡_)
--- runParser (parseSingleDec a) [] = no λ where (refl ^S suffix [ () ]S)
--- runParser (parseSingleDec a) (x ∷ xs)
---   with x ≟ a
--- ... | yes refl = yes (refl ^S xs [ refl ]S)
--- ... | no  x≢   = no λ where (refl ^S suffix [ refl ]S) → x≢ refl
-
 parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
          (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) λ xs → Σ[ ys ∈ List Σ ] (xs ≡ ys × length xs ≡ n)
 runParser (parseN zero m) xs = return (yes (success [] 0 refl ([] , refl , refl) xs refl))
@@ -61,20 +54,21 @@ runParser (parseN (suc n) m) (x ∷ xs) = do
           contradiction
             (success ys (length ys) refl (ys , refl , cong pred ysLen) suffix (∷-injectiveʳ ps≡))
             ¬parse
-  return (yes 
+  return (yes
     (success (x ∷ ys) _ refl
       (x ∷ ys , refl , trans₀ (sym (cong suc (cong length ys≡))) (cong suc ysLen))
       suffix (cong (x ∷_) (trans (cong (_++ suffix) (sym ys≡)) ps≡))))
 
--- _×ₚ_ : (A B : List Σ → Set) → List Σ → Set
--- A ×ₚ B = λ xs → A xs × B xs
-record _×ₚ_ (@0 A B : List Σ → Set) (@0 xs : List Σ) : Set where
+record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
     @0 {bs} : List Σ
     fstₚ : A bs
-    sndₚ : B bs
+    sndₚ : B bs fstₚ
     @0 bs≡ : bs ≡ xs
+
+_×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
+A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → NonNesting A → M (Level.Lift _ ⊤) →
@@ -141,3 +135,17 @@ runParser (parseWhileₜ p) (x ∷ xs)
   yes (success (x ∷ prefix) (1 + read) (cong suc read≡)
          (mkParseWhile (x ∷ prefix₁) term (a All.∷ allPrefix) ¬term (cong (x ∷_) ps≡₁))
          suffix (cong (x ∷_) ps≡))
+
+--
+
+OptionSuccess : ∀ {A} xs → Success (Option A) xs → Set
+OptionSuccess{A} xs so = if isNone (Success.value so)
+                      then ¬ Success A xs
+                      else ⊤
+
+optionSuccess : ∀ {A} {xs} → Dec (Success A xs)
+                → Σₚ (Success (Option A)) OptionSuccess xs
+optionSuccess (yes (success prefix read read≡ value suffix ps≡)) =
+  mk×ₚ (success prefix _ read≡ (some value) suffix ps≡) tt refl
+optionSuccess{xs = xs} (no  proof₁) =
+  mk×ₚ (success [] 0 refl none xs refl) proof₁ refl
