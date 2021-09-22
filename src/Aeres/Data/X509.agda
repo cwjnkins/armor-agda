@@ -166,6 +166,15 @@ open Length public
 -------------------------------------------Generic---------------------------------------
 module Generic where
 
+  record TLV (t : Dig) (A : List Dig → Set) (@0 bs : List Dig) : Set where
+    constructor mkTLV
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : A v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ t ∷ l ++ v
+
   postulate
     StringValue : List Dig → Set
     -- IntegerValue : List Dig → Set

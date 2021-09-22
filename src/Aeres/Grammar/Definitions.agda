@@ -20,3 +20,17 @@ data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
 isNone : ∀ {@0 A xs} →  Option A xs → Bool
 isNone none = true
 isNone (some _) = false
+
+record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
+  constructor mk×ₚ
+  field
+    @0 {bs} : List Σ
+    fstₚ : A bs
+    sndₚ : B bs fstₚ
+    @0 bs≡ : bs ≡ xs
+
+_×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
+A ×ₚ B = Σₚ A (λ xs _ → B xs)
+
+ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
+ExactLength A n = A ×ₚ ((_≡ n) ∘ length)

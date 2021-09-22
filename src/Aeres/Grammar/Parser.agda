@@ -59,17 +59,6 @@ runParser (parseN (suc n) m) (x ∷ xs) = do
       (x ∷ ys , refl , trans₀ (sym (cong suc (cong length ys≡))) (cong suc ysLen))
       suffix (cong (x ∷_) (trans (cong (_++ suffix) (sym ys≡)) ps≡))))
 
-record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
-  constructor mk×ₚ
-  field
-    @0 {bs} : List Σ
-    fstₚ : A bs
-    sndₚ : B bs fstₚ
-    @0 bs≡ : bs ≡ xs
-
-_×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
-A ×ₚ B = Σₚ A (λ xs _ → B xs)
-
 parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → NonNesting A → M (Level.Lift _ ⊤) →
   Parser (M ∘ Dec) (A ×ₚ ((_≤ n) ∘ length))

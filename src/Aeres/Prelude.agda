@@ -74,6 +74,7 @@ module String where
   open import Agda.Builtin.String public
     using ()
     renaming (primShowNat to showNat)
+String = String.String
 
 open import Data.Sum     public
   hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
