@@ -42,18 +42,6 @@ module Tag where
     Sett : Dig
     Sett = # 49
 
-    Version : Dig
-    Version = # 160
-
-    IssUid : Dig
-    IssUid = # 161
-
-    SubUid : Dig
-    SubUid = # 162
-
-    Extensions : Dig
-    Extensions = # 163
-
     Eighty : Dig
     Eighty = # 128
 
@@ -62,6 +50,24 @@ module Tag where
 
     EightyTwo : Dig
     EightyTwo = # 130
+
+    EightyThree : Dig
+    EightyThree = # 131
+
+    EightyFour : Dig
+    EightyFour = # 132
+
+    EightyFive : Dig
+    EightyFive = # 133
+
+    EightySix : Dig
+    EightySix = # 134
+
+    EightySeven : Dig
+    EightySeven = # 135
+
+    EightyEight : Dig
+    EightyEight = # 136
 
     A0 : Dig
     A0 = # 160
@@ -72,6 +78,33 @@ module Tag where
     A2 : Dig
     A2 = # 162
 
+    A3 : Dig
+    A3 = # 163
+
+    A4 : Dig
+    A4 = # 164
+
+    A5 : Dig
+    A5 = # 165
+
+    A6 : Dig
+    A6 = # 166
+
+    --- directory string tags
+    BMPString : Dig
+    BMPString = # 30
+
+    UniversalString : Dig
+    UniversalString = # 28
+
+    PrintableString : Dig
+    PrintableString = # 19
+
+    TeletexString : Dig
+    TeletexString = # 20
+
+    UTF8String : Dig
+    UTF8String = # 12
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -175,8 +208,8 @@ module Generic where
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
   postulate
-    StringValue : List Dig → Set
-    OctetValue : List Dig → Set
+    IA5String : List Dig → Set
+    OctetString : List Dig → Set
 
   record IntegerValue (@0 bs : List Dig) : Set where
     constructor mkIntegerValue
@@ -263,23 +296,18 @@ module Generic where
 module X509 where
 
   postulate
-    SignParam : List Dig → Set
-    PublicKey : List Dig → Set
-
-    AIAFields : List Dig → Set
-    UknwnExtnFields : List Dig → Set
-
-    Othernamegen : List Dig → Set
-    Rfcnamegen : List Dig → Set
-    Dnsnamegen : List Dig → Set
-    X400addgen : List Dig → Set
-    Dirnamegen : List Dig → Set
-    Edinamegen : List Dig → Set
-    Urigen : List Dig → Set
-    Ipaddgen : List Dig → Set
-    Ridgen : List Dig → Set
-
     PolicyQualifiers : List Dig → Set
+
+  module SOID where
+    --TODO : add other RSA signature algorithms
+    Sha256Rsa : List Dig
+    Sha256Rsa = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
+
+  -- RSA explicit null param case covered here
+  -- TODO : add cases for other RSA signature algorithms
+  data SignParam : List Dig →  List Dig → Set where
+    sha256rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha256Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → Generic.OctetString bs2 → SignParam bs1 bs2
 
   record SignAlg (bs : List Dig) : Set where
     constructor mkSignAlg
@@ -287,46 +315,71 @@ module X509 where
       @0 {l o p} : List Dig
       len : Length l
       signOID : Generic.OID o
-      param   : SignParam p
+      param   : SignParam o p -- RSA implicit null param case covered here; why "Option" not working here???
       @0 len≡ : getLength len ≡ length (o ++ p)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
-  ----------------------- Generalnames --------------------
-  
-  data Generalname : List Dig → Set where
-    oname : ∀ {@0 bs} → Othernamegen bs → Generalname bs
-    rfcname : ∀ {@0 bs} → Rfcnamegen bs → Generalname bs
-    dnsname : ∀ {@0 bs} → Dnsnamegen bs → Generalname bs
-    x400add : ∀ {@0 bs} → X400addgen bs → Generalname bs
-    dirname : ∀ {@0 bs} → Dirnamegen bs → Generalname bs
-    ediname : ∀ {@0 bs} → Edinamegen bs → Generalname bs
-    uri : ∀ {@0 bs} → Urigen bs → Generalname bs
-    ipadd : ∀ {@0 bs} → Ipaddgen bs → Generalname bs
-    rid : ∀ {@0 bs} → Ridgen bs → Generalname bs
-    
-  data Generalnames : List Dig → Set
+ --------------- RDNSeq -------------------------------------
 
-  record Generalnamesₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkGeneralnamesₐ
+  record TeletexString (bs : List Dig) : Set where 
+    constructor mkTeletexString
     field
-      @0 {bs₁ bs₂} : List Dig
-      extn : Generalname bs₁
-      rest   : Generalnames bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.TeletexString ∷ l ++ v
 
-  data Generalnames where
-    _∷[]  : ∀ {x} → Generalname x → Generalnames x
-    cons : ∀ {x} → Generalnamesₐ x → Generalnames x
+  record PrintableString (bs : List Dig) : Set where 
+    constructor mkPrintableString
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.PrintableString ∷ l ++ v
 
- --------------- RDName -------------------------------------
+  record UniversalString (bs : List Dig) : Set where 
+    constructor mkUniversalString
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.UniversalString ∷ l ++ v
+
+  record UTF8String (bs : List Dig) : Set where 
+    constructor mkUTF8String
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.UTF8String ∷ l ++ v
+
+  record BMPString (bs : List Dig) : Set where 
+    constructor mkBMPString
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.BMPString ∷ l ++ v
+  
+  data DirectoryString : List Dig → Set where
+    teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
+    printableString : ∀ {@0 bs} → PrintableString bs → DirectoryString bs
+    universalString : ∀ {@0 bs} → UniversalString bs → DirectoryString bs
+    utf8String : ∀ {@0 bs} → UTF8String bs → DirectoryString bs
+    bmpString : ∀ {@0 bs} → BMPString bs → DirectoryString bs
+ 
   record RDNSetSeq (bs : List Dig) : Set where
     constructor mkRDNSetSeq
     field
       @0 {l o v} : List Dig
       len : Length l
       oid : Generic.OID o
-      val : Generic.StringValue v
+      val : DirectoryString v
       @0 len≡ : getLength len ≡ length (o ++ v)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ v
 
@@ -369,14 +422,126 @@ module X509 where
     _∷[]  : ∀ {x} → RDNSet x → RDNSeqElems x
     cons : ∀ {x} → RDNSeqElemsₐ x → RDNSeqElems x
 
-  record RDName (bs : List Dig) : Set where
-    constructor mkRDName
+  record RDNSeq (bs : List Dig) : Set where
+    constructor mkRDNSeq
     field
       @0 {l e} : List Dig
       len : Length l
       elems : RDNSeqElems e
       @0 len≡ : getLength len ≡ length e
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ e
+
+----------------------- Generalnames --------------------
+
+  --- we do not support OtherName since very rarely used
+  record OtherName (bs : List Dig) : Set where 
+    constructor mkOtherName
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v -- abstracted
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.A0 ∷ l ++ v
+
+  record RfcName (bs : List Dig) : Set where 
+    constructor mkRfcName
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.IA5String v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightyOne ∷ l ++ v
+
+  record DnsName (bs : List Dig) : Set where 
+    constructor mkDnsName
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.IA5String v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
+
+  --- we do not support X400Address since very rarely used
+  record X400Address (bs : List Dig) : Set where 
+    constructor mkX400Address
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v -- abstracted
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.A3 ∷ l ++ v
+
+  record DirName (bs : List Dig) : Set where 
+    constructor mkDirName
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : RDNSeqElems v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.A4 ∷ l ++ v
+
+  --- we do not support EdipartyName since very rarely used
+  record EdipartyName (bs : List Dig) : Set where 
+    constructor mkEdipartyName
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v --abstracted
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.A5 ∷ l ++ v
+
+  record URI (bs : List Dig) : Set where 
+    constructor mkURI
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.IA5String v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightySix ∷ l ++ v
+
+  record IpAddress (bs : List Dig) : Set where 
+    constructor mkIpAddress
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightySeven ∷ l ++ v
+
+  record RegID (bs : List Dig) : Set where 
+    constructor mkRegID
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OIDField v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.EightyEight ∷ l ++ v
+  
+  data Generalname : List Dig → Set where
+    oname : ∀ {@0 bs} → OtherName bs → Generalname bs
+    rfcname : ∀ {@0 bs} → RfcName bs → Generalname bs
+    dnsname : ∀ {@0 bs} → DnsName bs → Generalname bs
+    x400add : ∀ {@0 bs} → X400Address bs → Generalname bs
+    dirname : ∀ {@0 bs} → DirName bs → Generalname bs
+    ediname : ∀ {@0 bs} → EdipartyName bs → Generalname bs
+    uri : ∀ {@0 bs} → URI bs → Generalname bs
+    ipadd : ∀ {@0 bs} → IpAddress bs → Generalname bs
+    rid : ∀ {@0 bs} → RegID bs → Generalname bs
+    
+  data Generalnames : List Dig → Set
+
+  record Generalnamesₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkGeneralnamesₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      extn : Generalname bs₁
+      rest   : Generalnames bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data Generalnames where
+    _∷[]  : ∀ {x} → Generalname x → Generalnames x
+    cons : ∀ {x} → Generalnamesₐ x → Generalnames x
 
   --------------------------TBSCert-----------------------------------------------------------------
   record Version (@0 bs : List Dig) : Set where
@@ -386,25 +551,25 @@ module X509 where
       len : Length l
       ver : Generic.Int v
       @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.Version ∷ l ++ v
+      @0 bs≡  : bs ≡ Tag.A0 ∷ l ++ v
 
   record IssUID (@0 bs : List Dig) : Set where
     constructor mkIssUid
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.BitstringValue v
       @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.IssUid ∷ l ++ v
+      @0 bs≡  : bs ≡ Tag.EightyOne ∷ l ++ v
 
   record SubUID (@0 bs : List Dig) : Set where
     constructor mkSubUid
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.BitstringValue v
       @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.SubUid ∷ l ++ v
+      @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
 
 --------------------------------------------------------- Validity --------------------------------
   record UtcTime (bs : List Dig) : Set where
@@ -454,6 +619,16 @@ module X509 where
       @0 len≡ : getLength len ≡ length (nb ++ na)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ nb ++ na
 
+  record PublicKey (bs : List Dig) : Set where
+    constructor mkPublicKey
+    field
+      @0 {l alg pk} : List Dig
+      len : Length l
+      algrithm : SignAlg alg
+      pubkey : Generic.Bitstring pk
+      @0 len≡ : getLength len ≡ length (alg ++ pk)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ alg ++ pk
+
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
  
@@ -462,7 +637,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Eighty ∷ l ++ v
 
@@ -503,7 +678,7 @@ module X509 where
       @0 {l1 l2 skid} : List Dig
       len1 : Length l1
       len2 : Length l2
-      skeyid : Generic.OctetValue skid
+      skeyid : Generic.OctetString skid
       @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ skid)
       @0 len2≡ : getLength len2 ≡ length skid
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Octetstring ∷ l2) ++ skid
@@ -663,7 +838,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : RDName v
+      val : RDNSeq v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A1 ∷ l ++ v
 
@@ -719,7 +894,52 @@ module X509 where
       
 ----------------------------------------- Authority Info access -----------------
 
+  record AccessDesc (bs : List Dig) : Set where
+    constructor mkAccessDesc
+    field
+      @0 {l acm acl} : List Dig
+      len : Length l
+      acmethod : Generic.OID acm
+      aclocation : Generalname acl
+      @0 len≡ : getLength len ≡ length (acm ++ acl)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ acm ++ acl
 
+  data AIASeqElems : List Dig → Set
+
+  record AIASeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkAIASeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      extn : AccessDesc bs₁
+      rest   : AIASeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data AIASeqElems where
+    _∷[]  : ∀ {x} → AccessDesc x → AIASeqElems x
+    cons : ∀ {x} → AIASeqElemsₐ x → AIASeqElems x
+    
+  record AIAFields (bs : List Dig) : Set where
+    constructor mkAIAFields
+    field
+      @0 {l1 l2 elems} : List Dig
+      len1 : Length l1
+      len2 : Length l2
+      seqelems : AIASeqElems elems
+      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
+      @0 len2≡ : getLength len2 ≡ length elems
+      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+
+----------------------------- unknown extension ----------------------
+
+  record UknwnExtnFields (bs : List Dig) : Set where
+    constructor mkUknwnExtnFields
+    field
+      @0 {l os} : List Dig
+      len : Length l
+      ocstr : Generic.OctetString os
+      @0 len≡ : getLength len ≡ length os
+      @0 bs≡  : bs ≡ Tag.Octetstring ∷ l ++ os 
 
 --------------------------------Extensions selection----------------------------------------
 
@@ -765,7 +985,7 @@ module X509 where
     cpextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
     crlextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
     aiaextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
-    unextn : ∀ {@0 bs1 bs2} → UknwnExtnFields bs2 → SelectExtn bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → UknwnExtnFields bs2 → SelectExtn bs1 bs2
 
   record Extension (bs : List Dig) : Set where
     constructor mkExtension
@@ -809,7 +1029,7 @@ module X509 where
       len : Length l
       elem :  ExtensionsSeq e
       @0 len≡ : getLength len ≡ length e
-      @0 bs≡  : bs ≡ Tag.Extensions ∷ l ++ e
+      @0 bs≡  : bs ≡ Tag.A3 ∷ l ++ e
 
 -----------------------------------------------------------------------------------------------
 
@@ -821,9 +1041,9 @@ module X509 where
       version : Option Version ver
       serial  : Generic.Int ser
       signAlg : SignAlg sa
-      issuer  : RDName i
+      issuer  : RDNSeq i
       validity : Validity va
-      subject  : RDName u
+      subject  : RDNSeq u
       pk       : PublicKey p
       issuerUID : Option IssUID u₁
       subjectUID : Option SubUID u₂
