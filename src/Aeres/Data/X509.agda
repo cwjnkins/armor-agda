@@ -105,6 +105,12 @@ module Tag where
 
     UTF8String : Dig
     UTF8String = # 12
+
+    IA5String : Dig
+    IA5String = # 22
+
+    VisibleString : Dig
+    VisibleString = # 26
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -208,7 +214,6 @@ module Generic where
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
   postulate
-    IA5String : List Dig → Set
     OctetString : List Dig → Set
 
   record IntegerValue (@0 bs : List Dig) : Set where
@@ -296,17 +301,41 @@ module Generic where
 module X509 where
 
   postulate
-    PolicyQualifiers : List Dig → Set
+    IA5StringValue : List Dig → Set
 
   module SOID where
     --TODO : add other RSA signature algorithms
+    Md5Rsa : List Dig
+    Md5Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
+    
+    Sha1Rsa : List Dig
+    Sha1Rsa =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
+
+    RsaPss : List Dig
+    RsaPss =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
+    
     Sha256Rsa : List Dig
-    Sha256Rsa = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
+    Sha256Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
+
+    Sha384Rsa : List Dig
+    Sha384Rsa =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 12 ]
+
+    Sha512Rsa : List Dig
+    Sha512Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
+
+    Sha224Rsa : List Dig
+    Sha224Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
 
   -- RSA explicit null param case covered here
   -- TODO : add cases for other RSA signature algorithms
   data SignParam : List Dig →  List Dig → Set where
+    md5rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Md5Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    sha1rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha1Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    rsapssp : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaPss) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha256rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha256Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetString bs2 → SignParam bs1 bs2
 
   record SignAlg (bs : List Dig) : Set where
@@ -365,6 +394,24 @@ module X509 where
       val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.BMPString ∷ l ++ v
+
+  record IA5String (bs : List Dig) : Set where 
+    constructor mkIA5String
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : IA5StringValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.IA5String ∷ l ++ v
+
+  record VisibleString (bs : List Dig) : Set where 
+    constructor mkVisibleString
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : Generic.OctetString v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.VisibleString ∷ l ++ v
   
   data DirectoryString : List Dig → Set where
     teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
@@ -372,6 +419,12 @@ module X509 where
     universalString : ∀ {@0 bs} → UniversalString bs → DirectoryString bs
     utf8String : ∀ {@0 bs} → UTF8String bs → DirectoryString bs
     bmpString : ∀ {@0 bs} → BMPString bs → DirectoryString bs
+
+  data DisplayText : List Dig → Set where
+    ia5String : ∀ {@0 bs} → IA5String bs → DisplayText bs
+    visibleString : ∀ {@0 bs} → VisibleString bs → DisplayText bs
+    bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
+    utf8String : ∀ {@0 bs} → UTF8String bs → DisplayText bs
  
   record RDNSetSeq (bs : List Dig) : Set where
     constructor mkRDNSetSeq
@@ -448,7 +501,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.IA5String v
+      val : IA5StringValue v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyOne ∷ l ++ v
 
@@ -457,7 +510,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.IA5String v
+      val : IA5StringValue v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
 
@@ -495,7 +548,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.IA5String v
+      val : IA5StringValue v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightySix ∷ l ++ v
 
@@ -700,7 +753,7 @@ module X509 where
     constructor mkEkuSeqElemsₐ
     field
       @0 {bs₁ bs₂} : List Dig
-      extn : Generic.OID bs₁
+      ekuid : Generic.OID bs₁
       rest   : EkuSeqElems bs₂
       @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
@@ -757,16 +810,98 @@ module X509 where
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ sannames
 
 ------------------------- certificate policies -------------------------
+  module PQOID where
+    CPSURI : List Dig
+    CPSURI = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
 
-  --record Polqualinfo (@0 bs : List Dig) : Set where
-  --  constructor mkPolqualinfo
-  --  field
-  --    @0 {l pqlid ql} : List Dig
-  --    len : Length l
-  --    cpqlid : Generic.OID pqlid
-  --    cql : Qualifier ql
-  --    @0 len≡ : getLength len ≡ length (pqlid ++ ql)
-  --    @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ pqlid ++ ql
+    USERNOTICE : List Dig
+    USERNOTICE = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
+
+  data IntegerSeqElems : List Dig → Set
+
+  record IntegerSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkIntegerSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      intnum : Generic.Int bs₁
+      rest   : IntegerSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data IntegerSeqElems where
+    _∷[]  : ∀ {x} → Generic.Int x → IntegerSeqElems x
+    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
+
+  record IntegerSeq (bs : List Dig) : Set where
+    constructor mkIntegerSeq
+    field
+      @0 {l elems} : List Dig
+      len : Length l
+      seqelems : IntegerSeqElems elems
+      @0 len≡ : getLength len ≡ length elems
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ elems
+
+  record NoticeReference (@0 bs : List Dig) : Set where
+    constructor mkNoticeReference
+    field
+      @0 {l org nn} : List Dig
+      len : Length l
+      organiztion : DisplayText org
+      noticenums : IntegerSeq nn
+      @0 len≡ : getLength len ≡ length (org ++ nn)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ org ++ nn
+
+  record UserNotice (@0 bs : List Dig) : Set where
+    constructor mkUserNotice
+    field
+      @0 {l nr et} : List Dig
+      len : Length l
+      noticeRef : Option NoticeReference nr
+      expText : Option DisplayText et
+      @0 len≡ : getLength len ≡ length (nr ++ et)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ nr ++ et
+
+  data Qualifier : List Dig →  List Dig → Set where
+    cpsuri : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.CPSURI) → IA5String bs2 → Qualifier bs1 bs2
+    unotice : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.USERNOTICE) → UserNotice bs2 → Qualifier bs1 bs2
+    
+  data PolicyQualifierId : List Dig → Set where
+    cpsuriid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.CPSURI) → PolicyQualifierId bs
+    unoticeid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.USERNOTICE) → PolicyQualifierId bs
+    
+  record PolicyQualifierInfo (@0 bs : List Dig) : Set where
+    constructor mkPolicyQualifierInfo
+    field
+      @0 {l pqlid ql} : List Dig
+      len : Length l
+      cpqlid : PolicyQualifierId pqlid
+      cql : Qualifier pqlid ql
+      @0 len≡ : getLength len ≡ length (pqlid ++ ql)
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ pqlid ++ ql
+
+  data PolicyQualifiersSeqElems : List Dig → Set
+
+  record PolicyQualifiersSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkPolicyQualifiersSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      extn : PolicyQualifierInfo bs₁
+      rest   : PolicyQualifiersSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data PolicyQualifiersSeqElems where
+    _∷[]  : ∀ {x} → PolicyQualifierInfo x → PolicyQualifiersSeqElems x
+    cons : ∀ {x} → PolicyQualifiersSeqElemsₐ x → PolicyQualifiersSeqElems x
+
+  record PolicyQualifiersSeq (bs : List Dig) : Set where
+    constructor mkPolicyQualifiersSeq
+    field
+      @0 {l elems} : List Dig
+      len : Length l
+      seqelems : PolicyQualifiersSeqElems elems
+      @0 len≡ : getLength len ≡ length elems
+      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ elems
 
   record PolicyInformation (bs : List Dig) : Set where
     constructor mkPolicyInformation
@@ -774,7 +909,7 @@ module X509 where
       @0 {l pid pqls} : List Dig
       len : Length l
       cpid : Generic.OID pid
-      cpqls : Option PolicyQualifiers pqls
+      cpqls : Option PolicyQualifiersSeq pqls
       @0 len≡ : getLength len ≡ length (pid ++ pqls)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ pid ++ pqls
 
@@ -893,13 +1028,23 @@ module X509 where
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
       
 ----------------------------------------- Authority Info access -----------------
+  module ACMOID where
+    CAISSUERS : List Dig
+    CAISSUERS = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 2 ]
+
+    OCSP : List Dig
+    OCSP = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 1 ]
+
+  data AccessMethod : List Dig → Set where
+    caissid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.CAISSUERS) → AccessMethod bs
+    ocspid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.OCSP) → AccessMethod bs
 
   record AccessDesc (bs : List Dig) : Set where
     constructor mkAccessDesc
     field
       @0 {l acm acl} : List Dig
       len : Length l
-      acmethod : Generic.OID acm
+      acmethod : AccessMethod acm
       aclocation : Generalname acl
       @0 len≡ : getLength len ≡ length (acm ++ acl)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ acm ++ acl
@@ -945,34 +1090,34 @@ module X509 where
 
   module ExtensionOID where
     AKI : List Dig
-    AKI = # 2 ∷ # 5 ∷ # 29 ∷ [ # 35 ]
+    AKI = # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 35 ]
 
     SKI : List Dig
-    SKI = # 2 ∷ # 5 ∷ # 29 ∷ [ # 14 ]
+    SKI =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 14 ]
 
     KU : List Dig
-    KU = # 2 ∷ # 5 ∷ # 29 ∷ [ # 15 ]
+    KU =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 15 ]
 
     EKU : List Dig
-    EKU = # 2 ∷ # 5 ∷ # 29 ∷ [ # 37 ]
+    EKU =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 37 ]
 
     BC : List Dig
-    BC = # 2 ∷ # 5 ∷ # 29 ∷ [ # 19 ]
+    BC =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 19 ]
 
     IAN : List Dig
-    IAN = # 2 ∷ # 5 ∷ # 29 ∷ [ # 18 ]
+    IAN =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 18 ]
 
     SAN : List Dig
-    SAN = # 2 ∷ # 5 ∷ # 29 ∷ [ # 17 ]
+    SAN =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 17 ]
 
     CPOL : List Dig
-    CPOL = # 2 ∷ # 5 ∷ # 29 ∷ [ # 32 ]
+    CPOL =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 32 ]
 
     CRLDIST : List Dig
-    CRLDIST = # 2 ∷ # 5 ∷ # 29 ∷ [ # 31 ]
+    CRLDIST =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 31 ]
 
     AIA : List Dig
-    AIA = # 1 ∷ # 3 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
+    AIA =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 
   data SelectExtn : List Dig →  List Dig → Set where
     akiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI) → AKIFields bs2 → SelectExtn bs1 bs2
