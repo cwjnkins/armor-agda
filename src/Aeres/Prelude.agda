@@ -74,6 +74,7 @@ module String where
   open import Agda.Builtin.String public
     using ()
     renaming (primShowNat to showNat)
+String = String.String
 
 open import Data.Sum     public
   hiding (map ; map₁ ; map₂ ; swap ; assocʳ ; assocˡ)
@@ -87,6 +88,8 @@ module Vec = Data.Vec
 Vec = Vec.Vec
 
 open import Function     public
+infix  0 case_ret_of_
+case_ret_of_ = case_return_of_
 
 import Induction.WellFounded
 module WellFounded where
@@ -141,6 +144,13 @@ open import Relation.Nullary.Sum public
 
 open import Relation.Unary public
   using (Decidable)
+
+-- Definitions
+record Singleton {ℓ} (@0 A : Set ℓ) (@0 a : A) : Set ℓ where
+  constructor singleton
+  field
+    x : A
+    @0 x≡ : x ≡ a
 
 -- Typeclasses
 

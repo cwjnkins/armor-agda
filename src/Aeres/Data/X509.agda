@@ -198,10 +198,49 @@ open Length public
 -------------------------------------------Generic---------------------------------------
 module Generic where
 
+  record TLV (t : Dig) (A : List Dig → Set) (@0 bs : List Dig) : Set where
+    constructor mkTLV
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : A v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ t ∷ l ++ v
+
   postulate
     StringValue : List Dig → Set
-    BitstringValue : List Dig → Set -- TODO : handle with padding bits, no tag, length is here, starts from inital octet (8.6.2)
     OctetValue : List Dig → Set
+
+  record IntegerValue (@0 bs : List Dig) : Set where
+    constructor mkIntegerValue
+    field
+      val : ℤ
+      @0 bs≡ : twosComplement bs ≡ val
+
+  record Int (@0 bs : List Dig) : Set where
+    constructor mkInt
+    field
+      @0 {l v} : List Dig
+      len : Length l
+      val : IntegerValue v
+      @0 len≡ : getLength len ≡ length v
+      @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
+
+  BitstringUnusedBits : Dig → List Dig → Set
+  BitstringUnusedBits bₕ [] = bₕ ≡ # 0
+  BitstringUnusedBits bₕ (_ ∷ _) = ⊤
+
+  record BitstringValue (@0 bs : List Dig) : Set where
+    constructor mkBitstringValue
+    field
+      bₕ : Dig
+      @0 bₕ<8 : toℕ bₕ < 8
+      bₜ : List Dig
+      @0 unusedBits : BitstringUnusedBits bₕ bₜ
+      @0 bs≡ : bs ≡ bₕ ∷ bₜ
+
+  Bitstring : (@0 _ : List Dig) → Set
+  Bitstring xs = TLV Tag.Bitstring BitstringValue xs
 
   record OIDSub (bs : List Dig) : Set where
     constructor mkOIDSub
@@ -243,21 +282,6 @@ module Generic where
       @0 len≡ : getLength len ≡ length o
       @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
 
-  record IntegerValue (@0 bs : List Dig) : Set where
-    constructor mkIntegerValue
-    field
-      val : ℤ
-      @0 bs≡ : twosComplement bs ≡ val
- 
-  record Int (@0 bs : List Dig) : Set where
-    constructor mkInt
-    field
-      @0 {l v} : List Dig
-      len : Length l
-      val : IntegerValue v
-      @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ Tag.Integer ∷ l ++ v
-
   record Boool (@0 bs : List Dig) : Set where
     constructor mkBoool
     field
@@ -267,16 +291,8 @@ module Generic where
       @0 len≡ : getLength len ≡ 1
       @0 bs≡ : bs ≡  Tag.Boolean ∷ l ++ (v ∷ [])
 
-  record Bitstring (@0 bs : List Dig) : Set where
-    constructor mkBitString
-    field
-      @0 {l} : List Dig
-      len : Length l
-      val : List Dig
-      @0 len≡ : getLength len ≡ length val
-      @0 bs≡ : bs ≡ Tag.Bitstring ∷ l ++ val
+------------------------------X.509-----------------------------------------------------------
 
------------------------------- X.509 -----------------------------------------------------------
 module X509 where
 
   postulate
