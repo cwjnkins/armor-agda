@@ -208,8 +208,8 @@ module Generic where
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
   postulate
-    StringValue : List Dig → Set
-    OctetValue : List Dig → Set
+    IA5String : List Dig → Set
+    OctetString : List Dig → Set
 
   record IntegerValue (@0 bs : List Dig) : Set where
     constructor mkIntegerValue
@@ -307,7 +307,7 @@ module X509 where
   -- TODO : add cases for other RSA signature algorithms
   data SignParam : List Dig →  List Dig → Set where
     sha256rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha256Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-    _ : ∀ {@0 bs1 bs2} → Generic.OctetValue bs2 → SignParam bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → Generic.OctetString bs2 → SignParam bs1 bs2
 
   record SignAlg (bs : List Dig) : Set where
     constructor mkSignAlg
@@ -326,7 +326,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.TeletexString ∷ l ++ v
 
@@ -335,7 +335,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.PrintableString ∷ l ++ v
 
@@ -344,7 +344,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.UniversalString ∷ l ++ v
 
@@ -353,7 +353,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.UTF8String ∷ l ++ v
 
@@ -362,7 +362,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.BMPString ∷ l ++ v
   
@@ -439,7 +439,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v -- abstracted
+      val : Generic.OctetString v -- abstracted
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A0 ∷ l ++ v
 
@@ -448,7 +448,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.StringValue v
+      val : Generic.IA5String v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyOne ∷ l ++ v
 
@@ -457,7 +457,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.StringValue v
+      val : Generic.IA5String v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightyTwo ∷ l ++ v
 
@@ -467,7 +467,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v -- abstracted
+      val : Generic.OctetString v -- abstracted
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A3 ∷ l ++ v
 
@@ -486,7 +486,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v --abstracted
+      val : Generic.OctetString v --abstracted
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.A5 ∷ l ++ v
 
@@ -495,7 +495,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.StringValue v
+      val : Generic.IA5String v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightySix ∷ l ++ v
 
@@ -504,7 +504,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.EightySeven ∷ l ++ v
 
@@ -637,7 +637,7 @@ module X509 where
     field
       @0 {l v} : List Dig
       len : Length l
-      val : Generic.OctetValue v
+      val : Generic.OctetString v
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ Tag.Eighty ∷ l ++ v
 
@@ -678,7 +678,7 @@ module X509 where
       @0 {l1 l2 skid} : List Dig
       len1 : Length l1
       len2 : Length l2
-      skeyid : Generic.OctetValue skid
+      skeyid : Generic.OctetString skid
       @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ skid)
       @0 len2≡ : getLength len2 ≡ length skid
       @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Octetstring ∷ l2) ++ skid
@@ -937,7 +937,7 @@ module X509 where
     field
       @0 {l os} : List Dig
       len : Length l
-      ocstr : Generic.OctetValue os
+      ocstr : Generic.OctetString os
       @0 len≡ : getLength len ≡ length os
       @0 bs≡  : bs ≡ Tag.Octetstring ∷ l ++ os 
 
