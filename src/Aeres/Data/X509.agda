@@ -338,13 +338,20 @@ module X509 where
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetString bs2 → SignParam bs1 bs2
 
+  record WrapperSignParam (bs : List Dig) : Set where
+    constructor mkWrapperSignParam
+    field
+      @0 {o p} : List Dig
+      param : SignParam o p
+      @0 bs≡  : bs ≡ o ++ p
+
   record SignAlg (bs : List Dig) : Set where
     constructor mkSignAlg
     field
       @0 {l o p} : List Dig
       len : Length l
       signOID : Generic.OID o
-      param   : SignParam o p -- RSA implicit null param case covered here; why "Option" not working here???
+      wparam : Option WrapperSignParam (o ++ p) -- RSA implicit null param case covered here
       @0 len≡ : getLength len ≡ length (o ++ p)
       @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ o ++ p
 
