@@ -287,14 +287,8 @@ module Generic where
       @0 len≡ : getLength len ≡ length o
       @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
 
-  record Boool (@0 bs : List Dig) : Set where
-    constructor mkBoool
-    field
-      @0 {l} : List Dig
-      len : Length l
-      v : Dig
-      @0 len≡ : getLength len ≡ 1
-      @0 bs≡ : bs ≡  Tag.Boolean ∷ l ++ (v ∷ [])
+  Boool : (@0 _ : List Dig) → Set
+  Boool bs = TLV Tag.Boolean (const Dig) bs
 
 ------------------------------X.509-----------------------------------------------------------
 
@@ -307,13 +301,13 @@ module X509 where
     --TODO : add other RSA signature algorithms
     Md5Rsa : List Dig
     Md5Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
-    
+
     Sha1Rsa : List Dig
     Sha1Rsa =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
 
     RsaPss : List Dig
     RsaPss =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
-    
+
     Sha256Rsa : List Dig
     Sha256Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
 
