@@ -298,3 +298,6 @@ module Lemmas where
     length (x ∷ xs ++ ys)     ∎
     where
     open ≤-Reasoning
+
+  ≡⇒≤ : ∀ {m n} → m ≡ n → m ≤ n
+  ≡⇒≤ refl = ≤-refl

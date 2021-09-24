@@ -277,15 +277,8 @@ module Generic where
     [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
     cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
 
-  record OID (@0 bs : List Dig) : Set where
-    constructor mkOid
-    field
-      @0 {l} : List Dig
-      @0 {o} : List Dig
-      len : Length l
-      oid : OIDField o
-      @0 len≡ : getLength len ≡ length o
-      @0 bs≡ : bs ≡ Tag.ObjectIdentifier ∷ l ++ o
+  OID : (@0 _ : List Dig) → Set
+  OID = TLV Tag.ObjectIdentifier OIDField
 
   Boool : (@0 _ : List Dig) → Set
   Boool bs = TLV Tag.Boolean (const Dig) bs

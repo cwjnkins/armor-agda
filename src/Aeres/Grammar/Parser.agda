@@ -33,6 +33,10 @@ Parser M = Parserᵢ (const M)
 ParserWF : (M : Set → Set) (A : List Σ → Set) → Set
 ParserWF M A = Parserᵢ (λ xs X → (@0 _ : Acc _<_ (length xs)) → M X) A
 
+parseWF : {M : Set → Set} {A : List Σ → Set} → ParserWF M A → Parser M A
+runParser (parseWF p) xs = runParser p xs (<-wellFounded (length xs))
+  where open import Data.Nat.Induction
+
 parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
          (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) (ExactLength (Singleton (List Σ)) n)
 runParser (parseN zero _) xs =
