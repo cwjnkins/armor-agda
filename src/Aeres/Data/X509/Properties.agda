@@ -24,8 +24,8 @@ module NonEmpty where
    Validity : NonEmpty X509.Validity
    Validity () refl
 
-   Cert : NonEmpty X509.Cert
-   Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
+   -- Cert : NonEmpty X509.Cert
+   -- Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
 
    postulate
      Int : NonEmpty Generic.Int
@@ -54,7 +54,8 @@ module Unambiguous where
 
 module NonNesting where
   postulate
-    OIDSub   : NonNesting Generic.OIDSub
+    OIDSub : NonNesting Generic.OIDSub
+    Int    : NonNesting Generic.Int
 
   LengthNN : NonNesting Length
   LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.short (Length.mkShort l l<128 refl)) (Length.short (Length.mkShort l₁ l<129 refl)) =

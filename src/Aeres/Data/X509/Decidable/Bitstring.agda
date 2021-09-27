@@ -23,12 +23,8 @@ module parseBitstring where
 
   here' = "parseBitstring"
 
-  parseBitstring : Parser Dig (Logging ∘ Dec) Generic.Bitstring
-  parseBitstring =
-    parseTLV Tag.Bitstring here' Generic.BitstringValue p
-    where
-    p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig _ n)
-    runParser (p n) xs = do
+  parseBitstringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.BitstringValue n)
+  runParser (parseBitstringValue n) xs = do
       yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) bsLen refl) suf₀ ps≡₀) ←
         runParser (parseN Dig n (tell $ here' String.++ ": underflow")) xs
         where
@@ -69,4 +65,16 @@ module parseBitstring where
               return (yes (success (bₕ ∷ bₜ₁ ∷ bₜ) r₀ r₀≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 (bₜ₁ ∷ bₜ) tt refl) bsLen refl) suf₀ ps≡₀)))
           refl
 
-open parseBitstring public using (parseBitstring)
+  parseBitstring : Parser Dig (Logging ∘ Dec) Generic.Bitstring
+  parseBitstring =
+    parseTLV Tag.Bitstring here' Generic.BitstringValue parseBitstringValue
+
+  parseIssUID : Parser Dig (Logging ∘ Dec) X509.IssUID
+  parseIssUID =
+    parseTLV Tag.EightyOne "issUID" Generic.BitstringValue parseBitstringValue
+
+  parseSubUID : Parser Dig (Logging ∘ Dec) X509.SubUID
+  parseSubUID =
+    parseTLV Tag.EightyTwo "subUID" Generic.BitstringValue parseBitstringValue
+
+open parseBitstring public using (parseBitstring ; parseIssUID)

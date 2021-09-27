@@ -5,7 +5,9 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties
+open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -19,34 +21,26 @@ open Base256
 module parseInt where
   here' = "parseInt"
 
-  open import Aeres.Data.X509.Decidable.Length
   open ≡-Reasoning
 
   parseInt : Parser Dig (Logging ∘ Dec) Generic.Int
-  runParser parseInt [] = do
-    tell $ here' String.++ ": underflow reading tag"
-    return ∘ no $ λ where
-      (success prefix read read≡ value suffix ps≡) →
-        ‼ NonEmpty.Int value (++-conicalˡ _ _ ps≡)
-  runParser parseInt (x ∷ xs)
-    with x ≟ Tag.Integer
-  ... | no  x≢ = do
-    tell $ here' String.++ ": tag mis-match"
-    return ∘ no $ λ where
-      (success .(Tag.Integer ∷ l ++ v) read read≡ (Generic.mkInt{l}{v} len val len≡ refl) suffix ps≡) →
-        contradiction (∷-injectiveˡ (sym ps≡)) x≢
-  ... | yes refl = do
-    yes (success pre₀ r₀ r₀≡ len₀ suf₀ ps≡₀) ← runParser parseLen xs
-      where no ¬parse → {!!}
-    yes (success .v r₁ r₁≡ (v , refl , vLen) suf₁ ps≡₀) ←
-      runParser (parseN Dig (getLength len₀) (tell $ here' String.++ ": underflow reading int")) suf₀
-      where no ¬parse → {!!}
-    return (yes
-      (success (Tag.Integer ∷ pre₀ ++ v)
-        (1 + r₀ + r₁)
-        (cong suc
-          (begin (r₀ + r₁ ≡⟨ cong (_+ r₁) r₀≡ ⟩
-                 length pre₀ + r₁ ≡⟨ cong (length pre₀ +_) r₁≡ ⟩
-                 length pre₀ + length v ≡⟨ sym $ length-++ pre₀ ⟩
-                 length (pre₀ ++ v) ∎)))
-        (Generic.mkInt len₀ (Generic.mkIntegerValue _ refl) (sym vLen) refl) suf₁ {!!}))
+  parseInt = parseTLV Tag.Integer "Int" Generic.IntegerValue p
+    where
+    p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.IntegerValue n)
+    runParser (p n) xs = do
+      yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton v₀ refl) v₀Len refl) suf₀ ps≡₀)
+        ← runParser (parseN Dig n (tell $ here' String.++ ": underflow reading it")) xs
+        where no ¬parse → do
+          return ∘ no $ λ where
+            (success prefix read read≡ (mk×ₚ (Generic.mkIntegerValue val bs≡₁) sndₚ refl) suffix ps≡) →
+              contradiction
+                (success prefix _ read≡
+                  (mk×ₚ (singleton prefix refl) sndₚ refl)
+                  suffix ps≡)
+                ¬parse
+      return (yes
+        (success pre₀ _ r₀≡
+          (mk×ₚ (Generic.mkIntegerValue (twosComplement v₀) refl) v₀Len refl)
+          suf₀ ps≡₀))
+
+open parseInt public using (parseInt)

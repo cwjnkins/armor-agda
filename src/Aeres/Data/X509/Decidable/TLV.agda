@@ -17,7 +17,11 @@ module Aeres.Data.X509.Decidable.TLV where
 
 open Base256
 
-module parseTLV (t : Dig) (tName : String) (A : List Dig → Set) (p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig A n)) where
+module parseTLV
+  (t : Dig) (tName : String) (A : List Dig → Set)
+  (p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig A n))
+  where
+
   here' = "TLV: " String.++ tName
 
   open ≡-Reasoning

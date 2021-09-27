@@ -63,6 +63,36 @@ runParser (parseN (suc n) m) (x ∷ xs) = do
   return (yes
     (success _ _ (cong suc r₀≡) (mk×ₚ (singleton (x ∷ bs) refl) (cong suc bsLen) refl) suf₀ (cong (x ∷_) ps≡₀)))
 
+parseExactLength : {M : Set → Set} ⦃ _ : Monad M ⦄ →
+                   {A : List Σ → Set} → (@0 _ : NonNesting A) →
+                   M (Level.Lift _ ⊤) →
+                   Parser (M ∘ Dec) A →
+                   ∀ n → Parser (M ∘ Dec) (ExactLength A n)
+runParser (parseExactLength nn m p n) xs = do
+  yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀) ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v vLen refl) suffix ps≡) →
+          contradiction
+            (success prefix _ read≡ v suffix ps≡)
+            ¬parse
+  case r₀ ≟ n of λ where
+    (no  r₀≢) → do
+      m
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v vLen refl) suffix ps≡) → ‼
+          let @0 pre₀≡ : pre₀ ≡ prefix
+              pre₀≡ = nn (trans ps≡₀ (sym ps≡)) v₀ v
+          in
+          contradiction
+            (begin (r₀           ≡⟨ r₀≡ ⟩
+                   length pre₀   ≡⟨ cong length pre₀≡ ⟩
+                   length prefix ≡⟨ vLen ⟩
+                   n ∎))
+            r₀≢
+    (yes refl) →
+      return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (‼ sym r₀≡) refl) suf₀ ps≡₀))
+  where open ≡-Reasoning
 
 parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → NonNesting A → M (Level.Lift _ ⊤) →
