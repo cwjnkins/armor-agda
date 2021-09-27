@@ -561,29 +561,26 @@ module X509 where
   AKIAuthCertSN : (@0 _ : List Dig) → Set
   AKIAuthCertSN xs = Generic.TLV Tag.EightyTwo  Generic.IntegerValue xs
 
-  record AKIFields (@0 bs : List Dig) : Set where
-    constructor mkAKIFields
+  record AKIFieldsSeqFields (@0 bs : List Dig) : Set where
+    constructor mkAKIFieldsSeqFields
     field
-      @0 {l1 l2 akid ci csn} : List Dig
-      len1 : Length l1
-      len2 : Length l2
+      @0 {akid ci csn} : List Dig
       akeyid : Option AKIKeyId akid
       authcertiss : Option AKIAuthCertIssuer ci
       authcertsn : Option AKIAuthCertSN csn
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ akid ++ ci ++ csn)
-      @0 len2≡ : getLength len2 ≡ length (akid ++ ci ++ csn)
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ akid ++ ci ++ csn
+      @0 bs≡  : bs ≡ akid ++ ci ++ csn
+
+  AKIFieldsSeq : (@0 _ : List Dig) → Set
+  AKIFieldsSeq xs = Generic.TLV Tag.Sequence  AKIFieldsSeqFields xs
+
+  AKIFields : (@0 _ : List Dig) → Set
+  AKIFields xs = Generic.TLV Tag.Octetstring  AKIFieldsSeq xs
 ------------------------------------------------------------------------------------------
-  record SKIFields (bs : List Dig) : Set where
-    constructor mkSKIFields
-    field
-      @0 {l1 l2 skid} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      skeyid : Generic.OctetString skid
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ skid)
-      @0 len2≡ : getLength len2 ≡ length skid
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Octetstring ∷ l2) ++ skid
+  SKIFieldsOctet : (@0 _ : List Dig) → Set
+  SKIFieldsOctet xs = Generic.TLV Tag.Octetstring   Generic.OctetString xs
+
+  SKIFields : (@0 _ : List Dig) → Set
+  SKIFields xs = Generic.TLV Tag.Octetstring  SKIFieldsOctet xs
 
   KUFields : (@0 _ : List Dig) → Set
   KUFields xs = Generic.TLV Tag.Octetstring  Generic.Bitstring xs
@@ -604,53 +601,40 @@ module X509 where
     _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
     cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
 
-  record EKUFields (bs : List Dig) : Set where
-    constructor mkEku
-    field
-      @0 {l1 l2 elems} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      seqelems : EkuSeqElems elems
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
-      @0 len2≡ : getLength len2 ≡ length elems
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+  EKUFieldsSeq : (@0 _ : List Dig) → Set
+  EKUFieldsSeq xs = Generic.TLV Tag.Sequence  EkuSeqElems xs
+
+  EKUFields : (@0 _ : List Dig) → Set
+  EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
       
 -------------------------------------------------------------------------------
 
-  record BCFields (@0 bs : List Dig) : Set where
-    constructor mkBCFields
+  record BCFieldsSeqFields (@0 bs : List Dig) : Set where
+    constructor mkBCFieldsSeqFields
     field
-      @0 {l1 l2 ca pl} : List Dig
-      len1 : Length l1
-      len2 : Length l2
+      @0 {ca pl} : List Dig
       bcca : Option Generic.Boool ca
       bcpathlen : Option Generic.Int pl
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ ca ++ pl)
-      @0 len2≡ : getLength len2 ≡ length (ca ++ pl)
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ ca ++ pl
+      @0 bs≡  : bs ≡ ca ++ pl
+
+  BCFieldsSeq : (@0 _ : List Dig) → Set
+  BCFieldsSeq xs = Generic.TLV Tag.Sequence  BCFieldsSeqFields xs
+
+  BCFields : (@0 _ : List Dig) → Set
+  BCFields xs = Generic.TLV Tag.Octetstring  BCFieldsSeq xs
 
 -------------------------- ian/san alternative names extensions ------------------
-  record IANFields (bs : List Dig) : Set where
-    constructor mkIANFields
-    field
-      @0 {l1 l2 iannames} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      iangens : Generalnames iannames
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ iannames)
-      @0 len2≡ : getLength len2 ≡ length iannames
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ iannames
+  IANFieldsSeq : (@0 _ : List Dig) → Set
+  IANFieldsSeq xs = Generic.TLV Tag.Sequence  Generalnames xs
 
-  record SANFields (bs : List Dig) : Set where
-    constructor mkSANFields
-    field
-      @0 {l1 l2 sannames} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      sangens : Generalnames sannames
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ sannames)
-      @0 len2≡ : getLength len2 ≡ length sannames
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ sannames
+  IANFields : (@0 _ : List Dig) → Set
+  IANFields xs = Generic.TLV Tag.Octetstring  IANFieldsSeq xs
+
+  SANFieldsSeq : (@0 _ : List Dig) → Set
+  SANFieldsSeq xs = Generic.TLV Tag.Sequence  Generalnames xs
+
+  SANFields : (@0 _ : List Dig) → Set
+  SANFields xs = Generic.TLV Tag.Octetstring  SANFieldsSeq xs
 
 ------------------------- certificate policies -------------------------
   module PQOID where
@@ -763,16 +747,11 @@ module X509 where
     _∷[]  : ∀ {x} → PolicyInformation x → CertPolSeqElems x
     cons : ∀ {x} → CertPolSeqElemsₐ x → CertPolSeqElems x
 
-  record CertPolFields (bs : List Dig) : Set where
-    constructor mkCertPolFields
-    field
-      @0 {l1 l2 elems} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      seqelems : CertPolSeqElems elems
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
-      @0 len2≡ : getLength len2 ≡ length elems
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+  CertPolFieldsSeq : (@0 _ : List Dig) → Set
+  CertPolFieldsSeq xs = Generic.TLV Tag.Sequence  CertPolSeqElems xs
+
+  CertPolFields : (@0 _ : List Dig) → Set
+  CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs
 
 ----------------------------- crl dist point extension --------------------------------
 
@@ -822,16 +801,11 @@ module X509 where
     _∷[]  : ∀ {x} → DistPoint x → CRLSeqElems x
     cons : ∀ {x} → CRLSeqElemsₐ x → CRLSeqElems x
 
-  record CRLDistFields (bs : List Dig) : Set where
-    constructor mkCRLDistFields
-    field
-      @0 {l1 l2 elems} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      seqelems : CRLSeqElems elems
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
-      @0 len2≡ : getLength len2 ≡ length elems
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+  CRLDistFieldsSeq : (@0 _ : List Dig) → Set
+  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence  CRLSeqElems xs
+
+  CRLDistFields : (@0 _ : List Dig) → Set
+  CRLDistFields xs = Generic.TLV Tag.Octetstring  CRLDistFieldsSeq xs
       
 ----------------------------------------- Authority Info access -----------------
   module ACMOID where
@@ -845,15 +819,16 @@ module X509 where
     caissid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.CAISSUERS) → AccessMethod bs
     ocspid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.OCSP) → AccessMethod bs
 
-  record AccessDesc (bs : List Dig) : Set where
-    constructor mkAccessDesc
+  record AccessDescFields (bs : List Dig) : Set where
+    constructor mkAccessDescFields
     field
-      @0 {l acm acl} : List Dig
-      len : Length l
+      @0 {acm acl} : List Dig
       acmethod : AccessMethod acm
       aclocation : Generalname acl
-      @0 len≡ : getLength len ≡ length (acm ++ acl)
-      @0 bs≡  : bs ≡ Tag.Sequence ∷ l ++ acm ++ acl
+      @0 bs≡  : bs ≡ acm ++ acl
+
+  AccessDesc : (@0 _ : List Dig) → Set
+  AccessDesc xs = Generic.TLV Tag.Sequence  AccessDescFields xs
 
   data AIASeqElems : List Dig → Set
 
@@ -869,17 +844,12 @@ module X509 where
   data AIASeqElems where
     _∷[]  : ∀ {x} → AccessDesc x → AIASeqElems x
     cons : ∀ {x} → AIASeqElemsₐ x → AIASeqElems x
-    
-  record AIAFields (bs : List Dig) : Set where
-    constructor mkAIAFields
-    field
-      @0 {l1 l2 elems} : List Dig
-      len1 : Length l1
-      len2 : Length l2
-      seqelems : AIASeqElems elems
-      @0 len1≡ : getLength len1 ≡ 1 + length (l2 ++ elems)
-      @0 len2≡ : getLength len2 ≡ length elems
-      @0 bs≡  : bs ≡ (Tag.Octetstring ∷ l1) ++ (Tag.Sequence ∷ l2) ++ elems
+ 
+  AIAFieldsSeq : (@0 _ : List Dig) → Set
+  AIAFieldsSeq xs = Generic.TLV Tag.Sequence  AIASeqElems xs
+
+  AIAFields : (@0 _ : List Dig) → Set
+  AIAFields xs = Generic.TLV Tag.Octetstring  AIAFieldsSeq xs
 
 ----------------------------- unknown extension ----------------------
 
