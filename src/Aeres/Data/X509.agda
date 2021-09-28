@@ -218,6 +218,8 @@ module Generic where
   Octetstring : (@0 _ : List Dig) → Set
   Octetstring = TLV Tag.Octetstring (Singleton (List Dig))
 
+  --Integers----------------------------------------
+
   record IntegerValue (@0 bs : List Dig) : Set where
     constructor mkIntegerValue
     field
@@ -226,6 +228,26 @@ module Generic where
 
   Int : (@0 _ : List Dig) → Set
   Int xs = TLV Tag.Integer IntegerValue xs
+
+  --Integer sequences-------------------------------
+
+  data IntegerSeqElems : List Dig → Set
+
+  record IntegerSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkIntegerSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      intnum : Int bs₁
+      rest   : IntegerSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data IntegerSeqElems where
+    _∷[]  : ∀ {x} → Int x → IntegerSeqElems x
+    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
+
+  IntegerSeq : (@0 _ : List Dig) → Set
+  IntegerSeq xs = TLV Tag.Sequence  IntegerSeqElems xs
 
   BitstringUnusedBits : Dig → List Dig → Set
   BitstringUnusedBits bₕ [] = bₕ ≡ # 0
@@ -609,7 +631,7 @@ module X509 where
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
-      
+
 -------------------------------------------------------------------------------
 
   record BCFieldsSeqFields (@0 bs : List Dig) : Set where
@@ -647,30 +669,12 @@ module X509 where
     USERNOTICE : List Dig
     USERNOTICE = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
 
-  data IntegerSeqElems : List Dig → Set
-
-  record IntegerSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkIntegerSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      intnum : Generic.Int bs₁
-      rest   : IntegerSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data IntegerSeqElems where
-    _∷[]  : ∀ {x} → Generic.Int x → IntegerSeqElems x
-    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
-
-  IntegerSeq : (@0 _ : List Dig) → Set
-  IntegerSeq xs = Generic.TLV Tag.Sequence  IntegerSeqElems xs
-
   record NoticeReferenceFields (@0 bs : List Dig) : Set where
     constructor mkNoticeReferenceFields
     field
       @0 {org nn} : List Dig
       organiztion : DisplayText org
-      noticenums : IntegerSeq nn
+      noticenums : Generic.IntegerSeq nn
       @0 bs≡  : bs ≡ org ++ nn
 
   NoticeReference : (@0 _ : List Dig) → Set
