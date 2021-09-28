@@ -56,6 +56,7 @@ module NonNesting where
   postulate
     OIDSub : NonNesting Generic.OIDSub
     Int    : NonNesting Generic.Int
+    TLV    : ∀ {t} {@0 A} → NonNesting (Generic.TLV t A)
 
   LengthNN : NonNesting Length
   LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.short (Length.mkShort l l<128 refl)) (Length.short (Length.mkShort l₁ l<129 refl)) =

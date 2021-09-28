@@ -213,8 +213,10 @@ module Generic where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
-  postulate
-    OctetString : List Dig → Set
+  -- TODO: extensions encoded as octet strings need to be tupled together with proofs
+  -- they can be parsed into supported structures
+  Octetstring : (@0 _ : List Dig) → Set
+  Octetstring = TLV Tag.Octetstring (Singleton (List Dig))
 
   record IntegerValue (@0 bs : List Dig) : Set where
     constructor mkIntegerValue
@@ -309,6 +311,7 @@ module X509 where
 
   -- RSA explicit null param case covered here
   -- TODO : add cases for other RSA signature algorithms
+  -- TODO: The current definition fails the "Unambiguous" property
   data SignParam : List Dig →  List Dig → Set where
     md5rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Md5Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha1rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha1Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
@@ -317,7 +320,7 @@ module X509 where
     sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-    _ : ∀ {@0 bs1 bs2} → Generic.OctetString bs2 → SignParam bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SignParam bs1 bs2
 
   record WrapperSignParam (bs : List Dig) : Set where
     constructor mkWrapperSignParam
@@ -331,7 +334,7 @@ module X509 where
     field
       @0 {o p} : List Dig
       signOID : Generic.OID o
-      wparam : Option WrapperSignParam (o ++ p) -- RSA implicit null param case covered here
+      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
       @0 bs≡  : bs ≡ o ++ p
 
   SignAlg : (@0 _ : List Dig) → Set
@@ -340,25 +343,25 @@ module X509 where
  --------------- RDNSeq -------------------------------------
 
   TeletexString : (@0 _ : List Dig) → Set
-  TeletexString xs = Generic.TLV Tag.TeletexString  Generic.OctetString xs
+  TeletexString xs = Generic.TLV Tag.TeletexString  Generic.Octetstring xs
 
   PrintableString : (@0 _ : List Dig) → Set
-  PrintableString xs = Generic.TLV Tag.PrintableString  Generic.OctetString xs
+  PrintableString xs = Generic.TLV Tag.PrintableString  Generic.Octetstring xs
 
   UniversalString : (@0 _ : List Dig) → Set
-  UniversalString xs = Generic.TLV Tag.UniversalString  Generic.OctetString xs
+  UniversalString xs = Generic.TLV Tag.UniversalString  Generic.Octetstring xs
 
   UTF8String : (@0 _ : List Dig) → Set
-  UTF8String xs = Generic.TLV Tag.UTF8String  Generic.OctetString xs
+  UTF8String xs = Generic.TLV Tag.UTF8String  Generic.Octetstring xs
 
   BMPString : (@0 _ : List Dig) → Set
-  BMPString xs = Generic.TLV Tag.BMPString  Generic.OctetString xs
+  BMPString xs = Generic.TLV Tag.BMPString  Generic.Octetstring xs
 
   IA5String : (@0 _ : List Dig) → Set
-  IA5String xs = Generic.TLV Tag.IA5String  IA5StringValue xs
+  IA5String xs = Generic.TLV Tag.IA5String  IA5StriingValue xs
 
   VisibleString : (@0 _ : List Dig) → Set
-  VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetString xs
+  VisibleString xs = Generic.TLV Tag.VisibleString  Generic.Octetstring xs
   
   data DirectoryString : List Dig → Set where
     teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
@@ -424,7 +427,7 @@ module X509 where
 
   --- we do not support OtherName since very rarely used
   OtherName : (@0 _ : List Dig) → Set
-  OtherName xs = Generic.TLV Tag.A0 Generic.OctetString xs --abstracted
+  OtherName xs = Generic.TLV Tag.A0 Generic.Octetstring xs --abstracted
 
   RfcName : (@0 _ : List Dig) → Set
   RfcName xs = Generic.TLV Tag.EightyOne IA5StringValue xs
@@ -434,20 +437,20 @@ module X509 where
 
   --- we do not support X400Address since very rarely used
   X400Address : (@0 _ : List Dig) → Set
-  X400Address xs = Generic.TLV Tag.A3 Generic.OctetString xs --abstracted
+  X400Address xs = Generic.TLV Tag.A3 Generic.Octetstring xs --abstracted
 
   DirName : (@0 _ : List Dig) → Set
   DirName xs = Generic.TLV Tag.A4 RDNSeqElems xs
 
   --- we do not support EdipartyName since very rarely used
   EdipartyName : (@0 _ : List Dig) → Set
-  EdipartyName xs = Generic.TLV Tag.A5 Generic.OctetString xs --abstracted
+  EdipartyName xs = Generic.TLV Tag.A5 Generic.Octetstring xs --abstracted
 
   URI : (@0 _ : List Dig) → Set
   URI xs = Generic.TLV Tag.EightySix IA5StringValue xs
 
   IpAddress : (@0 _ : List Dig) → Set
-  IpAddress xs = Generic.TLV Tag.EightySeven Generic.OctetString xs
+  IpAddress xs = Generic.TLV Tag.EightySeven Generic.Octetstring xs
 
   RegID : (@0 _ : List Dig) → Set
   RegID xs = Generic.TLV Tag.EightyEight Generic.OIDField xs
@@ -553,7 +556,7 @@ module X509 where
  ----------------------- aki extension -------------------
  
   AKIKeyId : (@0 _ : List Dig) → Set
-  AKIKeyId xs = Generic.TLV Tag.Eighty Generic.OctetString xs
+  AKIKeyId xs = Generic.TLV Tag.Eighty Generic.Octetstring xs
 
   AKIAuthCertIssuer : (@0 _ : List Dig) → Set
   AKIAuthCertIssuer xs = Generic.TLV Tag.A1 Generalnames xs
@@ -577,7 +580,7 @@ module X509 where
   AKIFields xs = Generic.TLV Tag.Octetstring  AKIFieldsSeq xs
 ------------------------------------------------------------------------------------------
   SKIFieldsOctet : (@0 _ : List Dig) → Set
-  SKIFieldsOctet xs = Generic.TLV Tag.Octetstring   Generic.OctetString xs
+  SKIFieldsOctet xs = Generic.TLV Tag.Octetstring   Generic.Octetstring xs
 
   SKIFields : (@0 _ : List Dig) → Set
   SKIFields xs = Generic.TLV Tag.Octetstring  SKIFieldsOctet xs
@@ -854,7 +857,7 @@ module X509 where
 ----------------------------- unknown extension ----------------------
 
   UknwnExtnFields : (@0 _ : List Dig) → Set
-  UknwnExtnFields xs = Generic.TLV Tag.Octetstring  Generic.OctetString xs
+  UknwnExtnFields xs = Generic.TLV Tag.Octetstring  Generic.Octetstring xs
 
 --------------------------------Extensions selection----------------------------------------
 
