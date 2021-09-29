@@ -218,6 +218,8 @@ module Generic where
   Octetstring : (@0 _ : List Dig) → Set
   Octetstring = TLV Tag.Octetstring (Singleton (List Dig))
 
+  --Integers----------------------------------------
+
   record IntegerValue (@0 bs : List Dig) : Set where
     constructor mkIntegerValue
     field
@@ -226,6 +228,45 @@ module Generic where
 
   Int : (@0 _ : List Dig) → Set
   Int xs = TLV Tag.Integer IntegerValue xs
+
+  --Sequences (of one type)-------------------------
+  data SeqElems (A : List Dig → Set) : List Dig → Set
+
+  record SeqElemsₐ (A : List Dig → Set) (@0 bs : List Dig) : Set where
+    inductive
+    constructor mkSeqElems
+    field
+      @0 {bs₁ bs₂} : List Dig
+      h : A bs₁
+      t : SeqElems A bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data SeqElems A where
+    _∷[] : ∀ {@0 xs} → A xs → SeqElems A xs
+    cons : ∀ {@0 xs} → SeqElemsₐ A xs → SeqElems A xs
+
+  Seq : (A : List Dig → Set) → (@0 _ : List Dig) → Set
+  Seq A = TLV Tag.Sequence (SeqElems A)
+
+  --Integer sequences-------------------------------
+
+  data IntegerSeqElems : List Dig → Set
+
+  record IntegerSeqElemsₐ (bs : List Dig) : Set where
+    inductive
+    constructor mkIntegerSeqElemsₐ
+    field
+      @0 {bs₁ bs₂} : List Dig
+      intnum : Int bs₁
+      rest   : IntegerSeqElems bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data IntegerSeqElems where
+    _∷[]  : ∀ {x} → Int x → IntegerSeqElems x
+    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
+
+  IntegerSeq : (@0 _ : List Dig) → Set
+  IntegerSeq xs = TLV Tag.Sequence  IntegerSeqElems xs
 
   BitstringUnusedBits : Dig → List Dig → Set
   BitstringUnusedBits bₕ [] = bₕ ≡ # 0
@@ -253,28 +294,28 @@ module Generic where
       @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
       @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
-  --private
-  --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
-  --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
+  -- --private
+  -- --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
+  -- --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
 
-  data OIDField : List Dig → Set
+  -- data OIDField : List Dig → Set
 
-  record OIDFieldₐ (@0 bs : List Dig) : Set where
-    inductive
-    constructor mkOIDFieldₐ
-    field
-      @0 {bs₁} : List Dig
-      @0 {bs₂} : List Dig
-      sub  : OIDSub bs₁
-      rest : OIDField bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+  -- record OIDFieldₐ (@0 bs : List Dig) : Set where
+  --   inductive
+  --   constructor mkOIDFieldₐ
+  --   field
+  --     @0 {bs₁} : List Dig
+  --     @0 {bs₂} : List Dig
+  --     sub  : OIDSub bs₁
+  --     rest : OIDField bs₂
+  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data OIDField where
-    [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
-    cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
+  -- data OIDField where
+  --   [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
+  --   cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
 
   OID : (@0 _ : List Dig) → Set
-  OID = TLV Tag.ObjectIdentifier OIDField
+  OID = TLV Tag.ObjectIdentifier (SeqElems OIDSub)
 
   Boool : (@0 _ : List Dig) → Set
   Boool = TLV Tag.Boolean (const Dig)
@@ -358,7 +399,7 @@ module X509 where
   BMPString xs = Generic.TLV Tag.BMPString  Generic.Octetstring xs
 
   IA5String : (@0 _ : List Dig) → Set
-  IA5String xs = Generic.TLV Tag.IA5String  IA5StriingValue xs
+  IA5String xs = Generic.TLV Tag.IA5String  IA5StringValue xs
 
   VisibleString : (@0 _ : List Dig) → Set
   VisibleString xs = Generic.TLV Tag.VisibleString  Generic.Octetstring xs
@@ -453,8 +494,8 @@ module X509 where
   IpAddress xs = Generic.TLV Tag.EightySeven Generic.Octetstring xs
 
   RegID : (@0 _ : List Dig) → Set
-  RegID xs = Generic.TLV Tag.EightyEight Generic.OIDField xs
-  
+  RegID xs = Generic.TLV Tag.EightyEight (Generic.Seq Generic.OIDSub) xs
+
   data Generalname : List Dig → Set where
     oname : ∀ {@0 bs} → OtherName bs → Generalname bs
     rfcname : ∀ {@0 bs} → RfcName bs → Generalname bs
@@ -465,7 +506,7 @@ module X509 where
     uri : ∀ {@0 bs} → URI bs → Generalname bs
     ipadd : ∀ {@0 bs} → IpAddress bs → Generalname bs
     rid : ∀ {@0 bs} → RegID bs → Generalname bs
-    
+
   data Generalnames : List Dig → Set
 
   record Generalnamesₐ (bs : List Dig) : Set where
@@ -482,7 +523,7 @@ module X509 where
     cons : ∀ {x} → Generalnamesₐ x → Generalnames x
 
   --------------------------TBSCert-----------------------------------------------------------------
-  
+
   Version : (@0 _ : List Dig) → Set
   Version xs = Generic.TLV Tag.A0 Generic.Int xs
 
@@ -609,7 +650,7 @@ module X509 where
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
-      
+
 -------------------------------------------------------------------------------
 
   record BCFieldsSeqFields (@0 bs : List Dig) : Set where
@@ -647,30 +688,12 @@ module X509 where
     USERNOTICE : List Dig
     USERNOTICE = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
 
-  data IntegerSeqElems : List Dig → Set
-
-  record IntegerSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkIntegerSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      intnum : Generic.Int bs₁
-      rest   : IntegerSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data IntegerSeqElems where
-    _∷[]  : ∀ {x} → Generic.Int x → IntegerSeqElems x
-    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
-
-  IntegerSeq : (@0 _ : List Dig) → Set
-  IntegerSeq xs = Generic.TLV Tag.Sequence  IntegerSeqElems xs
-
   record NoticeReferenceFields (@0 bs : List Dig) : Set where
     constructor mkNoticeReferenceFields
     field
       @0 {org nn} : List Dig
       organiztion : DisplayText org
-      noticenums : IntegerSeq nn
+      noticenums : Generic.IntegerSeq nn
       @0 bs≡  : bs ≡ org ++ nn
 
   NoticeReference : (@0 _ : List Dig) → Set
