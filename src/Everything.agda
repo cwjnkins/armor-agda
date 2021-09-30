@@ -11,6 +11,8 @@ open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Version
+open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.DirectoryString
 open import Aeres.Data.X509.Properties
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
