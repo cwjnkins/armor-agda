@@ -36,5 +36,13 @@ record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set)
 _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
+record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
+  constructor mk&ₚ
+  field
+    @0 {bs₁ bs₂} : List Σ
+    fstₚ : A bs₁
+    sndₚ : B bs₂
+    @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
 ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
 ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
