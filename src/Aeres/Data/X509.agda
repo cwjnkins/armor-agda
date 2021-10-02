@@ -215,8 +215,11 @@ module Generic where
 
   -- TODO: extensions encoded as octet strings need to be tupled together with proofs
   -- they can be parsed into supported structures
+  OctetstringValue :  (@0 _ : List Dig) → Set
+  OctetstringValue =  Singleton (List Dig)
+
   Octetstring : (@0 _ : List Dig) → Set
-  Octetstring = TLV Tag.Octetstring (Singleton (List Dig))
+  Octetstring xs = TLV Tag.Octetstring OctetstringValue xs
 
   --Integers----------------------------------------
 
@@ -314,8 +317,9 @@ module Generic where
 
 module X509 where
 
-  postulate
-    IA5StringValue : List Dig → Set
+  -- needs to change later
+  data IA5StringValue : List Dig → Set where 
+    ia5stringval : ∀ {x} → Generic.OctetstringValue x → IA5StringValue x
 
   module SOID where
     --TODO : add other RSA signature algorithms
@@ -351,7 +355,7 @@ module X509 where
     sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-    _ : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SignParam bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
 
   record WrapperSignParam (bs : List Dig) : Set where
     constructor mkWrapperSignParam
@@ -374,25 +378,25 @@ module X509 where
  --------------- RDNSeq -------------------------------------
 
   TeletexString : (@0 _ : List Dig) → Set
-  TeletexString xs = Generic.TLV Tag.TeletexString  Generic.Octetstring xs
+  TeletexString xs = Generic.TLV Tag.TeletexString  Generic.OctetstringValue xs
 
   PrintableString : (@0 _ : List Dig) → Set
-  PrintableString xs = Generic.TLV Tag.PrintableString  Generic.Octetstring xs
+  PrintableString xs = Generic.TLV Tag.PrintableString  Generic.OctetstringValue xs
 
   UniversalString : (@0 _ : List Dig) → Set
-  UniversalString xs = Generic.TLV Tag.UniversalString  Generic.Octetstring xs
+  UniversalString xs = Generic.TLV Tag.UniversalString  Generic.OctetstringValue xs
 
   UTF8String : (@0 _ : List Dig) → Set
-  UTF8String xs = Generic.TLV Tag.UTF8String  Generic.Octetstring xs
+  UTF8String xs = Generic.TLV Tag.UTF8String  Generic.OctetstringValue xs
 
   BMPString : (@0 _ : List Dig) → Set
-  BMPString xs = Generic.TLV Tag.BMPString  Generic.Octetstring xs
+  BMPString xs = Generic.TLV Tag.BMPString  Generic.OctetstringValue xs
 
   IA5String : (@0 _ : List Dig) → Set
   IA5String xs = Generic.TLV Tag.IA5String  IA5StringValue xs
 
   VisibleString : (@0 _ : List Dig) → Set
-  VisibleString xs = Generic.TLV Tag.VisibleString  Generic.Octetstring xs
+  VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetstringValue xs
   
   data DirectoryString : List Dig → Set where
     teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
@@ -458,7 +462,7 @@ module X509 where
 
   --- we do not support OtherName since very rarely used
   OtherName : (@0 _ : List Dig) → Set
-  OtherName xs = Generic.TLV Tag.A0 Generic.Octetstring xs --abstracted
+  OtherName xs = Generic.TLV Tag.A0 Generic.OctetstringValue xs --abstracted
 
   RfcName : (@0 _ : List Dig) → Set
   RfcName xs = Generic.TLV Tag.EightyOne IA5StringValue xs
@@ -468,20 +472,20 @@ module X509 where
 
   --- we do not support X400Address since very rarely used
   X400Address : (@0 _ : List Dig) → Set
-  X400Address xs = Generic.TLV Tag.A3 Generic.Octetstring xs --abstracted
+  X400Address xs = Generic.TLV Tag.A3 Generic.OctetstringValue xs --abstracted
 
   DirName : (@0 _ : List Dig) → Set
   DirName xs = Generic.TLV Tag.A4 RDNSeqElems xs
 
   --- we do not support EdipartyName since very rarely used
   EdipartyName : (@0 _ : List Dig) → Set
-  EdipartyName xs = Generic.TLV Tag.A5 Generic.Octetstring xs --abstracted
+  EdipartyName xs = Generic.TLV Tag.A5 Generic.OctetstringValue xs --abstracted
 
   URI : (@0 _ : List Dig) → Set
   URI xs = Generic.TLV Tag.EightySix IA5StringValue xs
 
   IpAddress : (@0 _ : List Dig) → Set
-  IpAddress xs = Generic.TLV Tag.EightySeven Generic.Octetstring xs
+  IpAddress xs = Generic.TLV Tag.EightySeven Generic.OctetstringValue xs
 
   RegID : (@0 _ : List Dig) → Set
   RegID xs = Generic.TLV Tag.EightyEight (Generic.Seq Generic.OIDSub) xs
@@ -587,7 +591,7 @@ module X509 where
  ----------------------- aki extension -------------------
  
   AKIKeyId : (@0 _ : List Dig) → Set
-  AKIKeyId xs = Generic.TLV Tag.Eighty Generic.Octetstring xs
+  AKIKeyId xs = Generic.TLV Tag.Eighty Generic.OctetstringValue xs
 
   AKIAuthCertIssuer : (@0 _ : List Dig) → Set
   AKIAuthCertIssuer xs = Generic.TLV Tag.A1 Generalnames xs
@@ -610,11 +614,9 @@ module X509 where
   AKIFields : (@0 _ : List Dig) → Set
   AKIFields xs = Generic.TLV Tag.Octetstring  AKIFieldsSeq xs
 ------------------------------------------------------------------------------------------
-  SKIFieldsOctet : (@0 _ : List Dig) → Set
-  SKIFieldsOctet xs = Generic.TLV Tag.Octetstring   Generic.Octetstring xs
 
   SKIFields : (@0 _ : List Dig) → Set
-  SKIFields xs = Generic.TLV Tag.Octetstring  SKIFieldsOctet xs
+  SKIFields xs = Generic.TLV Tag.Octetstring  Generic.Octetstring xs
 
   KUFields : (@0 _ : List Dig) → Set
   KUFields xs = Generic.TLV Tag.Octetstring  Generic.Bitstring xs
@@ -867,11 +869,6 @@ module X509 where
   AIAFields : (@0 _ : List Dig) → Set
   AIAFields xs = Generic.TLV Tag.Octetstring  AIAFieldsSeq xs
 
------------------------------ unknown extension ----------------------
-
-  UknwnExtnFields : (@0 _ : List Dig) → Set
-  UknwnExtnFields xs = Generic.TLV Tag.Octetstring  Generic.Octetstring xs
-
 --------------------------------Extensions selection----------------------------------------
 
   module ExtensionOID where
@@ -916,7 +913,7 @@ module X509 where
     cpextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
     crlextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
     aiaextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
-    _ : ∀ {@0 bs1 bs2} → UknwnExtnFields bs2 → SelectExtn bs1 bs2
+    _ : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SelectExtn bs1 bs2
 
   record ExtensionFields (bs : List Dig) : Set where
     constructor mkExtensionFields
