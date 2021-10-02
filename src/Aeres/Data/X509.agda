@@ -250,23 +250,8 @@ module Generic where
 
   --Integer sequences-------------------------------
 
-  data IntegerSeqElems : List Dig → Set
-
-  record IntegerSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkIntegerSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      intnum : Int bs₁
-      rest   : IntegerSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data IntegerSeqElems where
-    _∷[]  : ∀ {x} → Int x → IntegerSeqElems x
-    cons : ∀ {x} → IntegerSeqElemsₐ x → IntegerSeqElems x
-
   IntegerSeq : (@0 _ : List Dig) → Set
-  IntegerSeq xs = TLV Tag.Sequence  IntegerSeqElems xs
+  IntegerSeq xs = TLV Tag.Sequence (SeqElems Int) xs
 
   BitstringUnusedBits : Dig → List Dig → Set
   BitstringUnusedBits bₕ [] = bₕ ≡ # 0
@@ -317,8 +302,13 @@ module Generic where
   OID : (@0 _ : List Dig) → Set
   OID = TLV Tag.ObjectIdentifier (SeqElems OIDSub)
 
+  BoolValue : List Dig → Set
+  BoolValue [] = ⊥
+  BoolValue (x ∷ []) = Singleton _ x
+  BoolValue (_ ∷ _ ∷ _) = ⊥
+
   Boool : (@0 _ : List Dig) → Set
-  Boool = TLV Tag.Boolean (const Dig)
+  Boool = TLV Tag.Boolean BoolValue
 
 ------------------------------X.509-----------------------------------------------------------
 

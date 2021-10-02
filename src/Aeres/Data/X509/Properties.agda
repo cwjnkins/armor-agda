@@ -5,6 +5,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Data.Nat.Properties
   hiding (_≟_)
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties where
 
@@ -52,11 +53,13 @@ module Unambiguous where
     |    MinRep-irrelevant lₕₜMinRep lₕₜMinRep₁
   ... | refl | refl | refl | refl = refl
 
+  @0 getLengthUA : ∀ {xs ys} → xs ≡ ys → (l₁ : Length xs) (l₂ : Length ys) → getLength l₁ ≡ getLength l₂
+  getLengthUA refl l₁ l₂ = cong getLength (LengthUA l₁ l₂)
+
 module NonNesting where
   postulate
     OIDSub : NonNesting Generic.OIDSub
     Int    : NonNesting Generic.Int
-    TLV    : ∀ {t} {@0 A} → NonNesting (Generic.TLV t A)
 
   LengthNN : NonNesting Length
   LengthNN xs₁++ys₁≡xs₂++ys₂ (Length.short (Length.mkShort l l<128 refl)) (Length.short (Length.mkShort l₁ l<129 refl)) =
@@ -87,9 +90,33 @@ module NonNesting where
       proj₁ $ Lemmas.length-++-≡ _ _ _ _ lₜ++ys₁≡
                 (trans lₜLen (trans (cong (λ x → toℕ x ∸ 129) l≡) (sym lₜLen₁)))
 
--- -- corollary of `Unambiguous.LengthUA`
--- getLength≡ : ∀ {xs ys} → xs ≡ ys → (l₀ : Length xs) (l₁ : Length ys) → getLength l₀ ≡ getLength l₁
--- getLength≡{xs}{.xs} refl l₀ l₁ = cong getLength (Unambiguous.LengthUA l₀ l₁)
+  @0 TLV : ∀ {t} {@0 A} → NonNesting (Generic.TLV t A)
+  TLV{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Generic.mkTLV{l}{v} len val len≡ bs≡) (Generic.mkTLV{l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) =
+    ‼ (begin xs₁ ≡⟨ bs≡ ⟩
+             t ∷ l ++ v ≡⟨ cong (t ∷_) (cong (_++ v) l≡) ⟩
+             t ∷ l₁ ++ v ≡⟨ cong (t ∷_) (cong (l₁ ++_) v≡) ⟩
+             t ∷ l₁ ++ v₁ ≡⟨ sym bs≡₁ ⟩
+             xs₂ ∎)
+    where
+    open ≡-Reasoning
+    @0 l++≡ : l ++ v ++ ys₁ ≡ l₁ ++ v₁ ++ ys₂
+    l++≡ = ∷-injectiveʳ (begin (t ∷ l ++ v ++ ys₁     ≡⟨ cong (t ∷_) (solve (++-monoid Dig)) ⟩
+                                t ∷ (l ++ v) ++ ys₁   ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                                xs₁ ++ ys₁            ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                                xs₂ ++ ys₂            ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                                t ∷ (l₁ ++ v₁) ++ ys₂ ≡⟨ cong (t ∷_) (solve (++-monoid Dig)) ⟩
+                                t ∷ l₁ ++ v₁ ++ ys₂   ∎))
+
+    @0 l≡ : l ≡ l₁
+    l≡ = LengthNN l++≡ len len₁
+
+    @0 v≡ : v ≡ v₁
+    v≡ = proj₁ $ Lemmas.length-++-≡ _ _ _ _
+                   (++-cancelˡ l (trans l++≡ (cong (_++ v₁ ++ ys₂) (sym l≡))))
+                   (begin length v       ≡⟨ sym len≡ ⟩
+                          getLength len  ≡⟨ Unambiguous.getLengthUA l≡ len len₁ ⟩
+                          getLength len₁ ≡⟨ len≡₁ ⟩
+                          length v₁      ∎)
 
 -- module NoNest where
 --   postulate

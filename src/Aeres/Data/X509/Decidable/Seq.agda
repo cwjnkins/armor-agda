@@ -128,3 +128,6 @@ module parseSeq
   parseSeq = parseTLV Tag.Sequence "seq" (Generic.SeqElems A) parseSeqElems
 
 open parseSeq public using (parseSeqElems ; parseSeq)
+
+parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
+parseIntegerSeq = parseSeq "int" Generic.Int NonEmpty.Int NonNesting.Int parseInt
