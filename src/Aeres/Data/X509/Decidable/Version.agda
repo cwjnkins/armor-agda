@@ -28,6 +28,6 @@ module parseVersion where
   parseVersion = parseTLV Tag.A0 "version" Generic.Int p
     where
     p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.Int n)
-    p = parseExactLength Dig NonNesting.Int (tell $ here' String.++ ": length mismatch") parseInt
+    p = parseExactLength Dig NonNesting.TLV (tell $ here' String.++ ": length mismatch") parseInt
 
 open parseVersion public using (parseVersion)

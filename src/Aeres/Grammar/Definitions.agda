@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Definitions (Σ : Set) where
 
@@ -46,3 +47,27 @@ record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
 
 ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
 ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
+
+@0 NonNesting&ₚ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NonNesting (&ₚ A B)
+NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs₂₁} a₁ b₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} a₂ b₂ bs≡₁) =
+  begin xs₁          ≡⟨ bs≡ ⟩
+        bs₁₁ ++ bs₂₁ ≡⟨ cong (_++ bs₂₁) bs₁≡ ⟩
+        bs₁₂ ++ bs₂₁ ≡⟨ cong (bs₁₂ ++_) bs₂≡ ⟩
+        bs₁₂ ++ bs₂₂ ≡⟨ sym bs≡₁ ⟩
+        xs₂          ∎
+  where
+  open ≡-Reasoning
+
+  @0 xs++ys≡' : bs₁₁ ++ bs₂₁ ++ ys₁ ≡ bs₁₂ ++ bs₂₂ ++ ys₂
+  xs++ys≡' = begin bs₁₁ ++ bs₂₁ ++ ys₁   ≡⟨ solve (++-monoid Σ) ⟩
+                   (bs₁₁ ++ bs₂₁) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                   xs₁ ++ ys₁            ≡⟨ xs++ys≡ ⟩
+                   xs₂ ++ ys₂            ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                   (bs₁₂ ++ bs₂₂) ++ ys₂ ≡⟨ solve (++-monoid Σ) ⟩
+                   bs₁₂ ++ bs₂₂ ++ ys₂   ∎
+
+  @0 bs₁≡ : bs₁₁ ≡ bs₁₂
+  bs₁≡ = nnA xs++ys≡' a₁ a₂
+
+  @0 bs₂≡ : bs₂₁ ≡ bs₂₂
+  bs₂≡ = nnB (++-cancelˡ bs₁₁ (trans xs++ys≡' (cong (_++ bs₂₂ ++ ys₂) (sym bs₁≡)))) b₁ b₂

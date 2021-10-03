@@ -8,6 +8,7 @@ open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
+open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Version

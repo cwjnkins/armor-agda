@@ -28,9 +28,8 @@ module NonEmpty where
    -- Cert : NonEmpty X509.Cert
    -- Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
 
-   postulate
-     Int : NonEmpty Generic.Int
-
+   @0 TLV : ∀ {t} {@0 A} → NonEmpty (Generic.TLV t A)
+   TLV (Generic.mkTLV len val len≡ ()) refl
 
 module Unambiguous where
   MinRep-irrelevant : Irrelevant₂ Length.MinRep
@@ -59,7 +58,6 @@ module Unambiguous where
 module NonNesting where
   postulate
     OIDSub : NonNesting Generic.OIDSub
-    Int    : NonNesting Generic.Int
 
     DirectoryString : NonNesting X509.DirectoryString
 

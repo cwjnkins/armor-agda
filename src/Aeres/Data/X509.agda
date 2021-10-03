@@ -397,7 +397,7 @@ module X509 where
 
   VisibleString : (@0 _ : List Dig) → Set
   VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetstringValue xs
-  
+
   data DirectoryString : List Dig → Set where
     teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
     printableString : ∀ {@0 bs} → PrintableString bs → DirectoryString bs
@@ -410,53 +410,53 @@ module X509 where
     visibleString : ∀ {@0 bs} → VisibleString bs → DisplayText bs
     bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
     utf8String : ∀ {@0 bs} → UTF8String bs → DisplayText bs
- 
-  record RDNSetSeqFields (bs : List Dig) : Set where
-    constructor mkRDNSetSeqFields
+
+  record RDNATVFields (@0 bs : List Dig) : Set where
+    constructor mkRDNATVFields
     field
       @0 {o v} : List Dig
       oid : Generic.OID o
       val : DirectoryString v
       @0 bs≡  : bs ≡ o ++ v
 
-  RDNSetSeq : (@0 _ : List Dig) → Set
-  RDNSetSeq xs = Generic.TLV Tag.Sequence RDNSetSeqFields xs
+  RDNATV : (@0 _ : List Dig) → Set
+  RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
 
-  data RDNSetElems : List Dig → Set
+  -- data RDNSetElems : List Dig → Set
 
-  record RDNSetElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkRDNSetElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      rdnss : RDNSetSeq bs₁
-      rest  : RDNSetElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+  -- record RDNSetElemsₐ (bs : List Dig) : Set where
+  --   inductive
+  --   constructor mkRDNSetElemsₐ
+  --   field
+  --     @0 {bs₁ bs₂} : List Dig
+  --     rdnss : RDNSetSeq bs₁
+  --     rest  : RDNSetElems bs₂
+  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data RDNSetElems where
-    _∷[] : ∀ {x} → RDNSetSeq x → RDNSetElems x
-    cons : ∀ {x} → RDNSetElemsₐ x → RDNSetElems x
+  -- data RDNSetElems where
+  --   _∷[] : ∀ {x} → RDNSetSeq x → RDNSetElems x
+  --   cons : ∀ {x} → RDNSetElemsₐ x → RDNSetElems x
 
-  RDNSet : (@0 _ : List Dig) → Set
-  RDNSet xs = Generic.TLV Tag.Sett RDNSetElems xs
+  RDN : (@0 _ : List Dig) → Set
+  RDN xs = Generic.TLV Tag.Sett (Generic.SeqElems RDNATV) xs
 
-  data RDNSeqElems : List Dig → Set
+  -- data RDNSeqElems : List Dig → Set
 
-  record RDNSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkRDNSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      rdnSet : RDNSet bs₁
-      rest   : RDNSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+  -- record RDNSeqElemsₐ (bs : List Dig) : Set where
+  --   inductive
+  --   constructor mkRDNSeqElemsₐ
+  --   field
+  --     @0 {bs₁ bs₂} : List Dig
+  --     rdnSet : RDNSet bs₁
+  --     rest   : RDNSeqElems bs₂
+  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data RDNSeqElems where
-    _∷[]  : ∀ {x} → RDNSet x → RDNSeqElems x
-    cons : ∀ {x} → RDNSeqElemsₐ x → RDNSeqElems x
+  -- data RDNSeqElems where
+  --   _∷[]  : ∀ {x} → RDNSet x → RDNSeqElems x
+  --   cons : ∀ {x} → RDNSeqElemsₐ x → RDNSeqElems x
 
   RDNSeq : (@0 _ : List Dig) → Set
-  RDNSeq xs = Generic.TLV Tag.Sequence RDNSeqElems xs
+  RDNSeq = Generic.Seq RDN
 
 ----------------------- Generalnames --------------------
 
@@ -475,7 +475,7 @@ module X509 where
   X400Address xs = Generic.TLV Tag.A3 Generic.OctetstringValue xs --abstracted
 
   DirName : (@0 _ : List Dig) → Set
-  DirName xs = Generic.TLV Tag.A4 RDNSeqElems xs
+  DirName xs = Generic.TLV Tag.A4 (Generic.SeqElems RDN) xs
 
   --- we do not support EdipartyName since very rarely used
   EdipartyName : (@0 _ : List Dig) → Set

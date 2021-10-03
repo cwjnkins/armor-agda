@@ -19,7 +19,7 @@ module Aeres.Data.X509.Decidable.Seq where
 open Base256
 
 module parseSeq
-  (eName : String) (A : List Dig → Set) (ne : NonEmpty Dig A) (nn : NonNesting Dig A)
+  (eName : String) (A : List Dig → Set) (@0 ne : NonEmpty Dig A) (@0 nn : NonNesting Dig A)
   (p : Parser Dig (Logging ∘ Dec) A) where
 
   here' = "parseSeq"
@@ -130,4 +130,4 @@ module parseSeq
 open parseSeq public using (parseSeqElems ; parseSeq)
 
 parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
-parseIntegerSeq = parseSeq "int" Generic.Int NonEmpty.Int NonNesting.Int parseInt
+parseIntegerSeq = parseSeq "int" Generic.Int NonEmpty.TLV NonNesting.TLV parseInt
