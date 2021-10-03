@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --inversion-max-depth=1000 #-}
 
 open import Aeres.Prelude
 
@@ -272,6 +272,13 @@ module Generic where
   Bitstring : (@0 _ : List Dig) → Set
   Bitstring xs = TLV Tag.Bitstring BitstringValue xs
 
+  OIDLeastDigs : List Dig → Set
+  OIDLeastDigs = maybe (Fin._> # 128) ⊤ ∘ head
+
+  oidLeastDigs? : ∀ bs → Dec (OIDLeastDigs bs)
+  oidLeastDigs? [] = yes tt
+  oidLeastDigs? (x ∷ bs) = (# 128) Fin.<? x
+
   record OIDSub (bs : List Dig) : Set where
     constructor mkOIDSub
     field
@@ -279,8 +286,11 @@ module Generic where
       @0 lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
       lₑ   : Dig
       @0 lₑ<128 : toℕ lₑ < 128
-      @0 leastDigs : maybe (λ d → toℕ d > 128) ⊤ (head lₚ)
+      @0 leastDigs : OIDLeastDigs lₚ
       @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
+
+  mkOIDSubₛ : (lₚ : List Dig) (lₑ : Dig) {@0 _ : True (All.all ((_≥? 128) ∘ toℕ) lₚ)} {@0 _ : True (oidLeastDigs? lₚ)} {@0 _ : True (lₑ Fin.<? # 128)} → OIDSub (lₚ ∷ʳ lₑ)
+  mkOIDSubₛ lₚ lₑ {lₚ≥128}{leastDigs}{lₑ<128} = mkOIDSub lₚ (toWitness lₚ≥128) lₑ (toWitness lₑ<128) (toWitness leastDigs) refl
 
   -- --private
   -- --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
@@ -317,40 +327,55 @@ module Generic where
 
 module X509 where
 
-  -- needs to change later
-  data IA5StringValue : List Dig → Set where 
-    ia5stringval : ∀ {x} → Generic.OctetstringValue x → IA5StringValue x
+  -- TODO: double-check with Joy
+  record IA5StringValue (@0 bs : List Dig) : Set where
+    constructor mkIA5StringValue
+    field
+      str : Generic.OctetstringValue bs
+      all<128 : All (Fin._< # 128) (Singleton.x str)
 
   module SOID where
     --TODO : add other RSA signature algorithms
     Md5Rsa : List Dig
-    Md5Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
+    Md5Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
+
+    private
+      Md5Rsa' : Generic.OID Md5Rsa
+      Md5Rsa' =
+        Generic.mkTLV (Length.shortₛ (# 9))
+          (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 42))
+            (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [ # 134 ] (# 72))
+              (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ (# 134 ∷ [ # 247 ]) (# 13))
+                (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 1))
+                  (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 1))
+                    (Generic.mkOIDSubₛ [] (# 4) Generic.∷[]) refl)) refl)) refl)) refl)) refl))
+            refl refl
 
     Sha1Rsa : List Dig
-    Sha1Rsa =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
+    Sha1Rsa =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
 
     RsaPss : List Dig
-    RsaPss =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
+    RsaPss =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
 
     Sha256Rsa : List Dig
-    Sha256Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
+    Sha256Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
 
     Sha384Rsa : List Dig
-    Sha384Rsa =  # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 12 ]
+    Sha384Rsa =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 12 ]
 
     Sha512Rsa : List Dig
-    Sha512Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
+    Sha512Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
 
     Sha224Rsa : List Dig
-    Sha224Rsa = # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
+    Sha224Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
 
   -- RSA explicit null param case covered here
   -- TODO : add cases for other RSA signature algorithms
   -- TODO: The current definition fails the "Unambiguous" property
   data SignParam : List Dig →  List Dig → Set where
-    md5rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Md5Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-    sha1rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha1Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-    rsapssp : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaPss) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    md5rsap    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Md5Rsa)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    sha1rsap   : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha1Rsa)   → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    rsapssp    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaPss)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha256rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha256Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
@@ -422,38 +447,8 @@ module X509 where
   RDNATV : (@0 _ : List Dig) → Set
   RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
 
-  -- data RDNSetElems : List Dig → Set
-
-  -- record RDNSetElemsₐ (bs : List Dig) : Set where
-  --   inductive
-  --   constructor mkRDNSetElemsₐ
-  --   field
-  --     @0 {bs₁ bs₂} : List Dig
-  --     rdnss : RDNSetSeq bs₁
-  --     rest  : RDNSetElems bs₂
-  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  -- data RDNSetElems where
-  --   _∷[] : ∀ {x} → RDNSetSeq x → RDNSetElems x
-  --   cons : ∀ {x} → RDNSetElemsₐ x → RDNSetElems x
-
   RDN : (@0 _ : List Dig) → Set
   RDN xs = Generic.TLV Tag.Sett (Generic.SeqElems RDNATV) xs
-
-  -- data RDNSeqElems : List Dig → Set
-
-  -- record RDNSeqElemsₐ (bs : List Dig) : Set where
-  --   inductive
-  --   constructor mkRDNSeqElemsₐ
-  --   field
-  --     @0 {bs₁ bs₂} : List Dig
-  --     rdnSet : RDNSet bs₁
-  --     rest   : RDNSeqElems bs₂
-  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  -- data RDNSeqElems where
-  --   _∷[]  : ∀ {x} → RDNSet x → RDNSeqElems x
-  --   cons : ∀ {x} → RDNSeqElemsₐ x → RDNSeqElems x
 
   RDNSeq : (@0 _ : List Dig) → Set
   RDNSeq = Generic.Seq RDN
@@ -531,7 +526,7 @@ module X509 where
   record UtcTimeFields (bs : List Dig) : Set where
     constructor mkUtcTimeFields
     field
-      @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
+      {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
       @0 year : (0 ≤ ((toℕ y1 - 48) * 10 + (toℕ y2 - 48))) × (((toℕ y1 - 48) * 10 + (toℕ y2 - 48)) ≤ 99)
       @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
       @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
