@@ -60,3 +60,30 @@ module parseOIDField where
   parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDElems
 
 open parseOIDField public using (parseOIDElems ; parseOID)
+
+private
+  module Test where
+
+    open X509.SOID
+
+    test₁ : Generic.OID Md5Rsa
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOID Md5Rsa)} tt)
+
+    test₂ : Generic.OID Sha1Rsa
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha1Rsa)} tt)
+
+    test₃ : Generic.OID RsaPss
+    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseOID RsaPss)} tt)
+
+    test₄ : Generic.OID Sha256Rsa
+    test₄ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha256Rsa)} tt)
+
+    test₅ : Generic.OID Sha384Rsa
+    test₅ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha384Rsa)} tt)
+
+    test₆ : Generic.OID Sha512Rsa
+    test₆ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha512Rsa)} tt)
+
+    test₇ : Generic.OID Sha224Rsa
+    test₇ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha224Rsa)} tt)
+

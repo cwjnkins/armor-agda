@@ -14,22 +14,25 @@ open import Aeres.Grammar.Definitions Dig
 
 module NonEmpty where
 
-   OIDSub : NonEmpty Generic.OIDSub
-   OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
-   OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+  BoolValue : NonEmpty Generic.BoolValue
+  BoolValue () refl
 
-   Time : NonEmpty X509.Time
-   Time (X509.utctm ()) refl
-   Time (X509.gentm ()) refl
+  OIDSub : NonEmpty Generic.OIDSub
+  OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
+  OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 
-   Validity : NonEmpty X509.Validity
-   Validity () refl
+  Time : NonEmpty X509.Time
+  Time (X509.utctm ()) refl
+  Time (X509.gentm ()) refl
 
-   -- Cert : NonEmpty X509.Cert
-   -- Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
+  Validity : NonEmpty X509.Validity
+  Validity () refl
 
-   @0 TLV : ∀ {t} {@0 A} → NonEmpty (Generic.TLV t A)
-   TLV (Generic.mkTLV len val len≡ ()) refl
+  -- Cert : NonEmpty X509.Cert
+  -- Cert (X509.mkCert len tbs signAlg signature len≡ ()) refl
+
+  @0 TLV : ∀ {t} {@0 A} → NonEmpty (Generic.TLV t A)
+  TLV (Generic.mkTLV len val len≡ ()) refl
 
 module Unambiguous where
   MinRep-irrelevant : Irrelevant₂ Length.MinRep
@@ -57,7 +60,8 @@ module Unambiguous where
 
 module NonNesting where
   postulate
-    OIDSub : NonNesting Generic.OIDSub
+    OIDSub    : NonNesting Generic.OIDSub
+    BoolValue : NonNesting Generic.BoolValue
 
     DirectoryString : NonNesting X509.DirectoryString
 

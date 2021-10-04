@@ -10,107 +10,105 @@ open import Aeres.Grammar.Definitions Dig
 
 -------------------------------------------TAGS---------------------------------------------
 module Tag where
-  abstract
+  Boolean : Dig
+  Boolean = # 1
 
-    Boolean : Dig
-    Boolean = # 1
+  Integer : Dig
+  Integer = # 2
 
-    Integer : Dig
-    Integer = # 2
+  Bitstring : Dig
+  Bitstring = # 3
 
-    Bitstring : Dig
-    Bitstring = # 3
+  Octetstring : Dig
+  Octetstring = # 4
 
-    Octetstring : Dig
-    Octetstring = # 4
+  Null : Dig
+  Null = # 5
 
-    Null : Dig
-    Null = # 5
+  ObjectIdentifier : Dig
+  ObjectIdentifier = # 6
 
-    ObjectIdentifier : Dig
-    ObjectIdentifier = # 6
+  Utctime : Dig
+  Utctime = # 23
 
-    Utctime : Dig
-    Utctime = # 23
+  Gentime : Dig
+  Gentime = # 24
 
-    Gentime : Dig
-    Gentime = # 24
+  Sequence : Dig
+  Sequence = # 48
 
-    Sequence : Dig
-    Sequence = # 48
+  Sett : Dig
+  Sett = # 49
 
-    Sett : Dig
-    Sett = # 49
+  Eighty : Dig
+  Eighty = # 128
 
-    Eighty : Dig
-    Eighty = # 128
+  EightyOne : Dig
+  EightyOne = # 129
 
-    EightyOne : Dig
-    EightyOne = # 129
+  EightyTwo : Dig
+  EightyTwo = # 130
 
-    EightyTwo : Dig
-    EightyTwo = # 130
+  EightyThree : Dig
+  EightyThree = # 131
 
-    EightyThree : Dig
-    EightyThree = # 131
+  EightyFour : Dig
+  EightyFour = # 132
 
-    EightyFour : Dig
-    EightyFour = # 132
+  EightyFive : Dig
+  EightyFive = # 133
 
-    EightyFive : Dig
-    EightyFive = # 133
+  EightySix : Dig
+  EightySix = # 134
 
-    EightySix : Dig
-    EightySix = # 134
+  EightySeven : Dig
+  EightySeven = # 135
 
-    EightySeven : Dig
-    EightySeven = # 135
+  EightyEight : Dig
+  EightyEight = # 136
 
-    EightyEight : Dig
-    EightyEight = # 136
+  A0 : Dig
+  A0 = # 160
 
-    A0 : Dig
-    A0 = # 160
+  A1 : Dig
+  A1 = # 161
 
-    A1 : Dig
-    A1 = # 161
+  A2 : Dig
+  A2 = # 162
 
-    A2 : Dig
-    A2 = # 162
+  A3 : Dig
+  A3 = # 163
 
-    A3 : Dig
-    A3 = # 163
+  A4 : Dig
+  A4 = # 164
 
-    A4 : Dig
-    A4 = # 164
+  A5 : Dig
+  A5 = # 165
 
-    A5 : Dig
-    A5 = # 165
+  A6 : Dig
+  A6 = # 166
 
-    A6 : Dig
-    A6 = # 166
+  --- directory string tags
+  BMPString : Dig
+  BMPString = # 30
 
-    --- directory string tags
-    BMPString : Dig
-    BMPString = # 30
+  UniversalString : Dig
+  UniversalString = # 28
 
-    UniversalString : Dig
-    UniversalString = # 28
+  PrintableString : Dig
+  PrintableString = # 19
 
-    PrintableString : Dig
-    PrintableString = # 19
+  TeletexString : Dig
+  TeletexString = # 20
 
-    TeletexString : Dig
-    TeletexString = # 20
+  UTF8String : Dig
+  UTF8String = # 12
 
-    UTF8String : Dig
-    UTF8String = # 12
+  IA5String : Dig
+  IA5String = # 22
 
-    IA5String : Dig
-    IA5String = # 22
-
-    VisibleString : Dig
-    VisibleString = # 26
+  VisibleString : Dig
+  VisibleString = # 26
 -----------------------------------------Length------------------------------------------
 module Length where
 
@@ -315,10 +313,17 @@ module Generic where
   OID : (@0 _ : List Dig) → Set
   OID = TLV Tag.ObjectIdentifier (SeqElems OIDSub)
 
-  BoolValue : List Dig → Set
-  BoolValue [] = ⊥
-  BoolValue (x ∷ []) = Singleton _ x
-  BoolValue (_ ∷ _ ∷ _) = ⊥
+  data BoolRep : Bool → Dig → Set where
+    falseᵣ : BoolRep false (# 0)
+    trueᵣ  : BoolRep true  (# 255)
+
+  record BoolValue (@0 bs : List Dig) : Set where
+    constructor mkBoolValue
+    field
+      v : Bool
+      @0 b : Dig
+      @0 vᵣ : BoolRep v b
+      @0 bs≡ : bs ≡ [ b ]
 
   Boool : (@0 _ : List Dig) → Set
   Boool = TLV Tag.Boolean BoolValue
@@ -332,24 +337,13 @@ module X509 where
     constructor mkIA5StringValue
     field
       str : Generic.OctetstringValue bs
-      all<128 : All (Fin._< # 128) (Singleton.x str)
+      @0 all<128 : All (Fin._< # 128) (Singleton.x str)
 
   module SOID where
-    --TODO : add other RSA signature algorithms
+    -- NOTE: These are proven to be OIDs after the fact (see Aeres.Data.X509.Decidable.OID)
+    -- TODO: add other RSA signature algorithms
     Md5Rsa : List Dig
     Md5Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
-
-    private
-      Md5Rsa' : Generic.OID Md5Rsa
-      Md5Rsa' =
-        Generic.mkTLV (Length.shortₛ (# 9))
-          (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 42))
-            (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [ # 134 ] (# 72))
-              (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ (# 134 ∷ [ # 247 ]) (# 13))
-                (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 1))
-                  (Generic.cons (Generic.mkSeqElems (Generic.mkOIDSubₛ [] (# 1))
-                    (Generic.mkOIDSubₛ [] (# 4) Generic.∷[]) refl)) refl)) refl)) refl)) refl))
-            refl refl
 
     Sha1Rsa : List Dig
     Sha1Rsa =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
@@ -382,12 +376,12 @@ module X509 where
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
 
-  record WrapperSignParam (bs : List Dig) : Set where
-    constructor mkWrapperSignParam
-    field
-      @0 {o p} : List Dig
-      param : SignParam o p
-      @0 bs≡  : bs ≡ o ++ p
+  -- record WrapperSignParam (bs : List Dig) : Set where
+  --   constructor mkWrapperSignParam
+  --   field
+  --     @0 {o p} : List Dig
+  --     param : SignParam o p
+  --     @0 bs≡  : bs ≡ o ++ p
 
   record SignAlgFields (bs : List Dig) : Set where
     constructor mkSignAlgFields

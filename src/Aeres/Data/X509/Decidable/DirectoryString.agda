@@ -22,33 +22,6 @@ module parseDirectoryString where
   here' = "parseDirectoryString"
   open ≡-Reasoning
 
-  parseTeletexString : Parser Dig (Logging ∘ Dec) X509.TeletexString
-  parseTeletexString =
-    parseTLV Tag.TeletexString "teletex string" Generic.OctetstringValue Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
-  parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
-  parsePrintableString =
-    parseTLV Tag.PrintableString "printable string" Generic.OctetstringValue  Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
-  parseUniversalString : Parser Dig (Logging ∘ Dec) X509.UniversalString
-  parseUniversalString =
-    parseTLV Tag.UniversalString "universal string" Generic.OctetstringValue  Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
-  parseUTF8String : Parser Dig (Logging ∘ Dec) X509.UTF8String
-  parseUTF8String =
-    parseTLV Tag.UTF8String "UTF8 string" Generic.OctetstringValue Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
-  parseBMPString : Parser Dig (Logging ∘ Dec) X509.BMPString
-  parseBMPString =
-    parseTLV Tag.BMPString "BMP string" Generic.OctetstringValue Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
-  postulate
-    parseIA5String : Parser Dig (Logging ∘ Dec) X509.IA5String
-
-  parseVisibleString : Parser Dig (Logging ∘ Dec) X509.VisibleString
-  parseVisibleString =
-    parseTLV Tag.VisibleString "universal string" Generic.OctetstringValue  Aeres.Data.X509.Decidable.Octetstring.parseOctetstringValue
-
   parseDirectoryString : Parser Dig (Logging ∘ Dec) X509.DirectoryString
   runParser parseDirectoryString xs = do
     no ¬teletex ← runParser parseTeletexString xs

@@ -38,6 +38,30 @@ module parseOctetstring where
 
 open parseOctetstring public using (parseOctetstring)
 
+parseTeletexString : Parser Dig (Logging ∘ Dec) X509.TeletexString
+parseTeletexString =
+  parseTLV Tag.TeletexString "teletex string" Generic.OctetstringValue parseOctetstringValue
+
+parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
+parsePrintableString =
+  parseTLV Tag.PrintableString "printable string" Generic.OctetstringValue  parseOctetstringValue
+
+parseUniversalString : Parser Dig (Logging ∘ Dec) X509.UniversalString
+parseUniversalString =
+  parseTLV Tag.UniversalString "universal string" Generic.OctetstringValue  parseOctetstringValue
+
+parseUTF8String : Parser Dig (Logging ∘ Dec) X509.UTF8String
+parseUTF8String =
+  parseTLV Tag.UTF8String "UTF8 string" Generic.OctetstringValue parseOctetstringValue
+
+parseBMPString : Parser Dig (Logging ∘ Dec) X509.BMPString
+parseBMPString =
+  parseTLV Tag.BMPString "BMP string" Generic.OctetstringValue parseOctetstringValue
+
+parseVisibleString : Parser Dig (Logging ∘ Dec) X509.VisibleString
+parseVisibleString =
+  parseTLV Tag.VisibleString "universal string" Generic.OctetstringValue parseOctetstringValue
+
 module parseIA5StringValue where
 
   here' = "parseIA5StringValue"
