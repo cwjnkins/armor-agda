@@ -74,6 +74,17 @@ module Base256 where
     tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
     tc₂ = refl
 
+  -- Converts ASCII codes for '0'-'9' to the corresponding nat.
+  asciiNum₁ : Dig → ℕ
+  asciiNum₁ = (_- toℕ '0') ∘ toℕ
+
+  asciiNum : List Dig → ℕ
+  asciiNum xs = go (reverse xs)
+    where
+    go : List Dig → ℕ
+    go [] = 0
+    go (x ∷ xs) = asciiNum₁ x + 10 * go xs
+
 module Base128 where
   Byte = Binary 7
   Dig  = Fin (2 ^ 7)

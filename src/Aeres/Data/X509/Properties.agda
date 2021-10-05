@@ -21,9 +21,9 @@ module NonEmpty where
   OIDSub (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
   OIDSub (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 
-  Time : NonEmpty X509.Time
-  Time (X509.utctm ()) refl
-  Time (X509.gentm ()) refl
+  Time : NonEmpty Generic.Time
+  Time (Generic.utctm ()) refl
+  Time (Generic.gentm ()) refl
 
   Validity : NonEmpty X509.Validity
   Validity () refl
@@ -60,8 +60,9 @@ module Unambiguous where
 
 module NonNesting where
   postulate
-    OIDSub    : NonNesting Generic.OIDSub
-    BoolValue : NonNesting Generic.BoolValue
+    OIDSub        : NonNesting Generic.OIDSub
+    BoolValue     : NonNesting Generic.BoolValue
+    UtcTimeFields : NonNesting Generic.UtcTimeFields
 
     DirectoryString : NonNesting X509.DirectoryString
 

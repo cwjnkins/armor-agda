@@ -328,6 +328,62 @@ module Generic where
   Boool : (@0 _ : List Dig) → Set
   Boool = TLV Tag.Boolean BoolValue
 
+------------------------------Time------------------------------------------------------------
+
+  record UtcTimeFields (bs : List Dig) : Set where
+    constructor mkUtcTimeFields
+    field
+      @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
+
+      year : Singleton _ (asciiNum (y1 ∷ [ y2 ]))
+      @0 yearRange : All (InRange '0' '9') (y1 ∷ [ y2 ])
+
+      mon : Singleton _ (asciiNum (mn1 ∷ [ mn2 ]))
+      @0 monRange  :   mn1 ≡ # 0 × InRange '0' '9' mn2
+                     ⊎ mn1 ≡ # 1 × InRange '0' '2' mn2
+
+      -- TODO: where do we check valid dom? (Feb, leap year, etc)
+      day : Singleton _ (asciiNum (d1 ∷ [ d2 ]))
+      @0 dayRange  :   InRange '0' '2' d1 × InRange '0' '9' d2
+                     ⊎ toℕ d1 ≡ toℕ '3' × InRange '0' '1' d2
+
+      hour : Singleton _ (asciiNum (h1 ∷ [ h2 ]))
+      @0 hourRange :   InRange '0' '1' h1 × InRange '0' '9' h2
+                     ⊎ toℕ h1 ≡ toℕ '2' × InRange '0' '3' h2
+
+      min : Singleton _ (asciiNum (mi1 ∷ [ mi2 ]))
+      @0 minRange : InRange '0' '5' mi1 × InRange '0' '9' mi2
+
+      sec : Singleton _ (asciiNum (s1 ∷ [ s2 ]))
+      @0 secRange : InRange '0' '5' s1 × InRange '0' '9' s2
+
+      @0 term : toℕ z ≡ toℕ 'Z'
+      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ z ]
+
+  UtcTime : (@0 _ : List Dig) → Set
+  UtcTime xs = TLV Tag.Utctime UtcTimeFields xs
+
+  record GenTimeFields (bs : List Dig) : Set where
+    constructor mkGenTimeFields
+    field
+      @0 {y1 y2 y3 y4 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
+      @0 year : (1 ≤ ((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48))) ×
+        (((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48)) ≤ 9999)
+      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
+      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
+      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
+      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
+      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
+      @0 z≡ : toℕ z ≡ toℕ 'Z'
+      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ []
+
+  GenTime : (@0 _ : List Dig) → Set
+  GenTime = TLV Tag.Gentime GenTimeFields
+
+  data Time : List Dig → Set where
+    utctm : ∀ {@0 bs} → UtcTime bs → Time bs
+    gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
+
 ------------------------------X.509-----------------------------------------------------------
 
 module X509 where
@@ -490,20 +546,22 @@ module X509 where
     ipadd : ∀ {@0 bs} → IpAddress bs → Generalname bs
     rid : ∀ {@0 bs} → RegID bs → Generalname bs
 
-  data Generalnames : List Dig → Set
+  Generalnames = Generic.SeqElems Generalname
 
-  record Generalnamesₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkGeneralnamesₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      extn : Generalname bs₁
-      rest   : Generalnames bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+  -- data Generalnames : List Dig → Set
 
-  data Generalnames where
-    _∷[]  : ∀ {x} → Generalname x → Generalnames x
-    cons : ∀ {x} → Generalnamesₐ x → Generalnames x
+  -- record Generalnamesₐ (bs : List Dig) : Set where
+  --   inductive
+  --   constructor mkGeneralnamesₐ
+  --   field
+  --     @0 {bs₁ bs₂} : List Dig
+  --     extn : Generalname bs₁
+  --     rest   : Generalnames bs₂
+  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  -- data Generalnames where
+  --   _∷[]  : ∀ {x} → Generalname x → Generalnames x
+  --   cons : ∀ {x} → Generalnamesₐ x → Generalnames x
 
   --------------------------TBSCert-----------------------------------------------------------------
 
@@ -517,49 +575,12 @@ module X509 where
   SubUID xs = Generic.TLV Tag.EightyTwo Generic.BitstringValue xs
 
 --------------------------------------------------------- Validity --------------------------------
-  record UtcTimeFields (bs : List Dig) : Set where
-    constructor mkUtcTimeFields
-    field
-      {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
-      @0 year : (0 ≤ ((toℕ y1 - 48) * 10 + (toℕ y2 - 48))) × (((toℕ y1 - 48) * 10 + (toℕ y2 - 48)) ≤ 99)
-      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
-      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
-      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
-      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
-      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
-      @0 last_byte : toℕ z ≡ 90
-      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ []
-
-  UtcTime : (@0 _ : List Dig) → Set
-  UtcTime xs = Generic.TLV Tag.Utctime UtcTimeFields xs
-
-  record GenTimeFields (bs : List Dig) : Set where
-    constructor mkGenTimeFields
-    field
-      @0 {y1 y2 y3 y4 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
-      @0 year : (1 ≤ ((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48))) ×
-        (((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48)) ≤ 9999)
-      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
-      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
-      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
-      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
-      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
-      @0 last_byte : toℕ z ≡ 90
-      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ []
-
-  GenTime : (@0 _ : List Dig) → Set
-  GenTime xs = Generic.TLV Tag.Gentime GenTimeFields xs
-
-  data Time : List Dig → Set where
-    utctm : ∀ {@0 bs} → UtcTime bs → Time bs
-    gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
-
   record ValidityFields (bs : List Dig) : Set where
     constructor mkValidityFields
     field
       @0 {nb na} : List Dig
-      start : Time nb
-      end : Time na
+      start : Generic.Time nb
+      end : Generic.Time na
       @0 bs≡  : bs ≡ nb ++ na
 
   Validity : (@0 _ : List Dig) → Set
@@ -650,16 +671,16 @@ module X509 where
 
 -------------------------- ian/san alternative names extensions ------------------
   IANFieldsSeq : (@0 _ : List Dig) → Set
-  IANFieldsSeq xs = Generic.TLV Tag.Sequence  Generalnames xs
+  IANFieldsSeq xs = Generic.TLV Tag.Sequence Generalnames xs
 
   IANFields : (@0 _ : List Dig) → Set
-  IANFields xs = Generic.TLV Tag.Octetstring  IANFieldsSeq xs
+  IANFields xs = Generic.TLV Tag.Octetstring IANFieldsSeq xs
 
   SANFieldsSeq : (@0 _ : List Dig) → Set
-  SANFieldsSeq xs = Generic.TLV Tag.Sequence  Generalnames xs
+  SANFieldsSeq xs = Generic.TLV Tag.Sequence Generalnames xs
 
   SANFields : (@0 _ : List Dig) → Set
-  SANFields xs = Generic.TLV Tag.Octetstring  SANFieldsSeq xs
+  SANFields xs = Generic.TLV Tag.Octetstring SANFieldsSeq xs
 
 ------------------------- certificate policies -------------------------
   module PQOID where
@@ -694,11 +715,11 @@ module X509 where
   data Qualifier : List Dig →  List Dig → Set where
     cpsuri : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.CPSURI) → IA5String bs2 → Qualifier bs1 bs2
     unotice : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.USERNOTICE) → UserNotice bs2 → Qualifier bs1 bs2
-    
+
   data PolicyQualifierId : List Dig → Set where
     cpsuriid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.CPSURI) → PolicyQualifierId bs
     unoticeid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.USERNOTICE) → PolicyQualifierId bs
-    
+
   record PolicyQualifierInfoFields (@0 bs : List Dig) : Set where
     constructor mkPolicyQualifierInfoFields
     field
@@ -763,16 +784,16 @@ module X509 where
 ----------------------------- crl dist point extension --------------------------------
 
   CrlIssuer : (@0 _ : List Dig) → Set
-  CrlIssuer xs = Generic.TLV Tag.A2  Generalnames xs
+  CrlIssuer xs = Generic.TLV Tag.A2 Generalnames xs
 
   ReasonFlags : (@0 _ : List Dig) → Set
-  ReasonFlags xs = Generic.TLV Tag.EightyOne  Generic.BitstringValue xs
+  ReasonFlags xs = Generic.TLV Tag.EightyOne Generic.BitstringValue xs
 
   FullName : (@0 _ : List Dig) → Set
-  FullName xs = Generic.TLV Tag.A0  Generalnames xs
+  FullName xs = Generic.TLV Tag.A0 Generalnames xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
-  NameRTCrlIssuer xs = Generic.TLV Tag.A1  RDNSeq xs
+  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNSeq xs
 
   data DistPointNameChoice : (@0 _ : List Dig) → Set where
     fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
@@ -780,7 +801,7 @@ module X509 where
 
   DistPointName : (@0 _ : List Dig) → Set
   DistPointName xs = Generic.TLV Tag.A0  DistPointNameChoice xs
-      
+
   record DistPointFields (bs : List Dig) : Set where
     constructor mkDistPointFields
     field

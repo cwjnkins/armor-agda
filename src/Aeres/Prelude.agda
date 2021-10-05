@@ -139,6 +139,9 @@ contradiction p ¬p = ⊥-elim (¬p p)
 open import Relation.Nullary.Decidable public
   hiding (map)
 
+open import Relation.Nullary.Product public
+  using (_×-dec_)
+
 open import Relation.Nullary.Sum public
   using (_⊎-dec_)
 
@@ -152,12 +155,24 @@ record Singleton {ℓ} (@0 A : Set ℓ) (@0 a : A) : Set ℓ where
     x : A
     @0 x≡ : x ≡ a
 
+singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton _ a
+singleSelf{a = a} = singleton a refl
+
 -- Typeclasses
 
 record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
   field
     toℕ : A → ℕ
 open Numeric ⦃ ... ⦄ public
+
+InRange : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric A ⦄ ⦃ _ : Numeric B ⦄
+          → (l u : A) → B → Set
+InRange l u x = toℕ l ≤ toℕ x × toℕ x ≤ toℕ u
+
+inRange? : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric A ⦄ ⦃ _ : Numeric B ⦄
+          → (l u : A)
+          → (x : B) → Dec (InRange l u x)
+inRange? l u x = toℕ l ≤? toℕ x ×-dec toℕ x ≤? toℕ u
 
 instance
   ℕNumeric : Numeric ℕ
@@ -169,6 +184,9 @@ instance
 
   FinNumeric : ∀ {n} → Numeric (Fin n)
   Numeric.toℕ FinNumeric = Fin.toℕ
+
+  CharNumeric : Numeric Char
+  Numeric.toℕ CharNumeric = Char.toℕ
 
 record Eq {ℓ} (A : Set ℓ) : Set ℓ where
   infix 4 _≟_ _≠_
