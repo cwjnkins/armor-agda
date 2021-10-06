@@ -149,13 +149,13 @@ open import Relation.Unary public
   using (Decidable)
 
 -- Definitions
-record Singleton {ℓ} (@0 A : Set ℓ) (@0 a : A) : Set ℓ where
+record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
   constructor singleton
   field
     x : A
     @0 x≡ : x ≡ a
 
-singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton _ a
+singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
 singleSelf{a = a} = singleton a refl
 
 -- Typeclasses

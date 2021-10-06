@@ -10,6 +10,7 @@ open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Decidable.Octetstring

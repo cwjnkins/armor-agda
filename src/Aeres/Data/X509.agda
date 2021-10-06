@@ -214,7 +214,7 @@ module Generic where
   -- TODO: extensions encoded as octet strings need to be tupled together with proofs
   -- they can be parsed into supported structures
   OctetstringValue :  (@0 _ : List Dig) → Set
-  OctetstringValue =  Singleton (List Dig)
+  OctetstringValue =  Singleton
 
   Octetstring : (@0 _ : List Dig) → Set
   Octetstring xs = TLV Tag.Octetstring OctetstringValue xs
@@ -330,34 +330,43 @@ module Generic where
 
 ------------------------------Time------------------------------------------------------------
 
-  record UtcTimeFields (bs : List Dig) : Set where
+  record MonthDayHourMinSecFields (@0 bs : List Dig) : Set where
+    constructor mkMDHMSFields
+    field
+      @0 {mo₁ mo₂ d₁ d₂ h₁ h₂ mi₁ mi₂ s₁ s₂} : Dig
+
+      mon : Singleton (asciiNum (mo₁ ∷ [ mo₂ ]))
+      @0 monRange  :   mo₁ ≡ # 0 × InRange '0' '9' mo₂
+                     ⊎ mo₁ ≡ # 1 × InRange '0' '2' mo₂
+
+      -- TODO: where do we check valid dom? (Feb, leap year, etc)
+      day : Singleton (asciiNum (d₁ ∷ [ d₂ ]))
+      @0 dayRange  :   InRange '0' '2' d₁ × InRange '0' '9' d₂
+                     ⊎ toℕ d₁ ≡ toℕ '3' × InRange '0' '1' d₂
+
+      hour : Singleton (asciiNum (h₁ ∷ [ h₂ ]))
+      @0 hourRange :   InRange '0' '1' h₁ × InRange '0' '9' h₂
+                     ⊎ toℕ h₁ ≡ toℕ '2' × InRange '0' '3' h₂
+
+      min : Singleton (asciiNum (mi₁ ∷ [ mi₂ ]))
+      @0 minRange : InRange '0' '5' mi₁ × InRange '0' '9' mi₂
+
+      sec : Singleton (asciiNum (s₁ ∷ [ s₂ ]))
+      @0 secRange : InRange '0' '5' s₁ × InRange '0' '9' s₂
+
+      @0 bs≡ : bs ≡ mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]
+
+  record UtcTimeFields (@0 bs : List Dig) : Set where
     constructor mkUtcTimeFields
     field
       @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
 
-      year : Singleton _ (asciiNum (y1 ∷ [ y2 ]))
+      year : Singleton (asciiNum (y1 ∷ [ y2 ]))
       @0 yearRange : All (InRange '0' '9') (y1 ∷ [ y2 ])
 
-      mon : Singleton _ (asciiNum (mn1 ∷ [ mn2 ]))
-      @0 monRange  :   mn1 ≡ # 0 × InRange '0' '9' mn2
-                     ⊎ mn1 ≡ # 1 × InRange '0' '2' mn2
+      mmddhhmmss : MonthDayHourMinSecFields (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ [ s2 ])
 
-      -- TODO: where do we check valid dom? (Feb, leap year, etc)
-      day : Singleton _ (asciiNum (d1 ∷ [ d2 ]))
-      @0 dayRange  :   InRange '0' '2' d1 × InRange '0' '9' d2
-                     ⊎ toℕ d1 ≡ toℕ '3' × InRange '0' '1' d2
-
-      hour : Singleton _ (asciiNum (h1 ∷ [ h2 ]))
-      @0 hourRange :   InRange '0' '1' h1 × InRange '0' '9' h2
-                     ⊎ toℕ h1 ≡ toℕ '2' × InRange '0' '3' h2
-
-      min : Singleton _ (asciiNum (mi1 ∷ [ mi2 ]))
-      @0 minRange : InRange '0' '5' mi1 × InRange '0' '9' mi2
-
-      sec : Singleton _ (asciiNum (s1 ∷ [ s2 ]))
-      @0 secRange : InRange '0' '5' s1 × InRange '0' '9' s2
-
-      @0 term : toℕ z ≡ toℕ 'Z'
+      @0 term : z ≡ # toℕ 'Z'
       @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ z ]
 
   UtcTime : (@0 _ : List Dig) → Set
