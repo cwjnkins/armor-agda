@@ -33,9 +33,6 @@ module Fin where
 
 Fin = Fin.Fin
 
-infix 10 #_
-#_ = Fin.#_
-
 import Data.Integer
 module ℤ = Data.Integer
 ℤ = ℤ.ℤ
@@ -164,6 +161,11 @@ record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
   field
     toℕ : A → ℕ
 open Numeric ⦃ ... ⦄ public
+
+infix 10 #_
+#_ : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Numeric A ⦄
+     → (m : A) {n : ℕ} {m<n : True (suc (toℕ m) ≤? n) } → Fin n
+#_ _ {m<n = m<n} = Fin.fromℕ< (toWitness m<n)
 
 InRange : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric A ⦄ ⦃ _ : Numeric B ⦄
           → (l u : A) → B → Set
@@ -319,3 +321,17 @@ module Lemmas where
 
   ≡⇒≤ : ∀ {m n} → m ≡ n → m ≤ n
   ≡⇒≤ refl = ≤-refl
+
+  all-++-≡ : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} (P : A → Set ℓ₂)
+             → ∀ {ws x xs ys z zs}
+             → All P ws → ¬ P x → All P ys → ¬ P z
+             → ws ++ [ x ] ++ xs ≡ ys ++ [ z ] ++ zs
+             → ws ≡ ys
+  all-++-≡ P [] ¬x [] ¬z eq = refl
+  all-++-≡ P [] ¬x (px ∷ allys) ¬z eq =
+    contradiction (subst P (sym $ ∷-injectiveˡ eq) px) ¬x
+  all-++-≡ P (px ∷ allws) ¬x [] ¬z eq =
+    contradiction (subst P (∷-injectiveˡ eq) px) ¬z
+  all-++-≡ P (px ∷ allws) ¬x (px₁ ∷ allys) ¬z eq
+    with ∷-injectiveˡ eq
+  ... | refl = cong (_ ∷_) (all-++-≡ _ allws ¬x allys ¬z (∷-injectiveʳ eq))

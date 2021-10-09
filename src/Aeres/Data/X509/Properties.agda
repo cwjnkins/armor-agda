@@ -60,9 +60,12 @@ module Unambiguous where
 
 module NonNesting where
   postulate
+    ExactLengthNN : ∀ {A n} → NonNesting (ExactLength A n)
     OIDSub        : NonNesting Generic.OIDSub
     BoolValue     : NonNesting Generic.BoolValue
+    MonthDayHourMinSecFields : NonNesting Generic.MonthDayHourMinSecFields
     UtcTimeFields : NonNesting Generic.UtcTimeFields
+    @0 UtcTime       : NonNesting Generic.UtcTime
 
     DirectoryString : NonNesting X509.DirectoryString
 

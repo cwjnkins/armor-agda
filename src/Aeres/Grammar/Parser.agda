@@ -189,6 +189,7 @@ runParser (parse≤{A} n p nn m) xs = do
 -- Parse while a given guard is true, but it *must* be terminated by a symbol
 -- for which the guard is false (rather than from running out of symbols)
 -- TODO: erasure for prefix, allPrefix should be flipped
+-- TODO: either ¬term or EOF
 record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
   constructor mkParseWhile
   field

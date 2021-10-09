@@ -372,19 +372,44 @@ module Generic where
   UtcTime : (@0 _ : List Dig) → Set
   UtcTime xs = TLV Tag.Utctime UtcTimeFields xs
 
-  record GenTimeFields (bs : List Dig) : Set where
+  ValidSecFraction : List Dig → Set
+  ValidSecFraction [] = ⊤
+  ValidSecFraction (x ∷ []) = toℕ x ≢ toℕ '0'
+  ValidSecFraction (x ∷ x₁ ∷ xs) = ValidSecFraction (x₁ ∷ xs)
+
+  validSecFraction? : Decidable ValidSecFraction
+  validSecFraction? [] = yes tt
+  validSecFraction? (x ∷ []) = toℕ x ≠ toℕ '0'
+  validSecFraction? (x ∷ x₁ ∷ xs) = validSecFraction? (x₁ ∷ xs)
+
+  secFractionDot : List Dig → List Dig
+  secFractionDot xs = if null xs then [] else [ # toℕ '.' ]
+
+  record SecFraction (@0 bs : List Dig) : Set where
+    constructor mkSecFraction
+    field
+      sfrac : List Dig
+      @0 sfracRange : All (InRange '0' '9') sfrac
+      @0 sfracValid : ValidSecFraction sfrac
+
+      @0 {z} : Dig
+      @0 term : z ≡ # toℕ 'Z'
+
+      @0 bs≡ : bs ≡ (secFractionDot sfrac) ++ sfrac ++ [ z ]
+
+  record GenTimeFields (@0 bs : List Dig) : Set where
     constructor mkGenTimeFields
     field
-      @0 {y1 y2 y3 y4 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
-      @0 year : (1 ≤ ((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48))) ×
-        (((toℕ y1 - 48) * 1000 + (toℕ y2 - 48) * 100 + (toℕ y3 - 48) * 10 + (toℕ y4 - 48)) ≤ 9999)
-      @0 mon : (1 ≤ ((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48))) × (((toℕ mn1 - 48) * 10 + (toℕ mn2 - 48)) ≤ 12)
-      @0 day : (1 ≤ ((toℕ d1 - 48) * 10 + (toℕ d2 - 48))) × (((toℕ d1 - 48) * 10 + (toℕ d2 - 48)) ≤ 31)
-      @0 hour : (0 ≤ ((toℕ h1 - 48) * 10 + (toℕ h2 - 48))) × (((toℕ h1 - 48) * 10 + (toℕ h2 - 48)) ≤ 23)
-      @0 min : (0 ≤ ((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48))) × (((toℕ mi1 - 48) * 10 + (toℕ mi2 - 48)) ≤ 59)
-      @0 sec : (0 ≤ ((toℕ s1 - 48) * 10 + (toℕ s2 - 48))) × (((toℕ s1 - 48) * 10 + (toℕ s2 - 48)) ≤ 59)
-      @0 z≡ : toℕ z ≡ toℕ 'Z'
-      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ z ∷ []
+      @0 {y1 y2 y3 y4} : Dig
+      @0 {mdhms sf} : List Dig
+
+      year : Singleton (asciiNum (y1 ∷ y2 ∷ y3 ∷ [ y4 ]))
+      @0 yearRange : All (InRange '0' '9') (y1 ∷ y2 ∷ y3 ∷ [ y4 ])
+
+      mmddhhmmss : MonthDayHourMinSecFields mdhms
+      sfrac : SecFraction sf
+
+      @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ++ sf
 
   GenTime : (@0 _ : List Dig) → Set
   GenTime = TLV Tag.Gentime GenTimeFields
