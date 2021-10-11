@@ -414,6 +414,13 @@ module Generic where
   GenTime : (@0 _ : List Dig) → Set
   GenTime = TLV Tag.Gentime GenTimeFields
 
+  -- TODO: semantic checks
+  -- CAs conforming to this profile MUST always encode certificate validity
+  -- dates through the year 2049 as UTCTime; certificate validity dates in 2050
+  -- or later MUST be encoded as GeneralizedTime. Conforming applications MUST
+  -- be able to process validity dates that are encoded in either UTCTime or
+  -- GeneralizedTime.
+
   data Time : List Dig → Set where
     utctm : ∀ {@0 bs} → UtcTime bs → Time bs
     gentm  : ∀ {@0 bs} → GenTime  bs → Time bs

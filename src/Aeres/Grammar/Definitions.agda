@@ -18,6 +18,10 @@ NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys�
 NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
+NoConfusion : (A B : List Σ → Set) → Set
+NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+                  → (A xs₁ → ¬ B xs₂)
+
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs

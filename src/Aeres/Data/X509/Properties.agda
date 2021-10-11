@@ -126,6 +126,10 @@ module NonNesting where
                           getLength len₁ ≡⟨ len≡₁ ⟩
                           length v₁      ∎)
 
+-- module NoConfusion where
+--   postulate
+--     UtcTime×GenTime : NoConfusion Generic.UtcTime Generic.GenTime
+
 -- module NoNest where
 --   postulate
 --     OIDSub   : NoNest Generic.OIDSub

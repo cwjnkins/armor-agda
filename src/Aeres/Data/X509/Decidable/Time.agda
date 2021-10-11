@@ -336,3 +336,18 @@ parseGenTime =
   parseTLV _ "GenTime" _
     (parseExactLength Dig NonNesting.GenTimeFields
       (tell $ "GenTime: length mismatch") parseGenTimeFields)
+
+parseTime : Parser Dig (Logging ∘ Dec) Generic.Time
+runParser parseTime xs = do
+  utc? ← runParser parseUtcTime xs
+  case utc? of λ where
+    (yes utc) → return (yes (mapSuccess _ (λ {bs} → Generic.utctm{bs}) utc))
+    (no ¬utc) → do
+      yes gen ← runParser parseGenTime xs
+        where no ¬gen → do
+          return ∘ no $ λ where
+            (success prefix read read≡ (Generic.utctm x) suffix ps≡) →
+              contradiction (success prefix _ read≡ x _ ps≡) ¬utc
+            (success prefix read read≡ (Generic.gentm x) suffix ps≡) →
+              contradiction (success prefix _ read≡ x _ ps≡) ¬gen
+      return (yes (mapSuccess _ (λ {bs} → Generic.gentm{bs}) gen))
