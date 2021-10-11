@@ -319,6 +319,10 @@ module Lemmas where
     where
     open ≤-Reasoning
 
+  ++-cancel≡ˡ : ∀ {ℓ} {@0 A : Set ℓ} (@0 ws xs : List A) {@0 ys zs : List A} → ws ≡ xs
+                → ws ++ ys ≡ xs ++ zs → ys ≡ zs
+  ++-cancel≡ˡ .xs xs refl eq = ‼ ++-cancelˡ xs eq
+
   ≡⇒≤ : ∀ {m n} → m ≡ n → m ≤ n
   ≡⇒≤ refl = ≤-refl
 

@@ -282,7 +282,27 @@ module parseGenTimeFields where
       where no ¬parse → do
         tell $ here'
         return ∘ no $ λ where
-          x → {!!}
+          (success prefix read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{mdhms}{sf} year yearRange mmddhhmmss sfrac refl) suffix ps≡) → ‼
+            let @0 ps≡' : v₀ ++ pre₁ ++ suf₁ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ (mdhms ++ sf) ++ suffix
+                ps≡' = begin v₀ ++ pre₁ ++ suf₁   ≡⟨ solve (++-monoid Dig) ⟩
+                             v₀ ++ (pre₁ ++ suf₁) ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
+                             v₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
+                             xs ≡⟨ sym ps≡ ⟩
+                             _ ∎
+                @0 nn₁ : v₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ] × pre₁ ++ suf₁ ≡ (mdhms ++ sf) ++ suffix
+                nn₁ = Lemmas.length-++-≡ _ _ _ _ ps≡' refl
+
+                @0 nn₂₁ : pre₁ ≡ mdhms
+                nn₂₁ = NonNesting.MonthDayHourMinSecFields
+                        (trans₀ (proj₂ nn₁) (_ ≡ mdhms ++ sf ++ suffix ∋ solve (++-monoid Dig)))
+                        v₁ mmddhhmmss
+
+                @0 nn₂₂ : suf₁ ≡ sf ++ suffix
+                nn₂₂ = proj₂ $ Lemmas.length-++-≡ pre₁ _ mdhms _ (trans₀ (proj₂ nn₁) (++-assoc mdhms sf suffix)) (cong length nn₂₁)
+            in
+            contradiction
+              (success sf _ refl sfrac suffix (sym nn₂₂))
+              ¬parse
     case All.all? (inRange? '0' '9') v₀ of λ where
       (no ¬all) → do
         tell $ here' String.++ ": bad year"
@@ -307,3 +327,12 @@ module parseGenTimeFields where
                         xs ∎)))
     where
     open ≡-Reasoning
+
+
+open parseGenTimeFields public using (parseGenTimeFields)
+
+parseGenTime : Parser Dig (Logging ∘ Dec) Generic.GenTime
+parseGenTime =
+  parseTLV _ "GenTime" _
+    (parseExactLength Dig NonNesting.GenTimeFields
+      (tell $ "GenTime: length mismatch") parseGenTimeFields)

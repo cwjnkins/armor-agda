@@ -65,7 +65,7 @@ module NonNesting where
     BoolValue     : NonNesting Generic.BoolValue
     MonthDayHourMinSecFields : NonNesting Generic.MonthDayHourMinSecFields
     UtcTimeFields : NonNesting Generic.UtcTimeFields
-    @0 UtcTime       : NonNesting Generic.UtcTime
+    GenTimeFields : NonNesting Generic.GenTimeFields
 
     DirectoryString : NonNesting X509.DirectoryString
 
