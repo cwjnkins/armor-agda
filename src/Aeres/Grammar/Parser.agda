@@ -22,6 +22,14 @@ record Success (A : List Σ → Set) (xs : List Σ) : Set where
 mapSuccess : ∀ {A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
 mapSuccess f (success prefix read read≡ value suffix ps≡ ) = success prefix read read≡ (f value) suffix ps≡
 
+readDecSuccess : ∀ {A xs} → Dec (Success A xs) → ℕ
+readDecSuccess (yes s) = Success.read s
+readDecSuccess (no  _) = 0
+
+suffixDecSuccess : ∀ {A xs} → Dec (Success A xs) → List Σ
+suffixDecSuccess (yes s) = Success.suffix s
+suffixDecSuccess{xs = xs} (no _) = xs
+
 record Parserᵢ (M : List Σ → Set → Set) (A : List Σ → Set) : Set where
   constructor mkParser
   field

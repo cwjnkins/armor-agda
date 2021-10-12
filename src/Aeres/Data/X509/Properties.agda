@@ -5,6 +5,7 @@ open import Aeres.Prelude
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.Primitives
+import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
 
@@ -38,10 +39,11 @@ module NonNesting where
     ValidityFields  : NonNesting X509.ValidityFields
     GeneralName     : NonNesting X509.GeneralName
 
+module OIDSub          = Aeres.Data.X509.Properties.OIDSub
+module PublicKeyFields = Aeres.Data.X509.Properties.PublicKeyFields
 
 -- Finished lemmas
 module Length     = Aeres.Data.X509.Properties.Length
-module OIDSub     = Aeres.Data.X509.Properties.OIDSub
 module Primitives = Aeres.Data.X509.Properties.Primitives
 module TLV        = Aeres.Data.X509.Properties.TLV
-module Time        = Aeres.Data.X509.Properties.Time
+module Time       = Aeres.Data.X509.Properties.Time

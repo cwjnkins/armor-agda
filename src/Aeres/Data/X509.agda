@@ -505,6 +505,7 @@ module X509 where
     bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
     utf8String : ∀ {@0 bs} → UTF8String bs → DisplayText bs
 
+  -- TODO: these fields can come in any order!
   record RDNATVFields (@0 bs : List Dig) : Set where
     constructor mkRDNATVFields
     field
@@ -591,11 +592,11 @@ module X509 where
   Validity : (@0 _ : List Dig) → Set
   Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
 
-  record PublicKeyFields (bs : List Dig) : Set where
+  record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields
     field
       @0 {alg pk} : List Dig
-      algrithm : SignAlg alg
+      signalg : SignAlg alg
       pubkey : Generic.Bitstring pk
       @0 bs≡  : bs ≡ alg ++ pk
 
