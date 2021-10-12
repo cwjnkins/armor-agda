@@ -112,7 +112,7 @@ module Tag where
 -----------------------------------------Length------------------------------------------
 module Length where
 
-  record Short (bs : List Dig) : Set where
+  record Short (@0 bs : List Dig) : Set where
     constructor mkShort
     field
       l : Dig
@@ -134,7 +134,7 @@ module Length where
   ... | no  lₜ≢[] = pf₂ lₜ≢[]
   ... | yes lₜ≡[] = pf₁ lₜ≡[] mr
 
-  record Long (bs : List Dig) : Set where
+  record Long (@0 bs : List Dig) : Set where
     constructor mkLong
     field
       l : Dig
@@ -147,7 +147,7 @@ module Length where
       @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
   open Long
 
-  data Length : List Dig → Set where
+  data Length : (@0 _ : List Dig) → Set where
     short : ∀ {@0 bs} → Short bs → Length bs
     long  : ∀ {@0 bs} → Long  bs → Length bs
 
@@ -231,7 +231,7 @@ module Generic where
   Int xs = TLV Tag.Integer IntegerValue xs
 
   --Sequences (of one type)-------------------------
-  data SeqElems (A : List Dig → Set) : List Dig → Set
+  data SeqElems (A : List Dig → Set) : (@0 _ : List Dig) → Set
 
   record SeqElemsₐ (A : List Dig → Set) (@0 bs : List Dig) : Set where
     inductive
@@ -277,7 +277,7 @@ module Generic where
   oidLeastDigs? [] = yes tt
   oidLeastDigs? (x ∷ bs) = (# 128) Fin.<? x
 
-  record OIDSub (bs : List Dig) : Set where
+  record OIDSub (@0 bs : List Dig) : Set where
     constructor mkOIDSub
     field
       lₚ : List Dig
@@ -290,25 +290,10 @@ module Generic where
   mkOIDSubₛ : (lₚ : List Dig) (lₑ : Dig) {@0 _ : True (All.all ((_≥? 128) ∘ toℕ) lₚ)} {@0 _ : True (oidLeastDigs? lₚ)} {@0 _ : True (lₑ Fin.<? # 128)} → OIDSub (lₚ ∷ʳ lₑ)
   mkOIDSubₛ lₚ lₑ {lₚ≥128}{leastDigs}{lₑ<128} = mkOIDSub lₚ (toWitness lₚ≥128) lₑ (toWitness lₑ<128) (toWitness leastDigs) refl
 
+
   -- --private
   -- --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
   -- --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
-
-  -- data OIDField : List Dig → Set
-
-  -- record OIDFieldₐ (@0 bs : List Dig) : Set where
-  --   inductive
-  --   constructor mkOIDFieldₐ
-  --   field
-  --     @0 {bs₁} : List Dig
-  --     @0 {bs₂} : List Dig
-  --     sub  : OIDSub bs₁
-  --     rest : OIDField bs₂
-  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  -- data OIDField where
-  --   [_]OID : ∀ {@0 bs} → OIDSub bs → OIDField bs
-  --   cons : ∀ {@0 bs} → OIDFieldₐ bs → OIDField bs
 
   OID : (@0 _ : List Dig) → Set
   OID = TLV Tag.ObjectIdentifier (SeqElems OIDSub)
@@ -473,13 +458,6 @@ module X509 where
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
 
-  -- record WrapperSignParam (bs : List Dig) : Set where
-  --   constructor mkWrapperSignParam
-  --   field
-  --     @0 {o p} : List Dig
-  --     param : SignParam o p
-  --     @0 bs≡  : bs ≡ o ++ p
-
   record SignAlgFields (bs : List Dig) : Set where
     constructor mkSignAlgFields
     field
@@ -574,35 +552,21 @@ module X509 where
   IpAddress xs = Generic.TLV Tag.EightySeven Generic.OctetstringValue xs
 
   RegID : (@0 _ : List Dig) → Set
-  RegID xs = Generic.TLV Tag.EightyEight (Generic.Seq Generic.OIDSub) xs
+  RegID xs = Generic.TLV Tag.EightyEight (Generic.SeqElems Generic.OIDSub) xs
 
-  data Generalname : List Dig → Set where
-    oname : ∀ {@0 bs} → OtherName bs → Generalname bs
-    rfcname : ∀ {@0 bs} → RfcName bs → Generalname bs
-    dnsname : ∀ {@0 bs} → DnsName bs → Generalname bs
-    x400add : ∀ {@0 bs} → X400Address bs → Generalname bs
-    dirname : ∀ {@0 bs} → DirName bs → Generalname bs
-    ediname : ∀ {@0 bs} → EdipartyName bs → Generalname bs
-    uri : ∀ {@0 bs} → URI bs → Generalname bs
-    ipadd : ∀ {@0 bs} → IpAddress bs → Generalname bs
-    rid : ∀ {@0 bs} → RegID bs → Generalname bs
+  data GeneralName : List Dig → Set where
+    oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
+    rfcname : ∀ {@0 bs} → RfcName bs → GeneralName bs
+    dnsname : ∀ {@0 bs} → DnsName bs → GeneralName bs
+    x400add : ∀ {@0 bs} → X400Address bs → GeneralName bs
+    dirname : ∀ {@0 bs} → DirName bs → GeneralName bs
+    ediname : ∀ {@0 bs} → EdipartyName bs → GeneralName bs
+    uri : ∀ {@0 bs} → URI bs → GeneralName bs
+    ipadd : ∀ {@0 bs} → IpAddress bs → GeneralName bs
+    rid : ∀ {@0 bs} → RegID bs → GeneralName bs
 
-  Generalnames = Generic.SeqElems Generalname
-
-  -- data Generalnames : List Dig → Set
-
-  -- record Generalnamesₐ (bs : List Dig) : Set where
-  --   inductive
-  --   constructor mkGeneralnamesₐ
-  --   field
-  --     @0 {bs₁ bs₂} : List Dig
-  --     extn : Generalname bs₁
-  --     rest   : Generalnames bs₂
-  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  -- data Generalnames where
-  --   _∷[]  : ∀ {x} → Generalname x → Generalnames x
-  --   cons : ∀ {x} → Generalnamesₐ x → Generalnames x
+  GeneralNamesElems = Generic.SeqElems GeneralName
+  GeneralNames = Generic.TLV Tag.Sequence GeneralNamesElems
 
   --------------------------TBSCert-----------------------------------------------------------------
 
@@ -616,7 +580,7 @@ module X509 where
   SubUID xs = Generic.TLV Tag.EightyTwo Generic.BitstringValue xs
 
 --------------------------------------------------------- Validity --------------------------------
-  record ValidityFields (bs : List Dig) : Set where
+  record ValidityFields (@0 bs : List Dig) : Set where
     constructor mkValidityFields
     field
       @0 {nb na} : List Dig
@@ -640,12 +604,12 @@ module X509 where
 
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
- 
+
   AKIKeyId : (@0 _ : List Dig) → Set
   AKIKeyId xs = Generic.TLV Tag.Eighty Generic.OctetstringValue xs
 
   AKIAuthCertIssuer : (@0 _ : List Dig) → Set
-  AKIAuthCertIssuer xs = Generic.TLV Tag.A1 Generalnames xs
+  AKIAuthCertIssuer xs = Generic.TLV Tag.A1 GeneralNamesElems xs
 
   AKIAuthCertSN : (@0 _ : List Dig) → Set
   AKIAuthCertSN xs = Generic.TLV Tag.EightyTwo  Generic.IntegerValue xs
@@ -712,13 +676,13 @@ module X509 where
 
 -------------------------- ian/san alternative names extensions ------------------
   IANFieldsSeq : (@0 _ : List Dig) → Set
-  IANFieldsSeq xs = Generic.TLV Tag.Sequence Generalnames xs
+  IANFieldsSeq = GeneralNames -- Generic.TLV Tag.Sequence GeneralNamesElems
 
   IANFields : (@0 _ : List Dig) → Set
   IANFields xs = Generic.TLV Tag.Octetstring IANFieldsSeq xs
 
   SANFieldsSeq : (@0 _ : List Dig) → Set
-  SANFieldsSeq xs = Generic.TLV Tag.Sequence Generalnames xs
+  SANFieldsSeq = GeneralNames -- Generic.TLV Tag.Sequence GeneralNamesElems
 
   SANFields : (@0 _ : List Dig) → Set
   SANFields xs = Generic.TLV Tag.Octetstring SANFieldsSeq xs
@@ -825,13 +789,13 @@ module X509 where
 ----------------------------- crl dist point extension --------------------------------
 
   CrlIssuer : (@0 _ : List Dig) → Set
-  CrlIssuer xs = Generic.TLV Tag.A2 Generalnames xs
+  CrlIssuer xs = Generic.TLV Tag.A2 GeneralNamesElems xs
 
   ReasonFlags : (@0 _ : List Dig) → Set
   ReasonFlags xs = Generic.TLV Tag.EightyOne Generic.BitstringValue xs
 
   FullName : (@0 _ : List Dig) → Set
-  FullName xs = Generic.TLV Tag.A0 Generalnames xs
+  FullName xs = Generic.TLV Tag.A0 GeneralNamesElems xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
   NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNSeq xs
@@ -875,7 +839,7 @@ module X509 where
 
   CRLDistFields : (@0 _ : List Dig) → Set
   CRLDistFields xs = Generic.TLV Tag.Octetstring  CRLDistFieldsSeq xs
-      
+
 ----------------------------------------- Authority Info access -----------------
   module ACMOID where
     CAISSUERS : List Dig
@@ -893,7 +857,7 @@ module X509 where
     field
       @0 {acm acl} : List Dig
       acmethod : AccessMethod acm
-      aclocation : Generalname acl
+      aclocation : GeneralName acl
       @0 bs≡  : bs ≡ acm ++ acl
 
   AccessDesc : (@0 _ : List Dig) → Set

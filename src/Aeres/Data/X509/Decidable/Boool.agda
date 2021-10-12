@@ -6,7 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -28,7 +28,7 @@ module parseBool where
     tell $ here' String.++ ": underflow"
     return ∘ no $ λ where
       (success prefix read read≡ value suffix ps≡) →
-        contradiction (++-conicalˡ _ suffix ps≡) (NonEmpty.BoolValue value)
+        contradiction (++-conicalˡ _ suffix ps≡) (Props.Primitives.BoolValue.nonempty value)
   runParser parseBoolValue (x ∷ xs)
     with x ≟ # 0
   ... | yes refl =
@@ -47,6 +47,6 @@ module parseBool where
 
   parseBool : Parser Dig (Logging ∘ Dec) Generic.Boool
   parseBool = parseTLV Tag.Boolean "bool" Generic.BoolValue
-                (parseExactLength _ NonNesting.BoolValue (tell $ here' String.++ "bad length for bool") parseBoolValue)
+                (parseExactLength _ Props.Primitives.BoolValue.nonnesting (tell $ here' String.++ "bad length for bool") parseBoolValue)
 
 open parseBool public using (parseBoolValue ; parseBool)

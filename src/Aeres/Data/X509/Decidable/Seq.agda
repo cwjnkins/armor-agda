@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -130,4 +130,4 @@ module parseSeq
 open parseSeq public using (parseSeqElems ; parseSeq)
 
 parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
-parseIntegerSeq = parseSeq "int" Generic.Int NonEmpty.TLV NonNesting.TLV parseInt
+parseIntegerSeq = parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt

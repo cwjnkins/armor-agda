@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -28,6 +28,6 @@ module parseVersion where
   parseVersion = parseTLV Tag.A0 "version" Generic.Int p
     where
     p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.Int n)
-    p = parseExactLength Dig NonNesting.TLV (tell $ here' String.++ ": length mismatch") parseInt
+    p = parseExactLength Dig Props.TLV.nonnesting (tell $ here' String.++ ": length mismatch") parseInt
 
 open parseVersion public using (parseVersion)

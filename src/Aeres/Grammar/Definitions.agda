@@ -5,6 +5,22 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Definitions (Σ : Set) where
 
+infix 4 _≋_
+record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
+  constructor mk≋
+  field
+    @0 bs≡ : bs₁ ≡ bs₂
+    @0 a≡  : subst A bs≡ a₁ ≡ a₂
+
+pattern ≋-refl = mk≋ refl refl
+
+instance
+  Irrel≋ : ∀ {@0 A bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂} → Irrel (_≋_{A} a₁ a₂)
+  Irrel.irrel Irrel≋ ≋-refl = ≋-refl
+
+Decidable-≋ : ((@0 _ : List Σ) → Set) → Set
+Decidable-≋ A = ∀ {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) → Dec (_≋_{A} a₁ a₂)
+
 Unambiguous : (A : List Σ → Set) → Set
 Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
 
@@ -18,9 +34,9 @@ NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys�
 NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
-NoConfusion : (A B : List Σ → Set) → Set
-NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
-                  → (A xs₁ → ¬ B xs₂)
+-- NoConfusion : (A B : List Σ → Set) → Set
+-- NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+--                   → (A xs₁ → ¬ B xs₂)
 
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
@@ -37,9 +53,17 @@ record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set)
     fstₚ : A bs
     sndₚ : B bs fstₚ
     @0 bs≡ : bs ≡ xs
+open Σₚ public using (fstₚ ; sndₚ)
 
 _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
+
+ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
+ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
+
+exactLength-nonnesting : ∀ {@0 A} {n} → NonNesting (ExactLength A n)
+exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
+  proj₁ $ Lemmas.length-++-≡ _ _ _ _ xs₁++ys₁≡xs₂++ys₂ (trans sndₚ₁ (sym sndₚ₂))
 
 record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
   constructor mk&ₚ
@@ -48,9 +72,7 @@ record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
     fstₚ : A bs₁
     sndₚ : B bs₂
     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
-ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
+open &ₚ public using (fstₚ ; sndₚ)
 
 @0 NonNesting&ₚ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NonNesting (&ₚ A B)
 NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs₂₁} a₁ b₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} a₂ b₂ bs≡₁) =

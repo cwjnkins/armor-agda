@@ -5,7 +5,7 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -63,14 +63,14 @@ module parseTLV
                   l ++ v ++ suffix   ∎
 
                 @0 pre₀≡ : pre₀ ≡ l
-                pre₀≡ = NonNesting.LengthNN xs≡ len₀ len
+                pre₀≡ = Props.Length.nonnesting xs≡ len₀ len
 
                 @0 len≡' : getLength len ≡ getLength len₀
                 len≡' = begin
                   getLength len
                     ≡⟨ ≡-elim (λ eq → _ ≡ getLength (subst Length eq len)) refl (sym pre₀≡) ⟩
                   getLength (subst Length (sym pre₀≡) len)
-                    ≡⟨ cong getLength (Unambiguous.LengthUA (subst Length (sym pre₀≡) len) len₀) ⟩
+                    ≡⟨ cong getLength (Props.Length.unambiguous (subst Length (sym pre₀≡) len) len₀) ⟩
                   getLength len₀
                     ∎
             in

@@ -9,7 +9,7 @@ open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -28,9 +28,9 @@ module parseRDN where
   runParser (parseRDNATVFields n) xs = do
     yes (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} oid ds refl) valLen refl) suffix ps≡)
       ← runParser (parseExactLength Dig
-                    (NonNesting&ₚ Dig NonNesting.TLV NonNesting.DirectoryString)
+                    (NonNesting&ₚ Dig Props.TLV.nonnesting Props.NonNesting.DirectoryString)
                     (tell $ here₁ String.++ ": underflow")
-                    (parse× Dig NonNesting.TLV parseOID parseDirectoryString) n) xs
+                    (parse& Dig Props.TLV.nonnesting parseOID parseDirectoryString) n) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix@.(bs₁ ++ bs₂) read read≡ (mk×ₚ (X509.mkRDNATVFields{bs₁}{bs₂} oid ds refl) valLen refl) suffix ps≡) →
@@ -46,9 +46,12 @@ module parseRDN where
   parseRDN : Parser Dig (Logging ∘ Dec) X509.RDN
   parseRDN =
     parseTLV _ "RDN" _
-      (parseSeqElems "RDNATV" _ NonEmpty.TLV NonNesting.TLV
+      (parseSeqElems "RDNATV" _ Props.TLV.nonempty Props.TLV.nonnesting
         parseRDNATV)
 
   parseRDNSeq : Parser Dig (Logging ∘ Dec) X509.RDNSeq
   parseRDNSeq =
-    parseSeq "RDNSeq" _ NonEmpty.TLV NonNesting.TLV parseRDN
+    parseSeq "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN
+
+open parseRDN public
+  using (parseRDN ; parseRDNSeq)

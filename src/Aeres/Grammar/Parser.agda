@@ -38,11 +38,11 @@ parseWF : {M : Set → Set} {A : List Σ → Set} → ParserWF M A → Parser M 
 runParser (parseWF p) xs = runParser p xs (<-wellFounded (length xs))
   where open import Data.Nat.Induction
 
-parse× : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
+parse& : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
          → (@0 _ : NonNesting A)
          → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
          → Parser (M ∘ Dec) (&ₚ A B)
-runParser (parse× nn p₁ p₂) xs = do
+runParser (parse& nn p₁ p₂) xs = do
   yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀) ← runParser p₁ xs
     where no ¬parse → do
       return ∘ no $ λ where

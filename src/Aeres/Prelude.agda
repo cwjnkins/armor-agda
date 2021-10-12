@@ -85,8 +85,18 @@ module Vec = Data.Vec
 Vec = Vec.Vec
 
 open import Function     public
+  hiding (_∋_)
+
 infix  0 case_ret_of_
-case_ret_of_ = case_return_of_
+infixl 0 _∋_
+
+case_ret_of_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}
+               → (x : A) (@0 B : A → Set ℓ₂)
+               → ((x : A) → B x) → B x
+case a ret B of f = f a
+
+_∋_ : ∀ {ℓ} (@0 A : Set ℓ) → A → A
+A ∋ a = a
 
 import Induction.WellFounded
 module WellFounded where
@@ -98,20 +108,28 @@ module Level where
 
 open import Relation.Binary public
   using ()
-  renaming (Irrelevant to Irrelevant₂)
+  renaming (Irrelevant to Unique₂)
 
 open import Relation.Binary.PropositionalEquality public
   hiding (decSetoid ; cong)
   renaming ([_] to [_]R)
 module Reveal = Reveal_·_is_
 
+≡-unique : ∀ {ℓ} {A : Set ℓ} → Unique₂ (_≡_{A = A})
+≡-unique refl refl = refl
+
 ≡-irrel : ∀ {ℓ} {A : Set ℓ} {x y : A} → (@0 _ : x ≡ y) → x ≡ y
 ≡-irrel refl = refl
 
 ≡-elim : ∀ {ℓ ℓ₁}{A : Set ℓ}{x : A} →
-         (P : ∀ {y} → x ≡ y → Set ℓ₁) →
+         (@0 P : ∀ {y} → x ≡ y → Set ℓ₁) →
          P refl → ∀ {y} (eq : x ≡ y) → P eq
 ≡-elim P pf refl = pf
+
+≡-elimₖ : ∀ {ℓ ℓ₁}{A : Set ℓ}{x : A} →
+          (@0 P : x ≡ x → Set ℓ₁) →
+          P refl → (eq : x ≡ x) → P eq
+≡-elimₖ P pf refl = pf
 
 cong : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {@0 x y : A} → x ≡ y → f x ≡ f y
 cong f refl = refl
@@ -126,6 +144,7 @@ open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
 open import Relation.Nullary public
+  renaming (Irrelevant to Unique)
 
 open import Relation.Nullary.Negation public
   hiding (contradiction)

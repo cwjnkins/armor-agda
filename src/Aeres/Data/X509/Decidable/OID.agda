@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.Nat.Properties
@@ -54,7 +54,7 @@ module parseOIDField where
   here' = "parseOIDField"
 
   parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SeqElems Generic.OIDSub) n)
-  parseOIDElems = parseSeqElems "oid elems" Generic.OIDSub NonEmpty.OIDSub NonNesting.OIDSub parseOIDSub
+  parseOIDElems = parseSeqElems "oid elems" Generic.OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub
 
   parseOID : Parser Dig (Logging ∘ Dec) Generic.OID
   parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDElems
