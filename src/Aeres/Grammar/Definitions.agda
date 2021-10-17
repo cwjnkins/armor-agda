@@ -21,6 +21,7 @@ instance
 Decidable-≋ : ((@0 _ : List Σ) → Set) → Set
 Decidable-≋ A = ∀ {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) → Dec (_≋_{A} a₁ a₂)
 
+-- TODO: rename to "Unique"
 Unambiguous : (A : List Σ → Set) → Set
 Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
 
@@ -28,15 +29,16 @@ unambiguousHet : ∀ {A} → Unambiguous A → ∀ {xs ys} → (eq : xs ≡ ys)
                  → (a₁ : A xs) (a₂ : A ys) → subst A eq a₁ ≡ a₂
 unambiguousHet ua refl a₁ a₂ = ua a₁ a₂
 
+-- TODO: rename to "Unambiguous" 
 NonNesting : (A : List Σ → Set) → Set
 NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
 
 NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
--- NoConfusion : (A B : List Σ → Set) → Set
--- NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
---                   → (A xs₁ → ¬ B xs₂)
+NoConfusion : (A B : List Σ → Set) → Set
+NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+                  → (A xs₁ → ¬ B xs₂)
 
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []

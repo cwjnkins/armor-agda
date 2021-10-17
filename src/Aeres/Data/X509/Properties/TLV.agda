@@ -43,3 +43,7 @@ nonnesting{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (G
                         getLength len  ≡⟨ LengthProps.unambiguous-getLength l≡ len len₁ ⟩
                         getLength len₁ ≡⟨ len≡₁ ⟩
                         length v₁      ∎)
+
+@0 noconfusion : ∀ {@0 A₁ A₂} {t₁ t₂} → t₁ ≢ t₂ → NoConfusion (Generic.TLV t₁ A₁) (Generic.TLV t₂ A₂)
+noconfusion t₁≢t₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Generic.mkTLV len val len≡ bs≡) (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁) =
+ contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡₁)))) t₁≢t₂

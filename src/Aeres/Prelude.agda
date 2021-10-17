@@ -174,6 +174,8 @@ record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
 singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
 singleSelf{a = a} = singleton a refl
 
+pattern self {a} = singleton a refl
+
 -- Typeclasses
 
 record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
@@ -327,6 +329,10 @@ module Lemmas where
   length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
     with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
   ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs
+
+  length-++-≤₁ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → length xs ≤ length (xs ++ ys)
+  length-++-≤₁ [] ys = z≤n
+  length-++-≤₁ (x ∷ xs) ys = s≤s (length-++-≤₁ xs ys)
 
   length-++-< : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → xs ≢ [] → length ys < length (xs ++ ys)
   length-++-< [] ys xs≢[] = contradiction refl xs≢[]
