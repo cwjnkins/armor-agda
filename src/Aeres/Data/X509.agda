@@ -357,44 +357,20 @@ module Generic where
   UtcTime : (@0 _ : List Dig) → Set
   UtcTime xs = TLV Tag.Utctime UtcTimeFields xs
 
-  ValidSecFraction : List Dig → Set
-  ValidSecFraction [] = ⊤
-  ValidSecFraction (x ∷ []) = toℕ x ≢ toℕ '0'
-  ValidSecFraction (x ∷ x₁ ∷ xs) = ValidSecFraction (x₁ ∷ xs)
-
-  validSecFraction? : Decidable ValidSecFraction
-  validSecFraction? [] = yes tt
-  validSecFraction? (x ∷ []) = toℕ x ≠ toℕ '0'
-  validSecFraction? (x ∷ x₁ ∷ xs) = validSecFraction? (x₁ ∷ xs)
-
-  secFractionDot : List Dig → List Dig
-  secFractionDot xs = if null xs then [] else [ # toℕ '.' ]
-
-  record SecFraction (@0 bs : List Dig) : Set where
-    constructor mkSecFraction
-    field
-      sfrac : List Dig
-      @0 sfracRange : All (InRange '0' '9') sfrac
-      @0 sfracValid : ValidSecFraction sfrac
-
-      @0 {z} : Dig
-      @0 term : z ≡ # toℕ 'Z'
-
-      @0 bs≡ : bs ≡ (secFractionDot sfrac) ++ sfrac ++ [ z ]
-
   record GenTimeFields (@0 bs : List Dig) : Set where
     constructor mkGenTimeFields
     field
-      @0 {y1 y2 y3 y4} : Dig
-      @0 {mdhms sf} : List Dig
+      @0 {y1 y2 y3 y4 z} : Dig
+      @0 {mdhms} : List Dig
 
       year : Singleton (asciiNum (y1 ∷ y2 ∷ y3 ∷ [ y4 ]))
       @0 yearRange : All (InRange '0' '9') (y1 ∷ y2 ∷ y3 ∷ [ y4 ])
 
       mmddhhmmss : MonthDayHourMinSecFields mdhms
-      sfrac : SecFraction sf
 
-      @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ++ sf
+      @0 z≡ : z ≡ # 'Z'
+
+      @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ∷ʳ z
 
   GenTime : (@0 _ : List Dig) → Set
   GenTime = TLV Tag.Gentime GenTimeFields
