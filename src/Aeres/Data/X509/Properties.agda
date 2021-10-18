@@ -31,9 +31,9 @@ module NonNesting where
 
   postulate
     MonthDayHourMinSecFields : NonNesting Generic.MonthDayHourMinSecFields
-    UtcTimeFields : NonNesting Generic.UtcTimeFields
-    GenTimeFields : NonNesting Generic.GenTimeFields
-    Time          : NonNesting Generic.Time
+--    UtcTimeFields : NonNesting Generic.UtcTimeFields
+--    GenTimeFields : NonNesting Generic.GenTimeFields
+--    Time          : NonNesting Generic.Time
 
     DirectoryString : NonNesting X509.DirectoryString
     ValidityFields  : NonNesting X509.ValidityFields

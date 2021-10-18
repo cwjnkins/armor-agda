@@ -15,3 +15,14 @@ open import Aeres.Grammar.Definitions Dig
 nonempty : NonEmpty Generic.Time
 nonempty (Generic.utctm ()) refl
 nonempty (Generic.gentm ()) refl
+
+module UTC where
+  postulate
+     nonnesting : NonNesting Generic.UtcTimeFields
+
+module GenTime where
+  postulate
+    nonnesting : NonNesting Generic.GenTimeFields
+
+postulate
+  nonnesting : NonNesting Generic.Time
