@@ -131,3 +131,41 @@ open parseSeq public using (parseSeqElems ; parseSeq)
 
 parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
 parseIntegerSeq = parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt
+
+private                         
+  module Test where
+
+    elm₁ : List Dig
+    elm₁ = Tag.Integer ∷ # 1 ∷ [ # 4 ]
+
+    elm₂ : List Dig
+    elm₂ = Tag.Integer ∷ # 1 ∷ [ # 5 ]
+
+    elm₃ : List Dig
+    elm₃ = Tag.Integer ∷ # 1 ∷ [ # 6 ]
+
+    elm₄ : List Dig
+    elm₄ = Tag.Boolean ∷ # 1 ∷ [ # 255 ]
+    
+    Seq₁₂₃ : List Dig
+    Seq₁₂₃ = Tag.Sequence ∷ [ # 9 ] ++ elm₁ ++ elm₂ ++ elm₃
+
+    Seq₁₂₄ : List Dig
+    Seq₁₂₄ = Tag.Sequence ∷ [ # 9 ] ++ elm₁ ++ elm₂ ++ elm₄
+
+    SeqBad₁₂₃ : List Dig
+    SeqBad₁₂₃ = Tag.Sequence ∷ [ # 19 ] ++ elm₁ ++ elm₂ ++ elm₄
+
+    test₁ : Generic.Seq Generic.Int Seq₁₂₃
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser (parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt) Seq₁₂₃)} tt)
+
+    test₂ : Generic.IntegerSeq Seq₁₂₃
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseIntegerSeq Seq₁₂₃)} tt)
+
+    test₃ : ¬ Success _ Generic.IntegerSeq Seq₁₂₄
+    test₃ = toWitnessFalse {Q = Logging.val (runParser parseIntegerSeq Seq₁₂₄)} tt
+
+    test₄ : ¬ Success _ Generic.IntegerSeq SeqBad₁₂₃
+    test₄ = toWitnessFalse {Q = Logging.val (runParser parseIntegerSeq SeqBad₁₂₃)} tt
+
+

@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -27,7 +27,7 @@ module parseValidityFields where
   parseValidityFields : Parser Dig (Logging ∘ Dec) X509.ValidityFields
   runParser parseValidityFields xs = do
     yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)
-      ← runParser (parse& Dig NonNesting.Time parseTime parseTime) xs
+      ← runParser (parse& Dig Props.Time.nonnesting parseTime parseTime) xs
       where no ¬parse → do
         tell $ here'
         return ∘ no $ λ where

@@ -50,3 +50,25 @@ module parseBool where
                 (parseExactLength _ Props.Primitives.BoolValue.nonnesting (tell $ here' String.++ "bad length for bool") parseBoolValue)
 
 open parseBool public using (parseBoolValue ; parseBool)
+
+
+private
+  module Test where
+
+    tval : List Dig
+    tval = Tag.Boolean ∷ # 1 ∷ [ # 255 ]
+
+    fval : List Dig
+    fval = Tag.Boolean ∷ # 1 ∷ [ # 0 ]
+
+    badval : List Dig
+    badval = Tag.Boolean ∷ # 1 ∷ [ # 20 ]
+
+    test₁ : Generic.Boool tval
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBool tval)} tt)
+
+    test₂ : Generic.Boool fval
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBool fval)} tt)
+
+    test₃ : ¬ Success _ Generic.Boool badval
+    test₃ = toWitnessFalse {Q = Logging.val (runParser parseBool badval)} tt
