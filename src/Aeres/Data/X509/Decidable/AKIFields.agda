@@ -137,25 +137,24 @@ module parseAKIFields where
     check₃ (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) r₁<n' n“ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) r₂<n“ (self {n‴@._}) (yes (success pre₃ r₃ r₃≡ (mk×ₚ v₃ r₃≤n‴ refl) suf₃ ps≡₃)) n‴<r₃ =
       contradiction (≤-trans (Lemmas.≡⇒≤ r₃≡) r₃≤n‴) (<⇒≱ n‴<r₃)
 
-    @0 underflow : ∀ (x₁ : Res₁ X509.AKIKeyId) (r₁<n' : readDecSuccess _ x₁ < n') (n“ : Singleton (n' - readDecSuccess _ x₁))
-                   → (x₂ : Res₂ X509.AKIAuthCertIssuer x₁ (Singleton.x n“)) (r₂<n“ : readDecSuccess _ x₂ < Singleton.x n“) (n‴ : Singleton (Singleton.x n“ - readDecSuccess _ x₂))
-                   → (x₃ : Res₃ X509.AKIAuthCertSN x₁ (Singleton.x n“) x₂ (Singleton.x n‴)) → readDecSuccess _ x₃ < Singleton.x n‴  → ¬ Success _ (ExactLength _ X509.AKIFieldsSeqFields n') xs
-    underflow (no ¬akeyid) r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) authcertiss authcertsn refl) n'≡ refl) suffix ps≡) =
-      contradiction
-        (success _ _ refl (mk×ₚ akeyid (≤-trans (Lemmas.length-++-≤₁ akid (ci ++ csn)) (Lemmas.≡⇒≤ n'≡)) refl) (ci ++ csn ++ suffix) (trans (akid ++ ci ++ csn ++ suffix ≡ (akid ++ ci ++ csn) ++ suffix ∋ solve (++-monoid Dig)) ps≡))
-        ¬akeyid
-    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' self (no ¬authcertiss) r₂<n‴ self x₃ r₃<n“ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) (some authcertiss) authcertsn refl) n'≡ refl) suffix ps≡) = ‼
-      let @0 ps≡' : akid ++ ci ++ csn ++ suffix ≡ pre₁ ++ suf₁
-          ps≡' = begin akid ++ ci ++ csn ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
-                       (akid ++ ci ++ csn) ++ suffix ≡⟨ ps≡ ⟩
-                       xs ≡⟨ sym ps≡₁ ⟩
-                       pre₁ ++ suf₁ ∎
+    module underflow₁-₁
+      {@0 akid ci csn suffix pre₁ suf₁ : List Dig}
+      (@0 ps≡ : (akid ++ ci ++ csn) ++ suffix ≡ xs) (@0 ps≡₁ : pre₁ ++ suf₁ ≡ xs)
+      (n'≡ : length (akid ++ ci ++ csn) ≡ n')
+      (r₁ : ℕ) (@0 r₁≡ : r₁ ≡ length pre₁)
+      (akeyid : X509.AKIKeyId akid) (akeyid' : X509.AKIKeyId pre₁)
+      where
 
-          @0 akid≡ : akid ≡ pre₁
-          akid≡ = TLV.nonnesting ps≡' akeyid akeyid'
+      @0 ps≡₁' : akid ++ ci ++ csn ++ suffix ≡ pre₁ ++ suf₁
+      ps≡₁' = begin akid ++ ci ++ csn ++ suffix   ≡⟨ solve (++-monoid Dig) ⟩
+                    (akid ++ ci ++ csn) ++ suffix ≡⟨ ps≡ ⟩
+                    xs                            ≡⟨ sym ps≡₁ ⟩
+                    pre₁ ++ suf₁                  ∎
+      @0 akid≡ : akid ≡ pre₁
+      akid≡ = TLV.nonnesting ps≡₁' akeyid akeyid'
 
-          @0 n'-r₁≡ : n' - r₁ ≡ length (ci ++ csn)
-          n'-r₁≡ = begin
+      @0 n'-r₁≡ : n' - r₁ ≡ length (ci ++ csn)
+      n'-r₁≡ = begin
             n' - r₁ ≡⟨ cong (n' -_) r₁≡ ⟩
             n' - length pre₁ ≡⟨ cong (_- length pre₁) (sym n'≡) ⟩
             length (akid ++ ci ++ csn) - length pre₁ ≡⟨ cong (_∸ length pre₁) (length-++ akid) ⟩
@@ -165,12 +164,86 @@ module parseAKIFields where
             length (ci ++ csn) + (length pre₁ - length pre₁) ≡⟨ cong (length (ci ++ csn) +_) (n∸n≡0 (length pre₁)) ⟩
             length (ci ++ csn) + 0 ≡⟨ +-identityʳ _ ⟩
             length (ci ++ csn) ∎
-      in
+
+      module underflow₁₁-₁₁
+        {@0 pre₂ suf₂ : List Dig} (@0 ps≡₂ : pre₂ ++ suf₂ ≡ suf₁)
+        (r₂ : ℕ) (@0 r₂≡ : r₂ ≡ length pre₂)
+        (authcertiss : X509.AKIAuthCertIssuer ci) (authcertiss' : X509.AKIAuthCertIssuer pre₂)
+        where
+
+        @0 ps≡₂' : ci ++ csn ++ suffix ≡ pre₂ ++ suf₂
+        ps≡₂' = trans₀ (Lemmas.++-cancel≡ˡ _ _ akid≡ ps≡₁') (sym ps≡₂)
+
+        @0 ci≡ : ci ≡ pre₂
+        ci≡ = TLV.nonnesting ps≡₂' authcertiss authcertiss'
+
+        @0 n'-r₁-r₂≡ : n' - r₁ - r₂ ≡ length csn
+        n'-r₁-r₂≡ = begin
+          (n' - r₁) - r₂                           ≡⟨ cong (_- r₂) n'-r₁≡ ⟩
+          length (ci ++ csn) - r₂                  ≡⟨ cong (_- r₂) (length-++ ci) ⟩
+          length ci + length csn - r₂              ≡⟨ cong (λ x → length x + length csn - r₂) ci≡ ⟩
+          length pre₂ + length csn - r₂            ≡⟨ cong (length pre₂ + length csn -_) r₂≡ ⟩
+          length pre₂ + length csn - length pre₂   ≡⟨ cong (_- length pre₂) (+-comm (length pre₂) _) ⟩
+          length csn + length pre₂ - length pre₂   ≡⟨ +-∸-assoc (length csn){length pre₂} ≤-refl ⟩
+          length csn + (length pre₂ - length pre₂) ≡⟨ cong (length csn +_) (n∸n≡0 (length pre₂)) ⟩
+          length csn + 0                           ≡⟨ +-identityʳ (length csn) ⟩
+          length csn ∎
+
+        module underflow₁₁₁-₁₁₁
+          {@0 pre₃ suf₃ : List Dig} (@0 ps≡₃ : pre₃ ++ suf₃ ≡ suf₂)
+          (r₃ : ℕ) (@0 r₃≡ : r₃ ≡ length pre₃)
+          (authcertsn : X509.AKIAuthCertSN csn) (authcertsn' : X509.AKIAuthCertSN pre₃)
+          where
+
+          @0 ps≡₃' : csn ++ suffix ≡ pre₃ ++ suf₃
+          ps≡₃' = trans₀ (Lemmas.++-cancel≡ˡ _ _ ci≡ ps≡₂') (sym ps≡₃)
+
+          @0 csn≡ : csn ≡ pre₃
+          csn≡ = TLV.nonnesting ps≡₃' authcertsn authcertsn'
+
+          @0 n'-r₁-r₂-r₃≡ : n' - r₁ - r₂ - r₃ ≡ 0
+          n'-r₁-r₂-r₃≡ = begin
+            n' - r₁ - r₂ - r₃         ≡⟨ cong (_- r₃) n'-r₁-r₂≡ ⟩
+            length csn - r₃           ≡⟨ cong (λ x → length x - r₃) csn≡ ⟩
+            length pre₃ - r₃          ≡⟨ cong (length pre₃ -_) r₃≡ ⟩
+            length pre₃ - length pre₃ ≡⟨ n∸n≡0 (length pre₃) ⟩
+            0 ∎
+
+    @0 underflow : ∀ (x₁ : Res₁ X509.AKIKeyId) (r₁<n' : readDecSuccess _ x₁ < n') (n“ : Singleton (n' - readDecSuccess _ x₁))
+                   → (x₂ : Res₂ X509.AKIAuthCertIssuer x₁ (Singleton.x n“)) (r₂<n“ : readDecSuccess _ x₂ < Singleton.x n“) (n‴ : Singleton (Singleton.x n“ - readDecSuccess _ x₂))
+                   → (x₃ : Res₃ X509.AKIAuthCertSN x₁ (Singleton.x n“) x₂ (Singleton.x n‴)) → readDecSuccess _ x₃ < Singleton.x n‴  → ¬ Success _ (ExactLength _ X509.AKIFieldsSeqFields n') xs
+    underflow (no ¬akeyid) r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) authcertiss authcertsn refl) n'≡ refl) suffix ps≡) =
       contradiction
-        (success _ _ refl (mk×ₚ authcertiss (≤-trans (Lemmas.length-++-≤₁ ci _) (Lemmas.≡⇒≤ $ sym n'-r₁≡)) refl) (csn ++ suffix) (Lemmas.++-cancel≡ˡ _ _ akid≡ ps≡'))
+        (success _ _ refl (mk×ₚ akeyid (≤-trans (Lemmas.length-++-≤₁ akid (ci ++ csn)) (Lemmas.≡⇒≤ n'≡)) refl) (ci ++ csn ++ suffix) (trans (akid ++ ci ++ csn ++ suffix ≡ (akid ++ ci ++ csn) ++ suffix ∋ solve (++-monoid Dig)) ps≡))
+        ¬akeyid
+    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' self (no ¬authcertiss) r₂<n“ self x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) (some authcertiss) authcertsn refl) n'≡ refl) suffix ps≡) =
+      contradiction
+        (success _ _ refl (mk×ₚ authcertiss (≤-trans (Lemmas.length-++-≤₁ ci _) (Lemmas.≡⇒≤ $ sym n'-r₁≡)) refl) (csn ++ suffix) (Lemmas.++-cancel≡ˡ _ _ akid≡ ps≡₁'))
         ¬authcertiss
-    underflow (yes akeyid') r₁<n' n“ (yes authcertiss') r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields (some akeyid) (some authcertiss) authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
-    underflow (yes akeyid') r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields (some akeyid) none authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
+      where open underflow₁-₁{ci = ci} ps≡ ps≡₁ n'≡ r₁ r₁≡ akeyid akeyid'
+    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' self (yes (success pre₂ r₂ r₂≡ (mk×ₚ authcertiss' _ refl) suf₂ ps≡₂)) r₂<n“ self (no ¬authcertsn) r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) (some authcertiss) (some authcertsn) refl) n'≡ refl) suffix ps≡) = ‼
+      contradiction
+        (success _ _ n'-r₁-r₂≡ (mk×ₚ authcertsn (Lemmas.≡⇒≤ (sym n'-r₁-r₂≡)) refl) suffix (Lemmas.++-cancel≡ˡ _ _ ci≡ ps≡₂'))
+        ¬authcertsn
+      where
+      open underflow₁-₁{ci = ci} ps≡ ps≡₁ n'≡ r₁ r₁≡ akeyid akeyid'
+      open underflow₁₁-₁₁ ps≡₂ r₂ r₂≡ authcertiss authcertiss'
+    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' self (yes (success pre₂ r₂ r₂≡ (mk×ₚ authcertiss' _ refl) suf₂ ps≡₂)) r₂<n“ self (yes (success pre₃ r₃ r₃≡ (mk×ₚ authcertsn' _ refl) suf₃ ps≡₃)) r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) (some authcertiss) (some authcertsn) refl) n'≡ refl) suffix ps≡) =
+      contradiction (sym n'-r₁-r₂-r₃≡) (<⇒≢ (m<n⇒0<n∸m r₃<n‴))
+      where
+      open underflow₁-₁{ci = ci} ps≡ ps≡₁ n'≡ r₁ r₁≡ akeyid akeyid'
+      open underflow₁₁-₁₁ ps≡₂ r₂ r₂≡ authcertiss authcertiss'
+      open underflow₁₁₁-₁₁₁ ps≡₃ r₃ r₃≡ authcertsn authcertsn'
+    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' self (yes (success pre₂ r₂ r₂≡ (mk×ₚ authcertiss' _ refl) suf₂ ps≡₂)) r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) (some authcertiss) none refl) n'≡ refl) suffix ps≡) =
+      contradiction (sym n'-r₁-r₂≡) (<⇒≢ (m<n⇒0<n∸m r₂<n“))
+      where
+      open underflow₁-₁{ci = ci} ps≡ ps≡₁ n'≡ r₁ r₁≡ akeyid akeyid'
+      open underflow₁₁-₁₁ ps≡₂ r₂ r₂≡ authcertiss authcertiss'
+    underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid' _ refl) suf₁ ps≡₁)) r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} (some akeyid) none authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
+
+
+    -- underflow (yes akeyid') r₁<n' n“ (yes authcertiss') r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields (some akeyid) (some authcertiss) authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
+    -- underflow (yes akeyid') r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields (some akeyid) none authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
     underflow x₁ r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields none authcertiss authcertsn refl) n'≡ refl) suffix ps≡) = {!!}
 
     -- underflow (yes (success pre₁ r₁ r₁≡ (mk×ₚ akeyid akiIdLen refl) suf₁ ps≡₁)) r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success ._ read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields{akid = akid}{ci}{csn} none none (some authcertsn) refl) read≡n' refl) suffix ps≡) =

@@ -6,7 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -145,196 +145,171 @@ open parseUtcTimeFields public using (parseUtcTimeFields)
 parseUtcTime : Parser Dig (Logging ∘ Dec) Generic.UtcTime
 parseUtcTime =
   parseTLV _ "UtcTime" _
-    (parseExactLength Dig NonNesting.UtcTimeFields (tell $ "UtcTime: length mismatch") parseUtcTimeFields)
+    (parseExactLength Dig Props.Time.UTC.nonnesting (tell $ "UtcTime: length mismatch") parseUtcTimeFields)
 
 module parseGenTimeFields where
   open ≡-Reasoning
 
   here' = "parseGenTimeFields"
 
-  parseSecFraction : Parser Dig (Logging ∘ Dec) Generic.SecFraction
-  runParser parseSecFraction xs = do
-    x ← runParser (parseLit Dig (tell $ here' String.++ ": s. frac: underflow") (return _) [ # '.' ]) xs
-    case x of λ where
-      (yes (success .([ # '.' ]) _ refl refl suf₀ refl)) → do
-        yes (success ._ r₁ r₁≡ (mkParseWhile pre₁'@(p ∷ pre₁) term allPre₁ ¬term refl) suf₁ ps≡₁) ← return $ runParser (parseWhileₜ Dig (inRange? '0' '9')) suf₀
-          where yes (success ._ r₁ r₁≡ (mkParseWhile [] term All.[] ¬term refl) suf₁ ps≡₁) → do
-                  tell $ here' String.++ ": point with no s. frac"
-                  return ∘ no $ λ where
-                    (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
-                      case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
-                    (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (xᵣ All.∷ sfracRange) sfracValid term₁ refl) suffix ps≡) →
-                      contradiction
-                        (subst₀ (InRange '0' '9') (∷-injectiveˡ (trans (∷-injectiveʳ ps≡) (sym ps≡₁))) xᵣ)
-                        ¬term
-                no ¬parse → do
-                  tell $ here' String.++ ": underflow"
-                  return ∘ no $ λ where
-                    (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid {z} term refl) suffix ps≡) →
-                      case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
-                    (success ._ read read≡ (Generic.mkSecFraction sfrac'@(x ∷ sfrac) sfracRange sfracValid {z} term refl) suffix ps≡) → ‼
-                      let @0 ¬range : ¬ InRange '0' '9' z
-                          ¬range r =  <⇒≱ (≤-trans (s≤s (proj₂ r)) (toWitness{Q = 58 ≤? 90} tt)) (Lemmas.≡⇒≤ (cong toℕ (sym term)))
-                      in
-                      contradiction
-                        (success (sfrac' ∷ʳ z) _ refl (mkParseWhile sfrac' z sfracRange ¬range refl) suffix (∷-injectiveʳ ps≡))
-                        ¬parse
-        case Generic.validSecFraction? pre₁' of λ where
-          (no ¬parse) → do
-            tell $ here' String.++ ": invalid s. frac"
-            return ∘ no $ λ where
-              (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
-                case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
-              (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (xᵣ All.∷ sfracRange) sfracValid {z}term₁ refl) suffix ps≡) → ‼
-                let @0 ps≡' : x ∷ (sfrac ∷ʳ z) ++ suffix ≡ pre₁' ∷ʳ term ++ suf₁
-                    ps≡' = trans₀ (∷-injectiveʳ ps≡) (sym ps≡₁)
+--   parseSecFraction : Parser Dig (Logging ∘ Dec) Generic.SecFraction
+--   runParser parseSecFraction xs = do
+--     x ← runParser (parseLit Dig (tell $ here' String.++ ": s. frac: underflow") (return _) [ # '.' ]) xs
+--     case x of λ where
+--       (yes (success .([ # '.' ]) _ refl refl suf₀ refl)) → do
+--         yes (success ._ r₁ r₁≡ (mkParseWhile pre₁'@(p ∷ pre₁) term allPre₁ ¬term refl) suf₁ ps≡₁) ← return $ runParser (parseWhileₜ Dig (inRange? '0' '9')) suf₀
+--           where yes (success ._ r₁ r₁≡ (mkParseWhile [] term All.[] ¬term refl) suf₁ ps≡₁) → do
+--                   tell $ here' String.++ ": point with no s. frac"
+--                   return ∘ no $ λ where
+--                     (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
+--                       case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
+--                     (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (xᵣ All.∷ sfracRange) sfracValid term₁ refl) suffix ps≡) →
+--                       contradiction
+--                         (subst₀ (InRange '0' '9') (∷-injectiveˡ (trans (∷-injectiveʳ ps≡) (sym ps≡₁))) xᵣ)
+--                         ¬term
+--                 no ¬parse → do
+--                   tell $ here' String.++ ": underflow"
+--                   return ∘ no $ λ where
+--                     (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid {z} term refl) suffix ps≡) →
+--                       case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
+--                     (success ._ read read≡ (Generic.mkSecFraction sfrac'@(x ∷ sfrac) sfracRange sfracValid {z} term refl) suffix ps≡) → ‼
+--                       let @0 ¬range : ¬ InRange '0' '9' z
+--                           ¬range r =  <⇒≱ (≤-trans (s≤s (proj₂ r)) (toWitness{Q = 58 ≤? 90} tt)) (Lemmas.≡⇒≤ (cong toℕ (sym term)))
+--                       in
+--                       contradiction
+--                         (success (sfrac' ∷ʳ z) _ refl (mkParseWhile sfrac' z sfracRange ¬range refl) suffix (∷-injectiveʳ ps≡))
+--                         ¬parse
+--         case Generic.validSecFraction? pre₁' of λ where
+--           (no ¬parse) → do
+--             tell $ here' String.++ ": invalid s. frac"
+--             return ∘ no $ λ where
+--               (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
+--                 case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
+--               (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (xᵣ All.∷ sfracRange) sfracValid {z}term₁ refl) suffix ps≡) → ‼
+--                 let @0 ps≡' : x ∷ (sfrac ∷ʳ z) ++ suffix ≡ pre₁' ∷ʳ term ++ suf₁
+--                     ps≡' = trans₀ (∷-injectiveʳ ps≡) (sym ps≡₁)
 
-                    @0 ¬term₁ : ¬ InRange '0' '9' z
-                    ¬term₁ eq = contradiction (proj₂ eq) (<⇒≱ (≤-trans (toWitness{Q = 58 ≤? 90} tt) (Lemmas.≡⇒≤ (cong toℕ (sym term₁)))))
+--                     @0 ¬term₁ : ¬ InRange '0' '9' z
+--                     ¬term₁ eq = contradiction (proj₂ eq) (<⇒≱ (≤-trans (toWitness{Q = 58 ≤? 90} tt) (Lemmas.≡⇒≤ (cong toℕ (sym term₁)))))
 
-                    @0 pre≡' : x ∷ sfrac ≡ pre₁'
-                    pre≡' = Lemmas.all-++-≡ (InRange '0' '9') {ws = [ x ] ++ sfrac}{z}{suffix}{pre₁'}{term}{suf₁} (xᵣ All.∷ sfracRange) ¬term₁ allPre₁ ¬term
-                              (begin [ x ] ++ sfrac ++ ([ z ] ++ suffix) ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
-                                     [ x ] ++ (sfrac ++ [ z ]) ++ suffix ≡⟨ ps≡' ⟩
-                                     pre₁' ∷ʳ term ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
-                                     pre₁' ++ term ∷ suf₁ ∎)
-                in
-                contradiction
-                  (subst Generic.ValidSecFraction pre≡' sfracValid)
-                  ¬parse
-          (yes sfracValid) → do
-            yes (success ._ ._ refl refl suf₂ refl)
-              ← runParser (parseLit Dig (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # 'Z' ]) (term ∷ suf₁)
-              where no ¬parse → do
-                tell $ here' String.++ ": invalid s. frac"
-                return ∘ no $ λ where
-                  (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
-                    case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
-                  (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) sfracRange sfracValid {z}term₁ refl) suffix ps≡) → ‼
-                    let @0 ps≡' : x ∷ (sfrac ∷ʳ z) ++ suffix ≡ pre₁' ∷ʳ term ++ suf₁
-                        ps≡' = trans₀ (∷-injectiveʳ ps≡) (sym ps≡₁)
+--                     @0 pre≡' : x ∷ sfrac ≡ pre₁'
+--                     pre≡' = Lemmas.all-++-≡ (InRange '0' '9') {ws = [ x ] ++ sfrac}{z}{suffix}{pre₁'}{term}{suf₁} (xᵣ All.∷ sfracRange) ¬term₁ allPre₁ ¬term
+--                               (begin [ x ] ++ sfrac ++ ([ z ] ++ suffix) ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
+--                                      [ x ] ++ (sfrac ++ [ z ]) ++ suffix ≡⟨ ps≡' ⟩
+--                                      pre₁' ∷ʳ term ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
+--                                      pre₁' ++ term ∷ suf₁ ∎)
+--                 in
+--                 contradiction
+--                   (subst Generic.ValidSecFraction pre≡' sfracValid)
+--                   ¬parse
+--           (yes sfracValid) → do
+--             yes (success ._ ._ refl refl suf₂ refl)
+--               ← runParser (parseLit Dig (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # 'Z' ]) (term ∷ suf₁)
+--               where no ¬parse → do
+--                 tell $ here' String.++ ": invalid s. frac"
+--                 return ∘ no $ λ where
+--                   (success ._ read read≡ (Generic.mkSecFraction [] sfracRange sfracValid term refl) suffix ps≡) →
+--                     case trans₀ (sym term) (∷-injectiveˡ ps≡) of λ ()
+--                   (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) sfracRange sfracValid {z}term₁ refl) suffix ps≡) → ‼
+--                     let @0 ps≡' : x ∷ (sfrac ∷ʳ z) ++ suffix ≡ pre₁' ∷ʳ term ++ suf₁
+--                         ps≡' = trans₀ (∷-injectiveʳ ps≡) (sym ps≡₁)
 
-                        @0 ¬term₁ : ¬ InRange '0' '9' z
-                        ¬term₁ eq = contradiction (proj₂ eq) (<⇒≱ (≤-trans (toWitness{Q = 58 ≤? 90} tt) (Lemmas.≡⇒≤ (cong toℕ (sym term₁)))))
+--                         @0 ¬term₁ : ¬ InRange '0' '9' z
+--                         ¬term₁ eq = contradiction (proj₂ eq) (<⇒≱ (≤-trans (toWitness{Q = 58 ≤? 90} tt) (Lemmas.≡⇒≤ (cong toℕ (sym term₁)))))
 
-                        @0 pre≡' : x ∷ sfrac ≡ pre₁'
-                        pre≡' = Lemmas.all-++-≡ (InRange '0' '9') {ws = [ x ] ++ sfrac}{z}{suffix}{pre₁'}{term}{suf₁} sfracRange ¬term₁ allPre₁ ¬term
-                              (begin [ x ] ++ sfrac ++ ([ z ] ++ suffix) ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
-                                     [ x ] ++ (sfrac ++ [ z ]) ++ suffix ≡⟨ ps≡' ⟩
-                                     pre₁' ∷ʳ term ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
-                                     pre₁' ++ term ∷ suf₁ ∎)
-                    in
-                    contradiction
-                      (success [ z ] _ refl (cong [_] term₁) suffix
-                        (proj₂ $ Lemmas.length-++-≡ (x ∷ sfrac) _ pre₁' _
-                                   (begin (x ∷ sfrac ++ z ∷ suffix ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
-                                          x ∷ (sfrac ∷ʳ z) ++ suffix ≡⟨ ps≡' ⟩
-                                          (pre₁' ++ [ term ]) ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
-                                          pre₁' ++ term ∷ suf₁ ∎))
-                                   (cong length pre≡')))
-                      ¬parse
-            return (yes
-              (success (# '.' ∷ pre₁' ++ [ # 'Z' ]) (1 + r₁)
-                (cong suc r₁≡)
-                (Generic.mkSecFraction pre₁' allPre₁ sfracValid refl refl)
-                suf₂ (cong (# '.' ∷_) ps≡₁)))
-      (no ¬parse) → do
-        yes (success ._ ._ refl refl suf₀ ps≡₀)
-          ← runParser (parseLit Dig (return _) (tell $ here' String.++ ": s. frac: not terminated") [ # 'Z' ]) xs
-          where no ¬parse' → do
-            return ∘ no $ λ where
-              (success .([ _ ]) read read≡ (Generic.mkSecFraction [] sfracRange sfracValid{z} term refl) suffix ps≡) →
-                contradiction (success [ z ] _ refl (cong [_] term) suffix ps≡)
-                  ¬parse'
-              (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (px All.∷ sfracRange) sfracValid term refl) suffix ps≡) →
-                contradiction
-                  (success [ # '.' ] _ refl refl _ ps≡)
-                  ¬parse
-        return (yes (success [ # toℕ 'Z' ] _ refl (Generic.mkSecFraction [] All.[] tt refl refl) suf₀ ps≡₀))
+--                         @0 pre≡' : x ∷ sfrac ≡ pre₁'
+--                         pre≡' = Lemmas.all-++-≡ (InRange '0' '9') {ws = [ x ] ++ sfrac}{z}{suffix}{pre₁'}{term}{suf₁} sfracRange ¬term₁ allPre₁ ¬term
+--                               (begin [ x ] ++ sfrac ++ ([ z ] ++ suffix) ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
+--                                      [ x ] ++ (sfrac ++ [ z ]) ++ suffix ≡⟨ ps≡' ⟩
+--                                      pre₁' ∷ʳ term ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
+--                                      pre₁' ++ term ∷ suf₁ ∎)
+--                     in
+--                     contradiction
+--                       (success [ z ] _ refl (cong [_] term₁) suffix
+--                         (proj₂ $ Lemmas.length-++-≡ (x ∷ sfrac) _ pre₁' _
+--                                    (begin (x ∷ sfrac ++ z ∷ suffix ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
+--                                           x ∷ (sfrac ∷ʳ z) ++ suffix ≡⟨ ps≡' ⟩
+--                                           (pre₁' ++ [ term ]) ++ suf₁ ≡⟨ cong (p ∷_) (solve (++-monoid Dig)) ⟩
+--                                           pre₁' ++ term ∷ suf₁ ∎))
+--                                    (cong length pre≡')))
+--                       ¬parse
+--             return (yes
+--               (success (# '.' ∷ pre₁' ++ [ # 'Z' ]) (1 + r₁)
+--                 (cong suc r₁≡)
+--                 (Generic.mkSecFraction pre₁' allPre₁ sfracValid refl refl)
+--                 suf₂ (cong (# '.' ∷_) ps≡₁)))
+--       (no ¬parse) → do
+--         yes (success ._ ._ refl refl suf₀ ps≡₀)
+--           ← runParser (parseLit Dig (return _) (tell $ here' String.++ ": s. frac: not terminated") [ # 'Z' ]) xs
+--           where no ¬parse' → do
+--             return ∘ no $ λ where
+--               (success .([ _ ]) read read≡ (Generic.mkSecFraction [] sfracRange sfracValid{z} term refl) suffix ps≡) →
+--                 contradiction (success [ z ] _ refl (cong [_] term) suffix ps≡)
+--                   ¬parse'
+--               (success ._ read read≡ (Generic.mkSecFraction (x ∷ sfrac) (px All.∷ sfracRange) sfracValid term refl) suffix ps≡) →
+--                 contradiction
+--                   (success [ # '.' ] _ refl refl _ ps≡)
+--                   ¬parse
+--         return (yes (success [ # toℕ 'Z' ] _ refl (Generic.mkSecFraction [] All.[] tt refl refl) suf₀ ps≡₀))
 
-  parseGenTimeFields : Parser Dig (Logging ∘ Dec) Generic.GenTimeFields
-  runParser parseGenTimeFields xs = do
-    yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen refl) suf₀ ps≡₀)
-      ← runParser (parseN Dig (String.length "YYYY") (tell $ here' String.++ ": underflow")) xs
-      where no ¬parse → do
-        return ∘ no $ λ where
-          (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
-            contradiction
-              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf refl refl) _ ps≡)
-              ¬parse
-    yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
-      where no ¬parse → do
-        tell here'
-        return ∘ no $ λ where
-          (success prefix read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{mdhms}{sf} _ _ mmddhhmmss sfrac refl) suffix ps≡) → ‼
-            let @0 ps≡' : v₀ ++ suf₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ (mdhms ++ sf) ++ suffix
-                ps≡' = trans ps≡₀ (sym ps≡)
-            in
-            contradiction
-              (success mdhms _ refl mmddhhmmss (sf ++ suffix)
-                (begin mdhms ++ sf ++ suffix
-                         ≡⟨ solve (++-monoid Dig) ⟩
-                       (mdhms ++ sf) ++ suffix
-                         ≡⟨ (proj₂ $ Lemmas.length-++-≡ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ v₀ _ (sym ps≡') (sym vLen)) ⟩
-                       suf₀ ∎))
-              ¬parse
-    yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂) ← runParser parseSecFraction suf₁
-      where no ¬parse → do
-        tell $ here'
-        return ∘ no $ λ where
-          (success prefix read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{mdhms}{sf} year yearRange mmddhhmmss sfrac refl) suffix ps≡) → ‼
-            let @0 ps≡' : v₀ ++ pre₁ ++ suf₁ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ (mdhms ++ sf) ++ suffix
-                ps≡' = begin v₀ ++ pre₁ ++ suf₁   ≡⟨ solve (++-monoid Dig) ⟩
-                             v₀ ++ (pre₁ ++ suf₁) ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
-                             v₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
-                             xs ≡⟨ sym ps≡ ⟩
-                             _ ∎
-                @0 nn₁ : v₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ] × pre₁ ++ suf₁ ≡ (mdhms ++ sf) ++ suffix
-                nn₁ = Lemmas.length-++-≡ _ _ _ _ ps≡' refl
-
-                @0 nn₂₁ : pre₁ ≡ mdhms
-                nn₂₁ = NonNesting.MonthDayHourMinSecFields
-                        (trans₀ (proj₂ nn₁) (_ ≡ mdhms ++ sf ++ suffix ∋ solve (++-monoid Dig)))
-                        v₁ mmddhhmmss
-
-                @0 nn₂₂ : suf₁ ≡ sf ++ suffix
-                nn₂₂ = proj₂ $ Lemmas.length-++-≡ pre₁ _ mdhms _ (trans₀ (proj₂ nn₁) (++-assoc mdhms sf suffix)) (cong length nn₂₁)
-            in
-            contradiction
-              (success sf _ refl sfrac suffix (sym nn₂₂))
-              ¬parse
-    case All.all? (inRange? '0' '9') v₀ of λ where
-      (no ¬all) → do
-        tell $ here' String.++ ": bad year"
-        return ∘ no $ λ where
-          (success ._ read read≡ (Generic.mkGenTimeFields year yearRange mmddhhmmss sfrac refl) suffix ps≡) →
-            contradiction
-              (subst (All (InRange '0' '9')) (proj₁ $ Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₀)) refl) yearRange)
-              ¬all
-      (yes allv₀) →
-        return (yes
-          (success (v₀ ++ pre₁ ++ pre₂) (r₀ + r₁ + r₂)
-            (begin r₀ + r₁ + r₂ ≡⟨ cong (λ x → x + r₁ + r₂) r₀≡ ⟩
-                   length v₀ + r₁ + r₂ ≡⟨ cong (λ x → length v₀ + x + r₂) r₁≡ ⟩
-                   length (v₀ ++ pre₁) + r₂ ≡⟨ cong (length (v₀ ++ pre₁) +_) r₂≡ ⟩
-                   length (v₀ ++ pre₁) + length pre₂ ≡⟨ sym $ length-++ (v₀ ++ pre₁) ⟩
-                   length (v₀ ++ pre₁ ++ pre₂) ∎)
-            (Generic.mkGenTimeFields singleSelf allv₀ v₁ v₂ refl)
-            suf₂ (begin (v₀ ++ pre₁ ++ pre₂) ++ suf₂ ≡⟨ cong (v₀ ++_) (solve (++-monoid Dig)) ⟩
-                        v₀ ++ pre₁ ++ (pre₂ ++ suf₂) ≡⟨ cong (λ x → v₀ ++ pre₁ ++ x) ps≡₂ ⟩
-                        v₀ ++ pre₁ ++ suf₁ ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
-                        v₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
-                        xs ∎)))
-    where
-    open ≡-Reasoning
-
+  postulate
+    parseGenTimeFields : Parser Dig (Logging ∘ Dec) Generic.GenTimeFields
+  -- runParser parseGenTimeFields xs = do
+  --   yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen refl) suf₀ ps≡₀)
+  --     ← runParser (parseN Dig (String.length "YYYY") (tell $ here' String.++ ": underflow")) xs
+  --     where no ¬parse → do
+  --       return ∘ no $ λ where
+  --         (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
+  --           contradiction
+  --             (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf refl refl) _ ps≡)
+  --             ¬parse
+  --   yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
+  --     where no ¬parse → do
+  --       tell here'
+  --       return ∘ no $ λ where
+  --         (success prefix@._ read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{z}{mdhms} year yearRange mmddhhmmss z≡ refl) suffix ps≡) → ‼
+  --           let @0 ps≡' : v₀ ++ suf₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ mdhms ∷ʳ z ++ suffix
+  --               ps≡' = trans ps≡₀ (sym ps≡)
+  --           in
+  --           contradiction
+  --             (success _ _ refl mmddhhmmss (z ∷ suffix)
+  --               (begin (mdhms ++ z ∷ suffix
+  --                        ≡⟨ solve (++-monoid Dig) ⟩
+  --                      (mdhms ∷ʳ z) ++ suffix
+  --                        ≡⟨ (proj₂ $ Lemmas.length-++-≡ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ _ _ (sym ps≡') refl) ⟩
+  --                      suf₀ ∎)))
+  --             ¬parse
+  --   yes (success pre₂ ._ refl refl suf₂ ps≡₂)
+  --     ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ]) suf₁
+  --     where no ¬parse → {!!}
+  --   case All.all? (inRange? '0' '9') v₀ of λ where
+  --     (no ¬allv₀) → do
+  --       tell $ here' String.++ ": bad year"
+  --       return ∘ no $ λ where
+  --         (success prefix@._ read read≡ (Generic.mkGenTimeFields year yearRange mmddhhmmss z≡ refl) suffix ps≡) →
+  --           contradiction
+  --             (subst (All (InRange '0' '9')) (proj₁ $ Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₀)) refl) yearRange)
+  --             ¬allv₀
+  --     (yes allv₀) →
+  --       return (yes
+  --         (success (v₀ ++ pre₁ ++ pre₂) (r₀ + r₁ + 1)
+  --           (begin r₀ + r₁ + 1                       ≡⟨ cong (λ x → x + r₁ + 1) r₀≡ ⟩
+  --                  length v₀ + r₁ + 1                ≡⟨ cong (λ x → length v₀ + x + 1) r₁≡ ⟩
+  --                  length (v₀ ++ pre₁) + length pre₂ ≡⟨ sym $ length-++ (v₀ ++ pre₁) ⟩
+  --                  length (v₀ ++ pre₁ ++ pre₂)       ∎)
+  --           (Generic.mkGenTimeFields self allv₀ v₁ refl refl) suf₂
+  --           (begin (v₀ ++ pre₁ ++ pre₂) ++ suf₂  ≡⟨ cong (v₀ ++_) (solve (++-monoid Dig)) ⟩
+  --                   v₀ ++ pre₁ ++ (pre₂ ++ suf₂) ≡⟨ cong (λ x → v₀ ++ pre₁ ++ x) ps≡₂ ⟩
+  --                   v₀ ++ pre₁ ++ suf₁           ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
+  --                   v₀ ++ suf₀                   ≡⟨ ps≡₀ ⟩
+  --                   xs                           ∎)))
 
 open parseGenTimeFields public using (parseGenTimeFields)
 
 parseGenTime : Parser Dig (Logging ∘ Dec) Generic.GenTime
 parseGenTime =
   parseTLV _ "GenTime" _
-    (parseExactLength Dig NonNesting.GenTimeFields
+    (parseExactLength Dig Props.Time.GenTime.nonnesting
       (tell $ "GenTime: length mismatch") parseGenTimeFields)
 
 parseTime : Parser Dig (Logging ∘ Dec) Generic.Time
