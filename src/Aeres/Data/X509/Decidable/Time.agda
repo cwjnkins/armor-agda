@@ -280,7 +280,18 @@ module parseGenTimeFields where
               ¬parse
     yes (success pre₂ ._ refl refl suf₂ ps≡₂)
       ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ]) suf₁
-      where no ¬parse → {!!}
+      where no ¬parse → do
+        return ∘ no $ λ where
+          (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{z}{mdhms} year yearRange mmddhhmmss refl refl) suffix ps≡) → ‼
+            let @0 ps≡' : v₀ ++ pre₁ ++ suf₁ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ mdhms ∷ʳ z ++ suffix
+                ps≡' = trans (cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) ps≡₁) (trans ps≡₀ (sym ps≡)) -- trans ps≡₀ (sym ps≡)
+
+                @0 ps≡″ : pre₁ ++ suf₁ ≡ mdhms ++ [ z ] ++ suffix
+                ps≡″ = trans₀ (Lemmas.++-cancel≡ˡ _ _ (proj₁ $ Lemmas.length-++-≡ v₀ _ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ ps≡' refl) ps≡') (solve (++-monoid Dig))
+            in
+            contradiction
+              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (NonNesting.MonthDayHourMinSecFields (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
+              ¬parse
     case All.all? (inRange? '0' '9') v₀ of λ where
       (no ¬allv₀) → do
         tell $ here' String.++ ": bad year"
