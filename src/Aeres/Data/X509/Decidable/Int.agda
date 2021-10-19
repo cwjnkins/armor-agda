@@ -44,3 +44,25 @@ module parseInt where
   parseInt = parseTLV Tag.Integer "Int" Generic.IntegerValue parseIntValue
 
 open parseInt public using (parseIntValue ; parseInt)
+
+
+private
+  module Test where
+
+    intval₁ : List Dig
+    intval₁ = Tag.Integer ∷ # 1 ∷ [ # 255 ]
+
+    intval₂ : List Dig
+    intval₂ = Tag.Integer ∷ # 2 ∷ # 254 ∷ [ # 255 ]
+
+    intvalBad : List Dig
+    intvalBad = Tag.Integer ∷ # 4 ∷ # 254 ∷ [ # 255 ]
+
+    test₁ : Generic.Int intval₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseInt intval₁)} tt)
+
+    test₂ : Generic.Int intval₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseInt intval₂)} tt)
+
+    test₃ : ¬ Success _ Generic.Int intvalBad
+    test₃ = toWitnessFalse {Q = Logging.val (runParser parseInt intvalBad)} tt

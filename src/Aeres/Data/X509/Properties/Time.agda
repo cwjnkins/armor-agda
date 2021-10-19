@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
+import Aeres.Data.X509.Properties.TLV as TLVprops
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -17,12 +18,19 @@ nonempty (Generic.utctm ()) refl
 nonempty (Generic.gentm ()) refl
 
 module UTC where
-  postulate
-     nonnesting : NonNesting Generic.UtcTimeFields
+  @0 nonnesting : NonNesting Generic.UtcTimeFields
+  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkUtcTimeFields year yearRange mmddhhmmss term bs≡) (Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
+    with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
+  ... | fst , snd = fst
 
 module GenTime where
-  postulate
-    nonnesting : NonNesting Generic.GenTimeFields
+  @0 nonnesting : NonNesting Generic.GenTimeFields
+  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkGenTimeFields year yearRange mmddhhmmss sfrac bs≡) (Generic.mkGenTimeFields year₁ yearRange₁ mmddhhmmss₁ sfrac₁ bs≡₁)
+    with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
+  ... | fst , snd = fst
 
-postulate
-  nonnesting : NonNesting Generic.Time
+@0 nonnesting : NonNesting Generic.Time
+nonnesting x (Generic.utctm x₁) (Generic.utctm x₂) = ‼ TLVprops.nonnesting x x₁ x₂
+nonnesting x (Generic.utctm x₁) (Generic.gentm x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (Generic.gentm x₁) (Generic.utctm x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (Generic.gentm x₁) (Generic.gentm x₂) = ‼ TLVprops.nonnesting x x₁ x₂
