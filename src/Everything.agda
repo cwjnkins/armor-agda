@@ -14,8 +14,10 @@ open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SignAlg
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.Validity
@@ -24,6 +26,7 @@ open import Aeres.Data.X509.Properties
 open import Aeres.Data.X509.Properties.Length
 open import Aeres.Data.X509.Properties.OIDSub
 open import Aeres.Data.X509.Properties.Primitives
+open import Aeres.Data.X509.Properties.PublicKeyFields
 open import Aeres.Data.X509.Properties.TLV
 open import Aeres.Data.X509.Properties.Time
 open import Aeres.Grammar.Definitions
