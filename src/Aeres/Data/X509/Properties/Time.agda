@@ -26,9 +26,9 @@ module UTC where
 module GenTime where
   postulate
     @0 nonnesting : NonNesting Generic.GenTimeFields
-  -- nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkGenTimeFields year yearRange mmddhhmmss sfrac bs≡) (Generic.mkGenTimeFields year₁ yearRange₁ mmddhhmmss₁ sfrac₁ bs≡₁)
-  --   with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym {!bs≡₁!})))
-  -- ... | fst , snd = fst
+  -- nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange bs≡₂) z≡ bs≡) (Generic.mkGenTimeFields year₁ yearRange₁ (Generic.mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ bs≡₃) z≡₁ bs≡₁)
+  --   with  Lemmas.length-++-≡ {!!} {!!} {!!} {!!} {!!} {!!}
+  -- ... | f2 = {!!}
 
 @0 nonnesting : NonNesting Generic.Time
 nonnesting x (Generic.utctm x₁) (Generic.utctm x₂) = ‼ TLVprops.nonnesting x x₁ x₂
