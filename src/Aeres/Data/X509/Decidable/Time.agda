@@ -252,57 +252,67 @@ module parseGenTimeFields where
 --                   ¬parse
 --         return (yes (success [ # toℕ 'Z' ] _ refl (Generic.mkSecFraction [] All.[] tt refl refl) suf₀ ps≡₀))
 
-  postulate
-    parseGenTimeFields : Parser Dig (Logging ∘ Dec) Generic.GenTimeFields
-  -- runParser parseGenTimeFields xs = do
-  --   yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen refl) suf₀ ps≡₀)
-  --     ← runParser (parseN Dig (String.length "YYYY") (tell $ here' String.++ ": underflow")) xs
-  --     where no ¬parse → do
-  --       return ∘ no $ λ where
-  --         (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
-  --           contradiction
-  --             (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf refl refl) _ ps≡)
-  --             ¬parse
-  --   yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
-  --     where no ¬parse → do
-  --       tell here'
-  --       return ∘ no $ λ where
-  --         (success prefix@._ read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{z}{mdhms} year yearRange mmddhhmmss z≡ refl) suffix ps≡) → ‼
-  --           let @0 ps≡' : v₀ ++ suf₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ mdhms ∷ʳ z ++ suffix
-  --               ps≡' = trans ps≡₀ (sym ps≡)
-  --           in
-  --           contradiction
-  --             (success _ _ refl mmddhhmmss (z ∷ suffix)
-  --               (begin (mdhms ++ z ∷ suffix
-  --                        ≡⟨ solve (++-monoid Dig) ⟩
-  --                      (mdhms ∷ʳ z) ++ suffix
-  --                        ≡⟨ (proj₂ $ Lemmas.length-++-≡ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ _ _ (sym ps≡') refl) ⟩
-  --                      suf₀ ∎)))
-  --             ¬parse
-  --   yes (success pre₂ ._ refl refl suf₂ ps≡₂)
-  --     ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ]) suf₁
-  --     where no ¬parse → {!!}
-  --   case All.all? (inRange? '0' '9') v₀ of λ where
-  --     (no ¬allv₀) → do
-  --       tell $ here' String.++ ": bad year"
-  --       return ∘ no $ λ where
-  --         (success prefix@._ read read≡ (Generic.mkGenTimeFields year yearRange mmddhhmmss z≡ refl) suffix ps≡) →
-  --           contradiction
-  --             (subst (All (InRange '0' '9')) (proj₁ $ Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₀)) refl) yearRange)
-  --             ¬allv₀
-  --     (yes allv₀) →
-  --       return (yes
-  --         (success (v₀ ++ pre₁ ++ pre₂) (r₀ + r₁ + 1)
-  --           (begin r₀ + r₁ + 1                       ≡⟨ cong (λ x → x + r₁ + 1) r₀≡ ⟩
-  --                  length v₀ + r₁ + 1                ≡⟨ cong (λ x → length v₀ + x + 1) r₁≡ ⟩
-  --                  length (v₀ ++ pre₁) + length pre₂ ≡⟨ sym $ length-++ (v₀ ++ pre₁) ⟩
-  --                  length (v₀ ++ pre₁ ++ pre₂)       ∎)
-  --           (Generic.mkGenTimeFields self allv₀ v₁ refl refl) suf₂
-  --           (begin (v₀ ++ pre₁ ++ pre₂) ++ suf₂  ≡⟨ cong (v₀ ++_) (solve (++-monoid Dig)) ⟩
-  --                   v₀ ++ pre₁ ++ (pre₂ ++ suf₂) ≡⟨ cong (λ x → v₀ ++ pre₁ ++ x) ps≡₂ ⟩
-  --                   v₀ ++ pre₁ ++ suf₁           ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
-  --                   v₀ ++ suf₀                   ≡⟨ ps≡₀ ⟩
-  --                   xs                           ∎)))
+  parseGenTimeFields : Parser Dig (Logging ∘ Dec) Generic.GenTimeFields
+  runParser parseGenTimeFields xs = do
+    yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen refl) suf₀ ps≡₀)
+      ← runParser (parseN Dig (String.length "YYYY") (tell $ here' String.++ ": underflow")) xs
+      where no ¬parse → do
+        return ∘ no $ λ where
+          (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
+            contradiction
+              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf refl refl) _ ps≡)
+              ¬parse
+    yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
+      where no ¬parse → do
+        tell here'
+        return ∘ no $ λ where
+          (success prefix@._ read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{z}{mdhms} year yearRange mmddhhmmss z≡ refl) suffix ps≡) → ‼
+            let @0 ps≡' : v₀ ++ suf₀ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ mdhms ∷ʳ z ++ suffix
+                ps≡' = trans ps≡₀ (sym ps≡)
+            in
+            contradiction
+              (success _ _ refl mmddhhmmss (z ∷ suffix)
+                (begin (mdhms ++ z ∷ suffix
+                         ≡⟨ solve (++-monoid Dig) ⟩
+                       (mdhms ∷ʳ z) ++ suffix
+                         ≡⟨ (proj₂ $ Lemmas.length-++-≡ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ _ _ (sym ps≡') refl) ⟩
+                       suf₀ ∎)))
+              ¬parse
+    yes (success pre₂ ._ refl refl suf₂ ps≡₂)
+      ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ]) suf₁
+      where no ¬parse → do
+        return ∘ no $ λ where
+          (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁'}{y₂'}{y₃'}{y₄'}{z}{mdhms} year yearRange mmddhhmmss refl refl) suffix ps≡) → ‼
+            let @0 ps≡' : v₀ ++ pre₁ ++ suf₁ ≡ y₁' ∷ y₂' ∷ y₃' ∷ y₄' ∷ mdhms ∷ʳ z ++ suffix
+                ps≡' = trans (cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) ps≡₁) (trans ps≡₀ (sym ps≡)) -- trans ps≡₀ (sym ps≡)
+
+                @0 ps≡″ : pre₁ ++ suf₁ ≡ mdhms ++ [ z ] ++ suffix
+                ps≡″ = trans₀ (Lemmas.++-cancel≡ˡ _ _ (proj₁ $ Lemmas.length-++-≡ v₀ _ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ ps≡' refl) ps≡') (solve (++-monoid Dig))
+            in
+            contradiction
+              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (NonNesting.MonthDayHourMinSecFields (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
+              ¬parse
+    case All.all? (inRange? '0' '9') v₀ of λ where
+      (no ¬allv₀) → do
+        tell $ here' String.++ ": bad year"
+        return ∘ no $ λ where
+          (success prefix@._ read read≡ (Generic.mkGenTimeFields year yearRange mmddhhmmss z≡ refl) suffix ps≡) →
+            contradiction
+              (subst (All (InRange '0' '9')) (proj₁ $ Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₀)) refl) yearRange)
+              ¬allv₀
+      (yes allv₀) →
+        return (yes
+          (success (v₀ ++ pre₁ ++ pre₂) (r₀ + r₁ + 1)
+            (begin r₀ + r₁ + 1                       ≡⟨ cong (λ x → x + r₁ + 1) r₀≡ ⟩
+                   length v₀ + r₁ + 1                ≡⟨ cong (λ x → length v₀ + x + 1) r₁≡ ⟩
+                   length (v₀ ++ pre₁) + length pre₂ ≡⟨ sym $ length-++ (v₀ ++ pre₁) ⟩
+                   length (v₀ ++ pre₁ ++ pre₂)       ∎)
+            (Generic.mkGenTimeFields self allv₀ v₁ refl refl) suf₂
+            (begin (v₀ ++ pre₁ ++ pre₂) ++ suf₂  ≡⟨ cong (v₀ ++_) (solve (++-monoid Dig)) ⟩
+                    v₀ ++ pre₁ ++ (pre₂ ++ suf₂) ≡⟨ cong (λ x → v₀ ++ pre₁ ++ x) ps≡₂ ⟩
+                    v₀ ++ pre₁ ++ suf₁           ≡⟨ cong (v₀ ++_) ps≡₁ ⟩
+                    v₀ ++ suf₀                   ≡⟨ ps≡₀ ⟩
+                    xs                           ∎)))
 
 open parseGenTimeFields public using (parseGenTimeFields)
 
