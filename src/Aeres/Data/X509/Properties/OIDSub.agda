@@ -18,3 +18,7 @@ nonempty (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) r
 
 postulate
   nonnesting : NonNesting Generic.OIDSub
+-- nonnesting {_} {ys₁} {_} {ys₂} x (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs refl) (Generic.mkOIDSub [] lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl) = {!!}
+-- nonnesting {_} {ys₁} {_} {ys₂} x (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs refl) (Generic.mkOIDSub (x₁ ∷ lₚ₁) lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl) = {!!}
+-- nonnesting {_} {ys₁} {_} {ys₂} x (Generic.mkOIDSub (x₁ ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs refl) (Generic.mkOIDSub [] lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl) = {!!}
+-- nonnesting {_} {ys₁} {_} {ys₂} x (Generic.mkOIDSub (x₁ ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs refl) (Generic.mkOIDSub (x₂ ∷ lₚ₁) lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl) = {!!}

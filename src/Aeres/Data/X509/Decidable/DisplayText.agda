@@ -43,3 +43,17 @@ module parseDisplayText where
         contradiction (success _ _ read≡ x _ ps≡) ¬utf8
 
 open parseDisplayText public using (parseDisplayText)
+
+
+Dis₁ : List Dig
+Dis₁ = Tag.IA5String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+
+Dis₂ : List Dig
+Dis₂ = Tag.UTF8String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+
+
+test₁ : X509.DisplayText Dis₁
+test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₁)} tt)
+
+test₂ : X509.DisplayText Dis₂
+test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₂)} tt)
