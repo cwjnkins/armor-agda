@@ -56,8 +56,8 @@ Dir₂ : List Dig
 Dir₂ = Tag.PrintableString ∷ # 2 ∷ # 85 ∷ [ # 87 ]
 
 
-test₁ : X509.DirectoryString Dir₁
-test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₁)} tt)
+test₃₁ : X509.DirectoryString Dir₁
+test₃₁ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₁)} tt)
 
-test₂ : X509.DirectoryString Dir₂
-test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₂)} tt)
+test₃₂ : X509.DirectoryString Dir₂
+test₃₂ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₂)} tt)

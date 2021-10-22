@@ -52,8 +52,8 @@ Dis₂ : List Dig
 Dis₂ = Tag.UTF8String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
 
 
-test₁ : X509.DisplayText Dis₁
-test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₁)} tt)
+test₅₁ : X509.DisplayText Dis₁
+test₅₁ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₁)} tt)
 
-test₂ : X509.DisplayText Dis₂
-test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₂)} tt)
+test₅₂ : X509.DisplayText Dis₂
+test₅₂ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₂)} tt)
