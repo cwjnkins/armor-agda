@@ -263,7 +263,7 @@ module Generic where
     field
       bₕ : Dig
       @0 bₕ<8 : toℕ bₕ < 8
-      bₜ : List Dig
+      bₜ : List Dig         -- TODO : change to List bool and handle padding properly
       @0 unusedBits : BitstringUnusedBits bₕ bₜ
       @0 bs≡ : bs ≡ bₕ ∷ bₜ
 
