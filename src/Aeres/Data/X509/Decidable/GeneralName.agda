@@ -114,3 +114,23 @@ module parseGeneralName where
 
 open parseGeneralName public
   using (parseGeneralName ; parseGeneralNamesElems ; parseGeneralNames)
+
+
+Gen₁ : List Dig
+Gen₁ = Tag.EightyOne ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+
+Gen₂ : List Dig
+Gen₂ = Tag.EightyEight ∷ # 2 ∷ # 134 ∷ [ # 72 ]
+
+Gen₃ : List Dig
+Gen₃ = Tag.A4 ∷ # 26 ∷ # 49 ∷ # 11  ∷ # 48  ∷ # 9  ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ # 83 ∷ # 49 ∷ # 11 ∷ # 48 ∷ # 9 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ [ # 83 ]
+
+
+test₄₁ : X509.GeneralName Gen₁
+test₄₁ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₁)} tt)
+
+test₄₂ : X509.GeneralName Gen₂
+test₄₂ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₂)} tt)
+
+test₄₃ : X509.GeneralName Gen₃
+test₄₃ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₃)} tt)
