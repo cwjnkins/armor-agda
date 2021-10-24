@@ -416,3 +416,33 @@ module parseAKIFields where
       contradiction (trans (trans r₃≡ (cong length $ TLV.nonnesting (trans ps≡₃ (sym ps≡)) authcertsn' authcertsn)) n'≡) (<⇒≢ r₃<n‴)
     underflow x₁ r₁<n' n“ x₂ r₂<n“ n‴ x₃ r₃<n‴ (success prefix read read≡ (mk×ₚ (X509.mkAKIFieldsSeqFields none none none refl) () refl) suffix ps≡)
 
+open parseAKIFields public using (parseAKIKeyId ; parseAKIAuthCertIssuer ; parseAKIAuthCertSN ; parseAKIFieldsSeqFields)
+
+
+private
+  module Test where
+
+    AKIid₁ : List Dig
+    AKIid₁ = # 128 ∷ # 20 ∷ # 20 ∷ # 46 ∷ # 179 ∷ # 23 ∷ # 183 ∷ # 88 ∷ # 86 ∷ # 203 ∷ # 174 ∷ # 80 ∷ # 9 ∷ # 64 ∷ # 230 ∷ # 31 ∷ # 175 ∷ # 157 ∷ # 139 ∷ # 20 ∷ # 194 ∷ [ # 198 ]
+
+    AKIsn₁ : List Dig
+    AKIsn₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
+
+    AKIissuer₁ : List Dig
+    AKIissuer₁ = # 161 ∷ # 8 ∷ # 130 ∷ # 2 ∷ # 90 ∷ # 90 ∷ # 130 ∷ # 2 ∷ # 90 ∷ [ # 90 ]
+
+    AKIfields₁ : List Dig
+    AKIfields₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
+    
+    AKIidtest₁ : X509.AKIKeyId AKIid₁
+    AKIidtest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId AKIid₁)} tt)
+
+    AKIissuertest₁ : X509.AKIAuthCertIssuer AKIissuer₁
+    AKIissuertest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer AKIissuer₁)} tt)
+
+    AKIsntest₁ : X509.AKIAuthCertSN AKIsn₁
+    AKIsntest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN AKIsn₁)} tt)
+
+    -- AKIfieldstest₁ : X509.AKIFieldsSeqFields AKIfields₁
+    -- AKIfieldstest₁ = Success.value (toWitness {Q = Logging.val (runParser {!parseAKIFieldsSeqFields!} AKIfields₁) } tt)
+
