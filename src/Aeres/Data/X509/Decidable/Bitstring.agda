@@ -109,8 +109,8 @@ private
     test₂ : Generic.Bitstring Bitstring₂
     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₂)} tt)
 
-    test₃ : Generic.Bitstring Bitstring₃ ---- ???
-    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt)
+    -- test₃ : ¬ Success _ Generic.Bitstring Bitstring₃
+    -- test₃ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt
 
     test₄ : ¬ Success _ Generic.Bitstring Bitstring₄
     test₄ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₄)} tt

@@ -41,3 +41,15 @@ parseValidity : Parser Dig (Logging ∘ Dec) X509.Validity
 parseValidity =
   parseTLV _ "Validity" _
     (parseExactLength _ NonNesting.ValidityFields (tell $ "validity: length mismatch") parseValidityFields)
+
+
+
+--- test is not successful due to parsing issues in Time ? 
+private
+  module Test where
+
+    Validity₁ : List Dig
+    Validity₁ = Tag.Sequence ∷ # 32 ∷ # Tag.Gentime ∷ # 15 ∷ # 50 ∷ # 56 ∷ # 52 ∷ # 49 ∷ # 48 ∷ # 54 ∷ # 50 ∷ # 52 ∷ # 49 ∷ # 56 ∷ # 51 ∷ # 54 ∷ # 53 ∷ # 52 ∷ # 90 ∷ # Tag.Utctime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
+
+    -- validitytest₁ : X509.Validity Validity₁
+    -- validitytest₁ = Success.value (toWitness {Q = Logging.val (runParser parseValidity Validity₁)} tt)
