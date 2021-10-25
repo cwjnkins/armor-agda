@@ -324,11 +324,28 @@ module Lemmas where
   -- ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   -- ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
 
+  take-length-++ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → take (length xs) (xs ++ ys) ≡ xs
+  take-length-++ [] ys = refl
+  take-length-++ (x ∷ xs) ys = cong (x ∷_) (take-length-++ xs ys)
+
   length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
   length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
   length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
     with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
   ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs
+
+  ++-≡-⊆ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → ∃[ n ] ( ws ++ take n xs ≡ ys ⊎  ws ≡ ys ++ take n zs)
+  ++-≡-⊆ [] xs [] zs eq = 0 , inj₁ refl
+  ++-≡-⊆ [] (x₁ ∷ xs) (x ∷ ys) zs eq =
+    1 + length ys
+    , inj₁ (begin take (1 + length ys) (x₁ ∷ xs)
+                    ≡⟨ cong (take (1 + length ys)) eq ⟩
+                  take (1 + length ys) (x ∷ ys ++ zs)
+                    ≡⟨ cong (x ∷_) (take-length-++ ys zs) ⟩
+                  x ∷ ys ∎)
+    where open ≡-Reasoning
+  ++-≡-⊆ (x ∷ ws) xs [] zs eq = ?
+  ++-≡-⊆ (x ∷ ws) xs (x₁ ∷ ys) zs eq = {!!}
 
   length-++-≤₁ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → length xs ≤ length (xs ++ ys)
   length-++-≤₁ [] ys = z≤n
