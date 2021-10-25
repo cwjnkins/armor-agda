@@ -8,6 +8,7 @@ import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
+import Aeres.Data.X509.Properties.ValidityFields
 
 module Aeres.Data.X509.Properties where
 
@@ -31,12 +32,7 @@ module NonNesting where
 
   postulate
     MonthDayHourMinSecFields : NonNesting Generic.MonthDayHourMinSecFields
---    UtcTimeFields : NonNesting Generic.UtcTimeFields
---    GenTimeFields : NonNesting Generic.GenTimeFields
---    Time          : NonNesting Generic.Time
-
     DirectoryString : NonNesting X509.DirectoryString
-    ValidityFields  : NonNesting X509.ValidityFields
     GeneralName     : NonNesting X509.GeneralName
 
 module OIDSub          = Aeres.Data.X509.Properties.OIDSub

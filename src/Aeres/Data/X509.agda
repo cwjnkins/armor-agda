@@ -333,8 +333,8 @@ module Generic where
       @0 {mo₁ mo₂ d₁ d₂ h₁ h₂ mi₁ mi₂ s₁ s₂} : Dig
 
       mon : Singleton (asciiNum (mo₁ ∷ [ mo₂ ]))
-      @0 monRange  :   mo₁ ≡ # 0 × InRange '0' '9' mo₂
-                     ⊎ mo₁ ≡ # 1 × InRange '0' '2' mo₂
+      @0 monRange  :   mo₁ ≡ # '0' × InRange '0' '9' mo₂
+                     ⊎ mo₁ ≡ # '1' × InRange '0' '2' mo₂
 
       -- TODO: where do we check valid dom? (Feb, leap year, etc)
       day : Singleton (asciiNum (d₁ ∷ [ d₂ ]))

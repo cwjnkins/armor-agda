@@ -434,14 +434,14 @@ private
     AKIfields₁ : List Dig
     AKIfields₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
     
-    AKIidtest₁ : X509.AKIKeyId AKIid₁
-    AKIidtest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId AKIid₁)} tt)
+    test₁ : X509.AKIKeyId AKIid₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId AKIid₁)} tt)
 
-    AKIissuertest₁ : X509.AKIAuthCertIssuer AKIissuer₁
-    AKIissuertest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer AKIissuer₁)} tt)
+    test₂ : X509.AKIAuthCertIssuer AKIissuer₁
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer AKIissuer₁)} tt)
 
-    AKIsntest₁ : X509.AKIAuthCertSN AKIsn₁
-    AKIsntest₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN AKIsn₁)} tt)
+    test₃ : X509.AKIAuthCertSN AKIsn₁
+    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN AKIsn₁)} tt)
 
     -- AKIfieldstest₁ : X509.AKIFieldsSeqFields AKIfields₁
     -- AKIfieldstest₁ = Success.value (toWitness {Q = Logging.val (runParser {!parseAKIFieldsSeqFields!} AKIfields₁) } tt)

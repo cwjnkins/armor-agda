@@ -29,6 +29,7 @@ open import Aeres.Data.X509.Properties.Primitives
 open import Aeres.Data.X509.Properties.PublicKeyFields
 open import Aeres.Data.X509.Properties.TLV
 open import Aeres.Data.X509.Properties.Time
+open import Aeres.Data.X509.Properties.ValidityFields
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Aeres.Prelude
