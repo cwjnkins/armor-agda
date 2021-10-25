@@ -47,3 +47,17 @@ module parseDirectoryString where
         contradiction (success _ _ read≡ x _ ps≡) ¬bmp
 
 open parseDirectoryString public using (parseDirectoryString)
+
+
+Dir₁ : List Dig
+Dir₁ = Tag.TeletexString ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+
+Dir₂ : List Dig
+Dir₂ = Tag.PrintableString ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+
+
+test₃₁ : X509.DirectoryString Dir₁
+test₃₁ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₁)} tt)
+
+test₃₂ : X509.DirectoryString Dir₂
+test₃₂ = Success.value (toWitness {Q = Logging.val (runParser parseDirectoryString Dir₂)} tt)

@@ -336,3 +336,21 @@ runParser parseTime xs = do
             (success prefix read read≡ (Generic.gentm x) suffix ps≡) →
               contradiction (success prefix _ read≡ x _ ps≡) ¬gen
       return (yes (mapSuccess _ (λ {bs} → Generic.gentm{bs}) gen))
+
+
+
+---- test cases not working, needs to recheck the parser / mmddhhmmss parser
+private
+  module Test where
+
+    Gen₁ : List Dig
+    Gen₁ = # Tag.Gentime ∷ # 15 ∷ # 50 ∷ # 56 ∷ # 52 ∷ # 49 ∷ # 48 ∷ # 54 ∷ # 50 ∷ # 52 ∷ # 49 ∷ # 56 ∷ # 51 ∷ # 54 ∷ # 53 ∷ # 52 ∷ [ # 90 ]
+
+    Utc₁ : List Dig
+    Utc₁ = # Tag.Utctime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
+
+    -- gentest₁ : Generic.Time Gen₁
+    -- gentest₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)
+
+    -- utctest₁ : Generic.Time Utc₁
+    -- utctest₁ = Success.value (toWitness {Q = Logging.val (runParser parseTime Utc₁)} tt)

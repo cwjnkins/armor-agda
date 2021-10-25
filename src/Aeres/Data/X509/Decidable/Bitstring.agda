@@ -78,3 +78,49 @@ module parseBitstring where
     parseTLV Tag.EightyTwo "subUID" Generic.BitstringValue parseBitstringValue
 
 open parseBitstring public using (parseBitstring ; parseIssUID)
+
+private
+  module Test where
+
+    Bitstring₁ : List Dig
+    Bitstring₁ = Tag.Bitstring ∷ # 2 ∷ # 5 ∷ [ # 160 ]
+
+    Bitstring₂ : List Dig
+    Bitstring₂ = Tag.Bitstring ∷ # 2 ∷ # 0 ∷ [ # 160 ]
+
+    Bitstring₃ : List Dig
+    Bitstring₃ = Tag.Bitstring ∷ # 2 ∷ # 7 ∷ [ # 160 ] -- recheck, should be rejected
+
+    Bitstring₄ : List Dig
+    Bitstring₄ = Tag.Bitstring ∷ # 2 ∷ # 8 ∷ [ # 160 ]
+
+    Bitstring₅ : List Dig
+    Bitstring₅ = Tag.Bitstring ∷ # 3 ∷ # 8 ∷ # 255 ∷ [ # 160 ]
+
+    Bitstring₆ : List Dig
+    Bitstring₆ = Tag.Bitstring ∷ # 1 ∷ [ # 0 ]
+
+    Bitstring₇ : List Dig
+    Bitstring₇ = Tag.Bitstring ∷ # 1 ∷ [ # 3 ]
+
+    test₁ : Generic.Bitstring Bitstring₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₁)} tt)
+
+    test₂ : Generic.Bitstring Bitstring₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₂)} tt)
+
+    -- test₃ : ¬ Success _ Generic.Bitstring Bitstring₃
+    -- test₃ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt
+
+    test₄ : ¬ Success _ Generic.Bitstring Bitstring₄
+    test₄ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₄)} tt
+
+    test₅ : ¬ Success _ Generic.Bitstring Bitstring₅
+    test₅ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₅)} tt
+
+    test₆ : Generic.Bitstring Bitstring₆
+    test₆ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₆)} tt)
+
+    test₇ : ¬ Success _ Generic.Bitstring Bitstring₇
+    test₇ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₇)} tt
+

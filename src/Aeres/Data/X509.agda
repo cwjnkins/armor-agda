@@ -263,7 +263,7 @@ module Generic where
     field
       bₕ : Dig
       @0 bₕ<8 : toℕ bₕ < 8
-      bₜ : List Dig
+      bₜ : List Dig         -- TODO : change to List bool and handle padding properly
       @0 unusedBits : BitstringUnusedBits bₕ bₜ
       @0 bs≡ : bs ≡ bₕ ∷ bₜ
 
@@ -421,6 +421,9 @@ module X509 where
     Sha224Rsa : List Dig
     Sha224Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
 
+    RsaEncPk : List Dig
+    RsaEncPk = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]
+
   -- RSA explicit null param case covered here
   -- TODO : add cases for other RSA signature algorithms
   -- TODO: The current definition fails the "Unambiguous" property
@@ -432,6 +435,7 @@ module X509 where
     sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
+    rsaEncPk    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaEncPk)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
 
   record SignAlgFields (bs : List Dig) : Set where
