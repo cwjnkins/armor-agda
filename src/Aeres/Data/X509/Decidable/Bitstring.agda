@@ -25,45 +25,43 @@ module parseBitstring where
 
   parseBitstringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.BitstringValue n)
   runParser (parseBitstringValue n) xs = do
-      yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) bsLen refl) suf₀ ps≡₀) ←
-        runParser (parseN Dig n (tell $ here' String.++ ": underflow")) xs
-        where
-          (yes (success .[] .0 refl (mk×ₚ (singleton [] refl) refl refl) .xs refl)) →
-            return ∘ no $ λ where
-              (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 bₜ unusedBits refl) () refl) suffix ps≡)
-          (no ¬parse) →
-            return ∘ no $ λ where
-              (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 bₜ unusedBits refl) bsLen refl) suffix ps≡) →
-                contradiction
-                  (success (bₕ ∷ bₜ) read read≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) bsLen refl) suffix ps≡)
-                  ¬parse
-      case toℕ bₕ <? 8 of λ where
-        (no  bₕ≮8) → do
-          tell $ here' String.++ ": unused bits filed too large"
+    yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) bsLen refl) suf₀ ps≡₀) ←
+      runParser (parseN Dig n (tell $ here' String.++ ": underflow")) xs
+      where
+        (yes (success .[] .0 refl (mk×ₚ (singleton [] refl) refl refl) .xs refl)) →
           return ∘ no $ λ where
-            (success .(bₕ' ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ' bₕ<8 bₜ unusedBits refl) bsLen refl) suffix ps≡) →
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) () refl) suffix ps≡)
+        (no ¬parse) →
+          return ∘ no $ λ where
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
               contradiction
-                (subst ((_< 8) ∘ toℕ) (∷-injectiveˡ (trans ps≡ (sym ps≡₀))) bₕ<8)
-                bₕ≮8
-        (yes bₕ<8) →
-          (case bₜ ret (λ x → x ≡ bₜ → _) of λ where
-            [] refl →
-              case bₕ ≟ # 0 of λ where
-                (no  bₕ≢0) → do
-                  tell $ here' String.++ ": non-zero unused bits in 0-bit string"
-                  return ∘ no $ λ where
-                    (success ._ read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 [] unusedBits refl) bsLen refl) suffix ps≡) →
-                      contradiction
-                        (subst (_≡ # 0) (∷-injectiveˡ (trans ps≡ (sym ps≡₀))) unusedBits)
-                        bₕ≢0
-                    (success ._ read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 (bₜ₁ ∷ bₜ) unusedBits refl) bsLen' refl) suffix ps≡) →
-                      case (1 ≡ 2 + (length bₜ)) ∋ trans bsLen (sym bsLen') of λ ()
-                (yes bₕ≡0) →
-                  return (yes
-                    (success [ bₕ ] _ refl (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 [] bₕ≡0 refl) bsLen refl) suf₀ ps≡₀))
-            (bₜ₁ ∷ bₜ) refl →
-              return (yes (success (bₕ ∷ bₜ₁ ∷ bₜ) r₀ r₀≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₕ<8 (bₜ₁ ∷ bₜ) tt refl) bsLen refl) suf₀ ps≡₀)))
-          refl
+                (success (bₕ ∷ bₜ) _ read≡ (mk×ₚ self sndₚ₁ refl) suffix ps≡)
+                ¬parse
+    case toℕ bₕ <? 8 of λ where
+      (no bₕ≮8) → do
+        tell $ here' String.++ ": unused bits field too large"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+            contradiction
+              (≤-trans (Lemmas.≡⇒≤ (cong (suc ∘ toℕ) (∷-injectiveˡ (trans₀ ps≡₀ (sym ps≡))))) bₕ<8)
+              bₕ≮8
+      (yes bₕ<8) →
+        case Generic.bitstringUnusedBits? bₕ bₜ of λ where
+          (no ¬validunused) → do
+            tell $ here' String.++ ": bad unused bits"
+            return ∘ no $ λ where
+              (success prefix read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ' bₜ' _ _ unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+                contradiction
+                  (subst₂ Generic.BitstringUnusedBits{x = bₕ'}{u = bₜ'}{bₜ}
+                    (∷-injectiveˡ (trans₀ ps≡ (sym ps≡₀)))
+                    (∷-injectiveʳ (exactLength-nonnesting _ (trans₀ ps≡ (sym ps≡₀))
+                                    (mk×ₚ{A = Singleton} self sndₚ₁ refl)
+                                    (mk×ₚ self bsLen refl)))
+                    unusedBits)
+                  ¬validunused
+          (yes validunused) →
+            return (yes
+              (success (bₕ ∷ bₜ) _ r₀≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 self validunused refl) bsLen refl) suf₀ ps≡₀))
 
   parseBitstring : Parser Dig (Logging ∘ Dec) Generic.Bitstring
   parseBitstring =
@@ -109,8 +107,8 @@ private
     test₂ : Generic.Bitstring Bitstring₂
     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₂)} tt)
 
-    -- test₃ : ¬ Success _ Generic.Bitstring Bitstring₃
-    -- test₃ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt
+    test₃ : ¬ Success _ Generic.Bitstring Bitstring₃
+    test₃ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt
 
     test₄ : ¬ Success _ Generic.Bitstring Bitstring₄
     test₄ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₄)} tt

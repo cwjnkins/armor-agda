@@ -59,6 +59,7 @@ open import Data.Maybe public
 
 open import Data.Nat     public
   hiding (_≟_)
+open import Data.Nat.DivMod public
 open import Agda.Builtin.Nat public
   using (_-_)
 
@@ -165,6 +166,12 @@ open import Relation.Unary public
   using (Decidable)
 
 -- Definitions
+infixl 7 _%2^_
+_%2^_ : (m n : ℕ) → ℕ
+m %2^ n = _%_ m (2 ^ n) {fromWitnessFalse {Q = 2 ^ n Data.Nat.≟ 0} (λ eq → case 2 ≡ 0 ∋ m^n≡0⇒m≡0 2 n eq of λ ())}
+  where open import Data.Nat.Properties
+
+
 record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
   constructor singleton
   field

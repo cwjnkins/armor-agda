@@ -255,15 +255,27 @@ module Generic where
   IntegerSeq xs = TLV Tag.Sequence (SeqElems Int) xs
 
   BitstringUnusedBits : Dig → List Dig → Set
-  BitstringUnusedBits bₕ [] = bₕ ≡ # 0
-  BitstringUnusedBits bₕ (_ ∷ _) = ⊤
+  BitstringUnusedBits bₕ [] = toℕ bₕ ≡ 0
+  BitstringUnusedBits bₕ (bₜ ∷ []) = toℕ bₜ %2^ (toℕ bₕ) ≡ 0
+  BitstringUnusedBits bₕ (bₜ ∷ x ∷ bₜ') = BitstringUnusedBits bₕ (x ∷ bₜ')
+
+  bitstringUnusedBits? : ∀ b bs → Dec (BitstringUnusedBits b bs)
+  bitstringUnusedBits? b [] = toℕ b ≟ 0
+  bitstringUnusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
+  bitstringUnusedBits? b (x ∷ x₁ ∷ bs) = bitstringUnusedBits? b (x₁ ∷ bs)
+
+  toBitRep : Dig → List Dig → List Bool
+  toBitRep bₕ [] = []
+  toBitRep bₕ (bₜ ∷ []) = take (8 - toℕ bₜ) (Vec.toList{n = 8} (toBinary bₜ))
+  toBitRep bₕ (bₜ ∷ x ∷ bₜ') = Vec.toList{n = 8} (toBinary bₜ) ++ toBitRep bₕ (x ∷ bₜ')
 
   record BitstringValue (@0 bs : List Dig) : Set where
     constructor mkBitstringValue
     field
-      bₕ : Dig
+      @0 bₕ : Dig
+      @0 bₜ : List Dig
       @0 bₕ<8 : toℕ bₕ < 8
-      bₜ : List Dig         -- TODO : change to List bool and handle padding properly
+      bits : Singleton (toBitRep bₕ bₜ)
       @0 unusedBits : BitstringUnusedBits bₕ bₜ
       @0 bs≡ : bs ≡ bₕ ∷ bₜ
 
