@@ -32,41 +32,41 @@ module parseMonthDayHourMinSecFields where
               (success prefix _ refl (mk×ₚ singleSelf refl refl) suffix ps≡)
               ¬parse
     case check mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 suf₀ of λ where
-      (no  ¬check) → do
-        tell $ here' String.++ ": range check failed"
+      (l , no  ¬check) → do
+        tell $ here' String.++ ": range check failed " String.++ l
         return (no ¬check)
-      (yes ✓check) →
+      (_ , yes ✓check) →
         return (yes ✓check)
     where
     check : ∀ mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 suf₀
-            → Dec (Success Dig Generic.MonthDayHourMinSecFields (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ suf₀))
+            → String × Dec (Success Dig Generic.MonthDayHourMinSecFields (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ suf₀))
     check mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 suf₀
-      with mn1 ≟ # 0 ×-dec inRange? '0' '9' mn2 ⊎-dec mn1 ≟ # 1 ×-dec inRange? '0' '2' mn2
-    ... | no ¬mnᵣ = no λ where
+      with mn1 ≟ # '0' ×-dec inRange? '0' '9' mn2 ⊎-dec mn1 ≟ # '1' ×-dec inRange? '0' '2' mn2
+    ... | no ¬mnᵣ = "month" ,  no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ monRange _ _ _ _ _ _ _ _ refl) ._ refl) →
         contradiction monRange ¬mnᵣ
     ... | yes mnᵣ
       with inRange? '0' '2' d1 ×-dec inRange? '0' '9' d2 ⊎-dec toℕ d1 ≟ toℕ '3' ×-dec inRange? '0' '1' d2
-    ... | no ¬dᵣ = no λ where
+    ... | no ¬dᵣ = "day" , no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ dayRange _ _ _ _ _ _ refl) ._ refl) →
         contradiction dayRange ¬dᵣ
     ... | yes dᵣ
       with inRange? '0' '1' h1 ×-dec inRange? '0' '9' h2 ⊎-dec toℕ h1 ≟ toℕ '2' ×-dec inRange? '0' '3' h2
-    ... | no ¬hᵣ = no λ where
+    ... | no ¬hᵣ = "hour" , no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ _ _ hourRange _ _ _ _ refl) ._ refl) →
         contradiction hourRange ¬hᵣ
     ... | yes hᵣ
       with inRange? '0' '5' mi1 ×-dec inRange? '0' '9' mi2
-    ... | no ¬miᵣ = no λ where
+    ... | no ¬miᵣ = "min" , no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ _ _ _ _ minRange _ _ refl) ._ refl) →
         contradiction minRange ¬miᵣ
     ... | yes miᵣ
       with inRange? '0' '5' s1 ×-dec inRange? '0' '9' s2
-    ... | no ¬sᵣ = no λ where
+    ... | no ¬sᵣ = "sec" , no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ _ _ _ _ _ _ secRange refl) ._ refl) →
         contradiction secRange ¬sᵣ
     ... | yes sᵣ =
-      yes (success _ _ refl
+      "" , yes (success _ _ refl
         (Generic.mkMDHMSFields singleSelf mnᵣ singleSelf dᵣ singleSelf hᵣ singleSelf miᵣ singleSelf sᵣ refl)
         suf₀ refl)
 
@@ -339,7 +339,6 @@ runParser parseTime xs = do
 
 
 
----- test cases not working, needs to recheck the parser / mmddhhmmss parser
 private
   module Test where
 
@@ -349,8 +348,8 @@ private
     Utc₁ : List Dig
     Utc₁ = # Tag.Utctime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
 
-    -- gentest₁ : Generic.Time Gen₁
-    -- gentest₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)
+    test₁ : Generic.Time Gen₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)
 
-    -- utctest₁ : Generic.Time Utc₁
-    -- utctest₁ = Success.value (toWitness {Q = Logging.val (runParser parseTime Utc₁)} tt)
+    test₂ : Generic.Time Utc₁
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseTime Utc₁)} tt)

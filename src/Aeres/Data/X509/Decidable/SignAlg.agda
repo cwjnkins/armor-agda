@@ -37,12 +37,12 @@ private
     Sa₃ : List Dig
     Sa₃ = Tag.Sequence ∷ # 13 ∷ # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 11 ∷ # 5 ∷ [ # 0 ]
 
-    -- satest₁ : X509.SignAlg Sa₁
-    -- satest₁ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₁)} tt)
+    -- test₁ : X509.SignAlg Sa₁
+    -- test₁ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₁)} tt)
 
-    -- satest₂ : X509.SignAlg Sa₂
-    -- satest₂ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₂)} tt)
+    -- test₂ : X509.SignAlg Sa₂
+    -- test₂ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₂)} tt)
 
-    -- satest₃ : X509.SignAlg Sa₃
-    -- satest₃ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₃)} tt)
+    -- test₃ : X509.SignAlg Sa₃
+    -- test₃ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₃)} tt)
 
