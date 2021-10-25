@@ -57,7 +57,7 @@ open parseRDN public
   using (parseRDN ; parseRDNSeq)
 
 
-private                         
+private
   module Test where
 
   Name₁ : List Dig

@@ -450,7 +450,7 @@ module X509 where
     rsaEncPk    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaEncPk)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
     _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
 
-  record SignAlgFields (bs : List Dig) : Set where
+  record SignAlgFields (@0 bs : List Dig) : Set where
     constructor mkSignAlgFields
     field
       @0 {o p} : List Dig
@@ -498,7 +498,6 @@ module X509 where
     bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
     utf8String : ∀ {@0 bs} → UTF8String bs → DisplayText bs
 
-  -- TODO: these fields can come in any order!
   record RDNATVFields (@0 bs : List Dig) : Set where
     constructor mkRDNATVFields
     field

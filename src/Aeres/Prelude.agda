@@ -322,6 +322,16 @@ module Lemmas where
   open import Data.Nat.Properties
   open import Data.List.Properties
 
+  m+n-m≡n : ∀ {m n} → m ≤ n → m + (n - m) ≡ n
+  m+n-m≡n{m}{n} m≤n = begin
+    m + (n - m) ≡⟨ sym $ +-∸-assoc m m≤n ⟩
+    m + n - m ≡⟨ cong (_∸ m) (+-comm m n) ⟩
+    n + m - m ≡⟨ +-∸-assoc n {m} ≤-refl ⟩
+    n + (m - m) ≡⟨ cong (n +_) (n∸n≡0 m) ⟩
+    n + 0 ≡⟨ +-identityʳ n ⟩
+    n ∎
+    where open ≡-Reasoning
+
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   ++-assoc₄{A = A} ws xs ys zs = solve (++-monoid A)
 

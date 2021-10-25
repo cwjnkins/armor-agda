@@ -116,7 +116,7 @@ open parseGeneralName public
   using (parseGeneralName ; parseGeneralNamesElems ; parseGeneralNames)
 
 
-private                         
+private
   module Test where
 
   Gen₁ : List Dig
