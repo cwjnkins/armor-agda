@@ -99,20 +99,23 @@ open parseIA5StringValue public using (parseIA5StringValue)
 parseIA5String : Parser Dig (Logging ∘ Dec) X509.IA5String
 parseIA5String = parseTLV _ "IA5String" _ parseIA5StringValue
 
-Oct₁ : List Dig
-Oct₁ = Tag.Octetstring ∷ # 2 ∷ # 1 ∷ [ # 1 ]
+private                         
+  module Test where
+  
+  Oct₁ : List Dig
+  Oct₁ = Tag.Octetstring ∷ # 2 ∷ # 1 ∷ [ # 1 ]
 
-I5₂ : List Dig
-I5₂ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 1 ]
+  I5₂ : List Dig
+  I5₂ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 1 ]
 
-I5₃ : List Dig
-I5₃ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 160 ]
+  I5₃ : List Dig
+  I5₃ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 160 ]
 
-test₁ : Generic.Octetstring Oct₁
-test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOctetstring Oct₁)} tt)
+  test₁ : Generic.Octetstring Oct₁
+  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOctetstring Oct₁)} tt)
 
-test₂ :  X509.IA5String I5₂
-test₂ = Success.value (toWitness {Q = Logging.val (runParser parseIA5String I5₂)} tt)
+  test₂ :  X509.IA5String I5₂
+  test₂ = Success.value (toWitness {Q = Logging.val (runParser parseIA5String I5₂)} tt)
 
-test₃ : ¬ Success _ X509.IA5String I5₃
-test₃ = toWitnessFalse {Q = Logging.val (runParser parseIA5String I5₃)} tt
+  test₃ : ¬ Success _ X509.IA5String I5₃
+  test₃ = toWitnessFalse {Q = Logging.val (runParser parseIA5String I5₃)} tt

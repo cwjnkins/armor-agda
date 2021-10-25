@@ -348,8 +348,8 @@ private
     Utc₁ : List Dig
     Utc₁ = # Tag.Utctime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
 
-    gentest₁ : Generic.Time Gen₁
-    gentest₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)
+    test₁ : Generic.Time Gen₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)
 
-    utctest₁ : Generic.Time Utc₁
-    utctest₁ = Success.value (toWitness {Q = Logging.val (runParser parseTime Utc₁)} tt)
+    test₂ : Generic.Time Utc₁
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseTime Utc₁)} tt)
