@@ -344,8 +344,18 @@ module Lemmas where
                     ≡⟨ cong (x ∷_) (take-length-++ ys zs) ⟩
                   x ∷ ys ∎)
     where open ≡-Reasoning
-  ++-≡-⊆ (x ∷ ws) xs [] zs eq = ?
-  ++-≡-⊆ (x ∷ ws) xs (x₁ ∷ ys) zs eq = {!!}
+  ++-≡-⊆ (x ∷ ws) xs [] zs eq =
+    1 + length ws
+    , inj₂ (begin (x ∷ ws ≡⟨ sym (cong (x ∷_) (take-length-++ ws xs)) ⟩
+                  take (length (x ∷ ws)) (x ∷ ws ++ xs) ≡⟨ cong (take (1 + length ws)) eq ⟩
+                  take (length (x ∷ ws)) zs ∎))
+    where open ≡-Reasoning
+  ++-≡-⊆ (x ∷ ws) xs (x₁ ∷ ys) zs eq
+    with ∷-injectiveˡ eq
+  ... | refl
+    with ++-≡-⊆ ws xs ys zs (∷-injectiveʳ eq)
+  ... | n , inj₁ ys⊆ = n , inj₁ (cong (x ∷_) ys⊆)
+  ... | n , inj₂ ws⊆ = n , inj₂ (cong (x ∷_) ws⊆)
 
   length-++-≤₁ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → length xs ≤ length (xs ++ ys)
   length-++-≤₁ [] ys = z≤n
@@ -381,3 +391,7 @@ module Lemmas where
   all-++-≡ P (px ∷ allws) ¬x (px₁ ∷ allys) ¬z eq
     with ∷-injectiveˡ eq
   ... | refl = cong (_ ∷_) (all-++-≡ _ allws ¬x allys ¬z (∷-injectiveʳ eq))
+
+  ∷ʳ⇒≢[] : ∀ {ℓ} {A : Set ℓ} {xs : List A} {y} → xs ∷ʳ y ≢ []
+  ∷ʳ⇒≢[] {xs = []} ()
+  ∷ʳ⇒≢[] {xs = x ∷ xs} ()
