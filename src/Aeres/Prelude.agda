@@ -310,10 +310,10 @@ instance
   Monad.return MonadLogging x = mkLogged [] x
   Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
     with f val₁
-  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ [ "\n" ] ++ log₂) val₂
+  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
 
   WriterLogging : Writer Logging String.String
-  Writer.tell   WriterLogging w = mkLogged [ w ] (Level.lift tt)
+  Writer.tell   WriterLogging w = mkLogged [ w String.++ "\n" ] (Level.lift tt)
 
 -- Lemmas
 module Lemmas where
