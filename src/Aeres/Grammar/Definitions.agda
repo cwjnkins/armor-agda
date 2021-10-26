@@ -29,7 +29,7 @@ unambiguousHet : ∀ {A} → Unambiguous A → ∀ {xs ys} → (eq : xs ≡ ys)
                  → (a₁ : A xs) (a₂ : A ys) → subst A eq a₁ ≡ a₂
 unambiguousHet ua refl a₁ a₂ = ua a₁ a₂
 
--- TODO: rename to "Unambiguous" 
+-- TODO: rename to "Unambiguous"
 NonNesting : (A : List Σ → Set) → Set
 NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
 

@@ -7,6 +7,7 @@ module Aeres.Data.X509 where
 open import Aeres.Binary
 open Base256
 open import Aeres.Grammar.Definitions Dig
+open import Aeres.Grammar.Sum Dig
 
 -------------------------------------------TAGS---------------------------------------------
 module Tag where
@@ -212,12 +213,16 @@ module Generic where
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
   -- TODO: extensions encoded as octet strings need to be tupled together with proofs
-  -- they can be parsed into supported structures
+  -- they can be parsed into supported structures (semantic checks)
   OctetstringValue :  (@0 _ : List Dig) → Set
   OctetstringValue =  Singleton
 
   Octetstring : (@0 _ : List Dig) → Set
   Octetstring xs = TLV Tag.Octetstring OctetstringValue xs
+
+  --Null--------------------------------------------
+  Null : (@0 _ : List Dig) → Set
+  Null = TLV Tag.Null (_≡ [])
 
   --Integers----------------------------------------
 
@@ -455,7 +460,7 @@ module X509 where
     field
       @0 {o p} : List Dig
       signOID : Generic.OID o
-      param : Option Generic.Octetstring p
+      param : Option (Sum Generic.Octetstring Generic.Null) p
 --      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
       @0 bs≡  : bs ≡ o ++ p
 

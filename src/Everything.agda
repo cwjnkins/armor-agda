@@ -12,6 +12,7 @@ open import Aeres.Data.X509.Decidable.DisplayText
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.Null
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.PublicKey

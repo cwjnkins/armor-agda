@@ -8,6 +8,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Grammar.Parser (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
+open import Aeres.Grammar.Sum Σ
 
 record Success (A : List Σ → Set) (xs : List Σ) : Set where
   constructor success
@@ -236,6 +237,28 @@ runParser (parseWhileₜ p) (x ∷ xs)
   yes (success (x ∷ prefix) (1 + read) (cong suc read≡)
          (mkParseWhile (x ∷ prefix₁) term (a All.∷ allPrefix) ¬term (cong (x ∷_) ps≡₁))
          suffix (cong (x ∷_) ps≡))
+
+--
+
+module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
+
+  parseSum : ∀ {A B} → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B → M (Level.Lift _ ⊤)
+             → Parser (M ∘ Dec) (Sum A B)
+  runParser (parseSum p₁ p₂ err) xs = do
+    no ¬parse₁ ← runParser p₁ xs
+      where yes x → return (yes (mapSuccess Sum.inj₁ x))
+    no ¬parse₂ ← runParser p₂ xs
+      where yes x → return (yes (mapSuccess Sum.inj₂ x))
+    err
+    return ∘ no $ λ where
+      (success prefix read read≡ (inj₁ x) suffix ps≡) →
+        contradiction
+          (success prefix _ read≡ x suffix ps≡)
+          ¬parse₁
+      (success prefix read read≡ (inj₂ x) suffix ps≡) →
+        contradiction
+          (success prefix _ read≡ x suffix ps≡)
+          ¬parse₂
 
 --
 
