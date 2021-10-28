@@ -24,7 +24,10 @@ open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.Validity
 open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Properties
+open import Aeres.Data.X509.Properties.DirectoryString
+open import Aeres.Data.X509.Properties.GeneralName
 open import Aeres.Data.X509.Properties.Length
+open import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 open import Aeres.Data.X509.Properties.OIDSub
 open import Aeres.Data.X509.Properties.Primitives
 open import Aeres.Data.X509.Properties.PublicKeyFields

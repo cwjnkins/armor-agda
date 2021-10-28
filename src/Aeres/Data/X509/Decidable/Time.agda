@@ -290,7 +290,7 @@ module parseGenTimeFields where
                 ps≡″ = trans₀ (Lemmas.++-cancel≡ˡ _ _ (proj₁ $ Lemmas.length-++-≡ v₀ _ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ ps≡' refl) ps≡') (solve (++-monoid Dig))
             in
             contradiction
-              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (NonNesting.MonthDayHourMinSecFields (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
+              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (Props.MonthDayHourMinSecFields.nonnesting (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
               ¬parse
     case All.all? (inRange? '0' '9') v₀ of λ where
       (no ¬allv₀) → do

@@ -87,7 +87,7 @@ private
     Bitstring₂ = Tag.Bitstring ∷ # 2 ∷ # 0 ∷ [ # 160 ]
 
     Bitstring₃ : List Dig
-    Bitstring₃ = Tag.Bitstring ∷ # 2 ∷ # 7 ∷ [ # 160 ] -- recheck, should be rejected
+    Bitstring₃ = Tag.Bitstring ∷ # 2 ∷ # 7 ∷ [ # 160 ]
 
     Bitstring₄ : List Dig
     Bitstring₄ = Tag.Bitstring ∷ # 2 ∷ # 8 ∷ [ # 160 ]

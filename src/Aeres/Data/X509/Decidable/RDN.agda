@@ -28,7 +28,7 @@ module parseRDN where
   runParser (parseRDNATVFields n) xs = do
     yes (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} oid ds refl) valLen refl) suffix ps≡)
       ← runParser (parseExactLength Dig
-                    (NonNesting&ₚ Dig Props.TLV.nonnesting Props.NonNesting.DirectoryString)
+                    (NonNesting&ₚ Dig Props.TLV.nonnesting Props.DirectoryString.nonnesting)
                     (tell $ here₁ String.++ ": underflow")
                     (parse& Dig Props.TLV.nonnesting parseOID parseDirectoryString) n) xs
       where no ¬parse → do

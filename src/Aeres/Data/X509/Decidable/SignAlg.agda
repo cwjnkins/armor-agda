@@ -117,6 +117,10 @@ private
     Sa₃ : List Dig
     Sa₃ = Tag.Sequence ∷ # 13 ∷ # Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 11 ∷ # 5 ∷ [ # 0 ]
 
+    --- this is a test case for non-RSA signature algorithm (ex: ECDSA)
+    Sa₄ : List Dig
+    Sa₄ = Tag.Sequence ∷ # 19 ∷ # 6 ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ # 1 ∷ # 6 ∷ # 8 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 3 ∷ # 1 ∷ [ # 7 ]
+
     test₁ : X509.SignAlg Sa₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₁)} tt)
 
@@ -126,3 +130,6 @@ private
     test₃ : X509.SignAlg Sa₃
     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₃)} tt)
 
+    -- this should pass after fixing "param" for non-RSA case
+    -- test₄ : X509.SignAlg Sa₄
+    -- test₄ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₄)} tt)

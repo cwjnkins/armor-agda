@@ -24,3 +24,18 @@ module parseNull where
         (parseLit _ (return (Level.lift tt)) (return (Level.lift tt)) [])))
 
 open parseNull public using (parseNull)
+
+private
+  module Test where
+
+    Null₁ : List Dig
+    Null₁ = Tag.Null ∷ [ # 0 ]
+
+    Badnull₂ : List Dig
+    Badnull₂ = Tag.Null ∷ # 1 ∷ [ # 0 ]
+
+    test₁ : Generic.Null Null₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseNull Null₁)} tt)
+
+    test₂ : ¬ Success _ Generic.Null Badnull₂
+    test₂ = toWitnessFalse {Q = Logging.val (runParser parseNull Badnull₂)} tt
