@@ -697,7 +697,7 @@ module X509 where
     constructor mkNoticeReferenceFields
     field
       @0 {org nn} : List Dig
-      organiztion : DisplayText org
+      organization : DisplayText org
       noticenums : Generic.IntegerSeq nn
       @0 bs≡  : bs ≡ org ++ nn
 

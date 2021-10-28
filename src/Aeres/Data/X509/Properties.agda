@@ -30,13 +30,22 @@ module NonNesting where
   open import Aeres.Grammar.Definitions Dig
   open import Aeres.Data.X509
 
+module DisplayText where
+  open import Aeres.Binary
+  open Base256
+  open import Aeres.Grammar.Definitions Dig
+  open import Aeres.Data.X509
+
+  postulate
+    nonnesting : NonNesting X509.DisplayText
+
+
+-- Finished lemmas
 module OIDSub            = Aeres.Data.X509.Properties.OIDSub
 module PublicKeyFields   = Aeres.Data.X509.Properties.PublicKeyFields
 module GeneralName       = Aeres.Data.X509.Properties.GeneralName
 module DirectoryString   = Aeres.Data.X509.Properties.DirectoryString
 module MonthDayHourMinSecFields = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
-
--- Finished lemmas
 module Length     = Aeres.Data.X509.Properties.Length
 module Primitives = Aeres.Data.X509.Properties.Primitives
 module TLV        = Aeres.Data.X509.Properties.TLV
