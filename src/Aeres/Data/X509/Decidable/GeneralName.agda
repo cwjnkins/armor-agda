@@ -107,7 +107,7 @@ module parseGeneralName where
 
   parseGeneralNamesElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.GeneralNamesElems n)
   parseGeneralNamesElems =
-    parseSeqElems "general name" _ NonEmpty.GeneralName NonNesting.GeneralName parseGeneralName
+    parseSeqElems "general name" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName
 
   parseGeneralNames : Parser Dig (Logging ∘ Dec) X509.GeneralNames
   parseGeneralNames = parseTLV _ "general names" _ parseGeneralNamesElems
