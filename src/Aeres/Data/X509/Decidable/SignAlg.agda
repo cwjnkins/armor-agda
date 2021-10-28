@@ -48,21 +48,18 @@ module parseSignAlg where
             (mk×ₚ (X509.mkSignAlgFields v₀ none (pre₀ ≡ pre₀ ++ [] ∋ solve (++-monoid Dig))) (trans₀ (sym r₀≡) r≡n) refl)
             suf₀ ps≡₀))
       (tri< r<n _ _) → do
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡₁) ←
-          runParser (parseExactLength _ (nonnestingSum _ Props.TLV.nonnesting Props.TLV.nonnesting (TLV.noconfusion (λ ())))
-                      (tell $ here' String.++ ": underflow")
-                      (parseSum _ parseOctetstring parseNull (tell here')) (n - r₀)) suf₀
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡₁) ← runParser (parseOctetstringValue (n - r₀)) suf₀
           where no ¬parse → do
             return ∘ no $ λ where
-             (success prefix read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID none refl) signAlgLen refl) suffix ps≡) →
-               contradiction
+              (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID none refl) signAlgLen refl) suffix ps≡) →
+                contradiction
                   (begin (r₀ ≡⟨ r₀≡ ⟩
                          length pre₀ ≡⟨ cong length (TLV.nonnesting (trans₀ ps≡₀ (trans₀ (sym ps≡) ((o ++ []) ++ suffix ≡ o ++ [] ++ suffix ∋ solve (++-monoid Dig)))) v₀ signOID) ⟩
                          length o ≡⟨ cong length (o ≡ o ++ [] ∋ solve (++-monoid Dig)) ⟩
                          length prefix ≡⟨ signAlgLen ⟩
                          n ∎))
-                 (<⇒≢ r<n)
-             (success prefix read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID (some param) refl) signAlgLen refl) suffix ps≡) → ‼
+                  (<⇒≢ r<n)
+              (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID (some param) refl) signAlgLen refl) suffix ps≡) → ‼
                 let @0 ps≡' : o ++ p ++ suffix ≡ pre₀ ++ suf₀
                     ps≡' = trans₀ (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid Dig)) (trans₀ ps≡ (sym ps≡₀))
 
@@ -73,10 +70,10 @@ module parseSignAlg where
                   (success _ _ refl
                     (mk×ₚ param
                       (begin (length p ≡⟨ (sym $ m+n∸n≡m (length p) (length o)) ⟩
-                             (length p + length o) - length o ≡⟨ cong (_∸ length o) (+-comm (length p) (length o)) ⟩
-                             length o + length p - length o ≡⟨ cong (_∸ length o) (sym (length-++ o)) ⟩
-                             length (o ++ p) - length o ≡⟨ cong (_∸ length o) signAlgLen ⟩
-                             n - length o ≡⟨ cong ((n ∸_) ∘ length) (sym pre₀≡) ⟩
+                             (length p + length o) - length o ≡⟨ cong (_- length o) (+-comm (length p) (length o)) ⟩
+                             length o + length p - length o ≡⟨ cong (_- length o) (sym (length-++ o)) ⟩
+                             length (o ++ p) - length o ≡⟨ cong (_- length o) signAlgLen ⟩
+                             n - length o ≡⟨ cong ((n -_) ∘ length) (sym pre₀≡) ⟩
                              n - length pre₀ ≡⟨ cong (n -_) (sym r₀≡) ⟩
                              n - r₀ ∎))
                       refl)
@@ -101,7 +98,6 @@ module parseSignAlg where
                    pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                    pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
                    xs ∎)))
-
 
   parseSignAlg : Parser Dig (Logging ∘ Dec) X509.SignAlg
   parseSignAlg =

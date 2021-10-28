@@ -460,7 +460,7 @@ module X509 where
     field
       @0 {o p} : List Dig
       signOID : Generic.OID o
-      param : Option (Sum Generic.Octetstring Generic.Null) p
+      param : Option Generic.OctetstringValue p
 --      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
       @0 bs≡  : bs ≡ o ++ p
 
