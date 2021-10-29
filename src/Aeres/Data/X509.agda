@@ -635,23 +635,23 @@ module X509 where
   KUFields xs = Generic.TLV Tag.Octetstring  Generic.Bitstring xs
 
 ----------------------------------- eku extension -----------------------------------
-  data EkuSeqElems : List Dig → Set
+  -- data EkuSeqElems : List Dig → Set
 
-  record EkuSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkEkuSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      ekuid : Generic.OID bs₁
-      rest   : EkuSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+  -- record EkuSeqElemsₐ (bs : List Dig) : Set where
+  --   inductive
+  --   constructor mkEkuSeqElemsₐ
+  --   field
+  --     @0 {bs₁ bs₂} : List Dig
+  --     ekuid : Generic.OID bs₁
+  --     rest   : EkuSeqElems bs₂
+  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data EkuSeqElems where
-    _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
-    cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
+  -- data EkuSeqElems where
+  --   _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
+  --   cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
-  EKUFieldsSeq xs = Generic.TLV Tag.Sequence  EkuSeqElems xs
+  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Generic.OID) xs
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs

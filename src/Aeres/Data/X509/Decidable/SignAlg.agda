@@ -130,6 +130,5 @@ private
     test₃ : X509.SignAlg Sa₃
     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₃)} tt)
 
-    -- this should pass after fixing "param" for non-RSA case
-    -- test₄ : X509.SignAlg Sa₄
-    -- test₄ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₄)} tt)
+    test₄ : X509.SignAlg Sa₄
+    test₄ = Success.value (toWitness {Q = Logging.val (runParser parseSignAlg Sa₄)} tt)
