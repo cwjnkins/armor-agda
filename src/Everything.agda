@@ -9,8 +9,11 @@ open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Boool
 open import Aeres.Data.X509.Decidable.DirectoryString
 open import Aeres.Data.X509.Decidable.DisplayText
+open import Aeres.Data.X509.Decidable.EKUFields
 open import Aeres.Data.X509.Decidable.GeneralName
+open import Aeres.Data.X509.Decidable.IANFields
 open import Aeres.Data.X509.Decidable.Int
+open import Aeres.Data.X509.Decidable.KUFields
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.NoticeReference
 open import Aeres.Data.X509.Decidable.Null
@@ -18,8 +21,10 @@ open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
+open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.SignAlg
+open import Aeres.Data.X509.Decidable.SKIFields
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.Validity
