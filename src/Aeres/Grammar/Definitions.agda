@@ -48,6 +48,10 @@ isNone : ∀ {@0 A xs} →  Option A xs → Bool
 isNone none = true
 isNone (some _) = false
 
+mapOption : ∀ {@0 A B} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Option A xs → Option B xs
+mapOption f none = none
+mapOption f (some x) = some (f x)
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
@@ -63,9 +67,19 @@ A ×ₚ B = Σₚ A (λ xs _ → B xs)
 ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
 ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
 
+WithinLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
+WithinLength A n = A ×ₚ ((_≤ n) ∘ length)
+
 exactLength-nonnesting : ∀ {@0 A} {n} → NonNesting (ExactLength A n)
 exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
   proj₁ $ Lemmas.length-++-≡ _ _ _ _ xs₁++ys₁≡xs₂++ys₂ (trans sndₚ₁ (sym sndₚ₂))
+
+withinLength-nonnesting : ∀ {@0 A} {n} → NonNesting A → NonNesting (WithinLength A n)
+withinLength-nonnesting nn ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
+  nn ++≡ fstₚ₁ fstₚ₂
+
+withinLength-noconfusion₁ : ∀ {@0 A B} {n} → NoConfusion A B → NoConfusion (WithinLength A n) B
+withinLength-noconfusion₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) = nc ++≡ fstₚ₁
 
 record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
   constructor mk&ₚ

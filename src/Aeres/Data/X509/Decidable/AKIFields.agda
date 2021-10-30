@@ -433,7 +433,7 @@ private
 
     AKIfields₁ : List Dig
     AKIfields₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
-    
+
     test₁ : X509.AKIKeyId AKIid₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId AKIid₁)} tt)
 

@@ -974,7 +974,7 @@ module X509 where
       validity : Validity va
       subject  : RDNSeq u
       pk       : PublicKey p
-      issuerUID : Option IssUID u₁
+      issuerUID : Option IssUID u₁ -- if this takes a lot of time, this and the lower can be dropped
       subjectUID : Option SubUID u₂
       extensions : Option Extensions e
       @0 bs≡  : bs ≡ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
