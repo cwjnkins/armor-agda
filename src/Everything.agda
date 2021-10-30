@@ -27,6 +27,7 @@ import Aeres.Data.X509.Decidable.SignAlg
 import Aeres.Data.X509.Decidable.SKIFields
 import Aeres.Data.X509.Decidable.TLV
 import Aeres.Data.X509.Decidable.Time
+import Aeres.Data.X509.Decidable.UserNotice
 import Aeres.Data.X509.Decidable.Validity
 import Aeres.Data.X509.Decidable.Version
 import Aeres.Data.X509.Properties

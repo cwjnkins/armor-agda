@@ -58,7 +58,8 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   open ≡-Reasoning
 
-  parseOption₂ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NoConfusion A B
+  parseOption₂ : {A B : List Σ → Set}
+                 → (@0 _ : NonNesting A) → (@0 _ : NonNesting B) → (@0 _ : NoConfusion A B)
                  → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
                  → M (Level.Lift _ ⊤)
                  → ∀ n → Parser (M ∘ Dec) (ExactLength (&ₚ (Option A) (Option B)) n)
