@@ -40,6 +40,9 @@ NoConfusion : (A B : List Σ → Set) → Set
 NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
                   → (A xs₁ → ¬ B xs₂)
 
+Equivalent : (A B : (@0 _ : List Σ) → Set) → Set
+Equivalent A B = (∀ {@0 xs} → A xs → B xs) × (∀ {@0 xs} → B xs → A xs)
+
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
@@ -64,11 +67,24 @@ open Σₚ public using (fstₚ ; sndₚ)
 _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
-ExactLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
+noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
+noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y
+
+map×ₚ : ∀ {@0 A₁ A₂ B} → (∀ {@0 xs} → A₁ xs → A₂ xs) → (∀ {@0 xs} → (A₁ ×ₚ B) xs → (A₂ ×ₚ B) xs)
+map×ₚ f (mk×ₚ fstₚ₁ sndₚ₁ bs≡) = mk×ₚ (f fstₚ₁) sndₚ₁ bs≡
+
+equivalent×ₚ : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → Equivalent (A₁ ×ₚ B) (A₂ ×ₚ B)
+proj₁ (equivalent×ₚ (f , g)) = map×ₚ f
+proj₂ (equivalent×ₚ (f , g)) = map×ₚ g
+
+ExactLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
 ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
 
-WithinLength : (@0 A : List Σ → Set) → ℕ → List Σ → Set
+WithinLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
 WithinLength A n = A ×ₚ ((_≤ n) ∘ length)
+
+projectWithinLength : ∀ {@0 A xs} {n} → WithinLength A n xs → A xs
+projectWithinLength (mk×ₚ fstₚ₁ sndₚ₁ refl) = fstₚ₁
 
 exactLength-nonnesting : ∀ {@0 A} {n} → NonNesting (ExactLength A n)
 exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =

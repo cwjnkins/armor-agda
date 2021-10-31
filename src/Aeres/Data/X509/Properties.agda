@@ -12,6 +12,7 @@ import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
+import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
 
 module Aeres.Data.X509.Properties where
@@ -43,4 +44,5 @@ module Primitives               = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields          = Aeres.Data.X509.Properties.PublicKeyFields
 module TLV                      = Aeres.Data.X509.Properties.TLV
 module Time                     = Aeres.Data.X509.Properties.Time
+module UserNoticeFields         = Aeres.Data.X509.Properties.UserNoticeFields
 module ValidityFields           = Aeres.Data.X509.Properties.ValidityFields

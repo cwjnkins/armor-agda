@@ -41,7 +41,7 @@ yesPrefixDecSuccess nn (no ¬v) ++≡ v = ‼ (⊥-elim $ contradiction (success
 yesPrefixDecSuccess nn (yes (success prefix read read≡ value suffix ps≡)) ++≡ v =
   ‼ nn (trans₀ ps≡ (sym ++≡)) value v
 
-@0 noPrefixDecSuccess : ∀ {A B xs ys zs} → NoConfusion A B
+@0 noPrefixDecSuccess : ∀ {@0 A B xs ys zs} → NoConfusion A B
                         → (x : Dec (Success A xs)) → ys ++ zs ≡ xs → B ys → prefixDecSuccess x ≡ []
 noPrefixDecSuccess nc (no ¬parse) ++≡ v = refl
 noPrefixDecSuccess nc (yes (success prefix read read≡ v' suffix ps≡)) ++≡ v =
@@ -53,6 +53,10 @@ noReadDecSuccess nc (no ¬parse) ++≡ v = refl
 noReadDecSuccess nc (yes (success prefix read read≡ v' suffix ps≡)) ++≡ v =
   ⊥-elim (contradiction v (nc (trans₀ ps≡ (sym ++≡)) v'))
 
+withinLengthDecSuccess : ∀ {A xs n} → (x : Dec (Success (WithinLength A n) xs)) → readDecSuccess x ≤ n
+withinLengthDecSuccess (no _) = z≤n
+withinLengthDecSuccess {n = n} (yes (success prefix read read≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) suffix ps≡)) =
+  subst₀ (λ x → x ≤ n) (sym read≡) sndₚ₁
 
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
@@ -171,3 +175,113 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
                    prefixDecSuccess x₁ ++ pre₁ ++ suf₁ ≡⟨ cong (prefixDecSuccess x₁ ++_) ps≡₁ ⟩
                    prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ≡⟨ ps≡DecSuccess x₁ ⟩
                    xs ∎)))
+
+  parseOption₃ : {A B C : List Σ → Set}
+                 → (@0 _ : NonNesting A) → (@0 _ : NonNesting B) → (@0 _ : NonNesting C)
+                 → (@0 _ : NoConfusion A B) (@0 _ : NoConfusion A C) → (@0 _ : NoConfusion B C)
+                 → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B → Parser (M ∘ Dec) C
+                 → M (Level.Lift _ ⊤)
+                 → ∀ n → Parser (M ∘ Dec) (ExactLength (&ₚ (Option A) (&ₚ (Option B) (Option C))) n)
+  runParser (parseOption₃ nn₁ nn₂ nn₃ nc₁ nc₂ nc₃ p₁ p₂ p₃ underflow 0) xs =
+    return (yes (success _ _ refl (mk×ₚ (mk&ₚ none (mk&ₚ none none refl) refl) refl refl) xs refl))
+  runParser (parseOption₃{A}{B}{C} nn₁ nn₂ nn₃ nc₁ nc₂ nc₃ p₁ p₂ p₃ underflow n'@(suc n)) xs = do
+    x₁ ← runParser (parse≤ n' p₁ nn₁ (return (Level.lift tt))) xs
+    yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡) ←
+      runParser (parseOption₂ nn₂ nn₃ nc₃ p₂ p₃ underflow (n' - readDecSuccess x₁)) (suffixDecSuccess x₁)
+      where no ¬parse → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (mk&ₚ none (mk&ₚ{bs₁ = bs₁}{bs₂} (some v₂) v₃ refl) refl) valueLen refl) suffix ps≡) → ‼
+           let @0 ps≡' : bs₁ ++ bs₂ ++ suffix ≡ xs
+               ps≡' = trans₀ (bs₁ ++ bs₂ ++ suffix ≡ (bs₁ ++ bs₂) ++ suffix ∋ solve (++-monoid Σ)) ps≡
+           in
+           contradiction
+              (success _ _ refl
+                (mk×ₚ (mk&ₚ (some v₂) v₃ refl)
+                  (begin (length (bs₁ ++ bs₂) ≡⟨ valueLen ⟩
+                         n' ≡⟨ refl ⟩
+                         n' - 0 ≡⟨ cong ((n' ∸_) ∘ length)
+                                     (sym $ noPrefixDecSuccess{B = B}
+                                       (λ {xs₁}{ys₁}{xs₂}{ys₂} → noconfusion×ₚ₁ (λ {xs₂ = xs₂}{ys₂} → nc₁{xs₂ = xs₂}{ys₂}){xs₁}{ys₁}{xs₂}{ys₂}) x₁ ps≡' v₂) ⟩
+                         n' - length (prefixDecSuccess x₁) ≡⟨ cong (n' ∸_) (sym $ read≡DecSuccess x₁) ⟩
+                         n' - readDecSuccess x₁ ∎))
+                  refl)
+                suffix
+                (begin (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                       xs ≡⟨ (sym $ ps≡DecSuccess x₁) ⟩
+                       prefixDecSuccess x₁ ++ suffixDecSuccess x₁
+                         ≡⟨ cong (_++ suffixDecSuccess x₁)
+                              (noPrefixDecSuccess{B = B} (λ {xs₁}{ys₁}{xs₂}{ys₂} → noconfusion×ₚ₁ (λ {xs₂ = xs₂}{ys₂} → nc₁{xs₂ = xs₂}{ys₂}){xs₁}{ys₁}{xs₂}{ys₂}) x₁
+                                ps≡' v₂) ⟩
+                       suffixDecSuccess x₁ ∎))
+              ¬parse
+          (success prefix read read≡ (mk×ₚ (mk&ₚ none (mk&ₚ{bs₁ = bs₁}{bs₂} none (some v₃) refl) refl) valueLen refl) suffix ps≡) →
+            contradiction
+              (success _ _ refl
+                (mk×ₚ (mk&ₚ none (some v₃) refl)
+                  (begin (length bs₂ ≡⟨ valueLen ⟩
+                         n' ≡⟨ refl ⟩
+                         n' - 0 ≡⟨ cong ((n' -_) ∘ length)
+                                     (sym $ noPrefixDecSuccess {B = C}
+                                       ((λ {xs₁}{ys₁}{xs₂}{ys₂} → noconfusion×ₚ₁ (λ {xs₂ = xs₂}{ys₂} → nc₂{xs₂ = xs₂}{ys₂}){xs₁}{ys₁}{xs₂}{ys₂}))
+                                       x₁ ps≡ v₃) ⟩
+                         n' - length (prefixDecSuccess x₁) ≡⟨ cong (n' ∸_) (sym $ read≡DecSuccess x₁) ⟩
+                         n' - readDecSuccess x₁ ∎))
+                  refl)
+                suffix
+                (begin (prefix ++ suffix ≡⟨ ps≡ ⟩
+                       xs ≡⟨ (sym $ ps≡DecSuccess x₁) ⟩
+                       prefixDecSuccess x₁ ++ suffixDecSuccess x₁
+                         ≡⟨ cong (_++ suffixDecSuccess x₁)
+                              (noPrefixDecSuccess{B = C} ((λ {xs₁}{ys₁}{xs₂}{ys₂} → noconfusion×ₚ₁ (λ {xs₂ = xs₂}{ys₂} → nc₂{xs₂ = xs₂}{ys₂}){xs₁}{ys₁}{xs₂}{ys₂})) x₁ ps≡ v₃) ⟩
+                       suffixDecSuccess x₁ ∎)))
+              ¬parse
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁ = bs₁} (some v₁) (mk&ₚ{bs₁ = bs₂}{bs₃} v₂ v₃ refl) refl) valueLen refl) suffix ps≡) → ‼
+            let @0 ps≡' : bs₁ ++ bs₂ ++ bs₃ ++ suffix ≡ xs
+                ps≡' = trans₀ (bs₁ ++ bs₂ ++ bs₃ ++ suffix ≡ (bs₁ ++ bs₂ ++ bs₃) ++ suffix ∋ solve (++-monoid Σ)) ps≡
+
+                @0 bs₁≡ : bs₁ ≡ prefixDecSuccess x₁
+                bs₁≡ = (sym $ yesPrefixDecSuccess (withinLength-nonnesting nn₁) x₁ ps≡'
+                                                (mk×ₚ v₁ (≤-trans (Lemmas.length-++-≤₁ bs₁ (bs₂ ++ bs₃)) (Lemmas.≡⇒≤ valueLen)) refl))
+            in
+            contradiction
+              (success (bs₂ ++ bs₃) _ refl
+                (mk×ₚ (mk&ₚ v₂ v₃ refl)
+                  (begin (length (bs₂ ++ bs₃) ≡⟨ (sym $ m+n∸m≡n (length bs₁) _) ⟩
+                         length bs₁ + length (bs₂ ++ bs₃) - length bs₁ ≡⟨ cong (_∸ length bs₁) (sym $ length-++ bs₁) ⟩
+                         length (bs₁ ++ bs₂ ++ bs₃) - length bs₁ ≡⟨ cong (_∸ length bs₁) valueLen ⟩
+                         n' - length bs₁ ≡⟨ cong ((n' ∸_) ∘ length)
+                                              (sym $ yesPrefixDecSuccess (withinLength-nonnesting nn₁) x₁ ps≡'
+                                                (mk×ₚ v₁ (≤-trans (Lemmas.length-++-≤₁ bs₁ (bs₂ ++ bs₃)) (Lemmas.≡⇒≤ valueLen)) refl)) ⟩
+                         n' - length (prefixDecSuccess x₁) ≡⟨ cong (n' ∸_) (sym $ read≡DecSuccess x₁) ⟩
+                         n' - readDecSuccess x₁ ∎))
+                  refl)
+                suffix
+                (Lemmas.++-cancel≡ˡ _ _ bs₁≡
+                  (begin (bs₁ ++ (bs₂ ++ bs₃) ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
+                         bs₁ ++ bs₂ ++ bs₃ ++ suffix ≡⟨ ps≡' ⟩
+                         xs ≡⟨ (sym $ ps≡DecSuccess x₁) ⟩
+                         prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ∎))))
+              ¬parse
+    return (yes
+      (success (prefixDecSuccess x₁ ++ pre₁) n'
+        (begin (n' ≡⟨ (sym $ m+[n∸m]≡n (withinLengthDecSuccess x₁)) ⟩
+               readDecSuccess x₁ + (n' - readDecSuccess x₁) ≡⟨ cong (readDecSuccess x₁ +_) (sym $ v₁Len) ⟩
+               readDecSuccess x₁ + length pre₁ ≡⟨ cong (_+ length pre₁) (read≡DecSuccess x₁) ⟩
+               length (prefixDecSuccess x₁) + length pre₁ ≡⟨ (sym $ length-++ (prefixDecSuccess x₁)) ⟩
+               length (prefixDecSuccess x₁ ++ pre₁) ∎))
+        (mk×ₚ
+          (mk&ₚ
+            (mapOption (λ {xs = xs} → projectWithinLength{xs = xs}) (valueDecSuccess x₁))
+            v₁ refl)
+          (‼ (begin length (prefixDecSuccess x₁ ++ pre₁)
+                      ≡⟨ length-++ (prefixDecSuccess x₁) ⟩
+                    length (prefixDecSuccess x₁) + length pre₁
+                      ≡⟨ cong₂ _+_ (sym (read≡DecSuccess x₁)) v₁Len ⟩
+                    readDecSuccess x₁ + (n' - readDecSuccess x₁)
+                      ≡⟨ m+[n∸m]≡n{m = readDecSuccess x₁} (withinLengthDecSuccess x₁) ⟩
+                    n' ∎))
+          refl) suf₁
+          (begin (prefixDecSuccess x₁ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Σ) ⟩
+                 prefixDecSuccess x₁ ++ pre₁ ++ suf₁ ≡⟨ cong (prefixDecSuccess x₁ ++_) ps≡ ⟩
+                 prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ≡⟨ ps≡DecSuccess x₁ ⟩
+                 xs ∎)))

@@ -22,19 +22,11 @@ module parseUserNotice where
   here' = "parseUserNotice"
 
   parseUserNoticeFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.UserNoticeFields n)
-  runParser (parseUserNoticeFields n) xs = do
-    yes x ←
-      runParser
-        (parseOption₂ _ Props.TLV.nonnesting Props.DisplayText.nonnesting
-          Props.DisplayText.noconfusionNoticeReference
-          parseNoticeReference parseDisplayText
-          (tell $ here' String.++ ": underflow") n)
-        xs
-      where no ¬parse → do
-        return ∘ no $
-          ¬parse ∘ mapSuccess _ (λ where (mk×ₚ (X509.mkUserNoticeFields nr dt refl) len≡ refl) → (mk×ₚ (mk&ₚ nr dt refl) len≡ refl))
-    return (yes
-      (mapSuccess _ (λ where (mk×ₚ (mk&ₚ nr dt refl) len≡ refl) → mk×ₚ (X509.mkUserNoticeFields nr dt refl) len≡ refl) x))
+  parseUserNoticeFields n =
+    parseEquivalent _ (equivalent×ₚ _ Props.UserNoticeFields.equivalent)
+      (parseOption₂ _ Props.TLV.nonnesting Props.DisplayText.nonnesting Props.DisplayText.noconfusionNoticeReference
+        parseNoticeReference parseDisplayText
+        (tell $ here' String.++ ": underflow") n)
 
   parseUserNotice : Parser _ (Logging ∘ Dec) X509.UserNotice
   parseUserNotice =

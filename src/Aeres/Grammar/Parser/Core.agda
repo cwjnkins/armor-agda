@@ -6,6 +6,8 @@ open import Data.Nat.Properties
 
 module Aeres.Grammar.Parser.Core (Σ : Set) where
 
+open import Aeres.Grammar.Definitions Σ
+
 record Success (A : List Σ → Set) (xs : List Σ) : Set where
   constructor success
   field
@@ -27,3 +29,14 @@ open Parserᵢ public
 
 Parser : (M : Set → Set) (A : List Σ → Set) → Set
 Parser M = Parserᵢ (const M)
+
+module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
+
+  parseEquivalent : {A B : (@0 _ : List Σ) → Set} → Equivalent A B
+                    → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
+  runParser (parseEquivalent equiv p) xs = do
+    yes x ← runParser p xs
+      where no ¬parse → do
+        return ∘ no $ contraposition (mapSuccess (proj₂ equiv)) ¬parse
+    return (yes
+      (mapSuccess (proj₁ equiv) x))
