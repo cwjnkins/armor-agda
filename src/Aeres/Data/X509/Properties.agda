@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 
 import Aeres.Data.X509.Properties.DisplayText
+import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
@@ -35,6 +36,7 @@ module NonNesting where
 
 -- Finished lemmas
 module DisplayText              = Aeres.Data.X509.Properties.DisplayText
+module DistPointNameChoice      = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString          = Aeres.Data.X509.Properties.DirectoryString
 module GeneralName              = Aeres.Data.X509.Properties.GeneralName
 module Length                   = Aeres.Data.X509.Properties.Length
