@@ -2,6 +2,8 @@
 
 open import Aeres.Prelude
 
+import Aeres.Data.X509.Properties.AccessMethod
+import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
@@ -33,8 +35,9 @@ module NonNesting where
   open import Aeres.Grammar.Definitions Dig
   open import Aeres.Data.X509
 
-
 -- Finished lemmas
+module AccessMethod             = Aeres.Data.X509.Properties.AccessMethod
+module AccessDescFields         = Aeres.Data.X509.Properties.AccessDescFields
 module DisplayText              = Aeres.Data.X509.Properties.DisplayText
 module DistPointNameChoice      = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString          = Aeres.Data.X509.Properties.DirectoryString

@@ -791,7 +791,7 @@ module X509 where
     caissid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.CAISSUERS) → AccessMethod bs
     ocspid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.OCSP) → AccessMethod bs
 
-  record AccessDescFields (bs : List Dig) : Set where
+  record AccessDescFields (@0 bs : List Dig) : Set where
     constructor mkAccessDescFields
     field
       @0 {acm acl} : List Dig
