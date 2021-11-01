@@ -52,3 +52,15 @@ import Aeres.Grammar.Parser.While
 import Aeres.Prelude
 
 module Everything where
+
+
+-- TODO
+
+--- bcfields ...trying
+--- CertPolFields ...ongoing
+--- CRLDistFields ...ongoing
+--- AIAFields ...trying
+
+--- Extensions
+--- TBSCert
+--- Cert

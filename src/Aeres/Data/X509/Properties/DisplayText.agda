@@ -31,9 +31,17 @@ nonnesting x (X509.utf8String x₁) (X509.visibleString x₂) = ⊥-elim (TLVpro
 nonnesting x (X509.utf8String x₁) (X509.bmpString x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
 nonnesting x (X509.utf8String x₁) (X509.utf8String x₂) = ‼ TLVprops.nonnesting x x₁ x₂
 
+
 postulate
   @0 noconfusionTLV : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.PrintableString ∷ Tag.UniversalString ∷ Tag.UTF8String ∷ [ Tag.BMPString ]
                       → NoConfusion (Generic.TLV t A) X509.DisplayText
+-- noconfusionTLV x x₁ x₂ (X509.ia5String x₃) = ⊥-elim (TLVprops.noconfusion {!!}  x₁ x₂ x₃)
+-- noconfusionTLV x x₁ x₂ (X509.visibleString x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
+-- noconfusionTLV x x₁ x₂ (X509.bmpString x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
+-- noconfusionTLV x x₁ x₂ (X509.utf8String x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
+
+
+
 
 @0 noconfusionNoticeReference : NoConfusion X509.NoticeReference X509.DisplayText
 noconfusionNoticeReference = noconfusionTLV pf
