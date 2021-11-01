@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Properties as Props
+import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -26,9 +26,10 @@ module parseDistPoint where
 
   parseDistPointFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.DistPointFields n)
   parseDistPointFields n =
-    parseEquivalent _ {!!}
+    parseEquivalent _
+      (equivalent×ₚ _ Props.DistPointFields.equivalent)
       (parseOption₃ _ Props.TLV.nonnesting Props.TLV.nonnesting Props.TLV.nonnesting
-        {!!} {!!} (TLV.noconfusion (λ where ()))
+        (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ()))
         (parseTLV Tag.A0 "dist. point name" X509.DistPointNameChoice
           (parseExactLength _ Props.DistPointNameChoice.nonnesting
             (tell $ "parseDistPoint: name choice: underflow")

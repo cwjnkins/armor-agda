@@ -761,7 +761,7 @@ module X509 where
   DistPointName : (@0 _ : List Dig) → Set
   DistPointName xs = Generic.TLV Tag.A0  DistPointNameChoice xs
 
-  record DistPointFields (bs : List Dig) : Set where
+  record DistPointFields (@0 bs : List Dig) : Set where
     constructor mkDistPointFields
     field
       @0 {dp rsn issr} : List Dig
@@ -801,7 +801,7 @@ module X509 where
 
   AccessDesc : (@0 _ : List Dig) → Set
   AccessDesc xs = Generic.TLV Tag.Sequence  AccessDescFields xs
- 
+
   AIAFieldsSeq : (@0 _ : List Dig) → Set
   AIAFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems AccessDesc) xs
 

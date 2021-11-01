@@ -5,6 +5,7 @@ open import Aeres.Prelude
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.DisplayText
+import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.GeneralName
@@ -39,6 +40,7 @@ module NonNesting where
 module AccessMethod             = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields         = Aeres.Data.X509.Properties.AccessDescFields
 module DisplayText              = Aeres.Data.X509.Properties.DisplayText
+module DistPointFields          = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice      = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString          = Aeres.Data.X509.Properties.DirectoryString
 module GeneralName              = Aeres.Data.X509.Properties.GeneralName
