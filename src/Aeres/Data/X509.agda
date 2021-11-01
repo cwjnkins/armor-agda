@@ -635,20 +635,6 @@ module X509 where
   KUFields xs = Generic.TLV Tag.Octetstring  Generic.Bitstring xs
 
 ----------------------------------- eku extension -----------------------------------
-  -- data EkuSeqElems : List Dig → Set
-
-  -- record EkuSeqElemsₐ (bs : List Dig) : Set where
-  --   inductive
-  --   constructor mkEkuSeqElemsₐ
-  --   field
-  --     @0 {bs₁ bs₂} : List Dig
-  --     ekuid : Generic.OID bs₁
-  --     rest   : EkuSeqElems bs₂
-  --     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  -- data EkuSeqElems where
-  --   _∷[]  : ∀ {x} → Generic.OID x → EkuSeqElems x
-  --   cons : ∀ {x} → EkuSeqElemsₐ x → EkuSeqElems x
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
   EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Generic.OID) xs
@@ -734,23 +720,8 @@ module X509 where
   PolicyQualifierInfo : (@0 _ : List Dig) → Set
   PolicyQualifierInfo xs = Generic.TLV Tag.Sequence PolicyQualifierInfoFields xs
 
-  data PolicyQualifiersSeqElems : List Dig → Set
-
-  record PolicyQualifiersSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkPolicyQualifiersSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      extn : PolicyQualifierInfo bs₁
-      rest   : PolicyQualifiersSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data PolicyQualifiersSeqElems where
-    _∷[]  : ∀ {x} → PolicyQualifierInfo x → PolicyQualifiersSeqElems x
-    cons : ∀ {x} → PolicyQualifiersSeqElemsₐ x → PolicyQualifiersSeqElems x
-
   PolicyQualifiersSeq : (@0 _ : List Dig) → Set
-  PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence PolicyQualifiersSeqElems xs
+  PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyQualifierInfo) xs
 
   record PolicyInformationFields (bs : List Dig) : Set where
     constructor mkPolicyInformationFields
@@ -763,23 +734,8 @@ module X509 where
   PolicyInformation : (@0 _ : List Dig) → Set
   PolicyInformation xs = Generic.TLV Tag.Sequence PolicyInformationFields xs
 
-  data CertPolSeqElems : List Dig → Set
-
-  record CertPolSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkCertPolSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      polinfo : PolicyInformation bs₁
-      rest   : CertPolSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data CertPolSeqElems where
-    _∷[]  : ∀ {x} → PolicyInformation x → CertPolSeqElems x
-    cons : ∀ {x} → CertPolSeqElemsₐ x → CertPolSeqElems x
-
   CertPolFieldsSeq : (@0 _ : List Dig) → Set
-  CertPolFieldsSeq xs = Generic.TLV Tag.Sequence  CertPolSeqElems xs
+  CertPolFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyInformation) xs
 
   CertPolFields : (@0 _ : List Dig) → Set
   CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs
@@ -817,23 +773,8 @@ module X509 where
   DistPoint : (@0 _ : List Dig) → Set
   DistPoint xs = Generic.TLV Tag.Sequence DistPointFields xs
 
-  data CRLSeqElems : List Dig → Set
-
-  record CRLSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkCRLSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      extn : DistPoint bs₁
-      rest   : CRLSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data CRLSeqElems where
-    _∷[]  : ∀ {x} → DistPoint x → CRLSeqElems x
-    cons : ∀ {x} → CRLSeqElemsₐ x → CRLSeqElems x
-
   CRLDistFieldsSeq : (@0 _ : List Dig) → Set
-  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence  CRLSeqElems xs
+  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems DistPoint) xs
 
   CRLDistFields : (@0 _ : List Dig) → Set
   CRLDistFields xs = Generic.TLV Tag.Octetstring  CRLDistFieldsSeq xs
@@ -860,24 +801,9 @@ module X509 where
 
   AccessDesc : (@0 _ : List Dig) → Set
   AccessDesc xs = Generic.TLV Tag.Sequence  AccessDescFields xs
-
-  data AIASeqElems : List Dig → Set
-
-  record AIASeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkAIASeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      extn : AccessDesc bs₁
-      rest   : AIASeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data AIASeqElems where
-    _∷[]  : ∀ {x} → AccessDesc x → AIASeqElems x
-    cons : ∀ {x} → AIASeqElemsₐ x → AIASeqElems x
  
   AIAFieldsSeq : (@0 _ : List Dig) → Set
-  AIAFieldsSeq xs = Generic.TLV Tag.Sequence  AIASeqElems xs
+  AIAFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems AccessDesc) xs
 
   AIAFields : (@0 _ : List Dig) → Set
   AIAFields xs = Generic.TLV Tag.Octetstring  AIAFieldsSeq xs
@@ -940,23 +866,8 @@ module X509 where
   Extension : (@0 _ : List Dig) → Set
   Extension xs = Generic.TLV Tag.Sequence ExtensionFields xs
 
-  data ExtensionsSeqElems : List Dig → Set
-
-  record ExtensionsSeqElemsₐ (bs : List Dig) : Set where
-    inductive
-    constructor mkExtensionsSeqElemsₐ
-    field
-      @0 {bs₁ bs₂} : List Dig
-      extn : Extension bs₁
-      rest   : ExtensionsSeqElems bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data ExtensionsSeqElems where
-    _∷[]  : ∀ {x} → Extension x → ExtensionsSeqElems x
-    cons : ∀ {x} → ExtensionsSeqElemsₐ x → ExtensionsSeqElems x
-
   ExtensionsSeq : (@0 _ : List Dig) → Set
-  ExtensionsSeq xs = Generic.TLV Tag.Sequence  ExtensionsSeqElems xs
+  ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Extension) xs
 
   Extensions : (@0 _ : List Dig) → Set
   Extensions xs = Generic.TLV Tag.A3  ExtensionsSeq xs
