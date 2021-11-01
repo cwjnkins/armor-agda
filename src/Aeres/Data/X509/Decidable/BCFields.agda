@@ -4,6 +4,8 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
+open import Aeres.Data.X509.Decidable.Boool
+open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.Seq
@@ -25,8 +27,11 @@ module parseBCFields where
 
   open ≡-Reasoning
 
-  postulate
-    parseBCFieldsSeqFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.BCFieldsSeqFields n)
+
+  parseBCFieldsSeqFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.BCFieldsSeqFields n)
+  parseBCFieldsSeqFields n =
+    parseEquivalent _ (equivalent×ₚ _ Props.BCFieldsSeqFields.equivalent)
+      (parseOption₂ _ Props.TLV.nonnesting Props.TLV.nonnesting (TLV.noconfusion λ where ()) parseBool parseInt (tell $ here' String.++ ": underflow") _)
 
   parseBCFieldsSeq : Parser Dig (Logging ∘ Dec) X509.BCFieldsSeq
   parseBCFieldsSeq = parseTLV _ "BC Fields Seq" _ parseBCFieldsSeqFields

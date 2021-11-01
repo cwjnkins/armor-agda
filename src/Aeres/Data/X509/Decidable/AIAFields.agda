@@ -37,7 +37,8 @@ module parseAIAFields where
       (success prefix read read≡ (X509.ocspid x) suffix ps≡) → contradiction (success _ _ read≡ x _ ps≡) ¬parse₂
 
   parseAccessDescFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.AccessDescFields n)
-  parseAccessDescFields n = parseExactLength _  Props.AccessDescFields.nonnesting (tell $ here' String.++ ": underflow") (parseEquivalent _ Props.AccessDescFields.equivalent (parse& _ Props.AccessMethod.nonnesting parseAccessMethod parseGeneralName)) n
+  parseAccessDescFields n = parseExactLength _  Props.AccessDescFields.nonnesting (tell $ here' String.++ ": underflow")
+    (parseEquivalent _ Props.AccessDescFields.equivalent (parse& _ Props.AccessMethod.nonnesting parseAccessMethod parseGeneralName)) n
 
   parseAccessDesc :  Parser Dig (Logging ∘ Dec) X509.AccessDesc
   parseAccessDesc = parseTLV _ "Access Description" _ parseAccessDescFields

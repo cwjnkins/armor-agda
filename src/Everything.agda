@@ -6,6 +6,7 @@ import Aeres.Data.X509
 -- open import Aeres.Data.X509.Decidable
 import Aeres.Data.X509.Decidable.AIAFields
 import Aeres.Data.X509.Decidable.AKIFields
+import Aeres.Data.X509.Decidable.BCFields
 import Aeres.Data.X509.Decidable.Bitstring
 import Aeres.Data.X509.Decidable.Boool
 import Aeres.Data.X509.Decidable.DirectoryString
@@ -34,6 +35,7 @@ import Aeres.Data.X509.Decidable.Version
 import Aeres.Data.X509.Properties
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
+import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
@@ -58,8 +60,6 @@ module Everything where
 
 
 -- TODO
-
---- bcfields ...trying
 --- CertPolFields ...ongoing
 --- CRLDistFields ...ongoing
 
