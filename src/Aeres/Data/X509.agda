@@ -743,7 +743,7 @@ module X509 where
   PolicyQualifiersSeq : (@0 _ : List Dig) → Set
   PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyQualifierInfo) xs
 
-  record PolicyInformationFields (bs : List Dig) : Set where
+  record PolicyInformationFields (@0 bs : List Dig) : Set where
     constructor mkPolicyInformationFields
     field
       @0 {pid pqls} : List Dig
@@ -755,7 +755,7 @@ module X509 where
   PolicyInformation xs = Generic.TLV Tag.Sequence PolicyInformationFields xs
 
   CertPolFieldsSeq : (@0 _ : List Dig) → Set
-  CertPolFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyInformation) xs
+  CertPolFieldsSeq = Generic.Seq PolicyInformation
 
   CertPolFields : (@0 _ : List Dig) → Set
   CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs
