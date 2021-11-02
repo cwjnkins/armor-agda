@@ -40,6 +40,9 @@ NoConfusion : (A B : List Σ → Set) → Set
 NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
                   → (A xs₁ → ¬ B xs₂)
 
+symNoConfusion : ∀ {@0 A B} → NoConfusion A B → NoConfusion B A
+symNoConfusion nc ++≡ v₂ v₁ = nc (sym ++≡) v₁ v₂
+
 Equivalent : (A B : (@0 _ : List Σ) → Set) → Set
 Equivalent A B = (∀ {@0 xs} → A xs → B xs) × (∀ {@0 xs} → B xs → A xs)
 
@@ -96,6 +99,7 @@ withinLength-nonnesting nn ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fst
 
 withinLength-noconfusion₁ : ∀ {@0 A B} {n} → NoConfusion A B → NoConfusion (WithinLength A n) B
 withinLength-noconfusion₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) = nc ++≡ fstₚ₁
+
 
 record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
   constructor mk&ₚ

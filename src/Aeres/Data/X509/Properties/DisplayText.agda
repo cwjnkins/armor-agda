@@ -39,9 +39,7 @@ postulate
 -- noconfusionTLV x x₁ x₂ (X509.visibleString x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
 -- noconfusionTLV x x₁ x₂ (X509.bmpString x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
 -- noconfusionTLV x x₁ x₂ (X509.utf8String x₃) = ⊥-elim (TLVprops.noconfusion {!!} x₁ x₂ x₃)
-
-
-
+  @0 noconfusionSeq : ∀ {@0 A} → NoConfusion (Generic.Seq A) X509.DisplayText
 
 @0 noconfusionNoticeReference : NoConfusion X509.NoticeReference X509.DisplayText
 noconfusionNoticeReference = noconfusionTLV pf

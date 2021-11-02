@@ -701,21 +701,41 @@ module X509 where
   UserNotice : (@0 _ : List Dig) → Set
   UserNotice xs = Generic.TLV Tag.Sequence UserNoticeFields xs
 
-  data Qualifier : List Dig →  List Dig → Set where
-    cpsuri : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.CPSURI) → IA5String bs2 → Qualifier bs1 bs2
-    unotice : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.USERNOTICE) → UserNotice bs2 → Qualifier bs1 bs2
-
-  data PolicyQualifierId : List Dig → Set where
-    cpsuriid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.CPSURI) → PolicyQualifierId bs
-    unoticeid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.USERNOTICE) → PolicyQualifierId bs
-
-  record PolicyQualifierInfoFields (@0 bs : List Dig) : Set where
-    constructor mkPolicyQualifierInfoFields
+  record CPSURIQualifier (@0 bs : List Dig) : Set where
+    constructor mkCPSURIQualifier
     field
-      @0 {pqlid ql} : List Dig
-      cpqlid : PolicyQualifierId pqlid
-      cql : Qualifier pqlid ql
-      @0 bs≡  : bs ≡ pqlid ++ ql
+      @0 {bs₁ bs₂} : List Dig
+      @0 ≡cpsuri : bs₁ ≡ PQOID.CPSURI
+      cpsPointer : IA5String bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  record UserNoticeQualifier (@0 bs : List Dig) : Set where
+    constructor mkUserNoticeQualifier
+    field
+      @0 {bs₁ bs₂} : List Dig
+      @0 ≡usernotice : bs₁ ≡ PQOID.USERNOTICE
+      unotice : UserNotice bs₂
+      @0 bs≡ : bs ≡ bs₁ ++ bs₂
+
+  data PolicyQualifierInfoFields : @0 List Dig → Set where
+    cpsURI : ∀ {@0 bs} → CPSURIQualifier bs → PolicyQualifierInfoFields bs
+    userNoticeID : ∀ {@0 bs} → UserNoticeQualifier bs → PolicyQualifierInfoFields bs
+
+--   data Qualifier : (@0 _ _ : List Dig) → Set where
+--     cpsuri : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.CPSURI) → IA5String bs2 → Qualifier bs1 bs2
+--     unotice : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.USERNOTICE) → UserNotice bs2 → Qualifier bs1 bs2
+
+--   data PolicyQualifierId : @0 List Dig → Set where
+--     cpsuriid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.CPSURI) → PolicyQualifierId bs
+--     unoticeid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.USERNOTICE) → PolicyQualifierId bs
+
+--   record PolicyQualifierInfoFields (@0 bs : List Dig) : Set where
+--     constructor mkPolicyQualifierInfoFields
+--     field
+--       @0 {pqlid ql} : List Dig
+--       cpqlid : PolicyQualifierId pqlid
+--       cql : Qualifier pqlid ql
+--       @0 bs≡  : bs ≡ pqlid ++ ql
 
   PolicyQualifierInfo : (@0 _ : List Dig) → Set
   PolicyQualifierInfo xs = Generic.TLV Tag.Sequence PolicyQualifierInfoFields xs

@@ -181,6 +181,11 @@ record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
 singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
 singleSelf{a = a} = singleton a refl
 
+record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
+  constructor erased
+  field
+    @0 x : A
+
 pattern self {a} = singleton a refl
 
 -- Typeclasses
