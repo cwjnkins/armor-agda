@@ -20,3 +20,4 @@ module UserNoticeQualifier where
 
 postulate
   equivalent : Equivalent (Sum X509.CPSURIQualifier X509.UserNoticeQualifier) X509.PolicyQualifierInfoFields
+  nonnesting : NonNesting X509.PolicyQualifierInfoFields

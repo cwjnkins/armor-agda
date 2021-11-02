@@ -32,4 +32,4 @@ module parseUserNotice where
   parseUserNotice =
     parseTLV _ "user notice" _ parseUserNoticeFields
 
-open parseUserNotice using (parseUserNotice)
+open parseUserNotice public using (parseUserNotice)
