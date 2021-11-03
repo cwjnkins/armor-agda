@@ -727,7 +727,7 @@ module X509 where
   PolicyQualifiersSeq : (@0 _ : List Dig) → Set
   PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyQualifierInfo) xs
 
-  record PolicyInformationFields (bs : List Dig) : Set where
+  record PolicyInformationFields (@0 bs : List Dig) : Set where
     constructor mkPolicyInformationFields
     field
       @0 {pid pqls} : List Dig
@@ -739,7 +739,7 @@ module X509 where
   PolicyInformation xs = Generic.TLV Tag.Sequence PolicyInformationFields xs
 
   CertPolFieldsSeq : (@0 _ : List Dig) → Set
-  CertPolFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyInformation) xs
+  CertPolFieldsSeq = Generic.Seq PolicyInformation
 
   CertPolFields : (@0 _ : List Dig) → Set
   CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs
@@ -845,30 +845,40 @@ module X509 where
     AIA : List Dig
     AIA =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 
-  data SelectExtn : List Dig →  List Dig → Set where
-    akiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI) → AKIFields bs2 → SelectExtn bs1 bs2
-    skiextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SKI) → SKIFields bs2 → SelectExtn bs1 bs2
-    kuextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.KU) → KUFields bs2 → SelectExtn bs1 bs2
-    ekuextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.EKU) → EKUFields bs2 → SelectExtn bs1 bs2
-    bcextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.BC) → BCFields bs2 → SelectExtn bs1 bs2
-    ianextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.IAN) → IANFields bs2 → SelectExtn bs1 bs2
-    sanextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SAN) → SANFields bs2 → SelectExtn bs1 bs2
-    cpextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
-    crlextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
-    aiaextn : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
-    _ : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SelectExtn bs1 bs2
-
-  record ExtensionFields (bs : List Dig) : Set where
+  record ExtensionFields (@0 lit : List Dig) (A : @0 List Dig → Set) (@0 bs : List Dig) : Set where
     constructor mkExtensionFields
     field
       @0 {oex cex ocex} : List Dig
-      oidextn : Generic.OID oex
-      critical : Option Generic.Boool cex
-      octetextn :  SelectExtn oex ocex
-      @0 bs≡  : bs ≡ oex ++ cex ++ ocex
+      extnId : Generic.OID oex
+      @0 extnId≡ : oex ≡ lit
+      crit : Option Generic.Boool cex
+      extension : A ocex
+      @0 bs≡ : bs ≡ oex ++ cex ++ ocex
+
+  data SelectExtn : @0 List Dig → Set where
+    akiextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.AKI     AKIFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI) → AKIFields bs2 → SelectExtn bs1 bs2
+    skiextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.SKI     SKIFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SKI) → SKIFields bs2 → SelectExtn bs1 bs2
+    kuextn  : ∀ {@0 bs} → ExtensionFields ExtensionOID.KU      KUFields      bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.KU) → KUFields bs2 → SelectExtn bs1 bs2
+    ekuextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.EKU     EKUFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.EKU) → EKUFields bs2 → SelectExtn bs1 bs2
+    bcextn  : ∀ {@0 bs} → ExtensionFields ExtensionOID.BC      BCFields      bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.BC) → BCFields bs2 → SelectExtn bs1 bs2
+    ianextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.IAN     IANFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.IAN) → IANFields bs2 → SelectExtn bs1 bs2
+    sanextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.SAN     SANFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SAN) → SANFields bs2 → SelectExtn bs1 bs2
+    cpextn  : ∀ {@0 bs} → ExtensionFields ExtensionOID.CPOL    CertPolFields bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
+    crlextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.CRLDIST CRLDistFields bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
+    aiaextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.AIA     AIAFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
+    -- other : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SelectExtn bs1 bs2
+
+--   record ExtensionFields (bs : List Dig) : Set where
+--     constructor mkExtensionFields
+--     field
+--       @0 {oex cex ocex} : List Dig
+--       oidextn : Generic.OID oex
+--       critical : Option Generic.Boool cex
+--       octetextn :  SelectExtn oex ocex
+--       @0 bs≡  : bs ≡ oex ++ cex ++ ocex
 
   Extension : (@0 _ : List Dig) → Set
-  Extension xs = Generic.TLV Tag.Sequence ExtensionFields xs
+  Extension xs = Generic.TLV Tag.Sequence SelectExtn xs
 
   ExtensionsSeq : (@0 _ : List Dig) → Set
   ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Extension) xs
