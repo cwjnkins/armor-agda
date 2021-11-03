@@ -44,15 +44,4 @@ module parseDistPoint where
   parseDistPoint =
     parseTLV _ "dist point" _ parseDistPointFields
 
---   parseUserNoticeFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.UserNoticeFields n)
---   parseUserNoticeFields n =
---     parseEquivalent _ (equivalent×ₚ _ Props.UserNoticeFields.equivalent)
---       (parseOption₂ _ Props.TLV.nonnesting Props.DisplayText.nonnesting Props.DisplayText.noconfusionNoticeReference
---         parseNoticeReference parseDisplayText
---         (tell $ here' String.++ ": underflow") n)
-
---   parseUserNotice : Parser _ (Logging ∘ Dec) X509.UserNotice
---   parseUserNotice =
---     parseTLV _ "user notice" _ parseUserNoticeFields
-
--- open parseUserNotice using (parseUserNotice)
+open parseDistPoint public using (parseDistPoint)

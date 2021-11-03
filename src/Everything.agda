@@ -10,6 +10,7 @@ import Aeres.Data.X509.Decidable.BCFields
 import Aeres.Data.X509.Decidable.Bitstring
 import Aeres.Data.X509.Decidable.Boool
 import Aeres.Data.X509.Decidable.CertPolFields
+import Aeres.Data.X509.Decidable.CRLDistFields
 import Aeres.Data.X509.Decidable.DirectoryString
 import Aeres.Data.X509.Decidable.DisplayText
 import Aeres.Data.X509.Decidable.DistPoint
@@ -69,8 +70,7 @@ module Everything where
 
 
 -- TODO
---- CRLDistFields ...ongoing
-
+--- CRLDistFields ...ongoing/ choice
 --- Extensions
 --- TBSCert
 --- Cert
