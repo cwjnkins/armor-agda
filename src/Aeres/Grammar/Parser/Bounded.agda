@@ -9,6 +9,9 @@ module Aeres.Grammar.Parser.Bounded (Σ : Set) where
 open import Aeres.Grammar.Definitions Σ
 open import Aeres.Grammar.Parser.Core Σ
 
+ExactLengthParser : (M : Set → Set) (A : List Σ → Set) → Set
+ExactLengthParser M A = ∀ n → Parser M (ExactLength A n)
+
 parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
          (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) (ExactLength Singleton n)
 runParser (parseN zero _) xs =

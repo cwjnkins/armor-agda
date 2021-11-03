@@ -38,6 +38,7 @@ module ℤ = Data.Integer
 ℤ = ℤ.ℤ
 
 open import Data.List    public
+  hiding (_─_)
 
 open import Data.List.Properties public
 
@@ -181,10 +182,15 @@ record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
 singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
 singleSelf{a = a} = singleton a refl
 
+
+infix 100 ─_
 record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
-  constructor erased
+  constructor ─_
   field
     @0 x : A
+
+-- foo : ∀ {A B C : Set} → (f : A → Erased B → C → C) → A → B → C → C
+-- foo f a b c = f a (─ b) c
 
 pattern self {a} = singleton a refl
 
