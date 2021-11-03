@@ -719,23 +719,7 @@ module X509 where
 
   data PolicyQualifierInfoFields : @0 List Dig → Set where
     cpsURI : ∀ {@0 bs} → CPSURIQualifier bs → PolicyQualifierInfoFields bs
-    userNoticeID : ∀ {@0 bs} → UserNoticeQualifier bs → PolicyQualifierInfoFields bs
-
---   data Qualifier : (@0 _ _ : List Dig) → Set where
---     cpsuri : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.CPSURI) → IA5String bs2 → Qualifier bs1 bs2
---     unotice : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ PQOID.USERNOTICE) → UserNotice bs2 → Qualifier bs1 bs2
-
---   data PolicyQualifierId : @0 List Dig → Set where
---     cpsuriid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.CPSURI) → PolicyQualifierId bs
---     unoticeid : ∀ {@0 bs} → (@0 _ : bs ≡ PQOID.USERNOTICE) → PolicyQualifierId bs
-
---   record PolicyQualifierInfoFields (@0 bs : List Dig) : Set where
---     constructor mkPolicyQualifierInfoFields
---     field
---       @0 {pqlid ql} : List Dig
---       cpqlid : PolicyQualifierId pqlid
---       cql : Qualifier pqlid ql
---       @0 bs≡  : bs ≡ pqlid ++ ql
+    userNotice : ∀ {@0 bs} → UserNoticeQualifier bs → PolicyQualifierInfoFields bs
 
   PolicyQualifierInfo : (@0 _ : List Dig) → Set
   PolicyQualifierInfo xs = Generic.TLV Tag.Sequence PolicyQualifierInfoFields xs
