@@ -1,5 +1,4 @@
 {-# OPTIONS --subtyping #-}
-{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -50,10 +49,15 @@ noPrefixDecSuccess nc (yes (success prefix read read≡ v' suffix ps≡)) ++≡ 
 
 ynPrefixDecSuccess : ∀ {@0 A B ws xs ys zs} → NonNesting A → NoConfusion A B
                      → (x : Dec (Success A xs)) → ws ++ ys ++ zs ≡ xs → Option A ws → B ys → prefixDecSuccess x ≡ ws
-ynPrefixDecSuccess{B = B}{ys = ys} nn nc x ++≡  none v₂     =
-  {!!}
-ynPrefixDecSuccess nn nc x ++≡ (some x₁) v₂ =
-  {!!}
+ynPrefixDecSuccess{B = B}{ys = ys} nn nc (no _) ++≡  none v₂     = refl
+ynPrefixDecSuccess{B = B}{ys = ys} nn nc (yes (success prefix read read≡ value suffix ps≡)) ++≡  none v₂     =
+  ‼ ⊥-elim (contradiction
+    v₂
+    (nc (trans₀ ps≡ (sym ++≡)) value))
+ynPrefixDecSuccess nn nc (no ¬parse) ++≡ (some x₁) v₂ =
+  ‼ (⊥-elim (contradiction (success _ _ refl x₁ _ ++≡) ¬parse))
+ynPrefixDecSuccess nn nc (yes (success prefix read read≡ value suffix ps≡)) ++≡ (some x₁) v₂ =
+  ‼ nn (trans₀ ps≡ (sym ++≡)) value x₁
 
 -- ynPrefixDecSuccess nn nc (yes (success prefix read read≡ value suffix ps≡)) ++≡  none v₂ =
 --   ‼ ⊥-elim (nc (trans₀ ps≡ (trans₀ (sym ++≡) (sym (++-identityʳ _)))) value v₂)
@@ -89,23 +93,22 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} v₀ v₁ refl) vLen refl) suffix ps≡) → ‼
-            let @0 ps≡' : prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ≡ prefix ++ suffix
-                ps≡' = trans₀ (ps≡DecSuccess x₁) (sym ps≡)
+            let @0 ps≡' : prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ps≡' = trans₀ (trans₀ (ps≡DecSuccess x₁) (sym ps≡)) ((bs₁ ++ bs₂) ++ suffix ≡ bs₁ ++ bs₂ ++ suffix ∋ solve (++-monoid Σ))
 
                 @0 v₀' : Option (WithinLength A n) bs₁
-                v₀' = {!!}
+                v₀' = mapOptionK (λ x → mk×ₚ x (subst (length bs₁ ≤_) vLen (Lemmas.length-++-≤₁ bs₁ _)) refl) v₀
 
                 nc' : NoConfusion (WithinLength A n) B
-                nc' = {!!}
+                nc' = noconfusion×ₚ₁ (λ {xs₁'}{ys₁'}{xs₂'}{ys₂'} → nc{xs₁'}{ys₁'}{xs₂'}{ys₂'})
 
                 @0 pre₀≡ : prefixDecSuccess x₁ ≡ bs₁
                 pre₀≡ =
                   ynPrefixDecSuccess{A = WithinLength A n}{B = B}
                     (withinLength-nonnesting nn₁)
-                    nc' -- (λ where {xs₁}{xs₂ = xs₂} ++≡ (mk×ₚ v vLen bs≡) b → ‼ withinLength-noconfusion₁ (λ {xs₁'}{ys₁'}{xs₂'}{ys₂'} ++≡ a b → nc{xs₁'}{xs₂ = xs₂'} ++≡ a b){xs₁}{xs₂ = xs₂} ++≡ (mk×ₚ v vLen bs≡) {!!})
-                    x₁
-                    {!!} -- (trans₀ (bs₁ ++ bs₂ ++ suffix ≡ (bs₁ ++ bs₂) ++ suffix ∋ solve (++-monoid Σ)) ps≡) -- (trans₀ (bs₁ ++ bs₂ ++ suffix ≡ (bs₁ ++ bs₂) ++ suffix ∋ solve (++-monoid Σ)) ps≡)
-                    v₀' v₁ -- v₀' v₁
+                    nc' x₁
+                    (trans₀ (sym ps≡') (ps≡DecSuccess x₁))
+                    v₀' v₁
             in
             contradiction
               (success bs₂ _ refl
@@ -117,7 +120,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
                          n - length (prefixDecSuccess x₁) ≡⟨ cong (n -_) (sym (read≡DecSuccess x₁)) ⟩
                          n - readDecSuccess x₁ ∎)) refl)
                 suffix
-                {!!})
+                (Lemmas.++-cancel≡ˡ _ _ (sym pre₀≡) (sym ps≡')))
               ¬parse
     return (yes
       (success (prefixDecSuccess x₁ ++ pre₀) (readDecSuccess x₁ + r₀)

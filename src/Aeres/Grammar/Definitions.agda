@@ -58,6 +58,10 @@ mapOption : ∀ {@0 A B} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} →
 mapOption f none = none
 mapOption f (some x) = some (f x)
 
+mapOptionK : ∀ {@0 A B xs} → (A xs → B xs) → Option A xs → Option B xs
+mapOptionK f none = none
+mapOptionK f (some x) = some (f x)
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
