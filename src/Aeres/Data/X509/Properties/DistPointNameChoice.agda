@@ -19,5 +19,9 @@ nonnesting x (X509.fullname x₁) (X509.nameRTCrlissr x₂) = ⊥-elim (TLVprops
 nonnesting x (X509.nameRTCrlissr x₁) (X509.fullname x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
 nonnesting x (X509.nameRTCrlissr x₁) (X509.nameRTCrlissr x₂) = ‼ TLVprops.nonnesting x x₁ x₂
 
-postulate
-  equivalent : Equivalent (Sum X509.FullName X509.NameRTCrlIssuer) X509.DistPointNameChoice
+
+equivalent : Equivalent (Sum X509.FullName X509.NameRTCrlIssuer) X509.DistPointNameChoice
+proj₁ equivalent (Sum.inj₁ x) = X509.fullname x
+proj₁ equivalent (Sum.inj₂ x) = X509.nameRTCrlissr x
+proj₂ equivalent (X509.fullname x) = Sum.inj₁ x
+proj₂ equivalent (X509.nameRTCrlissr x) = Sum.inj₂ x

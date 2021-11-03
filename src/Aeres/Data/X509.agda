@@ -705,7 +705,7 @@ module X509 where
     constructor mkCPSURIQualifier
     field
       @0 {bs₁ bs₂} : List Dig
-      @0 ≡cpsuri : bs₁ ≡ PQOID.CPSURI
+      ≡cpsuri : bs₁ ≡ PQOID.CPSURI
       cpsPointer : IA5String bs₂
       @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
@@ -713,7 +713,7 @@ module X509 where
     constructor mkUserNoticeQualifier
     field
       @0 {bs₁ bs₂} : List Dig
-      @0 ≡usernotice : bs₁ ≡ PQOID.USERNOTICE
+      ≡usernotice : bs₁ ≡ PQOID.USERNOTICE
       unotice : UserNotice bs₂
       @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
