@@ -70,7 +70,7 @@ module Everything where
 
 
 -- TODO
---- CRLDistFields ...ongoing/ choice
+--- parseDistPointNameChoice ...ongoing/ choice
 --- Extensions
 --- TBSCert
 --- Cert

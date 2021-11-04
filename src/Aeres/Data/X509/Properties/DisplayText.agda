@@ -10,6 +10,7 @@ open import Data.Nat.Properties
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.DisplayText where
+open ≡-Reasoning
 
 open Base256
 open import Aeres.Grammar.Definitions Dig
@@ -33,13 +34,49 @@ nonnesting x (X509.utf8String x₁) (X509.bmpString x₂) = ⊥-elim (TLVprops.n
 nonnesting x (X509.utf8String x₁) (X509.utf8String x₂) = ‼ TLVprops.nonnesting x x₁ x₂
 
 
-postulate
-  @0 noconfusionTLV : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.PrintableString ∷ Tag.UniversalString ∷ Tag.UTF8String ∷ [ Tag.BMPString ]
+
+@0 noconfusionTLV : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.VisibleString ∷ Tag.BMPString ∷ [ Tag.UTF8String ]
                       → NoConfusion (Generic.TLV t A) X509.DisplayText
--- noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV len val len≡ bs≡) (X509.ia5String (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁)) = {!!}
--- noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV len val len≡ bs≡) (X509.visibleString (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁)) = {!!}
--- noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV len val len≡ bs≡) (X509.bmpString (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁)) = {!!}
--- noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV len val len≡ bs≡) (X509.utf8String (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁)) = {!!}
+noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV {l = l} {v = v} len val len≡ bs≡) (X509.ia5String (Generic.mkTLV {l = l₁} {v = v₁} len₁ val₁ len≡₁ bs≡₁))
+               = contradiction (here (∷-injectiveˡ (‼ x'))) x
+  where
+  @0 x' : t ∷ l ++ v ++ ys₁ ≡ Tag.IA5String ∷ l₁ ++ v₁ ++ ys₂
+  x' = begin ( t ∷ l ++ v ++ ys₁ ≡⟨ cong (t ∷_) (solve (++-monoid Dig))⟩
+              (t ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡)  ⟩
+              xs₁ ++ ys₁ ≡⟨ x₁ ⟩
+              xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+              (Tag.IA5String ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.IA5String ∷_) (solve (++-monoid Dig))⟩
+              Tag.IA5String ∷ l₁ ++ v₁ ++ ys₂ ∎)
+noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV {l = l} {v = v} len val len≡ bs≡) (X509.visibleString (Generic.mkTLV {l = l₁} {v = v₁} len₁ val₁ len≡₁ bs≡₁))
+  = contradiction (there (here (∷-injectiveˡ (‼ x')))) x
+  where
+  @0 x' : t ∷ l ++ v ++ ys₁ ≡ Tag.VisibleString ∷ l₁ ++ v₁ ++ ys₂
+  x' = begin ( t ∷ l ++ v ++ ys₁ ≡⟨ cong (t ∷_) (solve (++-monoid Dig))⟩
+              (t ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡)  ⟩
+              xs₁ ++ ys₁ ≡⟨ x₁ ⟩
+              xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+              (Tag.VisibleString ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.VisibleString ∷_) (solve (++-monoid Dig))⟩
+              Tag.VisibleString ∷ l₁ ++ v₁ ++ ys₂ ∎)
+noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV {l = l} {v = v} len val len≡ bs≡) (X509.bmpString (Generic.mkTLV {l = l₁} {v = v₁} len₁ val₁ len≡₁ bs≡₁))
+  = contradiction (there (there (here (∷-injectiveˡ (‼ x'))))) x
+  where
+  @0 x' : t ∷ l ++ v ++ ys₁ ≡ Tag.BMPString ∷ l₁ ++ v₁ ++ ys₂
+  x' = begin ( t ∷ l ++ v ++ ys₁ ≡⟨ cong (t ∷_) (solve (++-monoid Dig))⟩
+              (t ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡)  ⟩
+              xs₁ ++ ys₁ ≡⟨ x₁ ⟩
+              xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+              (Tag.BMPString ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.BMPString ∷_) (solve (++-monoid Dig))⟩
+              Tag.BMPString ∷ l₁ ++ v₁ ++ ys₂ ∎)
+noconfusionTLV {t} {A} x {xs₁} {ys₁} {xs₂} {ys₂} x₁ (Generic.mkTLV {l = l} {v = v} len val len≡ bs≡) (X509.utf8String (Generic.mkTLV {l = l₁} {v = v₁} len₁ val₁ len≡₁ bs≡₁))
+  = contradiction (there (there (there (here(∷-injectiveˡ (‼ x')))))) x
+  where
+  @0 x' : t ∷ l ++ v ++ ys₁ ≡ Tag.UTF8String ∷ l₁ ++ v₁ ++ ys₂
+  x' = begin ( t ∷ l ++ v ++ ys₁ ≡⟨ cong (t ∷_) (solve (++-monoid Dig))⟩
+              (t ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡)  ⟩
+              xs₁ ++ ys₁ ≡⟨ x₁ ⟩
+              xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+              (Tag.UTF8String ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.UTF8String ∷_) (solve (++-monoid Dig))⟩
+              Tag.UTF8String ∷ l₁ ++ v₁ ++ ys₂ ∎)
 
 
 
@@ -47,11 +84,11 @@ postulate
 noconfusionSeq = noconfusionTLV pf
   where
   pf : Tag.Sequence  ∉ _
-  pf (there (there (there (there (there ())))))
+  pf (there (there (there (there ()))))
 
 
 @0 noconfusionNoticeReference : NoConfusion X509.NoticeReference X509.DisplayText
 noconfusionNoticeReference = noconfusionTLV pf
   where
   pf : Tag.Sequence ∉ _
-  pf (there (there (there (there (there ())))))
+  pf (there (there (there (there ()))))
