@@ -266,6 +266,9 @@ record Irrel {ℓ} (@0 A : Set ℓ) : Set ℓ where
     irrel : (@0 _ : A) → A
   ‼_ = irrel
 open Irrel ⦃ ... ⦄ public
+infix 10 ̂‼_
+̂‼_ : ∀ {ℓ} {@0 A : Set ℓ} → ⦃ _ : Irrel A ⦄ → Erased A → A
+̂‼ (─ x) = ‼ x
 
 instance
   IrrelBot : Irrel ⊥

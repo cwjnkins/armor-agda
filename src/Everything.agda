@@ -70,7 +70,6 @@ module Everything where
 
 
 -- TODO
---- parseDistPointNameChoice ...ongoing/ choice
 --- Extensions
 --- TBSCert
 --- Cert

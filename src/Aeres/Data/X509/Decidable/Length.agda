@@ -37,6 +37,8 @@ open parseShortLen public using (parseShortLen)
 module parseLongLen where
   here' = "parseLongLen"
 
+  open ≡-Reasoning
+
   parseLongLen : Parser Dig (Logging ∘ Dec) Length.Long
   runParser parseLongLen [] = do
     tell $ here' String.++ ": underflow reading length"
@@ -55,61 +57,53 @@ module parseLongLen where
         contradiction l>128 l≯128
   ... | yes l>128
     with toℕ lₕ >? 0
-  ... | no lₕ≡0 = do
+  ... | no  lₕ≡0 = do
     tell $ here' String.++ ": first byte of length sequence must not be zero"
     return ∘ no $ λ where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction lₕ≢0 lₕ≡0
-  ... | yes  lₕ≢0
-    with runParser (parseN Dig {M = Logging} (toℕ l - 129) (return (Level.lift tt))) xs
-  ... | mkLogged _ (no parseFail) = do
-    tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
-    return ∘ no $ λ where
-      (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
-        contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) lₜLen refl) suffix refl)
-          parseFail
-  ... | mkLogged _ (yes (success .lₜ read read≡ (mk×ₚ (singleton lₜ refl) lₜLen refl) suffix refl))
-    with lₜ ≟ [] in eq₁
-  ... | no  lₜ≢[] =
-    return (yes
-      (success (l ∷ lₕ ∷ lₜ) _ (cong (2 +_) read≡)
-        (Length.mkLongₛ l lₕ lₜ
-          {fromWitness l>128} {fromWitness lₕ≢0} {fromWitness lₜLen} {fromWitness (inj₁ lₜ≢[])})
-        suffix refl))
-  ... | yes lₜ≡[]
-    with toℕ lₕ ≥? 128
-  ... | no  lₕ≱128 = do
-    tell $ here' String.++ ": long length used where short length would suffice"
-    return ∘ no $ ‼ go
-    where
-    @0 go : ¬ Success Dig Length.Long (l ∷ lₕ ∷ lₜ ++ suffix)
-    go (success prefix' read' read≡' (Length.mkLong l' l'>128 lₕ' lₕ'≢0 lₜ' lₜ'Len lₕₜMinRep' refl) suffix' ps≡') =
-      Length.MinRep-elim lₕ' lₜ' (λ _ _ → ⊥)
-        (λ lₜ'≡[] lₕ'≥128 → contradiction lₕ'≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
-        (λ lₜ'≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ'≢[])
-        lₕₜMinRep'
-      where
-      open ≡-Reasoning
+  ... | yes lₕ≢0 = do
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suf₀ refl)
+      ← runParser (parseN _ (toℕ l - 129) (return (Level.lift tt))) xs
+      where no ¬parse → do
+        tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
+        return ∘ no $ λ where
+          (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
+            contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suffix refl)
+              ¬parse
+    case lₜ ≟ [] of λ where
+      (no  lₜ≢[]) →
+        return (yes
+          (success (l ∷ lₕ ∷ lₜ) _ (cong (2 +_) r₀≡ )
+            (Length.mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₁ lₜ≢[])})
+            suf₀ refl))
+      (yes lₜ≡[]) →
+        case toℕ lₕ ≥? 128 of λ where
+          (no  lₕ≱128) → do
+            tell $ here' String.++ ": long length used where short length would suffice"
+            return ∘ no $ λ where
+              (success prefix read read≡ (Length.mkLong l' l'>128 lₕ' lₕ'≢0 lₜ' lₜ'Len lₕₜMinRep' refl) suffix ps≡) → ‼
+                let @0 l≡ : l' ≡ l
+                    l≡ = ∷-injectiveˡ ps≡
 
-      @0 l≡ : l' ≡ l
-      l≡ = ∷-injectiveˡ ps≡'
+                    @0 lₕ≡ : lₕ' ≡ lₕ
+                    lₕ≡ = ∷-injectiveˡ (∷-injectiveʳ ps≡)
 
-      @0 lₕ≡ : lₕ' ≡ lₕ
-      lₕ≡ = ∷-injectiveˡ (∷-injectiveʳ ps≡')
-
-      @0 lₜ≡ : lₜ' ≡ lₜ × suffix' ≡ suffix
-      lₜ≡ = Lemmas.length-++-≡ _ _ _ _ (∷-injectiveʳ (∷-injectiveʳ ps≡')) $ begin
-        length lₜ'   ≡⟨ lₜ'Len ⟩
-        toℕ l' - 129 ≡⟨ cong (λ i → toℕ i - 129) l≡ ⟩
-        toℕ l - 129  ≡⟨ sym lₜLen ⟩
-        length lₜ    ∎
-  ... | yes lₕ≥128 =
-    return (yes
-      (success _ _ refl
-        (Length.mkLongₛ l lₕ lₜ
-          {fromWitness l>128} {fromWitness lₕ≢0}
-          {fromWitness lₜLen} {fromWitness (inj₂ lₕ≥128)})
-        suffix refl))
+                    @0 lₜ≡ : lₜ' ≡ lₜ × suffix ≡ suf₀
+                    lₜ≡ = Lemmas.length-++-≡ _ _ _ _ (∷-injectiveʳ (∷-injectiveʳ ps≡)) $ begin
+                      length lₜ'   ≡⟨ lₜ'Len ⟩
+                      toℕ l' - 129 ≡⟨ cong (λ i → toℕ i - 129) l≡ ⟩
+                      toℕ l - 129  ≡⟨ sym lₜLen ⟩
+                      length lₜ    ∎
+                in
+                Length.MinRep-elim lₕ' lₜ' (λ _ _ → ⊥)
+                  (λ lₜ'≡[] lₕ'≥128 → contradiction lₕ'≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
+                  (λ lₜ'≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ'≢[])
+                  lₕₜMinRep'
+          (yes lₕ≥128) →
+            return (yes
+              (success _ _ refl
+                (Length.mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₂ lₕ≥128)}) suf₀ refl))
 
 open parseLongLen public using (parseLongLen)
 
@@ -129,7 +123,6 @@ module parseLen where
         contradiction (success _ _ read≡ long _ ps≡) ¬long
 
 open parseLen public using (parseLen)
-
 
 private
   module Test where

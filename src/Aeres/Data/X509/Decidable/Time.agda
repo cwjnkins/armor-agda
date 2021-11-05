@@ -23,13 +23,13 @@ module parseMonthDayHourMinSecFields where
 
   parseMonthDayHourMinSecFields : Parser Dig (Logging ∘ Dec) Generic.MonthDayHourMinSecFields
   runParser parseMonthDayHourMinSecFields xs = do
-    yes (success pre₀@._ ._ refl (mk×ₚ (singleton (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ []) refl) refl refl) suf₀ refl)
+    yes (success pre₀@._ ._ refl (mk×ₚ (singleton (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ []) refl) (─ refl) refl) suf₀ refl)
       ← runParser (parseN Dig (String.length "MMDDhhmmss") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix@._ _ _ (Generic.mkMDHMSFields _ _ _ _ _ _ _ _ _ _ refl) suffix ps≡) →
             contradiction
-              (success prefix _ refl (mk×ₚ singleSelf refl refl) suffix ps≡)
+              (success prefix _ refl (mk×ₚ singleSelf (─ refl) refl) suffix ps≡)
               ¬parse
     case check mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 suf₀ of λ where
       (l , no  ¬check) → do
@@ -79,13 +79,13 @@ module parseUtcTimeFields where
 
   parseUtcTimeFields : Parser Dig (Logging ∘ Dec) Generic.UtcTimeFields
   runParser parseUtcTimeFields xs = do
-    yes (success ._ ._ refl (mk×ₚ (singleton (y₁ ∷ y₂ ∷ []) refl) refl refl) suf₀ refl)
+    yes (success ._ ._ refl (mk×ₚ (singleton (y₁ ∷ y₂ ∷ []) refl) (─ refl) refl) suf₀ refl)
       ← runParser (parseN Dig (String.length "YY") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix@._ read read≡ (Generic.mkUtcTimeFields{y1 = y₁}{y₂} _ _ _ _ refl) suffix ps≡) →
             contradiction
-              (success (y₁ ∷ [ y₂ ]) 2 refl (mk×ₚ singleSelf refl refl) _ ps≡)
+              (success (y₁ ∷ [ y₂ ]) 2 refl (mk×ₚ singleSelf (─ refl) refl) _ ps≡)
               ¬parse
     yes (success pre₁@._ r₁ r₁≡ v₁@(Generic.mkMDHMSFields mon monᵣ day dayᵣ hour hourᵣ min minᵣ sec secᵣ refl) suf₁ ps≡₁)
       ← runParser parseMonthDayHourMinSecFields suf₀
@@ -260,7 +260,7 @@ module parseGenTimeFields where
         return ∘ no $ λ where
           (success ._ read read≡ (Generic.mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
             contradiction
-              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf refl refl) _ ps≡)
+              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf (─ refl) refl) _ ps≡)
               ¬parse
     yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
       where no ¬parse → do

@@ -34,7 +34,7 @@ module parseValidityFields where
         return ∘ no $ λ where
           (success ._ read read≡ (X509.mkValidityFields{nb = nb}{na} start end refl) suffix ps≡) →
             contradiction (success _ _ read≡ (mk&ₚ start end refl) suffix ps≡) ¬parse
-    return (yes (success pre₀ _ r₀≡ (X509.mkValidityFields (fstₚ v₀) (sndₚ v₀) (&ₚ.bs≡ v₀)) _ ps≡₀))
+    return (yes (success pre₀ _ r₀≡ (X509.mkValidityFields (fstₚ v₀) (sndₚ v₀) (&ₚᵈ.bs≡ v₀)) _ ps≡₀))
 
 open parseValidityFields public using (parseValidityFields)
 

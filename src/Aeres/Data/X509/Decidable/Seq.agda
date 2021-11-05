@@ -29,21 +29,21 @@ module parseSeq
 
   parseSeqElemsWF : ∀ n → ParserWF Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SeqElems A) n)
   runParser (parseSeqElemsWF n) xs (WellFounded.acc rs) = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ r₀≤len refl) suf₀ ps≡₀)
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len) refl) suf₀ ps≡₀)
       ← runParser (parse≤ _ n p nn (tell $ here' String.++ ": overflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (v Generic.∷[]) bsLen refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ (v Generic.∷[]) (─ bsLen) refl) suffix ps≡) →
             contradiction
               (success prefix _ read≡
-                (mk×ₚ v (Lemmas.≡⇒≤ bsLen) refl)
+                (mk×ₚ v (─ Lemmas.≡⇒≤ bsLen) refl)
                 suffix ps≡)
               ¬parse
-          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) bsLen refl) suffix ps≡) →
+          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) →
             contradiction
               (success bs₁ _ refl
                 (mk×ₚ h
-                  (m+n≤o⇒m≤o _ {length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen)))
+                  (─ m+n≤o⇒m≤o _ {length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen)))
                   refl)
                 (bs₂ ++ suffix)
                 (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
@@ -56,22 +56,22 @@ module parseSeq
       (tri≈ _ r₀≡n _) →
         return (yes
           (success pre₀ _ r₀≡
-            (mk×ₚ (v₀ Generic.∷[]) (trans₀ (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
+            (mk×ₚ (v₀ Generic.∷[]) (─ trans (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
       (tri< r₀<n _ _) → do
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ r₁≡len-pre₁ refl) suf₁ ps≡₁)
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁) refl) suf₁ ps≡₁)
           ← runParser (parseSeqElemsWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ (v Generic.∷[]) bsLen refl) suffix ps≡) →
+              (success prefix read read≡ (mk×ₚ (v Generic.∷[]) (─ bsLen) refl) suffix ps≡) →
                 contradiction
                   (begin (r₀            ≡⟨ r₀≡ ⟩
                           length pre₀   ≡⟨ cong length (nn (trans ps≡₀ (sym ps≡)) v₀ v) ⟩
                           length prefix ≡⟨ bsLen ⟩
                           n             ∎))
                   (<⇒≢ r₀<n)
-              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) bsLen refl) suffix ps≡) → ‼
+              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) → ‼
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
                     xs≡ = begin pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                                  xs                     ≡⟨ sym ps≡ ⟩
@@ -84,7 +84,7 @@ module parseSeq
                 contradiction
                   (success bs₂ _ refl
                     (mk×ₚ t
-                      (+-cancelˡ-≡ r₀
+                      (─ +-cancelˡ-≡ r₀
                          (begin (r₀ + length bs₂         ≡⟨ cong (_+ length bs₂) r₀≡ ⟩
                                 length pre₀ + length bs₂ ≡⟨ cong (λ x → length x + length bs₂) pre₀≡bs₁ ⟩
                                 length bs₁ + length bs₂  ≡⟨ sym (length-++ bs₁) ⟩
@@ -105,7 +105,7 @@ module parseSeq
                     length pre₀ + length pre₁ ≡⟨ (sym $ length-++ pre₀) ⟩
                     length (pre₀ ++ pre₁)     ∎))
             (mk×ₚ (Generic.cons (Generic.mkSeqElems v₀ v₁ refl))
-              (‼ (begin (length (pre₀ ++ pre₁)     ≡⟨ length-++ pre₀ ⟩
+              (─(begin (length (pre₀ ++ pre₁)     ≡⟨ length-++ pre₀ ⟩
                          length pre₀ + length pre₁ ≡⟨ cong (_+ _) (sym r₀≡) ⟩
                          r₀ + length pre₁          ≡⟨ cong (r₀ +_) r₁≡len-pre₁ ⟩
                          r₀ + (n - r₀)             ≡⟨ sym (+-∸-assoc r₀ (<⇒≤ r₀<n)) ⟩
@@ -132,7 +132,7 @@ open parseSeq public using (parseSeqElems ; parseSeq)
 parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
 parseIntegerSeq = parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt
 
-private                         
+private
   module Test where
 
     elm₁ : List Dig
@@ -146,7 +146,7 @@ private
 
     elm₄ : List Dig
     elm₄ = Tag.Boolean ∷ # 1 ∷ [ # 255 ]
-    
+
     Seq₁₂₃ : List Dig
     Seq₁₂₃ = Tag.Sequence ∷ [ # 9 ] ++ elm₁ ++ elm₂ ++ elm₃
 

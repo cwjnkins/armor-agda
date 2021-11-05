@@ -2,6 +2,7 @@
 
 open import Aeres.Prelude
 
+import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
@@ -9,6 +10,7 @@ import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
+import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
@@ -42,6 +44,7 @@ module NonNesting where
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 
 -- Finished lemmas
+module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
 module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
@@ -49,6 +52,7 @@ module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
+module Extension                 = Aeres.Data.X509.Properties.Extension
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields

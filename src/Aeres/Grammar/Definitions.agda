@@ -85,17 +85,17 @@ proj₁ (equivalent×ₚ (f , g)) = map×ₚ f
 proj₂ (equivalent×ₚ (f , g)) = map×ₚ g
 
 ExactLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
-ExactLength A n = A ×ₚ ((_≡ n) ∘ length)
+ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
 
 WithinLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
-WithinLength A n = A ×ₚ ((_≤ n) ∘ length)
+WithinLength A n = A ×ₚ (Erased ∘ (_≤ n) ∘ length)
 
 projectWithinLength : ∀ {@0 A xs} {n} → WithinLength A n xs → A xs
 projectWithinLength (mk×ₚ fstₚ₁ sndₚ₁ refl) = fstₚ₁
 
 exactLength-nonnesting : ∀ {@0 A} {n} → NonNesting (ExactLength A n)
-exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
-  proj₁ $ Lemmas.length-++-≡ _ _ _ _ xs₁++ys₁≡xs₂++ys₂ (trans sndₚ₁ (sym sndₚ₂))
+exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) =
+  proj₁ $ Lemmas.length-++-≡ _ _ _ _ xs₁++ys₁≡xs₂++ys₂ (trans₀ sndₚ₁ (sym sndₚ₂))
 
 withinLength-nonnesting : ∀ {@0 A} {n} → NonNesting A → NonNesting (WithinLength A n)
 withinLength-nonnesting nn ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
@@ -105,14 +105,17 @@ withinLength-noconfusion₁ : ∀ {@0 A B} {n} → NoConfusion A B → NoConfusi
 withinLength-noconfusion₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) = nc ++≡ fstₚ₁
 
 
-record &ₚ (@0 A B : List Σ → Set) (@0 bs : List Σ) : Set where
+record &ₚᵈ (@0 A : List Σ → Set) (@0 B : (@0 bs₁ : List Σ) → A bs₁ → List Σ → Set) (@0 bs : List Σ) : Set where
   constructor mk&ₚ
   field
     @0 {bs₁ bs₂} : List Σ
     fstₚ : A bs₁
-    sndₚ : B bs₂
+    sndₚ : B bs₁ fstₚ bs₂
     @0 bs≡ : bs ≡ bs₁ ++ bs₂
-open &ₚ public using (fstₚ ; sndₚ)
+open &ₚᵈ public using (fstₚ ; sndₚ)
+
+&ₚ : (@0 A B : List Σ → Set) (@0 bs : List Σ) → Set
+&ₚ A B = &ₚᵈ A λ _ _ → B
 
 @0 NonNesting&ₚ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NonNesting (&ₚ A B)
 NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs₂₁} a₁ b₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} a₂ b₂ bs≡₁) =

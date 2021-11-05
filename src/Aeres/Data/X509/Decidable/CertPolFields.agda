@@ -27,13 +27,13 @@ module parseCertPolFields where
 
   parsePolicyInformationFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.PolicyInformationFields n)
   runParser (parsePolicyInformationFields n) xs = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ v₀Len refl) suf₀ ps≡₀) ←
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len) refl) suf₀ ps≡₀) ←
       runParser (parse≤ _ n parseOID Props.TLV.nonnesting ((tell $ here' String.++ ": overflow"))) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid cpqls refl) sndₚ₁ refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid cpqls refl) (─ sndₚ₁) refl) suffix ps≡) →
             contradiction
-              (success pid _ refl (mk×ₚ cpid (≤-trans (Lemmas.length-++-≤₁ pid pqls) (Lemmas.≡⇒≤ sndₚ₁)) refl) (pqls ++ suffix)
+              (success pid _ refl (mk×ₚ cpid (─ ≤-trans (Lemmas.length-++-≤₁ pid pqls) (Lemmas.≡⇒≤ sndₚ₁)) refl) (pqls ++ suffix)
                 (begin (pid ++ pqls ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
                        (pid ++ pqls) ++ suffix ≡⟨ ps≡ ⟩
                        xs ∎)))
@@ -44,14 +44,14 @@ module parseCertPolFields where
         return (yes
           (success pre₀ r₀ r₀≡
             (mk×ₚ (X509.mkPolicyInformationFields v₀ none (sym $ ++-identityʳ pre₀))
-              (trans₀ (sym r₀≡) n≡r₀) refl)
+              (─ trans₀ (sym r₀≡) n≡r₀) refl)
             suf₀ ps≡₀))
       (tri< r₀<n _ _) → do
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡₁)
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁)
           ← runParser (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parsePolicyQualifiersSeq (n - r₀)) suf₀
           where no ¬parse → do
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid none refl) sndₚ₁ refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid none refl) (─ sndₚ₁) refl) suffix ps≡) → ‼
                 let @0 ps≡' : pid ++ suffix ≡ pre₀ ++ suf₀
                     ps≡' = (begin pid ++ suffix ≡⟨ cong (_++ suffix) (sym (++-identityʳ pid)) ⟩
                                   (pid ++ []) ++ suffix ≡⟨ ps≡ ⟩
@@ -67,7 +67,7 @@ module parseCertPolFields where
                          length (pid ++ []) ≡⟨ sndₚ₁ ⟩
                          n ∎))
                   (<⇒≢ r₀<n)
-              (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid (some cpqls) refl) sndₚ₁ refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid (some cpqls) refl) (─ sndₚ₁) refl) suffix ps≡) → ‼
                 let @0 ps≡' : pid ++ pqls ++ suffix ≡ pre₀ ++ suf₀
                     ps≡' = (begin pid ++ pqls ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
                                   (pid ++ pqls) ++ suffix ≡⟨ ps≡ ⟩
@@ -79,7 +79,7 @@ module parseCertPolFields where
                 contradiction
                   (success _ _ refl
                     (mk×ₚ cpqls
-                      (‼ (begin length pqls ≡⟨ sym (m+n∸m≡n (length pid) (length pqls)) ⟩
+                      (─ (begin length pqls ≡⟨ sym (m+n∸m≡n (length pid) (length pqls)) ⟩
                                 length pid + length pqls - length pid ≡⟨ cong (_∸ length pid) (sym (length-++ pid)) ⟩
                                 length (pid ++ pqls) - length pid ≡⟨ cong (_∸ length pid) sndₚ₁ ⟩
                                 n - length pid ≡⟨ cong ((n -_) ∘ length) pid≡ ⟩
@@ -95,7 +95,7 @@ module parseCertPolFields where
                    length pre₀ + length pre₁ ≡⟨ (sym $ length-++ pre₀) ⟩
                    length (pre₀ ++ pre₁) ∎))
             (mk×ₚ (X509.mkPolicyInformationFields v₀ (some v₁ ) refl)
-              (‼ (begin length (pre₀ ++ pre₁) ≡⟨ length-++ pre₀ ⟩
+              (─ (begin length (pre₀ ++ pre₁) ≡⟨ length-++ pre₀ ⟩
                         length pre₀ + length pre₁ ≡⟨ (sym $ cong (_+ length pre₁) r₀≡) ⟩
                         r₀ + length pre₁ ≡⟨ cong (r₀ +_) v₁Len ⟩
                         r₀ + (n - r₀) ≡⟨ m+[n∸m]≡n (<⇒≤ r₀<n) ⟩
