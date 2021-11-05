@@ -6,6 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.GeneralName
+open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.TLV
 import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -21,8 +22,15 @@ open Base256
 module parseDistPoint where
   here' = "parseDistPoint"
 
-  postulate
-    parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
+  parseFullName = parseTLV Tag.A0 "full name" _ parseGeneralNamesElems
+  parseNameRTCrlIssuer =
+    parseTLV Tag.A1 "RT CRL issuer" _
+      (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": length mis-match") parseRDNSeq)
+
+  parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
+  parseDistPointNameChoice =
+    parseEquivalent _ Props.DistPointNameChoice.equivalent
+      (parseSum _ parseFullName parseNameRTCrlIssuer)
 
   parseDistPointFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.DistPointFields n)
   parseDistPointFields n =
