@@ -16,6 +16,7 @@ open import Aeres.Data.X509.Decidable.KUFields
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.SKIFields
+open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -90,3 +91,14 @@ module parseExtension where
                                              (parseSum _
                                                (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseCRLDistFields n)
                                                (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseAIAFields n))))))))))))))))))
+
+  parseExtension : Parser _ (Logging ∘ Dec) X509.Extension
+  parseExtension = parseTLV _ "extension" _ parseSelectExtn
+
+  parseExtensionsSeq : Parser _ (Logging ∘ Dec) X509.ExtensionsSeq
+  parseExtensionsSeq = parseSeq "extension" _ Props.TLV.nonempty Props.TLV.nonnesting parseExtension
+
+  parseExtensions : Parser _ (Logging ∘ Dec) X509.Extensions
+  parseExtensions =
+    parseTLV _ "extensions" _
+      (parseExactLength _ Props.TLV.nonnesting (tell "parseExtensions: length mismatch") parseExtensionsSeq)
