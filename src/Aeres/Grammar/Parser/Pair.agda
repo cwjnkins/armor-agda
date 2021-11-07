@@ -10,6 +10,45 @@ module Aeres.Grammar.Parser.Pair (Σ : Set) where
 open import Aeres.Grammar.Definitions Σ
 open import Aeres.Grammar.Parser.Core Σ
 
+open ≡-Reasoning
+
+parse× : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
+         → @0 NonNesting A → @0 NonNesting B
+         → (mismatch : M (Level.Lift _ ⊤))
+         → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
+         → Parser (M ∘ Dec) (A ×ₚ B)
+runParser (parse×{B = B} nn₁ nn₂ m p₁ p₂) xs = do
+  yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀) ← runParser p₁ xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v₀' v₁' refl) suffix ps≡) →
+          contradiction
+            (success _ _ read≡ v₀' _ ps≡)
+            ¬parse
+  yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser p₂ xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v₀' v₁' refl) suffix ps≡) →
+          contradiction
+            (success _ _ read≡ v₁' _ ps≡)
+            ¬parse
+  case r₀ ≟ r₁ of λ where
+    (no  r₀≢r₁) → do
+      m
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ v₀' v₁' refl) suffix ps≡) → ‼
+          contradiction
+            (begin (r₀ ≡⟨ r₀≡ ⟩
+                   length pre₀ ≡⟨ cong length (nn₁ (trans₀ ps≡₀ (sym ps≡)) v₀ v₀') ⟩
+                   length prefix ≡⟨ cong length (nn₂ (trans₀ ps≡ (sym ps≡₁)) v₁' v₁) ⟩
+                   length pre₁ ≡⟨ sym r₁≡ ⟩
+                   r₁ ∎))
+            r₀≢r₁
+    (yes refl) →
+      return (yes
+        (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (subst₀ B (proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡₁ (sym ps≡₀)) (trans (sym r₁≡) r₀≡))) v₁) refl) suf₀ ps≡₀))
+
+
 parse& : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
          → (@0 _ : NonNesting A)
          → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
@@ -53,5 +92,59 @@ runParser (parse& nn p₁ p₂) xs = do
              pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
              pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
              xs ∎)))
-  where open ≡-Reasoning
+
+parse&ᵈ : {M : Set → Set} ⦃ _ : Monad M ⦄
+          → {@0 A : List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → List Σ → Set}
+          → (@0 _ : NonNesting A) (@0 _ : Unambiguous A)
+          → Parser (M ∘ Dec) A
+          → (∀ {@0 bs} → (a : A bs) → Parser (M ∘ Dec) (B bs a))
+          → Parser (M ∘ Dec) (&ₚᵈ A B)
+runParser (parse&ᵈ{A = A}{B} nn ua p₁ p₂) xs = do
+  yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀) ← runParser{A = A} p₁ xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} fstₚ sndₚ refl) suffix ps≡) →
+          contradiction
+            (success bs₁ _ refl fstₚ (bs₂ ++ suffix)
+              (begin bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
+                     (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                     xs ∎))
+            ¬parse
+  yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser (p₂ v₀) suf₀
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} fstₚ sndₚ refl) suffix ps≡) → ‼
+          let @0 xs≡ : bs₁ ++ bs₂ ++ suffix      ≡ pre₀ ++ suf₀
+              xs≡ = begin bs₁ ++ bs₂ ++ suffix   ≡⟨ solve (++-monoid Σ) ⟩
+                          (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                          xs                     ≡⟨ sym ps≡₀ ⟩
+                          pre₀ ++ suf₀           ∎
+
+              @0 bs₁≡ : bs₁ ≡ pre₀
+              bs₁≡ = nn xs≡ fstₚ v₀
+
+              @0 fstₚ≡ : subst A bs₁≡ fstₚ ≡ v₀
+              fstₚ≡ =
+                ≡-elim (λ {bs} eq → ∀ v₀ → subst A eq fstₚ ≡ v₀)
+                  (ua fstₚ) bs₁≡ v₀
+          in
+          contradiction
+            (success bs₂ _ refl
+              (subst (λ x → B pre₀ x bs₂) fstₚ≡
+                (≡-elim (λ {pre₀} eq → B pre₀ (subst A eq fstₚ) bs₂)
+                  sndₚ bs₁≡))
+              suffix
+              (++-cancelˡ pre₀ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))
+            ¬parse
+  return (yes
+    (success (pre₀ ++ pre₁) (r₀ + r₁)
+      (begin r₀ + r₁ ≡⟨ cong (_+ r₁) r₀≡ ⟩
+             length pre₀ + r₁ ≡⟨ cong (length pre₀ +_) r₁≡ ⟩
+             length pre₀ + length pre₁ ≡⟨ (sym $ length-++ pre₀) ⟩
+             length (pre₀ ++ pre₁) ∎)
+      (mk&ₚ v₀ v₁ refl) suf₁
+      (begin (pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Σ) ⟩
+             pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
+             pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
+             xs ∎)))
 

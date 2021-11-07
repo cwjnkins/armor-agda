@@ -8,7 +8,7 @@ module Aeres.Grammar.Parser.Core (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
 
-record Success (A : List Σ → Set) (xs : List Σ) : Set where
+record Success (@0 A : List Σ → Set) (@0 xs : List Σ) : Set where
   constructor success
   field
     @0 prefix : List Σ
@@ -21,7 +21,7 @@ record Success (A : List Σ → Set) (xs : List Σ) : Set where
 mapSuccess : ∀ {A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
 mapSuccess f (success prefix read read≡ value suffix ps≡ ) = success prefix read read≡ (f value) suffix ps≡
 
-record Parserᵢ (M : List Σ → Set → Set) (A : List Σ → Set) : Set where
+record Parserᵢ (M : List Σ → Set → Set) (@0 A : List Σ → Set) : Set where
   constructor mkParser
   field
     runParser : (xs : List Σ) → M xs (Success A xs)

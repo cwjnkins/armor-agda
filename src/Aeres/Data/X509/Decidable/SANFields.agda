@@ -28,3 +28,5 @@ module parseSANFields where
   parseSANFields : Parser Dig (Logging ∘ Dec) X509.SANFields
   parseSANFields = parseTLV _ "SAN Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseSeq "SAN Fields Elems" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName))
 
+
+open parseSANFields public using (parseSANFields)

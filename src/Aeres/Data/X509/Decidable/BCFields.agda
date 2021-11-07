@@ -38,3 +38,5 @@ module parseBCFields where
 
   parseBCFields : Parser Dig (Logging ∘ Dec) X509.BCFields
   parseBCFields = parseTLV _ "BC Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBCFieldsSeq)
+
+open parseBCFields public using (parseBCFields)

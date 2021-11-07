@@ -27,3 +27,5 @@ module parseSKIFields where
 
   parseSKIFields : Parser Dig (Logging ∘ Dec) X509.SKIFields
   parseSKIFields = parseTLV _ "SKI Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseOctetstring )
+
+open parseSKIFields public using (parseSKIFields)

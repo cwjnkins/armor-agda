@@ -15,6 +15,7 @@ import Aeres.Data.X509.Decidable.DirectoryString
 import Aeres.Data.X509.Decidable.DisplayText
 import Aeres.Data.X509.Decidable.DistPoint
 import Aeres.Data.X509.Decidable.EKUFields
+import Aeres.Data.X509.Decidable.Extension
 import Aeres.Data.X509.Decidable.GeneralName
 import Aeres.Data.X509.Decidable.IANFields
 import Aeres.Data.X509.Decidable.Int
@@ -44,6 +45,7 @@ import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
+import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
@@ -51,6 +53,7 @@ import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
+import Aeres.Data.X509.Properties.Seq
 import Aeres.Data.X509.Properties.Time
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.UserNoticeFields

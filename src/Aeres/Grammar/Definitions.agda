@@ -46,6 +46,13 @@ symNoConfusion nc ++≡ v₂ v₁ = nc (sym ++≡) v₁ v₂
 Equivalent : (A B : (@0 _ : List Σ) → Set) → Set
 Equivalent A B = (∀ {@0 xs} → A xs → B xs) × (∀ {@0 xs} → B xs → A xs)
 
+symEquivalent : ∀ {A B} → Equivalent A B → Equivalent B A
+symEquivalent (fst , snd) = snd , fst
+
+transEquivalent : ∀ {A B C} → Equivalent A B → Equivalent B C → Equivalent A C
+proj₁ (transEquivalent e₁ e₂) = proj₁ e₂ ∘ proj₁ e₁
+proj₂ (transEquivalent e₁ e₂) = proj₂ e₁ ∘ proj₂ e₂
+
 data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
@@ -76,6 +83,15 @@ A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
 noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y
+
+nonnesting×ₚ₁ : ∀ {@0 A B} → NonNesting A → NonNesting (A ×ₚ B)
+nonnesting×ₚ₁ nn ++≡ (mk×ₚ fstₚ₁ _ refl) (mk×ₚ fstₚ₂ _ refl) = nn ++≡ fstₚ₁ fstₚ₂
+
+unambiguous×ₚ : ∀ {@0 A B} → Unambiguous A → Unambiguous B → Unambiguous (A ×ₚ B)
+unambiguous×ₚ ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
+  subst₀ (λ x → mk×ₚ fstₚ₁ sndₚ₁ refl ≡ mk×ₚ x sndₚ₂ refl) (ua₁ fstₚ₁ fstₚ₂)
+    (subst₀ (λ x → mk×ₚ fstₚ₁ sndₚ₁ refl ≡ mk×ₚ fstₚ₁ x refl) (ua₂ sndₚ₁ sndₚ₂)
+      refl)
 
 map×ₚ : ∀ {@0 A₁ A₂ B} → (∀ {@0 xs} → A₁ xs → A₂ xs) → (∀ {@0 xs} → (A₁ ×ₚ B) xs → (A₂ ×ₚ B) xs)
 map×ₚ f (mk×ₚ fstₚ₁ sndₚ₁ bs≡) = mk×ₚ (f fstₚ₁) sndₚ₁ bs≡

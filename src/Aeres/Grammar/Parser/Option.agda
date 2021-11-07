@@ -80,7 +80,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   open ≡-Reasoning
 
-  parseOption₁&₁ : {A B : List Σ → Set}
+  parseOption₁&₁ : {@0 A B : List Σ → Set}
                    → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
                    → @0 NonNesting A → @0 NonNesting B
                    → @0 NoConfusion A B

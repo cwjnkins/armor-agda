@@ -29,3 +29,5 @@ module parseCRLDistFields where
   parseCRLDistFields = parseTLV _ "CRL Dist Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
     (parseSeq "CRL Dist Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseDistPoint))
 
+
+open parseCRLDistFields public using (parseCRLDistFields)

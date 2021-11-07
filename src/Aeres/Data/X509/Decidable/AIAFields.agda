@@ -46,3 +46,5 @@ module parseAIAFields where
   parseAIAFields : Parser Dig (Logging ∘ Dec) X509.AIAFields
   parseAIAFields = parseTLV _ "AIA Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
                      (parseSeq "AIA Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseAccessDesc) )
+
+open parseAIAFields public using (parseAIAFields)

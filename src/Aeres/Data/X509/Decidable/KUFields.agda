@@ -27,3 +27,5 @@ module parseKUFields where
 
   parseKUFields : Parser Dig (Logging ∘ Dec) X509.KUFields
   parseKUFields = parseTLV _ "KU Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring)
+
+open parseKUFields public using (parseKUFields)

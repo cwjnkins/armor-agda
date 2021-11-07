@@ -28,3 +28,4 @@ module parseIANFields where
   parseIANFields : Parser Dig (Logging ∘ Dec) X509.IANFields
   parseIANFields = parseTLV _ "IAN Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseSeq "IAN Fields Elems" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName))
 
+open parseIANFields public using (parseIANFields)

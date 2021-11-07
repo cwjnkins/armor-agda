@@ -16,6 +16,9 @@ nonempty : NonEmpty Generic.OIDSub
 nonempty (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 nonempty (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 
+postulate
+  unambiguous : Unambiguous Generic.OIDSub
+
 @0 nonnesting : NonNesting Generic.OIDSub
 nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (Generic.mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (Generic.mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
   with Lemmas.++-≡-⊆ (lₚ₁ ∷ʳ lₑ₁) _ (lₚ₂ ∷ʳ lₑ₂) _ ++≡

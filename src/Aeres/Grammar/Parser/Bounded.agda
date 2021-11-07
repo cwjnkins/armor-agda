@@ -61,7 +61,7 @@ runParser (parseLit underflow mismatch (l ∷ lit)) (x ∷ xs)
   return (yes (success (l ∷ pre₀) _ (cong suc r₀≡) refl suf₀ refl))
 
 parseExactLength : {M : Set → Set} ⦃ _ : Monad M ⦄ →
-                   {A : List Σ → Set} → (@0 _ : NonNesting A) →
+                   {@0 A : List Σ → Set} → (@0 _ : NonNesting A) →
                    M (Level.Lift _ ⊤) →
                    Parser (M ∘ Dec) A →
                    ∀ n → Parser (M ∘ Dec) (ExactLength A n)
@@ -91,7 +91,7 @@ runParser (parseExactLength nn m p n) xs = do
       return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (─ sym r₀≡) refl) suf₀ ps≡₀))
   where open ≡-Reasoning
 
-parse≤ : ∀ {A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
+parse≤ : ∀ {@0 A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → (@0 _ : NonNesting A) → M (Level.Lift _ ⊤) →
   Parser (M ∘ Dec) (WithinLength A n)
 runParser (parse≤{A} n p nn m) xs = do

@@ -50,8 +50,17 @@ module parseAKIFields where
         parseAKIKeyId parseAKIAuthCertIssuer parseAKIAuthCertSN
         (tell $ Here.AKI String.++ ": underflow") n)
 
+  parseAKIFieldsSeq : Parser _ (Logging ∘ Dec) X509.AKIFieldsSeq
+  parseAKIFieldsSeq =
+    parseTLV _ Here.AKI _ parseAKIFieldsSeqFields
 
-open parseAKIFields public using (parseAKIKeyId ; parseAKIAuthCertIssuer ; parseAKIAuthCertSN ; parseAKIFieldsSeqFields)
+  parseAKIFields : Parser _ (Logging ∘ Dec) X509.AKIFields
+  parseAKIFields =
+    parseTLV _ Here.AKI _ (parseExactLength _ Props.TLV.nonnesting
+      (tell $ Here.AKI String.++ ": overflow") parseAKIFieldsSeq)
+
+open parseAKIFields public using
+  (parseAKIKeyId ; parseAKIAuthCertIssuer ; parseAKIAuthCertSN ; parseAKIFieldsSeqFields ; parseAKIFields)
 
 
 private
