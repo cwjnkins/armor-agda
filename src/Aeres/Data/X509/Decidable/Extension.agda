@@ -56,7 +56,7 @@ module parseExtension where
             parseOID (parseLit _ (tell $ here' String.++ ": fields: underflow") (tell $ here' String.++ ": fields: literal mismatch" ) _))
           (nonnesting×ₚ₁ _ Props.TLV.nonnesting) (tell $ here' String.++ ": fields: overflow"))
         λ where
-          {._} (mk×ₚ (mk×ₚ fstₚ₁ refl refl) (─ bsLen) refl) →
+          {._} _ (mk×ₚ (mk×ₚ fstₚ₁ refl refl) (─ bsLen) refl) →
             parseOption₁&₁ _ parseBool p₁ Props.TLV.nonnesting nn nc (tell $ here' String.++ ": length mismatch (bool)") (n - length t))
 
 
@@ -102,3 +102,5 @@ module parseExtension where
   parseExtensions =
     parseTLV _ "extensions" _
       (parseExactLength _ Props.TLV.nonnesting (tell "parseExtensions: length mismatch") parseExtensionsSeq)
+
+open parseExtension public using (parseExtensions)

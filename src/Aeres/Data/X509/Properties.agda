@@ -18,7 +18,10 @@ import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.PublicKeyFields
+import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.Seq
+import Aeres.Data.X509.Properties.SignAlgFields
+import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
 import Aeres.Data.X509.Properties.UserNoticeFields
@@ -45,8 +48,13 @@ module NonNesting where
 module Extension                 = Aeres.Data.X509.Properties.Extension
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
+module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
+module Primitives                = Aeres.Data.X509.Properties.Primitives
+module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module Seq                       = Aeres.Data.X509.Properties.Seq
+module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TLV                       = Aeres.Data.X509.Properties.TLV
+module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields
 
 -- Finished lemmas
 module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
@@ -60,8 +68,6 @@ module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
-module Primitives                = Aeres.Data.X509.Properties.Primitives
-module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
+module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
 module Time                      = Aeres.Data.X509.Properties.Time
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields
-module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields

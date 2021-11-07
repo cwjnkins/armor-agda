@@ -53,7 +53,7 @@ transEquivalent : ∀ {A B C} → Equivalent A B → Equivalent B C → Equivale
 proj₁ (transEquivalent e₁ e₂) = proj₁ e₂ ∘ proj₁ e₁
 proj₂ (transEquivalent e₁ e₂) = proj₂ e₁ ∘ proj₂ e₂
 
-data Option (A : List Σ → Set) : (@0 _ : List Σ) → Set where
+data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
 
@@ -120,6 +120,12 @@ withinLength-nonnesting nn ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fst
 withinLength-noconfusion₁ : ∀ {@0 A B} {n} → NoConfusion A B → NoConfusion (WithinLength A n) B
 withinLength-noconfusion₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) = nc ++≡ fstₚ₁
 
+withinLength-unambiguous : ∀ {@0 A} {n} → Unambiguous A → Unambiguous (WithinLength A n)
+withinLength-unambiguous ua (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) =
+  subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ x (─ sndₚ₂) refl) (ua fstₚ₁ fstₚ₂)
+    (subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ fstₚ₁ (─ x) refl) (‼ ≤-irrelevant sndₚ₁ sndₚ₂)
+       refl)
+  where open import Data.Nat.Properties
 
 record &ₚᵈ (@0 A : List Σ → Set) (@0 B : (@0 bs₁ : List Σ) → A bs₁ → List Σ → Set) (@0 bs : List Σ) : Set where
   constructor mk&ₚ
@@ -156,3 +162,31 @@ NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{
 
   @0 bs₂≡ : bs₂₁ ≡ bs₂₂
   bs₂≡ = nnB (++-cancelˡ bs₁₁ (trans xs++ys≡' (cong (_++ bs₂₂ ++ ys₂) (sym bs₁≡)))) b₁ b₂
+
+unambiguous&ₚ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonNesting B → Unambiguous (&ₚ A B)
+unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ nn₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁ = bs₂₁}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
+  ‼ ≡-elim (λ {bs₁} _ → ∀ fstₚ bs≡₁ → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ{bs₁ = bs₁} fstₚ sndₚ₂ bs≡₁)
+    (λ fstₚ₂' bs≡₂' →
+      ‼ ≡-elim (λ {bs₂} _ → (sndₚ : B bs₂) (bs≡₂ : _ ≡ bs₁₁ ++ bs₂) → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ{bs₂ = bs₂} fstₚ₂' sndₚ bs≡₂ )
+        (λ sndₚ₂' bs≡₂' →
+          subst₂ (λ x y → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ x y bs≡₂') (ua₁ fstₚ₁ fstₚ₂') (ua₂ sndₚ₁ sndₚ₂')
+            (subst (λ x → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ fstₚ₁ sndₚ₁ x) (≡-unique bs≡ bs≡₂') refl))
+        bs₂≡ sndₚ₂ bs≡₂')
+    bs₁≡ fstₚ₂ bs≡₁
+  where
+  open ≡-Reasoning
+
+  @0 bs₁≡ : bs₁₁ ≡ bs₂₁
+  bs₁≡ = nn₁ (trans₀ (sym bs≡) bs≡₁) fstₚ₁ fstₚ₂
+
+  @0 fstₚ≡ : subst A bs₁≡ fstₚ₁ ≡ fstₚ₂
+  fstₚ≡ = ≡-elim (λ {y} eq → ∀ fstₚ₂ → subst A eq fstₚ₁ ≡ fstₚ₂) (ua₁ fstₚ₁) bs₁≡ fstₚ₂
+
+  @0 ++≡ : bs₁₁ ++ bs₁₂ ++ [] ≡ bs₂₁ ++ bs₂₂ ++ []
+  ++≡ = begin (bs₁₁ ++ bs₁₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
+              bs₁₁ ++ bs₁₂ ≡⟨ trans₀ (sym bs≡) bs≡₁ ⟩
+              bs₂₁ ++ bs₂₂ ≡⟨ solve (++-monoid Σ) ⟩
+               bs₂₁ ++ bs₂₂ ++ [] ∎)
+
+  @0 bs₂≡ : bs₁₂ ≡ bs₂₂
+  bs₂≡ = nn₂{ys₁ = []}{ys₂ = []} (Lemmas.++-cancel≡ˡ _ _ bs₁≡ ++≡) sndₚ₁ sndₚ₂

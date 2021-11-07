@@ -39,3 +39,58 @@ module Distribute where
     proj₁ exactLength-Sum (mk×ₚ (inj₂ x) sndₚ₁ refl) = Sum.inj₂ (mk×ₚ x sndₚ₁ refl)
     proj₂ exactLength-Sum (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₁ fstₚ₁) sndₚ₁ refl
     proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁ refl
+
+module NonNesting where
+
+  open ≡-Reasoning
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  noconfusion-option&₁ : ∀ {@0 A B} → NonNesting A → NonNesting B → NoConfusion A B → NonNesting (&ₚ (Option A) B)
+  noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ  none sndₚ₁ refl)    (mk&ₚ  none sndₚ₂ refl) = nn₂ ++≡ sndₚ₁ sndₚ₂
+  noconfusion-option&₁ nn₁ nn₂ nc {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ (mk&ₚ  none sndₚ₁ refl)    (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
+    ⊥-elim (nc ++≡' x sndₚ₁)
+    where
+    @0 ++≡' : bs₁ ++ bs₂ ++ ys₂ ≡ xs₁ ++ ys₁
+    ++≡' = begin bs₁ ++ bs₂ ++ ys₂ ≡⟨ solve (++-monoid Σ) ⟩
+                 (bs₁ ++ bs₂) ++ ys₂ ≡⟨ cong (_++ ys₂) (sym bs≡₁) ⟩
+                 xs₂ ++ ys₂ ≡⟨ sym ++≡ ⟩
+                 xs₁ ++ ys₁ ∎
+  noconfusion-option&₁ nn₁ nn₂ nc {xs₁}{ys₁}{xs₂}{ys₂} ++≡ (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
+    ⊥-elim (nc ++≡' x sndₚ₂)
+    where
+    @0 ++≡' : bs₁ ++ bs₂ ++ ys₁ ≡ xs₂ ++ ys₂
+    ++≡' = begin bs₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Σ) ⟩
+                 (bs₁ ++ bs₂) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                 xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+                 xs₂ ++ ys₂ ∎
+  noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
+    ‼ (NonNesting&ₚ nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
+
+module Unambiguous where
+
+  open ≡-Reasoning
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonNesting B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) = subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
+    ⊥-elim (nc bs≡'  x sndₚ₁)
+    where
+    @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
+    bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
+                 bs₁ ++ bs₂ ≡⟨ sym bs≡₁ ⟩
+                 xs ≡⟨ solve (++-monoid Σ) ⟩
+                 xs ++ [] ∎)
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc {xs} (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
+    ⊥-elim (nc bs≡' x sndₚ₂)
+    where
+    @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
+    bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
+                 bs₁ ++ bs₂ ≡⟨ sym bs≡ ⟩
+                 xs ≡⟨ solve (++-monoid Σ) ⟩
+                 xs ++ [] ∎)
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
+    cong (λ where (mk&ₚ v₀ v₁ eq) → mk&ₚ (some v₀) v₁ eq ) (‼ pf)
+    where
+    @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
+    pf = unambiguous&ₚ ua₁ nn₁ ua₂ nn₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)

@@ -19,3 +19,7 @@ module BoolValue where
   @0 nonnesting : NonNesting Generic.BoolValue
   nonnesting x (Generic.mkBoolValue v b vᵣ bs≡) (Generic.mkBoolValue v₁ b₁ vᵣ₁ bs≡₁) =
     proj₁ $ Lemmas.length-++-≡ _ _ _ _ x (trans (cong length bs≡) (cong length (sym bs≡₁)))
+
+module IntegerValue where
+  postulate
+    unambiguous : Unambiguous Generic.IntegerValue

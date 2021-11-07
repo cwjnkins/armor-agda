@@ -75,7 +75,7 @@ module parseBitstring where
   parseSubUID =
     parseTLV Tag.EightyTwo "subUID" Generic.BitstringValue parseBitstringValue
 
-open parseBitstring public using (parseBitstringValue ; parseBitstring ; parseIssUID)
+open parseBitstring public using (parseBitstringValue ; parseBitstring ; parseIssUID ; parseSubUID)
 
 private
   module Test where

@@ -15,6 +15,9 @@ open Base256
 open import Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
+postulate
+  unambiguous : Unambiguous X509.PublicKeyFields
+
 nonnesting : NonNesting X509.PublicKeyFields
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} signalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} signalg₁ pubkey₁ bs≡₁)
   with ‼ TLVprops.nonnesting x' signalg signalg₁

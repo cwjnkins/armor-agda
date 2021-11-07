@@ -97,7 +97,7 @@ parse&ᵈ : {M : Set → Set} ⦃ _ : Monad M ⦄
           → {@0 A : List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → List Σ → Set}
           → (@0 _ : NonNesting A) (@0 _ : Unambiguous A)
           → Parser (M ∘ Dec) A
-          → (∀ {@0 bs} → (a : A bs) → Parser (M ∘ Dec) (B bs a))
+          → (∀ {@0 bs} → Singleton (length bs) → (a : A bs) → Parser (M ∘ Dec) (B bs a))
           → Parser (M ∘ Dec) (&ₚᵈ A B)
 runParser (parse&ᵈ{A = A}{B} nn ua p₁ p₂) xs = do
   yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀) ← runParser{A = A} p₁ xs
@@ -110,7 +110,7 @@ runParser (parse&ᵈ{A = A}{B} nn ua p₁ p₂) xs = do
                      (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
                      xs ∎))
             ¬parse
-  yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser (p₂ v₀) suf₀
+  yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser (p₂ (singleton r₀ r₀≡) v₀) suf₀
     where no ¬parse → do
       return ∘ no $ λ where
         (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} fstₚ sndₚ refl) suffix ps≡) → ‼

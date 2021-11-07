@@ -19,3 +19,6 @@ nonnesting x x₁ x₂ = foo
   v2& : ∀ {bs} → X509.ValidityFields bs → (&ₚ Generic.Time Generic.Time) bs
   v2& (X509.mkValidityFields start end bs≡) = mk&ₚ start end bs≡
   foo = NonNesting&ₚ Timeprops.nonnesting Timeprops.nonnesting x (v2& x₁) (v2& x₂)
+
+postulate
+  unambiguous : Unambiguous X509.ValidityFields

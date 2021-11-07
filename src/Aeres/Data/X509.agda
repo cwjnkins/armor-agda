@@ -888,7 +888,7 @@ module X509 where
 
 -----------------------------------------------------------------------------------------------
 
-  record TBSCertFields (bs : List Dig) : Set where
+  record TBSCertFields (@0 bs : List Dig) : Set where
     constructor mkTBSCertFields
     field
       @0 {ver ser sa i va u p u₁ u₂ e} : List Dig
