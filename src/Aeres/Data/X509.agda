@@ -909,7 +909,7 @@ module X509 where
 
   ---------------------------------Certificate---------------------------------------------------
 
-  record CertFields (bs : List Dig) : Set where
+  record CertFields (@0 bs : List Dig) : Set where
     constructor mkCertFields
     field
       @0 {t sa sig} : List Dig

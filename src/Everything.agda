@@ -1,14 +1,16 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --guardedness #-}
 
 import Aeres.Arith
 import Aeres.Binary
 import Aeres.Data.X509
+import Aeres.Data.X509.Completeness
 -- open import Aeres.Data.X509.Decidable
 import Aeres.Data.X509.Decidable.AIAFields
 import Aeres.Data.X509.Decidable.AKIFields
 import Aeres.Data.X509.Decidable.BCFields
 import Aeres.Data.X509.Decidable.Bitstring
 import Aeres.Data.X509.Decidable.Boool
+import Aeres.Data.X509.Decidable.Cert
 import Aeres.Data.X509.Decidable.CertPolFields
 import Aeres.Data.X509.Decidable.CRLDistFields
 import Aeres.Data.X509.Decidable.DirectoryString
@@ -43,6 +45,7 @@ import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
+import Aeres.Data.X509.Properties.CertFields
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
@@ -73,7 +76,9 @@ import Aeres.Grammar.Parser.Sum
 import Aeres.Grammar.Parser.WellFounded
 import Aeres.Grammar.Parser.While
 import Aeres.Grammar.Properties
+import Aeres.IO
 import Aeres.Prelude
+import Main
 
 module Everything where
 
