@@ -179,20 +179,19 @@ record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
     x : A
     @0 x≡ : x ≡ a
 
+pattern self {a} = singleton a refl
+
 singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
 singleSelf{a = a} = singleton a refl
 
+uniqueSingleton : ∀ {ℓ} {@0 A : Set ℓ} {a : A} → Unique (Singleton a)
+uniqueSingleton self self = refl
 
 infix 100 ─_
 record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
   constructor ─_
   field
     @0 x : A
-
--- foo : ∀ {A B C : Set} → (f : A → Erased B → C → C) → A → B → C → C
--- foo f a b c = f a (─ b) c
-
-pattern self {a} = singleton a refl
 
 -- Typeclasses
 

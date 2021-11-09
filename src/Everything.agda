@@ -55,10 +55,12 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
+import Aeres.Data.X509.Properties.RDNSeq
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.Seq
 import Aeres.Data.X509.Properties.SignAlgFields

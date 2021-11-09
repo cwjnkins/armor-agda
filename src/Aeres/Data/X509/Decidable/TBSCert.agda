@@ -45,7 +45,7 @@ module parseTBSCert where
                       {bs₁} (singleton r₁ r₁≡) _ →
                         subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - x))) r₁≡
                           (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                            (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous (Seq.unambiguous (TLV.unambiguous (Seq.unambiguous (TLV.unambiguous Props.RDNATVFields.unambiguous))))))
+                            (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
                               (parse≤ _ (n - read - r₁) parseRDNSeq Props.TLV.nonnesting overflow)
                               λ {_} (singleton r₂ r₂≡) _ →
                                 subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - x))) r₂≡
@@ -56,7 +56,7 @@ module parseTBSCert where
                                         (singleton r₃ r₃≡) _ →
                                           subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - x))) r₃≡
                                             (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                              (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous (Seq.unambiguous (TLV.unambiguous (Seq.unambiguous (TLV.unambiguous Props.RDNATVFields.unambiguous))))))
+                                              (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
                                                 (parse≤ _ (n - read - r₁ - r₂ - r₃) parseRDNSeq Props.TLV.nonnesting overflow)
                                                 λ where
                                                   (singleton r₄ r₄≡) _ →

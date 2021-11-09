@@ -1,0 +1,19 @@
+{-# OPTIONS --subtyping #-}
+
+open import Aeres.Prelude
+open import Aeres.Binary
+open import Aeres.Data.X509
+import      Aeres.Data.X509.Properties.OIDSub as OIDSubProps
+import      Aeres.Data.X509.Properties.Seq    as SeqProps
+import      Aeres.Data.X509.Properties.TLV    as TLVProps
+open import Data.Nat.Properties
+  hiding (_≟_)
+open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+module Aeres.Data.X509.Properties.OID where
+
+open Base256
+open import Aeres.Grammar.Definitions Dig
+
+@0 unambiguous : Unambiguous Generic.OID
+unambiguous = TLVProps.unambiguous (SeqProps.unambiguous OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)

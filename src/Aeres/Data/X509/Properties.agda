@@ -15,11 +15,13 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
+import Aeres.Data.X509.Properties.RDNSeq
 import Aeres.Data.X509.Properties.Seq
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
@@ -48,12 +50,10 @@ module NonNesting where
 -- Unfinished lemmas
 module CertFields                = Aeres.Data.X509.Properties.CertFields
 module Extension                 = Aeres.Data.X509.Properties.Extension
-module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives
 module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
-module Seq                       = Aeres.Data.X509.Properties.Seq
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
 module TLV                       = Aeres.Data.X509.Properties.TLV
@@ -71,5 +71,9 @@ module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+module OID                       = Aeres.Data.X509.Properties.OID
+module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
+module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
+module Seq                       = Aeres.Data.X509.Properties.Seq
 module Time                      = Aeres.Data.X509.Properties.Time
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields

@@ -48,7 +48,7 @@ module parseExtension where
         (λ where
           (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) → ‼
             subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ x (─ sndₚ₂) refl)
-              (unambiguous×ₚ _ (TLV.unambiguous (Seq.unambiguous Props.OIDSub.unambiguous)) (λ where refl refl → refl) fstₚ₁ fstₚ₂)
+              (unambiguous×ₚ _ OID.unambiguous (λ where refl refl → refl) fstₚ₁ fstₚ₂)
                 (subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ fstₚ₁ (─ x) refl) (≤-irrelevant sndₚ₁ sndₚ₂)
                   refl))
         (parse≤ _ n
