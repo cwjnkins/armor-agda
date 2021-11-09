@@ -39,9 +39,9 @@ import Aeres.Data.X509.Decidable.UserNotice
 import Aeres.Data.X509.Decidable.Validity
 import Aeres.Data.X509.Decidable.Version
 import Aeres.Data.X509.Properties
-import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.AccessMethod
+import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.DisplayText
@@ -59,8 +59,8 @@ import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.Seq
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
-import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
+import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
 import Aeres.Grammar.Definitions
