@@ -294,6 +294,11 @@ module Generic where
   oidLeastDigs? [] = yes tt
   oidLeastDigs? (x ∷ bs) = (# 128) Fin.<? x
 
+  oidLeastDigs-unique : ∀ {bs} → Unique (OIDLeastDigs bs)
+  oidLeastDigs-unique {[]} tt tt = refl
+  oidLeastDigs-unique {x ∷ bs} x₁ x₂ = ≤-irrelevant x₁ x₂
+    where open import Data.Nat.Properties
+
   record OIDSub (@0 bs : List Dig) : Set where
     constructor mkOIDSub
     field
@@ -909,7 +914,7 @@ module X509 where
 
   ---------------------------------Certificate---------------------------------------------------
 
-  record CertFields (bs : List Dig) : Set where
+  record CertFields (@0 bs : List Dig) : Set where
     constructor mkCertFields
     field
       @0 {t sa sig} : List Dig

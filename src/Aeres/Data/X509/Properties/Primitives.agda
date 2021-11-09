@@ -21,5 +21,7 @@ module BoolValue where
     proj₁ $ Lemmas.length-++-≡ _ _ _ _ x (trans (cong length bs≡) (cong length (sym bs≡₁)))
 
 module IntegerValue where
-  postulate
-    unambiguous : Unambiguous Generic.IntegerValue
+  @0 unambiguous : Unambiguous Generic.IntegerValue
+  unambiguous{xs} (Generic.mkIntegerValue ._ refl) (Generic.mkIntegerValue val₁ bs≡₁) =
+    ≡-elim (λ {val₁} bs≡ → Generic.mkIntegerValue (twosComplement xs) refl ≡ Generic.mkIntegerValue val₁ bs≡)
+      refl bs≡₁

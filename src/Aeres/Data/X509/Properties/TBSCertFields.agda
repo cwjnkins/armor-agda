@@ -27,3 +27,6 @@ proj₁ equivalent (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ (
 proj₂ equivalent (X509.mkTBSCertFields version serial signAlg issuer validity subject pk issuerUID subjectUID extensions refl) =
   mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ pk (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
     (solve (++-monoid Dig))
+
+postulate
+  unambiguous : Unambiguous X509.TBSCertFields
