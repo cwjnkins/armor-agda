@@ -48,3 +48,13 @@ module parseNoticeReference where
   parseNoticeReference = parseTLV _ "notice reference: " _ parseNoticeReferenceFields
 
 open parseNoticeReference public using (parseNoticeReferenceFields ; parseNoticeReference)
+
+
+private                         
+  module Test where
+
+  val₁ : List Dig
+  val₁ = # 48 ∷ # 12 ∷ # 22 ∷ # 2 ∷ # 67 ∷ # 68 ∷ # 48 ∷ # 6 ∷ # 2 ∷ # 1 ∷ # 1 ∷ # 2 ∷ # 1 ∷ [ # 2 ]
+
+  test₁ : X509.NoticeReference val₁
+  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseNoticeReference val₁)} tt)

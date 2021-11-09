@@ -128,7 +128,6 @@ private
   Gen₃ : List Dig
   Gen₃ = Tag.A4 ∷ # 26 ∷ # 49 ∷ # 11  ∷ # 48  ∷ # 9  ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ # 83 ∷ # 49 ∷ # 11 ∷ # 48 ∷ # 9 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ [ # 83 ]
 
-
   test₁ : X509.GeneralName Gen₁
   test₁ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₁)} tt)
 

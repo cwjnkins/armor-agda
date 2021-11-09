@@ -15,9 +15,9 @@ import Aeres.Data.X509.Decidable.CertPolFields
 import Aeres.Data.X509.Decidable.CRLDistFields
 import Aeres.Data.X509.Decidable.DirectoryString
 import Aeres.Data.X509.Decidable.DisplayText
-import Aeres.Data.X509.Decidable.DistPoint
+import Aeres.Data.X509.Decidable.DistPoint -- ongoing (test₂ fails for nameRelativeCRLIssuer is present..needs spec change)
 import Aeres.Data.X509.Decidable.EKUFields
-import Aeres.Data.X509.Decidable.Extension
+import Aeres.Data.X509.Decidable.Extension -- ongoing (test₁ fails when unknwon extensions are present...needs spec change)
 import Aeres.Data.X509.Decidable.GeneralName
 import Aeres.Data.X509.Decidable.IANFields
 import Aeres.Data.X509.Decidable.Int
@@ -45,6 +45,7 @@ import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
+import Aeres.Data.X509.Properties.BitstringValue
 import Aeres.Data.X509.Properties.CertFields
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.DisplayText

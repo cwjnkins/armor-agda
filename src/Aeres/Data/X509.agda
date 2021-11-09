@@ -761,7 +761,7 @@ module X509 where
   FullName xs = Generic.TLV Tag.A0 GeneralNamesElems xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
-  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNSeq xs
+  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNSeq xs -- TODO : should be (Generic.SeqElems RDN) instead of RDNSeq..tag not required
 
   data DistPointNameChoice : (@0 _ : List Dig) → Set where
     fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
@@ -871,17 +871,8 @@ module X509 where
     cpextn  : ∀ {@0 bs} → ExtensionFields ExtensionOID.CPOL    CertPolFields bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
     crlextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.CRLDIST CRLDistFields bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
     aiaextn : ∀ {@0 bs} → ExtensionFields ExtensionOID.AIA     AIAFields     bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
-    -- other : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SelectExtn bs1 bs2
-
---   record ExtensionFields (bs : List Dig) : Set where
---     constructor mkExtensionFields
---     field
---       @0 {oex cex ocex} : List Dig
---       oidextn : Generic.OID oex
---       critical : Option Generic.Boool cex
---       octetextn :  SelectExtn oex ocex
---       @0 bs≡  : bs ≡ oex ++ cex ++ ocex
-
+    --TODO -- other : ∀ {@0 bs1 bs2} → Generic.Octetstring bs2 → SelectExtn bs1 bs2
+  
   Extension : (@0 _ : List Dig) → Set
   Extension xs = Generic.TLV Tag.Sequence SelectExtn xs
 

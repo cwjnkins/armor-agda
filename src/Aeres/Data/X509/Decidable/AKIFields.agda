@@ -66,27 +66,26 @@ open parseAKIFields public using
 private
   module Test where
 
-    AKIid₁ : List Dig
-    AKIid₁ = # 128 ∷ # 20 ∷ # 20 ∷ # 46 ∷ # 179 ∷ # 23 ∷ # 183 ∷ # 88 ∷ # 86 ∷ # 203 ∷ # 174 ∷ # 80 ∷ # 9 ∷ # 64 ∷ # 230 ∷ # 31 ∷ # 175 ∷ # 157 ∷ # 139 ∷ # 20 ∷ # 194 ∷ [ # 198 ]
+    val₁ : List Dig
+    val₁ = # 128 ∷ # 20 ∷ # 20 ∷ # 46 ∷ # 179 ∷ # 23 ∷ # 183 ∷ # 88 ∷ # 86 ∷ # 203 ∷ # 174 ∷ # 80 ∷ # 9 ∷ # 64 ∷ # 230 ∷ # 31 ∷ # 175 ∷ # 157 ∷ # 139 ∷ # 20 ∷ # 194 ∷ [ # 198 ]
 
-    AKIsn₁ : List Dig
-    AKIsn₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
+    val₂ : List Dig
+    val₂ = # 161 ∷ # 8 ∷ # 130 ∷ # 2 ∷ # 90 ∷ # 90 ∷ # 130 ∷ # 2 ∷ # 90 ∷ [ # 90 ]
+    
+    val₃ : List Dig
+    val₃ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
 
-    AKIissuer₁ : List Dig
-    AKIissuer₁ = # 161 ∷ # 8 ∷ # 130 ∷ # 2 ∷ # 90 ∷ # 90 ∷ # 130 ∷ # 2 ∷ # 90 ∷ [ # 90 ]
+    val₄ : List Dig
+    val₄ = # 4 ∷ # 24 ∷ # 48 ∷ # 22 ∷ # 128 ∷ # 20 ∷ # 138 ∷ # 116 ∷ # 127 ∷ # 175 ∷ # 133 ∷ # 205 ∷ # 238 ∷ # 149 ∷ # 205 ∷ # 61 ∷ # 156 ∷ # 208 ∷ # 226 ∷ # 70 ∷ # 20 ∷ # 243 ∷ # 113 ∷ # 53 ∷ # 29 ∷ [ # 39 ]
 
-    AKIfields₁ : List Dig
-    AKIfields₁ = # 130 ∷ # 2 ∷ # 2 ∷ [ # 3 ]
+    test₁ : X509.AKIKeyId val₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId val₁)} tt)
 
-    test₁ : X509.AKIKeyId AKIid₁
-    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId AKIid₁)} tt)
+    test₂ : X509.AKIAuthCertIssuer val₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer val₂)} tt)
 
-    test₂ : X509.AKIAuthCertIssuer AKIissuer₁
-    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer AKIissuer₁)} tt)
+    test₃ : X509.AKIAuthCertSN val₃
+    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN val₃)} tt)
 
-    test₃ : X509.AKIAuthCertSN AKIsn₁
-    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN AKIsn₁)} tt)
-
-    -- AKIfieldstest₁ : X509.AKIFieldsSeqFields AKIfields₁
-    -- AKIfieldstest₁ = Success.value (toWitness {Q = Logging.val (runParser {!parseAKIFieldsSeqFields!} AKIfields₁) } tt)
-
+    test₄ : X509.AKIFields val₄
+    test₄ = Success.value (toWitness {Q = Logging.val (runParser parseAKIFields val₄)} tt)
