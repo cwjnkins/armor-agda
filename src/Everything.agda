@@ -77,11 +77,10 @@ import Aeres.Grammar.Parser.WellFounded
 import Aeres.Grammar.Parser.While
 import Aeres.Grammar.Properties
 import Aeres.IO
+import Aeres.Main
 import Aeres.Prelude
-import Main
 
 module Everything where
 
 -- TODO
 --- some lemmas in Aeres.Data.X509.Properties
---- Cert

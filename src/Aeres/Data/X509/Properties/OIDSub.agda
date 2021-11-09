@@ -16,8 +16,25 @@ nonempty : NonEmpty Generic.OIDSub
 nonempty (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 nonempty (Generic.mkOIDSub (x ∷ lₚ) lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
 
-postulate
-  unambiguous : Unambiguous Generic.OIDSub
+@0 unambiguous : Unambiguous Generic.OIDSub
+unambiguous (Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl) (Generic.mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ bs≡₁) =
+  ≡-elim (λ {lₚ₁} lₚ≡ → ∀ lₚ₁≥128 leastDigs₁ bs≡₁ → Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl ≡ Generic.mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ<129 leastDigs₁ bs≡₁)
+    (λ lₚ₁≥128 leastDigs₁ bs≡₁' →
+      ≡-elim (λ {lₑ₁} lₑ≡ → ∀ lₑ₁<128 bs≡₁ → Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl ≡ Generic.mkOIDSub lₚ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ bs≡₁)
+        (λ where
+          lₑ₁<128 refl → ‼
+            subst₂ (λ x y → Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl ≡ Generic.mkOIDSub lₚ x lₑ y leastDigs₁ refl)
+              (All.irrelevant ≤-irrelevant lₚ≥128 _) (≤-irrelevant lₑ<128 _)
+              (subst₀ (λ x → Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl ≡ Generic.mkOIDSub _ lₚ≥128 _ lₑ<128 x refl) (Generic.oidLeastDigs-unique{bs = lₚ} leastDigs leastDigs₁)
+                refl))
+        lₑ≡ lₑ<129 bs≡₁')
+    lₚ≡ lₚ≥129 leastDigs₁ bs≡₁
+  where
+  @0 lₚ≡ : lₚ ≡ lₚ₁
+  lₚ≡ = ∷ʳ-injectiveˡ _ _ bs≡₁
+
+  @0 lₑ≡ : lₑ ≡ lₑ₁
+  lₑ≡ = ∷ʳ-injectiveʳ _ _ bs≡₁
 
 @0 nonnesting : NonNesting Generic.OIDSub
 nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (Generic.mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (Generic.mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
