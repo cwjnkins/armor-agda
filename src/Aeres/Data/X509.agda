@@ -264,6 +264,11 @@ module Generic where
   BitstringUnusedBits bₕ (bₜ ∷ []) = toℕ bₜ %2^ (toℕ bₕ) ≡ 0
   BitstringUnusedBits bₕ (bₜ ∷ x ∷ bₜ') = BitstringUnusedBits bₕ (x ∷ bₜ')
 
+  bitstringUnusedBits-unique : ∀ {bₕ bₜ} → Unique (BitstringUnusedBits bₕ bₜ)
+  bitstringUnusedBits-unique {bₜ = []} x y = ≡-unique x y
+  bitstringUnusedBits-unique {bₜ = x₁ ∷ []} x y = ≡-unique x y
+  bitstringUnusedBits-unique {bₜ = x₁ ∷ x₂ ∷ bₜ} x y = bitstringUnusedBits-unique{bₜ = x₂ ∷ bₜ} x y
+
   bitstringUnusedBits? : ∀ b bs → Dec (BitstringUnusedBits b bs)
   bitstringUnusedBits? b [] = toℕ b ≟ 0
   bitstringUnusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
