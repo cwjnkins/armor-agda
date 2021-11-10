@@ -58,3 +58,19 @@ module parsePolicyQualifierInfo where
       parsePolicyQualifierInfo
 
 open parsePolicyQualifierInfo public using (parsePolicyQualifierInfo ; parsePolicyQualifiersSeq)
+
+
+private
+  module Test where
+
+  val₁ : List Dig ---cps
+  val₁ = # 48 ∷ # 42 ∷ # 48 ∷ # 40 ∷ # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ # 1 ∷ # 22 ∷ # 28 ∷ # 104 ∷ # 116 ∷ # 116 ∷ # 112 ∷ # 115 ∷ # 58 ∷ # 47 ∷ # 47 ∷ # 119 ∷ # 119 ∷ # 119 ∷ # 46 ∷ # 100 ∷ # 105 ∷ # 103 ∷ # 105 ∷ # 99 ∷ # 101 ∷ # 114 ∷ # 116 ∷ # 46 ∷ # 99 ∷ # 111 ∷ # 109 ∷ # 47 ∷ # 67 ∷ # 80 ∷ [ # 83 ]
+
+  val₂ : List Dig ---unotice
+  val₂ =  # 48 ∷ # 32 ∷ # 48 ∷ # 30 ∷ # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ # 2 ∷ # 48 ∷ # 18 ∷ # 48 ∷ # 12 ∷ # 22 ∷ # 2 ∷ # 67 ∷ # 68 ∷ # 48 ∷ # 6 ∷ # 2 ∷ # 1 ∷ # 1 ∷ # 2 ∷ # 1 ∷ # 2 ∷ # 22 ∷ # 2 ∷ # 65 ∷ [ # 66 ]
+
+  test₁ : X509.PolicyQualifiersSeq val₁
+  test₁ = Success.value (toWitness {Q = Logging.val (runParser parsePolicyQualifiersSeq val₁)} tt)
+
+  test₂ : X509.PolicyQualifiersSeq val₂
+  test₂ = Success.value (toWitness {Q = Logging.val (runParser parsePolicyQualifiersSeq val₂)} tt)

@@ -40,3 +40,24 @@ module parseBCFields where
   parseBCFields = parseTLV _ "BC Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBCFieldsSeq)
 
 open parseBCFields public using (parseBCFields)
+
+private
+  module Test where
+
+    val₁ : List Dig
+    val₁ = # 4 ∷ # 2 ∷ # 48 ∷ [ # 0 ]
+
+    val₂ : List Dig
+    val₂ = # 4 ∷ # 5 ∷ # 48 ∷ # 3 ∷ # 1 ∷ # 1 ∷ [ # 255 ]
+
+    val₃ : List Dig
+    val₃ = # 4 ∷ # 8 ∷ # 48 ∷ # 6 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 2 ∷ # 1 ∷ [ # 0 ]
+
+    test₁ : X509.BCFields val₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₁)} tt)
+
+    test₂ : X509.BCFields val₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₂)} tt)
+
+    test₃ : X509.BCFields val₃
+    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₃)} tt)

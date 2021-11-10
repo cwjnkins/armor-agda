@@ -29,3 +29,18 @@ module parseEKUFields where
   parseEKUFields = parseTLV _ "EKU Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseSeq "EKU Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseOID))
 
 open parseEKUFields public using (parseEKUFields)
+
+private
+  module Test where
+
+    val₁ : List Dig
+    val₁ = # 4 ∷ # 12 ∷ # 48 ∷ # 10 ∷ # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 1 ]
+
+    val₂ : List Dig
+    val₂ = # 4 ∷ # 22 ∷ # 48 ∷ # 20 ∷ # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ # 1 ∷ # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 2 ]
+
+    test₁ : X509.EKUFields val₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseEKUFields val₁)} tt)
+
+    test₂ : X509.EKUFields val₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseEKUFields val₂)} tt)

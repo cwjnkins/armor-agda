@@ -29,3 +29,13 @@ module parseSKIFields where
   parseSKIFields = parseTLV _ "SKI Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseOctetstring )
 
 open parseSKIFields public using (parseSKIFields)
+
+
+private
+  module Test where
+
+    val₁ : List Dig
+    val₁ = # 4 ∷ # 22 ∷ # 4 ∷ # 20 ∷ # 147 ∷ # 61 ∷ # 128 ∷ # 160 ∷ # 120 ∷ # 95 ∷ # 164 ∷ # 18 ∷ # 101 ∷ # 194 ∷ # 57 ∷ # 173 ∷ # 54 ∷ # 77 ∷ # 116 ∷ # 177 ∷ # 171 ∷ # 84 ∷ # 108 ∷ [ # 167 ]
+
+    test₁ : X509.SKIFields val₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseSKIFields val₁)} tt)
