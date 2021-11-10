@@ -148,6 +148,12 @@ open import Relation.Binary.Definitions public
 open import Relation.Nullary public
   renaming (Irrelevant to Unique)
 
+×-unique : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → Unique A → Unique B → Unique (A × B)
+×-unique ua ub (a , b) (c , d)
+  with ua a c
+  |    ub b d
+... | refl | refl = refl
+
 open import Relation.Nullary.Negation public
   hiding (contradiction)
 

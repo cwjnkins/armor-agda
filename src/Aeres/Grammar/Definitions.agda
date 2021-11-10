@@ -53,6 +53,20 @@ transEquivalent : ∀ {A B C} → Equivalent A B → Equivalent B C → Equivale
 proj₁ (transEquivalent e₁ e₂) = proj₁ e₂ ∘ proj₁ e₁
 proj₂ (transEquivalent e₁ e₂) = proj₂ e₁ ∘ proj₂ e₂
 
+Iso : (A B : @0 List Σ → Set) → Set
+Iso A B = Σ[ e ∈ Equivalent A B ]
+            ((∀ {@0 xs} → proj₂ e ∘ proj₁ e ≗ id{A = A xs}) × (∀ {@0 xs} → proj₁ e ∘ proj₂ e ≗ id{A = B xs}))
+
+isoUnambiguous : ∀ {A B} → Iso A B → Unambiguous A → Unambiguous B
+isoUnambiguous ((a→b , b→a) , _ , id₂) ua{xs} b₁ b₂ =
+  subst₂ _≡_ (id₂ b₁) (id₂ b₂) (‼ b≡)
+  where
+  @0 a≡ : b→a b₁ ≡ b→a b₂
+  a≡ = ua (b→a b₁) (b→a b₂)
+
+  @0 b≡ : a→b (b→a b₁) ≡ a→b (b→a b₂)
+  b≡ = cong a→b a≡
+
 data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
