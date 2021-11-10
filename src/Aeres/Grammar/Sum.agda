@@ -15,3 +15,9 @@ nonnestingSum nn₁ nn₂ nc ++≡ (inj₁ x) (inj₁ x₁) = nn₁ ++≡ x x₁
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₁ x) (inj₂ x₁) = ⊥-elim (nc ++≡ x x₁)
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (sym ++≡) x₁ x)
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₂ x) (inj₂ x₁) = nn₂ ++≡ x x₁
+
+@0 unambiguousSum : ∀ {@0 A B} → Unambiguous A → Unambiguous B → NoConfusion A B → Unambiguous (Sum A B)
+unambiguousSum ua₁ ua₂ nc (inj₁ x) (inj₁ x₁) = cong inj₁ (ua₁ x x₁)
+unambiguousSum ua₁ ua₂ nc {xs} (inj₁ x) (inj₂ x₁) = ⊥-elim (nc (refl {x = xs ++ []}) x x₁) 
+unambiguousSum ua₁ ua₂ nc {xs} (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (refl {x = xs ++ []}) x₁ x)
+unambiguousSum ua₁ ua₂ nc (inj₂ x) (inj₂ x₁) = cong inj₂ (ua₂ x x₁)

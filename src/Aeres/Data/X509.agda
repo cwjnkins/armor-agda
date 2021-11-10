@@ -500,7 +500,7 @@ module X509 where
   VisibleString : (@0 _ : List Dig) → Set
   VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetstringValue xs
 
-  data DirectoryString : List Dig → Set where
+  data DirectoryString : @0 List Dig → Set where
     teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
     printableString : ∀ {@0 bs} → PrintableString bs → DirectoryString bs
     universalString : ∀ {@0 bs} → UniversalString bs → DirectoryString bs

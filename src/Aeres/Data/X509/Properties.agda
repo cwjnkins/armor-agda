@@ -15,6 +15,7 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.Primitives
@@ -50,6 +51,7 @@ module NonNesting where
 -- Unfinished lemmas
 module CertFields                = Aeres.Data.X509.Properties.CertFields
 module Extension                 = Aeres.Data.X509.Properties.Extension
+module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives

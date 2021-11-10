@@ -55,6 +55,7 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
