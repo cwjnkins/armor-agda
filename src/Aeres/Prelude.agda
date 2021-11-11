@@ -220,6 +220,12 @@ inRange? : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric
           → (x : B) → Dec (InRange l u x)
 inRange? l u x = toℕ l ≤? toℕ x ×-dec toℕ x ≤? toℕ u
 
+inRange-unique : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric A ⦄ ⦃ _ : Numeric B ⦄
+                 → ∀ {l u : A} {x : B}
+                 → (pf₁ pf₂ : InRange l u x) → pf₁ ≡ pf₂
+inRange-unique = ×-unique ≤-irrelevant ≤-irrelevant
+  where open import Data.Nat.Properties
+
 instance
   ℕNumeric : Numeric ℕ
   Numeric.toℕ ℕNumeric = id

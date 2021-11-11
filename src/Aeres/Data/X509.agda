@@ -342,29 +342,43 @@ module Generic where
 
 ------------------------------Time------------------------------------------------------------
 
+  MonthRange : (mo₁ mo₂ : Dig) → Set
+  MonthRange mo₁ mo₂ =   mo₁ ≡ # '0' × InRange '0' '9' mo₂
+                       ⊎ mo₁ ≡ # '1' × InRange '0' '2' mo₂
+
+  DayRange : (d₁ d₂ : Dig) → Set
+  DayRange d₁ d₂ =   InRange '0' '2' d₁ × InRange '0' '9' d₂
+                   ⊎ toℕ d₁ ≡ toℕ '3' × InRange '0' '1' d₂
+
+  HourRange : (h₁ h₂ : Dig) → Set
+  HourRange h₁ h₂ =    InRange '0' '1' h₁ × InRange '0' '9' h₂
+                     ⊎ toℕ h₁ ≡ toℕ '2' × InRange '0' '3' h₂
+
+  MinuteRange : (mi₁ mi₂ : Dig) → Set
+  MinuteRange mi₁ mi₂ = InRange '0' '5' mi₁ × InRange '0' '9' mi₂
+
+  SecRange = MinuteRange
+
   record MonthDayHourMinSecFields (@0 bs : List Dig) : Set where
     constructor mkMDHMSFields
     field
       @0 {mo₁ mo₂ d₁ d₂ h₁ h₂ mi₁ mi₂ s₁ s₂} : Dig
 
       mon : Singleton (asciiNum (mo₁ ∷ [ mo₂ ]))
-      @0 monRange  :   mo₁ ≡ # '0' × InRange '0' '9' mo₂
-                     ⊎ mo₁ ≡ # '1' × InRange '0' '2' mo₂
+      @0 monRange  : MonthRange mo₁ mo₂
 
       -- TODO: where do we check valid dom? (Feb, leap year, etc)
       day : Singleton (asciiNum (d₁ ∷ [ d₂ ]))
-      @0 dayRange  :   InRange '0' '2' d₁ × InRange '0' '9' d₂
-                     ⊎ toℕ d₁ ≡ toℕ '3' × InRange '0' '1' d₂
+      @0 dayRange  : DayRange d₁ d₂
 
       hour : Singleton (asciiNum (h₁ ∷ [ h₂ ]))
-      @0 hourRange :   InRange '0' '1' h₁ × InRange '0' '9' h₂
-                     ⊎ toℕ h₁ ≡ toℕ '2' × InRange '0' '3' h₂
+      @0 hourRange : HourRange h₁ h₂
 
       min : Singleton (asciiNum (mi₁ ∷ [ mi₂ ]))
-      @0 minRange : InRange '0' '5' mi₁ × InRange '0' '9' mi₂
+      @0 minRange : MinuteRange mi₁ mi₂
 
       sec : Singleton (asciiNum (s₁ ∷ [ s₂ ]))
-      @0 secRange : InRange '0' '5' s₁ × InRange '0' '9' s₂
+      @0 secRange : SecRange s₁ s₂
 
       @0 bs≡ : bs ≡ mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]
 
