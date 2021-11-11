@@ -14,6 +14,7 @@ open import Aeres.Data.X509.Decidable.EKUFields
 open import Aeres.Data.X509.Decidable.IANFields
 open import Aeres.Data.X509.Decidable.KUFields
 open import Aeres.Data.X509.Decidable.OID
+open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.SKIFields
 open import Aeres.Data.X509.Decidable.Seq
@@ -34,11 +35,11 @@ module parseExtension where
   here' = "parseExtension"
 
   parseExtensionFields
-    : ∀ {t} {@0 A : @0 List Dig → Set}
-      → @0  NonNesting _ A → @0 NoConfusion _ Generic.Boool A
+    : ∀ {@0 P} {@0 A : @0 List Dig → Set} (P? : ∀ bs → Dec (P bs))
+      → @0  NonNesting _ A → @0 NoConfusion _ Generic.Boool A → Unambiguous _ P
       → Parser _ (Logging ∘ Dec) A
-      → ExactLengthParser _ (Logging ∘ Dec) (X509.ExtensionFields t A)
-  parseExtensionFields{t}{A} nn nc p₁ n =
+      → ExactLengthParser _ (Logging ∘ Dec) (X509.ExtensionFields P A)
+  parseExtensionFields P? nn nc ua p n =
     parseEquivalent _
       (transEquivalent _
         (symEquivalent _ (Distribute.exactLength-& _))
@@ -48,49 +49,51 @@ module parseExtension where
         (λ where
           (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) → ‼
             subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ x (─ sndₚ₂) refl)
-              (unambiguous×ₚ _ OID.unambiguous (λ where refl refl → refl) fstₚ₁ fstₚ₂)
+              (unambiguous×ₚ _ OID.unambiguous (λ where (─ pf₁) (─ pf₂) → ‼ cong ─_ (ua pf₁ pf₂) ) fstₚ₁ fstₚ₂)
                 (subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ fstₚ₁ (─ x) refl) (≤-irrelevant sndₚ₁ sndₚ₂)
                   refl))
         (parse≤ _ n
-          (parse× _ Props.TLV.nonnesting (λ where _ refl refl → refl) (tell $ here' String.++ ": fields: impossible")
-            parseOID (parseLit _ (tell $ here' String.++ ": fields: underflow") (tell $ here' String.++ ": fields: literal mismatch" ) _))
-          (nonnesting×ₚ₁ _ Props.TLV.nonnesting) (tell $ here' String.++ ": fields: overflow"))
+          (parse×Dec _ Props.TLV.nonnesting (return (Level.lift tt)) parseOID λ x → erased? (P? x))
+            (nonnesting×ₚ₁ _ Props.TLV.nonnesting) (tell $ here' String.++ ": fields: overflow"))
         λ where
-          {._} _ (mk×ₚ (mk×ₚ fstₚ₁ refl refl) (─ bsLen) refl) →
-            parseOption₁&₁ _ parseBool p₁ Props.TLV.nonnesting nn nc (tell $ here' String.++ ": length mismatch (bool)") (n - length t))
-
+          (singleton r r≡) (mk×ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (─ bsLen) refl) →
+            subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n ∸ x))) r≡
+              (parseOption₁&₁ _ parseBool p Props.TLV.nonnesting nn nc ((tell $ here' String.++ ": length mismatch (bool)")) (n - r)))
 
   parseSelectExtn : ExactLengthParser _ (Logging ∘ Dec) X509.SelectExtn
   parseSelectExtn n =
     parseEquivalent _
       (transEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _)) (equivalent×ₚ _ Props.Extension.SelectExtn.equivalent))
       (parseSum _
-        (parseExtensionFields Props.TLV.nonnesting (TLV.noconfusion (λ ())) parseAKIFields n)
+        (parseExtensionFields (_≟ _) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ where refl refl → refl)  parseAKIFields n)
         (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
           (parseSum _
-            (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion (λ ())) parseSKIFields n)
+            (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion (λ ())) (λ where refl refl → refl) parseSKIFields n)
             (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                (parseSum _
-                 (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseKUFields n)
+                 (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseKUFields n)
                  (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                     (parseSum _
-                      (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseEKUFields n)
+                      (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseEKUFields n)
                       (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                          (parseSum _
-                           (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseBCFields n)
+                           (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseBCFields n)
                            (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                               (parseSum _
-                                (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseIANFields n)
+                                (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseIANFields n)
                                 (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                                    (parseSum _
-                                     (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseSANFields n)
+                                     (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseSANFields n)
                                      (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                                         (parseSum _
-                                          (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseCertPolFields n)
+                                          (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseCertPolFields n)
                                           (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                                              (parseSum _
-                                               (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseCRLDistFields n)
-                                               (parseExtensionFields Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) parseAIAFields n))))))))))))))))))
+                                               (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseCRLDistFields n)
+                                               (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
+                                                  (parseSum _
+                                                    (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
+                                                    (parseExtensionFields (λ bs → T-dec) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetstring n))))))))))))))))))))
 
   parseExtension : Parser _ (Logging ∘ Dec) X509.Extension
   parseExtension = parseTLV _ "extension" _ parseSelectExtn
@@ -117,8 +120,8 @@ private
     val₃ : List Dig
     val₃ = # 163 ∷ # 66 ∷ # 48 ∷ # 64 ∷ # 48 ∷ # 15 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ # 19 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 4 ∷ # 5 ∷ # 48 ∷ # 3 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 48 ∷ # 14 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ # 15 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 4 ∷ # 4 ∷ # 3 ∷ # 2 ∷ # 1 ∷ # 134 ∷ # 48 ∷ # 29 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ # 14 ∷ # 4 ∷ # 22 ∷ # 4 ∷ # 20 ∷ # 78 ∷ # 34 ∷ # 84 ∷ # 32 ∷ # 24 ∷ # 149 ∷ # 230 ∷ # 227 ∷ # 110 ∷ # 230 ∷ # 15 ∷ # 250 ∷ # 250 ∷ # 185 ∷ # 18 ∷ # 237 ∷ # 6 ∷ # 23 ∷ # 143 ∷ [ # 57 ]
 
-    -- test₁ : X509.Extensions val₁
-    -- test₁ = Success.value (toWitness {Q = Logging.val (runParser parseExtensions val₁)} tt)
+    test₁ : X509.Extensions val₁
+    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseExtensions val₁)} tt)
 
     test₂ : X509.Extensions val₂
     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseExtensions val₂)} tt)

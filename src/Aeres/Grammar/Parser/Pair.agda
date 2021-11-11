@@ -12,6 +12,38 @@ open import Aeres.Grammar.Parser.Core Σ
 
 open ≡-Reasoning
 
+parse×Dec : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
+            → @0 NonNesting A
+            → (decNo : M (Level.Lift _ ⊤))
+            → Parser (M ∘ Dec) A → Decidable B
+            → Parser (M ∘ Dec) (A ×ₚ B)
+runParser (parse×Dec{M}{A = A}{B} nn₁ decNo p b?) xs = do
+  yes x ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ value _ refl) suffix ps≡) →
+          contradiction (success prefix _ read≡ value suffix ps≡) ¬parse
+  check x
+  where
+  check : Success A xs → M (Dec (Success (A ×ₚ B) xs))
+  check (success prefix read read≡ value suffix ps≡) =
+    case v₁ ret _ of λ where
+      (no ¬b) → do
+        decNo
+        return ∘ no $ λ where
+          (success prefix' read' read≡' (mk×ₚ v₀' b' refl) suffix' ps≡') → ‼
+            let @0 prefix≡ : prefix ≡ prefix'
+                prefix≡ = nn₁ (trans₀ ps≡ (sym ps≡')) value v₀'
+            in
+            contradiction (subst₀ B (sym prefix≡) b') ¬b
+      (yes b) → return (yes (success _ _ read≡ (mk×ₚ value b refl) suffix ps≡))
+    where
+    v₁ : Dec (B prefix)
+    v₁ = subst₀ (Dec ∘ B) (take read xs ≡ prefix ∋ trans₀ (cong₂ take read≡ (sym ps≡)) (Lemmas.take-length-++ prefix suffix)) (b? (take read xs))
+
+  -- case b? (take r₀ xs) of λ where
+  --   x → {!!}
+
 parse× : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
          → @0 NonNesting A → @0 NonNesting B
          → (mismatch : M (Level.Lift _ ⊤))

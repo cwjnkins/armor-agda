@@ -55,8 +55,12 @@ Any = Any.Any
 open import Data.List.Membership.Propositional public
   using (_∈_ ; _∉_)
 
+import Data.List.Membership.DecPropositional
+
 open import Data.Maybe public
   hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
+
+
 
 open import Data.Nat     public
   hiding (_≟_)
@@ -163,6 +167,13 @@ contradiction p ¬p = ⊥-elim (¬p p)
 open import Relation.Nullary.Decidable public
   hiding (map)
 
+T-unique : ∀ {b} → Unique (T b)
+T-unique {true} tt tt = refl
+
+T-dec : ∀ {b} → Dec (T b)
+T-dec {false} = no λ ()
+T-dec {true} = yes tt
+
 open import Relation.Nullary.Product public
   using (_×-dec_)
 
@@ -198,6 +209,11 @@ record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
   constructor ─_
   field
     @0 x : A
+
+erased? : ∀ {ℓ} {@0 A : Set ℓ} → Dec A → Dec (Erased A)
+erased? (no ¬a) = no λ where
+  (─ x) → contradiction x ¬a
+erased? (yes a) = yes (─ a)
 
 -- Typeclasses
 
@@ -252,6 +268,14 @@ record Eq {ℓ} (A : Set ℓ) : Set ℓ where
   ... | yes pf = no (_$ pf)
 
 open Eq ⦃ ... ⦄ public
+
+infix 4 _∈?_ _∉?_
+
+_∈?_ : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → ∀ (x : A) xs → Dec (x ∈ xs)
+_∈?_ = Data.List.Membership.DecPropositional._∈?_ _≟_
+
+_∉?_ : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → ∀ (x : A) xs → Dec (x ∉ xs)
+_∉?_ = Data.List.Membership.DecPropositional._∉?_ _≟_
 
 instance
   ℕEq : Eq ℕ

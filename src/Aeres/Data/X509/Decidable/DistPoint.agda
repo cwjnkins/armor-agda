@@ -7,6 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.RDN
+open import Aeres.Data.X509.Decidable.Seq
 open import Aeres.Data.X509.Decidable.TLV
 import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -23,9 +24,11 @@ module parseDistPoint where
   here' = "parseDistPoint"
 
   parseFullName = parseTLV Tag.A0 "full name" _ parseGeneralNamesElems
+
+  parseNameRTCrlIssuer : Parser _ (Logging ∘ Dec) X509.NameRTCrlIssuer
   parseNameRTCrlIssuer =
     parseTLV Tag.A1 "RT CRL issuer" _
-      (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": length mis-match") parseRDNSeq)
+      (parseSeqElems "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN)
 
   parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
   parseDistPointNameChoice =
@@ -77,8 +80,8 @@ private
     test₁ : X509.DistPoint val₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDistPoint val₁)} tt)
 
-    -- test₂ : X509.DistPoint val₂
-    -- test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDistPoint val₂)} tt)
+    test₂ : X509.DistPoint val₂
+    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDistPoint val₂)} tt)
 
     test₃ : X509.DistPoint val₃
     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseDistPoint val₃)} tt)

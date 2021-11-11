@@ -19,6 +19,6 @@ proj₂ (proj₂ iso) (X509.mkSignAlgFields signOID param bs≡) = refl
 
 postulate
   @0 unambiguous : Unambiguous X509.SignAlgFields
--- unambiguous = isoUnambiguous iso (unambiguous&ₚ OIDProps.unambiguous TLVProps.nonnesting {!!} {!!})
+  -- unambiguous = isoUnambiguous iso {!Unambiguous.unambiguous-option!}
 
 
