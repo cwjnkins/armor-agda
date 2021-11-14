@@ -23,8 +23,91 @@ module UTC where
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
-  postulate
-    @0 unambiguous : Unambiguous Generic.UtcTimeFields
+  @0 unambiguous : Unambiguous Generic.UtcTimeFields
+  unambiguous (Generic.mkUtcTimeFields{y1 = y1}{y2}{mn1}{mn2}{d1}{d2}{h1}{h2}{mi1}{mi2}{s1}{s2} year yearRange mmddhhmmss refl bs≡) (Generic.mkUtcTimeFields{y1 = y1'}{y2'}{mn1'}{mn2'}{d1'}{d2'}{h1'}{h2'}{mi1'}{mi2'}{s1'}{s2'} year₁ yearRange₁ mmddhhmmss₁ refl bs≡₁) =
+    subst₂
+      ((λ y1“ y2“ → ∀ (year₁ : Singleton (asciiNum (y1“ ∷ [ y2“ ]))) (yearRange₁ : All (InRange '0' '9') (y1“ ∷ [ y2“ ])) bs≡
+        → _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ refl bs≡))
+      y1≡ y2≡
+      (λ year₁ yearRange₁ bs≡₁' →
+        subst₂
+          (λ mn1“ mn2“ →
+            ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1“ ∷ mn2“ ∷ d1' ∷ d2' ∷ h1' ∷ h2' ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
+            _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁ )
+          mn1≡ mn2≡
+          (λ mmddhhmmss₁ bs≡₁' →
+            subst₂
+              (λ d1“ d2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1“ ∷ d2“ ∷ h1' ∷ h2' ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
+                _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+              d1≡ d2≡
+              (λ mmddhhmmss₁ bs≡₁' →
+                subst₂
+                  (λ h1“ h2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1“ ∷ h2“ ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
+                    _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                  h1≡ h2≡
+                  (λ mmddhhmmss₁ bs≡₁' →
+                    subst₂
+                      (λ mi1“ mi2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1“ ∷ mi2“ ∷ s1' ∷ [ s2' ]))) bs≡₁ →
+                        _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                      mi1≡ mi2≡
+                      (λ mmddhhmmss₁ bs≡₁' →
+                        subst₂
+                          (λ s1“ s2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1“ ∷ [ s2“ ]))) bs≡₁ →
+                            _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                          s1≡ s2≡
+                          (λ mmddhhmmss₁ bs≡₁' →
+                            subst₂
+                              (λ year₁ yearRange₁ → _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁')
+                              (uniqueSingleton year _) (All.irrelevant (×-unique ≤-irrelevant ≤-irrelevant) yearRange yearRange₁)
+                              (subst₂
+                                (λ mmddhhmmss₁ bs≡₁' →
+                                  _ ≡ Generic.mkUtcTimeFields year yearRange mmddhhmmss₁ _ bs≡₁')
+                                (MDHMSProps.unambiguous mmddhhmmss mmddhhmmss₁) (≡-unique bs≡ bs≡₁') refl))
+                          mmddhhmmss₁ bs≡₁')
+                      mmddhhmmss₁ bs≡₁')
+                  mmddhhmmss₁ bs≡₁')
+              mmddhhmmss₁ bs≡₁')
+          mmddhhmmss₁ bs≡₁')
+      year₁ yearRange₁ bs≡₁
+    where
+    @0 bs≡' : y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ # 'Z' ] ≡ y1' ∷ y2' ∷ mn1' ∷ mn2' ∷ d1' ∷ d2' ∷ h1' ∷ h2' ∷ mi1' ∷ mi2' ∷ s1' ∷ s2' ∷ [ # 'Z' ]
+    bs≡' = trans₀ (sym bs≡) bs≡₁
+
+    @0 y1≡ : y1 ≡ y1'
+    y1≡ = ∷-injectiveˡ bs≡'
+
+    @0 y2≡ : y2 ≡ y2'
+    y2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ [ _ ] _ [ _ ] _ bs≡' refl))
+
+    @0 mn1≡ : mn1 ≡ mn1'
+    mn1≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ [ _ ]) _ (_ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 mn2≡ : mn2 ≡ mn2'
+    mn2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 d1≡ : d1 ≡ d1'
+    d1≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 d2≡ : d2 ≡ d2'
+    d2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 h1≡ : h1 ≡ h1'
+    h1≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 h2≡ : h2 ≡ h2'
+    h2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 mi1≡ : mi1 ≡ mi1'
+    mi1≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 mi2≡ : mi2 ≡ mi2'
+    mi2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 s1≡ : s1 ≡ s1'
+    s1≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+    @0 s2≡ : s2 ≡ s2'
+    s2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
 
 module GenTime where
   @0 nonnesting : NonNesting Generic.GenTimeFields
