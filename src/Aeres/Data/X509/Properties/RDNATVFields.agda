@@ -20,4 +20,4 @@ proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (X509.mkRDNATVFields oid val bs≡) = refl
 
 @0 unambiguous : Unambiguous X509.RDNATVFields
-unambiguous = isoUnambiguous iso (unambiguous&ₚ OIDProps.unambiguous TLVProps.nonnesting DirectoryStringProps.unambiguous DirectoryStringProps.nonnesting)
+unambiguous = isoUnambiguous iso (unambiguous&ₚ OIDProps.unambiguous TLVProps.nonnesting DirectoryStringProps.unambiguous)

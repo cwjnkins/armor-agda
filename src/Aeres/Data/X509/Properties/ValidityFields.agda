@@ -32,4 +32,4 @@ nonnesting x x₁ x₂ = foo
 unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ Timeprops.unambiguous Timeprops.nonnesting
-      Timeprops.unambiguous Timeprops.nonnesting)
+      Timeprops.unambiguous)

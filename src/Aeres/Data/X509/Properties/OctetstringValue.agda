@@ -10,5 +10,5 @@ open Base256
 open import Aeres.Grammar.Definitions Dig
 
 
-postulate
-  @0 unambiguous : Unambiguous Generic.OctetstringValue
+@0 unambiguous : Unambiguous Generic.OctetstringValue
+unambiguous (singleton x refl) (singleton .x refl) = refl

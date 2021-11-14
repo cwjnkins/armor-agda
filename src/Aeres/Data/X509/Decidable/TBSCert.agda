@@ -33,7 +33,7 @@ module parseTBSCert where
     parseEquivalent _ (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.TBSCertFields.equivalent))
       (parse&ᵈ _
         (withinLength-nonnesting (NonNesting.noconfusion-option&₁ Props.TLV.nonnesting Props.TLV.nonnesting (Props.TLV.noconfusion λ ())))
-        (withinLength-unambiguous (Unambiguous.unambiguous-option₁&₁ (Props.TLV.unambiguous (TLV.unambiguous Props.Primitives.IntegerValue.unambiguous)) Props.TLV.nonnesting (Props.TLV.unambiguous Props.Primitives.IntegerValue.unambiguous) Props.TLV.nonnesting (Props.TLV.noconfusion λ ())))
+        (withinLength-unambiguous (Unambiguous.unambiguous-option₁&₁ (Props.TLV.unambiguous (TLV.unambiguous Props.Primitives.IntegerValue.unambiguous)) Props.TLV.nonnesting (Props.TLV.unambiguous Props.Primitives.IntegerValue.unambiguous) (Props.TLV.noconfusion λ ())))
         (parseOption₁&₁≤ _ parseVersion parseInt Props.TLV.nonnesting Props.TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
         λ where
           {bs} (singleton read read≡) _ →

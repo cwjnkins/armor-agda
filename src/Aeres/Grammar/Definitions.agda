@@ -95,6 +95,10 @@ open Σₚ public using (fstₚ ; sndₚ)
 _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
+-- TODO: rename
+NotEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
+NotEmpty A = A ×ₚ ((_≥ 1) ∘ length)
+
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
 noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y
 
@@ -177,8 +181,8 @@ NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{
   @0 bs₂≡ : bs₂₁ ≡ bs₂₂
   bs₂≡ = nnB (++-cancelˡ bs₁₁ (trans xs++ys≡' (cong (_++ bs₂₂ ++ ys₂) (sym bs₁≡)))) b₁ b₂
 
-unambiguous&ₚ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonNesting B → Unambiguous (&ₚ A B)
-unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ nn₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁ = bs₂₁}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
+unambiguous&ₚ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → Unambiguous (&ₚ A B)
+unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁ = bs₂₁}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
   ‼ ≡-elim (λ {bs₁} _ → ∀ fstₚ bs≡₁ → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ{bs₁ = bs₁} fstₚ sndₚ₂ bs≡₁)
     (λ fstₚ₂' bs≡₂' →
       ‼ ≡-elim (λ {bs₂} _ → (sndₚ : B bs₂) (bs≡₂ : _ ≡ bs₁₁ ++ bs₂) → mk&ₚ fstₚ₁ sndₚ₁ bs≡ ≡ mk&ₚ{bs₂ = bs₂} fstₚ₂' sndₚ bs≡₂ )
@@ -203,4 +207,4 @@ unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ nn₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂
                bs₂₁ ++ bs₂₂ ++ [] ∎)
 
   @0 bs₂≡ : bs₁₂ ≡ bs₂₂
-  bs₂≡ = nn₂{ys₁ = []}{ys₂ = []} (Lemmas.++-cancel≡ˡ _ _ bs₁≡ ++≡) sndₚ₁ sndₚ₂
+  bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (trans₀ (sym bs≡) bs≡₁)

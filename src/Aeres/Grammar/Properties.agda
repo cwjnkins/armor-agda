@@ -71,9 +71,9 @@ module Unambiguous where
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-  unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonNesting B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
-  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) = subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
-  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
+  unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) = subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
     ⊥-elim (nc bs≡'  x sndₚ₁)
     where
     @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
@@ -81,7 +81,7 @@ module Unambiguous where
                  bs₁ ++ bs₂ ≡⟨ sym bs≡₁ ⟩
                  xs ≡⟨ solve (++-monoid Σ) ⟩
                  xs ++ [] ∎)
-  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc {xs} (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc {xs} (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
     ⊥-elim (nc bs≡' x sndₚ₂)
     where
     @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
@@ -89,14 +89,14 @@ module Unambiguous where
                  bs₁ ++ bs₂ ≡⟨ sym bs≡ ⟩
                  xs ≡⟨ solve (++-monoid Σ) ⟩
                  xs ++ [] ∎)
-  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
     cong (λ where (mk&ₚ v₀ v₁ eq) → mk&ₚ (some v₀) v₁ eq ) (‼ pf)
     where
     @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
-    pf = unambiguous&ₚ ua₁ nn₁ ua₂ nn₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
+    pf = unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
 
-  unambiguous-&₁option₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonNesting B → NonEmpty B → Unambiguous (&ₚ A (Option B))
-  unambiguous-&₁option₁{A}{B} ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂} fstₚ₂  none bs≡₁) = ‼
+  unambiguous-&₁option₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonEmpty B → Unambiguous (&ₚ A (Option B))
+  unambiguous-&₁option₁{A}{B} ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂} fstₚ₂  none bs≡₁) = ‼
     subst₀ (λ x → ∀ (fstₚ₂ : A x) bs≡₁ → mk&ₚ{A = A} fstₚ₁ none bs≡ ≡ mk&ₚ fstₚ₂ none bs≡₁)
       bs≡'
       (λ fstₚ₂ bs≡₁ →
@@ -105,15 +105,15 @@ module Unambiguous where
     where
     @0 bs≡' : bs₁ ≡ bs₂
     bs≡' = ++-cancelʳ _ _ (trans₀ (sym bs≡) bs≡₁)
-  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂}{bs₃} fstₚ₂ (some x) bs≡₁) =
+  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂}{bs₃} fstₚ₂ (some x) bs≡₁) =
     ⊥-elim (contradiction (Lemmas.++-cancel≡ˡ _ _ (nn₁ (sym bs≡') fstₚ₂ fstₚ₁) (sym bs≡')) (nc x))
     where
     @0 bs≡' : bs₁ ++ [] ≡ bs₂ ++ bs₃
     bs≡' = trans₀ (sym bs≡) bs≡₁
-  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ{bs₁ = bs₂}{bs₃} fstₚ₁ (some x) bs≡) (mk&ₚ{bs₁ = bs₁} fstₚ₂  none bs≡₁) =
+  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₂}{bs₃} fstₚ₁ (some x) bs≡) (mk&ₚ{bs₁ = bs₁} fstₚ₂  none bs≡₁) =
     ⊥-elim (contradiction (Lemmas.++-cancel≡ˡ _ _ (nn₁ (sym bs≡') fstₚ₁ fstₚ₂) (sym bs≡')) (nc x))
     where
     @0 bs≡' : bs₁ ++ [] ≡ bs₂ ++ bs₃
     bs≡' = trans₀ (sym bs≡₁) bs≡
-  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nn₂ nc (mk&ₚ fstₚ₁ (some x) bs≡) (mk&ₚ fstₚ₂ (some x₁) bs≡₁) =
-    cong (λ where (mk&ₚ x y bs≡) → mk&ₚ x (some y) bs≡) (unambiguous&ₚ ua₁ nn₁ ua₂ nn₂ (mk&ₚ fstₚ₁ x bs≡) (mk&ₚ fstₚ₂ x₁ bs≡₁))
+  unambiguous-&₁option₁ ua₁ nn₁ ua₂ nc (mk&ₚ fstₚ₁ (some x) bs≡) (mk&ₚ fstₚ₂ (some x₁) bs≡₁) =
+    cong (λ where (mk&ₚ x y bs≡) → mk&ₚ x (some y) bs≡) (unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ fstₚ₁ x bs≡) (mk&ₚ fstₚ₂ x₁ bs≡₁))

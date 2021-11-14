@@ -48,7 +48,7 @@ module parseSignAlg where
             (mk×ₚ (X509.mkSignAlgFields v₀ none (pre₀ ≡ pre₀ ++ [] ∋ solve (++-monoid Dig))) (─ trans₀ (sym r₀≡) r≡n) refl)
             suf₀ ps≡₀))
       (tri< r<n _ _) → do
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡₁) ← runParser (parseOctetstringValue (n - r₀)) suf₀
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁) ← runParser (parseOctetstringValue (n - r₀)) suf₀
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID none refl) signAlgLen refl) suffix ps≡) →
@@ -59,7 +59,7 @@ module parseSignAlg where
                          length prefix ≡⟨ ̂‼ signAlgLen ⟩
                          n ∎))
                   (<⇒≢ r<n)
-              (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID (some param) refl) signAlgLen refl) suffix ps≡) → ‼
+              (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID (some (mk×ₚ param _ refl)) refl) signAlgLen refl) suffix ps≡) → ‼
                 let @0 ps≡' : o ++ p ++ suffix ≡ pre₀ ++ suf₀
                     ps≡' = trans₀ (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid Dig)) (trans₀ ps≡ (sym ps≡₀))
 
@@ -87,10 +87,16 @@ module parseSignAlg where
                    length pre₀ + length pre₁ ≡⟨ sym (length-++ pre₀) ⟩
                    length (pre₀ ++ pre₁) ∎))
             (mk×ₚ
-              (X509.mkSignAlgFields v₀ (some v₁) refl)
+              (X509.mkSignAlgFields
+                v₀
+                (some
+                  (mk×ₚ v₁
+                    (subst₀ (0 <_) (sym v₁Len) (m<n⇒0<n∸m r<n))
+                    refl))
+                refl)
               (─ (begin length (pre₀ ++ pre₁) ≡⟨ length-++ pre₀ ⟩
                         length pre₀ + length pre₁ ≡⟨ cong (_+ length pre₁) (sym r₀≡) ⟩
-                        r₀ + length pre₁ ≡⟨ cong (r₀ +_) $ ̂‼ v₁Len ⟩
+                        r₀ + length pre₁ ≡⟨ cong (r₀ +_) $ ̂‼ (─ v₁Len) ⟩
                         r₀ + (n - r₀) ≡⟨ Lemmas.m+n-m≡n (<⇒≤ r<n) ⟩
                         n ∎))
               refl)
