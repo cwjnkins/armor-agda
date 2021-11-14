@@ -13,8 +13,6 @@ module Aeres.Data.X509.Properties.TLV where
 open Base256
 open import Aeres.Grammar.Definitions Dig
 
-postulate
-  unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Generic.TLV t A)
 
 nonempty : ∀ {t} {@0 A} → NonEmpty (Generic.TLV t A)
 nonempty (Generic.mkTLV len val len≡ ()) refl
@@ -50,3 +48,27 @@ nonnesting{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (G
 @0 noconfusion : ∀ {@0 A₁ A₂} {t₁ t₂} → t₁ ≢ t₂ → NoConfusion (Generic.TLV t₁ A₁) (Generic.TLV t₂ A₂)
 noconfusion t₁≢t₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Generic.mkTLV len val len≡ bs≡) (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁) =
  contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡₁)))) t₁≢t₂
+
+@0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Generic.TLV t A)
+unambiguous{t}{A} ua (Generic.mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) (Generic.mkTLV{l = l₂}{v₂} len₂ val₂ len≡₂ bs≡₂) =
+  subst₀ (λ l₂ → ∀ (len₂ : Length l₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV {l = l₂} len₂ val₂ len≡₂ bs≡₂ ) l≡
+    (λ len₂ len≡₂ bs≡₂' →
+      subst₀ (λ v₂ → ∀ (val₂ : A v₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂) v≡
+        (λ val₂ len≡₂ bs≡₂' →
+          subst₂ (λ len₂ val₂ → ∀ len≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂')
+            (LengthProps.unambiguous len₁ len₂) (ua val₁ val₂)
+            (λ len≡₂ →
+              subst₂ (λ x y → _ ≡ Generic.mkTLV len₁ val₁ x y) (≡-unique len≡₁ len≡₂) (≡-unique bs≡₁ bs≡₂')
+                refl)
+            len≡₂ )
+        val₂ len≡₂ bs≡₂')
+    len₂ len≡₂ bs≡₂
+  where
+  @0 bs≡' : l₁ ++ v₁ ≡ l₂ ++ v₂
+  bs≡' = ∷-injectiveʳ (trans₀ (sym bs≡₁) bs≡₂)
+
+  @0 l≡ : l₁ ≡ l₂
+  l≡ = LengthProps.nonnesting bs≡' len₁ len₂
+
+  @0 v≡ : v₁ ≡ v₂
+  v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
