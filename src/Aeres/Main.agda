@@ -25,11 +25,17 @@ main : IO.Main
 main = IO.run $
   Aeres.IO.getArgs IO.>>= λ args →
   case (head args) of λ where
-    nothing → IO.putStrLn usage
-    (just str) →
-      case str2dig str of λ where
-        nothing   → IO.putStrLn "invalid char range in input"
-        (just bs) →
-          case runParser parseCert bs of λ where
-            (mkLogged log (yes _)) → IO.putStrLn "OK"
-            (mkLogged log (no  _)) → IO.putStrLn (foldl String._++_ "" log)
+    nothing →
+      IO.getLine IO.>>= λ str →
+      runParserIO str
+    (just str) → runParserIO str
+  where
+  runParserIO : String → IO.IO _
+  runParserIO bs =
+    case str2dig bs of λ where
+      nothing   → IO.putStrLn "invalid char range in input"
+      (just bs) → case runParser parseCert bs of λ where
+        (mkLogged log (yes _)) → Aeres.IO.exitSuccess
+        (mkLogged log (no  _)) →
+          Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
+          Aeres.IO.exitFailure
