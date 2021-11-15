@@ -26,6 +26,8 @@ module SelectExtn where
                         (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) Generic.Octetstring)))))))))))
                    X509.SelectExtn
 
+    unambiguous : Unambiguous X509.SelectExtn
+
 equivalent : ∀ {@0 P} {@0 A : @0 List Dig → Set}
              → Equivalent
                  (&ₚ (Generic.OID ×ₚ (Erased ∘ P))
@@ -36,3 +38,19 @@ proj₁ equivalent (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fst�
   X509.mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
 proj₂ equivalent (X509.mkExtensionFields extnId extnId≡ crit extension refl) =
   mk&ₚ (mk×ₚ extnId (─ extnId≡) refl) (mk&ₚ crit extension refl) refl
+
+module Extension where
+  postulate
+    @0 unambiguous : ∀ {@0 P}{@0 A : @0 List Dig → Set} → Unambiguous P → Unambiguous A → Unambiguous (X509.ExtensionFields P A)
+
+module ExtensionsSeq where
+  import Aeres.Data.X509.Properties.Seq as SeqProps
+  import Aeres.Data.X509.Properties.TLV as TLVProps
+
+  @0 unambiguous : Unambiguous X509.ExtensionsSeq
+  unambiguous =
+    TLVProps.unambiguous
+      (SeqProps.unambiguous
+        (TLVProps.unambiguous SelectExtn.unambiguous) TLVProps.nonempty TLVProps.nonnesting)
+
+

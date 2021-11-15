@@ -25,3 +25,7 @@ module IntegerValue where
   unambiguous{xs} (Generic.mkIntegerValue ._ refl) (Generic.mkIntegerValue val₁ bs≡₁) =
     ≡-elim (λ {val₁} bs≡ → Generic.mkIntegerValue (twosComplement xs) refl ≡ Generic.mkIntegerValue val₁ bs≡)
       refl bs≡₁
+
+module BitstringValue where
+  postulate
+    @0 unambiguous : Unambiguous Generic.BitstringValue

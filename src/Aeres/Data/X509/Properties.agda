@@ -49,23 +49,15 @@ module NonNesting where
   open import Aeres.Data.X509
 
 -- Unfinished lemmas
-module CertFields                = Aeres.Data.X509.Properties.CertFields
 module Extension                 = Aeres.Data.X509.Properties.Extension
-module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
-module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
-module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives
-module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
-module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
-module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
-module TLV                       = Aeres.Data.X509.Properties.TLV
-module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields
 
 -- Finished lemmas
 module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
 module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
+module CertFields                = Aeres.Data.X509.Properties.CertFields
 module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
@@ -75,7 +67,15 @@ module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
+module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
+module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
+module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
+module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
 module Seq                       = Aeres.Data.X509.Properties.Seq
+module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
+module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
+module TLV                       = Aeres.Data.X509.Properties.TLV
 module Time                      = Aeres.Data.X509.Properties.Time
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields
+module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields
