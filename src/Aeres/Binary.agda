@@ -1,5 +1,5 @@
 open import Aeres.Prelude
-open import Aeres.Arith
+open import Aeres.Arith using (divmod2 ; 2^n≢0)
 
 open import Data.Fin.Properties
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
@@ -17,21 +17,15 @@ pattern #0 = false
 pattern #1 = true
 
 toBinary : ∀ {n} → Fin (2 ^ n) → Binary n
-toBinary{n} i = Vec.reverse $ help n (toℕ i) (toℕ<n i) (<-wellFounded (toℕ i))
+toBinary{n} i = Vec.reverse $ help n (toℕ i)
   where
-  help : (n : ℕ) (i : ℕ) (i< : i < 2 ^ n) → Acc _<_ i → Binary n
-  help zero i i< ac = []
-  help (suc n) 0 i< (acc rs) = Vec.replicate #0
-  help (suc n) 1 i< (acc rs) = #1 ∷ Vec.replicate #0
-  help (suc n) i@(suc (suc i')) i< (acc rs)
-    with divmod2-≤ i'
-  ...| q≤i'
+  help : (n : ℕ) (i : ℕ) → Binary n
+  help 0 i = []
+  help (suc n) 0 = Vec.replicate #0
+  help (suc n) 1 = #1 ∷ Vec.replicate #0
+  help (suc n) i@(suc (suc i'))
     with divmod2 i'
-    | inspect divmod2 i'
-  ... | q , r | [ eq ]R = r ∷ help n (suc q) pf (rs (suc q) (s≤s (s≤s q≤i')))
-    where
-    pf : 1 + q < 2 ^ n
-    pf rewrite sym (cong proj₁ eq) = divmod2-<-^ i' n i<
+  ... | q , r = r ∷ help n (1 + q)
 
 fromBinary : ∀ {n} → Binary n → Fin (2 ^ n)
 fromBinary bits = go (Vec.reverse bits)
