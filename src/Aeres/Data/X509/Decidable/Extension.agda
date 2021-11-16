@@ -43,7 +43,7 @@ module parseExtension where
     parseEquivalent _
       (transEquivalent _
         (symEquivalent _ (Distribute.exactLength-& _))
-        (equivalent×ₚ _ Props.Extension.equivalent))
+        (equivalent×ₚ _ Props.Extension.ExtensionFields.equivalent))
       (parse&ᵈ _
         (withinLength-nonnesting _ (nonnesting×ₚ₁ _ Props.TLV.nonnesting))
         (λ where
