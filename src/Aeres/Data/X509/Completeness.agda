@@ -13,8 +13,12 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 open Aeres.Grammar.Parser      Dig
 
-completeness : ∀ {bs} → Success X509.Cert bs → True (Logging.val (runParser parseCert bs))
+abstract
+  parseCert' : Parser (Logging ∘ Dec) X509.Cert
+  parseCert' = parseCert
+
+completeness : ∀ {bs} → Success X509.Cert bs → True (Logging.val (runParser parseCert' bs))
 completeness{bs} cert
-  with Logging.val $ runParser parseCert bs
+  with Logging.val $ runParser parseCert' bs
 ... | (yes _) = tt
 ... | no ¬cert = contradiction cert ¬cert
