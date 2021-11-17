@@ -13,3 +13,5 @@ equivalent : Equivalent (&ₚ (Option X509.AKIKeyId) (&ₚ (Option X509.AKIAuthC
 proj₁ equivalent (mk&ₚ v₁ (mk&ₚ v₂ v₃ refl) refl) = X509.mkAKIFieldsSeqFields v₁ v₂ v₃ refl
 proj₂ equivalent (X509.mkAKIFieldsSeqFields v₁ v₂ v₃ refl) = mk&ₚ v₁ (mk&ₚ v₂ v₃ refl) refl
 
+postulate
+  @0 unambiguous : Unambiguous X509.AKIFieldsSeqFields

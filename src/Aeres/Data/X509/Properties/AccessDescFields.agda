@@ -19,3 +19,6 @@ proj₂ equivalent (X509.mkAccessDescFields acmethod aclocation bs≡) = mk&ₚ 
 
 @0 nonnesting : NonNesting X509.AccessDescFields
 nonnesting x x₁ x₂ = NonNesting&ₚ AccessMethodProps.nonnesting GeneralNameProps.nonnesting x (proj₂ equivalent x₁) (proj₂ equivalent x₂)
+
+postulate
+  @0 unambiguous : Unambiguous X509.AccessDescFields

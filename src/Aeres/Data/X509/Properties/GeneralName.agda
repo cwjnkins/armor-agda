@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
-import Aeres.Data.X509.Properties.TLV as TLVprops
-open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+import      Aeres.Data.X509.Properties.TLV as TLVprops
+import      Aeres.Data.X509.Properties.Seq as Seqprops
+open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
-open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.GeneralName where
 
@@ -107,3 +107,15 @@ nonnesting x (X509.rid x₁) (X509.ediname x₂) = ⊥-elim (TLVprops.noconfusio
 nonnesting x (X509.rid x₁) (X509.uri x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
 nonnesting x (X509.rid x₁) (X509.ipadd x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
 nonnesting x (X509.rid x₁) (X509.rid x₂) = ‼ TLVprops.nonnesting x x₁ x₂
+
+
+module GeneralName where
+  postulate
+    @0 unambiguous : Unambiguous X509.GeneralName
+
+module GeneralNames where
+  @0 unambiguous : Unambiguous X509.GeneralNames
+  unambiguous = TLVprops.unambiguous (Seqprops.unambiguous GeneralName.unambiguous nonempty nonnesting)
+
+@0 unambiguous : _
+unambiguous = GeneralName.unambiguous

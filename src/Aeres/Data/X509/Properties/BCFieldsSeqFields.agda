@@ -13,3 +13,6 @@ open import Aeres.Grammar.Definitions Dig
 equivalent : Equivalent (&ₚ (Option Generic.Boool) (Option Generic.Int)) X509.BCFieldsSeqFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡
 proj₂ equivalent (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡) = mk&ₚ bcca bcpathlen bs≡
+
+postulate
+  @0 unambiguous : Unambiguous X509.BCFieldsSeqFields
