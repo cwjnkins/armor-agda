@@ -113,9 +113,14 @@ module GeneralName where
   postulate
     @0 unambiguous : Unambiguous X509.GeneralName
 
+
+module GeneralNamesElems where
+  @0 unambiguous : Unambiguous X509.GeneralNamesElems
+  unambiguous = Seqprops.unambiguous GeneralName.unambiguous nonempty nonnesting
+
 module GeneralNames where
   @0 unambiguous : Unambiguous X509.GeneralNames
-  unambiguous = TLVprops.unambiguous (Seqprops.unambiguous GeneralName.unambiguous nonempty nonnesting)
+  unambiguous = TLVprops.unambiguous GeneralNamesElems.unambiguous
 
 @0 unambiguous : _
 unambiguous = GeneralName.unambiguous
