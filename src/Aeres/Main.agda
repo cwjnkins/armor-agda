@@ -33,7 +33,7 @@ main = IO.run $
   runParserIO : String → IO.IO _
   runParserIO bs =
     case str2dig bs of λ where
-      nothing   → IO.putStrLn "invalid char range in input"
+      nothing   → Aeres.IO.putStrLnErr "invalid char range in input"
       (just bs) → case runParser parseCert bs of λ where
         (mkLogged log (yes _)) → Aeres.IO.exitSuccess
         (mkLogged log (no  _)) →

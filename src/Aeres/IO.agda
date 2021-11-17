@@ -1,7 +1,6 @@
 {-# OPTIONS --guardedness #-}
-open import Data.List
-open import Data.String
-open import Data.Unit
+
+open import Aeres.Prelude
 import      System.Exit
 
 module Aeres.IO where
@@ -9,6 +8,7 @@ module Aeres.IO where
 {-# FOREIGN GHC import qualified System.Environment #-}
 {-# FOREIGN GHC import qualified System.IO #-}
 {-# FOREIGN GHC import qualified Data.Text          #-}
+{-# FOREIGN GHC import qualified Data.Text.IO as TIO #-}
 
 module Primitive where
   open import IO.Primitive
@@ -19,9 +19,9 @@ module Primitive where
     hPutStrLn : Handle → String → IO ⊤
 
 {-# COMPILE GHC Primitive.getArgs = fmap Data.Text.pack <$> System.Environment.getArgs #-}
-{-# COMPILE GHC Primitive.Handle = System.IO.Handle #-}
+{-# COMPILE GHC Primitive.Handle = type System.IO.Handle #-}
 {-# COMPILE GHC Primitive.stderr = System.IO.stderr #-}
-{-# COMPILE GHC Primitive.hPutStrLn = System.IO.hPutStrLn #-}
+{-# COMPILE GHC Primitive.hPutStrLn = TIO.hPutStrLn #-}
 
 open import IO
 open System.Exit public using (exitFailure ; exitSuccess)
@@ -29,5 +29,5 @@ open System.Exit public using (exitFailure ; exitSuccess)
 getArgs : IO (List String)
 getArgs = lift Primitive.getArgs
 
-putStrLnErr : String → IO ⊤
-putStrLnErr str = lift (Primitive.hPutStrLn Primitive.stderr str)
+putStrLnErr : String → IO (Level.Lift Level.zero ⊤)
+putStrLnErr str = Level.lift IO.<$> (lift (Primitive.hPutStrLn Primitive.stderr str))
