@@ -14,6 +14,7 @@ import      Aeres.Data.X509.Properties.OctetstringValue   as OctetstringValuePro
 import      Aeres.Data.X509.Properties.TLV                as TLVProps
 import      Aeres.Data.X509.Properties.Seq                as SeqProps
 open import Aeres.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.Extension where
 
@@ -21,6 +22,8 @@ open Base256
 open import Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Properties  Dig
 open import Aeres.Grammar.Sum Dig
+
+open ≡-Reasoning
 
 module ExtensionFields where
   equivalent : ∀ {@0 P} {@0 A : @0 List Dig → Set}
@@ -190,6 +193,35 @@ module SelectExtn where
           noconfusion₂)
         noconfusion₁)
     where
+    noconfusionOIDS : ∀ {@0 A B oid₁ oid₂} → oid₁ ≢ oid₂ → NoConfusion (X509.ExtensionFields (_≡ oid₁) A) (X509.ExtensionFields (_≡ oid₂) B)
+    noconfusionOIDS oid≢ {xs₁}{ys₁}{xs₂}{ys₂}++≡ (X509.mkExtensionFields{oex = oex}{cex}{ocex} extnId extnId≡ crit extension bs≡) (X509.mkExtensionFields{oex = oex₁}{cex₁}{ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
+      contradiction oid≡ λ where refl → oid≢ (trans₀ (sym extnId≡) extnId≡₁)
+      where
+      @0 bs≡' : oex ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
+      bs≡' = begin oex ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+                   (oex ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                   xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+                   xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+                   oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
+
+      @0 oid≡ : oex ≡ oex₁
+      oid≡ = TLVProps.nonnesting bs≡' extnId extnId₁
+
+    noconfusionOIDN : ∀ {@0 A B oid} → (oid ∈ X509.ExtensionOID.Supported) → NoConfusion (X509.ExtensionFields (_≡ oid) A) (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) B)
+    noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (X509.mkExtensionFields {oex = _} {cex} {ocex} extnId refl crit extension bs≡) (X509.mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
+      contradiction (subst (_∈ X509.ExtensionOID.Supported) oid≡ supported) (toWitnessFalse extnId≡₁)
+      where
+      @0 bs≡' : oid ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
+      bs≡' = begin oid ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+                   (oid ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                   xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+                   xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+                   oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
+
+      @0 oid≡ : oid ≡ oex₁
+      oid≡ = TLVProps.nonnesting bs≡' extnId extnId₁
     postulate
       noconfusion₁ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields) (Sum _ _)
       noconfusion₂ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields) (Sum _ _)
@@ -199,9 +231,15 @@ module SelectExtn where
       noconfusion₆ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN) X509.IANFields) (Sum _ _)
       noconfusion₇ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields) (Sum _ _)
       noconfusion₈ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields) (Sum _ _)
-      noconfusion₉ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields) (Sum _ _)
-      noconfusion₀ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AIA) X509.AIAFields)
-                                 (X509.ExtensionFields _ _)
+
+    noconfusion₉ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields) (Sum _ _)
+    noconfusion₉ =
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields}
+        (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))
+
+    noconfusion₀ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AIA) X509.AIAFields)
+                               (X509.ExtensionFields _ _)
+    noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
 
     ua : Unambiguous (False ∘ (_∈? X509.ExtensionOID.Supported))
     ua = T-unique

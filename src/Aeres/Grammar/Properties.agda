@@ -67,6 +67,11 @@ module NonNesting where
   noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
     ‼ (NonNesting&ₚ nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
+module NoConfusion where
+  sumₚ : ∀ {@0 A B C} → NoConfusion A B → NoConfusion A C → NoConfusion A (Sum B C)
+  sumₚ nc₁ nc₂ ++≡ a (Sum.inj₁ x) = nc₁ ++≡ a x
+  sumₚ nc₁ nc₂ ++≡ a (Sum.inj₂ x) = nc₂ ++≡ a x
+
 module Unambiguous where
 
   open ≡-Reasoning
