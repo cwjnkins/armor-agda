@@ -1,19 +1,35 @@
 {-# OPTIONS --subtyping #-}
 
-import Aeres.Data.X509.Properties.TLV as TLVprops
-open import Aeres.Prelude
 open import Aeres.Binary
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
-open import Data.List
+import      Aeres.Data.X509.Properties.TLV as TLVprops
+open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
+open import Data.List
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.DisplayText where
 open ≡-Reasoning
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Sum         Dig
+
+postulate
+  equivalent : Equivalent
+                 (Sum X509.IA5String
+                 (Sum X509.VisibleString
+                 (Sum X509.BMPString
+                      X509.UTF8String)))
+                 X509.DisplayText
+
+postulate
+  @0 nonempty : NonEmpty X509.DisplayText
 
 nonnesting : NonNesting X509.DisplayText
 nonnesting x (X509.ia5String x₁) (X509.ia5String x₂) = ‼ TLVprops.nonnesting x x₁ x₂
@@ -92,3 +108,7 @@ noconfusionNoticeReference = noconfusionTLV pf
   where
   pf : Tag.Sequence ∉ _
   pf (there (there (there (there ()))))
+
+
+postulate
+  @0 unambiguous : Unambiguous X509.DisplayText

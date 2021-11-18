@@ -13,8 +13,10 @@ import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
+import Aeres.Data.X509.Properties.IA5StringValue
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
@@ -49,6 +51,7 @@ module NonNesting where
   open import Aeres.Data.X509
 
 -- Unfinished lemmas
+module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module Extension                 = Aeres.Data.X509.Properties.Extension
 module Primitives                = Aeres.Data.X509.Properties.Primitives
 
@@ -58,13 +61,14 @@ module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
 module CertFields                = Aeres.Data.X509.Properties.CertFields
-module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
+module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
 module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
 module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue

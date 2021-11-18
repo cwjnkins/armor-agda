@@ -431,7 +431,6 @@ module Generic where
 
 module X509 where
 
-  -- TODO: double-check with Joy
   record IA5StringValue (@0 bs : List Dig) : Set where
     constructor mkIA5StringValue
     field
@@ -521,7 +520,7 @@ module X509 where
     utf8String : ∀ {@0 bs} → UTF8String bs → DirectoryString bs
     bmpString : ∀ {@0 bs} → BMPString bs → DirectoryString bs
 
-  data DisplayText : List Dig → Set where
+  data DisplayText : @0 List Dig → Set where
     ia5String : ∀ {@0 bs} → IA5String bs → DisplayText bs
     visibleString : ∀ {@0 bs} → VisibleString bs → DisplayText bs
     bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
@@ -815,7 +814,7 @@ module X509 where
     OCSP : List Dig
     OCSP = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 1 ]
 
-  data AccessMethod : List Dig → Set where
+  data AccessMethod : @0 List Dig → Set where
     caissid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.CAISSUERS) → AccessMethod bs
     ocspid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.OCSP) → AccessMethod bs
 

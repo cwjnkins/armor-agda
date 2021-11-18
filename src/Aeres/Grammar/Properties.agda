@@ -68,6 +68,9 @@ module NonNesting where
     ‼ (NonNesting&ₚ nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
 module NoConfusion where
+  equivalent : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → NoConfusion A₁ B → NoConfusion A₂ B
+  equivalent eqv nc {xs₁}{ys₁}{xs₂}{ys₂}++≡ a b = ‼ nc {xs₁}{xs₂ = xs₂}++≡ (proj₂ eqv a) b
+
   sumₚ : ∀ {@0 A B C} → NoConfusion A B → NoConfusion A C → NoConfusion A (Sum B C)
   sumₚ nc₁ nc₂ ++≡ a (Sum.inj₁ x) = nc₁ ++≡ a x
   sumₚ nc₁ nc₂ ++≡ a (Sum.inj₂ x) = nc₂ ++≡ a x
