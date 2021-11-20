@@ -46,6 +46,12 @@ symNoConfusion nc ++≡ v₂ v₁ = nc (sym ++≡) v₁ v₂
 Equivalent : (A B : (@0 _ : List Σ) → Set) → Set
 Equivalent A B = (∀ {@0 xs} → A xs → B xs) × (∀ {@0 xs} → B xs → A xs)
 
+equivalent-nonempty : ∀ {@0 A B} → Equivalent A B → NonEmpty A → NonEmpty B
+equivalent-nonempty eqv ne b ≡[] = contradiction ≡[] (ne (proj₂ eqv b))
+
+equivalent-nonnesting : ∀ {@0 A B} → Equivalent A B → NonNesting A → NonNesting B
+equivalent-nonnesting{A}{B} eqv nn ++≡ b₁ b₂ = ‼ nn ++≡ (proj₂ eqv b₁) (proj₂ eqv b₂)
+
 symEquivalent : ∀ {A B} → Equivalent A B → Equivalent B A
 symEquivalent (fst , snd) = snd , fst
 

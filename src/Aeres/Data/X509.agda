@@ -575,7 +575,7 @@ module X509 where
   RegID : (@0 _ : List Dig) → Set
   RegID xs = Generic.TLV Tag.EightyEight (Generic.SeqElems Generic.OIDSub) xs
 
-  data GeneralName : List Dig → Set where
+  data GeneralName : @0 List Dig → Set where
     oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
     rfcname : ∀ {@0 bs} → RfcName bs → GeneralName bs
     dnsname : ∀ {@0 bs} → DnsName bs → GeneralName bs

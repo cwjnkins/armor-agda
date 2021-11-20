@@ -10,6 +10,10 @@ data Sum (@0 A B : (List Σ) → Set) : (@0 _ : List Σ) → Set where
   inj₁ : ∀ {@0 xs} → A xs → Sum A B xs
   inj₂ : ∀ {@0 xs} → B xs → Sum A B xs
 
+nonemptySum : ∀ {@0 A B} → NonEmpty A → NonEmpty B → NonEmpty (Sum A B)
+nonemptySum ne₁ ne₂ (inj₁ x) ≡[] = contradiction ≡[] (ne₁ x)
+nonemptySum ne₁ ne₂ (inj₂ x) ≡[] = contradiction ≡[] (ne₂ x)
+
 nonnestingSum : ∀ {@0 A B} → NonNesting A → NonNesting B → NoConfusion A B → NonNesting (Sum A B)
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₁ x) (inj₁ x₁) = nn₁ ++≡ x x₁
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₁ x) (inj₂ x₁) = ⊥-elim (nc ++≡ x x₁)

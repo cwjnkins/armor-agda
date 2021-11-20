@@ -15,5 +15,13 @@ module Aeres.Data.X509.Properties.OID where
 open Base256
 open import Aeres.Grammar.Definitions Dig
 
-@0 unambiguous : Unambiguous Generic.OID
-unambiguous = TLVProps.unambiguous (SeqProps.unambiguous OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
+module OID where
+  @0 unambiguous : Unambiguous Generic.OID
+  unambiguous = TLVProps.unambiguous (SeqProps.unambiguous OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
+
+module OIDSeq where
+  @0 unambiguous : Unambiguous (Generic.SeqElems Generic.OID)
+  unambiguous = SeqProps.unambiguous OID.unambiguous TLVProps.nonempty TLVProps.nonnesting
+
+@0 unambiguous : _
+unambiguous = OID.unambiguous
