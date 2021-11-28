@@ -57,10 +57,16 @@ open import Data.List.Membership.Propositional public
 
 import Data.List.Membership.DecPropositional
 
-open import Data.Maybe public
-  hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
+-- import Data.Maybe
+-- module Maybe = Data.Maybe
+-- open Data.Maybe public
+--   hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
 
-
+import Data.Maybe
+module Maybe where
+  open Data.Maybe public
+open Maybe public
+  hiding (module Maybe ; align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
 
 open import Data.Nat     public
   hiding (_≟_)
