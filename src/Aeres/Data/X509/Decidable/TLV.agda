@@ -34,7 +34,7 @@ module parseTLV
   runParser parseTLV (x ∷ xs) = do
     case x ≟ t of λ where
       (no  x≢) → do
-        tell $ here' String.++ ": tag mismatch"
+        tell $ here' String.++ ": tag mismatch, got " String.++ String.fromList [ Char.fromℕ (toℕ x) ]
         return ∘ no $ λ where
           (success .(t ∷ l ++ v) read read≡ (Generic.mkTLV{l}{v} len val len≡ refl) suffix ps≡) →
             contradiction (sym (∷-injectiveˡ ps≡)) x≢

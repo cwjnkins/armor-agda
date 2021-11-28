@@ -1,6 +1,7 @@
-open import Aeres.Prelude
-open import Aeres.Arith using (divmod2 ; 2^n≢0)
+{-# OPTIONS --inversion-max-depth=100 #-}
 
+open import Aeres.Arith using (divmod2 ; 2^n≢0)
+open import Aeres.Prelude
 open import Data.Fin.Properties
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
   hiding   (_≟_)
@@ -88,19 +89,44 @@ module Base64 where
   Dig  = Fin (2 ^ 6)
 
   charset : List Char
-  charset = String.toList "ABCDEFGHIJKLMNOPQRStUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+  charset = String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
   isByteRep : ∀ c → Dec (c ∈ charset)
   isByteRep c = Any.any (c ≟_) charset
 
-  toByte : Char → Maybe Byte
-  toByte c
+  toDig : Char → Maybe Dig
+  toDig c
     with isByteRep c
-  ...| no  c∉charset = nothing
-  ...| yes c∈charset = just (toBinary (Any.index c∈charset))
+  ... | no  c∉charset = nothing
+  ... | yes c∈charset = just (Any.index c∈charset)
+
+  toByte : Char → Maybe Byte
+  toByte c = do
+    d ← toDig c
+    return (toBinary d)
 
   isPad : ∀ c → Dec (c ≡ '=')
   isPad = _≟ '='
+
+  data Pad : Set where
+    pad2 : Vec Byte 2 → Pad
+    pad1 : Vec Byte 3 → Pad
+
+  toDigs : List Char → Maybe (List Dig)
+  toDigs [] = just []
+  toDigs (c ∷ []) =
+    if ⌊ isPad c ⌋ then just []
+    else Maybe.map [_] (toDig c)
+  toDigs (c₀ ∷ c₁ ∷ []) =
+    if ⌊ isPad c₀ ⌋ then just []
+    else do
+      d₀ ← toDig c₀
+      d₁ ← toDig c₁
+      return (d₀ ∷ [ d₁ ])
+  toDigs (c₀ ∷ cs'@(c₁ ∷ c₂ ∷ cs)) = do
+    d₀ ← toDig c₀
+    ds ← toDigs cs'
+    return (d₀ ∷ ds)
 
 module Bytes where
   base64To256 : Vec Base64.Byte 4 → Vec Base256.Byte 3
@@ -115,19 +141,62 @@ module Bytes where
       ∷ (b₃₅ ∷ b₃₆ ∷ b₄₁ ∷ b₄₂ ∷ b₄₃ ∷ b₄₄ ∷ b₄₅ ∷ b₄₆ ∷ [])
       ∷ []
 
-module EncDec64 where
+  pad64To256 : Base64.Pad → List Base256.Byte
+  pad64To256 (Base64.pad2 (
+      (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ [])
+    ∷ (b₂₁ ∷ b₂₂ ∷ b₂₃ ∷ b₂₄ ∷ b₂₅ ∷ b₂₆ ∷ [])
+    ∷ []))
+    = [ b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ b₂₁ ∷ b₂₂ ∷ [] ]
+  pad64To256 (Base64.pad1 (
+      (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ [])
+    ∷ (b₂₁ ∷ b₂₂ ∷ b₂₃ ∷ b₂₄ ∷ b₂₅ ∷ b₂₆ ∷ [])
+    ∷ (b₃₁ ∷ b₃₂ ∷ b₃₃ ∷ b₃₄ ∷ b₃₅ ∷ b₃₆ ∷ [])
+    ∷ []))
+    =   (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ b₂₁ ∷ b₂₂ ∷ [])
+      ∷ (b₂₃ ∷ b₂₄ ∷ b₂₅ ∷ b₂₆ ∷ b₃₁ ∷ b₃₂ ∷ b₃₃ ∷ b₃₄ ∷ [])
+      ∷ []
 
-  decode4 : ∀ {n} → Vec Base64.Dig (4 * n) → Vec Base256.Dig (3 * n)
-  decode4 {zero} cs = []
-  decode4 {suc n} cs
-    with *-distribˡ-+ 4 1 n
-  ...| pf
-    with 4 * (1 + n)
-  decode4 {suc n} cs | refl | ._
-    with *-distribˡ-+ 3 1 n
-  ...| pf'
-    with 3 * (1 + n)
-  decode4 {suc n} cs | refl | ._ | refl | ._ =
-    Vec._++_ {m = 3}{3 * n}
-      (Vec.map fromBinary (Bytes.base64To256 (Vec.take 4 (Vec.map toBinary cs))))
-      (decode4{n} (Vec.drop 4 cs))
+module Digs where
+
+  base64To256 : List Base64.Dig → Maybe (List Base256.Dig)
+  base64To256 [] = just []
+  base64To256 (x ∷ []) = nothing
+    -- a single base64 digit is not enough to encode a base256 digi
+  base64To256 (c₀ ∷ c₁ ∷ []) = do
+    let bs = Bytes.pad64To256 (Base64.pad2 (toBinary c₀ ∷ toBinary c₁ ∷ []))
+    return (map fromBinary bs)
+  base64To256 (c₀ ∷ c₁ ∷ c₂ ∷ []) = do
+    let bs = Bytes.pad64To256 (Base64.pad1 (toBinary c₀ ∷ toBinary c₁ ∷ toBinary c₂ ∷ []))
+    return (map fromBinary bs)
+  base64To256 (c₀ ∷ c₁ ∷ c₂ ∷ c₃ ∷ cs) = do
+    let bs = Bytes.base64To256 (toBinary c₀ ∷ toBinary c₁ ∷ toBinary c₂ ∷ toBinary c₃ ∷ [])
+    ds ← base64To256 cs
+    return (map fromBinary (Vec.toList bs) ++ ds)
+
+  -- base64To256 : ∀ {n} → Vec Base64.Dig (4 * n) → Vec Base256.Dig (3 * n)
+  -- base64To256 {zero} cs = []
+  -- base64To256 {suc n} cs
+  --   with *-distribˡ-+ 4 1 n
+  -- ...| pf
+  --   with 4 * (1 + n)
+  -- base64To256 {suc n} cs | refl | ._
+  --   with *-distribˡ-+ 3 1 n
+  -- ...| pf'
+  --   with 3 * (1 + n)
+  -- base64To256 {suc n} cs | refl | ._ | refl | ._ =
+  --   Vec._++_ {m = 3}{3 * n}
+  --     (Vec.map fromBinary (Bytes.base64To256 (Vec.take 4 (Vec.map toBinary cs))))
+  --     (base64To256{n} (Vec.drop 4 cs))
+
+module Decode where
+
+  base64 : List Char → Maybe (List Base256.Dig)
+  base64 cs = do
+    ds ← Base64.toDigs cs
+    Digs.base64To256 ds
+
+  private
+    test₀ : String
+    test₀ = String.fromList (map (Char.fromℕ ∘ toℕ) (from-just foo))
+      where
+      foo = base64 (String.toList "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu")
