@@ -55,15 +55,17 @@ module Length where
     field
       l : UInt8
       @erased l<128 : toℕ l < 128
-      @erased bs≡ : bs ≡ [ l ]
+      @erased serial : bs ≡ [ l ]
   #+end_code
 
   - \AgdaDatatype{Short} is not a type, but a /predicate/ (a family of types
     indexed by bytestrings).
   - \AgdaBound{bs} is a bound variable, the formal argument to the predicate we
     are defining.
-    It can also be thought of as the /serialization/ of the type we are
-    defining.
+    It can also be thought of as a /serialization/ of the type we are
+    defining (our modeling discipline allows for the possibility that there may
+    be multiple serializations of a given value; in the case of
+    \AgdaDatatype{Short}, it is clear that this is not so).
     It is marked as being erased at runtime with the \AgdaSymbol{@erased}
     annotation (the parsed structure does not carry its serialization around).
   - \AgdaInductiveConstructor{mkShort} is the constructor for
@@ -75,10 +77,17 @@ module Length where
     - \AgdaField{l<128} is a constraint on \AgdaField{l}. Per the ANS.1 grammar,
       lengths exceeding 127 must be represented by a /long length/.
 
-    - \AgdaField{bs≡} relates the data field \AgdaField{l} to the serialization
+    - \AgdaField{serial} relates the data field \AgdaField{l} to the serialization
       \AgdaBound{bs}.
       In this case, \AgdaField{bs} must be equal to the singleton list
       containing \AgdaField{l}.
+
+
+  A parser which returns \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} is
+  therefore a sound parser for short lengths /by construction/, because in order
+  to create a value of type \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} one
+  must produce witnesses that \AgdaBound{bs} is a singleton list whose sole
+  element is strictly less than 128.
 
 *** Object Subidentifiers
   Here is another example: object sub-identifiers
@@ -95,7 +104,7 @@ record OIDSub (@erased bs : List Dig) : Set where
     @erased lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
     @erased lₑ<128 : toℕ lₑ < 128
     @erased leastBytes : OIDLeastBytes lₚ
-    @erased bs≡ : bs ≡ lₚ ++ [ lₑ ]
+    @erased serial : bs ≡ lₚ ++ [ lₑ ]
   #+end_code
 
   - The data fields are \AgdaField{lₚ} (the prefix bytes) and \AgdaField{lₑ}
@@ -104,9 +113,9 @@ record OIDSub (@erased bs : List Dig) : Set where
   - Per section 8.19.2 of the X.690 specification,
 
     #+begin_quote
-    Each sub-identifier is represented as a series of (one or more) octets. Bit 8
-    of each octet indicates whether it is the last in the series: bit 8 of the
-    last octet is zero; bit 8 of each preceding octet is one.
+    /Each sub-identifier is represented as a series of (one or more) octets. Bit 8
+    of each octet indicates whether it is the last in the series: bit 8 of the/
+    /last octet is zero; bit 8 of each preceding octet is one./
     #+end_quote
 
     Therefore, all of the bytes in the prefix must be at least as large as 128,
@@ -119,27 +128,46 @@ record OIDSub (@erased bs : List Dig) : Set where
     requirement that this holds of the prefix \AgdaField{lₚ} is enforced by
     \AgdaField{leastBytes}. 
 
-  *NOTE:* A parser that (upon success) returns e.g. a =Short= or an =OIDSub=
-  indexed by (a prefix of) the given byte string is a sound parser /by
-  construction/, because it is returning a proof that that byte string conforms
-  to the specification.
+*** Generic ``sequence-of'' type
 
-*** Generic sequences (of one type)
+    The next Agda definitions model sequences of a single type with a variable
+    number of entries.
 
     #+begin_code
   mutual
-    data SeqElems (A : List Dig → Set) : @erased List Dig → Set where
-      single : (@erased bs : List Dig) → A bs → SeqElems A bs
-      cons   : (@erased bs : List Dig) → SeqElemFields A bs → SeqElems A bs
-    record SeqElemFields (A : List Dig → Set) (@erased bs : List Dig) : Set where
+    data SeqElems (@erased A : List Dig → Set) : @erased List Dig → Set where
+      []   : (@erased bs : List Dig) → SeqElems A bs
+      cons : (@erased bs : List Dig) → SeqElemFields A bs → SeqElems A bs
+    record SeqElemFields (@erased A : List Dig → Set) (@erased bs : List Dig) : Set where
       inductive
       constructor mkSeqElems
       field
         @erased bs₁ bs₂ : List Dig
         h : A bs₁
         t : SeqElems A bs₂
-        @erased bs≡ : bs ≡ bs₁ ++ bs₂
+        @erased serial : bs ≡ bs₁ ++ bs₂
     #+end_code
+
+    - The algebraic datatype \AgdaDatatype{SeqElems} is defined mutually with
+      the record \AgdaDatatype{SeqElemFields}.
+
+    - \AgdaDatatype{SeqElems} follows the usual format for defining a list as an
+      algebraic datatype, except that the parameter \AgdaBound{A} gives the type
+      /family/ of elements, and the list is indexed by its serialization.
+
+    - One constructs a nonempty list with \AgdaInductiveConstructor{cons}, which
+      takes as an argument an element of the record type
+      \AgdaDatatype{SeqElemFields}.
+
+    - Since \AgdaDatatype{SeqElemFields} is recursive (indirectly, by the type
+      of \AgdaField{t}), Agda requires we declare it either
+      \AgdaKeyword{inductive} or \AgdaKeyword{coinductive}.
+
+    - The record has two fields, the head of the list \AgdaField{h} and the tail
+      \AgdaField{t}.
+
+    - The serialization is the concatenation of the serializations of the head
+      and tail elements (as given by the type of \AgdaField{serial}).
   
 ** Contribution
 

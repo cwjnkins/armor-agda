@@ -84,7 +84,6 @@ import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
 
-module Everything where
+import summary
 
--- TODO
---- some lemmas in Aeres.Data.X509.Properties
+module Everything where
