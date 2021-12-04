@@ -14,11 +14,11 @@ open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.Decidable.Seq where
+module Aeres.Data.X509.Decidable.SequenceOf where
 
 open Base256
 
-module parseSeq
+module parseSequenceOf
   (eName : String) (A : List Dig → Set) (@0 ne : NonEmpty Dig A) (@0 nn : NonNesting Dig A)
   (p : Parser Dig (Logging ∘ Dec) A) where
 
@@ -27,8 +27,8 @@ module parseSeq
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-  parseSeqElemsWF : ∀ n → ParserWF Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SeqElems A) n)
-  runParser (parseSeqElemsWF n) xs (WellFounded.acc rs) = do
+  parseSequenceOfWF : ∀ n → ParserWF Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SequenceOf A) n)
+  runParser (parseSequenceOfWF n) xs (WellFounded.acc rs) = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len) refl) suf₀ ps≡₀)
       ← runParser (parse≤ _ n p nn (tell $ here' String.++ ": overflow")) xs
       where no ¬parse → do
@@ -39,7 +39,7 @@ module parseSeq
                 (mk×ₚ v (─ Lemmas.≡⇒≤ bsLen) refl)
                 suffix ps≡)
               ¬parse
-          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) →
+          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) →
             contradiction
               (success bs₁ _ refl
                 (mk×ₚ h
@@ -61,7 +61,7 @@ module parseSeq
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
         yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁) refl) suf₁ ps≡₁)
-          ← runParser (parseSeqElemsWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
+          ← runParser (parseSequenceOfWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix read read≡ (mk×ₚ (v Generic.∷[]) (─ bsLen) refl) suffix ps≡) →
@@ -71,7 +71,7 @@ module parseSeq
                           length prefix ≡⟨ bsLen ⟩
                           n             ∎))
                   (<⇒≢ r₀<n)
-              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSeqElems{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) → ‼
+              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (Generic.cons (Generic.mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) → ‼
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
                     xs≡ = begin pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                                  xs                     ≡⟨ sym ps≡ ⟩
@@ -104,7 +104,7 @@ module parseSeq
                     length pre₀ + r₁          ≡⟨ cong (length pre₀ +_) r₁≡ ⟩
                     length pre₀ + length pre₁ ≡⟨ (sym $ length-++ pre₀) ⟩
                     length (pre₀ ++ pre₁)     ∎))
-            (mk×ₚ (Generic.cons (Generic.mkSeqElems v₀ v₁ refl))
+            (mk×ₚ (Generic.cons (Generic.mkSequenceOf v₀ v₁ refl))
               (─(begin (length (pre₀ ++ pre₁)     ≡⟨ length-++ pre₀ ⟩
                          length pre₀ + length pre₁ ≡⟨ cong (_+ _) (sym r₀≡) ⟩
                          r₀ + length pre₁          ≡⟨ cong (r₀ +_) r₁≡len-pre₁ ⟩
@@ -121,13 +121,13 @@ module parseSeq
                     pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                     xs                      ∎))))
 
-  parseSeqElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SeqElems A) n)
-  parseSeqElems n = parseWF Dig (parseSeqElemsWF n)
+  parseSequenceOf : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SequenceOf A) n)
+  parseSequenceOf n = parseWF Dig (parseSequenceOfWF n)
 
   parseSeq : Parser Dig (Logging ∘ Dec) (Generic.Seq A)
-  parseSeq = parseTLV Tag.Sequence "seq" (Generic.SeqElems A) parseSeqElems
+  parseSeq = parseTLV Tag.Sequence "seq" (Generic.SequenceOf A) parseSequenceOf
 
-open parseSeq public using (parseSeqElems ; parseSeq)
+open parseSequenceOf public using (parseSequenceOf ; parseSeq)
 
 parseIntegerSeq : Parser Dig (Logging ∘ Dec) Generic.IntegerSeq
 parseIntegerSeq = parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt

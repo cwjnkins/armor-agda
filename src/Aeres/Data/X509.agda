@@ -236,28 +236,38 @@ module Generic where
   Int xs = TLV Tag.Integer IntegerValue xs
 
   --Sequences (of one type)-------------------------
-  data SeqElems (A : List Dig → Set) : (@0 _ : List Dig) → Set
+  data SequenceOf (@0 A : List Dig → Set) : @0 List Dig → Set
 
-  record SeqElemsₐ (A : List Dig → Set) (@0 bs : List Dig) : Set where
+  record SequenceOfFields (@0 A : List Dig → Set) (@0 bs : List Dig) : Set where
     inductive
-    constructor mkSeqElems
+    constructor mkSequenceOf
     field
       @0 {bs₁ bs₂} : List Dig
       h : A bs₁
-      t : SeqElems A bs₂
+      t : SequenceOf A bs₂
       @0 bs≡ : bs ≡ bs₁ ++ bs₂
 
-  data SeqElems A where
-    _∷[] : ∀ {@0 xs} → A xs → SeqElems A xs
-    cons : ∀ {@0 xs} → SeqElemsₐ A xs → SeqElems A xs
+  data SequenceOf A where
+    nil  : SequenceOf A []
+    cons : ∀ {@0 xs} → SequenceOfFields A xs → SequenceOf A xs
+
+  lengthSequence : ∀ {@0 A xs} → SequenceOf A xs → ℕ
+  lengthSequence nil = 0
+  lengthSequence (cons (mkSequenceOf h t bs≡)) = 1 + lengthSequence t
+
+  BoundedSequenceOf : (@0 A : List Dig → Set) → @0 ℕ → @0 List Dig → Set
+  BoundedSequenceOf A n = Σₚ (SequenceOf A) λ _ seq → lengthSequence seq ≥ n
+
+  NonEmptySequenceOf : (@0 A : List Dig → Set) → @0 List Dig → Set
+  NonEmptySequenceOf A = BoundedSequenceOf A 1
 
   Seq : (A : List Dig → Set) → (@0 _ : List Dig) → Set
-  Seq A = TLV Tag.Sequence (SeqElems A)
+  Seq A = TLV Tag.Sequence (SequenceOf A)
 
   --Integer sequences-------------------------------
 
   IntegerSeq : (@0 _ : List Dig) → Set
-  IntegerSeq xs = TLV Tag.Sequence (SeqElems Int) xs
+  IntegerSeq xs = TLV Tag.Sequence (SequenceOf Int) xs
 
   BitstringUnusedBits : Dig → List Dig → Set
   BitstringUnusedBits bₕ [] = toℕ bₕ ≡ 0
@@ -323,7 +333,7 @@ module Generic where
   -- --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
 
   OID : (@0 _ : List Dig) → Set
-  OID = TLV Tag.ObjectIdentifier (SeqElems OIDSub)
+  OID = TLV Tag.ObjectIdentifier (NonEmptySequenceOf OIDSub)
 
   data BoolRep : Bool → Dig → Set where
     falseᵣ : BoolRep false (# 0)
@@ -538,7 +548,7 @@ module X509 where
   RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
 
   RDN : (@0 _ : List Dig) → Set
-  RDN xs = Generic.TLV Tag.Sett (Generic.SeqElems RDNATV) xs
+  RDN xs = Generic.TLV Tag.Sett (Generic.SequenceOf RDNATV) xs
 
   RDNSeq : (@0 _ : List Dig) → Set
   RDNSeq = Generic.Seq RDN
@@ -560,7 +570,7 @@ module X509 where
   X400Address xs = Generic.TLV Tag.A3 Generic.OctetstringValue xs --abstracted
 
   DirName : (@0 _ : List Dig) → Set
-  DirName xs = Generic.TLV Tag.A4 (Generic.SeqElems RDN) xs
+  DirName xs = Generic.TLV Tag.A4 (Generic.SequenceOf RDN) xs
 
   --- we do not support EdipartyName since very rarely used
   EdipartyName : (@0 _ : List Dig) → Set
@@ -573,7 +583,7 @@ module X509 where
   IpAddress xs = Generic.TLV Tag.EightySeven Generic.OctetstringValue xs
 
   RegID : (@0 _ : List Dig) → Set
-  RegID xs = Generic.TLV Tag.EightyEight (Generic.SeqElems Generic.OIDSub) xs
+  RegID xs = Generic.TLV Tag.EightyEight (Generic.NonEmptySequenceOf Generic.OIDSub) xs
 
   data GeneralName : @0 List Dig → Set where
     oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
@@ -586,7 +596,7 @@ module X509 where
     ipadd : ∀ {@0 bs} → IpAddress bs → GeneralName bs
     rid : ∀ {@0 bs} → RegID bs → GeneralName bs
 
-  GeneralNamesElems = Generic.SeqElems GeneralName
+  GeneralNamesElems = Generic.NonEmptySequenceOf GeneralName
   GeneralNames = Generic.TLV Tag.Sequence GeneralNamesElems
 
   --------------------------TBSCert-----------------------------------------------------------------
@@ -660,7 +670,7 @@ module X509 where
 ----------------------------------- eku extension -----------------------------------
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
-  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Generic.OID) xs
+  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SequenceOf Generic.OID) xs
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
@@ -748,7 +758,7 @@ module X509 where
   PolicyQualifierInfo xs = Generic.TLV Tag.Sequence PolicyQualifierInfoFields xs
 
   PolicyQualifiersSeq : (@0 _ : List Dig) → Set
-  PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems PolicyQualifierInfo) xs
+  PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf PolicyQualifierInfo) xs
 
   record PolicyInformationFields (@0 bs : List Dig) : Set where
     constructor mkPolicyInformationFields
@@ -779,8 +789,11 @@ module X509 where
   FullName xs = Generic.TLV Tag.A0 GeneralNamesElems xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
-  NameRTCrlIssuer xs = Generic.TLV Tag.A1 (Generic.SeqElems RDN) xs
+  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDN xs
 
+  -- DistributionPointName ::= CHOICE {
+  --      fullName                [0]     GeneralNames,
+  --      nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
   data DistPointNameChoice : (@0 _ : List Dig) → Set where
     fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
     nameRTCrlissr : ∀ {@0 bs} → NameRTCrlIssuer bs → DistPointNameChoice bs
@@ -801,7 +814,7 @@ module X509 where
   DistPoint xs = Generic.TLV Tag.Sequence DistPointFields xs
 
   CRLDistFieldsSeq : (@0 _ : List Dig) → Set
-  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems DistPoint) xs
+  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf DistPoint) xs
 
   CRLDistFields : (@0 _ : List Dig) → Set
   CRLDistFields xs = Generic.TLV Tag.Octetstring  CRLDistFieldsSeq xs
@@ -830,7 +843,7 @@ module X509 where
   AccessDesc xs = Generic.TLV Tag.Sequence  AccessDescFields xs
 
   AIAFieldsSeq : (@0 _ : List Dig) → Set
-  AIAFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems AccessDesc) xs
+  AIAFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf AccessDesc) xs
 
   AIAFields : (@0 _ : List Dig) → Set
   AIAFields xs = Generic.TLV Tag.Octetstring  AIAFieldsSeq xs
@@ -898,7 +911,7 @@ module X509 where
   Extension xs = Generic.TLV Tag.Sequence SelectExtn xs
 
   ExtensionsSeq : (@0 _ : List Dig) → Set
-  ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.SeqElems Extension) xs
+  ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf Extension) xs
 
   Extensions : (@0 _ : List Dig) → Set
   Extensions xs = Generic.TLV Tag.A3  ExtensionsSeq xs

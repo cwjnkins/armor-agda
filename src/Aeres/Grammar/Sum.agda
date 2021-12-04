@@ -20,8 +20,12 @@ nonnestingSum nn₁ nn₂ nc ++≡ (inj₁ x) (inj₂ x₁) = ⊥-elim (nc ++≡
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (sym ++≡) x₁ x)
 nonnestingSum nn₁ nn₂ nc ++≡ (inj₂ x) (inj₂ x₁) = nn₂ ++≡ x x₁
 
+-- TODO: rename
+@0 unambiguousSum' : ∀ {@0 A B} → Unambiguous A → Unambiguous B → (∀ {xs} → A xs → ¬ B xs ) → Unambiguous (Sum A B)
+unambiguousSum'{A} ua₁ ua₂ nc (inj₁ x) (inj₁ x₁) = cong Sum.inj₁ (ua₁ x x₁)
+unambiguousSum' ua₁ ua₂ nc (inj₁ x) (inj₂ x₁) = ⊥-elim (nc x x₁)
+unambiguousSum' ua₁ ua₂ nc (inj₂ x) (inj₁ x₁) = ⊥-elim (nc x₁ x)
+unambiguousSum' ua₁ ua₂ nc (inj₂ x) (inj₂ x₁) = cong Sum.inj₂ (ua₂ x x₁)
+
 @0 unambiguousSum : ∀ {@0 A B} → Unambiguous A → Unambiguous B → NoConfusion A B → Unambiguous (Sum A B)
-unambiguousSum ua₁ ua₂ nc (inj₁ x) (inj₁ x₁) = cong inj₁ (ua₁ x x₁)
-unambiguousSum ua₁ ua₂ nc {xs} (inj₁ x) (inj₂ x₁) = ⊥-elim (nc (refl {x = xs ++ []}) x x₁) 
-unambiguousSum ua₁ ua₂ nc {xs} (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (refl {x = xs ++ []}) x₁ x)
-unambiguousSum ua₁ ua₂ nc (inj₂ x) (inj₂ x₁) = cong inj₂ (ua₂ x x₁)
+unambiguousSum ua₁ ua₂ nc = unambiguousSum' ua₁ ua₂ λ {xs} → nc (refl {x = xs ++ []})
