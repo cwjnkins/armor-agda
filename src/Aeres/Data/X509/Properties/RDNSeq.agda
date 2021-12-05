@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Prelude
 import      Aeres.Data.X509.Properties.RDNATVFields as RDNATVFieldsProps
-import      Aeres.Data.X509.Properties.Seq          as SeqProps
+import      Aeres.Data.X509.Properties.SequenceOf   as SeqProps
 import      Aeres.Data.X509.Properties.TLV          as TLVProps
 
 module Aeres.Data.X509.Properties.RDNSeq where

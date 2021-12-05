@@ -17,7 +17,10 @@ open import Aeres.Grammar.Definitions Dig
 
 module OID where
   @0 unambiguous : Unambiguous Generic.OID
-  unambiguous = TLVProps.unambiguous (SeqProps.unambiguous OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
+  unambiguous =
+    TLVProps.unambiguous
+      (SeqProps.BoundedSequenceOf.unambiguous
+        OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
 
 module OIDSeq where
   @0 unambiguous : Unambiguous (Generic.SequenceOf Generic.OID)

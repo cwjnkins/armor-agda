@@ -11,7 +11,7 @@ import      Aeres.Data.X509.Properties.OIDSub           as OIDSubProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.RDNSeq           as RDNProps
 import      Aeres.Data.X509.Properties.TLV              as TLVProps
-import      Aeres.Data.X509.Properties.Seq              as SeqProps
+import      Aeres.Data.X509.Properties.SequenceOf       as SeqProps
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -198,7 +198,7 @@ module GeneralName where
                   (unambiguousSum (TLVProps.unambiguous IA5Props.unambiguous)
                     (unambiguousSum (TLVProps.unambiguous OSProps.unambiguous)
                       (TLVProps.unambiguous
-                        (SeqProps.unambiguous
+                        (SeqProps.BoundedSequenceOf.unambiguous
                           OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting))
                         (TLVProps.noconfusion λ ()))
                       (NoConfusion.sumₚ{A = X509.URI} (TLVProps.noconfusion λ ())
@@ -235,7 +235,9 @@ module GeneralName where
 
 module GeneralNamesElems where
   @0 unambiguous : Unambiguous X509.GeneralNamesElems
-  unambiguous = SeqProps.unambiguous GeneralName.unambiguous nonempty nonnesting
+  unambiguous =
+    SeqProps.BoundedSequenceOf.unambiguous
+      GeneralName.unambiguous nonempty nonnesting
 
 module GeneralNames where
   @0 unambiguous : Unambiguous X509.GeneralNames

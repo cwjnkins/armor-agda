@@ -63,7 +63,7 @@ import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNSeq
 import Aeres.Data.X509.Properties.RDNATVFields
-import Aeres.Data.X509.Properties.Seq
+import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.Time

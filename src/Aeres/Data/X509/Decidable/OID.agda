@@ -5,7 +5,7 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -53,8 +53,8 @@ open parseOIDSub public using (parseOIDSub)
 module parseOIDField where
   here' = "parseOIDField"
 
-  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.SeqElems Generic.OIDSub) n)
-  parseOIDElems = parseSeqElems "oid elems" Generic.OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub
+  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.NonEmptySequenceOf Generic.OIDSub) n)
+  parseOIDElems n = parseBoundedSequenceOf "oid elems" Generic.OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub n 1
 
   parseOID : Parser Dig (Logging ∘ Dec) Generic.OID
   parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDElems

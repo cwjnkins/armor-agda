@@ -547,8 +547,11 @@ module X509 where
   RDNATV : (@0 _ : List Dig) → Set
   RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
 
+  RDNElems : @0 List Dig → Set
+  RDNElems = Generic.SequenceOf RDNATV
+
   RDN : (@0 _ : List Dig) → Set
-  RDN xs = Generic.TLV Tag.Sett (Generic.SequenceOf RDNATV) xs
+  RDN = Generic.TLV Tag.Sett RDNElems
 
   RDNSeq : (@0 _ : List Dig) → Set
   RDNSeq = Generic.Seq RDN
@@ -789,7 +792,7 @@ module X509 where
   FullName xs = Generic.TLV Tag.A0 GeneralNamesElems xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
-  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDN xs
+  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNElems xs
 
   -- DistributionPointName ::= CHOICE {
   --      fullName                [0]     GeneralNames,

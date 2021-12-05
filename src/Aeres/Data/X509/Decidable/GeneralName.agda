@@ -8,7 +8,7 @@ open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.RDN
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -38,7 +38,7 @@ parseX400Address = parseTLV _ "DNS name" _ parseOctetstringValue
 parseDirName : Parser Dig (Logging ∘ Dec) X509.DirName
 parseDirName =
   parseTLV _ "Dir. name" _
-    (parseSeqElems "RDN" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN)
+    (parseSequenceOf "RDN" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN)
 
 parseEdipartyName : Parser Dig (Logging ∘ Dec) X509.EdipartyName
 parseEdipartyName = parseTLV _ "EDI party name" _ parseOctetstringValue
@@ -106,8 +106,8 @@ module parseGeneralName where
         contradiction (success _ _ read≡ x _ ps≡) ¬rid
 
   parseGeneralNamesElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.GeneralNamesElems n)
-  parseGeneralNamesElems =
-    parseSeqElems "general name" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName
+  parseGeneralNamesElems n =
+    parseBoundedSequenceOf "general name" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName n 1
 
   parseGeneralNames : Parser Dig (Logging ∘ Dec) X509.GeneralNames
   parseGeneralNames = parseTLV _ "general names" _ parseGeneralNamesElems

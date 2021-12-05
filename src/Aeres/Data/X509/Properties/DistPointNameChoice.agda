@@ -2,10 +2,11 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.GeneralName as GNProps
-import      Aeres.Data.X509.Properties.RDNSeq      as RDNProps
-import      Aeres.Data.X509.Properties.Seq         as SeqProps
-import      Aeres.Data.X509.Properties.TLV         as TLVProps
+import      Aeres.Data.X509.Properties.GeneralName  as GNProps
+import      Aeres.Data.X509.Properties.RDNATVFields as RDNATVProps
+import      Aeres.Data.X509.Properties.RDNSeq       as RDNProps
+import      Aeres.Data.X509.Properties.SequenceOf   as SeqProps
+import      Aeres.Data.X509.Properties.TLV          as TLVProps
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -39,6 +40,11 @@ proj₂ (proj₂ iso) (X509.nameRTCrlissr x) = refl
 @0 unambiguous : Unambiguous X509.DistPointNameChoice
 unambiguous =
   isoUnambiguous iso
-    (unambiguousSum (TLVProps.unambiguous GNProps.GeneralNamesElems.unambiguous)
-      (TLVProps.unambiguous (SeqProps.unambiguous RDNProps.RDN.unambiguous TLVProps.nonempty TLVProps.nonnesting))
-        (TLVProps.noconfusion λ ()))
+    (unambiguousSum
+      (TLVProps.unambiguous GNProps.GeneralNamesElems.unambiguous)
+      (TLVProps.unambiguous
+        (SeqProps.unambiguous
+          (TLVProps.unambiguous RDNATVProps.unambiguous)
+          TLVProps.nonempty
+          TLVProps.nonnesting))
+      (TLVProps.noconfusion λ ()))

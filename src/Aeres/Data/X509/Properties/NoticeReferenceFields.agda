@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DisplayText as DisplayTextProps
 import      Aeres.Data.X509.Properties.Primitives  as PrimProps
 import      Aeres.Data.X509.Properties.TLV         as TLVProps
-import      Aeres.Data.X509.Properties.Seq         as SeqProps
+import      Aeres.Data.X509.Properties.SequenceOf  as SeqProps
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)

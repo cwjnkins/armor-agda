@@ -7,7 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.DirectoryString
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.OID
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -46,7 +46,7 @@ module parseRDN where
   parseRDN : Parser Dig (Logging ∘ Dec) X509.RDN
   parseRDN =
     parseTLV _ "RDN" _
-      (parseSeqElems "RDNATV" _ Props.TLV.nonempty Props.TLV.nonnesting
+      (parseSequenceOf "RDNATV" _ Props.TLV.nonempty Props.TLV.nonnesting
         parseRDNATV)
 
   parseRDNSeq : Parser Dig (Logging ∘ Dec) X509.RDNSeq

@@ -63,6 +63,37 @@ module SequenceOf where
     bs₂≡ : bs₁₂ ≡ bs₂₂
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
+  @0 sameLength : ∀ {@0 A bs} → NonNesting A → NonEmpty A → (s₁ s₂ : Generic.SequenceOf A bs) → Generic.lengthSequence s₁ ≡ Generic.lengthSequence s₂
+  sameLength nn ne Generic.nil Generic.nil = refl
+  sameLength nn ne Generic.nil (Generic.cons (Generic.mkSequenceOf h t bs≡)) =
+    contradiction
+      (++-conicalˡ _ _ (sym bs≡))
+      (ne h)
+  sameLength nn ne (Generic.cons (Generic.mkSequenceOf h t bs≡)) Generic.nil =
+    contradiction
+      (++-conicalˡ _ _ (sym bs≡))
+      (ne h)
+  sameLength nn ne (Generic.cons (Generic.mkSequenceOf{bs₁₁}{bs₁₂} h t bs≡)) (Generic.cons (Generic.mkSequenceOf{bs₂₁}{bs₂₂} h₁ t₁ bs≡₁)) =
+    cong suc (trans₀ ih lem)
+    where
+    @0 bs₁≡ : bs₁₁ ≡ bs₂₁
+    bs₁≡ = nn (trans₀ (sym bs≡) bs≡₁) h h₁
+
+    @0 bs₂≡ : bs₁₂ ≡ bs₂₂
+    bs₂≡ = proj₂ (Lemmas.length-++-≡ _ _ _ _ ((trans₀ (sym bs≡) bs≡₁)) (cong length bs₁≡))
+
+    t₁' : Generic.SequenceOf _ bs₁₂
+    t₁' = subst₀ (Generic.SequenceOf _) (sym bs₂≡) t₁
+
+    ih : Generic.lengthSequence t ≡ Generic.lengthSequence t₁'
+    ih = sameLength nn ne t t₁'
+
+    @0 lem : Generic.lengthSequence t₁' ≡ Generic.lengthSequence t₁
+    lem =
+      ≡-elim
+        (λ {ys} eq → ∀ (t' : Generic.SequenceOf _ ys) → Generic.lengthSequence (subst₀ _ (sym eq) t') ≡ Generic.lengthSequence t')
+        (λ t → refl) bs₂≡ t₁
+
 module BoundedSequenceOf where
 
   @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (Generic.BoundedSequenceOf A n)
