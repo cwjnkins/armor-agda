@@ -6,7 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -26,7 +26,12 @@ module parseSANFields where
   open ≡-Reasoning
 
   parseSANFields : Parser Dig (Logging ∘ Dec) X509.SANFields
-  parseSANFields = parseTLV _ "SAN Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseSeq "SAN Fields Elems" _ Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName))
+  parseSANFields =
+    parseTLV _ "SAN Fields" _
+      (parseExactLength _ Props.TLV.nonnesting
+        (tell $ here' String.++ ": underflow")
+          (parseNonEmptySeq "SAN Fields Elems" _
+            Props.GeneralName.nonempty Props.GeneralName.nonnesting parseGeneralName))
 
 
 open parseSANFields public using (parseSANFields)

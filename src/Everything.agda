@@ -32,7 +32,7 @@ import Aeres.Data.X509.Decidable.PublicKey
 import Aeres.Data.X509.Decidable.RDN
 import Aeres.Data.X509.Decidable.SANFields
 import Aeres.Data.X509.Decidable.SKIFields
-import Aeres.Data.X509.Decidable.Seq
+import Aeres.Data.X509.Decidable.SequenceOf
 import Aeres.Data.X509.Decidable.SignAlg
 import Aeres.Data.X509.Decidable.TBSCert
 import Aeres.Data.X509.Decidable.TLV

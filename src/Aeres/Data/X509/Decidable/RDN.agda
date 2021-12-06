@@ -54,7 +54,7 @@ module parseRDN where
     parseSeq "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN
 
 open parseRDN public
-  using (parseRDN ; parseRDNSeq)
+  using (parseRDNATV ; parseRDN ; parseRDNSeq)
 
 
 private

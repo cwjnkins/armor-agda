@@ -264,6 +264,9 @@ module Generic where
   Seq : (A : List Dig → Set) → (@0 _ : List Dig) → Set
   Seq A = TLV Tag.Sequence (SequenceOf A)
 
+  NonEmptySeq : (@0 A : List Dig → Set) → @0 List Dig → Set
+  NonEmptySeq A = TLV Tag.Sequence (NonEmptySequenceOf A)
+
   --Integer sequences-------------------------------
 
   IntegerSeq : (@0 _ : List Dig) → Set

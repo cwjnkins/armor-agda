@@ -150,7 +150,10 @@ module parseSequenceOf
   parseSeq : Parser (Logging ∘ Dec) (Generic.Seq A)
   parseSeq = parseTLV Tag.Sequence "seq" (Generic.SequenceOf A) parseSequenceOf
 
-open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseSeq)
+  parseNonEmptySeq : Parser (Logging ∘ Dec) (Generic.NonEmptySeq A)
+  parseNonEmptySeq = parseTLV Tag.Sequence "seq" (Generic.NonEmptySequenceOf A) λ n → parseBoundedSequenceOf n 1
+
+open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseNonEmptySeq ; parseSeq)
 
 parseIntegerSeq : Parser (Logging ∘ Dec) Generic.IntegerSeq
 parseIntegerSeq = parseSeq "int" Generic.Int Props.TLV.nonempty Props.TLV.nonnesting parseInt
