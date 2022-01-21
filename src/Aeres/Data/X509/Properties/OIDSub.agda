@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+import Aeres.Grammar.Definitions
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -10,7 +11,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.OIDSub where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions Dig
 
 nonempty : NonEmpty Generic.OIDSub
 nonempty (Generic.mkOIDSub [] lₚ≥128 lₑ lₑ<128 leastDigs ()) refl
@@ -35,6 +36,18 @@ unambiguous (Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl) (Gen
 
   @0 lₑ≡ : lₑ ≡ lₑ₁
   lₑ≡ = ∷ʳ-injectiveʳ _ _ bs≡₁
+
+instance
+  OIDSub≋ : Eq≋ Generic.OIDSub
+  Eq≋._≋?_ OIDSub≋ {bs} {bs₁} a₁@(Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) a₂@(Generic.mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ bs≡₁)
+    with lₚ ∷ʳ lₑ ≟ lₚ₁ ∷ʳ lₑ₁
+  ... | yes bs≡bs₁ =
+    yes (mk≋ bs≡bs₁' (unambiguous (subst Generic.OIDSub bs≡bs₁' a₁) a₂))
+    where
+    @0 bs≡bs₁' : bs ≡ bs₁
+    bs≡bs₁' = trans bs≡ (trans bs≡bs₁ (sym bs≡₁))
+  ... | no ¬bs≡bs₁ = no λ where
+    (mk≋ bs≡bs₁ a≡) → contradiction (trans (sym bs≡) (trans bs≡bs₁ bs≡₁)) ¬bs≡bs₁
 
 @0 nonnesting : NonNesting Generic.OIDSub
 nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (Generic.mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (Generic.mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
