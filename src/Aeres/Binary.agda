@@ -128,6 +128,14 @@ module Base64 where
     ds ← toDigs cs'
     return (d₀ ∷ ds)
 
+  record EncodedString (@0 es : List Char) : Set where
+    constructor mkEncodedString
+    field
+      contents : List Char
+      contents∈charset : All (λ x → x ∈ charset) contents
+      padding : List Char
+      @0 es≡ : es ≡ contents ++ padding
+
 module Bytes where
   base64To256 : Vec Base64.Byte 4 → Vec Base256.Byte 3
   base64To256
