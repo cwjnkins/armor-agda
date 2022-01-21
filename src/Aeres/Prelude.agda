@@ -224,6 +224,9 @@ erased? (yes a) = yes (─ a)
 erased-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique A → Unique (Erased A)
 erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) refl
 
+Exists─ : (A : Set) (B : @0 A → Set) → Set
+Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
+
 -- Typeclasses
 
 record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
@@ -295,6 +298,9 @@ instance
 
   FinEq : ∀ {n} → Eq (Fin n)
   Eq._≟_ FinEq = Fin._≟_
+
+  ℤEq : Eq ℤ
+  Eq._≟_ ℤEq = ℤ._≟_
 
   ListEq : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → Eq (List A)
   Eq._≟_ ListEq = ≡-dec _≟_

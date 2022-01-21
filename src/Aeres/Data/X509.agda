@@ -232,8 +232,13 @@ module Generic where
       val : ℤ
       @0 bs≡ : twosComplement bs ≡ val
 
-  Int : (@0 _ : List Dig) → Set
-  Int xs = TLV Tag.Integer IntegerValue xs
+  module Int where
+    Int : (@0 _ : List Dig) → Set
+    Int xs = TLV Tag.Integer IntegerValue xs
+
+    getVal : ∀ {@0 bs} → Int bs → ℤ
+    getVal i = IntegerValue.val (TLV.val i)
+  open Int public using (Int)
 
   --Sequences (of one type)-------------------------
   data SequenceOf (@0 A : List Dig → Set) : @0 List Dig → Set
@@ -607,8 +612,14 @@ module X509 where
 
   --------------------------TBSCert-----------------------------------------------------------------
 
-  Version : (@0 _ : List Dig) → Set
-  Version xs = Generic.TLV Tag.A0 Generic.Int xs
+  module Version where
+    Version : (@0 _ : List Dig) → Set
+    Version xs = Generic.TLV Tag.A0 Generic.Int xs
+
+    getVal : ∀ {@0 bs} → Version bs → ℤ
+    getVal v = Int.getVal (TLV.val v)
+      where open Generic
+  open Version public using (Version)
 
   IssUID : (@0 _ : List Dig) → Set
   IssUID xs = Generic.TLV Tag.EightyOne Generic.BitstringValue xs
@@ -940,6 +951,10 @@ module X509 where
       extensions : Option Extensions e
       @0 bs≡  : bs ≡ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
+    getVersion : ℤ
+    getVersion =
+      elimOption{X = const ℤ} (ℤ.+ 0) (λ v → Version.getVal v) version
+
   TBSCert : (@0 _ : List Dig) → Set
   TBSCert xs = Generic.TLV Tag.Sequence TBSCertFields xs
 
@@ -954,5 +969,20 @@ module X509 where
       signature : Generic.Bitstring sig
       @0 bs≡  : bs ≡ t ++ sa ++ sig
 
-  Cert : (@0 _ : List Dig) → Set
-  Cert xs = Generic.TLV Tag.Sequence  CertFields xs
+    getVersion : ℤ
+    getVersion = TBSCertFields.getVersion (Generic.TLV.val tbs)
+
+    getExtensions : Exists─ (List Dig) (Option Extensions)
+    getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
+
+  module Cert where
+    Cert : (@0 _ : List Dig) → Set
+    Cert xs = Generic.TLV Tag.Sequence  CertFields xs
+
+    module _ {@0 bs} (c : Cert bs) where
+      getVersion : ℤ
+      getVersion = CertFields.getVersion (Generic.TLV.val c)
+
+      getExtensions : Exists─ (List Dig) (Option Extensions)
+      getExtensions = CertFields.getExtensions (Generic.TLV.val c)
+  open Cert public using (Cert)
