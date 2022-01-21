@@ -25,7 +25,7 @@ import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.RDNSeq
-import Aeres.Data.X509.Properties.Seq
+import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.TLV
@@ -76,7 +76,7 @@ module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInf
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
-module Seq                       = Aeres.Data.X509.Properties.Seq
+module Seq                       = Aeres.Data.X509.Properties.SequenceOf
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
 module TLV                       = Aeres.Data.X509.Properties.TLV

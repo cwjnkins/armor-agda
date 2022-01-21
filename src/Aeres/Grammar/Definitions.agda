@@ -77,9 +77,16 @@ data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
 
+elimOption : ∀ {@0 A} {X : List Σ → Set} → X [] → (∀ {@0 xs} → A xs → X xs) → ∀ {@0 xs} → Option A xs → X xs
+elimOption n s none = n
+elimOption n s (some x) = s x
+
 isNone : ∀ {@0 A xs} →  Option A xs → Bool
 isNone none = true
 isNone (some _) = false
+
+isSome : ∀ {@0 A xs} → Option A xs → Bool
+isSome x = not (isNone x)
 
 mapOption : ∀ {@0 A B} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Option A xs → Option B xs
 mapOption f none = none
@@ -110,6 +117,12 @@ noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fst
 
 nonnesting×ₚ₁ : ∀ {@0 A B} → NonNesting A → NonNesting (A ×ₚ B)
 nonnesting×ₚ₁ nn ++≡ (mk×ₚ fstₚ₁ _ refl) (mk×ₚ fstₚ₂ _ refl) = nn ++≡ fstₚ₁ fstₚ₂
+
+unambiguousΣₚ : ∀ {@0 A B} → Unambiguous A → (∀ {xs} a → (b₁ b₂ : B xs a) → b₁ ≡ b₂) → Unambiguous (Σₚ A B)
+unambiguousΣₚ{A}{B} ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
+  subst₀ (λ o → (t : B _ o) → _ ≡ mk×ₚ o t refl) (ua₁ fstₚ₁ fstₚ₂)
+    (λ t → subst₀ (λ _ → _ ≡ _) (ua₂ _ sndₚ₁ t) refl)
+    sndₚ₂
 
 unambiguous×ₚ : ∀ {@0 A B} → Unambiguous A → Unambiguous B → Unambiguous (A ×ₚ B)
 unambiguous×ₚ ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =

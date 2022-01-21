@@ -12,7 +12,7 @@ import      Aeres.Data.X509.Properties.Primitives         as PrimProps
 import      Aeres.Data.X509.Properties.OID                as OIDProps
 import      Aeres.Data.X509.Properties.OctetstringValue   as OctetstringValueProps
 import      Aeres.Data.X509.Properties.TLV                as TLVProps
-import      Aeres.Data.X509.Properties.Seq                as SeqProps
+import      Aeres.Data.X509.Properties.SequenceOf         as SeqProps
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -167,7 +167,7 @@ module SelectExtn where
                           (ExtensionFields.unambiguous ≡-unique
                             (TLVProps.unambiguous
                               (TLVProps.unambiguous
-                                (SeqProps.unambiguous
+                                (SeqProps.BoundedSequenceOf.unambiguous
                                   (TLVProps.unambiguous DistPointFieldsProps.unambiguous)
                                   TLVProps.nonempty TLVProps.nonnesting)))
                             (TLVProps.noconfusion λ ()))
@@ -175,7 +175,7 @@ module SelectExtn where
                             (ExtensionFields.unambiguous ≡-unique
                               (TLVProps.unambiguous
                                 (TLVProps.unambiguous
-                                  (SeqProps.unambiguous
+                                  (SeqProps.BoundedSequenceOf.unambiguous
                                     (TLVProps.unambiguous ADProps.unambiguous)
                                     TLVProps.nonempty TLVProps.nonnesting)))
                               (TLVProps.noconfusion λ ()))
@@ -354,13 +354,14 @@ module SelectExtn where
     ua = T-unique
 
 module ExtensionsSeq where
-  import Aeres.Data.X509.Properties.Seq as SeqProps
-  import Aeres.Data.X509.Properties.TLV as TLVProps
+  import Aeres.Data.X509.Properties.SequenceOf as SeqProps
+  import Aeres.Data.X509.Properties.TLV        as TLVProps
 
   @0 unambiguous : Unambiguous X509.ExtensionsSeq
   unambiguous =
     TLVProps.unambiguous
-      (SeqProps.unambiguous
-        (TLVProps.unambiguous SelectExtn.unambiguous) TLVProps.nonempty TLVProps.nonnesting)
+      (SeqProps.BoundedSequenceOf.unambiguous
+        (TLVProps.unambiguous SelectExtn.unambiguous)
+        TLVProps.nonempty TLVProps.nonnesting)
 
 

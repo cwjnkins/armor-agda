@@ -5,7 +5,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.OID                       as OIDProps
 import      Aeres.Data.X509.Properties.PolicyQualifierInfoFields as PQIProps
-import      Aeres.Data.X509.Properties.Seq                       as SeqProps
+import      Aeres.Data.X509.Properties.SequenceOf                as SeqProps
 import      Aeres.Data.X509.Properties.TLV                       as TLVProps
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -31,6 +31,6 @@ unambiguous =
     (Unambiguous.unambiguous-&₁option₁
       OIDProps.unambiguous TLVProps.nonnesting
       (TLVProps.unambiguous
-        (SeqProps.unambiguous
+        (SeqProps.BoundedSequenceOf.unambiguous
           (TLVProps.unambiguous PQIProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting))
       TLVProps.nonempty)

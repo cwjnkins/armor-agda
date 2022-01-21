@@ -32,7 +32,7 @@ import Aeres.Data.X509.Decidable.PublicKey
 import Aeres.Data.X509.Decidable.RDN
 import Aeres.Data.X509.Decidable.SANFields
 import Aeres.Data.X509.Decidable.SKIFields
-import Aeres.Data.X509.Decidable.Seq
+import Aeres.Data.X509.Decidable.SequenceOf
 import Aeres.Data.X509.Decidable.SignAlg
 import Aeres.Data.X509.Decidable.TBSCert
 import Aeres.Data.X509.Decidable.TLV
@@ -63,7 +63,7 @@ import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNSeq
 import Aeres.Data.X509.Properties.RDNATVFields
-import Aeres.Data.X509.Properties.Seq
+import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.Time
@@ -84,7 +84,6 @@ import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
 
-module Everything where
+import summary
 
--- TODO
---- some lemmas in Aeres.Data.X509.Properties
+module Everything where

@@ -5,7 +5,7 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.DisplayText
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions

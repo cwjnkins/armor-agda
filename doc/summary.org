@@ -1,0 +1,378 @@
+# -*- eval: (smartparens-mode); eval: (flyspell-mode); -*-
+#+TITLE: AERES: Summary of verification architecture
+
+#+OPTIONS: toc:nil
+
+#+LATEX_HEADER: \usepackage{bbm}
+#+LATEX_HEADER: \usepackage[greek,english]{babel}
+
+#+LATEX_HEADER: \usepackage{latex/agda}
+
+#+LATEX_HEADER: \DeclareUnicodeCharacter{8346}{\ensuremath { _p}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{7522}{\ensuremath { _i}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{8337}{\ensuremath { _e}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{8321}{\ensuremath { _1}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{8322}{\ensuremath { _2}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{955}{\ensuremath{\lambda}}
+#+LATEX_HEADER: \DeclareUnicodeCharacter{8759}{\ensuremath{::}}
+
+  #+ATTR_LATEX: :options [hide]
+  #+begin_code
+    open import Aeres.Prelude
+    open import Aeres.Binary
+    
+    module summary where
+
+    open Base256
+    Type = Set
+  #+end_code
+
+* Specification
+
+  This section describes the discipline used in Aeres to model the supported
+  subset of X.509.
+  Parsers in Aeres construct values from inputs of type
+  \AgdaDatatype{List}\AgdaSpace{}\AgdaFunction{UInt8} --- that is, lists of
+  nonnegative integers which are no greater than 255.
+  Unlike the other X.509 parsers we have discussed, the types of the values
+  constructed from bytestring inputs /depends/ upon those inputs.
+  This allows us to have an X.509 parser that is sound /by construction/,
+  because the parser returns a proof that /the input conforms to the
+  specification/.
+
+  To illustrate this point, we now look at some Agda definitions that capture a
+  handful of the ANS.1 DER type specifications.
+  
+
+** [[../src/Aeres/Data/X509.agda][Agda X.509 Definitions]]
+*** Short lengths
+   Consider the definition short lengths, given as \AgdaDatatype{Short} below.
+
+  #+begin_code
+module Length where
+  record Short (@erased bs : List UInt8) : Type where
+    constructor mkShort
+    field
+      l : UInt8
+      @erased l<128 : toℕ l < 128
+      @erased serial : bs ≡ [ l ]
+  #+end_code
+
+  - \AgdaDatatype{Short} is not a type, but a /predicate/ (a family of types
+    indexed by bytestrings).
+  - \AgdaBound{bs} is a bound variable, the formal argument to the predicate we
+    are defining.
+    It can also be thought of as a /serialization/ of the type we are
+    defining (our modeling discipline allows for the possibility that there may
+    be multiple serializations of a given value; in the case of
+    \AgdaDatatype{Short}, it is clear that this is not so).
+    It is marked as being erased at runtime with the \AgdaSymbol{@erased}
+    annotation (the parsed structure does not carry its serialization around).
+  - \AgdaInductiveConstructor{mkShort} is the constructor for
+    \AgdaDatatype{Short}\AgdaSpace{}\AgdaBound{bs} (for all \AgdaBound{bs}),
+    requiring three arguments whose types are given by the fields below
+    - \AgdaField{l} is a single byte, whose value is to be interpreted as the
+      length of some other content.
+
+    - \AgdaField{l<128} is a constraint on \AgdaField{l}. Per the ANS.1 grammar,
+      lengths exceeding 127 must be represented by a /long length/.
+
+    - \AgdaField{serial} relates the data field \AgdaField{l} to the serialization
+      \AgdaBound{bs}.
+      In this case, \AgdaField{bs} must be equal to the singleton list
+      containing \AgdaField{l}.
+
+
+  A parser which returns \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} is
+  therefore a sound parser for short lengths /by construction/, because in order
+  to create a value of type \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} one
+  must produce witnesses that \AgdaBound{bs} is a singleton list whose sole
+  element is strictly less than 128.
+
+*** Object Subidentifiers
+  Here is another example: object sub-identifiers
+  
+  #+begin_code
+OIDLeastBytes : List Dig → Set
+OIDLeastBytes [] = ⊤
+OIDLeastBytes (b  ∷ bs) = toℕ b > 128
+record OIDSub (@erased bs : List Dig) : Set where
+  constructor mkOIDSub
+  field
+    lₚ : List Dig
+    lₑ : Dig
+    @erased lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
+    @erased lₑ<128 : toℕ lₑ < 128
+    @erased leastBytes : OIDLeastBytes lₚ
+    @erased serial : bs ≡ lₚ ++ [ lₑ ]
+  #+end_code
+
+  - The data fields are \AgdaField{lₚ} (the prefix bytes) and \AgdaField{lₑ}
+    (the ending byte).
+
+  - Per section 8.19.2 of the X.690 specification,
+
+    #+begin_quote
+    /Each sub-identifier is represented as a series of (one or more) octets. Bit 8
+    of each octet indicates whether it is the last in the series: bit 8 of the/
+    /last octet is zero; bit 8 of each preceding octet is one./
+    #+end_quote
+
+    Therefore, all of the bytes in the prefix must be at least as large as 128,
+    and the ending byte must be strictly less than 128.
+    This is enforced by \AgdaField{lₚ≥128} and \AgdaField{lₑ>128}.
+
+  - Finally, as X.509 uses DER, we require that the least number of bytes are
+    used for representing the object sub-identifier.
+    The definition of this property is \AgdaFunction{OIDLeastBytes}, and the
+    requirement that this holds of the prefix \AgdaField{lₚ} is enforced by
+    \AgdaField{leastBytes}. 
+
+*** Generic ``sequence-of'' type
+
+    The next Agda definitions model sequences of a single type with a variable
+    number of entries.
+
+    #+begin_code
+  mutual
+    data SeqElems (@erased A : List Dig → Set) : @erased List Dig → Set where
+      []   : (@erased bs : List Dig) → SeqElems A bs
+      cons : (@erased bs : List Dig) → SeqElemFields A bs → SeqElems A bs
+    record SeqElemFields (@erased A : List Dig → Set) (@erased bs : List Dig) : Set where
+      inductive
+      constructor mkSeqElems
+      field
+        @erased bs₁ bs₂ : List Dig
+        h : A bs₁
+        t : SeqElems A bs₂
+        @erased serial : bs ≡ bs₁ ++ bs₂
+    #+end_code
+
+    - The algebraic datatype \AgdaDatatype{SeqElems} is defined mutually with
+      the record \AgdaDatatype{SeqElemFields}.
+
+    - \AgdaDatatype{SeqElems} follows the usual format for defining a list as an
+      algebraic datatype, except that the parameter \AgdaBound{A} gives the type
+      /family/ of elements, and the list is indexed by its serialization.
+
+    - One constructs a nonempty list with \AgdaInductiveConstructor{cons}, which
+      takes as an argument an element of the record type
+      \AgdaDatatype{SeqElemFields}.
+
+    - Since \AgdaDatatype{SeqElemFields} is recursive (indirectly, by the type
+      of \AgdaField{t}), Agda requires we declare it either
+      \AgdaKeyword{inductive} or \AgdaKeyword{coinductive}.
+
+    - The record has two fields, the head of the list \AgdaField{h} and the tail
+      \AgdaField{t}.
+
+    - The serialization is the concatenation of the serializations of the head
+      and tail elements (as given by the type of \AgdaField{serial}).
+  
+** Contribution
+
+   One of the contributes of this work is a formalization in Agda of a subset
+   of X.509 and X.690 (DER).
+   We believe that this specification is human-readable (though it may require
+   learning some of Agda's notational convention), while at the same time
+   completely unambiguous (compared to the natural language description of both
+   specs).
+
+* [[../src/Aeres/Grammar/Parser/Core.agda][Parsing]]
+
+   The results of a successful parse of a structure =A= from =xs= are given by
+   the =Success= record.
+
+   #+begin_example
+record Success (@erased A : List Dig → Set) (@erased xs : List Dig) : Set where
+  constructor success
+  field
+    @erased prefix : List Dig
+    read   : ℕ
+    @erased read≡ : read ≡ length prefix
+    value  : A prefix
+    suffix : List Dig
+    @erased ps≡ : prefix ++ suffix ≡ xs
+   #+end_example
+
+   The unerased fields are the returned values, and the erased fields are
+   part of the specification.
+   - =prefix=, the bytes consumed during parsing
+
+     This is not returned at run time, but it is needed to state the type of the
+     parsed result.
+   - =read=, the number of bytes read (enforced by the field =read≡=)
+   - =value=, the construction of the structure =A= from =prefix=
+   - =suffix=, the remaining bytes to consume for future parsing.
+   - The field =ps≡= guarantees that =prefix= and =suffix= are correctly named.
+
+   With the definition of the type of results of parsing, we define a parser
+   itself as a record wrapping a function from byte strings to "possible
+   =Success= es" --- the structure =Parser= is parameterized by a type
+   constructor =M= to allow for flexible handling of failure.
+
+   #+begin_example
+record Parserᵢ (M : List Dig → Set → Set) (A : List Dig → Set) : Set where
+  constructor mkParser
+  field
+    runParser : (xs : List Dig) → M xs (Success A xs)
+open Parserᵢ public
+
+Parser : (M : Set → Set) (A : List Dig → Set) → Set
+Parser M = Parserᵢ (const M)
+   #+end_example
+
+   For parsing X.509, the environment =M= for failure will always involve =Dec=,
+   discussed next. (TODO: =Dec= should probably be part of the definition of =Parserᵢ=)
+
+** =Dec= and complete parsing
+
+    In the Agda standard library, the type =Dec : Set -> Set= is the type of
+    "decisions" about a proposition =P : Set=.
+    That is, a proof of =Dec P= is either a proof of =P= or a proof of =¬ P=.
+
+    #+begin_example
+data Dec (P : Set) : Set where
+  yes :   P → Dec P
+  no  : ¬ P → Dec P
+    #+end_example
+
+    Now consider the use of =Dec= in the context of parsing
+
+    #+begin_example
+  parseInt : Parser Dec Int
+    #+end_example
+
+    where =Int= is the X.690 DER encoding of an integer.
+    When this parser is run on a byte string =xs=, it returns =Dec (Success Int
+    xs)=. There are two options.
+    - if the decision is =yes=, then we have a proof that there exists some
+      prefix of =xs= which conforms to the specification =Int=
+
+    - if the decision is =no=, then we have a proof that *no prefix exists*
+      from which an =Int= may be parse
+
+
+    Because the parser returns a /decision/ on whether a successful parse is
+    possible, we have completeness as well as soundness.
+    Consider the following proof.
+
+    #+begin_example
+record ⊤ : Set where
+  constructor tt
+
+data ⊥ : Set where
+
+True : ∀ {P} → Dec P → Set
+True (yes _) = ⊤
+True (no  _) = ⊥
+
+completeness : ∀ {bs} → Success Int bs → True (runParser parseInt bs)
+completeness{bs} cert
+  with runParser parseInt bs
+... | (yes _) = tt
+... | no ¬cert = contradiction cert ¬cert
+    #+end_example
+    
+
+    - \(\top\) is a trivially inhabited type (a true proposition)
+    - \(\bot\) is a trivially uninhabited type (a false proposition)
+    - =True= computes a type by case analysis on a decision over some
+      proposition. It is defined in such a way that a term of type
+      =True (runParser parseInt bs)= implies that =runParser parseInt bs= was
+      successful
+
+    - In the proof, we assume that an oracle has given us a successful parse of
+      an =Int= from byte string =bs=. We show that this means the parser /must/
+      succeed as well.
+
+      - Of course, if the parser does succeed (the =yes= case), then we are done
+        --- the goal is =True (yes _)=, or more succinctly \(\top\).
+      - If we fail, the parser returns a proof that there is /no/ way to parse
+        an =Int= from =bs=, contradicting our assumption.
+
+* Lemmas
+
+  The proof effort makes use of several lemmas concerning the
+  specification[fn::These may not need to be mentioned in the paper, but I will
+  describe them for the sake of completeness], which on their own may be seen
+  as a minor contribution about the properties of the X.690 and X.509 languages.
+
+  
+  - =NonNesting= (should be: =Unambiguous=)
+
+    The property that there is only one way to parse a structure =A= from a
+    given byte string
+
+    #+begin_example
+NonNesting : (A : List Dig → Set) → Set
+NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+               → A xs₁ → A xs₂ → xs₁ ≡ xs₂
+    #+end_example
+
+    In particular, it is relatively easy to show that TLV structures are
+    unambiguous, because the length of the content is encoded in the byte string
+    itself.
+
+  - =Unambiguous= (should be: =Unique=)
+
+    Byte strings uniquely determine the fields of the structure.
+
+    #+begin_example
+Unambiguous : (A : List Dig → Set) → Set
+Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
+    #+end_example
+
+  - =NoConfusion=
+
+    It is not possible to confuse the structure =A= for the structure =B= when
+    parsing a byte string; put another way, it is not possible to both be able
+    to parse an =A= and a =B= from the same byte string. This is needed when e.g.
+    some fields are optional.
+
+    #+begin_example
+NoConfusion : (A B : List Dig → Set) → Set
+NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+                  → (A xs₁ → ¬ B xs₂)
+    #+end_example
+
+** Parser Combinators
+
+   At present, Aeres is intended to be used as a stand-alone application for
+   differential testing of X.509 parser implementations.
+   However, the development contains several generic parser combinators that
+   could be packaged into their own library for sound and complete parsing of
+   arbitrary languages.
+
+   For example, here is the type of a parser combinator which takes a parser for
+   =A= and returns a parser for =A= in which the length of the byte string read
+   is exactly =n=
+
+   #+begin_example
+ExactLength : (@erased A : List Dig → Set) → ℕ → @erased List Dig → Set
+ExactLength A n xs = A xs × Erased (length xs ≤ n)
+
+parseExactLength : {@erased A : List Dig → Set} → @erased NonNesting A →
+                   Parser Dec A →
+                   ∀ n → Parser Dec (ExactLength A n)
+   #+end_example
+
+   where =Erased= is a record containing a single field of the given type,
+   erased at run time.
+   #+begin_example
+record Erased (@erased A : Set) : Set where
+  constructor mkErased
+  field
+    @erased x : A
+   #+end_example
+
+   Here, we require as an assumption that =A= is =NonNesting= (that is, has no
+   left recursion).
+   If we did not have this, then there may be multiple ways to parse =A= from a
+   given byte string.
+   If the given parser succeeds but returns a =A= built from a prefix that is
+   not the specified length, we would not be able to conclude that there is *no*
+   way to parse =A= from that byte string such that we consume exactly =n= bytes.
+   
+#  LocalWords:  notational Agda Agda's unerased TLV Aeres DER Combinators
+#  LocalWords:  combinator combinators

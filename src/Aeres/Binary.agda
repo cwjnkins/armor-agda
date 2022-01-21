@@ -48,8 +48,9 @@ private
   test₂ = refl
 
 module Base256 where
-  Byte = Binary 8
-  Dig  = Fin (2 ^ 8)
+  Byte  = Binary 8
+  Dig   = Fin (2 ^ 8)
+  UInt8 = Dig
 
   twosComplement : List Dig → ℤ
   twosComplement xs = go (reverse xs) 0 0

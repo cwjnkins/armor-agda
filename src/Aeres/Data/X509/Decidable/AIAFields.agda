@@ -6,7 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.Seq
+open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -28,9 +28,9 @@ module parseAIAFields where
 
   parseAccessMethod : Parser Dig (Logging ∘ Dec) X509.AccessMethod
   runParser parseAccessMethod xs = do
-    no ¬parse₁ ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatched CA Issuer ID") X509.ACMOID.CAISSUERS) xs  
+    no ¬parse₁ ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatched CA Issuer ID") X509.ACMOID.CAISSUERS) xs
       where yes x → return (yes (mapSuccess _ (λ {xs} eq → X509.caissid {xs} eq) x) )
-    no ¬parse₂ ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatched OCSP ID") X509.ACMOID.OCSP) xs 
+    no ¬parse₂ ← runParser (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatched OCSP ID") X509.ACMOID.OCSP) xs
       where yes x → return (yes (mapSuccess _ (λ {xs} eq → X509.ocspid {xs} eq) x))
     return ∘ no $ λ where
       (success prefix read read≡ (X509.caissid x) suffix ps≡) → contradiction (success _ _ read≡ x _ ps≡) ¬parse₁
@@ -45,10 +45,9 @@ module parseAIAFields where
 
   parseAIAFields : Parser Dig (Logging ∘ Dec) X509.AIAFields
   parseAIAFields = parseTLV _ "AIA Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-                     (parseSeq "AIA Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseAccessDesc) )
+                     (parseNonEmptySeq "AIA fields elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseAccessDesc))
 
 open parseAIAFields public using (parseAIAFields)
-
 
 private
   module Test where
