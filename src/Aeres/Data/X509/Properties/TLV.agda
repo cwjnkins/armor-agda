@@ -72,3 +72,8 @@ unambiguous{t}{A} ua (Generic.mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs�
 
   @0 v≡ : v₁ ≡ v₂
   v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
+
+
+postulate
+  instance
+    EqTLV : ∀ {A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (Generic.TLV t A)
