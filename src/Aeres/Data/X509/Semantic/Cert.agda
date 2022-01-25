@@ -24,3 +24,15 @@ scp2 c
   with v ≟ ℤ.+ 2
 ... | yes v≡ = yes (λ _ → v≡)
 ... | no ¬v≡ = no (λ abs → contradiction (abs tt) ¬v≡)
+
+SCP4 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP4 c = ℤ.+ 0  ℤ.<  X509.Cert.getSerial c
+
+scp4 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP4 c)
+scp4 c = (ℤ.+ 0  ℤ.<?  X509.Cert.getSerial c)
+
+
+decOIDSub : Decidable-≋ Generic.OIDSub
+decOIDSub a₁ a₂ = {!!}
+
+

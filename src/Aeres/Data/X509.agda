@@ -955,6 +955,9 @@ module X509 where
     getVersion =
       elimOption{X = const ℤ} (ℤ.+ 0) (λ v → Version.getVal v) version
 
+    getSerial : ℤ
+    getSerial = Generic.Int.getVal serial
+
   TBSCert : (@0 _ : List Dig) → Set
   TBSCert xs = Generic.TLV Tag.Sequence TBSCertFields xs
 
@@ -972,6 +975,9 @@ module X509 where
     getVersion : ℤ
     getVersion = TBSCertFields.getVersion (Generic.TLV.val tbs)
 
+    getSerial : ℤ
+    getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
+
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
 
@@ -982,6 +988,9 @@ module X509 where
     module _ {@0 bs} (c : Cert bs) where
       getVersion : ℤ
       getVersion = CertFields.getVersion (Generic.TLV.val c)
+
+      getSerial : ℤ
+      getSerial = CertFields.getSerial (Generic.TLV.val c)
 
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)
