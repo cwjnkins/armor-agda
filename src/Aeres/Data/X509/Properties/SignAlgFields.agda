@@ -30,3 +30,6 @@ unambiguous =
       λ where (mk×ₚ _ () refl) refl)
 
 
+postulate
+  instance
+    SignAlgFieldsEq : Eq≋ X509.SignAlgFields

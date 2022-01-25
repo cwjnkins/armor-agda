@@ -505,8 +505,22 @@ module X509 where
 --      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
       @0 bs≡  : bs ≡ o ++ p
 
-  SignAlg : (@0 _ : List Dig) → Set
-  SignAlg xs = Generic.TLV Tag.Sequence SignAlgFields xs
+  module SignAlg where
+    SignAlg : (@0 _ : List Dig) → Set
+    SignAlg xs = Generic.TLV Tag.Sequence SignAlgFields xs
+
+    -- getSignOID : ∀ {@0 bs} → SignAlg bs → List Dig 
+    -- getSignOID x = SignAlgFields.o (Generic.TLV.val x)
+    -- getParam : ∀ {@0 bs} → SignAlg bs → List Dig 
+    -- getParam x = SignAlgFields.p (Generic.TLV.val x)
+
+    getSignOID : ∀ {@0 bs} → SignAlg bs → Exists─ (List Dig) Generic.OID
+    getSignOID x = _ , (SignAlgFields.signOID (Generic.TLV.val x))
+
+    getParam :  ∀ {@0 bs} → SignAlg bs → Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+    getParam x = _ , (SignAlgFields.param (Generic.TLV.val x))
+
+  open SignAlg public using (SignAlg)
 
  --------------- RDNSeq -------------------------------------
 
@@ -955,6 +969,14 @@ module X509 where
     getVersion =
       elimOption{X = const ℤ} (ℤ.+ 0) (λ v → Version.getVal v) version
 
+    getSerial : ℤ
+    getSerial = Generic.Int.getVal serial
+
+    getSignAlg : Exists─ (List Dig) SignAlg
+    getSignAlg = _ , signAlg
+    -- getSignAlgParam : Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+    -- getSignAlgParam = SignAlg.getParam signAlg
+
   TBSCert : (@0 _ : List Dig) → Set
   TBSCert xs = Generic.TLV Tag.Sequence TBSCertFields xs
 
@@ -972,8 +994,21 @@ module X509 where
     getVersion : ℤ
     getVersion = TBSCertFields.getVersion (Generic.TLV.val tbs)
 
+    getSerial : ℤ
+    getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
+
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
+
+    getTBSCertSignAlg : Exists─ (List Dig) SignAlg
+    getTBSCertSignAlg = TBSCertFields.getSignAlg (Generic.TLV.val tbs)
+    -- getTBSCertSignAlgParam : Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+    -- getTBSCertSignAlgParam = TBSCertFields.getSignAlgParam (Generic.TLV.val tbs)
+
+    getCertSignAlg : Exists─ (List Dig) SignAlg
+    getCertSignAlg =  _ , signAlg
+    -- getCertSignAlgParam : Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+    -- getCertSignAlgParam = SignAlg.getParam signAlg
 
   module Cert where
     Cert : (@0 _ : List Dig) → Set
@@ -983,6 +1018,19 @@ module X509 where
       getVersion : ℤ
       getVersion = CertFields.getVersion (Generic.TLV.val c)
 
+      getSerial : ℤ
+      getSerial = CertFields.getSerial (Generic.TLV.val c)
+
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)
+
+      getTBSCertSignAlg : Exists─ (List Dig) SignAlg
+      getTBSCertSignAlg = CertFields.getTBSCertSignAlg (Generic.TLV.val c)
+      -- getTBSCertSignAlgParam : Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+      -- getTBSCertSignAlgParam = CertFields.getTBSCertSignAlgParam (Generic.TLV.val c)
+
+      getCertSignAlg : Exists─ (List Dig) SignAlg
+      getCertSignAlg = CertFields.getCertSignAlg (Generic.TLV.val c)
+      -- getCertSignAlgParam : Exists─ (List Dig) (Option (NotEmpty Generic.OctetstringValue))
+      -- getCertSignAlgParam = CertFields.getCertSignAlgParam (Generic.TLV.val c)
   open Cert public using (Cert)
