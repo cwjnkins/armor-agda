@@ -6,7 +6,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Grammar.Definitions (Σ : Set) where
 
 infix 4 _≋_
-record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
+record _≋_ {@0 A : @0 List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
   constructor mk≋
   field
     @0 bs≡ : bs₁ ≡ bs₂
@@ -20,6 +20,13 @@ instance
 
 Decidable-≋ : ((@0 _ : List Σ) → Set) → Set
 Decidable-≋ A = ∀ {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) → Dec (_≋_{A} a₁ a₂)
+
+record Eq≋ (@0 A : @0 List Σ → Set) : Set where
+  infix 4 _≋?_
+  field
+    _≋?_ : Decidable-≋ A
+
+open Eq≋ ⦃ ... ⦄ public
 
 -- TODO: rename to "Unique"
 Unambiguous : (A : List Σ → Set) → Set
