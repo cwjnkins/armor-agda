@@ -3,8 +3,11 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.OID              as OIDProps
+import      Aeres.Data.X509.Properties.OIDSub           as OIDSubProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.TLV              as TLVProps
+import      Aeres.Data.X509.Properties.SequenceOf       as SeqProps
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -12,7 +15,7 @@ open import Data.Nat.Properties
 module Aeres.Data.X509.Properties.SignAlgFields where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Properties  Dig
 
 iso : Iso (&ₚ Generic.OID (Option (NotEmpty Generic.OctetstringValue))) X509.SignAlgFields
@@ -30,6 +33,20 @@ unambiguous =
       λ where (mk×ₚ _ () refl) refl)
 
 
-postulate
-  instance
-    SignAlgFieldsEq : Eq≋ X509.SignAlgFields
+instance
+  SignAlgFieldsEq : Eq≋ X509.SignAlgFields
+  Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂
+    with X509.SignAlgFields.signOID sf₁ ≋? X509.SignAlgFields.signOID sf₂
+    |    X509.SignAlgFields.param   sf₁ ≋? X509.SignAlgFields.param   sf₂
+  ... | no ¬oid₁≋oid₂ | _ = no λ where
+    ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
+  ... | yes ≋-refl | no ¬param₁≋param₂ = no λ where
+    ≋-refl → contradiction ≋-refl ¬param₁≋param₂
+  ... | yes ≋-refl | yes ≋-refl
+    with ‼ bs₁≡bs₂
+    where
+    @0 bs₁≡bs₂ : bs₁ ≡ bs₂
+    bs₁≡bs₂ = trans (X509.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlgFields.bs≡ sf₂))
+  ... | refl
+    with ‼ ≡-unique (X509.SignAlgFields.bs≡ sf₁) (X509.SignAlgFields.bs≡ sf₂)
+  ... | refl = yes ≋-refl

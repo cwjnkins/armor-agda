@@ -203,7 +203,7 @@ open Length public
 -------------------------------------------Generic---------------------------------------
 module Generic where
 
-  record TLV (t : Dig) (A : List Dig → Set) (@0 bs : List Dig) : Set where
+  record TLV (t : Dig) (@0 A : List Dig → Set) (@0 bs : List Dig) : Set where
     constructor mkTLV
     field
       @0 {l v} : List Dig

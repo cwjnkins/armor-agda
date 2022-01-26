@@ -103,6 +103,17 @@ mapOptionK : ∀ {@0 A B xs} → (A xs → B xs) → Option A xs → Option B xs
 mapOptionK f none = none
 mapOptionK f (some x) = some (f x)
 
+instance
+  OptionEq : ∀ {A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (Option A)
+  Eq≋._≋?_ OptionEq {.[]} {.[]} none none = yes ≋-refl
+  Eq≋._≋?_ OptionEq {.[]} {bs₂} none (some x) = no (λ where (mk≋ refl ()))
+  Eq≋._≋?_ OptionEq {bs₁} {.[]} (some x) none = no λ where (mk≋ refl ())
+  Eq≋._≋?_ OptionEq {bs₁} {bs₂} (some v₁) (some v₂) =
+    case v₁ ≋? v₂ of λ where
+      (yes ≋-refl) → yes ≋-refl
+      (no  ¬v₁≋v₂) → no λ where
+        ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
@@ -116,8 +127,12 @@ _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 -- TODO: rename
-NotEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
+NotEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
 NotEmpty A = A ×ₚ ((_≥ 1) ∘ length)
+
+postulate
+  instance
+    NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)
 
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
 noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y

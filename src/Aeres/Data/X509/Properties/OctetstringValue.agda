@@ -12,3 +12,7 @@ open import Aeres.Grammar.Definitions Dig
 
 @0 unambiguous : Unambiguous Generic.OctetstringValue
 unambiguous (singleton x refl) (singleton .x refl) = refl
+
+postulate
+  instance
+    OctetStringValueEq≋ : Eq≋ Generic.OctetstringValue

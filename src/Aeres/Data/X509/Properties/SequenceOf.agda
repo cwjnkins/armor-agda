@@ -101,4 +101,8 @@ module BoundedSequenceOf where
     unambiguousΣₚ (SequenceOf.unambiguous uaₐ naₐ nnₐ)
       λ {xs} a → ≤-irrelevant
 
+  postulate
+    instance
+      BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (Generic.BoundedSequenceOf A n)
+
 open SequenceOf public
