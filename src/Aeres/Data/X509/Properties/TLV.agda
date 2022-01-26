@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+import      Aeres.Grammar.Definitions
 import Aeres.Data.X509.Properties.Length as LengthProps
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -11,8 +12,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.TLV where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
-
+open Aeres.Grammar.Definitions Dig
 
 nonempty : ∀ {t} {@0 A} → NonEmpty (Generic.TLV t A)
 nonempty (Generic.mkTLV len val len≡ ()) refl
@@ -74,6 +74,22 @@ unambiguous{t}{A} ua (Generic.mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs�
   v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
 
 
-postulate
-  instance
-    EqTLV : ∀ {A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (Generic.TLV t A)
+instance
+  EqTLV : ∀ {A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (Generic.TLV t A)
+  Eq≋._≋?_ (EqTLV{t = t}) {bs₁} {bs₂} t₁ t₂
+    with Generic.TLV.len t₁ ≋? Generic.TLV.len t₂
+    |    Generic.TLV.val t₁ ≋? Generic.TLV.val t₂
+  ... | no ¬len₁≋len₂ | _ = no λ where
+    (mk≋ refl refl) → contradiction ≋-refl ¬len₁≋len₂
+  ... | yes ≋-refl | no ¬v₁≋v₂ = no λ where
+    ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+  ... | yes ≋-refl | yes ≋-refl
+    with ‼ ≡-unique (Generic.TLV.len≡ t₁) (Generic.TLV.len≡ t₂)
+  ... | refl
+    with ‼ bs₁≡bs₂
+    where
+    @0 bs₁≡bs₂ : bs₁ ≡ bs₂
+    bs₁≡bs₂ = trans (Generic.TLV.bs≡ t₁) (sym (Generic.TLV.bs≡ t₂))
+  ... | refl
+    with ‼ ≡-unique (Generic.TLV.bs≡ t₁) (Generic.TLV.bs≡ t₂)
+  ... | refl = yes ≋-refl
