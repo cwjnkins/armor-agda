@@ -66,3 +66,33 @@ SCP5 c = 0 < X509.Cert.getIssuerLen c
 scp5 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP5 c)
 scp5 c = 0 <? X509.Cert.getIssuerLen c 
 
+
+-- Unique Identifiers fields MUST only appear if the Version is 2 or 3.
+SCP7₁ : ∀ {@0 bs} → X509.Cert bs → Set
+SCP7₁ c = T (isSome (proj₂ (X509.Cert.getSubUID c))) → (X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)
+
+SCP7₂ : ∀ {@0 bs} → X509.Cert bs → Set
+SCP7₂ c = T (isSome (proj₂ (X509.Cert.getIssUID c))) → (X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)
+
+scp7₁ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₁ c)
+scp7₁ c
+  with isSome (proj₂ (X509.Cert.getSubUID c))
+... | false = yes (λ ())
+... | true
+  with X509.Cert.getVersion c
+... | v
+  with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
+... | yes v≡ = yes (λ _ → v≡)
+... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
+
+scp7₂ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₂ c)
+scp7₂ c
+  with isSome (proj₂ (X509.Cert.getIssUID c))
+... | false = yes (λ ())
+... | true
+  with X509.Cert.getVersion c
+... | v
+  with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
+... | yes v≡ = yes (λ _ → v≡)
+... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
+ 

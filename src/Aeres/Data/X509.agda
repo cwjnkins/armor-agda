@@ -934,10 +934,9 @@ module X509 where
 
   ExtensionsSeq : (@0 _ : List Dig) → Set
   ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf Extension) xs
-
+  
   Extensions : (@0 _ : List Dig) → Set
   Extensions xs = Generic.TLV Tag.A3  ExtensionsSeq xs
-
 -----------------------------------------------------------------------------------------------
 
   record TBSCertFields (@0 bs : List Dig) : Set where
@@ -966,6 +965,9 @@ module X509 where
     getIssuerLen : ℕ
     getIssuerLen = RDNSeq.getRDNSeqLen issuer
 
+    getSubjectLen :  ℕ
+    getSubjectLen = RDNSeq.getRDNSeqLen subject
+
     getSignAlg : Exists─ (List Dig) SignAlg
     getSignAlg = _ , signAlg
  
@@ -992,6 +994,15 @@ module X509 where
     getIssuerLen :  ℕ
     getIssuerLen = TBSCertFields.getIssuerLen (Generic.TLV.val tbs)
 
+    getSubjectLen :  ℕ
+    getSubjectLen = TBSCertFields.getSubjectLen (Generic.TLV.val tbs)
+
+    getIssUID : Exists─ (List Dig) (Option IssUID)
+    getIssUID = _ , (TBSCertFields.issuerUID (Generic.TLV.val tbs))
+
+    getSubUID : Exists─ (List Dig) (Option SubUID)
+    getSubUID = _ , (TBSCertFields.subjectUID (Generic.TLV.val tbs))
+
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
 
@@ -1000,6 +1011,7 @@ module X509 where
  
     getCertSignAlg : Exists─ (List Dig) SignAlg
     getCertSignAlg =  _ , signAlg
+
 
   module Cert where
     Cert : (@0 _ : List Dig) → Set
@@ -1015,6 +1027,15 @@ module X509 where
       getIssuerLen :  ℕ
       getIssuerLen = CertFields.getIssuerLen (Generic.TLV.val c)
 
+      getSubjectLen :  ℕ
+      getSubjectLen = CertFields.getSubjectLen (Generic.TLV.val c)
+
+      getIssUID : Exists─ (List Dig) (Option IssUID)
+      getIssUID = CertFields.getIssUID (Generic.TLV.val c)
+
+      getSubUID : Exists─ (List Dig) (Option SubUID)
+      getSubUID = CertFields.getSubUID (Generic.TLV.val c)
+      
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)
 
@@ -1023,4 +1044,5 @@ module X509 where
 
       getCertSignAlg : Exists─ (List Dig) SignAlg
       getCertSignAlg = CertFields.getCertSignAlg (Generic.TLV.val c)
+
   open Cert public using (Cert)
