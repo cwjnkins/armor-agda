@@ -561,8 +561,13 @@ module X509 where
   RDN : (@0 _ : List Dig) → Set
   RDN = Generic.TLV Tag.Sett RDNElems
 
-  RDNSeq : (@0 _ : List Dig) → Set
-  RDNSeq = Generic.Seq RDN
+  module RDNSeq where
+    RDNSeq : (@0 _ : List Dig) → Set
+    RDNSeq = Generic.Seq RDN
+
+    getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
+    getRDNSeqLen (Generic.mkTLV len val len≡ bs≡) = Generic.lengthSequence val
+  open RDNSeq public using (RDNSeq)
 
 ----------------------- Generalnames --------------------
 
@@ -958,8 +963,8 @@ module X509 where
     getSerial : ℤ
     getSerial = Generic.Int.getVal serial
 
-    getIssuer : Exists─ (List Dig) RDNSeq
-    getIssuer = _ , issuer
+    getIssuerLen : ℕ
+    getIssuerLen = RDNSeq.getRDNSeqLen issuer
 
     getSignAlg : Exists─ (List Dig) SignAlg
     getSignAlg = _ , signAlg
@@ -984,8 +989,8 @@ module X509 where
     getSerial : ℤ
     getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
 
-    getIssuer : Exists─ (List Dig) RDNSeq
-    getIssuer = TBSCertFields.getIssuer (Generic.TLV.val tbs)
+    getIssuerLen :  ℕ
+    getIssuerLen = TBSCertFields.getIssuerLen (Generic.TLV.val tbs)
 
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
@@ -1007,8 +1012,8 @@ module X509 where
       getSerial : ℤ
       getSerial = CertFields.getSerial (Generic.TLV.val c)
 
-      getIssuer : Exists─ (List Dig) RDNSeq
-      getIssuer = CertFields.getIssuer (Generic.TLV.val c)
+      getIssuerLen :  ℕ
+      getIssuerLen = CertFields.getIssuerLen (Generic.TLV.val c)
 
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)

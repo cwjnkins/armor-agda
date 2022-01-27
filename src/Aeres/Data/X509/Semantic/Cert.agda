@@ -60,16 +60,9 @@ scp4 c = (ℤ.+ 0 ℤ.<? X509.Cert.getSerial c)
 
 
 -- The Issuer field MUST contain a non-empty distinguished name (DN).
--- SCP5 : ∀ {@0 bs} → X509.Cert bs → Set
--- SCP5 c = T (proj₂ (X509.Cert.getIssuer c))
+SCP5 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP5 c = 0 < X509.Cert.getIssuerLen c 
 
--- scp2 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP2 c)
--- scp2 c
---   with isSome (proj₂ (X509.Cert.getExtensions c))
--- ... | false = yes (λ ())
--- ... | true
---   with X509.Cert.getVersion c
--- ... | v
---   with v ≟ ℤ.+ 2
--- ... | yes v≡ = yes (λ _ → v≡)
--- ... | no ¬v≡ = no (λ abs → contradiction (abs tt) ¬v≡)
+scp5 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP5 c)
+scp5 c = 0 <? X509.Cert.getIssuerLen c 
+
