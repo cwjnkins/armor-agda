@@ -63,6 +63,29 @@ module SequenceOf where
     bs₂≡ : bs₁₂ ≡ bs₂₂
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
+  instance
+    SequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (Generic.SequenceOf A)
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} Generic.nil Generic.nil = yes ≋-refl
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} Generic.nil (Generic.cons x) = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (Generic.cons x) Generic.nil = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {bs₂} (Generic.cons v₁) (Generic.cons v₂)
+      with Generic.SequenceOfFields.h v₁ ≋? Generic.SequenceOfFields.h v₂
+    ... | yes ≋-refl
+      with Eq≋._≋?_ SequenceOfEq≋ (Generic.SequenceOfFields.t v₁) (Generic.SequenceOfFields.t v₂)
+    ... | yes ≋-refl
+      with ‼ Generic.SequenceOfFields.bs≡ v₁
+    ... | refl =
+      yes (mk≋ (sym $ Generic.SequenceOfFields.bs≡ v₂)
+            (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ Generic.SequenceOfFields.bs₁ v₁ ++ _) →
+              subst _ (sym bs₂≡) (Generic.cons (Generic.mkSequenceOf (Generic.SequenceOfFields.h v₂) (Generic.SequenceOfFields.t v₂) bs≡)) ≡ Generic.cons v₂)
+              (λ bs₂≡ → subst (λ x → Generic.cons (Generic.mkSequenceOf (Generic.SequenceOfFields.h v₂) (Generic.SequenceOfFields.t v₂) x) ≡ Generic.cons v₂)
+                (‼ (≡-unique (Generic.SequenceOfFields.bs≡ v₂) bs₂≡)) refl)
+              (Generic.SequenceOfFields.bs≡ v₂) (Generic.SequenceOfFields.bs≡ v₁)))
+    Eq≋._≋?_ SequenceOfEq≋ (Generic.cons v₁) (Generic.cons v₂) | yes ≋-refl | no ¬v₁≋v₂ = no λ where
+      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+    Eq≋._≋?_ SequenceOfEq≋ (Generic.cons v₁) (Generic.cons v₂) | no ¬v₁≋v₂ = no λ where
+      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+
   @0 sameLength : ∀ {@0 A bs} → NonNesting A → NonEmpty A → (s₁ s₂ : Generic.SequenceOf A bs) → Generic.lengthSequence s₁ ≡ Generic.lengthSequence s₂
   sameLength nn ne Generic.nil Generic.nil = refl
   sameLength nn ne Generic.nil (Generic.cons (Generic.mkSequenceOf h t bs≡)) =
@@ -101,8 +124,17 @@ module BoundedSequenceOf where
     unambiguousΣₚ (SequenceOf.unambiguous uaₐ naₐ nnₐ)
       λ {xs} a → ≤-irrelevant
 
-  postulate
-    instance
-      BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (Generic.BoundedSequenceOf A n)
+  instance
+    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (Generic.BoundedSequenceOf A n)
+    Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
+      with fstₚ v₁ ≋? fstₚ v₂
+    ... | yes ≋-refl
+      with ‼ ≤-irrelevant (sndₚ v₁) (sndₚ v₂)
+    ... | refl
+      with ‼ Σₚ.bs≡ v₁
+      |    ‼ Σₚ.bs≡ v₂
+    ... | refl | refl = yes (mk≋ refl (subst (λ x → mk×ₚ _ _ x ≡ v₂) (≡-unique (Σₚ.bs≡ v₂) (Σₚ.bs≡ v₁)) refl))
+    Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
+      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
 
 open SequenceOf public
