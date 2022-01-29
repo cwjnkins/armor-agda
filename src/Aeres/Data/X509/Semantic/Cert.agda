@@ -60,11 +60,34 @@ scp4 c = (ℤ.+ 0 ℤ.<? X509.Cert.getSerial c)
 
 
 -- The Issuer field MUST contain a non-empty distinguished name (DN).
+-- TODO : fix the parser to enforce set length to minimum 1
 SCP5 : ∀ {@0 bs} → X509.Cert bs → Set
 SCP5 c = 0 < X509.Cert.getIssuerLen c 
 
 scp5 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP5 c)
 scp5 c = 0 <? X509.Cert.getIssuerLen c 
+
+
+-- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
+isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
+isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields Aeres.Grammar.Definitions.none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields (Aeres.Grammar.Definitions.some (Generic.mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+
+
+-- If the Subject is a CA (e.g., the Basic Constraints extension, is present and the value of CA is TRUE),
+-- then the Subject field MUST be populated with a non-empty distinguished name.
+SCP6 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP6 c = T (isCA (X509.Cert.getBC c)) → (0 < X509.Cert.getSubjectLen c)
+
+scp6 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP6 c)
+scp6 c
+  with isCA (X509.Cert.getBC c)
+... | false = yes (λ ())
+... | true
+  with 0 <? X509.Cert.getSubjectLen c
+... | no ¬p = no λ x → contradiction (x tt) ¬p
+... | yes p = yes (λ _ → p)
 
 
 -- Unique Identifiers fields MUST only appear if the Version is 2 or 3.
