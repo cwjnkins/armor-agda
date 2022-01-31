@@ -12,6 +12,34 @@ open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
 
+
+------- helper functions -----
+-- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
+isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
+isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields Aeres.Grammar.Definitions.none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields (Aeres.Grammar.Definitions.some (Generic.mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+
+
+-- returns BCPathLen if exists
+getBCPathLen : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List Dig) (Option Generic.Int)
+getBCPathLen (─ .[] , Aeres.Grammar.Definitions.none) = _ , none
+getBCPathLen (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
+
+
+-- isCRLSign present in KU extension ? bit 6 == true ?
+isCRLIssuer : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isCRLIssuer (─ .[] , Aeres.Grammar.Definitions.none) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₆
+
+
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
 SCP1 : ∀ {@0 bs} → X509.Cert bs → Set
@@ -68,13 +96,6 @@ scp5 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP5 c)
 scp5 c = 0 <? X509.Cert.getIssuerLen c 
 
 
--- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
-isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
-isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
-isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields Aeres.Grammar.Definitions.none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields (Aeres.Grammar.Definitions.some (Generic.mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
-
-
 -- If the Subject is a CA (e.g., the Basic Constraints extension, is present and the value of CA is TRUE),
 -- then the Subject field MUST be populated with a non-empty distinguished name.
 SCP6 : ∀ {@0 bs} → X509.Cert bs → Set
@@ -118,4 +139,40 @@ scp7₂ c
   with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
 ... | yes v≡ = yes (λ _ → v≡)
 ... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
- 
+
+
+-- Where it appears, the PathLenConstraint field MUST be greater than or equal to zero.
+SCP8 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP8 c
+  with getBCPathLen (X509.Cert.getBC c)
+... | ─ .[] , Aeres.Grammar.Definitions.none = (T true)
+... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤ Generic.Int.getVal x)
+
+scp8 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP8 c)
+scp8 c
+  with getBCPathLen (X509.Cert.getBC c)
+... | ─ .[] , Aeres.Grammar.Definitions.none = yes tt
+... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤? Generic.Int.getVal x)
+
+
+-- if the Subject is a CRL issuer (e.g., the Key Usage extension, is present and the value of CRLSign is TRUE),
+-- then the Subject field MUST be populated with a non-empty distinguished name.
+SCP9 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP9 c = T (isCRLIssuer (X509.Cert.getKU c)) → (0 < X509.Cert.getSubjectLen c)
+
+scp9 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP9 c)
+scp9 c
+  with (isCRLIssuer (X509.Cert.getKU c))
+... | false = yes (λ ())
+... | true
+  with (0 <? X509.Cert.getSubjectLen c)
+... | no ¬p = no λ x → contradiction (x tt) ¬p
+... | yes p = yes (λ x → p)
+
+
+-- When the Key Usage extension appears in a certificate, at least one of the bits MUST be set to 1
+-- SCP10 : ∀ {@0 bs} → X509.Cert bs → Set
+-- SCP10 c = {!!}
+
+-- scp10 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP10 c)
+-- scp10 c = {!!}
