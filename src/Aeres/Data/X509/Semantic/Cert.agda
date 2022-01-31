@@ -40,6 +40,12 @@ isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId
 isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₆
 
 
+-- get KU Bits in bool list
+getKUBits : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → List Bool
+getKUBits (─ .[] , Aeres.Grammar.Definitions.none) = []
+getKUBits (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
+
+
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
 SCP1 : ∀ {@0 bs} → X509.Cert bs → Set
@@ -170,9 +176,8 @@ scp9 c
 ... | yes p = yes (λ x → p)
 
 
--- When the Key Usage extension appears in a certificate, at least one of the bits MUST be set to 1
--- SCP10 : ∀ {@0 bs} → X509.Cert bs → Set
--- SCP10 c = {!!}
+SCP10 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP10 c = true ∈ getKUBits (X509.Cert.getKU c)
 
--- scp10 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP10 c)
--- scp10 c = {!!}
+scp10 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP10 c)
+scp10 c = true ∈? getKUBits (X509.Cert.getKU c)

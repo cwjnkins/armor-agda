@@ -305,6 +305,9 @@ instance
   ListEq : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → Eq (List A)
   Eq._≟_ ListEq = ≡-dec _≟_
 
+  BoolEq : Eq Bool
+  Eq._≟_ BoolEq = Data.Bool._≟_
+
 record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ
