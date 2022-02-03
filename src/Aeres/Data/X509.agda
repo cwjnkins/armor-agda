@@ -940,6 +940,11 @@ module X509 where
     getKU : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
     getKU (Generic.mkTLV len (kuextn x) len≡ bs≡) = _ , (some x)
     getKU (Generic.mkTLV len _ len≡ bs≡) = _ , none
+
+    getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+    getSAN (Generic.mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
+    getSAN (Generic.mkTLV len _ len≡ bs≡) = _ , none
+ 
   open Extension public using (Extension)
 
   module ExtensionsSeq where
@@ -963,6 +968,15 @@ module X509 where
       helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getKU h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
+
+    getSAN : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+    getSAN (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+      where
+      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+      helper Generic.nil = _ , none
+      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getSAN h) of λ where
+        (─ .[] , none) → helper t
+        y@(fst , some x) → y
   open ExtensionsSeq public using (ExtensionsSeq)
 
   module Extensions where
@@ -974,6 +988,9 @@ module X509 where
 
     getKU : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
     getKU (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getKU val
+
+    getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+    getSAN (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
   open Extensions public using (Extensions)
 
 -----------------------------------------------------------------------------------------------
@@ -1014,6 +1031,9 @@ module X509 where
 
     getKU : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
     getKU = elimOption (_ , none) (λ v → Extensions.getKU v) extensions
+
+    getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+    getSAN = elimOption (_ , none) (λ v → Extensions.getSAN v) extensions
  
   TBSCert : (@0 _ : List Dig) → Set
   TBSCert xs = Generic.TLV Tag.Sequence TBSCertFields xs
@@ -1062,6 +1082,9 @@ module X509 where
     getKU : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
     getKU = TBSCertFields.getKU (Generic.TLV.val tbs)
 
+    getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+    getSAN = TBSCertFields.getSAN (Generic.TLV.val tbs)
+
 
   module Cert where
     Cert : (@0 _ : List Dig) → Set
@@ -1100,5 +1123,8 @@ module X509 where
 
       getKU : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
       getKU = CertFields.getKU (Generic.TLV.val c)
+
+      getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+      getSAN = CertFields.getSAN (Generic.TLV.val c)
 
   open Cert public using (Cert)

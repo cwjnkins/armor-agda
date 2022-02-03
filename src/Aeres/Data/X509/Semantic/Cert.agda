@@ -40,10 +40,41 @@ isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId
 isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₆
 
 
+-- isKeyCertSign present in KU extension ? bit 5 == true ?
+isKeyCertSignPresent : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isKeyCertSignPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₅
+
+
 -- get KU Bits in bool list
 getKUBits : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → List Bool
 getKUBits (─ .[] , Aeres.Grammar.Definitions.none) = []
 getKUBits (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
+
+
+-- is SAN extension critical ? 
+isSANCritical : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
+isSANCritical (─ .[] , Aeres.Grammar.Definitions.none) = false
+isSANCritical (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡)) = false
+isSANCritical (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (Generic.mkTLV len (Generic.mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
+
+
+-- get SAN length
+getSANLength : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → ℕ
+getSANLength (─ .[] , Aeres.Grammar.Definitions.none) = 0
+getSANLength (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = Generic.lengthSequence fstₚ₁
+
+
+-- is SAN present in Cert ?
+isSANPresent : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
+isSANPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
+isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
@@ -176,8 +207,67 @@ scp9 c
 ... | yes p = yes (λ x → p)
 
 
+-- When the Key Usage extension appears in a certificate, at least one of the bits MUST be set to 1.
 SCP10 : ∀ {@0 bs} → X509.Cert bs → Set
 SCP10 c = true ∈ getKUBits (X509.Cert.getKU c)
 
 scp10 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP10 c)
 scp10 c = true ∈? getKUBits (X509.Cert.getKU c)
+
+
+-- If subject naming information is present only in the Subject Alternative Name extension ,
+-- then the Subject name MUST be an empty sequence and the Subject Alternative Name extension MUST be critical.
+-- If the subject field contains an empty sequence, then the issuing CA MUST include a
+-- subjectAltName extension that is marked as critical.
+SCP11 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP11 c = (0 ≡ X509.Cert.getSubjectLen c) → T (isSANCritical (X509.Cert.getSAN c))
+
+scp11 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP11 c)
+scp11 c with (0 ≟ X509.Cert.getSubjectLen c)
+scp11 c    | no n with isSANCritical (X509.Cert.getSAN c)
+scp11 c    | no n    | false = yes n
+scp11 c    | no n    | true  = yes (λ x → tt)
+scp11 c    | yes y with isSANCritical (X509.Cert.getSAN c)
+scp11 c    | yes y   | false = no (λ x → contradiction y x)
+scp11 c    | yes y   | true  = yes (λ x → tt)
+
+
+-- If the Subject Alternative Name extension is present, the sequence MUST contain at least one entry.
+SCP12 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP12 c = T (isSANPresent (X509.Cert.getSAN c)) → (0 < getSANLength (X509.Cert.getSAN c))
+
+scp12 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP12 c)
+scp12 c
+  with isSANPresent (X509.Cert.getSAN c)
+... | false = yes (λ ())
+... | true
+  with 0 <? getSANLength (X509.Cert.getSAN c)
+... | yes y = yes (λ x → y)
+... | no n = no (λ x → contradiction (x tt) n)
+
+
+-- If the KeyCertSign bit is asserted, then the CA bit in the Basic Constraints extension MUST also be asserted.
+SCP13 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP13 c = T (isKeyCertSignPresent (X509.Cert.getKU c)) → T (isCA (X509.Cert.getBC c))
+
+scp13 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP13 c)
+scp13 c with isKeyCertSignPresent (X509.Cert.getKU c)
+scp13 c    | false with isCA (X509.Cert.getBC c)
+scp13 c    | false    | _ =  yes (λ ())
+scp13 c    | true with isCA (X509.Cert.getBC c)
+scp13 c    | true     | false = no (contradiction tt)
+scp13 c    | true     | true  = yes λ x → x
+
+
+-- A certificate-using system MUST reject the certificate if it encounters a critical Extension
+-- it does not recognize or a critical Extension that contains information that it cannot process.
+
+
+
+
+
+-- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
+-- either distributionPoint or CRLIssuer MUST be present.
+-- The certificate Validity period includes the current time.
+-- A certificate MUST NOT include more than one instance of a particular Extension.
+-- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
