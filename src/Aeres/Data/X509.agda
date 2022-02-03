@@ -944,6 +944,10 @@ module X509 where
     getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN (Generic.mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
     getSAN (Generic.mkTLV len _ len≡ bs≡) = _ , none
+
+    getCRLDIST : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len (crlextn x) len≡ bs≡) = _ , (some x)
+    getCRLDIST (Generic.mkTLV len _ len≡ bs≡) = _ , none
   open Extension public using (Extension)
 
   module ExtensionsSeq where
@@ -977,6 +981,15 @@ module X509 where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
+    getCRLDIST : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+      where
+      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+      helper Generic.nil = _ , none
+      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getCRLDIST h) of λ where
+        (─ .[] , none) → helper t
+        y@(fst , some x) → y
+
     getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List Dig) Extension)
     getExtensionsList (Generic.mkTLV len (mk×ₚ fstₚ₁ sndₚ₁ bs≡₁) len≡ bs≡) = helper fstₚ₁
       where
@@ -997,6 +1010,9 @@ module X509 where
 
     getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
+
+    getCRLDIST : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getCRLDIST val
 
     getExtensionsList : ∀ {@0 bs} → Extensions bs → List (Exists─ (List Dig) Extension)
     getExtensionsList (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val
@@ -1043,6 +1059,9 @@ module X509 where
 
     getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN = elimOption (_ , none) (λ v → Extensions.getSAN v) extensions
+
+    getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST = elimOption (_ , none) (λ v → Extensions.getCRLDIST v) extensions
 
     getExtensionsList : List (Exists─ (List Dig) Extension)
     getExtensionsList = elimOption [] (λ v → Extensions.getExtensionsList v) extensions
@@ -1094,6 +1113,9 @@ module X509 where
     getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN = TBSCertFields.getSAN (Generic.TLV.val tbs)
 
+    getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST = TBSCertFields.getCRLDIST (Generic.TLV.val tbs)
+
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
     
@@ -1138,6 +1160,9 @@ module X509 where
 
       getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
       getSAN = CertFields.getSAN (Generic.TLV.val c)
+
+      getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+      getCRLDIST = CertFields.getCRLDIST (Generic.TLV.val c)
 
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)

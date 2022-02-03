@@ -85,15 +85,18 @@ isUnkwnCriticalExtension (fst , Generic.mkTLV len _ len≡ bs≡) = false
 
 -- is any unknown extention critical from the list ?
 isAnyOtherExtnCritical : List (Exists─ (List Dig) X509.Extension) → Bool
-isAnyOtherExtnCritical x = helper₁ x
+isAnyOtherExtnCritical x = helper x
   where
   -- returns true only if at least one extension in the list is unknown and that extension has critical bit = true
-  helper₁ : List (Exists─ (List Dig) X509.Extension) → Bool
-  helper₁ [] = false
-  helper₁ (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
-    false → helper₁ x₁
+  helper : List (Exists─ (List Dig) X509.Extension) → Bool
+  helper [] = false
+  helper (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
+    false → helper x₁
     true → true
 
+-- checkCRLDist : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
+-- checkCRLDist (─ .[] , Aeres.Grammar.Definitions.none) = true
+-- checkCRLDist (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len₂ val len≡₂ bs≡₅) t bs≡₄)) sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = {!!}
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
@@ -294,5 +297,20 @@ scp15 c
 
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
--- The certificate Validity period includes the current time.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
+-- The certificate Validity period includes the current time
