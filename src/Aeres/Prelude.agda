@@ -37,8 +37,13 @@ import Data.Integer
 module ℤ = Data.Integer
 ℤ = ℤ.ℤ
 
-open import Data.List    public
-  hiding (_─_)
+module List where
+  open import Data.List    public
+    hiding (_─_)
+
+  open import Data.List.Relation.Unary.Unique.DecPropositional public
+    using (Unique ; unique?)
+open List public hiding (Unique ; unique? ; module List)
 
 open import Data.List.Properties public
 
@@ -288,6 +293,9 @@ _∈?_ = Data.List.Membership.DecPropositional._∈?_ _≟_
 
 _∉?_ : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → ∀ (x : A) xs → Dec (x ∉ xs)
 _∉?_ = Data.List.Membership.DecPropositional._∉?_ _≟_
+
+unique? : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → ∀ xs → Dec (List.Unique _≟_ xs)
+unique? = List.unique? _≟_
 
 instance
   ℕEq : Eq ℕ
