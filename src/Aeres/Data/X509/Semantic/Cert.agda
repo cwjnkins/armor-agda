@@ -77,6 +77,24 @@ isSANPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
 isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 
 
+-- returns true only if the extension is unknown and has critical bit = true
+isUnkwnCriticalExtension : Exists─ (List Dig) X509.Extension → Bool
+isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (Generic.mkTLV len₁ (Generic.mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , Generic.mkTLV len _ len≡ bs≡) = false
+
+-- is any unknown extention critical from the list ?
+isAnyOtherExtnCritical : List (Exists─ (List Dig) X509.Extension) → Bool
+isAnyOtherExtnCritical x = helper₁ x
+  where
+  -- returns true only if at least one extension in the list is unknown and that extension has critical bit = true
+  helper₁ : List (Exists─ (List Dig) X509.Extension) → Bool
+  helper₁ [] = false
+  helper₁ (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
+    false → helper₁ x₁
+    true → true
+
+
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
 SCP1 : ∀ {@0 bs} → X509.Cert bs → Set
@@ -259,15 +277,22 @@ scp13 c    | true     | false = no (contradiction tt)
 scp13 c    | true     | true  = yes λ x → x
 
 
+-- A certificate MUST NOT include more than one instance of a particular Extension.
+
+
 -- A certificate-using system MUST reject the certificate if it encounters a critical Extension
 -- it does not recognize or a critical Extension that contains information that it cannot process.
+SCP15 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP15 c = T (isAnyOtherExtnCritical (X509.Cert.getExtensionsList c)) → T false
 
-
-
+scp15 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP15 c)
+scp15 c
+  with isAnyOtherExtnCritical (X509.Cert.getExtensionsList c)
+... | false = yes (λ ())
+... | true = no (contradiction tt)
 
 
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
 -- The certificate Validity period includes the current time.
--- A certificate MUST NOT include more than one instance of a particular Extension.
 -- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
