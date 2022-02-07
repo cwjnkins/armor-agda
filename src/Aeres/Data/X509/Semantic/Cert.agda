@@ -77,6 +77,21 @@ isSANPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
 isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 
 
+-- helper for SCP17 :  While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
+-- either distributionPoint or CRLIssuer MUST be present.
+checkCRLDistStruct : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
+checkCRLDistStruct (─ .[] , Aeres.Grammar.Definitions.none) = true
+checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
+  where
+  helper : ∀ {@0 bs} → Generic.SequenceOf X509.DistPoint bs → Bool
+  helper Generic.nil = true
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+
+
 -- returns all certificate policy OIDs
 getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
 getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
@@ -120,11 +135,6 @@ getExtensionsOIDList = map helper
   helper (fst , Generic.mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , Generic.mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , Generic.mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-
-
--- checkCRLDist : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
--- checkCRLDist (─ .[] , Aeres.Grammar.Definitions.none) = true
--- checkCRLDist (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len₂ val len≡₂ bs≡₅) t bs≡₄)) sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = {!!}
 
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
@@ -339,4 +349,16 @@ scp16 c = List.unique? _≟_ (getPolicyOIDList (X509.Cert.getCPOL c))
 
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
+SCP17 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP17 c = T (checkCRLDistStruct (X509.Cert.getCRLDIST c))
+
+scp17 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP17 c)
+scp17 c
+  with checkCRLDistStruct (X509.Cert.getCRLDIST c)
+... | false = no (λ x → x)
+... | true = yes tt
+
+
+
+
 -- The certificate Validity period includes the current time
