@@ -77,6 +77,16 @@ isSANPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
 isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 
 
+-- returns all certificate policy OIDs
+getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
+getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
+getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper val
+  where
+  helper : ∀ {@0 bs} → Generic.SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
+  helper Generic.nil = []
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
+
+
 -- returns true only if the extension is unknown and has critical bit = true
 isUnkwnCriticalExtension : Exists─ (List Dig) X509.Extension → Bool
 isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡₁)) len≡ bs≡) = false
@@ -94,9 +104,28 @@ isAnyOtherExtnCritical x = helper x
     false → helper x₁
     true → true
 
+
+getExtensionsOIDList : List (Exists─ (List Dig) X509.Extension) →  List (Exists─ (List Dig) Generic.OID)
+getExtensionsOIDList = map helper
+  where
+  helper : Exists─ (List Dig) X509.Extension → (Exists─ (List Dig) Generic.OID)
+  helper (fst , Generic.mkTLV len (X509.akiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.skiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.kuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.ekuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.bcextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.ianextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.sanextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.cpextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+
+
 -- checkCRLDist : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
 -- checkCRLDist (─ .[] , Aeres.Grammar.Definitions.none) = true
 -- checkCRLDist (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len₂ val len≡₂ bs≡₅) t bs≡₄)) sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = {!!}
+
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
@@ -281,6 +310,11 @@ scp13 c    | true     | true  = yes λ x → x
 
 
 -- A certificate MUST NOT include more than one instance of a particular Extension.
+SCP14 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP14 c = List.Unique _≟_ (getExtensionsOIDList (X509.Cert.getExtensionsList c))
+
+scp14 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP14 c)
+scp14 c = List.unique? _≟_ (getExtensionsOIDList (X509.Cert.getExtensionsList c))
 
 
 -- A certificate-using system MUST reject the certificate if it encounters a critical Extension
@@ -295,22 +329,14 @@ scp15 c
 ... | true = no (contradiction tt)
 
 
+-- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
+SCP16 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP16 c = List.Unique _≟_ (getPolicyOIDList (X509.Cert.getCPOL c))
+
+scp16 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP16 c)
+scp16 c = List.unique? _≟_ (getPolicyOIDList (X509.Cert.getCPOL c))
+
+
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
 -- The certificate Validity period includes the current time
