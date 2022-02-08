@@ -641,8 +641,71 @@ module X509 where
       end : Generic.Time na
       @0 bs≡  : bs ≡ nb ++ na
 
-  Validity : (@0 _ : List Dig) → Set
-  Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
+  module Validity where
+    Validity : (@0 _ : List Dig) → Set
+    Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
+
+    getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getYearNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields (singleton x x≡) yearRange mmddhhmmss term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = processUTCYear x
+      where
+      processUTCYear : ℕ → ℕ
+      processUTCYear x
+        with x <? 50
+      ... | no ¬p = 1900 + x
+      ... | yes p = 2000 + x
+    getYearNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields (singleton x x≡) yearRange mmddhhmmss z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getMonthNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getMonthNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getDayNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getDayNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getHourNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getHourNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getMinNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getMinNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getSecNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getSecNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getYearNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields (singleton x x≡) yearRange mmddhhmmss term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = processUTCYear x
+      where
+      processUTCYear : ℕ → ℕ
+      processUTCYear x
+        with x <? 50
+      ... | no ¬p = 1900 + x
+      ... | yes p = 2000 + x
+    getYearNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields (singleton x x≡) yearRange mmddhhmmss z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getMonthNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getMonthNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getDayNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getDayNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getHourNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getHourNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getMinNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getMinNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getSecNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getSecNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    
+  open Validity public using (Validity)
 
   record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields
@@ -1058,6 +1121,32 @@ module X509 where
     getSerial : ℤ
     getSerial = Generic.Int.getVal serial
 
+    getYearNB :  ℕ
+    getYearNB = Validity.getYearNB validity
+    getMonthNB :  ℕ
+    getMonthNB = Validity.getMonthNB validity
+    getDayNB :  ℕ
+    getDayNB = Validity.getDayNB validity
+    getHourNB :  ℕ
+    getHourNB = Validity.getHourNB validity
+    getMinNB :  ℕ
+    getMinNB = Validity.getMinNB validity
+    getSecNB :  ℕ
+    getSecNB = Validity.getSecNB validity
+
+    getYearNA :  ℕ
+    getYearNA = Validity.getYearNA validity
+    getMonthNA :  ℕ
+    getMonthNA = Validity.getMonthNA validity
+    getDayNA :  ℕ
+    getDayNA = Validity.getDayNA validity
+    getHourNA :  ℕ
+    getHourNA = Validity.getHourNA validity
+    getMinNA :  ℕ
+    getMinNA = Validity.getMinNA validity
+    getSecNA :  ℕ
+    getSecNA = Validity.getSecNA validity
+
     getIssuerLen : ℕ
     getIssuerLen = RDNSeq.getRDNSeqLen issuer
 
@@ -1104,6 +1193,32 @@ module X509 where
 
     getSerial : ℤ
     getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
+
+    getYearNB :  ℕ
+    getYearNB = TBSCertFields.getYearNB (Generic.TLV.val tbs)
+    getMonthNB :  ℕ
+    getMonthNB = TBSCertFields.getMonthNB (Generic.TLV.val tbs)
+    getDayNB :  ℕ
+    getDayNB = TBSCertFields.getDayNB (Generic.TLV.val tbs)
+    getHourNB :  ℕ
+    getHourNB = TBSCertFields.getHourNB (Generic.TLV.val tbs)
+    getMinNB :  ℕ
+    getMinNB = TBSCertFields.getMinNB (Generic.TLV.val tbs)
+    getSecNB :  ℕ
+    getSecNB = TBSCertFields.getSecNB (Generic.TLV.val tbs)
+
+    getYearNA :  ℕ
+    getYearNA = TBSCertFields.getYearNA (Generic.TLV.val tbs)
+    getMonthNA :  ℕ
+    getMonthNA = TBSCertFields.getMonthNA (Generic.TLV.val tbs)
+    getDayNA :  ℕ
+    getDayNA = TBSCertFields.getDayNA (Generic.TLV.val tbs)
+    getHourNA :  ℕ
+    getHourNA = TBSCertFields.getHourNA (Generic.TLV.val tbs)
+    getMinNA :  ℕ
+    getMinNA = TBSCertFields.getMinNA (Generic.TLV.val tbs)
+    getSecNA :  ℕ
+    getSecNA = TBSCertFields.getSecNA (Generic.TLV.val tbs)
 
     getIssuerLen :  ℕ
     getIssuerLen = TBSCertFields.getIssuerLen (Generic.TLV.val tbs)
@@ -1154,6 +1269,32 @@ module X509 where
 
       getSerial : ℤ
       getSerial = CertFields.getSerial (Generic.TLV.val c)
+
+      getYearNB :  ℕ
+      getYearNB = CertFields.getYearNB (Generic.TLV.val c)
+      getMonthNB :  ℕ
+      getMonthNB = CertFields.getMonthNB (Generic.TLV.val c)
+      getDayNB :  ℕ
+      getDayNB = CertFields.getDayNB (Generic.TLV.val c)
+      getHourNB :  ℕ
+      getHourNB = CertFields.getHourNB (Generic.TLV.val c)
+      getMinNB :  ℕ
+      getMinNB = CertFields.getMinNB (Generic.TLV.val c)
+      getSecNB :  ℕ
+      getSecNB = CertFields.getSecNB (Generic.TLV.val c)
+
+      getYearNA :  ℕ
+      getYearNA = CertFields.getYearNA (Generic.TLV.val c)
+      getMonthNA :  ℕ
+      getMonthNA = CertFields.getMonthNA (Generic.TLV.val c)
+      getDayNA :  ℕ
+      getDayNA = CertFields.getDayNA (Generic.TLV.val c)
+      getHourNA :  ℕ
+      getHourNA = CertFields.getHourNA (Generic.TLV.val c)
+      getMinNA :  ℕ
+      getMinNA = CertFields.getMinNA (Generic.TLV.val c)
+      getSecNA :  ℕ
+      getSecNA = CertFields.getSecNA (Generic.TLV.val c)
 
       getIssuerLen :  ℕ
       getIssuerLen = CertFields.getIssuerLen (Generic.TLV.val c)

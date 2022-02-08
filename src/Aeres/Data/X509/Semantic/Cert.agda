@@ -14,6 +14,48 @@ open Aeres.Grammar.Definitions Dig
 
 
 ------- helper functions -----
+
+-- returns true iff time1 <= time2
+checkTwoTimes : ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → Bool
+checkTwoTimes yr₁ mn₁ da₁ hr₁ mi₁ se₁ yr₂ mn₂ da₂ hr₂ mi₂ se₂
+  with yr₁ <? yr₂
+...  | yes p₁ = true
+...  | no ¬p₁
+  with yr₂ <? yr₁
+...  | yes p₂ = false
+...  | no ¬p₂
+  with mn₁ <? mn₂
+...  | yes p₃ = true
+...  | no ¬p₃
+  with mn₂ <? mn₁
+...  | yes p₄ = false
+...  | no ¬p₄ 
+  with da₁ <? da₂
+...  | yes p₅ = true
+...  | no ¬p₅ 
+  with da₂ <? da₁
+...  | yes p₆ = false
+...  | no ¬p₆
+  with hr₁ <? hr₂
+...  | yes p₇ = true
+...  | no ¬p₇
+  with hr₂ <? hr₁
+...  | yes p₈ = false
+...  | no ¬p₈
+  with mi₁ <? mi₂
+...  | yes p₉ = true
+...  | no ¬p₉
+  with mi₂ <? mi₁
+...  | yes p₁₀ = false
+...  | no ¬p₁₀
+  with se₁ <? se₂
+...  | yes p₁₁ = true
+...  | no ¬p₁₁
+  with se₂ <? se₁
+...  | yes p₁₂ = false
+...  | no ¬p₁₂ = true
+
+
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
 isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
 isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
@@ -359,6 +401,20 @@ scp17 c
 ... | true = yes tt
 
 
-
-
 -- The certificate Validity period includes the current time
+SCP18 : ∀ {@0 bs} → X509.Cert bs → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → Set
+SCP18 x x₁ x₂ x₃ x₄ x₅ x₆
+  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) x₁ x₂ x₃ x₄ x₅ x₆
+... | false = T false
+... | true with checkTwoTimes x₁ x₂ x₃ x₄ x₅ x₆ (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
+...        | false = T false
+...        | true = T true
+
+scp18 : ∀ {@0 bs} (x : X509.Cert bs) → (cyr : ℕ) → (cmn : ℕ) → (cda : ℕ) → (chr : ℕ) → (cmi : ℕ) → (csec : ℕ) → Dec (SCP18 x cyr cmn cda chr cmi csec)
+scp18 x cyr cmn cda chr cmi csec
+  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) cyr cmn cda chr cmi csec
+... | false = no λ ()
+... | true with checkTwoTimes cyr cmn cda chr cmi csec (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
+...        | false = no λ ()
+...        | true = yes tt
+
