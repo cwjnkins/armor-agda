@@ -14,6 +14,48 @@ open Aeres.Grammar.Definitions Dig
 
 
 ------- helper functions -----
+
+-- returns true iff time1 <= time2
+checkTwoTimes : ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → Bool
+checkTwoTimes yr₁ mn₁ da₁ hr₁ mi₁ se₁ yr₂ mn₂ da₂ hr₂ mi₂ se₂
+  with yr₁ <? yr₂
+...  | yes p₁ = true
+...  | no ¬p₁
+  with yr₂ <? yr₁
+...  | yes p₂ = false
+...  | no ¬p₂
+  with mn₁ <? mn₂
+...  | yes p₃ = true
+...  | no ¬p₃
+  with mn₂ <? mn₁
+...  | yes p₄ = false
+...  | no ¬p₄ 
+  with da₁ <? da₂
+...  | yes p₅ = true
+...  | no ¬p₅ 
+  with da₂ <? da₁
+...  | yes p₆ = false
+...  | no ¬p₆
+  with hr₁ <? hr₂
+...  | yes p₇ = true
+...  | no ¬p₇
+  with hr₂ <? hr₁
+...  | yes p₈ = false
+...  | no ¬p₈
+  with mi₁ <? mi₂
+...  | yes p₉ = true
+...  | no ¬p₉
+  with mi₂ <? mi₁
+...  | yes p₁₀ = false
+...  | no ¬p₁₀
+  with se₁ <? se₂
+...  | yes p₁₁ = true
+...  | no ¬p₁₁
+  with se₂ <? se₁
+...  | yes p₁₂ = false
+...  | no ¬p₁₂ = true
+
+
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
 isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
 isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
@@ -77,6 +119,31 @@ isSANPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
 isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 
 
+-- helper for SCP17 :  While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
+-- either distributionPoint or CRLIssuer MUST be present.
+checkCRLDistStruct : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
+checkCRLDistStruct (─ .[] , Aeres.Grammar.Definitions.none) = true
+checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
+  where
+  helper : ∀ {@0 bs} → Generic.SequenceOf X509.DistPoint bs → Bool
+  helper Generic.nil = true
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+
+
+-- returns all certificate policy OIDs
+getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
+getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
+getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper val
+  where
+  helper : ∀ {@0 bs} → Generic.SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
+  helper Generic.nil = []
+  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
+
+
 -- returns true only if the extension is unknown and has critical bit = true
 isUnkwnCriticalExtension : Exists─ (List Dig) X509.Extension → Bool
 isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡₁)) len≡ bs≡) = false
@@ -85,14 +152,31 @@ isUnkwnCriticalExtension (fst , Generic.mkTLV len _ len≡ bs≡) = false
 
 -- is any unknown extention critical from the list ?
 isAnyOtherExtnCritical : List (Exists─ (List Dig) X509.Extension) → Bool
-isAnyOtherExtnCritical x = helper₁ x
+isAnyOtherExtnCritical x = helper x
   where
   -- returns true only if at least one extension in the list is unknown and that extension has critical bit = true
-  helper₁ : List (Exists─ (List Dig) X509.Extension) → Bool
-  helper₁ [] = false
-  helper₁ (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
-    false → helper₁ x₁
+  helper : List (Exists─ (List Dig) X509.Extension) → Bool
+  helper [] = false
+  helper (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
+    false → helper x₁
     true → true
+
+
+getExtensionsOIDList : List (Exists─ (List Dig) X509.Extension) →  List (Exists─ (List Dig) Generic.OID)
+getExtensionsOIDList = map helper
+  where
+  helper : Exists─ (List Dig) X509.Extension → (Exists─ (List Dig) Generic.OID)
+  helper (fst , Generic.mkTLV len (X509.akiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.skiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.kuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.ekuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.bcextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.ianextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.sanextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.cpextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , Generic.mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
 
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
@@ -278,6 +362,11 @@ scp13 c    | true     | true  = yes λ x → x
 
 
 -- A certificate MUST NOT include more than one instance of a particular Extension.
+SCP14 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP14 c = List.Unique _≟_ (getExtensionsOIDList (X509.Cert.getExtensionsList c))
+
+scp14 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP14 c)
+scp14 c = List.unique? _≟_ (getExtensionsOIDList (X509.Cert.getExtensionsList c))
 
 
 -- A certificate-using system MUST reject the certificate if it encounters a critical Extension
@@ -292,7 +381,40 @@ scp15 c
 ... | true = no (contradiction tt)
 
 
+-- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
+SCP16 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP16 c = List.Unique _≟_ (getPolicyOIDList (X509.Cert.getCPOL c))
+
+scp16 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP16 c)
+scp16 c = List.unique? _≟_ (getPolicyOIDList (X509.Cert.getCPOL c))
+
+
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
--- The certificate Validity period includes the current time.
--- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
+SCP17 : ∀ {@0 bs} → X509.Cert bs → Set
+SCP17 c = T (checkCRLDistStruct (X509.Cert.getCRLDIST c))
+
+scp17 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP17 c)
+scp17 c
+  with checkCRLDistStruct (X509.Cert.getCRLDIST c)
+... | false = no (λ x → x)
+... | true = yes tt
+
+
+-- The certificate Validity period includes the current time
+SCP18 : ∀ {@0 bs} → X509.Cert bs → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → Set
+SCP18 x x₁ x₂ x₃ x₄ x₅ x₆
+  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) x₁ x₂ x₃ x₄ x₅ x₆
+... | false = T false
+... | true with checkTwoTimes x₁ x₂ x₃ x₄ x₅ x₆ (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
+...        | false = T false
+...        | true = T true
+
+scp18 : ∀ {@0 bs} (x : X509.Cert bs) → (cyr : ℕ) → (cmn : ℕ) → (cda : ℕ) → (chr : ℕ) → (cmi : ℕ) → (csec : ℕ) → Dec (SCP18 x cyr cmn cda chr cmi csec)
+scp18 x cyr cmn cda chr cmi csec
+  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) cyr cmn cda chr cmi csec
+... | false = no λ ()
+... | true with checkTwoTimes cyr cmn cda chr cmi csec (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
+...        | false = no λ ()
+...        | true = yes tt
+

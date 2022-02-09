@@ -659,8 +659,71 @@ module X509 where
       end : Generic.Time na
       @0 bs≡  : bs ≡ nb ++ na
 
-  Validity : (@0 _ : List Dig) → Set
-  Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
+  module Validity where
+    Validity : (@0 _ : List Dig) → Set
+    Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
+
+    getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getYearNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields (singleton x x≡) yearRange mmddhhmmss term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = processUTCYear x
+      where
+      processUTCYear : ℕ → ℕ
+      processUTCYear x
+        with x <? 50
+      ... | no ¬p = 1900 + x
+      ... | yes p = 2000 + x
+    getYearNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields (singleton x x≡) yearRange mmddhhmmss z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getMonthNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getMonthNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getDayNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getDayNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getHourNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getHourNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getMinNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getMinNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
+    getSecNB (Generic.mkTLV len (mkValidityFields (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+    getSecNB (Generic.mkTLV len (mkValidityFields (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) end bs≡₁) len≡ bs≡) = x
+
+    getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getYearNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields (singleton x x≡) yearRange mmddhhmmss term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = processUTCYear x
+      where
+      processUTCYear : ℕ → ℕ
+      processUTCYear x
+        with x <? 50
+      ... | no ¬p = 1900 + x
+      ... | yes p = 2000 + x
+    getYearNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields (singleton x x≡) yearRange mmddhhmmss z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getMonthNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getMonthNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields (singleton x x≡) monRange day dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getDayNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getDayNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange (singleton x x≡) dayRange hour hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getHourNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getHourNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange (singleton x x≡) hourRange min minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getMinNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getMinNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange (singleton x x≡) minRange sec secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+
+    getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
+    getSecNA (Generic.mkTLV len (mkValidityFields start (Generic.utctm (Generic.mkTLV len₁ (Generic.mkUtcTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) term bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    getSecNA (Generic.mkTLV len (mkValidityFields start (Generic.gentm (Generic.mkTLV len₁ (Generic.mkGenTimeFields year yearRange (Generic.mkMDHMSFields mon monRange day dayRange hour hourRange min minRange (singleton x x≡) secRange bs≡₄) z≡ bs≡₃) len≡₁ bs≡₂)) bs≡₁) len≡ bs≡) = x
+    
+  open Validity public using (Validity)
 
   record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields
@@ -962,6 +1025,14 @@ module X509 where
     getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN (Generic.mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
     getSAN (Generic.mkTLV len _ len≡ bs≡) = _ , none
+
+    getCRLDIST : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len (crlextn x) len≡ bs≡) = _ , (some x)
+    getCRLDIST (Generic.mkTLV len _ len≡ bs≡) = _ , none
+
+    getCPOL : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+    getCPOL (Generic.mkTLV len (cpextn x) len≡ bs≡) = _ , (some x)
+    getCPOL (Generic.mkTLV len _ len≡ bs≡) = _ , none
   open Extension public using (Extension)
 
   module ExtensionsSeq where
@@ -995,6 +1066,24 @@ module X509 where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
+    getCRLDIST : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+      where
+      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+      helper Generic.nil = _ , none
+      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getCRLDIST h) of λ where
+        (─ .[] , none) → helper t
+        y@(fst , some x) → y
+
+    getCPOL : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+    getCPOL (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+      where
+      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+      helper Generic.nil = _ , none
+      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getCPOL h) of λ where
+        (─ .[] , none) → helper t
+        y@(fst , some x) → y
+
     getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List Dig) Extension)
     getExtensionsList (Generic.mkTLV len (mk×ₚ fstₚ₁ sndₚ₁ bs≡₁) len≡ bs≡) = helper fstₚ₁
       where
@@ -1015,6 +1104,12 @@ module X509 where
 
     getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
+
+    getCRLDIST : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getCRLDIST val
+
+    getCPOL : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+    getCPOL (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getCPOL val
 
     getExtensionsList : ∀ {@0 bs} → Extensions bs → List (Exists─ (List Dig) Extension)
     getExtensionsList (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val
@@ -1044,6 +1139,32 @@ module X509 where
     getSerial : ℤ
     getSerial = Generic.Int.getVal serial
 
+    getYearNB :  ℕ
+    getYearNB = Validity.getYearNB validity
+    getMonthNB :  ℕ
+    getMonthNB = Validity.getMonthNB validity
+    getDayNB :  ℕ
+    getDayNB = Validity.getDayNB validity
+    getHourNB :  ℕ
+    getHourNB = Validity.getHourNB validity
+    getMinNB :  ℕ
+    getMinNB = Validity.getMinNB validity
+    getSecNB :  ℕ
+    getSecNB = Validity.getSecNB validity
+
+    getYearNA :  ℕ
+    getYearNA = Validity.getYearNA validity
+    getMonthNA :  ℕ
+    getMonthNA = Validity.getMonthNA validity
+    getDayNA :  ℕ
+    getDayNA = Validity.getDayNA validity
+    getHourNA :  ℕ
+    getHourNA = Validity.getHourNA validity
+    getMinNA :  ℕ
+    getMinNA = Validity.getMinNA validity
+    getSecNA :  ℕ
+    getSecNA = Validity.getSecNA validity
+
     getIssuerLen : ℕ
     getIssuerLen = RDNSeq.getRDNSeqLen issuer
 
@@ -1061,6 +1182,12 @@ module X509 where
 
     getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN = elimOption (_ , none) (λ v → Extensions.getSAN v) extensions
+
+    getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST = elimOption (_ , none) (λ v → Extensions.getCRLDIST v) extensions
+
+    getCPOL : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+    getCPOL = elimOption (_ , none) (λ v → Extensions.getCPOL v) extensions
 
     getExtensionsList : List (Exists─ (List Dig) Extension)
     getExtensionsList = elimOption [] (λ v → Extensions.getExtensionsList v) extensions
@@ -1084,6 +1211,32 @@ module X509 where
 
     getSerial : ℤ
     getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
+
+    getYearNB :  ℕ
+    getYearNB = TBSCertFields.getYearNB (Generic.TLV.val tbs)
+    getMonthNB :  ℕ
+    getMonthNB = TBSCertFields.getMonthNB (Generic.TLV.val tbs)
+    getDayNB :  ℕ
+    getDayNB = TBSCertFields.getDayNB (Generic.TLV.val tbs)
+    getHourNB :  ℕ
+    getHourNB = TBSCertFields.getHourNB (Generic.TLV.val tbs)
+    getMinNB :  ℕ
+    getMinNB = TBSCertFields.getMinNB (Generic.TLV.val tbs)
+    getSecNB :  ℕ
+    getSecNB = TBSCertFields.getSecNB (Generic.TLV.val tbs)
+
+    getYearNA :  ℕ
+    getYearNA = TBSCertFields.getYearNA (Generic.TLV.val tbs)
+    getMonthNA :  ℕ
+    getMonthNA = TBSCertFields.getMonthNA (Generic.TLV.val tbs)
+    getDayNA :  ℕ
+    getDayNA = TBSCertFields.getDayNA (Generic.TLV.val tbs)
+    getHourNA :  ℕ
+    getHourNA = TBSCertFields.getHourNA (Generic.TLV.val tbs)
+    getMinNA :  ℕ
+    getMinNA = TBSCertFields.getMinNA (Generic.TLV.val tbs)
+    getSecNA :  ℕ
+    getSecNA = TBSCertFields.getSecNA (Generic.TLV.val tbs)
 
     getIssuerLen :  ℕ
     getIssuerLen = TBSCertFields.getIssuerLen (Generic.TLV.val tbs)
@@ -1112,12 +1265,17 @@ module X509 where
     getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
     getSAN = TBSCertFields.getSAN (Generic.TLV.val tbs)
 
+    getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+    getCRLDIST = TBSCertFields.getCRLDIST (Generic.TLV.val tbs)
+
+    getCPOL : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+    getCPOL = TBSCertFields.getCPOL (Generic.TLV.val tbs)
+
     getExtensions : Exists─ (List Dig) (Option Extensions)
     getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
     
     getExtensionsList : List (Exists─ (List Dig) Extension)
     getExtensionsList = TBSCertFields.getExtensionsList (Generic.TLV.val tbs)
-
 
   module Cert where
     Cert : (@0 _ : List Dig) → Set
@@ -1129,6 +1287,32 @@ module X509 where
 
       getSerial : ℤ
       getSerial = CertFields.getSerial (Generic.TLV.val c)
+
+      getYearNB :  ℕ
+      getYearNB = CertFields.getYearNB (Generic.TLV.val c)
+      getMonthNB :  ℕ
+      getMonthNB = CertFields.getMonthNB (Generic.TLV.val c)
+      getDayNB :  ℕ
+      getDayNB = CertFields.getDayNB (Generic.TLV.val c)
+      getHourNB :  ℕ
+      getHourNB = CertFields.getHourNB (Generic.TLV.val c)
+      getMinNB :  ℕ
+      getMinNB = CertFields.getMinNB (Generic.TLV.val c)
+      getSecNB :  ℕ
+      getSecNB = CertFields.getSecNB (Generic.TLV.val c)
+
+      getYearNA :  ℕ
+      getYearNA = CertFields.getYearNA (Generic.TLV.val c)
+      getMonthNA :  ℕ
+      getMonthNA = CertFields.getMonthNA (Generic.TLV.val c)
+      getDayNA :  ℕ
+      getDayNA = CertFields.getDayNA (Generic.TLV.val c)
+      getHourNA :  ℕ
+      getHourNA = CertFields.getHourNA (Generic.TLV.val c)
+      getMinNA :  ℕ
+      getMinNA = CertFields.getMinNA (Generic.TLV.val c)
+      getSecNA :  ℕ
+      getSecNA = CertFields.getSecNA (Generic.TLV.val c)
 
       getIssuerLen :  ℕ
       getIssuerLen = CertFields.getIssuerLen (Generic.TLV.val c)
@@ -1156,6 +1340,12 @@ module X509 where
 
       getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
       getSAN = CertFields.getSAN (Generic.TLV.val c)
+
+      getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+      getCRLDIST = CertFields.getCRLDIST (Generic.TLV.val c)
+
+      getCPOL : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+      getCPOL = CertFields.getCPOL (Generic.TLV.val c)
 
       getExtensions : Exists─ (List Dig) (Option Extensions)
       getExtensions = CertFields.getExtensions (Generic.TLV.val c)
