@@ -137,7 +137,7 @@ checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields
 -- returns all certificate policy OIDs
 getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
 getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
-getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper val
+getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
   where
   helper : ∀ {@0 bs} → Generic.SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
   helper Generic.nil = []
