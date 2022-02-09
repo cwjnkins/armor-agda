@@ -49,30 +49,36 @@ nonnesting{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (G
 noconfusion t₁≢t₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Generic.mkTLV len val len≡ bs≡) (Generic.mkTLV len₁ val₁ len≡₁ bs≡₁) =
  contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡₁)))) t₁≢t₂
 
-@0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Generic.TLV t A)
-unambiguous{t}{A} ua (Generic.mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) (Generic.mkTLV{l = l₂}{v₂} len₂ val₂ len≡₂ bs≡₂) =
-  subst₀ (λ l₂ → ∀ (len₂ : Length l₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV {l = l₂} len₂ val₂ len≡₂ bs≡₂ ) l≡
-    (λ len₂ len≡₂ bs≡₂' →
-      subst₀ (λ v₂ → ∀ (val₂ : A v₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂) v≡
-        (λ val₂ len≡₂ bs≡₂' →
-          subst₂ (λ len₂ val₂ → ∀ len≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂')
-            (LengthProps.unambiguous len₁ len₂) (ua val₁ val₂)
-            (λ len≡₂ →
-              subst₂ (λ x y → _ ≡ Generic.mkTLV len₁ val₁ x y) (≡-unique len≡₁ len≡₂) (≡-unique bs≡₁ bs≡₂')
-                refl)
-            len≡₂ )
-        val₂ len≡₂ bs≡₂')
-    len₂ len≡₂ bs≡₂
-  where
-  @0 bs≡' : l₁ ++ v₁ ≡ l₂ ++ v₂
-  bs≡' = ∷-injectiveʳ (trans₀ (sym bs≡₁) bs≡₂)
+module TLV where
+  @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Generic.TLV t A)
+  unambiguous{t}{A} ua (Generic.mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) (Generic.mkTLV{l = l₂}{v₂} len₂ val₂ len≡₂ bs≡₂) =
+    subst₀ (λ l₂ → ∀ (len₂ : Length l₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV {l = l₂} len₂ val₂ len≡₂ bs≡₂ ) l≡
+      (λ len₂ len≡₂ bs≡₂' →
+        subst₀ (λ v₂ → ∀ (val₂ : A v₂) len≡₂ bs≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂) v≡
+          (λ val₂ len≡₂ bs≡₂' →
+            subst₂ (λ len₂ val₂ → ∀ len≡₂ → Generic.mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ Generic.mkTLV len₂ val₂ len≡₂ bs≡₂')
+              (LengthProps.unambiguous len₁ len₂) (ua val₁ val₂)
+              (λ len≡₂ →
+                subst₂ (λ x y → _ ≡ Generic.mkTLV len₁ val₁ x y) (≡-unique len≡₁ len≡₂) (≡-unique bs≡₁ bs≡₂')
+                  refl)
+              len≡₂ )
+          val₂ len≡₂ bs≡₂')
+      len₂ len≡₂ bs≡₂
+    where
+    @0 bs≡' : l₁ ++ v₁ ≡ l₂ ++ v₂
+    bs≡' = ∷-injectiveʳ (trans₀ (sym bs≡₁) bs≡₂)
+  
+    @0 l≡ : l₁ ≡ l₂
+    l≡ = LengthProps.nonnesting bs≡' len₁ len₂
+  
+    @0 v≡ : v₁ ≡ v₂
+    v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
 
-  @0 l≡ : l₁ ≡ l₂
-  l≡ = LengthProps.nonnesting bs≡' len₁ len₂
+module NonEmptyVal where
+  @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Σₚ (Generic.TLV t A) Generic.NonEmptyVal)
+  unambiguous ua = unambiguousΣₚ (TLV.unambiguous ua) λ tlv → ≤-irrelevant
 
-  @0 v≡ : v₁ ≡ v₂
-  v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
-
+open TLV public
 
 instance
   EqTLV : ∀ {A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (Generic.TLV t A)
@@ -93,3 +99,20 @@ instance
   ... | refl
     with ‼ ≡-unique (Generic.TLV.bs≡ t₁) (Generic.TLV.bs≡ t₂)
   ... | refl = yes ≋-refl
+
+@0 getLengthLen≡ : ∀ {t} {A : List Dig → Set} {@0 xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+                   → (v₁ : Generic.TLV t A xs₁) (v₂ : Generic.TLV t A xs₂) → getLength (Generic.TLV.len v₁) ≡ getLength (Generic.TLV.len v₂)
+getLengthLen≡{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ v₁ v₂
+  with LengthProps.nonnesting (∷-injectiveʳ bs≡') (Generic.TLV.len v₁) (Generic.TLV.len v₂)
+  where
+  open ≡-Reasoning
+  bs≡' : t ∷ Generic.TLV.l v₁ ++ Generic.TLV.v v₁ ++ ys₁ ≡ t ∷ Generic.TLV.l v₂ ++ Generic.TLV.v v₂ ++ ys₂
+  bs≡' = begin
+    t ∷ Generic.TLV.l v₁ ++ Generic.TLV.v v₁ ++ ys₁   ≡⟨ cong (t ∷_) (sym $ ++-assoc (Generic.TLV.l v₁) _ _) ⟩
+    (t ∷ Generic.TLV.l v₁ ++ Generic.TLV.v v₁) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym $ Generic.TLV.bs≡ v₁) ⟩
+    xs₁ ++ ys₁                                        ≡⟨ ++≡ ⟩
+    xs₂ ++ ys₂                                        ≡⟨ cong (_++ ys₂) (Generic.TLV.bs≡ v₂) ⟩
+    (t ∷ Generic.TLV.l v₂ ++ Generic.TLV.v v₂) ++ ys₂ ≡⟨ cong (t ∷_) (++-assoc (Generic.TLV.l v₂) _ _) ⟩
+    t ∷ Generic.TLV.l v₂ ++ Generic.TLV.v v₂ ++ ys₂   ∎
+... | refl = cong getLength (LengthProps.unambiguous (Generic.TLV.len v₁) (Generic.TLV.len v₂))
+

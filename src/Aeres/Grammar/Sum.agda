@@ -6,7 +6,7 @@ module Aeres.Grammar.Sum (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
 
-data Sum (@0 A B : (List Σ) → Set) : (@0 _ : List Σ) → Set where
+data Sum (@0 A B : List Σ → Set) : (@0 _ : List Σ) → Set where
   inj₁ : ∀ {@0 xs} → A xs → Sum A B xs
   inj₂ : ∀ {@0 xs} → B xs → Sum A B xs
 

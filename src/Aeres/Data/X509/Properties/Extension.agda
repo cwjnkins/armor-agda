@@ -135,61 +135,43 @@ module SelectExtn where
       (unambiguousSum
         (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous AKIProps.unambiguous)) (TLVProps.noconfusion λ ()))
         (unambiguousSum
-          (ExtensionFields.unambiguous ≡-unique
-            (TLVProps.unambiguous (TLVProps.unambiguous OctetstringValueProps.unambiguous))
-            (TLVProps.noconfusion λ ()))
-          (unambiguousSum
-            (ExtensionFields.unambiguous ≡-unique
-              (TLVProps.unambiguous (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous)) (TLVProps.noconfusion λ ()))
+          (ExtensionFields.unambiguous ≡-unique ((TLVProps.unambiguous (TLVProps.unambiguous OctetstringValueProps.unambiguous))) (TLVProps.noconfusion λ ()))
             (unambiguousSum
-              (ExtensionFields.unambiguous ≡-unique
-                (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.unambiguous OIDProps.unambiguous TLVProps.nonempty TLVProps.nonnesting)))
-                (TLVProps.noconfusion (λ ())))
+              (ExtensionFields.unambiguous ≡-unique ((TLVProps.unambiguous (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous))) (TLVProps.noconfusion λ ()))
               (unambiguousSum
-                (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous BCProps.unambiguous)) (TLVProps.noconfusion λ ()))
+                (ExtensionFields.unambiguous ≡-unique
+                  (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous OIDProps.unambiguous TLVProps.nonempty TLVProps.nonnesting)))
+                  (TLVProps.noconfusion λ ()))
                 (unambiguousSum
-                  (ExtensionFields.unambiguous ≡-unique
-                    (TLVProps.unambiguous
-                      GeneralNameProps.GeneralNames.unambiguous)
-                    (TLVProps.noconfusion λ ()))
-                    (unambiguousSum
-                      (ExtensionFields.unambiguous ≡-unique
-                        (TLVProps.unambiguous GeneralNameProps.GeneralNames.unambiguous)
-                        (TLVProps.noconfusion λ ()))
+                  (ExtensionFields.unambiguous ≡-unique ((TLVProps.unambiguous (TLVProps.unambiguous BCProps.unambiguous))) ((TLVProps.noconfusion λ ())))
+                  (unambiguousSum
+                    (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLVProps.noconfusion λ ()))
+                    (unambiguousSum (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLVProps.noconfusion λ ()))
                       (unambiguousSum
                         (ExtensionFields.unambiguous ≡-unique
-                          (TLVProps.unambiguous
-                            (TLVProps.unambiguous
-                              (SeqProps.unambiguous
-                                (TLVProps.unambiguous PIProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)))
-                          (TLVProps.noconfusion (λ ())))
+                          (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous PIProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)))
+                          (TLVProps.noconfusion λ ()))
                         (unambiguousSum
                           (ExtensionFields.unambiguous ≡-unique
-                            (TLVProps.unambiguous
-                              (TLVProps.unambiguous
-                                (SeqProps.BoundedSequenceOf.unambiguous
-                                  (TLVProps.unambiguous DistPointFieldsProps.unambiguous)
-                                  TLVProps.nonempty TLVProps.nonnesting)))
+                            (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous DistPointFieldsProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)))
                             (TLVProps.noconfusion λ ()))
                           (unambiguousSum
                             (ExtensionFields.unambiguous ≡-unique
                               (TLVProps.unambiguous
                                 (TLVProps.unambiguous
                                   (SeqProps.BoundedSequenceOf.unambiguous
-                                    (TLVProps.unambiguous ADProps.unambiguous)
-                                    TLVProps.nonempty TLVProps.nonnesting)))
+                                    ((TLVProps.unambiguous ADProps.unambiguous)) TLVProps.nonempty TLVProps.nonnesting)))
                               (TLVProps.noconfusion λ ()))
-                            (ExtensionFields.unambiguous
-                              ua (TLVProps.unambiguous OctetstringValueProps.unambiguous)
-                              (TLVProps.noconfusion λ ()))
+                            (ExtensionFields.unambiguous ua
+                              (TLVProps.unambiguous OctetstringValueProps.unambiguous) (TLVProps.noconfusion λ ()))
                             noconfusion₀)
                           noconfusion₉)
                         noconfusion₈)
                       noconfusion₇)
                     noconfusion₆)
-                noconfusion₅)
-              noconfusion₄)
-            noconfusion₃)
+                  noconfusion₅)
+                noconfusion₄)
+              noconfusion₃)
           noconfusion₂)
         noconfusion₁)
     where

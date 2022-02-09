@@ -6,7 +6,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Properties as Props
-open import Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -16,10 +16,11 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Decidable.TLV where
 
 open Base256
+open Aeres.Grammar.Definitions Dig
 
 module parseTLV
   (t : Dig) (tName : String) (A : List Dig → Set)
-  (p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig A n))
+  (p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength A n))
   where
 
   here' = "TLV: " String.++ tName
@@ -100,3 +101,48 @@ module parseTLV
                       xs                      ∎)))))
 
 open parseTLV public using (parseTLV)
+
+parseTLVLenBound
+  : ∀ {t A} l u → Parser Dig (Logging ∘ Dec) (Generic.TLV t A)
+    → Parser Dig (Logging ∘ Dec) (Σₚ (Generic.TLV t A) (Generic.LenBounded l u))
+runParser (parseTLVLenBound l u p) xs = do
+  yes (success pre r r≡ v suf bs≡) ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+          contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
+  case inRange? l u (getLength (Generic.TLV.len v)) of λ where
+    (yes l≤len≤u) →
+      return (yes
+        (success pre r r≡ (mk×ₚ v l≤len≤u refl) suf bs≡))
+    (no  ¬l≤len≤u) → do
+      tell $ "parseTLVLenBound" String.++ ": given length bounds violated"
+      return ∘ no $ λ where
+        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u refl) suf' bs≡') → ‼
+          let @0 len≡ : getLength (Generic.TLV.len v) ≡ getLength (Generic.TLV.len v')
+              len≡ = TLV.getLengthLen≡ (trans₀ bs≡ (sym bs≡')) v v'
+          in
+          contradiction (subst (InRange l u) (sym len≡) l≤len≤u) ¬l≤len≤u
+
+parseTLVNonEmpty
+  : ∀ {t A} → Parser Dig (Logging ∘ Dec) (Generic.TLV t A)
+    → Parser Dig (Logging ∘ Dec) (Σₚ (Generic.TLV t A) Generic.NonEmptyVal)
+runParser (parseTLVNonEmpty p) xs = do
+  yes (success pre r r≡ v suf bs≡) ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+          contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
+  case 1 ≤? (getLength (Generic.TLV.len v)) of λ where
+    (yes l≤len≤u) →
+      return (yes
+        (success pre r r≡ (mk×ₚ v l≤len≤u refl) suf bs≡))
+    (no  ¬l≤len≤u) → do
+      tell $ "parseTLVLenBound" String.++ ": given length bounds violated"
+      return ∘ no $ λ where
+        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u refl) suf' bs≡') → ‼
+          let @0 len≡ : getLength (Generic.TLV.len v) ≡ getLength (Generic.TLV.len v')
+              len≡ = TLV.getLengthLen≡ (trans₀ bs≡ (sym bs≡')) v v'
+          in
+          contradiction (subst (1 ≤_) (sym len≡) l≤len≤u) ¬l≤len≤u
+

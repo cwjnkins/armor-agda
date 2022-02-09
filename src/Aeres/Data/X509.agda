@@ -212,6 +212,16 @@ module Generic where
       @0 len≡ : getLength len ≡ length v
       @0 bs≡  : bs ≡ t ∷ l ++ v
 
+  NonEmptyVal : ∀ {t}{@0 A} → (bs : List Dig) (tlv : TLV t A bs) → Set
+  NonEmptyVal bs tlv = 1 ≤ getLength (TLV.len tlv)
+
+  TLVNonEmptyVal : (t : Dig) (@0 A : List Dig → Set) (@0 bs : List Dig) → Set
+  TLVNonEmptyVal t A = Σₚ (TLV t A) NonEmptyVal
+
+  LenBounded : ∀ {t}{@0 A} → (l u : ℕ) → (bs : List Dig) (tlv : TLV t A bs) → Set
+  LenBounded l u bs tlv = InRange l u (getLength (TLV.len tlv))
+
+
   -- TODO: extensions encoded as octet strings need to be tupled together with proofs
   -- they can be parsed into supported structures (semantic checks)
   OctetstringValue :  (@0 _ : List Dig) → Set
@@ -532,18 +542,24 @@ module X509 where
   VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetstringValue xs
 
   data DirectoryString : @0 List Dig → Set where
-    teletexString : ∀ {@0 bs} → TeletexString bs → DirectoryString bs
-    printableString : ∀ {@0 bs} → PrintableString bs → DirectoryString bs
-    universalString : ∀ {@0 bs} → UniversalString bs → DirectoryString bs
-    utf8String : ∀ {@0 bs} → UTF8String bs → DirectoryString bs
-    bmpString : ∀ {@0 bs} → BMPString bs → DirectoryString bs
+    teletexString : ∀ {@0 bs} → Σₚ TeletexString Generic.NonEmptyVal bs → DirectoryString bs
+    printableString : ∀ {@0 bs} → Σₚ PrintableString Generic.NonEmptyVal bs → DirectoryString bs
+    universalString : ∀ {@0 bs} → Σₚ UniversalString Generic.NonEmptyVal bs → DirectoryString bs
+    utf8String : ∀ {@0 bs} → Σₚ UTF8String Generic.NonEmptyVal bs → DirectoryString bs
+    bmpString  : ∀ {@0 bs} → Σₚ BMPString  Generic.NonEmptyVal bs → DirectoryString bs
 
   data DisplayText : @0 List Dig → Set where
-    ia5String : ∀ {@0 bs} → IA5String bs → DisplayText bs
-    visibleString : ∀ {@0 bs} → VisibleString bs → DisplayText bs
-    bmpString : ∀ {@0 bs} → BMPString bs → DisplayText bs
-    utf8String : ∀ {@0 bs} → UTF8String bs → DisplayText bs
+    ia5String     : ∀ {@0 bs} → Σₚ IA5String     (Generic.LenBounded 1 200) bs → DisplayText bs
+    visibleString : ∀ {@0 bs} → Σₚ VisibleString (Generic.LenBounded 1 200) bs → DisplayText bs
+    bmpString     : ∀ {@0 bs} → Σₚ BMPString     (Generic.LenBounded 1 200) bs → DisplayText bs
+    utf8String    : ∀ {@0 bs} → Σₚ UTF8String    (Generic.LenBounded 1 200) bs → DisplayText bs
 
+
+  -- AttributeTypeAndValue ::= SEQUENCE {
+  --   type     AttributeType,
+  --   value    AttributeValue }
+  -- AttributeType ::= OBJECT IDENTIFIER
+  -- AttributeValue ::= ANY -- DEFINED BY AttributeType
   record RDNATVFields (@0 bs : List Dig) : Set where
     constructor mkRDNATVFields
     field
@@ -555,8 +571,10 @@ module X509 where
   RDNATV : (@0 _ : List Dig) → Set
   RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
 
+ -- RelativeDistinguishedName ::=
+ --   SET SIZE (1..MAX) OF AttributeTypeAndValu
   RDNElems : @0 List Dig → Set
-  RDNElems = Generic.SequenceOf RDNATV
+  RDNElems = Generic.NonEmptySequenceOf RDNATV
 
   RDN : (@0 _ : List Dig) → Set
   RDN = Generic.TLV Tag.Sett RDNElems
@@ -692,7 +710,7 @@ module X509 where
 ----------------------------------- eku extension -----------------------------------
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
-  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.SequenceOf Generic.OID) xs
+  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf Generic.OID) xs
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
@@ -794,7 +812,7 @@ module X509 where
   PolicyInformation xs = Generic.TLV Tag.Sequence PolicyInformationFields xs
 
   CertPolFieldsSeq : (@0 _ : List Dig) → Set
-  CertPolFieldsSeq = Generic.Seq PolicyInformation
+  CertPolFieldsSeq = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf PolicyInformation)
 
   CertPolFields : (@0 _ : List Dig) → Set
   CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs

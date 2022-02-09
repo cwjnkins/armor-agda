@@ -43,8 +43,6 @@ unambiguous =
     (unambiguousSum
       (TLVProps.unambiguous GNProps.GeneralNamesElems.unambiguous)
       (TLVProps.unambiguous
-        (SeqProps.unambiguous
-          (TLVProps.unambiguous RDNATVProps.unambiguous)
-          TLVProps.nonempty
-          TLVProps.nonnesting))
+        (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous RDNATVProps.unambiguous)
+          TLVProps.nonempty TLVProps.nonnesting))
       (TLVProps.noconfusion λ ()))

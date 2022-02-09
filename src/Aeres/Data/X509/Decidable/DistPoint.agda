@@ -28,7 +28,7 @@ module parseDistPoint where
   parseNameRTCrlIssuer : Parser _ (Logging ∘ Dec) X509.NameRTCrlIssuer
   parseNameRTCrlIssuer =
     parseTLV Tag.A1 "RT CRL issuer" _
-      (parseSequenceOf "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDNATV)
+      (λ n → parseBoundedSequenceOf "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDNATV n 1)
 
   parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
   parseDistPointNameChoice =

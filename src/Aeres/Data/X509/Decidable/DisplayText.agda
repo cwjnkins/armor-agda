@@ -24,13 +24,13 @@ module parseDisplayText where
 
   parseDisplayText : Parser Dig (Logging ∘ Dec) X509.DisplayText
   runParser parseDisplayText xs = do
-    no ¬ia5String ← runParser parseIA5String xs
+    no ¬ia5String ← runParser (parseTLVLenBound 1 200 parseIA5String) xs
       where yes b → return (yes (mapSuccess Dig (λ {bs} → X509.ia5String{bs}) b))
-    no ¬visibleString ← runParser parseVisibleString xs
+    no ¬visibleString ← runParser (parseTLVLenBound 1 200 parseVisibleString) xs
       where yes b → return (yes (mapSuccess Dig (λ {bs} → X509.visibleString{bs}) b))
-    no ¬bmp ← runParser parseBMPString xs
+    no ¬bmp ← runParser (parseTLVLenBound 1 200 parseBMPString) xs
       where yes b → return (yes (mapSuccess Dig (λ {bs} → X509.bmpString{bs}) b))
-    no ¬utf8 ← runParser parseUTF8String xs
+    no ¬utf8 ← runParser (parseTLVLenBound 1 200 parseUTF8String) xs
       where yes u → return (yes (mapSuccess Dig (λ {bs} → X509.utf8String{bs}) u))
     return ∘ no $ λ where
       (success prefix read read≡ (X509.ia5String x) suffix ps≡) →

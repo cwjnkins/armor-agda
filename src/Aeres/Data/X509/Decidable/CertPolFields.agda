@@ -112,7 +112,7 @@ module parseCertPolFields where
     parseTLV _ "policy info" _ parsePolicyInformationFields
 
   parseCertPolFieldsSeq : Parser _ (Logging ∘ Dec) X509.CertPolFieldsSeq
-  parseCertPolFieldsSeq = parseSeq "policy info" _ Props.TLV.nonempty Props.TLV.nonnesting parsePolicyInformation
+  parseCertPolFieldsSeq = parseNonEmptySeq "policy info" _ Props.TLV.nonempty Props.TLV.nonnesting parsePolicyInformation
 
   parseCertPolFields : Parser _ (Logging ∘ Dec) X509.CertPolFields
   parseCertPolFields =

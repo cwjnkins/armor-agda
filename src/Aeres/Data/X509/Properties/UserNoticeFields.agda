@@ -33,11 +33,13 @@ private
            DisplayTextProps.equivalent
            (symNoConfusion{X509.NoticeReference}{Sum _ _}
              (NoConfusion.sumₚ{X509.NoticeReference}
-               (TLVProps.noconfusion (λ ()))
+               (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference}
+                 (TLVProps.noconfusion λ ()))
                (NoConfusion.sumₚ{X509.NoticeReference}
-                 (TLVProps.noconfusion λ ())
+                 (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ()))
                  (NoConfusion.sumₚ{X509.NoticeReference}
-                   (TLVProps.noconfusion λ ()) (TLVProps.noconfusion λ ()))))))
+                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ()))
+                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ())))))))
 
 @0 unambiguous : Unambiguous X509.UserNoticeFields
 unambiguous =

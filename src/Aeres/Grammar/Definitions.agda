@@ -131,6 +131,9 @@ A ×ₚ B = Σₚ A (λ xs _ → B xs)
 NotEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
 NotEmpty A = A ×ₚ ((_≥ 1) ∘ length)
 
+Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
+Bounded A l u = A ×ₚ (InRange l u ∘ length)
+
 instance
   NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)
   Eq≋._≋?_ NotEmptyEq{bs₁ = bs₁}{bs₂} v₁ v₂
@@ -148,6 +151,12 @@ instance
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
 noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y
 
+noconfusion×ₚ : ∀ {@0 A₁ A₂ B₁ B₂} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B₁) (A₂ ×ₚ B₂)
+noconfusion×ₚ nc₁ ++≡ (mk×ₚ fstₚ _ refl) (mk×ₚ fstₚ' _ refl) = nc₁ ++≡ fstₚ fstₚ'
+
+noconfusionΣₚ : ∀ {@0 A₁ A₂ B₁ B₂} → NoConfusion A₁ A₂ → NoConfusion (Σₚ A₁ B₁) (Σₚ A₂ B₂)
+noconfusionΣₚ nc₁ ++≡ (mk×ₚ fstₚ _ refl) (mk×ₚ fstₚ' _ refl) = nc₁ ++≡ fstₚ fstₚ'
+
 nonnesting×ₚ₁ : ∀ {@0 A B} → NonNesting A → NonNesting (A ×ₚ B)
 nonnesting×ₚ₁ nn ++≡ (mk×ₚ fstₚ₁ _ refl) (mk×ₚ fstₚ₂ _ refl) = nn ++≡ fstₚ₁ fstₚ₂
 
@@ -162,6 +171,16 @@ unambiguous×ₚ ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ�
   subst₀ (λ x → mk×ₚ fstₚ₁ sndₚ₁ refl ≡ mk×ₚ x sndₚ₂ refl) (ua₁ fstₚ₁ fstₚ₂)
     (subst₀ (λ x → mk×ₚ fstₚ₁ sndₚ₁ refl ≡ mk×ₚ fstₚ₁ x refl) (ua₂ sndₚ₁ sndₚ₂)
       refl)
+
+unambiguousNotEmpty : ∀ {@0 A : @0 List Σ → Set} → Unambiguous A → Unambiguous (NotEmpty A)
+unambiguousNotEmpty ua = unambiguous×ₚ ua (λ x₁ x₂ → ≤-irrelevant x₁ x₂)
+
+nonemptyΣₚ₁ : ∀ {@0 A B} → NonEmpty A → NonEmpty (Σₚ A B)
+nonemptyΣₚ₁ ne (mk×ₚ fstₚ₁ sndₚ₁ refl) xs≡[] = contradiction xs≡[] (ne fstₚ₁)
+
+nonnestingΣₚ₁ : ∀ {@0 A B} → NonNesting A → NonNesting (Σₚ A B)
+nonnestingΣₚ₁ nn xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
+  nn xs₁++ys₁≡xs₂++ys₂ fstₚ₁ fstₚ₂
 
 map×ₚ : ∀ {@0 A₁ A₂ B} → (∀ {@0 xs} → A₁ xs → A₂ xs) → (∀ {@0 xs} → (A₁ ×ₚ B) xs → (A₂ ×ₚ B) xs)
 map×ₚ f (mk×ₚ fstₚ₁ sndₚ₁ bs≡) = mk×ₚ (f fstₚ₁) sndₚ₁ bs≡

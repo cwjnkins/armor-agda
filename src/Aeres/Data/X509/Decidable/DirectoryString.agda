@@ -24,15 +24,15 @@ module parseDirectoryString where
 
   parseDirectoryString : Parser Dig (Logging ∘ Dec) X509.DirectoryString
   runParser parseDirectoryString xs = do
-    no ¬teletex ← runParser parseTeletexString xs
+    no ¬teletex ← runParser (parseTLVNonEmpty parseTeletexString) xs
       where yes t → return (yes (mapSuccess Dig (λ {bs} → X509.teletexString{bs}) t))
-    no ¬printable ← runParser parsePrintableString xs
+    no ¬printable ← runParser (parseTLVNonEmpty parsePrintableString) xs
       where yes p → return (yes (mapSuccess Dig (λ {bs} → X509.printableString{bs}) p))
-    no ¬universal ← runParser parseUniversalString xs
+    no ¬universal ← runParser (parseTLVNonEmpty parseUniversalString) xs
       where yes u → return (yes (mapSuccess Dig (λ {bs} → X509.universalString{bs}) u))
-    no ¬utf8 ← runParser parseUTF8String xs
+    no ¬utf8 ← runParser (parseTLVNonEmpty parseUTF8String) xs
       where yes u → return (yes (mapSuccess Dig (λ {bs} → X509.utf8String{bs}) u))
-    no ¬bmp ← runParser parseBMPString xs
+    no ¬bmp ← runParser (parseTLVNonEmpty parseBMPString) xs
       where yes b → return (yes (mapSuccess Dig (λ {bs} → X509.bmpString{bs}) b))
     return ∘ no $ λ where
       (success prefix read read≡ (X509.teletexString x) suffix ps≡) →

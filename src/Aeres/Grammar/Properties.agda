@@ -1,13 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+import Aeres.Grammar.Definitions
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Data.List.Properties
 
 module Aeres.Grammar.Properties (Σ : Set) where
 
-open import Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions Σ
 open import Aeres.Grammar.Sum Σ
 
 module Distribute where
@@ -74,6 +75,12 @@ module NoConfusion where
   sumₚ : ∀ {@0 A B C} → NoConfusion A B → NoConfusion A C → NoConfusion A (Sum B C)
   sumₚ nc₁ nc₂ ++≡ a (Sum.inj₁ x) = nc₁ ++≡ a x
   sumₚ nc₁ nc₂ ++≡ a (Sum.inj₂ x) = nc₂ ++≡ a x
+
+  sigmaₚ₁ : ∀ {@0 A₁ B₁ A₂ B₂} → NoConfusion A₁ A₂ → NoConfusion (Σₚ A₁ B₁) (Σₚ A₂ B₂)
+  sigmaₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) = nc ++≡ fstₚ₁ fstₚ₂
+
+  sigmaₚ₁ᵣ : ∀ {@0 A₁ A₂ B₂} → NoConfusion A₁ A₂ → NoConfusion A₁ (Σₚ A₂ B₂)
+  sigmaₚ₁ᵣ nc ++≡ v₁ (mk×ₚ fstₚ₂ sndₚ₂ refl) = nc ++≡ v₁ fstₚ₂
 
 module Unambiguous where
 

@@ -26,7 +26,7 @@ module parseEKUFields where
   open ≡-Reasoning
 
   parseEKUFields : Parser Dig (Logging ∘ Dec) X509.EKUFields
-  parseEKUFields = parseTLV _ "EKU Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseSeq "EKU Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseOID))
+  parseEKUFields = parseTLV _ "EKU Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseNonEmptySeq "EKU Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseOID))
 
 open parseEKUFields public using (parseEKUFields)
 

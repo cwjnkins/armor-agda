@@ -46,8 +46,7 @@ module parseRDN where
   parseRDN : Parser Dig (Logging ∘ Dec) X509.RDN
   parseRDN =
     parseTLV _ "RDN" _
-      (parseSequenceOf "RDNATV" _ Props.TLV.nonempty Props.TLV.nonnesting
-        parseRDNATV)
+      λ n → parseBoundedSequenceOf "RDNATV" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDNATV n 1
 
   parseRDNSeq : Parser Dig (Logging ∘ Dec) X509.RDNSeq
   parseRDNSeq =
