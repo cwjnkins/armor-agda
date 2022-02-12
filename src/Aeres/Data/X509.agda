@@ -652,6 +652,7 @@ module X509 where
 
 --------------------------------------------------------- Validity --------------------------------
   record ValidityFields (@0 bs : List Dig) : Set where
+    --- move getter in Generic.Time
     constructor mkValidityFields
     field
       @0 {nb na} : List Dig
@@ -1354,3 +1355,11 @@ module X509 where
       getExtensionsList = CertFields.getExtensionsList (Generic.TLV.val c)
 
   open Cert public using (Cert)
+
+  module Chain where
+    Chain : (@0 _ : List Dig) → Set
+    Chain = Generic.NonEmptySequenceOf Cert
+  open Chain public using (Chain)
+
+    
+  
