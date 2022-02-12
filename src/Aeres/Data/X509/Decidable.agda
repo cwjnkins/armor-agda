@@ -1,10 +1,46 @@
-open import Aeres.Prelude
+{-# OPTIONS --subtyping #-}
+
 open import Aeres.Binary
-open import Aeres.Data.X509
-open import Aeres.Data.X509.Properties
+import      Aeres.Grammar.Parser
+open import Aeres.Prelude
 
 open Base256
-open import Aeres.Data.Parser Dig
+open Aeres.Grammar.Parser Dig
 
 module Aeres.Data.X509.Decidable where
 
+open import Aeres.Data.X509.Decidable.AIAFields
+open import Aeres.Data.X509.Decidable.AKIFields
+open import Aeres.Data.X509.Decidable.BCFields
+open import Aeres.Data.X509.Decidable.Bitstring
+open import Aeres.Data.X509.Decidable.Boool
+open import Aeres.Data.X509.Decidable.Cert
+open import Aeres.Data.X509.Decidable.CertPolFields
+open import Aeres.Data.X509.Decidable.CRLDistFields
+open import Aeres.Data.X509.Decidable.DirectoryString
+open import Aeres.Data.X509.Decidable.DisplayText
+open import Aeres.Data.X509.Decidable.DistPoint
+open import Aeres.Data.X509.Decidable.EKUFields
+open import Aeres.Data.X509.Decidable.Extension
+open import Aeres.Data.X509.Decidable.GeneralName
+open import Aeres.Data.X509.Decidable.IANFields
+open import Aeres.Data.X509.Decidable.Int
+open import Aeres.Data.X509.Decidable.KUFields
+open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.NoticeReference
+open import Aeres.Data.X509.Decidable.Null
+open import Aeres.Data.X509.Decidable.OID
+open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.PolicyQualifierInfo
+open import Aeres.Data.X509.Decidable.PublicKey
+open import Aeres.Data.X509.Decidable.RDN
+open import Aeres.Data.X509.Decidable.SANFields
+open import Aeres.Data.X509.Decidable.SKIFields
+open import Aeres.Data.X509.Decidable.SequenceOf
+open import Aeres.Data.X509.Decidable.SignAlg
+open import Aeres.Data.X509.Decidable.TBSCert
+open import Aeres.Data.X509.Decidable.TLV
+open import Aeres.Data.X509.Decidable.Time
+open import Aeres.Data.X509.Decidable.UserNotice
+open import Aeres.Data.X509.Decidable.Validity
+open import Aeres.Data.X509.Decidable.Version

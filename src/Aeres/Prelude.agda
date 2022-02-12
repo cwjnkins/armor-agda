@@ -185,6 +185,10 @@ T-dec : ∀ {b} → Dec (T b)
 T-dec {false} = no λ ()
 T-dec {true} = yes tt
 
+True_And_ : ∀ {ℓ₁ ℓ₂} {P : Set ℓ₁} → Dec P → (P → Set ℓ₂) → Set ℓ₂
+True_And_ (yes pf) Q = Q pf
+True_And_{ℓ₂ = ℓ₂} (no ¬pf) Q = Level.Lift ℓ₂ ⊥
+
 open import Relation.Nullary.Product public
   using (_×-dec_)
 

@@ -1,17 +1,13 @@
 {-# OPTIONS --subtyping #-}
 
-import Aeres.Grammar.Definitions
-import Aeres.Grammar.Parser.Core
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parser.Core
 open import Aeres.Prelude
 
 module Aeres.Grammar.Parser.Completeness (Σ : Set) where
 
 open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.Parser.Core Σ
-
-True_And_ : {P : Set} → Dec P → (P → Set) → Set
-True_And_ (yes pf) Q = Q pf
-True_And_ (no ¬pf) Q = ⊥
 
 UniqueParse : (List Σ → Set) → Set
 UniqueParse A = ∀ {@0 bs} → Unique (Success A bs)
@@ -25,7 +21,7 @@ CompleteParse A M extract parser =
 
 module _ {@0 A : List Σ → Set} (unambiguousA : Unambiguous A) (nonnestingA : NonNesting A) where
 
-  uniqueParse : UniqueParse A
+  @0 uniqueParse : UniqueParse A
   uniqueParse p₁ p₂
     with ‼ nonnestingA (trans (Success.ps≡ p₁) (sym (Success.ps≡ p₂))) (Success.value p₁) (Success.value p₂)
   ... | refl
@@ -42,7 +38,7 @@ module _ {@0 A : List Σ → Set} (unambiguousA : Unambiguous A) (nonnestingA : 
   module _ {M : Set → Set} (extract : ∀ {@0 bs} → M (Dec (Success A bs)) → Dec (Success A bs)) (parser : Parser (M ∘ Dec) A)
     where
 
-    completeParse : CompleteParse A M extract parser
+    @0 completeParse : CompleteParse A M extract parser
     completeParse{bs} v
       with extract $ runParser parser bs
     ... | (yes v') = uniqueParse v v'

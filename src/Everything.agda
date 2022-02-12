@@ -4,7 +4,7 @@ import Aeres.Arith
 import Aeres.Binary
 import Aeres.Data.X509
 import Aeres.Data.X509.Completeness
--- open import Aeres.Data.X509.Decidable
+import Aeres.Data.X509.Decidable
 import Aeres.Data.X509.Decidable.AIAFields
 import Aeres.Data.X509.Decidable.AKIFields
 import Aeres.Data.X509.Decidable.BCFields
