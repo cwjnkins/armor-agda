@@ -451,10 +451,41 @@ module Generic where
   -- be able to process validity dates that are encoded in either UTCTime or
   -- GeneralizedTime.
 
-  data Time : List Dig → Set where
-    utctm : ∀ {@0 bs} → UtcTime bs → Time bs
-    gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
+  module Time where
+    data Time : @0 List Dig → Set where
+      utctm : ∀ {@0 bs} → UtcTime bs → Time bs
+      gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
 
+    getYear : ∀ {@0 bs} →  Time bs → ℕ
+    getYear (utctm x) = 
+      let year = Singleton.x (UtcTimeFields.year (TLV.val x)) in
+        case year <? 50 of λ where
+          (yes _) → 2000 + year
+          (no  _) → 1900 + year
+    getYear (gentm x) = Singleton.x (GenTimeFields.year (TLV.val x))
+
+    getMonth : ∀ {@0 bs} → Time bs → ℕ
+    getMonth (utctm x) = Singleton.x (MonthDayHourMinSecFields.mon (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getMonth (gentm x) = Singleton.x (MonthDayHourMinSecFields.mon (GenTimeFields.mmddhhmmss (TLV.val x)))
+
+    getDay : ∀ {@0 bs} → Time bs → ℕ
+    getDay (utctm x) = Singleton.x (MonthDayHourMinSecFields.day (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getDay (gentm x) = Singleton.x (MonthDayHourMinSecFields.day (GenTimeFields.mmddhhmmss (TLV.val x)))
+
+    getHour : ∀ {@0 bs} → Time bs → ℕ
+    getHour (utctm x) = Singleton.x (MonthDayHourMinSecFields.hour (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getHour (gentm x) = Singleton.x (MonthDayHourMinSecFields.hour (GenTimeFields.mmddhhmmss (TLV.val x)))
+
+    getMin : ∀ {@0 bs} → Time bs → ℕ
+    getMin (utctm x) = Singleton.x (MonthDayHourMinSecFields.min (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getMin (gentm x) = Singleton.x (MonthDayHourMinSecFields.min (GenTimeFields.mmddhhmmss (TLV.val x)))
+
+    getSec : ∀ {@0 bs} → Time bs → ℕ
+    getSec (utctm x) = Singleton.x (MonthDayHourMinSecFields.sec (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getSec (gentm x) = Singleton.x (MonthDayHourMinSecFields.sec (GenTimeFields.mmddhhmmss (TLV.val x)))
+    
+
+  open Time public using (Time ; utctm ; gentm) hiding (module Time)
 ------------------------------X.509-----------------------------------------------------------
 
 module X509 where

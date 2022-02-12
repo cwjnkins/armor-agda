@@ -67,6 +67,7 @@ import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.Time
+import Aeres.Data.X509.Properties.Time.Ordering
 import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
