@@ -109,3 +109,11 @@ unambiguous =
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)
+
+postulate
+  instance
+    DirectoryStringEq≋ : Eq≋ X509.DirectoryString
+
+
+
+

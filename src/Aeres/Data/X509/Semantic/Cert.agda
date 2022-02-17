@@ -64,7 +64,7 @@ isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId
 
 
 -- returns BCPathLen if exists
-getBCPathLen : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List Dig) (Option Generic.Int)
+getBCPathLen :  Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List Dig) (Option Generic.Int)
 getBCPathLen (─ .[] , Aeres.Grammar.Definitions.none) = _ , none
 getBCPathLen (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
 

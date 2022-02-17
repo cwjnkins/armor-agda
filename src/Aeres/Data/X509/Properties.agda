@@ -6,6 +6,7 @@ import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
+import Aeres.Data.X509.Properties.Cert
 import Aeres.Data.X509.Properties.CertFields
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
@@ -51,9 +52,7 @@ module NonNesting where
   open import Aeres.Data.X509
 
 -- Unfinished lemmas
-module DisplayText               = Aeres.Data.X509.Properties.DisplayText
-module Extension                 = Aeres.Data.X509.Properties.Extension
-module Primitives                = Aeres.Data.X509.Properties.Primitives
+module Cert               = Aeres.Data.X509.Properties.Cert
 
 -- Finished lemmas
 module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
@@ -64,6 +63,8 @@ module CertFields                = Aeres.Data.X509.Properties.CertFields
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
+module DisplayText               = Aeres.Data.X509.Properties.DisplayText
+module Extension                 = Aeres.Data.X509.Properties.Extension
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
 module Length                    = Aeres.Data.X509.Properties.Length
@@ -73,6 +74,7 @@ module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
+module Primitives                = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
