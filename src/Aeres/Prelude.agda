@@ -157,11 +157,18 @@ subst₀ P refl x = x
 trans₀ : ∀ {ℓ} {@0 A : Set ℓ} {@0 x y z : A} → (@0 _ : x ≡ y) (@0 _ : y ≡ z) → x ≡ z
 trans₀ refl refl = refl
 
+≤-unique : Unique₂ _≤_
+≤-unique = ≤-irrelevant
+  where open import Data.Nat.Properties
+
 open import Relation.Binary.Definitions public
   using (Tri ; tri< ; tri≈ ; tri> )
 
 open import Relation.Nullary public
   renaming (Irrelevant to Unique)
+
+⊤-unique : Unique ⊤
+⊤-unique tt tt = refl
 
 ×-unique : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → Unique A → Unique B → Unique (A × B)
 ×-unique ua ub (a , b) (c , d)

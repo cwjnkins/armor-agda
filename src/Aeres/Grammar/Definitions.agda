@@ -45,8 +45,9 @@ NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
 
 NoConfusion : (A B : List Σ → Set) → Set
-NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
-                  → (A xs₁ → ¬ B xs₂)
+NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂}
+                  → (xs₁++ys₁≡xs₂++ys₂ : xs₁ ++ ys₁ ≡ xs₂ ++ ys₂)
+                  → (a : A xs₁) → ¬ B xs₂
 
 symNoConfusion : ∀ {@0 A B} → NoConfusion A B → NoConfusion B A
 symNoConfusion nc ++≡ v₂ v₁ = nc (sym ++≡) v₁ v₂
