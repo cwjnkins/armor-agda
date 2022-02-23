@@ -13,7 +13,7 @@ ExactLengthParser : (M : Set → Set) (A : List Σ → Set) → Set
 ExactLengthParser M A = ∀ n → Parser M (ExactLength A n)
 
 parseN : {M : Set → Set} ⦃ _ : Monad M ⦄ →
-         (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) (ExactLength Singleton n)
+         (n : ℕ) → M (Level.Lift _ ⊤) → Parser (M ∘ Dec) (ExactLengthString n)
 runParser (parseN zero _) xs =
   return (yes (success [] _ refl (mk×ₚ (singleton [] refl) (─ refl) refl) xs refl))
 runParser (parseN (suc n) m) [] = do

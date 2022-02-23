@@ -39,7 +39,9 @@ unambiguousHet ua refl a₁ a₂ = ua a₁ a₂
 
 -- TODO: rename to "Unambiguous"
 NonNesting : (A : List Σ → Set) → Set
-NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → A xs₂ → xs₁ ≡ xs₂
+NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂}
+               → (xs₁++ys₁≡xs₂++ys₂ : xs₁ ++ ys₁ ≡ xs₂ ++ ys₂)
+               → (a₁ : A xs₁) (a₂ : A xs₂) → xs₁ ≡ xs₂
 
 NonEmpty : (A : List Σ → Set) → Set
 NonEmpty A = ∀ {xs : List Σ} → A xs → xs ≢ []
@@ -193,6 +195,14 @@ proj₂ (equivalent×ₚ (f , g)) = map×ₚ g
 ExactLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
 ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
 
+ExactLengthString : ℕ → @0 List Σ → Set
+ExactLengthString n = ExactLength Singleton n
+
+lookupELS : ∀ {@0 xs} {n} (s : ExactLengthString n xs) → Fin n → Σ
+lookupELS (mk×ₚ (singleton (x ∷ x₁) refl) _ _) Fin.zero = x
+lookupELS (mk×ₚ (singleton (x ∷ x₁) refl) (─ sndₚ₁) refl) (Fin.suc i) =
+  lookupELS (mk×ₚ (singleton x₁ refl) (─ (suc-injective sndₚ₁)) refl) i
+
 WithinLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
 WithinLength A n = A ×ₚ (Erased ∘ (_≤ n) ∘ length)
 
@@ -202,6 +212,12 @@ projectWithinLength (mk×ₚ fstₚ₁ sndₚ₁ refl) = fstₚ₁
 exactLength-nonnesting : ∀ {@0 A} {n} → NonNesting (ExactLength A n)
 exactLength-nonnesting xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) =
   proj₁ $ Lemmas.length-++-≡ _ _ _ _ xs₁++ys₁≡xs₂++ys₂ (trans₀ sndₚ₁ (sym sndₚ₂))
+
+exactLengthString-unambiguous : ∀ {n} → Unambiguous (ExactLengthString n)
+exactLengthString-unambiguous =
+  unambiguous×ₚ
+    (λ where self self → refl)
+    λ where (─ len≡₁) (─ len≡₂) → cong ─_ (‼ ≡-irrelevant len≡₁ len≡₂)
 
 withinLength-nonnesting : ∀ {@0 A} {n} → NonNesting A → NonNesting (WithinLength A n)
 withinLength-nonnesting nn ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
