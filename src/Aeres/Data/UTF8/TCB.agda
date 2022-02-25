@@ -52,5 +52,14 @@ UTF8Char =
   (Sum UTF8Char3
        UTF8Char4))
 
+pattern uft81 b₁ b₁range bs≡ =
+  Sum.inj₁ (mkUTF8Char1 b₁ b₁range bs≡)
+pattern uft82 b₁ b₂ b₁range b₂range bs≡ =
+  Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₁range b₂range bs≡))
+pattern uft83 b₁ b₂ b₃ b₁range b₂range b₃range bs≡ =
+  Sum.inj₂ (Sum.inj₂ Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₃ b₁range b₂range b₃range bs≡))
+pattern uft84 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡ =
+  Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡))))
+
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
