@@ -52,3 +52,10 @@ private
         toℕ (Fin.raise 97 i) <⟨ Fin.toℕ<n (Fin.raise 97 i) ⟩
         26 + 97 ≤⟨ toWitness{Q = 123 ≤? 127} tt ⟩
         127 ∎)
+
+
+  test₃ : Trie V₂ _
+  test₃ = fromList ((([ # 65 ] , (─ [ # 97 ]) , (Sum.inj₁ (mkUTF8Char1 _ (toWitness {Q = 97 <? 128 } tt ) refl)) ))
+                   ∷ ((# 197 ∷ [ # 138 ]) , ((─ (# 197 ∷ [ # 139 ])) , (Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 _  _ (toWitness {Q = inRange? 192 223 197 } tt) (toWitness {Q = inRange? 128 191 139} tt) refl))))) ∷ {!!})
+
+
