@@ -8,6 +8,7 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
+open import Relation.Binary
 
 module Aeres.Data.UTF8.Properties where
 
@@ -49,9 +50,10 @@ module UTF8Char4Props where
            × InRange 128 191 (lookupELS els (# 2))
            × InRange 128 191 (lookupELS els (# 3)))
 
-  equiv : Equivalent Rep UTF8Char4
-  proj₁ equiv x = {!!}
-  proj₂ equiv = {!!}
+  postulate
+    equiv : Equivalent Rep UTF8Char4
+  -- proj₁ equiv x = {!!}
+  -- proj₂ equiv = {!!}
 
 -- nonempty : NonEmpty UTF8Char
 -- nonempty (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ ()))) refl
