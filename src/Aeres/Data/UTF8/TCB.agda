@@ -19,7 +19,7 @@ record UTF8Char1 (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ [ b₁ ]
 
 record UTF8Char2 (@0 bs : List UInt8) : Set where
-  constructor mkUTF8Char1
+  constructor mkUTF8Char2
   field
     b₁ b₂ : UInt8
     @0 b₁range : InRange 192 223 b₁
@@ -27,7 +27,7 @@ record UTF8Char2 (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ b₁ ∷ [ b₂ ]
 
 record UTF8Char3 (@0 bs : List UInt8) : Set where
-  constructor mkUTF8Char1
+  constructor mkUTF8Char3
   field
     b₁ b₂ b₃ : UInt8
     @0 b₁range : InRange 224 239 b₁
@@ -36,7 +36,7 @@ record UTF8Char3 (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ b₁ ∷ b₂ ∷ [ b₃ ]
 
 record UTF8Char4 (@0 bs : List UInt8) : Set where
-  constructor mkUTF8Char1
+  constructor mkUTF8Char4
   field
     b₁ b₂ b₃ b₄ : UInt8
     @0 b₁range : InRange 240 247 b₁
