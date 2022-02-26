@@ -97,6 +97,9 @@ import Aeres.Grammar.Properties
 import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
+import Aeres.Test.X509.Cert
+import Aeres.Test.X509.Extension
+import Aeres.Test.X509.RDN
 
 import summary
 
