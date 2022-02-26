@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
+  hiding (tabulate)
 import      Data.Fin.Properties as Fin
 import      Data.List.Relation.Binary.Equality.Propositional as List
 import      Data.Nat.Properties as Nat
@@ -16,12 +17,15 @@ open import Data.Tree.AVL.Value (List.≋-setoid{A = UInt8})
   as Value public
   hiding (const)
 
+tabulate : ∀ {ℓ} {n} {V : Value ℓ} → (Fin n → ∃ (Value.family V)) → Trie V _
+tabulate f = fromList (Vec.toList (Vec.tabulate f))
+
 private
   V₁ : Value Level.zero
   V₁ = Value.const (List UInt8)
 
   test₁ : Trie V₁ _
-  test₁ = fromList (Vec.toList (Vec.tabulate mkEntry))
+  test₁ = tabulate mkEntry
     where
     mkEntry : Fin 26 → List UInt8 × List UInt8
     proj₁ (mkEntry i) = [ Fin.inject+ 165 (Fin.raise 65 i) ]
@@ -37,7 +41,7 @@ private
   --   subst UTF8Char1 (List.≋⇒≡ bs₁≡bs₂) u₁
 
   test₂ : Trie V₂ _
-  test₂ = fromList (Vec.toList (Vec.tabulate mkEntry))
+  test₂ = tabulate mkEntry
     where
     mkEntry : Fin 26 → List UInt8 × Exists─ (List UInt8) UTF8Char
     proj₁ (mkEntry i) = [ Fin.inject+ 165 (Fin.raise 65 i) ]
@@ -54,8 +58,68 @@ private
         127 ∎)
 
 
-  test₃ : Trie V₂ _
-  test₃ = fromList ((([ # 65 ] , (─ [ # 97 ]) , (Sum.inj₁ (mkUTF8Char1 _ (toWitness {Q = 97 <? 128 } tt ) refl)) ))
-                   ∷ ((# 197 ∷ [ # 138 ]) , ((─ (# 197 ∷ [ # 139 ])) , (Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 _  _ (toWitness {Q = inRange? 192 223 197 } tt) (toWitness {Q = inRange? 128 191 139} tt) refl))))) ∷ {!!})
+  private
+    inRangeLemmaᵤ : ∀ {l u} (p : Σ[ n ∈ ℕ ] InRange l u n) → {wit : True (u <? 256)} → proj₁ p < 256
+    inRangeLemmaᵤ p {wit} = Nat.≤-trans (s≤s $ proj₂ (proj₂ p)) (toWitness wit)
+
+  translate2-2Map : (p₁ p₂ : Σ[ n ∈ ℕ ] InRange 192 223 n)
+                    → (r o : Fin 32)
+                    → (l : Σ[ n ∈ ℕ ] InRange 128 (191 - toℕ r - toℕ o) n)
+                    → Trie V₂ _
+  translate2-2Map p₁ p₂ r o l = tabulate mkEntry
+    where
+    open Nat.≤-Reasoning
+    mkEntry : Fin (toℕ r) → List UInt8 × Exists─ (List UInt8) UTF8Char
+    proj₁ (mkEntry i) =
+      Fin.fromℕ< (inRangeLemmaᵤ p₁)
+      ∷ [ Fin.fromℕ<{m = proj₁ l + toℕ i}
+            (s≤s $ begin
+              (proj₁ l + toℕ i)
+                ≤⟨ Nat.+-monoˡ-≤ (toℕ i) (proj₂ (proj₂ l)) ⟩
+              (191 - toℕ r - toℕ o) + toℕ i
+                ≤⟨ Nat.+-monoʳ-≤ (191 - toℕ r - toℕ o) (Fin.toℕ≤n i) ⟩
+              191 - toℕ r - toℕ o + toℕ r
+                ≤⟨ Nat.+-monoˡ-≤ (toℕ r) (begin
+                  191 - toℕ r - toℕ o ≤⟨ Nat.∸-monoʳ-≤ {n = toℕ o} (191 - toℕ r) z≤n ⟩
+                  191 - toℕ r          ≤⟨ Nat.m∸n≤m 191 (toℕ r) ⟩
+                  191 ∎) ⟩
+              191 + toℕ r
+                ≤⟨ Nat.+-monoʳ-≤ 191 (Fin.toℕ≤n r) ⟩
+              191 + 32
+                ≤⟨ toWitness{Q = 191 + 32 ≤? 255} tt ⟩
+              255 ∎) ]
+        
+    proj₂ (mkEntry i) = (─ bs) , Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 _ _ ({!!} , {!!}) {!!} refl))
+      where
+      pf : InRange 128 191 (proj₁ l + toℕ o + toℕ i)
+      proj₁ pf = {!!}
+      proj₂ pf = begin
+        proj₁ l + toℕ o + toℕ i ≡⟨ Nat.+-assoc (proj₁ l) (toℕ o) (toℕ i) ⟩
+        proj₁ l + (toℕ o + toℕ i) ≤⟨ Nat.+-monoˡ-≤ (toℕ o + toℕ i) (proj₂ (proj₂ l)) ⟩
+        (191 - toℕ r - toℕ o) + (toℕ o + toℕ i) ≡⟨ cong (_+ (toℕ o + toℕ i)) (Nat.∸-+-assoc 191 (toℕ r) (toℕ o)) ⟩
+        191 - (toℕ r + toℕ o) + (toℕ o + toℕ i) ≡⟨ cong (λ x → 191 - x + (toℕ o + toℕ i)) (Nat.+-comm (toℕ r) (toℕ o)) ⟩
+        191 - (toℕ o + toℕ r) + (toℕ o + toℕ i) ≤⟨ Nat.+-monoʳ-≤ (191 - (toℕ o + toℕ r))
+                                                     (Nat.+-monoʳ-≤ (toℕ o) (Fin.toℕ≤n i)) ⟩
+        191 - (toℕ o + toℕ r) + (toℕ o + toℕ r)
+          ≡⟨ sym (Nat.+-∸-comm (toℕ o + toℕ r)
+               (begin
+                 toℕ o + toℕ r ≤⟨ Nat.+-mono-≤ (Fin.toℕ≤n o) (Fin.toℕ≤n r) ⟩
+                 32 + 32 ≤⟨ toWitness{Q = 64 ≤? 191} tt ⟩
+                 191 ∎))
+           ⟩
+        191 + (toℕ o + toℕ r) - (toℕ o + toℕ r) ≡⟨ Nat.+-∸-assoc 191 (Nat.≤-refl{x = toℕ o + toℕ r}) ⟩
+        191 + ((toℕ o + toℕ r) - (toℕ o + toℕ r)) ≡⟨ cong (191 +_) (Nat.n∸n≡0 (toℕ o + toℕ r)) ⟩
+        191 - 0 ≡⟨ Nat.+-identityʳ 191 ⟩
+        191 ∎
+
+      b₂ : UInt8
+      b₂ = Fin.fromℕ<{m = proj₁ l + toℕ o + toℕ i} (s≤s (Nat.≤-trans (proj₂ pf) (toWitness{Q = 191 ≤? 255} tt)))
+
+      @0 bs : List UInt8
+      bs = Fin.fromℕ< (inRangeLemmaᵤ p₂) ∷ [ b₂ ]
+
+  -- test₃ : Trie V₂ _
+  -- test₃ = fromList ((([ # 65 ] , (─ [ # 97 ]) , (Sum.inj₁ (mkUTF8Char1 _ (toWitness {Q = 97 <? 128 } tt ) refl)) ))
+  --                  ∷ ((# 197 ∷ [ # 138 ]) , ((─ (# 197 ∷ [ # 139 ])) , (Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 _  _ (toWitness {Q = inRange? 192 223 197 } tt) (toWitness {Q = inRange? 128 191 139} tt) refl))))) ∷ {!!})
 
 

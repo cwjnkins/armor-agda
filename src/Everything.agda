@@ -2,6 +2,9 @@
 
 import Aeres.Arith
 import Aeres.Binary
+import Aeres.Data.UTF8.Parser
+import Aeres.Data.UTF8.Properties
+import Aeres.Data.UTF8.TCB
 import Aeres.Data.X509
 import Aeres.Data.X509.Completeness
 import Aeres.Data.X509.Decidable

@@ -108,8 +108,24 @@ module parseUTF8 where
                    ×-dec inRange? 128 191 b₂
                    ×-dec inRange? 128 191 b₃))
 
+  parseUTF8Char4 : Parser (Logging ∘ Dec) UTF8Char4
+  parseUTF8Char4 =
+    parseEquivalent UTF8Props.UTF8Char4Props.equiv
+      (parseSigma exactLength-nonnesting exactLengthString-unambiguous
+        (parseN 4 (tell $ hereChar String.++ ": underflow (4)"))
+        λ els →
+          let b₁ = lookupELS els (# 0)
+              b₂ = lookupELS els (# 1)
+              b₃ = lookupELS els (# 2)
+              b₄ = lookupELS els (# 3)
+          in
+          erased? (      inRange? 240 247 b₁ ×-dec inRange? 128 191 b₂
+                   ×-dec inRange? 128 191 b₃ ×-dec inRange? 128 191 b₄))
+
   parseUTF8Char : Parser (Logging ∘ Dec) UTF8Char
   parseUTF8Char =
-    parseSum parseUTF8Char1
-      (parseSum parseUTF8Char2
-        (parseSum parseUTF8Char3 {!!}))
+    parseEquivalent UTF8Props.UTF8CharProps.equiv
+      (parseSum parseUTF8Char1
+        (parseSum parseUTF8Char2
+          (parseSum parseUTF8Char3
+            parseUTF8Char4)))

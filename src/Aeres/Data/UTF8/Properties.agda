@@ -50,9 +50,31 @@ module UTF8Char4Props where
            × InRange 128 191 (lookupELS els (# 2))
            × InRange 128 191 (lookupELS els (# 3)))
 
-  postulate
-    equiv : Equivalent Rep UTF8Char4
-  -- proj₁ equiv x = {!!}
+  equiv : Equivalent Rep UTF8Char4
+  proj₁ equiv (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl) refl) (─ (fst , fst₁ , fst₂ , snd)) refl) =
+    mkUTF8Char4 x x₁ x₂ x₃ fst fst₁ fst₂ snd refl
+  proj₂ equiv (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡) =
+    mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range , b₄range)) (sym bs≡)
+
+
+module UTF8CharProps where
+  Rep : @0 List UInt8 → Set
+  Rep =  Sum UTF8Char1
+        (Sum UTF8Char2
+        (Sum UTF8Char3
+             UTF8Char4))
+
+  equiv : Equivalent Rep UTF8Char
+  proj₁ equiv (inj₁ u1) = utf81 u1
+  proj₁ equiv (inj₂ (inj₁ x)) = utf82 x
+  proj₁ equiv (inj₂ (inj₂ (inj₁ x))) = utf83 x
+  proj₁ equiv (inj₂ (inj₂ (inj₂ x))) = utf84 x
+  proj₂ equiv (utf81 x) = inj₁ x
+  proj₂ equiv (utf82 x) = inj₂ (inj₁ x)
+  proj₂ equiv (utf83 x) = inj₂ (inj₂ (inj₁ x))
+  proj₂ equiv (utf84 x) = inj₂ (inj₂ (inj₂ x))
+
+-- proj₁ equiv x = {!!}
   -- proj₂ equiv = {!!}
 
 -- nonempty : NonEmpty UTF8Char

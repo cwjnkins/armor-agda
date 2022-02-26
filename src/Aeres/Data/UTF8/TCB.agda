@@ -45,21 +45,11 @@ record UTF8Char4 (@0 bs : List UInt8) : Set where
     @0 b₄range : InRange 128 191 b₄
     @0 bs≡ : bs ≡ b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]
 
-UTF8Char : @0 List UInt8 → Set
-UTF8Char =
-  Sum  UTF8Char1
-  (Sum UTF8Char2
-  (Sum UTF8Char3
-       UTF8Char4))
-
-pattern uft81 b₁ b₁range bs≡ =
-  Sum.inj₁ (mkUTF8Char1 b₁ b₁range bs≡)
-pattern uft82 b₁ b₂ b₁range b₂range bs≡ =
-  Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₁range b₂range bs≡))
-pattern uft83 b₁ b₂ b₃ b₁range b₂range b₃range bs≡ =
-  Sum.inj₂ (Sum.inj₂ Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₃ b₁range b₂range b₃range bs≡))
-pattern uft84 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡ =
-  Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkUTF8Char2 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡))))
+data UTF8Char (@0 bs : List UInt8) : Set where
+  utf81 : UTF8Char1 bs → UTF8Char bs
+  utf82 : UTF8Char2 bs → UTF8Char bs
+  utf83 : UTF8Char3 bs → UTF8Char bs
+  utf84 : UTF8Char4 bs → UTF8Char bs
 
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
