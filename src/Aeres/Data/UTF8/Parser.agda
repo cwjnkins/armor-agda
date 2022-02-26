@@ -129,3 +129,10 @@ module parseUTF8 where
         (parseSum parseUTF8Char2
           (parseSum parseUTF8Char3
             parseUTF8Char4)))
+
+  parseUTF8 : ∀ n → Parser (Logging ∘ Dec) (ExactLength UTF8 n)
+  parseUTF8 =
+    parseIList (tell "parseUTF8: underflow") UTF8Char
+      UTF8Props.UTF8CharProps.nonempty
+      UTF8Props.UTF8CharProps.nonnesting
+      parseUTF8Char

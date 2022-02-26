@@ -26,4 +26,4 @@ lengthSequence : ∀ {@0 A xs} → IList A xs → ℕ
 lengthSequence nil = 0
 lengthSequence (cons (mkIListCons h t bs≡)) = 1 + lengthSequence t
 
-pattern consIList h t bs≡ = cons (mkIListCons h t bs≡)
+pattern consIList bs₁ bs₂ h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
