@@ -1,10 +1,11 @@
-{-# OPTIONS --subtyping --guardedness #-}
+{-# OPTIONS --subtyping --guardedness --sized-types #-}
 
 import Aeres.Arith
 import Aeres.Binary
 import Aeres.Data.UTF8.Parser
 import Aeres.Data.UTF8.Properties
 import Aeres.Data.UTF8.TCB
+import Aeres.Data.UTF8.Trie
 import Aeres.Data.X509
 import Aeres.Data.X509.Completeness
 import Aeres.Data.X509.Decidable
