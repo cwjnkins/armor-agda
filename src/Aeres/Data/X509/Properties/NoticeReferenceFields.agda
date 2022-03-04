@@ -20,7 +20,7 @@ open Aeres.Grammar.Definitions Dig
 open Aeres.Grammar.Properties  Dig
 
 
-iso : Iso (&ₚ X509.DisplayText Generic.IntegerSeq) X509.NoticeReferenceFields
+iso : Iso (&ₚ X509.DisplayText IntegerSeq) X509.NoticeReferenceFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkNoticeReferenceFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (X509.mkNoticeReferenceFields organization noticenums bs≡) = mk&ₚ organization noticenums bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
@@ -32,5 +32,6 @@ unambiguous =
     (unambiguous&ₚ
       DisplayTextProps.unambiguous DisplayTextProps.nonnesting
       (TLVProps.unambiguous
-        (SeqProps.unambiguous (TLVProps.unambiguous PrimProps.IntegerValue.unambiguous)
-          TLVProps.nonempty TLVProps.nonnesting)))
+        (SeqProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+          TLVProps.nonempty (NonNesting Int ∋ TLVProps.nonnesting))))
+          

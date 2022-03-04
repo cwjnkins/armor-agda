@@ -24,7 +24,7 @@ open Base256
 
 parseOtherName : Parser Dig (Logging ∘ Dec) X509.OtherName
 parseOtherName =
-  parseTLV _ "other name" _ parseOctetstringValue
+  parseTLV _ "other name" _ parseOctetStringValue
 
 parseRfcName : Parser Dig (Logging ∘ Dec) X509.RfcName
 parseRfcName = parseTLV _ "RFC name" _ parseIA5StringValue
@@ -33,7 +33,7 @@ parseDnsName : Parser Dig (Logging ∘ Dec) X509.DnsName
 parseDnsName = parseTLV _ "DNS name" _ parseIA5StringValue
 
 parseX400Address : Parser Dig (Logging ∘ Dec) X509.X400Address
-parseX400Address = parseTLV _ "DNS name" _ parseOctetstringValue
+parseX400Address = parseTLV _ "DNS name" _ parseOctetStringValue
 
 parseDirName : Parser Dig (Logging ∘ Dec) X509.DirName
 parseDirName =
@@ -41,13 +41,13 @@ parseDirName =
     (parseSequenceOf "RDN" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN)
 
 parseEdipartyName : Parser Dig (Logging ∘ Dec) X509.EdipartyName
-parseEdipartyName = parseTLV _ "EDI party name" _ parseOctetstringValue
+parseEdipartyName = parseTLV _ "EDI party name" _ parseOctetStringValue
 
 parseURI : Parser Dig (Logging ∘ Dec) X509.URI
 parseURI = parseTLV _ "URI" _ parseIA5StringValue
 
 parseIpAddress : Parser Dig (Logging ∘ Dec) X509.IpAddress
-parseIpAddress = parseTLV _ "IP address" _ parseOctetstringValue
+parseIpAddress = parseTLV _ "IP address" _ parseOctetStringValue
 
 parseRegID : Parser Dig (Logging ∘ Dec) X509.RegID
 parseRegID = parseTLV _ "registered name" _ parseOIDElems
@@ -114,25 +114,3 @@ module parseGeneralName where
 
 open parseGeneralName public
   using (parseGeneralName ; parseGeneralNamesElems ; parseGeneralNames)
-
-
-private
-  module Test where
-
-  Gen₁ : List Dig
-  Gen₁ = Tag.EightyOne ∷ # 2 ∷ # 85 ∷ [ # 87 ]
-
-  Gen₂ : List Dig
-  Gen₂ = Tag.EightyEight ∷ # 2 ∷ # 134 ∷ [ # 72 ]
-
-  Gen₃ : List Dig
-  Gen₃ = Tag.A4 ∷ # 26 ∷ # 49 ∷ # 11  ∷ # 48  ∷ # 9  ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ # 83 ∷ # 49 ∷ # 11 ∷ # 48 ∷ # 9 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ [ # 83 ]
-
-  test₁ : X509.GeneralName Gen₁
-  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₁)} tt)
-
-  test₂ : X509.GeneralName Gen₂
-  test₂ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₂)} tt)
-
-  test₃ : X509.GeneralName Gen₃
-  test₃ = Success.value (toWitness {Q = Logging.val (runParser parseGeneralName Gen₃)} tt)

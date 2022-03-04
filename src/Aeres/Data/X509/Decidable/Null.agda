@@ -17,7 +17,7 @@ module parseNull where
 
   open ≡-Reasoning
 
-  parseNull : Parser Dig (Logging ∘ Dec) Generic.Null
+  parseNull : Parser Dig (Logging ∘ Dec) Null
   parseNull =
     (parseTLV Tag.Null "null" (_≡ [])
       (parseExactLength _ (λ where _ refl refl → refl) (tell $ here' String.++ ": nonzero length")
@@ -34,8 +34,8 @@ private
     Badnull₂ : List Dig
     Badnull₂ = Tag.Null ∷ # 1 ∷ [ # 0 ]
 
-    test₁ : Generic.Null Null₁
+    test₁ : Null Null₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseNull Null₁)} tt)
 
-    test₂ : ¬ Success _ Generic.Null Badnull₂
+    test₂ : ¬ Success _ Null Badnull₂
     test₂ = toWitnessFalse {Q = Logging.val (runParser parseNull Badnull₂)} tt

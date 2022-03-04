@@ -20,7 +20,7 @@ open ≡-Reasoning
 unambiguous{xs} (X509.mkPublicKeyFields{alg = alg₁}{pk₁} signalg₁ pubkey₁ bs≡₁) (X509.mkPublicKeyFields{alg = alg₂}{pk₂} signalg₂ pubkey₂ bs≡₂) =
   ≡-elim (λ {alg₂} alg≡ → ∀ (signalg₂ : X509.SignAlg alg₂) bs≡₂ → X509.mkPublicKeyFields signalg₁ pubkey₁ bs≡₁ ≡ X509.mkPublicKeyFields signalg₂ pubkey₂ bs≡₂)
     (λ signalg₂' bs≡₂' →
-      ≡-elim (λ {pk₂} pk≡ → ∀ (pubkey₂ : Generic.Bitstring pk₂) bs≡₂ → X509.mkPublicKeyFields signalg₁ pubkey₁ bs≡₁ ≡ X509.mkPublicKeyFields signalg₂' pubkey₂ bs≡₂)
+      ≡-elim (λ {pk₂} pk≡ → ∀ (pubkey₂ : BitString pk₂) bs≡₂ → X509.mkPublicKeyFields signalg₁ pubkey₁ bs≡₁ ≡ X509.mkPublicKeyFields signalg₂' pubkey₂ bs≡₂)
         (λ pubkey₂' bs≡₂' →
           subst₂ (λ x y → X509.mkPublicKeyFields signalg₁ pubkey₁ bs≡₁ ≡ X509.mkPublicKeyFields x y bs≡₂')
             (TLVprops.unambiguous SignAlgFieldsProps.unambiguous signalg₁ signalg₂') (TLVprops.unambiguous BitstringProps.unambiguous pubkey₁ pubkey₂')

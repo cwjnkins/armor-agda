@@ -56,19 +56,18 @@ module ExtensionFields where
         (Unambiguous.unambiguous-option₁&₁ (TLVProps.unambiguous PrimProps.BoolValue.unambiguous) TLVProps.nonnesting ua₂ nc))
 
 module SelectExtn where
-  equivalent : Equivalent
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            X509.SKIFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            X509.KUFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            X509.EKUFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            X509.BCFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN      )            X509.IANFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN      )            X509.SANFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            X509.CertPolFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST  )            X509.CRLDistFields)
-                 (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AIA      )            X509.AIAFields)
-                      (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) Generic.Octetstring)))))))))))
-                 X509.SelectExtn
+  Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            X509.SKIFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            X509.KUFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            X509.EKUFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            X509.BCFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN      )            X509.IANFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN      )            X509.SANFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            X509.CertPolFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST  )            X509.CRLDistFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AIA      )            X509.AIAFields)
+             (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) OctetString)))))))))))
+  equivalent : Equivalent Rep X509.SelectExtn
   proj₁ equivalent (Sum.inj₁ x) = X509.akiextn x
   proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = X509.skiextn x
   proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = X509.kuextn x
@@ -92,19 +91,7 @@ module SelectExtn where
   proj₂ equivalent (X509.aiaextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
   proj₂ equivalent (X509.other x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ $ x
 
-  iso : Iso
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            X509.SKIFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            X509.KUFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            X509.EKUFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            X509.BCFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN      )            X509.IANFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN      )            X509.SANFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            X509.CertPolFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST  )            X509.CRLDistFields)
-          (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AIA      )            X509.AIAFields)
-               (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) Generic.Octetstring)))))))))))
-          X509.SelectExtn
+  iso : Iso Rep X509.SelectExtn
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
   proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl

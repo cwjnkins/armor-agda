@@ -19,38 +19,38 @@ open Aeres.Grammar.Properties  Dig
 open Aeres.Grammar.Sum         Dig
 
 module SequenceOf where
-  equivalent : ∀ {@0 A} → Equivalent (Sum (Option (const ⊥)) (&ₚ A (Generic.SequenceOf A))) (Generic.SequenceOf A)
-  proj₁ equivalent (Sum.inj₁ none) = Generic.nil
+  equivalent : ∀ {@0 A} → Equivalent (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
+  proj₁ equivalent (Sum.inj₁ none) = nil
   proj₁ equivalent (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) =
-    Generic.cons (Generic.mkSequenceOf fstₚ₁ sndₚ₁ bs≡)
-  proj₂ equivalent Generic.nil = inj₁ none
-  proj₂ equivalent (Generic.cons (Generic.mkSequenceOf h t bs≡)) =
+    consSequenceOf fstₚ₁ sndₚ₁ bs≡
+  proj₂ equivalent nil = inj₁ none
+  proj₂ equivalent (cons (mkSequenceOf h t bs≡)) =
     inj₂ (mk&ₚ h t bs≡)
 
-  iso : ∀ {@0 A} → Iso (Sum (Option (const ⊥)) (&ₚ A (Generic.SequenceOf A))) (Generic.SequenceOf A)
+  iso : ∀ {@0 A} → Iso (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (Sum.inj₁ none) = refl
   proj₁ (proj₂ iso) (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) = refl
-  proj₂ (proj₂ iso) Generic.nil = refl
-  proj₂ (proj₂ iso) (Generic.cons (Generic.mkSequenceOf h t bs≡)) = refl
+  proj₂ (proj₂ iso) nil = refl
+  proj₂ (proj₂ iso) (cons (mkSequenceOf h t bs≡)) = refl
 
-  @0 nonempty : ∀ {@0 A n} → NonEmpty A → NonEmpty (Generic.BoundedSequenceOf A (suc n))
-  nonempty ne (mk×ₚ (Generic.cons (Generic.mkSequenceOf h t bs≡)) sndₚ₁ refl) refl =
+  @0 nonempty : ∀ {@0 A n} → NonEmpty A → NonEmpty (BoundedSequenceOf A (suc n))
+  nonempty ne (mk×ₚ (cons (mkSequenceOf h t bs≡)) sndₚ₁ refl) refl =
     ne h (++-conicalˡ _ _ (sym bs≡))
 
-  @0 unambiguous : ∀ {@0 A} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (Generic.SequenceOf A)
-  unambiguous ua ne nn Generic.nil Generic.nil = refl
-  unambiguous ua ne nn{xs} Generic.nil (Generic.cons (Generic.mkSequenceOf{bs₁}{bs₂} h t bs≡)) =
+  @0 unambiguous : ∀ {@0 A} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (SequenceOf A)
+  unambiguous ua ne nn nil nil = refl
+  unambiguous ua ne nn{xs} nil (cons (mkSequenceOf{bs₁}{bs₂} h t bs≡)) =
     contradiction (++-conicalˡ _ _ (sym bs≡)) (ne h)
-  unambiguous ua ne nn {xs} (Generic.cons (Generic.mkSequenceOf h t bs≡)) Generic.nil =
+  unambiguous ua ne nn {xs} (cons (mkSequenceOf h t bs≡)) nil =
     contradiction (++-conicalˡ _ _ (sym bs≡)) (ne h)
-  unambiguous ua ne nn (Generic.cons (Generic.mkSequenceOf{bs₁ = bs₁₁}{bs₁₂} h t bs≡)) (Generic.cons (Generic.mkSequenceOf{bs₁ = bs₂₁}{bs₂₂} h₁ t₁ bs≡₁)) =
-    ≡-elim (λ {bs₂₁} bs₁≡ → ∀ h₁ bs≡₁ → _ ≡ Generic.cons (Generic.mkSequenceOf {bs₁ = bs₂₁} h₁ t₁ bs≡₁))
+  unambiguous{A} ua ne nn (consIList{bs₁₁}{bs₁₂} h t bs≡) (consIList{bs₂₁}{bs₂₂} h₁ t₁ bs≡₁) =
+    ≡-elim (λ {bs₂₁} bs₁≡ → ∀ h₁ bs≡₁ → _ ≡ cons (mkIListCons{bs₁ = bs₂₁} h₁ t₁ bs≡₁))
       (λ h₁ bs≡₁ →
-        ≡-elim (λ {bs₂₂} bs₂≡ → ∀ t₁ bs≡₁ → _ ≡ Generic.cons (Generic.mkSequenceOf{bs₂ = bs₂₂} h₁ t₁ bs≡₁))
+        ≡-elim (λ {bs₂₂} bs₂≡ → ∀ t₁ bs≡₁ → _ ≡ cons (mkIListCons h₁ t₁ bs≡₁))
           (λ t₁ bs≡₁ →
-            subst₂ (λ x y → _ ≡ Generic.cons (Generic.mkSequenceOf x y bs≡₁)) (ua h h₁) (unambiguous ua ne nn t t₁)
-              (subst₀ (λ x → _ ≡ Generic.cons (Generic.mkSequenceOf _ _ x)) (≡-unique bs≡ bs≡₁) refl))
+            subst₂ (λ x y → _ ≡ cons (mkIListCons x y bs≡₁)) (ua h h₁) (unambiguous ua ne nn t t₁)
+              (subst₀ (λ x → _ ≡ cons (mkIListCons _ _ x)) (≡-unique bs≡ bs≡₁) refl))
           bs₂≡ t₁ bs≡₁)
       bs₁≡ h₁ bs≡₁
     where
@@ -64,39 +64,39 @@ module SequenceOf where
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
   instance
-    SequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (Generic.SequenceOf A)
-    Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} Generic.nil Generic.nil = yes ≋-refl
-    Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} Generic.nil (Generic.cons x) = no λ where (mk≋ refl ())
-    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (Generic.cons x) Generic.nil = no λ where (mk≋ refl ())
-    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {bs₂} (Generic.cons v₁) (Generic.cons v₂)
-      with Generic.SequenceOfFields.h v₁ ≋? Generic.SequenceOfFields.h v₂
+    SequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} nil nil = yes ≋-refl
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} nil (cons x) = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (cons x) nil = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {bs₂} (cons v₁) (cons v₂)
+      with IListCons.head v₁ ≋? IListCons.head v₂
     ... | yes ≋-refl
-      with Eq≋._≋?_ SequenceOfEq≋ (Generic.SequenceOfFields.t v₁) (Generic.SequenceOfFields.t v₂)
+      with Eq≋._≋?_ SequenceOfEq≋ (IListCons.tail v₁) (IListCons.tail v₂)
     ... | yes ≋-refl
-      with ‼ Generic.SequenceOfFields.bs≡ v₁
+      with ‼ IListCons.bs≡ v₁
     ... | refl =
-      yes (mk≋ (sym $ Generic.SequenceOfFields.bs≡ v₂)
-            (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ Generic.SequenceOfFields.bs₁ v₁ ++ _) →
-              subst _ (sym bs₂≡) (Generic.cons (Generic.mkSequenceOf (Generic.SequenceOfFields.h v₂) (Generic.SequenceOfFields.t v₂) bs≡)) ≡ Generic.cons v₂)
-              (λ bs₂≡ → subst (λ x → Generic.cons (Generic.mkSequenceOf (Generic.SequenceOfFields.h v₂) (Generic.SequenceOfFields.t v₂) x) ≡ Generic.cons v₂)
-                (‼ (≡-unique (Generic.SequenceOfFields.bs≡ v₂) bs₂≡)) refl)
-              (Generic.SequenceOfFields.bs≡ v₂) (Generic.SequenceOfFields.bs≡ v₁)))
-    Eq≋._≋?_ SequenceOfEq≋ (Generic.cons v₁) (Generic.cons v₂) | yes ≋-refl | no ¬v₁≋v₂ = no λ where
+      yes (mk≋ (sym $ IListCons.bs≡ v₂)
+            (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ IListCons.bs₁ v₁ ++ _) →
+              subst _ (sym bs₂≡) (cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) bs≡)) ≡ cons v₂)
+              (λ bs₂≡ → subst (λ x → cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) x) ≡ cons v₂)
+                (‼ (≡-unique (IListCons.bs≡ v₂) bs₂≡)) refl)
+              (IListCons.bs≡ v₂) (IListCons.bs≡ v₁)))
+    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | yes ≋-refl | no ¬v₁≋v₂ = no λ where
       ≋-refl → contradiction ≋-refl ¬v₁≋v₂
-    Eq≋._≋?_ SequenceOfEq≋ (Generic.cons v₁) (Generic.cons v₂) | no ¬v₁≋v₂ = no λ where
+    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | no ¬v₁≋v₂ = no λ where
       ≋-refl → contradiction ≋-refl ¬v₁≋v₂
 
-  @0 sameLength : ∀ {@0 A bs} → NonNesting A → NonEmpty A → (s₁ s₂ : Generic.SequenceOf A bs) → Generic.lengthSequence s₁ ≡ Generic.lengthSequence s₂
-  sameLength nn ne Generic.nil Generic.nil = refl
-  sameLength nn ne Generic.nil (Generic.cons (Generic.mkSequenceOf h t bs≡)) =
+  @0 sameLength : ∀ {@0 A bs} → NonNesting A → NonEmpty A → (s₁ s₂ : SequenceOf A bs) → lengthSequence s₁ ≡ lengthSequence s₂
+  sameLength nn ne nil nil = refl
+  sameLength nn ne nil (cons (mkSequenceOf h t bs≡)) =
     contradiction
       (++-conicalˡ _ _ (sym bs≡))
       (ne h)
-  sameLength nn ne (Generic.cons (Generic.mkSequenceOf h t bs≡)) Generic.nil =
+  sameLength nn ne (cons (mkSequenceOf h t bs≡)) nil =
     contradiction
       (++-conicalˡ _ _ (sym bs≡))
       (ne h)
-  sameLength nn ne (Generic.cons (Generic.mkSequenceOf{bs₁₁}{bs₁₂} h t bs≡)) (Generic.cons (Generic.mkSequenceOf{bs₂₁}{bs₂₂} h₁ t₁ bs≡₁)) =
+  sameLength nn ne (cons (mkSequenceOf{bs₁₁}{bs₁₂} h t bs≡)) (cons (mkSequenceOf{bs₂₁}{bs₂₂} h₁ t₁ bs≡₁)) =
     cong suc (trans₀ ih lem)
     where
     @0 bs₁≡ : bs₁₁ ≡ bs₂₁
@@ -105,27 +105,27 @@ module SequenceOf where
     @0 bs₂≡ : bs₁₂ ≡ bs₂₂
     bs₂≡ = proj₂ (Lemmas.length-++-≡ _ _ _ _ ((trans₀ (sym bs≡) bs≡₁)) (cong length bs₁≡))
 
-    t₁' : Generic.SequenceOf _ bs₁₂
-    t₁' = subst₀ (Generic.SequenceOf _) (sym bs₂≡) t₁
+    t₁' : SequenceOf _ bs₁₂
+    t₁' = subst₀ (SequenceOf _) (sym bs₂≡) t₁
 
-    ih : Generic.lengthSequence t ≡ Generic.lengthSequence t₁'
+    ih : lengthSequence t ≡ lengthSequence t₁'
     ih = sameLength nn ne t t₁'
 
-    @0 lem : Generic.lengthSequence t₁' ≡ Generic.lengthSequence t₁
+    @0 lem : lengthSequence t₁' ≡ lengthSequence t₁
     lem =
       ≡-elim
-        (λ {ys} eq → ∀ (t' : Generic.SequenceOf _ ys) → Generic.lengthSequence (subst₀ _ (sym eq) t') ≡ Generic.lengthSequence t')
+        (λ {ys} eq → ∀ (t' : SequenceOf _ ys) → lengthSequence (subst₀ _ (sym eq) t') ≡ lengthSequence t')
         (λ t → refl) bs₂≡ t₁
 
 module BoundedSequenceOf where
 
-  @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (Generic.BoundedSequenceOf A n)
+  @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (BoundedSequenceOf A n)
   unambiguous uaₐ naₐ nnₐ =
     unambiguousΣₚ (SequenceOf.unambiguous uaₐ naₐ nnₐ)
       λ {xs} a → ≤-irrelevant
 
   instance
-    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (Generic.BoundedSequenceOf A n)
+    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
     Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
       with fstₚ v₁ ≋? fstₚ v₂
     ... | yes ≋-refl

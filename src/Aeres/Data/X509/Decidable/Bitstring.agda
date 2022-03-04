@@ -23,17 +23,17 @@ module parseBitstring where
 
   here' = "parseBitstring"
 
-  parseBitstringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.BitstringValue n)
+  parseBitstringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig BitStringValue n)
   runParser (parseBitstringValue n) xs = do
     yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) (─ bsLen) refl) suf₀ ps≡₀) ←
       runParser (parseN Dig n (tell $ here' String.++ ": underflow")) xs
       where
         (yes (success .[] .0 refl (mk×ₚ (singleton [] refl) (─ refl) refl) .xs refl)) →
           return ∘ no $ λ where
-            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) () refl) suffix ps≡)
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) () refl) suffix ps≡)
         (no ¬parse) →
           return ∘ no $ λ where
-            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
               contradiction
                 (success (bₕ ∷ bₜ) _ read≡ (mk×ₚ self sndₚ₁ refl) suffix ps≡)
                 ¬parse
@@ -41,18 +41,18 @@ module parseBitstring where
       (no bₕ≮8) → do
         tell $ here' String.++ ": unused bits field too large"
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
             contradiction
               (≤-trans (Lemmas.≡⇒≤ (cong (suc ∘ toℕ) (∷-injectiveˡ (trans₀ ps≡₀ (sym ps≡))))) bₕ<8)
               bₕ≮8
       (yes bₕ<8) →
-        case Generic.bitstringUnusedBits? bₕ bₜ of λ where
+        case BitString.unusedBits? bₕ bₜ of λ where
           (no ¬validunused) → do
             tell $ here' String.++ ": bad unused bits"
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ (Generic.mkBitstringValue bₕ' bₜ' _ _ unusedBits refl) (─ sndₚ₁) refl) suffix ps≡) →
+              (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ' bₜ' _ _ unusedBits refl) (─ sndₚ₁) refl) suffix ps≡) →
                 contradiction
-                  (subst₂ Generic.BitstringUnusedBits{x = bₕ'}{u = bₜ'}{bₜ}
+                  (subst₂ BitString.UnusedBits{x = bₕ'}{u = bₜ'}{bₜ}
                     (∷-injectiveˡ (trans₀ ps≡ (sym ps≡₀)))
                     (∷-injectiveʳ (exactLength-nonnesting _ (trans₀ ps≡ (sym ps≡₀))
                                     (mk×ₚ{A = Singleton} self (─ sndₚ₁) refl)
@@ -61,19 +61,19 @@ module parseBitstring where
                   ¬validunused
           (yes validunused) →
             return (yes
-              (success (bₕ ∷ bₜ) _ r₀≡ (mk×ₚ (Generic.mkBitstringValue bₕ bₜ bₕ<8 self validunused refl) (─ bsLen) refl) suf₀ ps≡₀))
+              (success (bₕ ∷ bₜ) _ r₀≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 self validunused refl) (─ bsLen) refl) suf₀ ps≡₀))
 
-  parseBitstring : Parser Dig (Logging ∘ Dec) Generic.Bitstring
+  parseBitstring : Parser Dig (Logging ∘ Dec) BitString
   parseBitstring =
-    parseTLV Tag.Bitstring here' Generic.BitstringValue parseBitstringValue
+    parseTLV Tag.BitString here' BitStringValue parseBitstringValue
 
   parseIssUID : Parser Dig (Logging ∘ Dec) X509.IssUID
   parseIssUID =
-    parseTLV Tag.EightyOne "issUID" Generic.BitstringValue parseBitstringValue
+    parseTLV Tag.A81 "issUID" BitStringValue parseBitstringValue
 
   parseSubUID : Parser Dig (Logging ∘ Dec) X509.SubUID
   parseSubUID =
-    parseTLV Tag.EightyTwo "subUID" Generic.BitstringValue parseBitstringValue
+    parseTLV Tag.A82 "subUID" BitStringValue parseBitstringValue
 
 open parseBitstring public using (parseBitstringValue ; parseBitstring ; parseIssUID ; parseSubUID)
 
@@ -81,44 +81,44 @@ private
   module Test where
 
     Bitstring₁ : List Dig
-    Bitstring₁ = Tag.Bitstring ∷ # 2 ∷ # 5 ∷ [ # 160 ]
+    Bitstring₁ = Tag.BitString ∷ # 2 ∷ # 5 ∷ [ # 160 ]
 
     Bitstring₂ : List Dig
-    Bitstring₂ = Tag.Bitstring ∷ # 2 ∷ # 0 ∷ [ # 160 ]
+    Bitstring₂ = Tag.BitString ∷ # 2 ∷ # 0 ∷ [ # 160 ]
 
     Bitstring₃ : List Dig
-    Bitstring₃ = Tag.Bitstring ∷ # 2 ∷ # 7 ∷ [ # 160 ]
+    Bitstring₃ = Tag.BitString ∷ # 2 ∷ # 7 ∷ [ # 160 ]
 
     Bitstring₄ : List Dig
-    Bitstring₄ = Tag.Bitstring ∷ # 2 ∷ # 8 ∷ [ # 160 ]
+    Bitstring₄ = Tag.BitString ∷ # 2 ∷ # 8 ∷ [ # 160 ]
 
     Bitstring₅ : List Dig
-    Bitstring₅ = Tag.Bitstring ∷ # 3 ∷ # 8 ∷ # 255 ∷ [ # 160 ]
+    Bitstring₅ = Tag.BitString ∷ # 3 ∷ # 8 ∷ # 255 ∷ [ # 160 ]
 
     Bitstring₆ : List Dig
-    Bitstring₆ = Tag.Bitstring ∷ # 1 ∷ [ # 0 ]
+    Bitstring₆ = Tag.BitString ∷ # 1 ∷ [ # 0 ]
 
     Bitstring₇ : List Dig
-    Bitstring₇ = Tag.Bitstring ∷ # 1 ∷ [ # 3 ]
+    Bitstring₇ = Tag.BitString ∷ # 1 ∷ [ # 3 ]
 
-    test₁ : Generic.Bitstring Bitstring₁
+    test₁ : BitString Bitstring₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₁)} tt)
 
-    test₂ : Generic.Bitstring Bitstring₂
+    test₂ : BitString Bitstring₂
     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₂)} tt)
 
-    test₃ : ¬ Success _ Generic.Bitstring Bitstring₃
+    test₃ : ¬ Success _ BitString Bitstring₃
     test₃ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₃)} tt
 
-    test₄ : ¬ Success _ Generic.Bitstring Bitstring₄
+    test₄ : ¬ Success _ BitString Bitstring₄
     test₄ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₄)} tt
 
-    test₅ : ¬ Success _ Generic.Bitstring Bitstring₅
+    test₅ : ¬ Success _ BitString Bitstring₅
     test₅ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₅)} tt
 
-    test₆ : Generic.Bitstring Bitstring₆
+    test₆ : BitString Bitstring₆
     test₆ = Success.value (toWitness {Q = Logging.val (runParser parseBitstring Bitstring₆)} tt)
 
-    test₇ : ¬ Success _ Generic.Bitstring Bitstring₇
+    test₇ : ¬ Success _ BitString Bitstring₇
     test₇ = toWitnessFalse {Q = Logging.val (runParser parseBitstring Bitstring₇)} tt
 

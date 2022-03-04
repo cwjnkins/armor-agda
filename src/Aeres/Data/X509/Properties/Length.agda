@@ -13,7 +13,7 @@ module Aeres.Data.X509.Properties.Length where
 open Base256
 open Aeres.Grammar.Definitions Dig
 
-@0 minrepUnique : ∀ {lₕ lₜ} → Unique (Length.MinRep lₕ lₜ)
+@0 minrepUnique : ∀ {lₕ lₜ} → Unique (Length.MinRepLong lₕ lₜ)
 minrepUnique{lₕ}{[]} p₁ p₂ = ≤-irrelevant p₁ p₂
 minrepUnique {lₕ} {x ∷ lₜ} tt tt = refl
 

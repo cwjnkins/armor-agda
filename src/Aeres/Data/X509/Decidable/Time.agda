@@ -72,18 +72,18 @@ module parseMonthDayHourMinSecFields where
 
 open parseMonthDayHourMinSecFields public using (parseMonthDayHourMinSecFields)
 
-module parseUtcTimeFields where
+module parseUTCTimeFields where
 
-  here' = "parseUtcTimeFields"
+  here' = "parseUTCTimeFields"
   open ≡-Reasoning
 
-  parseUtcTimeFields : Parser Dig (Logging ∘ Dec) Generic.UtcTimeFields
-  runParser parseUtcTimeFields xs = do
+  parseUTCTimeFields : Parser Dig (Logging ∘ Dec) Generic.UTCTimeFields
+  runParser parseUTCTimeFields xs = do
     yes (success ._ ._ refl (mk×ₚ (singleton (y₁ ∷ y₂ ∷ []) refl) (─ refl) refl) suf₀ refl)
       ← runParser (parseN Dig (String.length "YY") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          (success prefix@._ read read≡ (Generic.mkUtcTimeFields{y1 = y₁}{y₂} _ _ _ _ refl) suffix ps≡) →
+          (success prefix@._ read read≡ (Generic.mkUTCTimeFields{y1 = y₁}{y₂} _ _ _ _ refl) suffix ps≡) →
             contradiction
               (success (y₁ ∷ [ y₂ ]) 2 refl (mk×ₚ singleSelf (─ refl) refl) _ ps≡)
               ¬parse
@@ -92,7 +92,7 @@ module parseUtcTimeFields where
       where no ¬parse → do
         tell $ here'
         return ∘ no $ λ where
-          (success prefix read read≡ (Generic.mkUtcTimeFields{y1 = y₁'}{y₂'}{z = z} year yearRange mmddhhmmss term refl) suffix ps≡) → ‼
+          (success prefix read read≡ (Generic.mkUTCTimeFields{y1 = y₁'}{y₂'}{z = z} year yearRange mmddhhmmss term refl) suffix ps≡) → ‼
             let @0 y₁≡ : y₁' ≡ y₁
                 y₁≡ = ∷-injectiveˡ ps≡
 
@@ -109,7 +109,7 @@ module parseUtcTimeFields where
       ← runParser (parseLit Dig (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # toℕ 'Z' ]) suf₁
       where no ¬parse → do
         return ∘ no $ λ where
-          (success prefix@._ read read≡ (Generic.mkUtcTimeFields{y1 = y₁'}{y₂'}{z = z} year yearRange mmddhhmmss term refl) suffix ps≡) → ‼
+          (success prefix@._ read read≡ (Generic.mkUTCTimeFields{y1 = y₁'}{y₂'}{z = z} year yearRange mmddhhmmss term refl) suffix ps≡) → ‼
             let @0 ps≡' : _
                 ps≡' = proj₂ $
                   Lemmas.length-++-≡
@@ -126,7 +126,7 @@ module parseUtcTimeFields where
       (no ¬yᵣ) → do
         tell $ here' String.++ ": invalid range for year"
         return ∘ no $ λ where
-          (success prefix read read≡ (Generic.mkUtcTimeFields{y1 = y₁'}{y₂'} year yearRange _ _ refl) suffix ps≡) →
+          (success prefix read read≡ (Generic.mkUTCTimeFields{y1 = y₁'}{y₂'} year yearRange _ _ refl) suffix ps≡) →
             contradiction
               (subst (All (InRange '0' '9')) (proj₁ $ Lemmas.length-++-≡ _ _ _ _ ps≡ refl) yearRange)
               ¬yᵣ
@@ -136,16 +136,16 @@ module parseUtcTimeFields where
             (2 + r₁ + 1)
             (cong (2 +_) (begin r₁ + 1 ≡⟨ cong (_+ 1) r₁≡ ⟩
                                 11     ∎))
-            (Generic.mkUtcTimeFields singleSelf yᵣ v₁ refl refl)
+            (Generic.mkUTCTimeFields singleSelf yᵣ v₁ refl refl)
             suf₂
             (cong (λ x → y₁ ∷ y₂ ∷ x) ps≡₁)))
 
-open parseUtcTimeFields public using (parseUtcTimeFields)
+open parseUTCTimeFields public using (parseUTCTimeFields)
 
-parseUtcTime : Parser Dig (Logging ∘ Dec) Generic.UtcTime
-parseUtcTime =
-  parseTLV _ "UtcTime" _
-    (parseExactLength Dig Props.Time.UTC.nonnesting (tell $ "UtcTime: length mismatch") parseUtcTimeFields)
+parseUTCTime : Parser Dig (Logging ∘ Dec) Generic.UTCTime
+parseUTCTime =
+  parseTLV _ "UTCTime" _
+    (parseExactLength Dig Props.Time.UTC.nonnesting (tell $ "UTCTime: length mismatch") parseUTCTimeFields)
 
 module parseGenTimeFields where
   open ≡-Reasoning
@@ -324,7 +324,7 @@ parseGenTime =
 
 parseTime : Parser Dig (Logging ∘ Dec) Generic.Time
 runParser parseTime xs = do
-  utc? ← runParser parseUtcTime xs
+  utc? ← runParser parseUTCTime xs
   case utc? of λ where
     (yes utc) → return (yes (mapSuccess _ (λ {bs} → Generic.utctm{bs}) utc))
     (no ¬utc) → do
@@ -343,10 +343,10 @@ private
   module Test where
 
     Gen₁ : List Dig
-    Gen₁ = # Tag.Gentime ∷ # 15 ∷ # 50 ∷ # 56 ∷ # 52 ∷ # 49 ∷ # 48 ∷ # 54 ∷ # 50 ∷ # 52 ∷ # 49 ∷ # 56 ∷ # 51 ∷ # 54 ∷ # 53 ∷ # 52 ∷ [ # 90 ]
+    Gen₁ = # Tag.GeneralizedTime ∷ # 15 ∷ # 50 ∷ # 56 ∷ # 52 ∷ # 49 ∷ # 48 ∷ # 54 ∷ # 50 ∷ # 52 ∷ # 49 ∷ # 56 ∷ # 51 ∷ # 54 ∷ # 53 ∷ # 52 ∷ [ # 90 ]
 
     Utc₁ : List Dig
-    Utc₁ = # Tag.Utctime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
+    Utc₁ = # Tag.UTCTime ∷ # 13 ∷ # 57 ∷ # 55 ∷ # 48 ∷ # 53 ∷ # 51 ∷ # 48 ∷ # 49 ∷ # 52 ∷ # 52 ∷ # 56 ∷ # 50 ∷ # 50 ∷ [ # 90 ]
 
     test₁ : Generic.Time Gen₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser  parseTime Gen₁)} tt)

@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+open import Aeres.Data.X690-DER.Int
 open import Data.Nat.Properties
   hiding (_≟_)
 
@@ -26,22 +27,20 @@ module BoolValue where
   unambiguous (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ refl) (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ refl) = refl
 
 module IntegerValue where
-  @0 unambiguous : Unambiguous Generic.IntegerValue
-  unambiguous{xs} (Generic.mkIntegerValue ._ refl) (Generic.mkIntegerValue val₁ bs≡₁) =
-    ≡-elim (λ {val₁} bs≡ → Generic.mkIntegerValue (twosComplement xs) refl ≡ Generic.mkIntegerValue val₁ bs≡)
-      refl bs≡₁
+  @0 unambiguous : Unambiguous IntegerValue
+  unambiguous{xs} self self = refl
 
 module BitstringValue where
-  @0 unambiguous : Unambiguous Generic.BitstringValue
-  unambiguous (Generic.mkBitstringValue bₕ bₜ bₕ<8 bits unusedBits bs≡) (Generic.mkBitstringValue bₕ₁ bₜ₁ bₕ<9 bits₁ unusedBits₁ bs≡₁) =
+  @0 unambiguous : Unambiguous BitStringValue
+  unambiguous (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits bs≡) (mkBitStringValue bₕ₁ bₜ₁ bₕ<9 bits₁ unusedBits₁ bs≡₁) =
     subst₂
-      (λ bₕ₁ bₜ₁ → ∀ (bₕ₁<8 : toℕ bₕ₁ < 8) (bits₁ : Singleton (Generic.toBitRep bₕ₁ bₜ₁)) (unusedBits₁ : Generic.BitstringUnusedBits bₕ₁ bₜ₁) bs≡₁ →
-        _ ≡ Generic.mkBitstringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁)
+      (λ bₕ₁ bₜ₁ → ∀ (bₕ₁<8 : toℕ bₕ₁ < 8) (bits₁ : Singleton (BitString.toBitRep bₕ₁ bₜ₁)) (unusedBits₁ : BitString.UnusedBits bₕ₁ bₜ₁) bs≡₁ →
+        _ ≡ mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁)
       bₕ≡ bₜ≡
       (λ bₕ₁<8 bits₁ unusedBits₁ bs≡₁ →
-        subst₂ (λ bₕ₁<8 bs≡₁ → _ ≡ Generic.mkBitstringValue bₕ bₜ bₕ₁<8 bits₁ unusedBits₁ bs≡₁ ) (≤-irrelevant bₕ<8 _) (≡-unique bs≡ _)
-          (subst₂ (λ bits₁ unusedBits₁ → _ ≡ Generic.mkBitstringValue bₕ bₜ bₕ<8 bits₁ unusedBits₁ bs≡)
-            (uniqueSingleton bits _) (‼ Generic.bitstringUnusedBits-unique{bₕ}{bₜ} unusedBits unusedBits₁)
+        subst₂ (λ bₕ₁<8 bs≡₁ → _ ≡ mkBitStringValue bₕ bₜ bₕ₁<8 bits₁ unusedBits₁ bs≡₁ ) (≤-irrelevant bₕ<8 _) (≡-unique bs≡ _)
+          (subst₂ (λ bits₁ unusedBits₁ → _ ≡ mkBitStringValue bₕ bₜ bₕ<8 bits₁ unusedBits₁ bs≡)
+            (uniqueSingleton bits _) (‼ BitString.uniqueUnusedBits{bₕ}{bₜ} unusedBits unusedBits₁)
             refl))
       bₕ<9 bits₁ unusedBits₁ bs≡₁
     where

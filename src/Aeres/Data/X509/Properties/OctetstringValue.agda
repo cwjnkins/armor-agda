@@ -11,11 +11,11 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 
 
-@0 unambiguous : Unambiguous Generic.OctetstringValue
+@0 unambiguous : Unambiguous OctetStringValue
 unambiguous (singleton x refl) (singleton .x refl) = refl
 
 instance
-  OctetstringValueEq≋ : Eq≋ Generic.OctetstringValue
+  OctetstringValueEq≋ : Eq≋ OctetStringValue
   Eq≋._≋?_ OctetstringValueEq≋{._}{._} (singleton bs₁ refl) (singleton bs₂ refl)
     with bs₁ ≟ bs₂
   ... | yes refl = yes ≋-refl

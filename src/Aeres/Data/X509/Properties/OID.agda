@@ -24,7 +24,7 @@ module OID where
         OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
 
 module OIDSeq where
-  @0 unambiguous : Unambiguous (Generic.SequenceOf Generic.OID)
+  @0 unambiguous : Unambiguous (SequenceOf Generic.OID)
   unambiguous = SeqProps.unambiguous OID.unambiguous TLVProps.nonempty TLVProps.nonnesting
 
 @0 unambiguous : _

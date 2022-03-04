@@ -25,9 +25,9 @@ module parseVersion where
   open ≡-Reasoning
 
   parseVersion : Parser Dig (Logging ∘ Dec) X509.Version
-  parseVersion = parseTLV Tag.A0 "version" Generic.Int p
+  parseVersion = parseTLV Tag.AA0 "version" Int p
     where
-    p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.Int n)
+    p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Int n)
     p = parseExactLength Dig Props.TLV.nonnesting (tell $ here' String.++ ": length mismatch") parseInt
 
 open parseVersion public using (parseVersion)
@@ -36,19 +36,19 @@ private
   module Test where
 
     Version₁ : List Dig
-    Version₁ = Tag.A0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 0 ]
+    Version₁ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 0 ]
 
     Version₂ : List Dig
-    Version₂ = Tag.A0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 1 ]
+    Version₂ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 1 ]
 
     Version₃ : List Dig
-    Version₃ = Tag.A0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 2 ]
+    Version₃ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 2 ]
 
     Version₄ : List Dig
-    Version₄ = Tag.A0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
+    Version₄ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
 
     VersionBadLen : List Dig
-    VersionBadLen = Tag.A0 ∷ # 4 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
+    VersionBadLen = Tag.AA0 ∷ # 4 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
 
     test₁ : X509.Version Version₁
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₁)} tt)
