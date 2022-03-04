@@ -20,6 +20,10 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module UTF8Char1Props where
+  @0 unambiguous : Unambiguous UTF8Char1
+  unambiguous (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 .b₁ b₁range₁ refl) =
+    subst (λ b₁range' → _ ≡ mkUTF8Char1 _ b₁range' refl) (≤-unique b₁range b₁range₁) refl
+
   nonnesting : NonNesting UTF8Char1
   nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 b₂ b₁range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ [ b₁ ] _ [ b₂ ] _ xs₁++ys₁≡xs₂++ys₂ refl

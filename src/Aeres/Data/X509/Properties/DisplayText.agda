@@ -118,19 +118,25 @@ unambiguous =
       (unambiguousΣₚ (TLVProps.unambiguous IA5Props.unambiguous)
         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
       (unambiguousSum
-        (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
-          (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-        (unambiguousSum
-          (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
-            (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-          (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
-            (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))
-        (NoConfusion.sumₚ{A = Σₚ X509.VisibleString _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))))
-      (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
-        (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-        (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))))
+        (unambiguousΣₚ (TLVProps.unambiguous {!!}) {!!}) {!!} {!!})
+      {!!})
+    -- (unambiguousSum
+    --   (unambiguousΣₚ (TLVProps.unambiguous IA5Props.unambiguous)
+    --     (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+    --   (unambiguousSum
+    --     (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
+    --       (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+    --     (unambiguousSum
+    --       (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
+    --         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+    --       (unambiguousΣₚ (TLVProps.unambiguous OSProps.unambiguous)
+    --         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+    --       (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))
+    --     (NoConfusion.sumₚ{A = Σₚ X509.VisibleString _}
+    --       (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
+    --       (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))))
+    --   (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
+    --     (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
+    --     (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
+    --       (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
+    --       (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))))

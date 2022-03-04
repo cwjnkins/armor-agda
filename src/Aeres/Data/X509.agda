@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping --inversion-max-depth=1000 #-}
 
 open import Aeres.Binary
+open import Aeres.Data.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
@@ -245,22 +246,23 @@ module X509 where
   TeletexString xs = TLV Tag.TeletexString  OctetStringValue xs
 
   PrintableString : (@0 _ : List Dig) → Set
-  PrintableString xs = TLV Tag.PrintableString  OctetStringValue xs
+  PrintableString xs = TLV Tag.PrintableString  IA5StringValue xs
 
   UniversalString : (@0 _ : List Dig) → Set
-  UniversalString xs = TLV Tag.UniversalString  OctetStringValue xs
+  UniversalString xs = TLV Tag.UniversalString  UTF8 xs
 
   UTF8String : (@0 _ : List Dig) → Set
-  UTF8String xs = TLV Tag.UTF8String  OctetStringValue xs
+  UTF8String xs = TLV Tag.UTF8String  UTF8 xs
 
   BMPString : (@0 _ : List Dig) → Set
-  BMPString xs = TLV Tag.BMPString  OctetStringValue xs
+  BMPString xs = TLV Tag.BMPString  UTF8 xs
 
   IA5String : (@0 _ : List Dig) → Set
   IA5String xs = TLV Tag.IA5String  IA5StringValue xs
 
+  -- TODO: check this (is it UTF8?)
   VisibleString : (@0 _ : List Dig) → Set
-  VisibleString xs = TLV Tag.VisibleString  OctetStringValue xs
+  VisibleString xs = TLV Tag.VisibleString  UTF8 xs
 
   data DirectoryString : @0 List Dig → Set where
     teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs
