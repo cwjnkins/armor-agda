@@ -29,5 +29,5 @@ unambiguous =
     (Unambiguous.option₃&₂
       (TLVProps.unambiguous OSProps.unambiguous) TLVProps.nonnesting TLVProps.nonempty
       (TLVProps.unambiguous GeneralNameProps.GeneralNamesElems.unambiguous) TLVProps.nonnesting TLVProps.nonempty
-      (TLVProps.unambiguous PrimProps.IntegerValue.unambiguous) TLVProps.nonempty
+      (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}) TLVProps.nonempty
       (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ()) (TLVProps.noconfusion λ ()))

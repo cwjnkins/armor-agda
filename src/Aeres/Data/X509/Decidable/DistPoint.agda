@@ -23,11 +23,11 @@ open Base256
 module parseDistPoint where
   here' = "parseDistPoint"
 
-  parseFullName = parseTLV Tag.A0 "full name" _ parseGeneralNamesElems
+  parseFullName = parseTLV Tag.AA0 "full name" _ parseGeneralNamesElems
 
   parseNameRTCrlIssuer : Parser _ (Logging ∘ Dec) X509.NameRTCrlIssuer
   parseNameRTCrlIssuer =
-    parseTLV Tag.A1 "RT CRL issuer" _
+    parseTLV Tag.AA1 "RT CRL issuer" _
       (λ n → parseBoundedSequenceOf "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDNATV n 1)
 
   parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
@@ -41,12 +41,12 @@ module parseDistPoint where
       (equivalent×ₚ _ Props.DistPointFields.equivalent)
       (parseOption₃ _ Props.TLV.nonnesting Props.TLV.nonnesting Props.TLV.nonnesting
         (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ()))
-        (parseTLV Tag.A0 "dist. point name" X509.DistPointNameChoice
+        (parseTLV Tag.AA0 "dist. point name" X509.DistPointNameChoice
           (parseExactLength _ Props.DistPointNameChoice.nonnesting
             (tell $ "parseDistPoint: name choice: underflow")
             parseDistPointNameChoice))
-        (parseTLV Tag.EightyOne "reason flags" _ parseBitstringValue)
-        (parseTLV Tag.A2 "CRL issuer" X509.GeneralNamesElems
+        (parseTLV Tag.A81 "reason flags" _ parseBitstringValue)
+        (parseTLV Tag.AA2 "CRL issuer" X509.GeneralNamesElems
           parseGeneralNamesElems)
         (tell $ here' String.++ ": failed")
         n)

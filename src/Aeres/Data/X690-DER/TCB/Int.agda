@@ -12,6 +12,8 @@ open Base256
 IntegerValue : @0 List UInt8 → Set
 IntegerValue bs = Singleton (twosComplement bs)
 
+pattern mkIntegerValue x y = singleton x y
+
 Int : @0 List UInt8 → Set
 Int = TLV Tag.Integer IntegerValue
 

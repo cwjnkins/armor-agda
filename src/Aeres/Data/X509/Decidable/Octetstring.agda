@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
+open import Aeres.Data.UTF8
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
@@ -18,49 +19,45 @@ module Aeres.Data.X509.Decidable.Octetstring where
 
 open Base256
 
-module parseOctetstringValue where
+module parseOctetStringValue where
   here' = "parseOctetStringValue"
 
   open ≡-Reasoning
 
-  parseOctetstringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig Generic.OctetstringValue n)
-  parseOctetstringValue = λ n → parseN Dig n (tell $ here' String.++ ": underflow")
+  parseOctetStringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig OctetStringValue n)
+  parseOctetStringValue = λ n → parseN Dig n (tell $ here' String.++ ": underflow")
 
-open parseOctetstringValue public using (parseOctetstringValue)
+open parseOctetStringValue public using (parseOctetStringValue)
 
-module parseOctetstring where
+module parseOctetString where
   here' = "parseOctetString"
 
   open ≡-Reasoning
 
-  parseOctetstring : Parser Dig (Logging ∘ Dec) Generic.Octetstring
-  parseOctetstring = parseTLV Tag.Octetstring  "Octet string" Generic.OctetstringValue parseOctetstringValue 
+  parseOctetString : Parser Dig (Logging ∘ Dec) OctetString
+  parseOctetString = parseTLV Tag.OctetString  "Octet string" OctetStringValue parseOctetStringValue 
 
-open parseOctetstring public using (parseOctetstring)
+open parseOctetString public using (parseOctetString)
 
 parseTeletexString : Parser Dig (Logging ∘ Dec) X509.TeletexString
 parseTeletexString =
-  parseTLV Tag.TeletexString "teletex string" Generic.OctetstringValue parseOctetstringValue
-
-parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
-parsePrintableString =
-  parseTLV Tag.PrintableString "printable string" Generic.OctetstringValue  parseOctetstringValue
+  parseTLV Tag.TeletexString "teletex string" OctetStringValue parseOctetStringValue
 
 parseUniversalString : Parser Dig (Logging ∘ Dec) X509.UniversalString
 parseUniversalString =
-  parseTLV Tag.UniversalString "universal string" Generic.OctetstringValue  parseOctetstringValue
+  parseTLV Tag.UniversalString "universal string" _ parseUTF8
 
 parseUTF8String : Parser Dig (Logging ∘ Dec) X509.UTF8String
 parseUTF8String =
-  parseTLV Tag.UTF8String "UTF8 string" Generic.OctetstringValue parseOctetstringValue
+  parseTLV Tag.UTF8String "UTF8 string" _ parseUTF8
 
 parseBMPString : Parser Dig (Logging ∘ Dec) X509.BMPString
 parseBMPString =
-  parseTLV Tag.BMPString "BMP string" Generic.OctetstringValue parseOctetstringValue
+  parseTLV Tag.BMPString "BMP string" _ parseUTF8
 
 parseVisibleString : Parser Dig (Logging ∘ Dec) X509.VisibleString
 parseVisibleString =
-  parseTLV Tag.VisibleString "universal string" Generic.OctetstringValue parseOctetstringValue
+  parseTLV Tag.VisibleString "universal string" _ parseUTF8
 
 module parseIA5StringValue where
 
@@ -68,7 +65,7 @@ module parseIA5StringValue where
 
   parseIA5StringValue : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig X509.IA5StringValue n)
   runParser (parseIA5StringValue n) xs = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen) refl) suf₀ ps≡₀) ← runParser (parseOctetstringValue n) xs
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen) refl) suf₀ ps≡₀) ← runParser (parseOctetStringValue n) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ (X509.mkIA5StringValue str all<128) strLen refl) suffix ps≡) →
@@ -99,11 +96,15 @@ open parseIA5StringValue public using (parseIA5StringValue)
 parseIA5String : Parser Dig (Logging ∘ Dec) X509.IA5String
 parseIA5String = parseTLV _ "IA5String" _ parseIA5StringValue
 
+parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
+parsePrintableString =
+  parseTLV Tag.PrintableString "printable string" X509.IA5StringValue parseIA5StringValue
+
 private
   module Test where
 
   Oct₁ : List Dig
-  Oct₁ = Tag.Octetstring ∷ # 2 ∷ # 1 ∷ [ # 1 ]
+  Oct₁ = Tag.OctetString ∷ # 2 ∷ # 1 ∷ [ # 1 ]
 
   I5₂ : List Dig
   I5₂ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 1 ]
@@ -111,8 +112,8 @@ private
   I5₃ : List Dig
   I5₃ = Tag.IA5String ∷ # 2 ∷ # 1 ∷ [ # 160 ]
 
-  test₁ : Generic.Octetstring Oct₁
-  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOctetstring Oct₁)} tt)
+  test₁ : OctetString Oct₁
+  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOctetString Oct₁)} tt)
 
   test₂ :  X509.IA5String I5₂
   test₂ = Success.value (toWitness {Q = Logging.val (runParser parseIA5String I5₂)} tt)

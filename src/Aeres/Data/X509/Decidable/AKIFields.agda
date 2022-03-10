@@ -31,7 +31,7 @@ module parseAKIFields where
   open ≡-Reasoning
 
   parseAKIKeyId : Parser Dig (Logging ∘ Dec) X509.AKIKeyId
-  parseAKIKeyId = parseTLV _ Here.AKIKeyId _ parseOctetstringValue
+  parseAKIKeyId = parseTLV _ Here.AKIKeyId _ parseOctetStringValue
 
   parseAKIAuthCertIssuer : Parser Dig (Logging ∘ Dec) X509.AKIAuthCertIssuer
   parseAKIAuthCertIssuer = parseTLV _ Here.AKIAuthCertIssuer _ parseGeneralNamesElems

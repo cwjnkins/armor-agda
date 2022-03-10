@@ -59,58 +59,58 @@ checkTwoTimes yr₁ mn₁ da₁ hr₁ mi₁ se₁ yr₂ mn₂ da₂ hr₂ mi₂ 
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
 isCA : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
 isCA (─ .[] , Aeres.Grammar.Definitions.none) = false
-isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields Aeres.Grammar.Definitions.none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields (Aeres.Grammar.Definitions.some (Generic.mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields Aeres.Grammar.Definitions.none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCA (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields (Aeres.Grammar.Definitions.some (mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
 
 
 -- returns BCPathLen if exists
-getBCPathLen :  Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List Dig) (Option Generic.Int)
+getBCPathLen :  Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List Dig) (Option Int)
 getBCPathLen (─ .[] , Aeres.Grammar.Definitions.none) = _ , none
-getBCPathLen (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
+getBCPathLen (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
 
 
 -- isCRLSign present in KU extension ? bit 6 == true ?
 isCRLIssuer : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
 isCRLIssuer (─ .[] , Aeres.Grammar.Definitions.none) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₆
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCRLIssuer (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₆
 
 
 -- isKeyCertSign present in KU extension ? bit 5 == true ?
 isKeyCertSignPresent : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
 isKeyCertSignPresent (─ .[] , Aeres.Grammar.Definitions.none) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₅
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isKeyCertSignPresent (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₅
 
 
 -- get KU Bits in bool list
 getKUBits : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → List Bool
 getKUBits (─ .[] , Aeres.Grammar.Definitions.none) = []
-getKUBits (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Generic.mkBitstringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
+getKUBits (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
 
 
 -- is SAN extension critical ? 
 isSANCritical : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
 isSANCritical (─ .[] , Aeres.Grammar.Definitions.none) = false
 isSANCritical (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡)) = false
-isSANCritical (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (Generic.mkTLV len (Generic.mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
+isSANCritical (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (mkTLV len (Generic.mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
 
 
 -- get SAN length
 getSANLength : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → ℕ
 getSANLength (─ .[] , Aeres.Grammar.Definitions.none) = 0
-getSANLength (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = Generic.lengthSequence fstₚ₁
+getSANLength (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = lengthSequence fstₚ₁
 
 
 -- is SAN present in Cert ?
@@ -123,32 +123,32 @@ isSANPresent (fst , Aeres.Grammar.Definitions.some x) = true
 -- either distributionPoint or CRLIssuer MUST be present.
 checkCRLDistStruct : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
 checkCRLDistStruct (─ .[] , Aeres.Grammar.Definitions.none) = true
-checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
+checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
   where
-  helper : ∀ {@0 bs} → Generic.SequenceOf X509.DistPoint bs → Bool
-  helper Generic.nil = true
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper : ∀ {@0 bs} → SequenceOf X509.DistPoint bs → Bool
+  helper nil = true
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
 
 
 -- returns all certificate policy OIDs
 getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
 getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
-getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (Generic.mkTLV len (Generic.mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
+getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
   where
-  helper : ∀ {@0 bs} → Generic.SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
-  helper Generic.nil = []
-  helper (Generic.cons (Generic.mkSequenceOf (Generic.mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
+  helper : ∀ {@0 bs} → SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
+  helper nil = []
+  helper (cons (mkSequenceOf (mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
 
 
 -- returns true only if the extension is unknown and has critical bit = true
 isUnkwnCriticalExtension : Exists─ (List Dig) X509.Extension → Bool
-isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , Generic.mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (Generic.mkTLV len₁ (Generic.mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , Generic.mkTLV len _ len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ Aeres.Grammar.Definitions.none extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ (Aeres.Grammar.Definitions.some (mkTLV len₁ (Generic.mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len _ len≡ bs≡) = false
 
 -- is any unknown extention critical from the list ?
 isAnyOtherExtnCritical : List (Exists─ (List Dig) X509.Extension) → Bool
@@ -166,17 +166,17 @@ getExtensionsOIDList : List (Exists─ (List Dig) X509.Extension) →  List (Exi
 getExtensionsOIDList = map helper
   where
   helper : Exists─ (List Dig) X509.Extension → (Exists─ (List Dig) Generic.OID)
-  helper (fst , Generic.mkTLV len (X509.akiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.skiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.kuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.ekuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.bcextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.ianextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.sanextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.cpextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
-  helper (fst , Generic.mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.akiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.skiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.kuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.ekuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.bcextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.ianextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.sanextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.cpextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
 
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
@@ -196,16 +196,13 @@ SCP2 : ∀ {@0 bs} → X509.Cert bs → Set
 SCP2 c = T (isSome (proj₂ (X509.Cert.getExtensions c))) → X509.Cert.getVersion c ≡ ℤ.+ 2
 
 scp2 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP2 c)
-scp2 c
-  with isSome (proj₂ (X509.Cert.getExtensions c))
-... | false = yes (λ ())
-... | true
-  with X509.Cert.getVersion c
-... | v
-  with v ≟ ℤ.+ 2
-... | yes v≡ = yes (λ _ → v≡)
-... | no ¬v≡ = no (λ abs → contradiction (abs tt) ¬v≡)
-
+scp2 c =
+  case proj₂ (X509.Cert.getExtensions c) ret (λ x → Dec (T (isSome x) → X509.Cert.getVersion c ≡ ℤ.+ 2)) of λ where
+    none → yes (λ ())
+    (some x) →
+      case X509.Cert.getVersion c ≟ ℤ.+ 2 of λ where
+        (no ¬p) → no (λ abs → contradiction (abs tt) ¬p)
+        (yes p) → yes (λ _ → p)
 
 -- At a minimum, conforming implementations MUST recognize Version 3 certificates.
 -- Generation of Version 2 certificates is not expected by implementations based on this profile.
@@ -258,41 +255,36 @@ SCP7₂ : ∀ {@0 bs} → X509.Cert bs → Set
 SCP7₂ c = T (isSome (proj₂ (X509.Cert.getIssUID c))) → (X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)
 
 scp7₁ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₁ c)
-scp7₁ c
-  with isSome (proj₂ (X509.Cert.getSubUID c))
-... | false = yes (λ ())
-... | true
-  with X509.Cert.getVersion c
-... | v
-  with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
-... | yes v≡ = yes (λ _ → v≡)
-... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
+scp7₁ c =
+  case proj₂ (X509.Cert.getSubUID c) ret (λ x → Dec (T (isSome x) → X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)) of λ where
+    none → yes λ ()
+    (some x) →
+      case (X509.Cert.getVersion c ≟ ℤ.+ 1 ⊎-dec X509.Cert.getVersion c ≟ ℤ.+ 2) of λ where
+        (no ¬p) → no (λ abs → contradiction (abs tt) ¬p)
+        (yes p) → yes (λ _ → p)
 
 scp7₂ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₂ c)
-scp7₂ c
-  with isSome (proj₂ (X509.Cert.getIssUID c))
-... | false = yes (λ ())
-... | true
-  with X509.Cert.getVersion c
-... | v
-  with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
-... | yes v≡ = yes (λ _ → v≡)
-... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
-
+scp7₂ c =
+  case proj₂ (X509.Cert.getIssUID c) ret (λ x → Dec (T (isSome x) → X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)) of (λ where
+    none → yes (λ ())
+    (some _) →
+      case (X509.Cert.getVersion c ≟ ℤ.+ 1 ⊎-dec X509.Cert.getVersion c ≟ ℤ.+ 2) of λ where
+        (no ¬p) → no (λ abs → contradiction (abs tt) ¬p)
+        (yes p) → yes λ _ → p)
 
 -- Where it appears, the PathLenConstraint field MUST be greater than or equal to zero.
+SCP8' : Exists─ (List UInt8) (Option Int) → Set
+SCP8' (─ .[] , none) = ⊤
+SCP8' (fst , some x) = ℤ.+ 0 ℤ.≤ Int.getVal x
+
 SCP8 : ∀ {@0 bs} → X509.Cert bs → Set
-SCP8 c
-  with getBCPathLen (X509.Cert.getBC c)
-... | ─ .[] , Aeres.Grammar.Definitions.none = (T true)
-... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤ Generic.Int.getVal x)
+SCP8 c = SCP8' (getBCPathLen (X509.Cert.getBC c))
 
 scp8 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP8 c)
-scp8 c
-  with getBCPathLen (X509.Cert.getBC c)
-... | ─ .[] , Aeres.Grammar.Definitions.none = yes tt
-... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤? Generic.Int.getVal x)
-
+scp8 c =
+  case (getBCPathLen (X509.Cert.getBC c)) ret (λ x → Dec (SCP8' x)) of λ where
+    (─ .[] , none) → yes tt
+    (fst , some x) → ℤ.+ 0 ℤ.≤? Int.getVal x
 
 -- if the Subject is a CRL issuer (e.g., the Key Usage extension, is present and the value of CRLSign is TRUE),
 -- then the Subject field MUST be populated with a non-empty distinguished name.

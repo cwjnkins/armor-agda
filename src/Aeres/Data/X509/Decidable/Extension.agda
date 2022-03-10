@@ -93,7 +93,7 @@ module parseExtension where
                                                (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
                                                   (parseSum _
                                                     (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
-                                                    (parseExtensionFields (λ bs → T-dec) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetstring n))))))))))))))))))))
+                                                    (parseExtensionFields (λ bs → T-dec) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetString n))))))))))))))))))))
 
   parseExtension : Parser _ (Logging ∘ Dec) X509.Extension
   parseExtension = parseTLV _ "extension" _ parseSelectExtn

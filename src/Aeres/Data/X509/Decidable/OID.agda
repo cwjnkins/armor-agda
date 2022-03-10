@@ -53,7 +53,7 @@ open parseOIDSub public using (parseOIDSub)
 module parseOIDField where
   here' = "parseOIDField"
 
-  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (Generic.NonEmptySequenceOf Generic.OIDSub) n)
+  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (NonEmptySequenceOf Generic.OIDSub) n)
   parseOIDElems n = parseBoundedSequenceOf "oid elems" Generic.OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub n 1
 
   parseOID : Parser Dig (Logging ∘ Dec) Generic.OID

@@ -1,324 +1,23 @@
 {-# OPTIONS --subtyping --inversion-max-depth=1000 #-}
 
+open import Aeres.Binary
+open import Aeres.Data.UTF8.TCB
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 module Aeres.Data.X509 where
 
-open import Aeres.Binary
 open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Sum Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Sum         UInt8
 
--------------------------------------------TAGS---------------------------------------------
-module Tag where
-  Boolean : Dig
-  Boolean = # 1
-
-  Integer : Dig
-  Integer = # 2
-
-  Bitstring : Dig
-  Bitstring = # 3
-
-  Octetstring : Dig
-  Octetstring = # 4
-
-  Null : Dig
-  Null = # 5
-
-  ObjectIdentifier : Dig
-  ObjectIdentifier = # 6
-
-  Utctime : Dig
-  Utctime = # 23
-
-  Gentime : Dig
-  Gentime = # 24
-
-  Sequence : Dig
-  Sequence = # 48
-
-  Sett : Dig
-  Sett = # 49
-
-  Eighty : Dig
-  Eighty = # 128
-
-  EightyOne : Dig
-  EightyOne = # 129
-
-  EightyTwo : Dig
-  EightyTwo = # 130
-
-  EightyThree : Dig
-  EightyThree = # 131
-
-  EightyFour : Dig
-  EightyFour = # 132
-
-  EightyFive : Dig
-  EightyFive = # 133
-
-  EightySix : Dig
-  EightySix = # 134
-
-  EightySeven : Dig
-  EightySeven = # 135
-
-  EightyEight : Dig
-  EightyEight = # 136
-
-  A0 : Dig
-  A0 = # 160
-
-  A1 : Dig
-  A1 = # 161
-
-  A2 : Dig
-  A2 = # 162
-
-  A3 : Dig
-  A3 = # 163
-
-  A4 : Dig
-  A4 = # 164
-
-  A5 : Dig
-  A5 = # 165
-
-  A6 : Dig
-  A6 = # 166
-
-  --- directory string tags
-  BMPString : Dig
-  BMPString = # 30
-
-  UniversalString : Dig
-  UniversalString = # 28
-
-  PrintableString : Dig
-  PrintableString = # 19
-
-  TeletexString : Dig
-  TeletexString = # 20
-
-  UTF8String : Dig
-  UTF8String = # 12
-
-  IA5String : Dig
-  IA5String = # 22
-
-  VisibleString : Dig
-  VisibleString = # 26
------------------------------------------Length------------------------------------------
-module Length where
-
-  record Short (@0 bs : List Dig) : Set where
-    constructor mkShort
-    field
-      l : Dig
-      @0 l<128 : toℕ l < 128
-      @0 bs≡ : bs ≡ [ l ]
-  open Short
-
-  MinRep : Dig → List Dig → Set
-  MinRep lₕ lₜ =
-    if ⌊ lₜ ≟ [] ⌋ then toℕ lₕ ≥ 128 else ⊤
-
-  MinRep-elim
-    : ∀ {ℓ} lₕ lₜ (P : Dig → List Dig → Set ℓ) →
-      (lₜ ≡ [] → toℕ lₕ ≥ 128 → P lₕ lₜ) →
-      (lₜ ≢ [] → P lₕ lₜ) →
-      MinRep lₕ lₜ → P lₕ lₜ
-  MinRep-elim lₕ lₜ P pf₁ pf₂ mr
-    with lₜ ≟ []
-  ... | no  lₜ≢[] = pf₂ lₜ≢[]
-  ... | yes lₜ≡[] = pf₁ lₜ≡[] mr
-
-  record Long (@0 bs : List Dig) : Set where
-    constructor mkLong
-    field
-      l : Dig
-      @0 l>128 : 128 < toℕ l
-      lₕ : Dig
-      @0 lₕ≢0 : toℕ lₕ > 0
-      lₜ : List Dig
-      @0 lₜLen : length lₜ ≡ toℕ l - 129
-      @0 lₕₜMinRep : MinRep lₕ lₜ
-      @0 bs≡ : bs ≡ l ∷ lₕ ∷ lₜ
-  open Long
-
-  data Length : (@0 _ : List Dig) → Set where
-    short : ∀ {@0 bs} → Short bs → Length bs
-    long  : ∀ {@0 bs} → Long  bs → Length bs
-
-  shortₛ : ∀ l → {@0 _ : True (toℕ l <? 128)} → Length [ l ]
-  shortₛ l {l<128} = short (mkShort l (toWitness l<128) refl)
-
-  mkLongₛ : ∀ l lₕ lₜ →
-          {@0 _ : True (128 <? toℕ l)}
-          {@0 _ : True (toℕ lₕ >? 0)}
-          {@0 _ : True (length lₜ ≟ (toℕ l - 129))}
-          {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
-          → Long (l ∷ lₕ ∷ lₜ)
-  mkLongₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
-   (mkLong l
-          (toWitness l>128) lₕ
-          (toWitness lₕ≢0) lₜ
-          (toWitness lₜLen) (go mr) {- (toWitness mr) -} refl)
-   where
-   go : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128) → if ⌊ lₜ ≟ [] ⌋ then toℕ lₕ ≥ 128 else ⊤
-   go mr
-     with toWitness mr
-   ... | inj₁ lₜ≢[]
-     with lₜ ≟ []
-   ... | no  _ = tt
-   ... | yes lₜ≡[] = contradiction lₜ≡[] lₜ≢[]
-   go mr | inj₂ y
-     with lₜ ≟ []
-   ... | no _ = tt
-   ... | yes lₜ≡[] = y
-
-  longₛ : ∀ l lₕ lₜ →
-        {@0 _ : True (128 <? toℕ l)}
-        {@0 _ : True (toℕ lₕ >? 0)}
-        {@0 _ : True (length lₜ ≟ (toℕ l - 129))}
-        {@0 _ : True (lₜ ≠ [] ⊎-dec toℕ lₕ ≥? 128)}
-            → Length (l ∷ lₕ ∷ lₜ)
-  longₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr} =
-    long (mkLongₛ l lₕ lₜ {l>128} {lₕ≢0} {lₜLen} {mr})
-
-  getLength : ∀ {@0 bs} → Length bs → ℕ
-  getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
-  getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = go (reverse (lₕ ∷ lₜ))
-    where
-    go : List Dig → ℕ
-    go [] = 0
-    go (b ∷ bs') = toℕ b + 256 * go bs'
-
-open Length public
-  using  (Length ; getLength)
-  hiding (module Length)
+open import Aeres.Data.X690-DER public
 
 -------------------------------------------Generic---------------------------------------
 module Generic where
-
-  record TLV (t : Dig) (@0 A : List Dig → Set) (@0 bs : List Dig) : Set where
-    constructor mkTLV
-    field
-      @0 {l v} : List Dig
-      len : Length l
-      val : A v
-      @0 len≡ : getLength len ≡ length v
-      @0 bs≡  : bs ≡ t ∷ l ++ v
-
-  NonEmptyVal : ∀ {t}{@0 A} → (bs : List Dig) (tlv : TLV t A bs) → Set
-  NonEmptyVal bs tlv = 1 ≤ getLength (TLV.len tlv)
-
-  TLVNonEmptyVal : (t : Dig) (@0 A : List Dig → Set) (@0 bs : List Dig) → Set
-  TLVNonEmptyVal t A = Σₚ (TLV t A) NonEmptyVal
-
-  LenBounded : ∀ {t}{@0 A} → (l u : ℕ) → (bs : List Dig) (tlv : TLV t A bs) → Set
-  LenBounded l u bs tlv = InRange l u (getLength (TLV.len tlv))
-
-
-  -- TODO: extensions encoded as octet strings need to be tupled together with proofs
-  -- they can be parsed into supported structures (semantic checks)
-  OctetstringValue :  (@0 _ : List Dig) → Set
-  OctetstringValue =  Singleton
-
-  Octetstring : (@0 _ : List Dig) → Set
-  Octetstring xs = TLV Tag.Octetstring OctetstringValue xs
-
-  --Null--------------------------------------------
-  Null : (@0 _ : List Dig) → Set
-  Null = TLV Tag.Null (_≡ [])
-
-  --Integers----------------------------------------
-
-  record IntegerValue (@0 bs : List Dig) : Set where
-    constructor mkIntegerValue
-    field
-      val : ℤ
-      @0 bs≡ : twosComplement bs ≡ val
-
-  module Int where
-    Int : (@0 _ : List Dig) → Set
-    Int xs = TLV Tag.Integer IntegerValue xs
-
-    getVal : ∀ {@0 bs} → Int bs → ℤ
-    getVal i = IntegerValue.val (TLV.val i)
-  open Int public using (Int)
-
-  --Sequences (of one type)-------------------------
-  data SequenceOf (@0 A : List Dig → Set) : @0 List Dig → Set
-
-  record SequenceOfFields (@0 A : List Dig → Set) (@0 bs : List Dig) : Set where
-    inductive
-    constructor mkSequenceOf
-    field
-      @0 {bs₁ bs₂} : List Dig
-      h : A bs₁
-      t : SequenceOf A bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data SequenceOf A where
-    nil  : SequenceOf A []
-    cons : ∀ {@0 xs} → SequenceOfFields A xs → SequenceOf A xs
-
-  lengthSequence : ∀ {@0 A xs} → SequenceOf A xs → ℕ
-  lengthSequence nil = 0
-  lengthSequence (cons (mkSequenceOf h t bs≡)) = 1 + lengthSequence t
-
-  BoundedSequenceOf : (@0 A : List Dig → Set) → @0 ℕ → @0 List Dig → Set
-  BoundedSequenceOf A n = Σₚ (SequenceOf A) λ _ seq → lengthSequence seq ≥ n
-
-  NonEmptySequenceOf : (@0 A : List Dig → Set) → @0 List Dig → Set
-  NonEmptySequenceOf A = BoundedSequenceOf A 1
-
-  Seq : (A : List Dig → Set) → (@0 _ : List Dig) → Set
-  Seq A = TLV Tag.Sequence (SequenceOf A)
-
-  NonEmptySeq : (@0 A : List Dig → Set) → @0 List Dig → Set
-  NonEmptySeq A = TLV Tag.Sequence (NonEmptySequenceOf A)
-
-  --Integer sequences-------------------------------
-
-  IntegerSeq : (@0 _ : List Dig) → Set
-  IntegerSeq xs = TLV Tag.Sequence (SequenceOf Int) xs
-
-  BitstringUnusedBits : Dig → List Dig → Set
-  BitstringUnusedBits bₕ [] = toℕ bₕ ≡ 0
-  BitstringUnusedBits bₕ (bₜ ∷ []) = toℕ bₜ %2^ (toℕ bₕ) ≡ 0
-  BitstringUnusedBits bₕ (bₜ ∷ x ∷ bₜ') = BitstringUnusedBits bₕ (x ∷ bₜ')
-
-  bitstringUnusedBits-unique : ∀ {bₕ bₜ} → Unique (BitstringUnusedBits bₕ bₜ)
-  bitstringUnusedBits-unique {bₜ = []} x y = ≡-unique x y
-  bitstringUnusedBits-unique {bₜ = x₁ ∷ []} x y = ≡-unique x y
-  bitstringUnusedBits-unique {bₜ = x₁ ∷ x₂ ∷ bₜ} x y = bitstringUnusedBits-unique{bₜ = x₂ ∷ bₜ} x y
-
-  bitstringUnusedBits? : ∀ b bs → Dec (BitstringUnusedBits b bs)
-  bitstringUnusedBits? b [] = toℕ b ≟ 0
-  bitstringUnusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
-  bitstringUnusedBits? b (x ∷ x₁ ∷ bs) = bitstringUnusedBits? b (x₁ ∷ bs)
-
-  toBitRep : Dig → List Dig → List Bool
-  toBitRep bₕ [] = []
-  toBitRep bₕ (bₜ ∷ []) = take (8 - toℕ bₜ) (Vec.toList{n = 8} (toBinary bₜ))
-  toBitRep bₕ (bₜ ∷ x ∷ bₜ') = Vec.toList{n = 8} (toBinary bₜ) ++ toBitRep bₕ (x ∷ bₜ')
-
-  record BitstringValue (@0 bs : List Dig) : Set where
-    constructor mkBitstringValue
-    field
-      @0 bₕ : Dig
-      @0 bₜ : List Dig
-      @0 bₕ<8 : toℕ bₕ < 8
-      bits : Singleton (toBitRep bₕ bₜ)
-      @0 unusedBits : BitstringUnusedBits bₕ bₜ
-      @0 bs≡ : bs ≡ bₕ ∷ bₜ
-
-  Bitstring : (@0 _ : List Dig) → Set
-  Bitstring xs = TLV Tag.Bitstring BitstringValue xs
 
   OIDLeastDigs : List Dig → Set
   OIDLeastDigs = maybe (Fin._> # 128) ⊤ ∘ head
@@ -345,10 +44,9 @@ module Generic where
   mkOIDSubₛ : (lₚ : List Dig) (lₑ : Dig) {@0 _ : True (All.all ((_≥? 128) ∘ toℕ) lₚ)} {@0 _ : True (oidLeastDigs? lₚ)} {@0 _ : True (lₑ Fin.<? # 128)} → OIDSub (lₚ ∷ʳ lₑ)
   mkOIDSubₛ lₚ lₑ {lₚ≥128}{leastDigs}{lₑ<128} = mkOIDSub lₚ (toWitness lₚ≥128) lₑ (toWitness lₑ<128) (toWitness leastDigs) refl
 
-
-  -- --private
-  -- --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
-  -- --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
+  --private
+  --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
+  --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
 
   OID : (@0 _ : List Dig) → Set
   OID = TLV Tag.ObjectIdentifier (NonEmptySequenceOf OIDSub)
@@ -410,8 +108,8 @@ module Generic where
 
       @0 bs≡ : bs ≡ mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]
 
-  record UtcTimeFields (@0 bs : List Dig) : Set where
-    constructor mkUtcTimeFields
+  record UTCTimeFields (@0 bs : List Dig) : Set where
+    constructor mkUTCTimeFields
     field
       @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
 
@@ -423,8 +121,8 @@ module Generic where
       @0 term : z ≡ # toℕ 'Z'
       @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ z ]
 
-  UtcTime : (@0 _ : List Dig) → Set
-  UtcTime xs = TLV Tag.Utctime UtcTimeFields xs
+  UTCTime : (@0 _ : List Dig) → Set
+  UTCTime xs = TLV Tag.UTCTime UTCTimeFields xs
 
   record GenTimeFields (@0 bs : List Dig) : Set where
     constructor mkGenTimeFields
@@ -442,39 +140,39 @@ module Generic where
       @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ∷ʳ z
 
   GenTime : (@0 _ : List Dig) → Set
-  GenTime = TLV Tag.Gentime GenTimeFields
+  GenTime = TLV Tag.GeneralizedTime GenTimeFields
 
   module Time where
     data Time : @0 List Dig → Set where
-      utctm : ∀ {@0 bs} → UtcTime bs → Time bs
+      utctm : ∀ {@0 bs} → UTCTime bs → Time bs
       gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
 
     getYear : ∀ {@0 bs} →  Time bs → ℕ
     getYear (utctm x) = 
-      let year = Singleton.x (UtcTimeFields.year (TLV.val x)) in
+      let year = Singleton.x (UTCTimeFields.year (TLV.val x)) in
         case year <? 50 of λ where
           (yes _) → 2000 + year
           (no  _) → 1900 + year
     getYear (gentm x) = Singleton.x (GenTimeFields.year (TLV.val x))
 
     getMonth : ∀ {@0 bs} → Time bs → ℕ
-    getMonth (utctm x) = Singleton.x (MonthDayHourMinSecFields.mon (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getMonth (utctm x) = Singleton.x (MonthDayHourMinSecFields.mon (UTCTimeFields.mmddhhmmss (TLV.val x)))
     getMonth (gentm x) = Singleton.x (MonthDayHourMinSecFields.mon (GenTimeFields.mmddhhmmss (TLV.val x)))
 
     getDay : ∀ {@0 bs} → Time bs → ℕ
-    getDay (utctm x) = Singleton.x (MonthDayHourMinSecFields.day (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getDay (utctm x) = Singleton.x (MonthDayHourMinSecFields.day (UTCTimeFields.mmddhhmmss (TLV.val x)))
     getDay (gentm x) = Singleton.x (MonthDayHourMinSecFields.day (GenTimeFields.mmddhhmmss (TLV.val x)))
 
     getHour : ∀ {@0 bs} → Time bs → ℕ
-    getHour (utctm x) = Singleton.x (MonthDayHourMinSecFields.hour (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getHour (utctm x) = Singleton.x (MonthDayHourMinSecFields.hour (UTCTimeFields.mmddhhmmss (TLV.val x)))
     getHour (gentm x) = Singleton.x (MonthDayHourMinSecFields.hour (GenTimeFields.mmddhhmmss (TLV.val x)))
 
     getMin : ∀ {@0 bs} → Time bs → ℕ
-    getMin (utctm x) = Singleton.x (MonthDayHourMinSecFields.min (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getMin (utctm x) = Singleton.x (MonthDayHourMinSecFields.min (UTCTimeFields.mmddhhmmss (TLV.val x)))
     getMin (gentm x) = Singleton.x (MonthDayHourMinSecFields.min (GenTimeFields.mmddhhmmss (TLV.val x)))
 
     getSec : ∀ {@0 bs} → Time bs → ℕ
-    getSec (utctm x) = Singleton.x (MonthDayHourMinSecFields.sec (UtcTimeFields.mmddhhmmss (TLV.val x)))
+    getSec (utctm x) = Singleton.x (MonthDayHourMinSecFields.sec (UTCTimeFields.mmddhhmmss (TLV.val x)))
     getSec (gentm x) = Singleton.x (MonthDayHourMinSecFields.sec (GenTimeFields.mmddhhmmss (TLV.val x)))
     
 
@@ -486,7 +184,7 @@ module X509 where
   record IA5StringValue (@0 bs : List Dig) : Set where
     constructor mkIA5StringValue
     field
-      str : Generic.OctetstringValue bs
+      str : OctetStringValue bs
       @0 all<128 : All (Fin._< # 128) (Singleton.x str)
 
   module SOID where
@@ -528,55 +226,56 @@ module X509 where
   --   sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
   --   sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
   --   rsaEncPk    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaEncPk)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   _ : ∀ {@0 bs1 bs2} → Generic.OctetstringValue bs2 → SignParam bs1 bs2
+  --   _ : ∀ {@0 bs1 bs2} → OctetStringValue bs2 → SignParam bs1 bs2
 
   record SignAlgFields (@0 bs : List Dig) : Set where
     constructor mkSignAlgFields
     field
       @0 {o p} : List Dig
       signOID : Generic.OID o
-      param : Option (NotEmpty Generic.OctetstringValue) p
+      param : Option (NotEmpty OctetStringValue) p
 --      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
       @0 bs≡  : bs ≡ o ++ p
 
   SignAlg : (@0 _ : List Dig) → Set
-  SignAlg xs = Generic.TLV Tag.Sequence SignAlgFields xs
+  SignAlg xs = TLV Tag.Sequence SignAlgFields xs
 
  --------------- RDNSeq -------------------------------------
 
   TeletexString : (@0 _ : List Dig) → Set
-  TeletexString xs = Generic.TLV Tag.TeletexString  Generic.OctetstringValue xs
+  TeletexString xs = TLV Tag.TeletexString  OctetStringValue xs
 
   PrintableString : (@0 _ : List Dig) → Set
-  PrintableString xs = Generic.TLV Tag.PrintableString  Generic.OctetstringValue xs
+  PrintableString xs = TLV Tag.PrintableString  IA5StringValue xs
 
   UniversalString : (@0 _ : List Dig) → Set
-  UniversalString xs = Generic.TLV Tag.UniversalString  Generic.OctetstringValue xs
+  UniversalString xs = TLV Tag.UniversalString  UTF8 xs
 
   UTF8String : (@0 _ : List Dig) → Set
-  UTF8String xs = Generic.TLV Tag.UTF8String  Generic.OctetstringValue xs
+  UTF8String xs = TLV Tag.UTF8String  UTF8 xs
 
   BMPString : (@0 _ : List Dig) → Set
-  BMPString xs = Generic.TLV Tag.BMPString  Generic.OctetstringValue xs
+  BMPString xs = TLV Tag.BMPString  UTF8 xs
 
   IA5String : (@0 _ : List Dig) → Set
-  IA5String xs = Generic.TLV Tag.IA5String  IA5StringValue xs
+  IA5String xs = TLV Tag.IA5String  IA5StringValue xs
 
+  -- TODO: check this (is it UTF8?)
   VisibleString : (@0 _ : List Dig) → Set
-  VisibleString xs = Generic.TLV Tag.VisibleString  Generic.OctetstringValue xs
+  VisibleString xs = TLV Tag.VisibleString  UTF8 xs
 
   data DirectoryString : @0 List Dig → Set where
-    teletexString : ∀ {@0 bs} → Σₚ TeletexString Generic.NonEmptyVal bs → DirectoryString bs
-    printableString : ∀ {@0 bs} → Σₚ PrintableString Generic.NonEmptyVal bs → DirectoryString bs
-    universalString : ∀ {@0 bs} → Σₚ UniversalString Generic.NonEmptyVal bs → DirectoryString bs
-    utf8String : ∀ {@0 bs} → Σₚ UTF8String Generic.NonEmptyVal bs → DirectoryString bs
-    bmpString  : ∀ {@0 bs} → Σₚ BMPString  Generic.NonEmptyVal bs → DirectoryString bs
+    teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs
+    printableString : ∀ {@0 bs} → Σₚ PrintableString TLVNonEmptyVal bs → DirectoryString bs
+    universalString : ∀ {@0 bs} → Σₚ UniversalString TLVNonEmptyVal bs → DirectoryString bs
+    utf8String : ∀ {@0 bs} → Σₚ UTF8String TLVNonEmptyVal bs → DirectoryString bs
+    bmpString  : ∀ {@0 bs} → Σₚ BMPString  TLVNonEmptyVal bs → DirectoryString bs
 
   data DisplayText : @0 List Dig → Set where
-    ia5String     : ∀ {@0 bs} → Σₚ IA5String     (Generic.LenBounded 1 200) bs → DisplayText bs
-    visibleString : ∀ {@0 bs} → Σₚ VisibleString (Generic.LenBounded 1 200) bs → DisplayText bs
-    bmpString     : ∀ {@0 bs} → Σₚ BMPString     (Generic.LenBounded 1 200) bs → DisplayText bs
-    utf8String    : ∀ {@0 bs} → Σₚ UTF8String    (Generic.LenBounded 1 200) bs → DisplayText bs
+    ia5String     : ∀ {@0 bs} → Σₚ IA5String     (TLVLenBounded 1 200) bs → DisplayText bs
+    visibleString : ∀ {@0 bs} → Σₚ VisibleString (TLVLenBounded 1 200) bs → DisplayText bs
+    bmpString     : ∀ {@0 bs} → Σₚ BMPString     (TLVLenBounded 1 200) bs → DisplayText bs
+    utf8String    : ∀ {@0 bs} → Σₚ UTF8String    (TLVLenBounded 1 200) bs → DisplayText bs
 
 
   -- AttributeTypeAndValue ::= SEQUENCE {
@@ -593,55 +292,55 @@ module X509 where
       @0 bs≡  : bs ≡ o ++ v
 
   RDNATV : (@0 _ : List Dig) → Set
-  RDNATV xs = Generic.TLV Tag.Sequence RDNATVFields xs
+  RDNATV xs = TLV Tag.Sequence RDNATVFields xs
 
  -- RelativeDistinguishedName ::=
- --   SET SIZE (1..MAX) OF AttributeTypeAndValu
+ --   SET SIZE (1..MAX) OF AttributeTypeAndValue
   RDNElems : @0 List Dig → Set
-  RDNElems = Generic.NonEmptySequenceOf RDNATV
+  RDNElems = NonEmptySequenceOf RDNATV
 
   RDN : (@0 _ : List Dig) → Set
-  RDN = Generic.TLV Tag.Sett RDNElems
+  RDN = TLV Tag.Sett RDNElems
 
   module RDNSeq where
     RDNSeq : (@0 _ : List Dig) → Set
-    RDNSeq = Generic.Seq RDN
+    RDNSeq = Seq RDN
 
     getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
-    getRDNSeqLen (Generic.mkTLV len val len≡ bs≡) = Generic.lengthSequence val
+    getRDNSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val
   open RDNSeq public using (RDNSeq)
 
 ----------------------- Generalnames --------------------
 
   --- we do not support OtherName since very rarely used
   OtherName : (@0 _ : List Dig) → Set
-  OtherName xs = Generic.TLV Tag.A0 Generic.OctetstringValue xs --abstracted
+  OtherName xs = TLV Tag.AA0 OctetStringValue xs --abstracted
 
   RfcName : (@0 _ : List Dig) → Set
-  RfcName xs = Generic.TLV Tag.EightyOne IA5StringValue xs
+  RfcName xs = TLV Tag.A81 IA5StringValue xs
 
   DnsName : (@0 _ : List Dig) → Set
-  DnsName xs = Generic.TLV Tag.EightyTwo IA5StringValue xs
+  DnsName xs = TLV Tag.A82 IA5StringValue xs
 
   --- we do not support X400Address since very rarely used
   X400Address : (@0 _ : List Dig) → Set
-  X400Address xs = Generic.TLV Tag.A3 Generic.OctetstringValue xs --abstracted
+  X400Address xs = TLV Tag.AA3 OctetStringValue xs --abstracted
 
   DirName : (@0 _ : List Dig) → Set
-  DirName xs = Generic.TLV Tag.A4 (Generic.SequenceOf RDN) xs
+  DirName xs = TLV Tag.AA4 (SequenceOf RDN) xs
 
   --- we do not support EdipartyName since very rarely used
   EdipartyName : (@0 _ : List Dig) → Set
-  EdipartyName xs = Generic.TLV Tag.A5 Generic.OctetstringValue xs --abstracted
+  EdipartyName xs = TLV Tag.AA5 OctetStringValue xs --abstracted
 
   URI : (@0 _ : List Dig) → Set
-  URI xs = Generic.TLV Tag.EightySix IA5StringValue xs
+  URI xs = TLV Tag.A86 IA5StringValue xs
 
   IpAddress : (@0 _ : List Dig) → Set
-  IpAddress xs = Generic.TLV Tag.EightySeven Generic.OctetstringValue xs
+  IpAddress xs = TLV Tag.A87 OctetStringValue xs
 
   RegID : (@0 _ : List Dig) → Set
-  RegID xs = Generic.TLV Tag.EightyEight (Generic.NonEmptySequenceOf Generic.OIDSub) xs
+  RegID xs = TLV Tag.A88 (NonEmptySequenceOf Generic.OIDSub) xs
 
   data GeneralName : @0 List Dig → Set where
     oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
@@ -654,14 +353,14 @@ module X509 where
     ipadd : ∀ {@0 bs} → IpAddress bs → GeneralName bs
     rid : ∀ {@0 bs} → RegID bs → GeneralName bs
 
-  GeneralNamesElems = Generic.NonEmptySequenceOf GeneralName
-  GeneralNames = Generic.TLV Tag.Sequence GeneralNamesElems
+  GeneralNamesElems = NonEmptySequenceOf GeneralName
+  GeneralNames = TLV Tag.Sequence GeneralNamesElems
 
   --------------------------TBSCert-----------------------------------------------------------------
 
   module Version where
     Version : (@0 _ : List Dig) → Set
-    Version xs = Generic.TLV Tag.A0 Generic.Int xs
+    Version xs = TLV Tag.AA0 Int xs
 
     getVal : ∀ {@0 bs} → Version bs → ℤ
     getVal v = Int.getVal (TLV.val v)
@@ -669,10 +368,10 @@ module X509 where
   open Version public using (Version)
 
   IssUID : (@0 _ : List Dig) → Set
-  IssUID xs = Generic.TLV Tag.EightyOne Generic.BitstringValue xs
+  IssUID xs = TLV Tag.A81 BitStringValue xs
 
   SubUID : (@0 _ : List Dig) → Set
-  SubUID xs = Generic.TLV Tag.EightyTwo Generic.BitstringValue xs
+  SubUID xs = TLV Tag.A82 BitStringValue xs
 
 --------------------------------------------------------- Validity --------------------------------
   record ValidityFields (@0 bs : List Dig) : Set where
@@ -686,33 +385,33 @@ module X509 where
 
   module Validity where
     Validity : (@0 _ : List Dig) → Set
-    Validity xs = Generic.TLV Tag.Sequence ValidityFields xs
+    Validity xs = TLV Tag.Sequence ValidityFields xs
 
     getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear start
+    getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear start
     getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth start
+    getMonthNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth start
     getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay start
+    getDayNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay start
     getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour start
+    getHourNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour start
     getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin start
+    getMinNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin start
     getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNB (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec start
+    getSecNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec start
 
     getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear end
+    getYearNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear end
     getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth end
+    getMonthNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth end
     getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay end
+    getDayNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay end
     getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour end
+    getHourNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour end
     getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin end
+    getMinNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin end
     getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNA (Generic.mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec end
+    getSecNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec end
     
   open Validity public using (Validity)
 
@@ -721,23 +420,23 @@ module X509 where
     field
       @0 {alg pk} : List Dig
       signalg : SignAlg alg
-      pubkey : Generic.Bitstring pk
+      pubkey : BitString pk
       @0 bs≡  : bs ≡ alg ++ pk
 
   PublicKey : (@0 _ : List Dig) → Set
-  PublicKey xs = Generic.TLV Tag.Sequence PublicKeyFields xs
+  PublicKey xs = TLV Tag.Sequence PublicKeyFields xs
 
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
 
   AKIKeyId : (@0 _ : List Dig) → Set
-  AKIKeyId xs = Generic.TLV Tag.Eighty Generic.OctetstringValue xs
+  AKIKeyId xs = TLV Tag.A80 OctetStringValue xs
 
   AKIAuthCertIssuer : (@0 _ : List Dig) → Set
-  AKIAuthCertIssuer xs = Generic.TLV Tag.A1 GeneralNamesElems xs
+  AKIAuthCertIssuer xs = TLV Tag.AA1 GeneralNamesElems xs
 
   AKIAuthCertSN : (@0 _ : List Dig) → Set
-  AKIAuthCertSN xs = Generic.TLV Tag.EightyTwo  Generic.IntegerValue xs
+  AKIAuthCertSN xs = TLV Tag.A82  IntegerValue xs
 
   record AKIFieldsSeqFields (@0 bs : List Dig) : Set where
     constructor mkAKIFieldsSeqFields
@@ -749,25 +448,25 @@ module X509 where
       @0 bs≡  : bs ≡ akid ++ ci ++ csn
 
   AKIFieldsSeq : (@0 _ : List Dig) → Set
-  AKIFieldsSeq xs = Generic.TLV Tag.Sequence  AKIFieldsSeqFields xs
+  AKIFieldsSeq xs = TLV Tag.Sequence  AKIFieldsSeqFields xs
 
   AKIFields : (@0 _ : List Dig) → Set
-  AKIFields xs = Generic.TLV Tag.Octetstring  AKIFieldsSeq xs
+  AKIFields xs = TLV Tag.OctetString  AKIFieldsSeq xs
 ------------------------------------------------------------------------------------------
 
   SKIFields : (@0 _ : List Dig) → Set
-  SKIFields xs = Generic.TLV Tag.Octetstring  Generic.Octetstring xs
+  SKIFields xs = TLV Tag.OctetString  OctetString xs
 
   KUFields : (@0 _ : List Dig) → Set
-  KUFields xs = Generic.TLV Tag.Octetstring  Generic.Bitstring xs
+  KUFields xs = TLV Tag.OctetString  BitString xs
 
 ----------------------------------- eku extension -----------------------------------
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
-  EKUFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf Generic.OID) xs
+  EKUFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Generic.OID) xs
 
   EKUFields : (@0 _ : List Dig) → Set
-  EKUFields xs = Generic.TLV Tag.Octetstring  EKUFieldsSeq xs
+  EKUFields xs = TLV Tag.OctetString  EKUFieldsSeq xs
 
 -------------------------------------------------------------------------------
 
@@ -776,27 +475,27 @@ module X509 where
     field
       @0 {ca pl} : List Dig
       bcca : Option Generic.Boool ca
-      bcpathlen : Option Generic.Int pl
+      bcpathlen : Option Int pl
       @0 bs≡  : bs ≡ ca ++ pl
 
   BCFieldsSeq : (@0 _ : List Dig) → Set
-  BCFieldsSeq xs = Generic.TLV Tag.Sequence  BCFieldsSeqFields xs
+  BCFieldsSeq xs = TLV Tag.Sequence  BCFieldsSeqFields xs
 
   BCFields : (@0 _ : List Dig) → Set
-  BCFields xs = Generic.TLV Tag.Octetstring  BCFieldsSeq xs
+  BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
 
 -------------------------- ian/san alternative names extensions ------------------
   IANFieldsSeq : (@0 _ : List Dig) → Set
-  IANFieldsSeq = GeneralNames -- Generic.TLV Tag.Sequence GeneralNamesElems
+  IANFieldsSeq = GeneralNames -- TLV Tag.Sequence GeneralNamesElems
 
   IANFields : (@0 _ : List Dig) → Set
-  IANFields xs = Generic.TLV Tag.Octetstring IANFieldsSeq xs
+  IANFields xs = TLV Tag.OctetString IANFieldsSeq xs
 
   SANFieldsSeq : (@0 _ : List Dig) → Set
-  SANFieldsSeq = GeneralNames -- Generic.TLV Tag.Sequence GeneralNamesElems
+  SANFieldsSeq = GeneralNames -- TLV Tag.Sequence GeneralNamesElems
 
   SANFields : (@0 _ : List Dig) → Set
-  SANFields xs = Generic.TLV Tag.Octetstring SANFieldsSeq xs
+  SANFields xs = TLV Tag.OctetString SANFieldsSeq xs
 
 ------------------------- certificate policies -------------------------
   module PQOID where
@@ -811,11 +510,11 @@ module X509 where
     field
       @0 {org nn} : List Dig
       organization : DisplayText org
-      noticenums : Generic.IntegerSeq nn
+      noticenums : IntegerSeq nn
       @0 bs≡  : bs ≡ org ++ nn
 
   NoticeReference : (@0 _ : List Dig) → Set
-  NoticeReference xs = Generic.TLV Tag.Sequence NoticeReferenceFields xs
+  NoticeReference xs = TLV Tag.Sequence NoticeReferenceFields xs
 
   record UserNoticeFields (@0 bs : List Dig) : Set where
     constructor mkUserNoticeFields
@@ -826,7 +525,7 @@ module X509 where
       @0 bs≡  : bs ≡ nr ++ et
 
   UserNotice : (@0 _ : List Dig) → Set
-  UserNotice xs = Generic.TLV Tag.Sequence UserNoticeFields xs
+  UserNotice xs = TLV Tag.Sequence UserNoticeFields xs
 
   record CPSURIQualifier (@0 bs : List Dig) : Set where
     constructor mkCPSURIQualifier
@@ -849,10 +548,10 @@ module X509 where
     userNotice : ∀ {@0 bs} → UserNoticeQualifier bs → PolicyQualifierInfoFields bs
 
   PolicyQualifierInfo : (@0 _ : List Dig) → Set
-  PolicyQualifierInfo xs = Generic.TLV Tag.Sequence PolicyQualifierInfoFields xs
+  PolicyQualifierInfo xs = TLV Tag.Sequence PolicyQualifierInfoFields xs
 
   PolicyQualifiersSeq : (@0 _ : List Dig) → Set
-  PolicyQualifiersSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf PolicyQualifierInfo) xs
+  PolicyQualifiersSeq xs = TLV Tag.Sequence (NonEmptySequenceOf PolicyQualifierInfo) xs
 
   record PolicyInformationFields (@0 bs : List Dig) : Set where
     constructor mkPolicyInformationFields
@@ -863,27 +562,27 @@ module X509 where
       @0 bs≡  : bs ≡ pid ++ pqls
 
   PolicyInformation : (@0 _ : List Dig) → Set
-  PolicyInformation xs = Generic.TLV Tag.Sequence PolicyInformationFields xs
+  PolicyInformation xs = TLV Tag.Sequence PolicyInformationFields xs
 
   CertPolFieldsSeq : (@0 _ : List Dig) → Set
-  CertPolFieldsSeq = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf PolicyInformation)
+  CertPolFieldsSeq = TLV Tag.Sequence (NonEmptySequenceOf PolicyInformation)
 
   CertPolFields : (@0 _ : List Dig) → Set
-  CertPolFields xs = Generic.TLV Tag.Octetstring  CertPolFieldsSeq xs
+  CertPolFields xs = TLV Tag.OctetString  CertPolFieldsSeq xs
 
 ----------------------------- crl dist point extension --------------------------------
 
   CrlIssuer : (@0 _ : List Dig) → Set
-  CrlIssuer xs = Generic.TLV Tag.A2 GeneralNamesElems xs
+  CrlIssuer xs = TLV Tag.AA2 GeneralNamesElems xs
 
   ReasonFlags : (@0 _ : List Dig) → Set
-  ReasonFlags xs = Generic.TLV Tag.EightyOne Generic.BitstringValue xs
+  ReasonFlags xs = TLV Tag.A81 BitStringValue xs
 
   FullName : (@0 _ : List Dig) → Set
-  FullName xs = Generic.TLV Tag.A0 GeneralNamesElems xs
+  FullName xs = TLV Tag.AA0 GeneralNamesElems xs
 
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
-  NameRTCrlIssuer xs = Generic.TLV Tag.A1 RDNElems xs
+  NameRTCrlIssuer xs = TLV Tag.AA1 RDNElems xs
 
   -- DistributionPointName ::= CHOICE {
   --      fullName                [0]     GeneralNames,
@@ -893,7 +592,7 @@ module X509 where
     nameRTCrlissr : ∀ {@0 bs} → NameRTCrlIssuer bs → DistPointNameChoice bs
 
   DistPointName : (@0 _ : List Dig) → Set
-  DistPointName xs = Generic.TLV Tag.A0  DistPointNameChoice xs
+  DistPointName xs = TLV Tag.AA0  DistPointNameChoice xs
 
   record DistPointFields (@0 bs : List Dig) : Set where
     constructor mkDistPointFields
@@ -905,13 +604,13 @@ module X509 where
       @0 bs≡  : bs ≡ dp ++ rsn ++ issr
 
   DistPoint : (@0 _ : List Dig) → Set
-  DistPoint xs = Generic.TLV Tag.Sequence DistPointFields xs
+  DistPoint xs = TLV Tag.Sequence DistPointFields xs
 
   CRLDistFieldsSeq : (@0 _ : List Dig) → Set
-  CRLDistFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf DistPoint) xs
+  CRLDistFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf DistPoint) xs
 
   CRLDistFields : (@0 _ : List Dig) → Set
-  CRLDistFields xs = Generic.TLV Tag.Octetstring  CRLDistFieldsSeq xs
+  CRLDistFields xs = TLV Tag.OctetString  CRLDistFieldsSeq xs
 
 ----------------------------------------- Authority Info access -----------------
   module ACMOID where
@@ -934,13 +633,13 @@ module X509 where
       @0 bs≡  : bs ≡ acm ++ acl
 
   AccessDesc : (@0 _ : List Dig) → Set
-  AccessDesc xs = Generic.TLV Tag.Sequence  AccessDescFields xs
+  AccessDesc xs = TLV Tag.Sequence  AccessDescFields xs
 
   AIAFieldsSeq : (@0 _ : List Dig) → Set
-  AIAFieldsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf AccessDesc) xs
+  AIAFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf AccessDesc) xs
 
   AIAFields : (@0 _ : List Dig) → Set
-  AIAFields xs = Generic.TLV Tag.Octetstring  AIAFieldsSeq xs
+  AIAFields xs = TLV Tag.OctetString  AIAFieldsSeq xs
 
 --------------------------------Extensions selection----------------------------------------
 
@@ -999,111 +698,111 @@ module X509 where
     cpextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CPOL   )              CertPolFields       bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
     crlextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CRLDIST)              CRLDistFields       bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
     aiaextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.AIA    )              AIAFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
-    other   : ∀ {@0 bs} → ExtensionFields (False ∘ (_∈? ExtensionOID.Supported)) Generic.Octetstring bs → SelectExtn bs
+    other   : ∀ {@0 bs} → ExtensionFields (False ∘ (_∈? ExtensionOID.Supported)) OctetString bs → SelectExtn bs
 
   module Extension where
     Extension : (@0 _ : List Dig) → Set
-    Extension xs = Generic.TLV Tag.Sequence SelectExtn xs
+    Extension xs = TLV Tag.Sequence SelectExtn xs
 
     getBC : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-    getBC (Generic.mkTLV len (bcextn x) len≡ bs≡) = _ , (some x)
-    getBC (Generic.mkTLV len _ len≡ bs≡) = _ , none
+    getBC (mkTLV len (bcextn x) len≡ bs≡) = _ , (some x)
+    getBC (mkTLV len _ len≡ bs≡) = _ , none
 
     getKU : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-    getKU (Generic.mkTLV len (kuextn x) len≡ bs≡) = _ , (some x)
-    getKU (Generic.mkTLV len _ len≡ bs≡) = _ , none
+    getKU (mkTLV len (kuextn x) len≡ bs≡) = _ , (some x)
+    getKU (mkTLV len _ len≡ bs≡) = _ , none
 
     getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-    getSAN (Generic.mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
-    getSAN (Generic.mkTLV len _ len≡ bs≡) = _ , none
+    getSAN (mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
+    getSAN (mkTLV len _ len≡ bs≡) = _ , none
 
     getCRLDIST : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-    getCRLDIST (Generic.mkTLV len (crlextn x) len≡ bs≡) = _ , (some x)
-    getCRLDIST (Generic.mkTLV len _ len≡ bs≡) = _ , none
+    getCRLDIST (mkTLV len (crlextn x) len≡ bs≡) = _ , (some x)
+    getCRLDIST (mkTLV len _ len≡ bs≡) = _ , none
 
     getCPOL : ∀ {@0 bs} → Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-    getCPOL (Generic.mkTLV len (cpextn x) len≡ bs≡) = _ , (some x)
-    getCPOL (Generic.mkTLV len _ len≡ bs≡) = _ , none
+    getCPOL (mkTLV len (cpextn x) len≡ bs≡) = _ , (some x)
+    getCPOL (mkTLV len _ len≡ bs≡) = _ , none
   open Extension public using (Extension)
 
   module ExtensionsSeq where
     ExtensionsSeq : (@0 _ : List Dig) → Set
-    ExtensionsSeq xs = Generic.TLV Tag.Sequence (Generic.NonEmptySequenceOf Extension) xs
+    ExtensionsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Extension) xs
 
     getBC : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-    getBC (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    getBC (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-      helper Generic.nil = _ , none
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getBC h) of λ where
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
+      helper nil = _ , none
+      helper (consIList h t bs≡) = case (Extension.getBC h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
     getKU : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-    getKU (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    getKU (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-      helper Generic.nil = _ , none
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getKU h) of λ where
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
+      helper nil = _ , none
+      helper (consIList h t bs≡) = case (Extension.getKU h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
     getSAN : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-    getSAN (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    getSAN (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-      helper Generic.nil = _ , none
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getSAN h) of λ where
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
+      helper nil = _ , none
+      helper (consIList h t bs≡) = case (Extension.getSAN h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
     getCRLDIST : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-    getCRLDIST (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    getCRLDIST (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-      helper Generic.nil = _ , none
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getCRLDIST h) of λ where
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
+      helper nil = _ , none
+      helper (consIList h t bs≡) = case (Extension.getCRLDIST h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
     getCPOL : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-    getCPOL (Generic.mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    getCPOL (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-      helper Generic.nil = _ , none
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = case (Extension.getCPOL h) of λ where
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
+      helper nil = _ , none
+      helper (consIList h t bs≡) = case (Extension.getCPOL h) of λ where
         (─ .[] , none) → helper t
         y@(fst , some x) → y
 
     getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List Dig) Extension)
-    getExtensionsList (Generic.mkTLV len (mk×ₚ fstₚ₁ sndₚ₁ bs≡₁) len≡ bs≡) = helper fstₚ₁
+    getExtensionsList (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁ bs≡₁) len≡ bs≡) = helper fstₚ₁
       where
-      helper : ∀ {@0 bs} → Generic.SequenceOf Extension bs → List (Exists─ (List Dig) Extension)
-      helper Generic.nil = []
-      helper (Generic.cons (Generic.mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
+      helper : ∀ {@0 bs} → SequenceOf Extension bs → List (Exists─ (List Dig) Extension)
+      helper nil = []
+      helper (consIList h t bs≡) = (_ , h) ∷ helper t
   open ExtensionsSeq public using (ExtensionsSeq)
 
   module Extensions where
     Extensions : (@0 _ : List Dig) → Set
-    Extensions xs = Generic.TLV Tag.A3  ExtensionsSeq xs
+    Extensions xs = TLV Tag.AA3  ExtensionsSeq xs
 
     getBC : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-    getBC (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getBC val
+    getBC (mkTLV len val len≡ bs≡) = ExtensionsSeq.getBC val
 
     getKU : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-    getKU (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getKU val
+    getKU (mkTLV len val len≡ bs≡) = ExtensionsSeq.getKU val
 
     getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-    getSAN (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
+    getSAN (mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
 
     getCRLDIST : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-    getCRLDIST (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getCRLDIST val
+    getCRLDIST (mkTLV len val len≡ bs≡) = ExtensionsSeq.getCRLDIST val
 
     getCPOL : ∀ {@0 bs} → Extensions bs → Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-    getCPOL (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getCPOL val
+    getCPOL (mkTLV len val len≡ bs≡) = ExtensionsSeq.getCPOL val
 
     getExtensionsList : ∀ {@0 bs} → Extensions bs → List (Exists─ (List Dig) Extension)
-    getExtensionsList (Generic.mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val
+    getExtensionsList (mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val
   open Extensions public using (Extensions)
 
 -----------------------------------------------------------------------------------------------
@@ -1113,7 +812,7 @@ module X509 where
     field
       @0 {ver ser sa i va u p u₁ u₂ e} : List Dig
       version : Option Version ver
-      serial  : Generic.Int ser
+      serial  : Int ser
       signAlg : SignAlg sa
       issuer  : RDNSeq i
       validity : Validity va
@@ -1128,7 +827,7 @@ module X509 where
     getVersion = elimOption{X = const ℤ} (ℤ.+ 0) (λ v → Version.getVal v) version
 
     getSerial : ℤ
-    getSerial = Generic.Int.getVal serial
+    getSerial = Int.getVal serial
 
     getYearNB :  ℕ
     getYearNB = Validity.getYearNB validity
@@ -1190,7 +889,7 @@ module X509 where
     getExtensionsList = elimOption [] (λ v → Extensions.getExtensionsList v) extensions
  
   TBSCert : (@0 _ : List Dig) → Set
-  TBSCert xs = Generic.TLV Tag.Sequence TBSCertFields xs
+  TBSCert xs = TLV Tag.Sequence TBSCertFields xs
 
   ---------------------------------Certificate---------------------------------------------------
 
@@ -1200,173 +899,173 @@ module X509 where
       @0 {t sa sig} : List Dig
       tbs : TBSCert t
       signAlg : SignAlg sa
-      signature : Generic.Bitstring sig
+      signature : BitString sig
       @0 bs≡  : bs ≡ t ++ sa ++ sig
 
     getVersion : ℤ
-    getVersion = TBSCertFields.getVersion (Generic.TLV.val tbs)
+    getVersion = TBSCertFields.getVersion (TLV.val tbs)
 
     getSerial : ℤ
-    getSerial = TBSCertFields.getSerial (Generic.TLV.val tbs)
+    getSerial = TBSCertFields.getSerial (TLV.val tbs)
 
     getYearNB :  ℕ
-    getYearNB = TBSCertFields.getYearNB (Generic.TLV.val tbs)
+    getYearNB = TBSCertFields.getYearNB (TLV.val tbs)
     getMonthNB :  ℕ
-    getMonthNB = TBSCertFields.getMonthNB (Generic.TLV.val tbs)
+    getMonthNB = TBSCertFields.getMonthNB (TLV.val tbs)
     getDayNB :  ℕ
-    getDayNB = TBSCertFields.getDayNB (Generic.TLV.val tbs)
+    getDayNB = TBSCertFields.getDayNB (TLV.val tbs)
     getHourNB :  ℕ
-    getHourNB = TBSCertFields.getHourNB (Generic.TLV.val tbs)
+    getHourNB = TBSCertFields.getHourNB (TLV.val tbs)
     getMinNB :  ℕ
-    getMinNB = TBSCertFields.getMinNB (Generic.TLV.val tbs)
+    getMinNB = TBSCertFields.getMinNB (TLV.val tbs)
     getSecNB :  ℕ
-    getSecNB = TBSCertFields.getSecNB (Generic.TLV.val tbs)
+    getSecNB = TBSCertFields.getSecNB (TLV.val tbs)
 
     getYearNA :  ℕ
-    getYearNA = TBSCertFields.getYearNA (Generic.TLV.val tbs)
+    getYearNA = TBSCertFields.getYearNA (TLV.val tbs)
     getMonthNA :  ℕ
-    getMonthNA = TBSCertFields.getMonthNA (Generic.TLV.val tbs)
+    getMonthNA = TBSCertFields.getMonthNA (TLV.val tbs)
     getDayNA :  ℕ
-    getDayNA = TBSCertFields.getDayNA (Generic.TLV.val tbs)
+    getDayNA = TBSCertFields.getDayNA (TLV.val tbs)
     getHourNA :  ℕ
-    getHourNA = TBSCertFields.getHourNA (Generic.TLV.val tbs)
+    getHourNA = TBSCertFields.getHourNA (TLV.val tbs)
     getMinNA :  ℕ
-    getMinNA = TBSCertFields.getMinNA (Generic.TLV.val tbs)
+    getMinNA = TBSCertFields.getMinNA (TLV.val tbs)
     getSecNA :  ℕ
-    getSecNA = TBSCertFields.getSecNA (Generic.TLV.val tbs)
+    getSecNA = TBSCertFields.getSecNA (TLV.val tbs)
 
     getIssuerLen :  ℕ
-    getIssuerLen = TBSCertFields.getIssuerLen (Generic.TLV.val tbs)
+    getIssuerLen = TBSCertFields.getIssuerLen (TLV.val tbs)
 
     getSubjectLen :  ℕ
-    getSubjectLen = TBSCertFields.getSubjectLen (Generic.TLV.val tbs)
+    getSubjectLen = TBSCertFields.getSubjectLen (TLV.val tbs)
 
     getIssuer :  Exists─ (List Dig) RDNSeq
-    getIssuer = TBSCertFields.getIssuer (Generic.TLV.val tbs)
+    getIssuer = TBSCertFields.getIssuer (TLV.val tbs)
 
     getSubject :  Exists─ (List Dig) RDNSeq
-    getSubject = TBSCertFields.getSubject (Generic.TLV.val tbs)
+    getSubject = TBSCertFields.getSubject (TLV.val tbs)
 
     getIssUID : Exists─ (List Dig) (Option IssUID)
-    getIssUID = _ , (TBSCertFields.issuerUID (Generic.TLV.val tbs))
+    getIssUID = _ , (TBSCertFields.issuerUID (TLV.val tbs))
 
     getSubUID : Exists─ (List Dig) (Option SubUID)
-    getSubUID = _ , (TBSCertFields.subjectUID (Generic.TLV.val tbs))
+    getSubUID = _ , (TBSCertFields.subjectUID (TLV.val tbs))
 
     getTBSCertSignAlg : Exists─ (List Dig) SignAlg
-    getTBSCertSignAlg = TBSCertFields.getSignAlg (Generic.TLV.val tbs)
+    getTBSCertSignAlg = TBSCertFields.getSignAlg (TLV.val tbs)
  
     getCertSignAlg : Exists─ (List Dig) SignAlg
     getCertSignAlg =  _ , signAlg
 
     getBC : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-    getBC = TBSCertFields.getBC (Generic.TLV.val tbs)
+    getBC = TBSCertFields.getBC (TLV.val tbs)
 
     getKU : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-    getKU = TBSCertFields.getKU (Generic.TLV.val tbs)
+    getKU = TBSCertFields.getKU (TLV.val tbs)
 
     getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-    getSAN = TBSCertFields.getSAN (Generic.TLV.val tbs)
+    getSAN = TBSCertFields.getSAN (TLV.val tbs)
 
     getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-    getCRLDIST = TBSCertFields.getCRLDIST (Generic.TLV.val tbs)
+    getCRLDIST = TBSCertFields.getCRLDIST (TLV.val tbs)
 
     getCPOL : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-    getCPOL = TBSCertFields.getCPOL (Generic.TLV.val tbs)
+    getCPOL = TBSCertFields.getCPOL (TLV.val tbs)
 
     getExtensions : Exists─ (List Dig) (Option Extensions)
-    getExtensions = _ , (TBSCertFields.extensions (Generic.TLV.val tbs))
+    getExtensions = _ , (TBSCertFields.extensions (TLV.val tbs))
     
     getExtensionsList : List (Exists─ (List Dig) Extension)
-    getExtensionsList = TBSCertFields.getExtensionsList (Generic.TLV.val tbs)
+    getExtensionsList = TBSCertFields.getExtensionsList (TLV.val tbs)
 
   module Cert where
     Cert : (@0 _ : List Dig) → Set
-    Cert xs = Generic.TLV Tag.Sequence  CertFields xs
+    Cert xs = TLV Tag.Sequence  CertFields xs
 
     module _ {@0 bs} (c : Cert bs) where
       getVersion : ℤ
-      getVersion = CertFields.getVersion (Generic.TLV.val c)
+      getVersion = CertFields.getVersion (TLV.val c)
 
       getSerial : ℤ
-      getSerial = CertFields.getSerial (Generic.TLV.val c)
+      getSerial = CertFields.getSerial (TLV.val c)
 
       getYearNB :  ℕ
-      getYearNB = CertFields.getYearNB (Generic.TLV.val c)
+      getYearNB = CertFields.getYearNB (TLV.val c)
       getMonthNB :  ℕ
-      getMonthNB = CertFields.getMonthNB (Generic.TLV.val c)
+      getMonthNB = CertFields.getMonthNB (TLV.val c)
       getDayNB :  ℕ
-      getDayNB = CertFields.getDayNB (Generic.TLV.val c)
+      getDayNB = CertFields.getDayNB (TLV.val c)
       getHourNB :  ℕ
-      getHourNB = CertFields.getHourNB (Generic.TLV.val c)
+      getHourNB = CertFields.getHourNB (TLV.val c)
       getMinNB :  ℕ
-      getMinNB = CertFields.getMinNB (Generic.TLV.val c)
+      getMinNB = CertFields.getMinNB (TLV.val c)
       getSecNB :  ℕ
-      getSecNB = CertFields.getSecNB (Generic.TLV.val c)
+      getSecNB = CertFields.getSecNB (TLV.val c)
 
       getYearNA :  ℕ
-      getYearNA = CertFields.getYearNA (Generic.TLV.val c)
+      getYearNA = CertFields.getYearNA (TLV.val c)
       getMonthNA :  ℕ
-      getMonthNA = CertFields.getMonthNA (Generic.TLV.val c)
+      getMonthNA = CertFields.getMonthNA (TLV.val c)
       getDayNA :  ℕ
-      getDayNA = CertFields.getDayNA (Generic.TLV.val c)
+      getDayNA = CertFields.getDayNA (TLV.val c)
       getHourNA :  ℕ
-      getHourNA = CertFields.getHourNA (Generic.TLV.val c)
+      getHourNA = CertFields.getHourNA (TLV.val c)
       getMinNA :  ℕ
-      getMinNA = CertFields.getMinNA (Generic.TLV.val c)
+      getMinNA = CertFields.getMinNA (TLV.val c)
       getSecNA :  ℕ
-      getSecNA = CertFields.getSecNA (Generic.TLV.val c)
+      getSecNA = CertFields.getSecNA (TLV.val c)
 
       getIssuerLen :  ℕ
-      getIssuerLen = CertFields.getIssuerLen (Generic.TLV.val c)
+      getIssuerLen = CertFields.getIssuerLen (TLV.val c)
 
       getSubjectLen :  ℕ
-      getSubjectLen = CertFields.getSubjectLen (Generic.TLV.val c)
+      getSubjectLen = CertFields.getSubjectLen (TLV.val c)
 
       getIssuer :  Exists─ (List Dig) RDNSeq
-      getIssuer = CertFields.getIssuer (Generic.TLV.val c)
+      getIssuer = CertFields.getIssuer (TLV.val c)
 
       getSubject :  Exists─ (List Dig) RDNSeq
-      getSubject = CertFields.getSubject (Generic.TLV.val c)
+      getSubject = CertFields.getSubject (TLV.val c)
 
       getIssUID : Exists─ (List Dig) (Option IssUID)
-      getIssUID = CertFields.getIssUID (Generic.TLV.val c)
+      getIssUID = CertFields.getIssUID (TLV.val c)
 
       getSubUID : Exists─ (List Dig) (Option SubUID)
-      getSubUID = CertFields.getSubUID (Generic.TLV.val c)
+      getSubUID = CertFields.getSubUID (TLV.val c)
 
       getTBSCertSignAlg : Exists─ (List Dig) SignAlg
-      getTBSCertSignAlg = CertFields.getTBSCertSignAlg (Generic.TLV.val c)
+      getTBSCertSignAlg = CertFields.getTBSCertSignAlg (TLV.val c)
 
       getCertSignAlg : Exists─ (List Dig) SignAlg
-      getCertSignAlg = CertFields.getCertSignAlg (Generic.TLV.val c)
+      getCertSignAlg = CertFields.getCertSignAlg (TLV.val c)
 
       getBC : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
-      getBC = CertFields.getBC (Generic.TLV.val c)
+      getBC = CertFields.getBC (TLV.val c)
 
       getKU : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.KU) KUFields))
-      getKU = CertFields.getKU (Generic.TLV.val c)
+      getKU = CertFields.getKU (TLV.val c)
 
       getSAN : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.SAN) SANFields))
-      getSAN = CertFields.getSAN (Generic.TLV.val c)
+      getSAN = CertFields.getSAN (TLV.val c)
 
       getCRLDIST : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CRLDIST) CRLDistFields))
-      getCRLDIST = CertFields.getCRLDIST (Generic.TLV.val c)
+      getCRLDIST = CertFields.getCRLDIST (TLV.val c)
 
       getCPOL : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.CPOL) CertPolFields))
-      getCPOL = CertFields.getCPOL (Generic.TLV.val c)
+      getCPOL = CertFields.getCPOL (TLV.val c)
 
       getExtensions : Exists─ (List Dig) (Option Extensions)
-      getExtensions = CertFields.getExtensions (Generic.TLV.val c)
+      getExtensions = CertFields.getExtensions (TLV.val c)
  
       getExtensionsList : List (Exists─ (List Dig) Extension)
-      getExtensionsList = CertFields.getExtensionsList (Generic.TLV.val c)
+      getExtensionsList = CertFields.getExtensionsList (TLV.val c)
 
   open Cert public using (Cert)
 
   module Chain where
     Chain : (@0 _ : List Dig) → Set
-    Chain = Generic.NonEmptySequenceOf Cert
+    Chain = NonEmptySequenceOf Cert
   open Chain public using (Chain)
 
     

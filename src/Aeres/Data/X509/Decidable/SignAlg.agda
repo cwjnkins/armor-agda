@@ -48,7 +48,7 @@ module parseSignAlg where
             (mk×ₚ (X509.mkSignAlgFields v₀ none (pre₀ ≡ pre₀ ++ [] ∋ solve (++-monoid Dig))) (─ trans₀ (sym r₀≡) r≡n) refl)
             suf₀ ps≡₀))
       (tri< r<n _ _) → do
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁) ← runParser (parseOctetstringValue (n - r₀)) suf₀
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁) ← runParser (parseOctetStringValue (n - r₀)) suf₀
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix@._ read read≡ (mk×ₚ (X509.mkSignAlgFields{o = o}{p} signOID none refl) signAlgLen refl) suffix ps≡) →

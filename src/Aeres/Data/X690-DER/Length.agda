@@ -71,5 +71,5 @@ module Length where
   _ = longₛ (# 130) (# 1) [ # 1 ]
 
 open Length public
-  using (Length)
+  using (Length ; getLength)
   hiding (module Length)

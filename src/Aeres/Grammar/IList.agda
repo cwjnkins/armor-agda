@@ -22,8 +22,14 @@ data IList A where
   nil : IList A []
   cons : ∀ {@0 xs} → IListCons A xs → IList A xs
 
-lengthSequence : ∀ {@0 A xs} → IList A xs → ℕ
-lengthSequence nil = 0
-lengthSequence (cons (mkIListCons h t bs≡)) = 1 + lengthSequence t
+lengthIList : ∀ {@0 A xs} → IList A xs → ℕ
+lengthIList nil = 0
+lengthIList (cons (mkIListCons h t bs≡)) = 1 + lengthIList t
 
-pattern consIList bs₁ bs₂ h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
+IListLowerBounded : (@0 A : List Σ → Set) → @0 ℕ → @0 List Σ → Set
+IListLowerBounded A n = Σₚ (IList A) (λ s xs → lengthIList xs ≥ n)
+
+IListNonEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
+IListNonEmpty A = IListLowerBounded A 1
+
+pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)

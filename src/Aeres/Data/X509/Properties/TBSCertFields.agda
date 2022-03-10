@@ -20,7 +20,7 @@ open import Aeres.Grammar.Properties  Dig
 open ≡-Reasoning
 
 equivalent : Equivalent
-               (&ₚ (&ₚ (Option X509.Version) Generic.Int)
+               (&ₚ (&ₚ (Option X509.Version) Int)
                (&ₚ X509.SignAlg
                (&ₚ X509.RDNSeq
                (&ₚ X509.Validity
@@ -37,7 +37,7 @@ proj₂ equivalent (X509.mkTBSCertFields version serial signAlg issuer validity 
     (trans₀ bs≡ (solve (++-monoid Dig)))
 
 iso : Iso
-        (&ₚ (&ₚ (Option X509.Version) Generic.Int)
+        (&ₚ (&ₚ (Option X509.Version) Int)
         (&ₚ X509.SignAlg
         (&ₚ X509.RDNSeq
         (&ₚ X509.Validity
@@ -57,8 +57,8 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ
       (Unambiguous.unambiguous-option₁&₁
-        (TLVProps.unambiguous (TLVProps.unambiguous PrimProps.IntegerValue.unambiguous))
-        TLVProps.nonnesting (TLVProps.unambiguous PrimProps.IntegerValue.unambiguous)
+        (TLVProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
+        TLVProps.nonnesting (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
         (TLVProps.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
         TLVProps.nonnesting TLVProps.nonnesting (TLVProps.noconfusion λ ()))

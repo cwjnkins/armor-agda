@@ -18,50 +18,50 @@ nonempty (Generic.utctm ()) refl
 nonempty (Generic.gentm ()) refl
 
 module UTC where
-  @0 nonnesting : NonNesting Generic.UtcTimeFields
-  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkUtcTimeFields year yearRange mmddhhmmss term bs≡) (Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
+  @0 nonnesting : NonNesting Generic.UTCTimeFields
+  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (Generic.mkUTCTimeFields year yearRange mmddhhmmss term bs≡) (Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
-  @0 unambiguous : Unambiguous Generic.UtcTimeFields
-  unambiguous (Generic.mkUtcTimeFields{y1 = y1}{y2}{mn1}{mn2}{d1}{d2}{h1}{h2}{mi1}{mi2}{s1}{s2} year yearRange mmddhhmmss refl bs≡) (Generic.mkUtcTimeFields{y1 = y1'}{y2'}{mn1'}{mn2'}{d1'}{d2'}{h1'}{h2'}{mi1'}{mi2'}{s1'}{s2'} year₁ yearRange₁ mmddhhmmss₁ refl bs≡₁) =
+  @0 unambiguous : Unambiguous Generic.UTCTimeFields
+  unambiguous (Generic.mkUTCTimeFields{y1 = y1}{y2}{mn1}{mn2}{d1}{d2}{h1}{h2}{mi1}{mi2}{s1}{s2} year yearRange mmddhhmmss refl bs≡) (Generic.mkUTCTimeFields{y1 = y1'}{y2'}{mn1'}{mn2'}{d1'}{d2'}{h1'}{h2'}{mi1'}{mi2'}{s1'}{s2'} year₁ yearRange₁ mmddhhmmss₁ refl bs≡₁) =
     subst₂
       ((λ y1“ y2“ → ∀ (year₁ : Singleton (asciiNum (y1“ ∷ [ y2“ ]))) (yearRange₁ : All (InRange '0' '9') (y1“ ∷ [ y2“ ])) bs≡
-        → _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ refl bs≡))
+        → _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ refl bs≡))
       y1≡ y2≡
       (λ year₁ yearRange₁ bs≡₁' →
         subst₂
           (λ mn1“ mn2“ →
             ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1“ ∷ mn2“ ∷ d1' ∷ d2' ∷ h1' ∷ h2' ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
-            _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁ )
+            _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁ )
           mn1≡ mn2≡
           (λ mmddhhmmss₁ bs≡₁' →
             subst₂
               (λ d1“ d2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1“ ∷ d2“ ∷ h1' ∷ h2' ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
-                _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
               d1≡ d2≡
               (λ mmddhhmmss₁ bs≡₁' →
                 subst₂
                   (λ h1“ h2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1“ ∷ h2“ ∷ mi1' ∷ mi2' ∷ s1' ∷ [ s2' ]))) bs≡₁ →
-                    _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                    _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
                   h1≡ h2≡
                   (λ mmddhhmmss₁ bs≡₁' →
                     subst₂
                       (λ mi1“ mi2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1“ ∷ mi2“ ∷ s1' ∷ [ s2' ]))) bs≡₁ →
-                        _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                        _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
                       mi1≡ mi2≡
                       (λ mmddhhmmss₁ bs≡₁' →
                         subst₂
                           (λ s1“ s2“ → ∀ (mmddhhmmss₁ : Generic.MonthDayHourMinSecFields ((mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1“ ∷ [ s2“ ]))) bs≡₁ →
-                            _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
+                            _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁)
                           s1≡ s2≡
                           (λ mmddhhmmss₁ bs≡₁' →
                             subst₂
-                              (λ year₁ yearRange₁ → _ ≡ Generic.mkUtcTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁')
+                              (λ year₁ yearRange₁ → _ ≡ Generic.mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ _ bs≡₁')
                               (uniqueSingleton year _) (All.irrelevant (×-unique ≤-irrelevant ≤-irrelevant) yearRange yearRange₁)
                               (subst₂
                                 (λ mmddhhmmss₁ bs≡₁' →
-                                  _ ≡ Generic.mkUtcTimeFields year yearRange mmddhhmmss₁ _ bs≡₁')
+                                  _ ≡ Generic.mkUTCTimeFields year yearRange mmddhhmmss₁ _ bs≡₁')
                                 (MDHMSProps.unambiguous mmddhhmmss mmddhhmmss₁) (≡-unique bs≡ bs≡₁') refl))
                           mmddhhmmss₁ bs≡₁')
                       mmddhhmmss₁ bs≡₁')

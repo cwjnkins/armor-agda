@@ -96,7 +96,7 @@ module parseLongLen where
                       toℕ l - 129  ≡⟨ sym lₜLen ⟩
                       length lₜ    ∎
                 in
-                Length.MinRep-elim lₕ' lₜ' (λ _ _ → ⊥)
+                Length.elimMinRepLong lₕ' lₜ' (λ _ _ → ⊥)
                   (λ lₜ'≡[] lₕ'≥128 → contradiction lₕ'≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
                   (λ lₜ'≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ'≢[])
                   lₕₜMinRep'

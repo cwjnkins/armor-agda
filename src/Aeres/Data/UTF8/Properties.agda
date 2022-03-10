@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.IList.Properties
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -14,12 +15,17 @@ open import Relation.Binary
 module Aeres.Data.UTF8.Properties where
 
 open Base256
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList       UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Definitions      UInt8
+open Aeres.Grammar.IList            UInt8
+open Aeres.Grammar.IList.Properties UInt8
+open Aeres.Grammar.Properties       UInt8
+open Aeres.Grammar.Sum              UInt8
 
 module UTF8Char1Props where
+  @0 unambiguous : Unambiguous UTF8Char1
+  unambiguous (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 .b₁ b₁range₁ refl) =
+    subst (λ b₁range' → _ ≡ mkUTF8Char1 _ b₁range' refl) (≤-unique b₁range b₁range₁) refl
+
   nonnesting : NonNesting UTF8Char1
   nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 b₂ b₁range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ [ b₁ ] _ [ b₂ ] _ xs₁++ys₁≡xs₂++ys₂ refl
@@ -87,6 +93,11 @@ module UTF8Char1Props where
       b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char1.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
 module UTF8Char2Props where
+  @0 unambiguous : Unambiguous UTF8Char2
+  unambiguous (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 .b₁ .b₂ b₁range₁ b₂range₁ refl) =
+    subst₂ (λ b₁r b₂r → mkUTF8Char2 b₁ b₂ b₁range b₂range refl ≡ mkUTF8Char2 _ _ b₁r b₂r refl)
+      (inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) (inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) refl
+
   nonnesting : NonNesting UTF8Char2
   nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ (b₁ ∷ [ b₂ ]) _ (b₃ ∷ [ b₄ ]) _ xs₁++ys₁≡xs₂++ys₂ refl
@@ -158,6 +169,17 @@ module UTF8Char3Props where
   proj₂ (proj₂ iso) (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) =
     refl
 
+  @0 unambiguous : Unambiguous UTF8Char3
+  unambiguous =
+    isoUnambiguous iso
+      (unambiguousΣₚ
+        exactLengthString-unambiguous
+        (λ {xs} a →
+          erased-unique
+            (×-unique (inRange-unique{A = ℕ}{B = UInt8})
+              (×-unique (inRange-unique{A = ℕ}{B = UInt8})
+                (inRange-unique{A = ℕ}{B = UInt8})))))
+
   noconfusion : NoConfusion UTF8Char3 UTF8Char4
   noconfusion{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
     contradiction
@@ -200,6 +222,22 @@ module UTF8Char4Props where
     mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range , b₄range)) (sym bs≡)
 
 
+  iso : Iso Rep UTF8Char4
+  proj₁ iso = equiv
+  proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl) refl) (─ (r₁ , r₂ , r₃ , r₄)) refl) = refl
+  proj₂ (proj₂ iso) (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) = refl
+
+  @0 unambiguous : Unambiguous UTF8Char4
+  unambiguous =
+    isoUnambiguous iso
+      (unambiguousΣₚ exactLengthString-unambiguous
+        (λ {xs} a →
+          erased-unique
+            (×-unique (inRange-unique{A = ℕ}{B = UInt8})
+              (×-unique (inRange-unique{A = ℕ}{B = UInt8})
+                (×-unique (inRange-unique{A = ℕ}{B = UInt8})
+                  (inRange-unique{A = ℕ}{B = UInt8}))))))
+
 module UTF8CharProps where
   Rep : @0 List UInt8 → Set
   Rep =  Sum UTF8Char1
@@ -216,6 +254,31 @@ module UTF8CharProps where
   proj₂ equiv (utf82 x) = inj₂ (inj₁ x)
   proj₂ equiv (utf83 x) = inj₂ (inj₂ (inj₁ x))
   proj₂ equiv (utf84 x) = inj₂ (inj₂ (inj₂ x))
+
+  iso : Iso Rep UTF8Char
+  proj₁ iso = equiv
+  proj₁ (proj₂ iso) (inj₁ x) = refl
+  proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
+  proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl
+  proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₂ x))) = refl
+  proj₂ (proj₂ iso) (utf81 x) = refl
+  proj₂ (proj₂ iso) (utf82 x) = refl
+  proj₂ (proj₂ iso) (utf83 x) = refl
+  proj₂ (proj₂ iso) (utf84 x) = refl
+
+  @0 unambiguous : Unambiguous UTF8Char
+  unambiguous =
+    isoUnambiguous iso
+      (unambiguousSum
+        UTF8Char1Props.unambiguous
+        (unambiguousSum
+          UTF8Char2Props.unambiguous
+          (unambiguousSum
+            UTF8Char3Props.unambiguous
+            UTF8Char4Props.unambiguous
+            UTF8Char3Props.noconfusion)
+          UTF8Char2Props.noconfusion)
+        UTF8Char1Props.noconfusion)
 
   nonempty : NonEmpty UTF8Char
   nonempty (utf81 ()) refl
@@ -235,3 +298,8 @@ module UTF8CharProps where
             UTF8Char3Props.noconfusion)
           UTF8Char2Props.noconfusion)
         UTF8Char1Props.noconfusion)
+
+@0 unambiguous : Unambiguous UTF8
+unambiguous =
+  IListProps.unambiguous
+    UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
