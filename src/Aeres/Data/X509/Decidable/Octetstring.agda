@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
+open import Aeres.Data.UTF8
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
@@ -42,25 +43,21 @@ parseTeletexString : Parser Dig (Logging ∘ Dec) X509.TeletexString
 parseTeletexString =
   parseTLV Tag.TeletexString "teletex string" OctetStringValue parseOctetStringValue
 
-parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
-parsePrintableString =
-  parseTLV Tag.PrintableString "printable string" OctetStringValue  parseOctetStringValue
-
 parseUniversalString : Parser Dig (Logging ∘ Dec) X509.UniversalString
 parseUniversalString =
-  parseTLV Tag.UniversalString "universal string" OctetStringValue  parseOctetStringValue
+  parseTLV Tag.UniversalString "universal string" _ parseUTF8
 
 parseUTF8String : Parser Dig (Logging ∘ Dec) X509.UTF8String
 parseUTF8String =
-  parseTLV Tag.UTF8String "UTF8 string" OctetStringValue parseOctetStringValue
+  parseTLV Tag.UTF8String "UTF8 string" _ parseUTF8
 
 parseBMPString : Parser Dig (Logging ∘ Dec) X509.BMPString
 parseBMPString =
-  parseTLV Tag.BMPString "BMP string" OctetStringValue parseOctetStringValue
+  parseTLV Tag.BMPString "BMP string" _ parseUTF8
 
 parseVisibleString : Parser Dig (Logging ∘ Dec) X509.VisibleString
 parseVisibleString =
-  parseTLV Tag.VisibleString "universal string" OctetStringValue parseOctetStringValue
+  parseTLV Tag.VisibleString "universal string" _ parseUTF8
 
 module parseIA5StringValue where
 
@@ -98,6 +95,10 @@ open parseIA5StringValue public using (parseIA5StringValue)
 
 parseIA5String : Parser Dig (Logging ∘ Dec) X509.IA5String
 parseIA5String = parseTLV _ "IA5String" _ parseIA5StringValue
+
+parsePrintableString : Parser Dig (Logging ∘ Dec) X509.PrintableString
+parsePrintableString =
+  parseTLV Tag.PrintableString "printable string" X509.IA5StringValue parseIA5StringValue
 
 private
   module Test where

@@ -136,3 +136,5 @@ module parseUTF8 where
       UTF8Props.UTF8CharProps.nonempty
       UTF8Props.UTF8CharProps.nonnesting
       parseUTF8Char
+
+open parseUTF8 public using (parseUTF8)

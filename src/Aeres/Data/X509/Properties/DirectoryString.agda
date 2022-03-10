@@ -1,11 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
-import Aeres.Data.X509.Properties.TLV as TLVprops
-import Aeres.Data.X509.Properties.OctetstringValue as OctetstringValueProps
-import Aeres.Grammar.Sum
-open import Aeres.Prelude
 open import Aeres.Binary
+import      Aeres.Grammar.Sum
+open import Aeres.Data.UTF8
+import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
+import      Aeres.Data.X509.Properties.TLV              as TLVprops
+import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
+import      Aeres.Data.X509.Properties.OctetstringValue as OctetStringValueProps
+open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -98,14 +101,12 @@ proj₂ (proj₂ iso) (X509.bmpString x) = refl
 @0 unambiguous : Unambiguous X509.DirectoryString
 unambiguous =
   isoUnambiguous iso
-    (unambiguousSum
-      (TLVprops.NonEmptyVal.unambiguous OctetstringValueProps.unambiguous)
-      (unambiguousSum
-        (TLVprops.NonEmptyVal.unambiguous OctetstringValueProps.unambiguous)
-        (unambiguousSum (TLVprops.NonEmptyVal.unambiguous OctetstringValueProps.unambiguous)
-          (unambiguousSum (TLVprops.NonEmptyVal.unambiguous OctetstringValueProps.unambiguous)
-            (TLVprops.NonEmptyVal.unambiguous OctetstringValueProps.unambiguous)
-            (noconfusionΣₚ (TLVprops.noconfusion λ ())))
+    (unambiguousSum (TLVprops.NonEmptyVal.unambiguous OctetStringValueProps.unambiguous)
+      (unambiguousSum (TLVprops.NonEmptyVal.unambiguous IA5Props.unambiguous)
+        (unambiguousSum (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+          (unambiguousSum (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+            (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+              (noconfusionΣₚ (TLVprops.noconfusion λ ())))
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)
