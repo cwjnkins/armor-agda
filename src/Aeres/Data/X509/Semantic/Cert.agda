@@ -255,41 +255,36 @@ SCP7₂ : ∀ {@0 bs} → X509.Cert bs → Set
 SCP7₂ c = T (isSome (proj₂ (X509.Cert.getIssUID c))) → (X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)
 
 scp7₁ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₁ c)
-scp7₁ c = {!!}
---   with isSome (proj₂ (X509.Cert.getSubUID c))
--- ... | false = yes (λ ())
--- ... | true
---   with X509.Cert.getVersion c
--- ... | v
---   with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
--- ... | yes v≡ = yes (λ _ → v≡)
--- ... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
+scp7₁ c =
+  case proj₂ (X509.Cert.getSubUID c) ret (λ x → Dec (T (isSome x) → X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)) of λ where
+    none → yes λ ()
+    (some x) →
+      case (X509.Cert.getVersion c ≟ ℤ.+ 1 ⊎-dec X509.Cert.getVersion c ≟ ℤ.+ 2) of λ where
+        (no ¬p) → no (λ abs → contradiction (abs tt) ¬p)
+        (yes p) → yes (λ _ → p)
 
 scp7₂ : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP7₂ c)
-scp7₂ c = {!!}
---   with isSome (proj₂ (X509.Cert.getIssUID c))
--- ... | false = yes (λ ())
--- ... | true
---   with X509.Cert.getVersion c
--- ... | v
---   with (v ≟ ℤ.+ 1 ⊎-dec v ≟ ℤ.+ 2)
--- ... | yes v≡ = yes (λ _ → v≡)
--- ... | no ¬v≡ = no (λ x → contradiction (x tt) ¬v≡)
-
+scp7₂ c =
+  case proj₂ (X509.Cert.getIssUID c) ret (λ x → Dec (T (isSome x) → X509.Cert.getVersion c ≡ ℤ.+ 1 ⊎ X509.Cert.getVersion c ≡  ℤ.+ 2)) of (λ where
+    none → yes (λ ())
+    (some _) →
+      case (X509.Cert.getVersion c ≟ ℤ.+ 1 ⊎-dec X509.Cert.getVersion c ≟ ℤ.+ 2) of λ where
+        (no ¬p) → no (λ abs → contradiction (abs tt) ¬p)
+        (yes p) → yes λ _ → p)
 
 -- Where it appears, the PathLenConstraint field MUST be greater than or equal to zero.
+SCP8' : Exists─ (List UInt8) (Option Int) → Set
+SCP8' (─ .[] , none) = ⊤
+SCP8' (fst , some x) = ℤ.+ 0 ℤ.≤ Int.getVal x
+
 SCP8 : ∀ {@0 bs} → X509.Cert bs → Set
-SCP8 c = {!!}
---   with getBCPathLen (X509.Cert.getBC c)
--- ... | ─ .[] , Aeres.Grammar.Definitions.none = (T true)
--- ... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤ Int.getVal x)
+SCP8 c = SCP8' (getBCPathLen (X509.Cert.getBC c))
 
 scp8 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP8 c)
-scp8 c = {!!}
---   with getBCPathLen (X509.Cert.getBC c)
--- ... | ─ .[] , Aeres.Grammar.Definitions.none = yes tt
--- ... | fst , Aeres.Grammar.Definitions.some x = (ℤ.+ 0 ℤ.≤? Int.getVal x)
-
+scp8 c =
+  case (getBCPathLen (X509.Cert.getBC c)) ret (λ x → Dec (SCP8' x)) of λ where
+    (─ .[] , none) → yes tt
+    (fst , some x) → ℤ.+ 0 ℤ.≤? Int.getVal x
 
 -- if the Subject is a CRL issuer (e.g., the Key Usage extension, is present and the value of CRLSign is TRUE),
 -- then the Subject field MUST be populated with a non-empty distinguished name.

@@ -32,7 +32,7 @@ CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = X509.Cert.getVersion h ≡ ℤ.
 
 -- TODO: call LDAP StringPrep over val and val₁
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → X509.RDNATV bs₁ → X509.RDNATV bs₂ → Set
-MatchRDNATV (Generic.mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (Generic.mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = Generic.OID} oid oid₁ × _≋_ {A = X509.DirectoryString} val val₁
+MatchRDNATV (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = Generic.OID} oid oid₁ × _≋_ {A = X509.DirectoryString} val val₁
 
 data InSeq {bs} (a : X509.RDNATV bs) : (b : List Dig) → SequenceOf X509.RDNATV b → Set where
   here  : ∀ {bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (px : MatchRDNATV a x) (bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
@@ -46,7 +46,7 @@ MatchRDNElemsLen : ∀ {@0 bs₁ bs₂} → X509.RDNElems bs₁ → X509.RDNElem
 MatchRDNElemsLen (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
 
 MatchRDN : ∀ {@0 bs₁ bs₂} → X509.RDN bs₁ → X509.RDN bs₂ → Set
-MatchRDN (Generic.mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (Generic.mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ bs₂' fstₚ₂
+MatchRDN (mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ bs₂' fstₚ₂
 
 MatchRDNSeqHelper : ∀ {@0 bs₁ bs₂} → SequenceOfFields X509.RDN bs₁ → SequenceOfFields X509.RDN bs₂ → Set
 MatchRDNSeqHelper (mkSequenceOf h nil bs≡) (mkSequenceOf h₁ nil bs≡₁) = MatchRDN h h₁
@@ -55,10 +55,10 @@ MatchRDNSeqHelper (mkSequenceOf h (cons x) bs≡) (mkSequenceOf h₁ nil bs≡�
 MatchRDNSeqHelper (mkSequenceOf h (cons x) bs≡) (mkSequenceOf h₁ (cons x₁) bs≡₁) = MatchRDN h h₁ × MatchRDNSeqHelper x x₁
 
 MatchRDNSeq : ∀ {@0 bs₁ bs₂} → X509.RDNSeq bs₁ → X509.RDNSeq bs₂ → Set
-MatchRDNSeq (Generic.mkTLV len nil len≡ bs≡) (Generic.mkTLV len₁ nil len≡₁ bs≡₁) = ⊤
-MatchRDNSeq (Generic.mkTLV len nil len≡ bs≡) (Generic.mkTLV len₁ (cons x) len≡₁ bs≡₁) = ⊥
-MatchRDNSeq (Generic.mkTLV len (cons x) len≡ bs≡) (Generic.mkTLV len₁ nil len≡₁ bs≡₁) = ⊥
-MatchRDNSeq (Generic.mkTLV len (cons x) len≡ bs≡) (Generic.mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = MatchRDNSeqHelper x x₁
+MatchRDNSeq (mkTLV len nil len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = ⊤
+MatchRDNSeq (mkTLV len nil len≡ bs≡) (mkTLV len₁ (cons x) len≡₁ bs≡₁) = ⊥
+MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = ⊥
+MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = MatchRDNSeqHelper x x₁
 
 CCP6Seq : List (Exists─ (List Dig) X509.Cert) → Set
 CCP6Seq [] = ⊥
@@ -74,19 +74,19 @@ postulate
   AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (AllInSeq xs b c)
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNATV bs₁) → (m : X509.RDNATV bs₂) → Dec (MatchRDNATV n m)
-MatchRDNATV-dec (Generic.mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (Generic.mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec _≋?_ {A = X509.DirectoryString} val val₁
+MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec _≋?_ {A = X509.DirectoryString} val val₁
 
 MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNElems bs₁) → (m : X509.RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
 MatchRDNElemsLen-dec (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
 
 MatchRDN-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDN bs₁) → (m : X509.RDN bs₂) → Dec (MatchRDN n m)
-MatchRDN-dec (Generic.mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (Generic.mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ bs₂' fstₚ₂
+MatchRDN-dec (mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ bs₂' fstₚ₂
 
 MatchRDNSeq-dec : ∀ {@0 bs₁ bs₂} → (a : X509.RDNSeq bs₁) → (b : X509.RDNSeq bs₂) → Dec (MatchRDNSeq a b)
-MatchRDNSeq-dec (Generic.mkTLV len nil len≡ bs≡) (Generic.mkTLV len₁ nil len≡₁ bs≡₁) = yes tt
-MatchRDNSeq-dec (Generic.mkTLV len nil len≡ bs≡) (Generic.mkTLV len₁ (cons x) len≡₁ bs≡₁) = no (λ ())
-MatchRDNSeq-dec (Generic.mkTLV len (cons x) len≡ bs≡) (Generic.mkTLV len₁ nil len≡₁ bs≡₁) = no (λ ())
-MatchRDNSeq-dec (Generic.mkTLV len (cons x) len≡ bs≡) (Generic.mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = helper x x₁
+MatchRDNSeq-dec (mkTLV len nil len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = yes tt
+MatchRDNSeq-dec (mkTLV len nil len≡ bs≡) (mkTLV len₁ (cons x) len≡₁ bs≡₁) = no (λ ())
+MatchRDNSeq-dec (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = no (λ ())
+MatchRDNSeq-dec (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = helper x x₁
   where
   helper : ∀ {@0 bs₁ bs₂} → (a : SequenceOfFields X509.RDN bs₁) → (b : SequenceOfFields X509.RDN bs₂) → Dec (MatchRDNSeqHelper a b)
   helper (mkSequenceOf h nil bs≡) (mkSequenceOf h₁ nil bs≡₁) = MatchRDN-dec h h₁
