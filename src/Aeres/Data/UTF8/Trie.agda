@@ -15,10 +15,8 @@ module Aeres.Data.UTF8.Trie where
 open Base256
 
 open        Aeres.Grammar.IList UInt8
-open import Data.Trie (Fin.<-strictTotalOrder 256) public
-open import Data.Tree.AVL.Value (List.≋-setoid{A = UInt8})
--- (List.≋-setoid (Fin.≡-setoid 256))
-  as Value public
+open import Data.Trie (Fin.<-strictTotalOrder 256) as Trie public
+open import Data.Tree.AVL.Value (List.≋-setoid{A = UInt8}) as Value public
   hiding (const)
 
 UTF8TrieValue : Value _
@@ -27,9 +25,10 @@ UTF8TrieValue = Value.const (Exists─ (List Dig) UTF8)
 UTF8Trie : Set
 UTF8Trie = Trie UTF8TrieValue _
 
+lookupUTF8Trie = Trie.lookup
+
 tabulateUTF8Trie : ∀ {n} → (Fin n → ∃ (Value.family UTF8TrieValue)) → UTF8Trie
 tabulateUTF8Trie f = fromList (Vec.toList (Vec.tabulate f))
-
 
 private
   inRangeLemmaᵤ : ∀ {l u} (p : Σ[ n ∈ ℕ ] InRange l u n) → {wit : True (u <? 256)} → proj₁ p < 256

@@ -2,6 +2,7 @@
 
 open import Aeres.Prelude
   hiding (head ; tail)
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList (Σ : Set) where
 
@@ -22,6 +23,12 @@ data IList A where
   nil : IList A []
   cons : ∀ {@0 xs} → IListCons A xs → IList A xs
 
+appendIList : ∀ {@0 A xs₁ xs₂} → IList A xs₁ → IList A xs₂ → IList A (xs₁ ++ xs₂)
+appendIList nil x₁ = x₁
+appendIList (cons (mkIListCons head tail refl)) x₁
+  with appendIList tail x₁
+... | y = cons (mkIListCons head y  (solve (++-monoid Σ)))
+
 lengthIList : ∀ {@0 A xs} → IList A xs → ℕ
 lengthIList nil = 0
 lengthIList (cons (mkIListCons h t bs≡)) = 1 + lengthIList t
@@ -33,3 +40,4 @@ IListNonEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
 IListNonEmpty A = IListLowerBounded A 1
 
 pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
+

@@ -7,7 +7,7 @@ open import Aeres.Data.UTF8.TCB
 open import Aeres.Data.UTF8.Trie
 import      Aeres.Grammar.IList
 
-module Aeres.Data.X509.Semantic.StringPrep.Mapping.M11 where
+module Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M11 where
 
 open Base256
 open Aeres.Grammar.IList UInt8
