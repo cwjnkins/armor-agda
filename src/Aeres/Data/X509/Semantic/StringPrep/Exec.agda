@@ -4,7 +4,7 @@ import      Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Properties
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
+import      Aeres.Grammar.IList as IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -17,42 +17,47 @@ module Aeres.Data.X509.Semantic.StringPrep.Exec where
 open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.IList UInt8
 
 
--- StringPrepCompare : ∀ {@0 bs₁ bs₂} → X509.DirectoryString bs₁ → X509.DirectoryString bs₂ → Set
--- StringPrepCompare a@(X509.teletexString x) b@(X509.teletexString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.teletexString x) b@(X509.printableString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.teletexString x) b@(X509.universalString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.teletexString x) b@(X509.utf8String x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.teletexString x) b@(X509.bmpString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.printableString x) b@(X509.teletexString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.printableString x) b@(X509.printableString x₁) = {!!}
--- StringPrepCompare a@(X509.printableString x) b@(X509.universalString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.printableString x) b@(X509.utf8String x₁) = {!!}
--- StringPrepCompare a@(X509.printableString x) b@(X509.bmpString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.universalString x) b@(X509.teletexString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.universalString x) b@(X509.printableString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.universalString x) b@(X509.universalString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.universalString x) b@(X509.utf8String x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.universalString x) b@(X509.bmpString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.utf8String x) b@(X509.teletexString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.utf8String x) b@(X509.printableString x₁) = {!!}
--- StringPrepCompare a@(X509.utf8String x) b@(X509.universalString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.utf8String x) b@(X509.utf8String x₁) = {!!}
--- StringPrepCompare a@(X509.utf8String x) b@(X509.bmpString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.bmpString x) b@(X509.teletexString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.bmpString x) b@(X509.printableString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.bmpString x) b@(X509.universalString x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.bmpString x) b@(X509.utf8String x₁) = _≋_ {A = X509.DirectoryString} a b
--- StringPrepCompare a@(X509.bmpString x) b@(X509.bmpString x₁) = _≋_ {A = X509.DirectoryString} a b
+Compare : ∀ {@0 bs₁ bs₂} → X509.DirectoryString bs₁ → X509.DirectoryString bs₂ → Set
+Compare (X509.teletexString x) (X509.teletexString x₁) = ⊥
+Compare (X509.teletexString x) (X509.printableString x₁) = ⊥
+Compare (X509.teletexString x) (X509.universalString x₁) = ⊥
+Compare (X509.teletexString x) (X509.utf8String x₁) = ⊥
+Compare (X509.teletexString x) (X509.bmpString x₁) = ⊥
+Compare (X509.printableString x) (X509.teletexString x₁) = ⊥
+Compare (X509.printableString x) (X509.printableString x₁) = {!!}
+Compare (X509.printableString x) (X509.universalString x₁) = {!!}
+Compare (X509.printableString x) (X509.utf8String x₁) = {!!}
+Compare (X509.printableString x) (X509.bmpString x₁) = {!!}
+Compare (X509.universalString x) (X509.teletexString x₁) = ⊥
+Compare (X509.universalString x) (X509.printableString x₁) = {!!}
+Compare (X509.universalString x) (X509.universalString x₁) = {!!}
+Compare (X509.universalString x) (X509.utf8String x₁) = {!!}
+Compare (X509.universalString x) (X509.bmpString x₁) = {!!}
+Compare (X509.utf8String x) (X509.teletexString x₁) = ⊥
+Compare (X509.utf8String x) (X509.printableString x₁) = {!!}
+Compare (X509.utf8String x) (X509.universalString x₁) = {!!}
+Compare (X509.utf8String x) (X509.utf8String x₁) = {!!}
+Compare (X509.utf8String x) (X509.bmpString x₁) = {!!}
+Compare (X509.bmpString x) (X509.teletexString x₁) = ⊥
+Compare (X509.bmpString x) (X509.printableString x₁) = {!!}
+Compare (X509.bmpString x) (X509.universalString x₁) = {!!}
+Compare (X509.bmpString x) (X509.utf8String x₁) = {!!}
+Compare (X509.bmpString x) (X509.bmpString x₁) = {!!}
 
 
-Transcode : ∀ {@0 bs} → X509.DirectoryString bs → UTF8 bs
-Transcode (X509.teletexString x) = {!!}
-Transcode (X509.printableString x) = {!!}
-Transcode (X509.universalString x) = {!!}
-Transcode (X509.utf8String (Aeres.Grammar.Definitions.mk×ₚ (Generic.mkTLV len (singleton x x≡) len≡ bs≡₁) sndₚ₁ bs≡)) = {!!}
-Transcode (X509.bmpString x) = {!!}
+Transcode : ∀ {@0 bs} → X509.DirectoryString bs → Exists─ (List UInt8) UTF8
+Transcode (X509.teletexString x) = _ , nil
+Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = helper x all<128
+  where
+  helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
+  helper [] All.[] = _ , nil
+  helper (x ∷ ss) (px All.∷ x₁) = _ , (cons (IList.mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper ss x₁)) refl))
+Transcode (X509.universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
+Transcode (X509.utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
+Transcode (X509.bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
 
 
+-- CaseFoldingNFKC : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
+-- CaseFoldingNFKC x = {!!}
