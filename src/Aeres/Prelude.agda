@@ -367,6 +367,10 @@ instance
   MonadMaybe = monad
     where open import Data.Maybe.Categorical
 
+  MonadError : ∀ {ℓ₁ ℓ₂} {E : Set ℓ₁} → Monad{ℓ₁ Level.⊔ ℓ₂} (E ⊎_)
+  MonadError{ℓ₂ = ℓ₂}{E = E} = monad
+    where open import Data.Sum.Categorical.Left E ℓ₂
+
 module MonadZero {ℓ} {M : Set ℓ → Set ℓ} (m : MonadZero M) where
   import Category.Monad
 
