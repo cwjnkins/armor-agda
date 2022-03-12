@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping --sized-types #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509
@@ -21,94 +21,60 @@ open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
 
-MergeTwoUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8
-MergeTwoUTF8 = {!!}
+appendUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8
+appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , appendIList snd snd₁
 
 lookupB2Map : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupB2Map x 
   with lookupUTF8Trie (serializeUTF8Char' x) B2Map
-... | nothing = _ , nil
+... | nothing = _ , (cons (mkIListCons x nil refl))
 ... | just x₁
   with x₁
 ... | this x₂ = x₂
-... | that x₃ = ?
+... | that x₃ = _ , (cons (mkIListCons x nil refl))
 ... | these x₂ x₃ = x₂
 
 
-Transcode : ∀ {@0 bs} → X509.DirectoryString bs → Exists─ (List UInt8) UTF8
-Transcode (X509.teletexString x) = _ , nil
-Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = helper x all<128
+Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
+Transcode (X509.teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
+Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
   where
   helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
   helper [] All.[] = _ , nil
-  helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (IList.mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
-Transcode (X509.universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
-Transcode (X509.utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
-Transcode (X509.bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = _ , val
+  helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
+Transcode (X509.universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (X509.utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (X509.bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV {v = v} len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 
-
-InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-InitialMapping = {!!}
-
+postulate
+  InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 
 CaseFoldingNFKC : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 CaseFoldingNFKC nil = _ , nil
-CaseFoldingNFKC (cons (mkIListCons head₁ tail₁ bs≡)) = MergeTwoUTF8 (lookupB2Map head₁) (CaseFoldingNFKC tail₁)
+CaseFoldingNFKC (cons (mkIListCons head₁ tail₁ bs≡)) = appendUTF8 (lookupB2Map head₁) (CaseFoldingNFKC tail₁)
 
+postulate
+  Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
+  InsigCharHandling : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 
-Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
-Prohibit = {!!}
-
-
-InsigCharHandling : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-InsigCharHandling = {!!}
-
-
-ProcessString : ∀ {@0 bs} → X509.DirectoryString bs → Exists─ (List UInt8) UTF8
-ProcessString x
-  with Transcode x
-... | _ , nil = _ , nil
-... | _ , cons x₂
-  with InitialMapping (cons x₂)
-... | _ , nil = _ , nil
-... | _ , cons x₃
-  with CaseFoldingNFKC (cons x₃)
-... | _ , nil = _ , nil
-... | _ , cons x₄
-  with Prohibit (cons x₄)
-... | true = _ , nil
-... | false = InsigCharHandling (cons x₄)
-
+ProcessString : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
+ProcessString str
+  with Transcode str
+... | inj₁ err = inj₁ err
+... | inj₂ ts
+  with InitialMapping (proj₂ ts)
+... | ims
+  with CaseFoldingNFKC (proj₂ ims)
+... | ms
+  with Prohibit (proj₂ ms)
+... | true = inj₁ "error in stringprep : prohibitted unicode character present"
+... | false = inj₂ (InsigCharHandling (proj₂ ms))
 
 Compare : ∀ {@0 bs₁ bs₂} → X509.DirectoryString bs₁ → X509.DirectoryString bs₂ → Set
 Compare x x₁
   with ProcessString x
-... | _ , nil = ⊥
-... | _ , cons x₃
+... | inj₁ err = ⊥
+... | inj₂ a
   with ProcessString x₁
-... | _ , nil = ⊥
-... | _ , cons x₄ =  _≋_ {A = UTF8} (cons x₃) (cons x₄)
-
-
-
--- CheckIfOnlySpaces : ∀ {@0 bs} → UTF8 bs → Bool
--- CheckIfOnlySpaces nil = false
--- CheckIfOnlySpaces (cons (mkIListCons head₁ tail₁ bs≡)) = helper head₁ tail₁
---   where
---   helper : ∀ {bs ps} → UTF8Char bs → UTF8 ps → Bool
---   helper (utf81 (mkUTF8Char1 b₁ b₁range bs≡)) nil
---     with b₁ ≟ # 32
---   ... | z = {!!}
---   helper (utf81 (mkUTF8Char1 b₁ b₁range bs≡)) (cons x) = {!!}
---   helper (utf82 x) x₁ = false
---   helper (utf83 x) x₁ = false
---   helper (utf84 x) x₁ = false
-
-
-
-
-  --   with b₁ ≟ # 32
-  -- ... | no ¬p = false
-  -- ... | yes p = true ∧ helper {!!}
-
-
+... | inj₁ err = ⊥
+... | inj₂ b = _≋_ {A = UTF8} (proj₂ a) (proj₂ b)
