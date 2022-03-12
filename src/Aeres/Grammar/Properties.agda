@@ -17,6 +17,17 @@ module Distribute where
 
   module _ {@0 A B : @0 List Σ → Set} where
 
+    ×ₚ-Σₚ-iso
+      : ∀ {@0 C : (xs : List Σ) (a : A xs) → Set}
+        → Iso ((Σₚ A C) ×ₚ B)
+              (Σₚ (A ×ₚ B) λ _ x → C _ (fstₚ x))
+    proj₁ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c refl) b refl) =
+      mk×ₚ (mk×ₚ a b refl) c refl
+    proj₂ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b refl) c refl) =
+      mk×ₚ (mk×ₚ a c refl) b refl
+    proj₁ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c refl) b refl) = refl
+    proj₂ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b refl) c refl) = refl
+
     exactLength-& : ∀ {n} → Equivalent (ExactLength (&ₚ A B) n)
                           (&ₚᵈ (WithinLength A n)
                                (λ bs₁ _ → ExactLength B (n - length bs₁)))
