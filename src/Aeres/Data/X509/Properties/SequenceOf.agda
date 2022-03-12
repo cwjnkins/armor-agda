@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.Length as LengthProps
@@ -14,9 +15,10 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.SequenceOf where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties  Dig
-open Aeres.Grammar.Sum         Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
 module SequenceOf where
   equivalent : ∀ {@0 A} → Equivalent (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
@@ -64,7 +66,7 @@ module SequenceOf where
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
   instance
-    SequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
+    SequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
     Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} nil nil = yes ≋-refl
     Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} nil (cons x) = no λ where (mk≋ refl ())
     Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (cons x) nil = no λ where (mk≋ refl ())
@@ -125,7 +127,7 @@ module BoundedSequenceOf where
       λ {xs} a → ≤-irrelevant
 
   instance
-    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List Dig → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
+    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
     Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
       with fstₚ v₁ ≋? fstₚ v₂
     ... | yes ≋-refl

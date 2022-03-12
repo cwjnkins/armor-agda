@@ -2,8 +2,11 @@
 
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.IList.Properties as IList
+import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Parser.Bounded
 import      Aeres.Grammar.Parser.Core
+import      Aeres.Grammar.Parser.Sigma
 import      Aeres.Grammar.Parser.WellFounded
 open import Aeres.Prelude
 open import Data.List.Properties
@@ -14,8 +17,10 @@ module Aeres.Grammar.Parser.IList (Σ : Set) where
 
 open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.IList Σ
+open Aeres.Grammar.Properties Σ
 open Aeres.Grammar.Parser.Bounded Σ
 open Aeres.Grammar.Parser.Core Σ
+open Aeres.Grammar.Parser.Sigma Σ
 open Aeres.Grammar.Parser.WellFounded Σ
 
 module parseIList
@@ -119,4 +124,14 @@ module parseIList
   parseIList : ∀ n → Parser (M ∘ Dec) (ExactLength (IList A) n)
   parseIList n = parseWF (parseIListWF n)
 
-open parseIList public using (parseIList)
+  parseIListNonEmpty : ∀ n → Parser (M ∘ Dec) (ExactLength (IListNonEmpty A) n)
+  parseIListNonEmpty n =
+    parseEquivalent{A = Σₚ (ExactLength (IList A) n) (λ _ xs → lengthIList (fstₚ xs) ≥ 1)}
+      (symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
+      (parseSigma' exactLength-nonnesting (λ _ → _ ≥? 1)
+        (λ where
+           (mk×ₚ l₁ sndₚ₁ refl) (mk×ₚ l₂ sndₚ₂ refl) ≥1 →
+             subst₀ (_≥ 1) (IList.lengthIList≡ _ ne nn l₁ l₂) ≥1)
+        (parseIList n))
+
+open parseIList public using (parseIList ; parseIListNonEmpty)
