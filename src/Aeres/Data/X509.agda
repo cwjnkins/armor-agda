@@ -1065,7 +1065,7 @@ module X509 where
 
   module Chain where
     Chain : (@0 _ : List Dig) → Set
-    Chain = NonEmptySequenceOf Cert
+    Chain = IListNonEmpty Cert
   open Chain public using (Chain)
 
     

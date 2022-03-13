@@ -8,4 +8,3 @@ module Aeres.Data.X690-DER.SequenceOf where
 
 open Base256
 open Aeres.Data.X690-DER.TCB.SequenceOf public
-open Aeres.Grammar.IList UInt8 public

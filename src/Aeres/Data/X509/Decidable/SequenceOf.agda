@@ -3,13 +3,14 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parser
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.TLV
 import      Aeres.Data.X509.Properties as Props
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parser
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -18,6 +19,7 @@ module Aeres.Data.X509.Decidable.SequenceOf where
 
 open Base256
 open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Parser      Dig
 
 module parseSequenceOf

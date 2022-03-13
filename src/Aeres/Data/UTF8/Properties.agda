@@ -17,9 +17,10 @@ module Aeres.Data.UTF8.Properties where
 open Base256
 open Aeres.Grammar.Definitions      UInt8
 open Aeres.Grammar.IList            UInt8
-open Aeres.Grammar.IList.Properties UInt8
 open Aeres.Grammar.Properties       UInt8
 open Aeres.Grammar.Sum              UInt8
+
+module IListProps = Aeres.Grammar.IList.Properties UInt8
 
 module UTF8Char1Props where
   @0 unambiguous : Unambiguous UTF8Char1
