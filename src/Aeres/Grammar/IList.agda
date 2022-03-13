@@ -29,6 +29,13 @@ appendIList (cons (mkIListCons head tail refl)) x₁
   with appendIList tail x₁
 ... | y = cons (mkIListCons head y  (solve (++-monoid Σ)))
 
+reverseIList : ∀ {@0 A xs} → IList A xs → Exists─ _ (IList A)
+reverseIList x = helper x nil
+  where
+  helper : ∀ {@0 A xs₁ xs₂} → IList A xs₁ → IList A xs₂ → Exists─ _ (IList A)
+  helper nil x₁ = _ , x₁
+  helper (cons (mkIListCons head tail bs≡)) x₁ = helper tail (appendIList (cons (mkIListCons head nil refl)) x₁)
+
 lengthIList : ∀ {@0 A xs} → IList A xs → ℕ
 lengthIList nil = 0
 lengthIList (cons (mkIListCons h t bs≡)) = 1 + lengthIList t
@@ -40,4 +47,3 @@ IListNonEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
 IListNonEmpty A = IListLowerBounded A 1
 
 pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
-
