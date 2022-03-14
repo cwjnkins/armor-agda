@@ -4,6 +4,7 @@ import      Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Properties
 import      Aeres.Grammar.Definitions
+open import Aeres.Grammar.IList as IList
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Semantic.Cert where
@@ -127,11 +128,11 @@ checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields
   where
   helper : ∀ {@0 bs} → SequenceOf X509.DistPoint bs → Bool
   helper nil = true
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields crldp Aeres.Grammar.Definitions.none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = false
+  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields Aeres.Grammar.Definitions.none (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) Aeres.Grammar.Definitions.none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields (Aeres.Grammar.Definitions.some x₁) (Aeres.Grammar.Definitions.some x) (Aeres.Grammar.Definitions.some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
 
 
 -- returns all certificate policy OIDs
@@ -141,7 +142,7 @@ getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields e
   where
   helper : ∀ {@0 bs} → SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
   helper nil = []
-  helper (cons (mkSequenceOf (mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
+  helper (cons (mkIListCons (mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
 
 
 -- returns true only if the extension is unknown and has critical bit = true

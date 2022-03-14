@@ -5,6 +5,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Properties
 open import Aeres.Data.X509.Semantic.StringPrep.Exec
 import      Aeres.Grammar.Definitions
+open import Aeres.Grammar.IList as IList
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Semantic.Chain where
@@ -18,7 +19,7 @@ open Aeres.Grammar.Definitions Dig
 
 
 ChainToList : ∀ {@0 bs} → X509.Chain bs  → List (Exists─ (List Dig) X509.Cert)
-ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
+ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
   where
   helper :  ∀ {@0 bs}  → SequenceOf X509.Cert bs → List (Exists─ (List Dig) X509.Cert)
   helper nil = []
