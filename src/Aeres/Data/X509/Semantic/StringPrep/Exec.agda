@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping --sized-types #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509
@@ -13,6 +13,7 @@ open import Aeres.Data.UTF8.Serializer
 open import Aeres.Data.UTF8.TCB
 open import Aeres.Data.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Combine
+import      Data.Nat.Properties as Nat
 open import Data.These.Base
 
 module Aeres.Data.X509.Semantic.StringPrep.Exec where
@@ -48,34 +49,51 @@ checkOnlySpaces (cons (mkIListCons (utf82 x) tail₁ bs≡)) = false
 checkOnlySpaces (cons (mkIListCons (utf83 x) tail₁ bs≡)) = false
 checkOnlySpaces (cons (mkIListCons (utf84 x) tail₁ bs≡)) = false
 
-lstripUTF8 : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-lstripUTF8 IList.nil = _ , nil
+lstripUTF8 : ∀ {@0 bs} → (bsname : UTF8 bs) → Exists─ (List UInt8) (Σₚ UTF8 (λ xs a → lengthIList _ a ≤ lengthIList _ bsname))
+lstripUTF8 nil = _ , (Aeres.Grammar.Definitions.mk×ₚ nil z≤n refl)
 lstripUTF8 a@(cons (mkIListCons (utf81 (mkUTF8Char1 b₁ b₁range bs≡₁)) tail₁ bs≡))
   with toℕ b₁ ≟ 32
-... | no ¬p = _ , a
-... | yes p = lstripUTF8 tail₁
-lstripUTF8 a@(cons (mkIListCons (utf82 x) tail₁ bs≡)) = _ , a
-lstripUTF8 a@(cons (mkIListCons (utf83 x) tail₁ bs≡)) = _ , a
-lstripUTF8 a@(cons (mkIListCons (utf84 x) tail₁ bs≡)) = _ , a
+... | no ¬p = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+... | yes p
+  with lstripUTF8 tail₁
+... | fst , Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ refl = fst , (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ (Nat.≤-step sndₚ₁) refl)
+lstripUTF8 a@(cons (mkIListCons (utf82 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+lstripUTF8 a@(cons (mkIListCons (utf83 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+lstripUTF8 a@(cons (mkIListCons (utf84 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+
+lstripUTF8' : ∀ {@0 bs} → (bsname : UTF8 bs) → Exists─ (List UInt8) UTF8
+lstripUTF8' bsname
+  with lstripUTF8 bsname
+... | fst , snd = _ , fstₚ snd
 
 rstripUTF8 : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-rstripUTF8 x = reverseIList _ (proj₂ (lstripUTF8 (proj₂ (reverseIList _ x))))
+rstripUTF8 x = reverseIList _ (proj₂ (lstripUTF8' (proj₂ (reverseIList _ x))))
 
 stripUTF8 :  ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-stripUTF8 x = rstripUTF8 (proj₂ (lstripUTF8 x))
+stripUTF8 x = rstripUTF8 (proj₂ (lstripUTF8' x))
 
 addSpacesStartEnd :  ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 addSpacesStartEnd x = _ , (appendIList _ (appendIList _ (proj₂ spaceUTF8) x) (proj₂ spaceUTF8))
 
-innerSeqSpaceHelper : ∀ {@0 bs ss} → UTF8 bs → UTF8 ss → Exists─ (List UInt8) UTF8
-innerSeqSpaceHelper IList.nil x₁ = _ , x₁
-innerSeqSpaceHelper (cons (mkIListCons (utf81 x@(mkUTF8Char1 b₁ b₁range bs≡₁)) tail₁ bs≡)) x₁
+innerSeqSpaceHelperWF : ∀ {@0 bs ss} → (bsname : UTF8 bs) → Acc _<_ (lengthIList _ bsname) → UTF8 ss → Exists─ (List UInt8) UTF8
+innerSeqSpaceHelperWF IList.nil ac x₁ = _ , x₁
+innerSeqSpaceHelperWF (cons (mkIListCons (utf81 x@(mkUTF8Char1 b₁ b₁range bs≡₁)) tail₁ bs≡)) (WellFounded.acc rs) x₁
   with toℕ b₁ ≟ 32
-... | no ¬p = innerSeqSpaceHelper tail₁ (appendIList _ x₁ (cons (mkIListCons (utf81 x) nil refl)))
-... | yes p = innerSeqSpaceHelper (proj₂ (lstripUTF8 tail₁)) ((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8))))
-innerSeqSpaceHelper (cons (mkIListCons (utf82 x) tail₁ bs≡)) x₁ = innerSeqSpaceHelper tail₁ (appendIList _ x₁ (cons (mkIListCons (utf82 x) nil refl)))
-innerSeqSpaceHelper (cons (mkIListCons (utf83 x) tail₁ bs≡)) x₁ = innerSeqSpaceHelper tail₁ (appendIList _ x₁ (cons (mkIListCons (utf83 x) nil refl)))
-innerSeqSpaceHelper (cons (mkIListCons (utf84 x) tail₁ bs≡)) x₁ = innerSeqSpaceHelper tail₁ (appendIList _ x₁ (cons (mkIListCons (utf84 x) nil refl)))
+... | no ¬p = innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf81 x) nil refl)))
+... | yes p
+  with lstripUTF8 tail₁
+... | fst , Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₂ = innerSeqSpaceHelperWF fstₚ₁ (rs (lengthIList _ fstₚ₁) (s≤s sndₚ₁)) (((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)))))
+innerSeqSpaceHelperWF (cons (mkIListCons (utf82 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
+  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf82 x) nil refl)))
+innerSeqSpaceHelperWF (cons (mkIListCons (utf83 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
+  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf83 x) nil refl)))
+innerSeqSpaceHelperWF (cons (mkIListCons (utf84 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
+  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf84 x) nil refl)))
+
+innerSeqSpaceHelper : ∀ {@0 bs ss} → (bsname : UTF8 bs) → UTF8 ss → Exists─ (List UInt8) UTF8
+innerSeqSpaceHelper bsname = innerSeqSpaceHelperWF bsname (<-wellFounded _)
+  where open import Data.Nat.Induction
+
 
 
 Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
@@ -103,7 +121,7 @@ InsigCharHandling x
   ---- output only two spaces
 ... | true = _ , appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)
   ---- else, ensure one space at start and end, two space per seq of inner spaces
-... | false = innerSeqSpaceHelper (proj₂ (stripUTF8 x)) nil
+... | false = _ , appendIList _ (appendIList _ (proj₂ spaceUTF8) (proj₂ (innerSeqSpaceHelper (proj₂ (stripUTF8 x)) nil))) (proj₂ spaceUTF8)
 
 ProcessString : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 ProcessString str
