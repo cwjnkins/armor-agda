@@ -17,10 +17,13 @@ import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.IA5StringValue
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
+import Aeres.Data.X509.Properties.PCFieldsSeqFields
+import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.PublicKeyFields
@@ -53,6 +56,8 @@ module NonNesting where
 
 -- Unfinished lemmas
 module Cert               = Aeres.Data.X509.Properties.Cert
+module NCFieldsSeqFields  = Aeres.Data.X509.Properties.NCFieldsSeqFields
+module PolicyMapFields    = Aeres.Data.X509.Properties.PolicyMapFields
 
 -- Finished lemmas
 module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
@@ -73,6 +78,7 @@ module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFie
 module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
+module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields

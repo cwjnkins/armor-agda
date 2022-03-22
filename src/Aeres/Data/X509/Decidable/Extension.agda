@@ -12,9 +12,13 @@ open import Aeres.Data.X509.Decidable.CRLDistFields
 open import Aeres.Data.X509.Decidable.CertPolFields
 open import Aeres.Data.X509.Decidable.EKUFields
 open import Aeres.Data.X509.Decidable.IANFields
+open import Aeres.Data.X509.Decidable.INAPFields
 open import Aeres.Data.X509.Decidable.KUFields
+open import Aeres.Data.X509.Decidable.NCFields
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.PCFields
+open import Aeres.Data.X509.Decidable.PMFields
 open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.SKIFields
 open import Aeres.Data.X509.Decidable.SequenceOf
@@ -91,9 +95,21 @@ module parseExtension where
                                              (parseSum _
                                                (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseCRLDistFields n)
                                                (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                  (parseSum _
-                                                    (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
-                                                    (parseExtensionFields (λ bs → T-dec) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetString n))))))))))))))))))))
+                                                 (parseSum _
+                                                   (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseNCFields n)
+                                                   (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
+                                                     (parseSum _
+                                                       (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parsePCFields n)
+                                                       (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
+                                                         (parseSum _
+                                                           (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parsePMFields n)
+                                                           (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
+                                                             (parseSum _
+                                                               (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseINAPFields n)
+                                                               (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
+                                                                 (parseSum _
+                                                                   (parseExtensionFields (_≟ _) Props.TLV.nonnesting (Props.TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
+                                                                   (parseExtensionFields (λ bs → T-dec) Props.TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetString n))))))))))))))))))))))))))))
 
   parseExtension : Parser _ (Logging ∘ Dec) X509.Extension
   parseExtension = parseTLV _ "extension" _ parseSelectExtn

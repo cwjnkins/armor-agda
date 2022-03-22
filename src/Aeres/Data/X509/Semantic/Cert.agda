@@ -176,6 +176,10 @@ getExtensionsOIDList = map helper
   helper (fst , mkTLV len (X509.sanextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.cpextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.crlextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.ncextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.pcextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.pmextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
+  helper (fst , mkTLV len (X509.inapextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.aiaextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.other x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
 

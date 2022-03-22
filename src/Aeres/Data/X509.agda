@@ -420,7 +420,7 @@ module X509 where
     field
       @0 {alg pk} : List Dig
       signalg : SignAlg alg
-      pubkey : BitString pk
+      pubkey : BitString pk --- needs to expand for RSA
       @0 bs≡  : bs ≡ alg ++ pk
 
   PublicKey : (@0 _ : List Dig) → Set
@@ -486,13 +486,13 @@ module X509 where
 
 -------------------------- ian/san alternative names extensions ------------------
   IANFieldsSeq : (@0 _ : List Dig) → Set
-  IANFieldsSeq = GeneralNames -- TLV Tag.Sequence GeneralNamesElems
+  IANFieldsSeq = GeneralNames
 
   IANFields : (@0 _ : List Dig) → Set
   IANFields xs = TLV Tag.OctetString IANFieldsSeq xs
 
   SANFieldsSeq : (@0 _ : List Dig) → Set
-  SANFieldsSeq = GeneralNames -- TLV Tag.Sequence GeneralNamesElems
+  SANFieldsSeq = GeneralNames
 
   SANFields : (@0 _ : List Dig) → Set
   SANFields xs = TLV Tag.OctetString SANFieldsSeq xs
@@ -584,9 +584,6 @@ module X509 where
   NameRTCrlIssuer : (@0 _ : List Dig) → Set
   NameRTCrlIssuer xs = TLV Tag.AA1 RDNElems xs
 
-  -- DistributionPointName ::= CHOICE {
-  --      fullName                [0]     GeneralNames,
-  --      nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
   data DistPointNameChoice : (@0 _ : List Dig) → Set where
     fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
     nameRTCrlissr : ∀ {@0 bs} → NameRTCrlIssuer bs → DistPointNameChoice bs
@@ -641,6 +638,95 @@ module X509 where
   AIAFields : (@0 _ : List Dig) → Set
   AIAFields xs = TLV Tag.OctetString  AIAFieldsSeq xs
 
+------------------------------------ Name Constraints ---------------------------
+
+  MinBaseDistance : (@0 _ : List Dig) → Set
+  MinBaseDistance xs = TLV Tag.A80 IntegerValue xs
+
+  MaxBaseDistance : (@0 _ : List Dig) → Set
+  MaxBaseDistance xs = TLV Tag.A81 IntegerValue xs
+
+  record GeneralSubtreeFields (@0 bs : List Dig) : Set where
+    constructor mkGeneralSubtreeFields
+    field
+      @0 {bse minb maxb} : List Dig
+      base : GeneralName bse
+      minimum : Option MinBaseDistance minb
+      maximum : Option MaxBaseDistance maxb
+      @0 bs≡  : bs ≡ bse ++ minb ++ maxb
+
+  GeneralSubtree : (@0 _ : List Dig) → Set
+  GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
+
+  GeneralSubtrees : (@0 _ : List Dig) → Set
+  GeneralSubtrees xs = TLV Tag.Sequence (NonEmptySequenceOf GeneralSubtree) xs
+
+  PermittedSubtrees : (@0 _ : List Dig) → Set
+  PermittedSubtrees xs = TLV Tag.AA0 GeneralSubtrees xs
+
+  ExcludedSubtrees : (@0 _ : List Dig) → Set
+  ExcludedSubtrees xs = TLV Tag.AA1 GeneralSubtrees xs
+
+  record NCFieldsSeqFields (@0 bs : List Dig) : Set where
+    constructor mkNCFieldsSeqFields
+    field
+      @0 {pe ex} : List Dig
+      permt : Option PermittedSubtrees pe
+      excld : Option ExcludedSubtrees ex
+      @0 bs≡  : bs ≡ pe ++ ex
+
+  NCFieldsSeq : (@0 _ : List Dig) → Set
+  NCFieldsSeq xs = TLV Tag.Sequence NCFieldsSeqFields xs
+
+  NCFields : (@0 _ : List Dig) → Set
+  NCFields xs = TLV Tag.OctetString  NCFieldsSeq xs
+
+------------------------------------ Policy Constraints ---------------------------
+
+  RequireExplicitPolicy : (@0 _ : List Dig) → Set
+  RequireExplicitPolicy xs = TLV Tag.A80 IntegerValue xs
+
+  InhibitPolicyMapping : (@0 _ : List Dig) → Set
+  InhibitPolicyMapping xs = TLV Tag.A81 IntegerValue xs
+
+  record PCFieldsSeqFields (@0 bs : List Dig) : Set where
+    constructor mkPCFieldsSeqFields
+    field
+      @0 {req ini} : List Dig
+      require : Option RequireExplicitPolicy req
+      ihibit : Option InhibitPolicyMapping ini
+      @0 bs≡  : bs ≡ req ++ ini
+
+  PCFieldsSeq : (@0 _ : List Dig) → Set
+  PCFieldsSeq xs = TLV Tag.Sequence PCFieldsSeqFields xs
+
+  PCFields : (@0 _ : List Dig) → Set
+  PCFields xs = TLV Tag.OctetString  PCFieldsSeq xs
+
+------------------------------------ Policy Mappings ---------------------------
+
+  record PolicyMapFields (@0 bs : List Dig) : Set where
+    constructor mkPolicyMapFields
+    field
+      @0 {iss sub} : List Dig
+      issuerDomainPolicy : Generic.OID iss
+      subjectDomainPolicy : Generic.OID sub
+      @0 bs≡  : bs ≡ iss ++ sub
+
+  PolicyMap : (@0 _ : List Dig) → Set
+  PolicyMap xs = TLV Tag.Sequence PolicyMapFields xs
+
+  PMFieldsSeq : (@0 _ : List Dig) → Set
+  PMFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf PolicyMap) xs
+
+  PMFields : (@0 _ : List Dig) → Set
+  PMFields xs = TLV Tag.OctetString  PMFieldsSeq xs
+
+------------------------------------ Inhibit anyPolicy ---------------------------
+
+  INAPFields : (@0 _ : List Dig) → Set
+  INAPFields xs = TLV Tag.OctetString Int xs
+
 --------------------------------Extensions selection----------------------------------------
 
   module ExtensionOID where
@@ -671,11 +757,23 @@ module X509 where
     CRLDIST : List Dig
     CRLDIST =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 31 ]
 
+    NC : List Dig
+    NC =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 30 ]
+
+    PC : List Dig
+    PC =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 36 ]
+
+    PM : List Dig
+    PM =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 33 ]
+
+    INAP : List Dig
+    INAP =  # 6 ∷ # 3 ∷ # 85 ∷ # 29 ∷ [ # 54 ]
+
     AIA : List Dig
     AIA =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 
     Supported : List (List Dig)
-    Supported = AKI ∷ SKI ∷ KU ∷ EKU ∷ BC ∷ IAN ∷ SAN ∷ CPOL ∷ CRLDIST ∷ [ AIA ]
+    Supported = AKI ∷ SKI ∷ KU ∷ EKU ∷ BC ∷ IAN ∷ SAN ∷ CPOL ∷ CRLDIST ∷ NC ∷ PC ∷ PM ∷ INAP ∷ [ AIA ] 
 
   record ExtensionFields (@0 P : List Dig → Set) (A : @0 List Dig → Set) (@0 bs : List Dig) : Set where
     constructor mkExtensionFields
@@ -688,16 +786,20 @@ module X509 where
       @0 bs≡ : bs ≡ oex ++ cex ++ ocex
 
   data SelectExtn : @0 List Dig → Set where
-    akiextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.AKI    )              AKIFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AKI) → AKIFields bs2 → SelectExtn bs1 bs2
-    skiextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.SKI    )              SKIFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SKI) → SKIFields bs2 → SelectExtn bs1 bs2
-    kuextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.KU     )              KUFields            bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.KU) → KUFields bs2 → SelectExtn bs1 bs2
-    ekuextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.EKU    )              EKUFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.EKU) → EKUFields bs2 → SelectExtn bs1 bs2
-    bcextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.BC     )              BCFields            bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.BC) → BCFields bs2 → SelectExtn bs1 bs2
-    ianextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.IAN    )              IANFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.IAN) → IANFields bs2 → SelectExtn bs1 bs2
-    sanextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.SAN    )              SANFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.SAN) → SANFields bs2 → SelectExtn bs1 bs2
-    cpextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CPOL   )              CertPolFields       bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CPOL) → CertPolFields bs2 → SelectExtn bs1 bs2
-    crlextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CRLDIST)              CRLDistFields       bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.CRLDIST) → CRLDistFields bs2 → SelectExtn bs1 bs2
-    aiaextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.AIA    )              AIAFields           bs → SelectExtn bs -- ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ ExtensionOID.AIA) → AIAFields bs2 → SelectExtn bs1 bs2
+    akiextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.AKI    )              AKIFields           bs → SelectExtn bs 
+    skiextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.SKI    )              SKIFields           bs → SelectExtn bs 
+    kuextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.KU     )              KUFields            bs → SelectExtn bs 
+    ekuextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.EKU    )              EKUFields           bs → SelectExtn bs 
+    bcextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.BC     )              BCFields            bs → SelectExtn bs 
+    ianextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.IAN    )              IANFields           bs → SelectExtn bs 
+    sanextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.SAN    )              SANFields           bs → SelectExtn bs 
+    cpextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CPOL   )              CertPolFields       bs → SelectExtn bs 
+    crlextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.CRLDIST)              CRLDistFields       bs → SelectExtn bs 
+    ncextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.NC     )              NCFields            bs → SelectExtn bs 
+    pcextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.PC     )              PCFields            bs → SelectExtn bs 
+    pmextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.PM     )              PMFields            bs → SelectExtn bs 
+    inapextn  : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.INAP )              INAPFields          bs → SelectExtn bs 
+    aiaextn : ∀ {@0 bs} → ExtensionFields (_≡ ExtensionOID.AIA    )              AIAFields           bs → SelectExtn bs
     other   : ∀ {@0 bs} → ExtensionFields (False ∘ (_∈? ExtensionOID.Supported)) OctetString bs → SelectExtn bs
 
   module Extension where
