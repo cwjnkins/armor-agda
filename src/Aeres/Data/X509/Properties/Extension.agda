@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -167,7 +167,7 @@ module SelectExtn where
                             (unambiguousSum
                               (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous PMProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)) ) (TLVProps.noconfusion λ ()))
                               (unambiguousSum
-                                (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous {!!})) (TLVProps.noconfusion λ ()))
+                                (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous {xs})) (TLVProps.noconfusion λ ()))
                                 (unambiguousSum
                                   (ExtensionFields.unambiguous ≡-unique
                                     (TLVProps.unambiguous

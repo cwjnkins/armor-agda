@@ -26,8 +26,18 @@ module parsePCFields where
 
   open ≡-Reasoning
 
-  postulate
-    parsePCFields : Parser Dig (Logging ∘ Dec) X509.PCFields
+  parsePCFields : Parser Dig (Logging ∘ Dec) X509.PCFields
+  parsePCFields =
+    parseTLV _ "Policy Constraiint Fields" _
+      (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
+        (parseTLV _ "Policy Constraiint Fields" _ helper))
+    where
+    helper : (n : ℕ) → Parser Dig (Logging ∘ Dec) (ExactLength Dig (X509.PCFieldsSeqFields) n)
+    helper n =
+      parseEquivalent _ (equivalent×ₚ _ Props.PCFieldsSeqFields.equivalent)
+        (parseOption₂ _ Props.TLV.nonnesting Props.TLV.nonnesting (TLV.noconfusion (λ ()))
+          (parseTLV _ "require explicit policy" _ parseIntValue)
+          (parseTLV _ "inhibit policy mapping" _ parseIntValue)
+          (tell $ here' String.++ ": underflow") n)
 
 open parsePCFields public using (parsePCFields)
-

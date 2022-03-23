@@ -7,6 +7,7 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
@@ -26,9 +27,19 @@ module parsePMFields where
 
   open ≡-Reasoning
 
-  postulate
-    parsePMFields : Parser Dig (Logging ∘ Dec) X509.PMFields
+
+  parsePolicyMapFields : Parser _ (Logging ∘ Dec) X509.PolicyMapFields
+  parsePolicyMapFields =
+    parseEquivalent _ Props.PolicyMapFields.equivalent
+      (parse& _ Props.TLV.nonnesting parseOID parseOID)
+
+  parsePMFields : Parser Dig (Logging ∘ Dec) X509.PMFields
+  parsePMFields =
+    parseTLV _ "Policy Mappings" _
+      (parseExactLength _  Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
+        (parseNonEmptySeq "Policy Mappings elems" _ Props.TLV.nonempty Props.TLV.nonnesting
+          (parseTLV _ "aaa" _
+            (λ n → parseExactLength _ Props.PolicyMapFields.nonnesting (tell $ here' String.++ ": underflow") parsePolicyMapFields n))))
+
 
 open parsePMFields public using (parsePMFields)
-
-

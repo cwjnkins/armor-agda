@@ -61,6 +61,7 @@ import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
+import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields

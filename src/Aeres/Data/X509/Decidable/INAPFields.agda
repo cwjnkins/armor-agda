@@ -26,7 +26,9 @@ module parseINAPFields where
 
   open ≡-Reasoning
 
-  postulate
-    parseINAPFields : Parser Dig (Logging ∘ Dec) X509.INAPFields
+  parseINAPFields : Parser Dig (Logging ∘ Dec) X509.INAPFields
+  parseINAPFields =
+    parseTLV _ " Inhibit Any Policy" _
+      λ n → parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseInt n
 
 open parseINAPFields public using (parseINAPFields)
