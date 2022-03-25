@@ -95,7 +95,6 @@ innerSeqSpaceHelper bsname = innerSeqSpaceHelperWF bsname (<-wellFounded _)
   where open import Data.Nat.Induction
 
 
-
 Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 Transcode (X509.teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
 Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
@@ -144,3 +143,11 @@ Compare x x₁
   with ProcessString x₁
 ... | inj₁ err = ⊥
 ... | inj₂ b = _≋_ {A = UTF8} (proj₂ a) (proj₂ b)
+
+
+
+-- CaseFoldingNFKCTest : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
+-- CaseFoldingNFKCTest nil = _ , nil
+-- CaseFoldingNFKCTest (cons (mkIListCons head₁ tail₁ bs≡)) = case inRange? 'A' 'Z' head₁ of λ where
+--   (no ¬p) → appendUTF8 (_ , cons (mkIListCons head₁ nil refl)) (CaseFoldingNFKCTest tail₁)
+--   (yes p) → appendUTF8 (_ , cons (mkIListCons (utf81 (mkUTF8Char1 {!!} {!!} {!!})) nil refl)) {!!}

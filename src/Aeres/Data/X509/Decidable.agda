@@ -24,13 +24,17 @@ open import Aeres.Data.X509.Decidable.EKUFields
 open import Aeres.Data.X509.Decidable.Extension
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.IANFields
+open import Aeres.Data.X509.Decidable.INAPFields
 open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.KUFields
 open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.NCFields
 open import Aeres.Data.X509.Decidable.NoticeReference
 open import Aeres.Data.X509.Decidable.Null
 open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.PCFields
+open import Aeres.Data.X509.Decidable.PMFields
 open import Aeres.Data.X509.Decidable.PolicyQualifierInfo
 open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN

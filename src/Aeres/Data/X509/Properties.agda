@@ -14,15 +14,19 @@ import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
+import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.IA5StringValue
 import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
-import Aeres.Data.X509.Properties.Primitives
+import Aeres.Data.X509.Properties.PCFieldsSeqFields
+import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
+import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.RDNSeq
@@ -66,13 +70,17 @@ module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module Extension                 = Aeres.Data.X509.Properties.Extension
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
+module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
 module Length                    = Aeres.Data.X509.Properties.Length
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
+module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
 module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
+module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
+module PolicyMapFields           = Aeres.Data.X509.Properties.PolicyMapFields
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
