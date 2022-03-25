@@ -8,9 +8,8 @@ open import Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
-open import Aeres.Data.UTF8.Parser
+open import Aeres.Data.UTF8
 open import Aeres.Data.UTF8.Serializer
-open import Aeres.Data.UTF8.TCB
 open import Aeres.Data.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Combine
 import      Data.Nat.Properties as Nat
@@ -146,8 +145,17 @@ Compare x x₁
 
 
 
--- CaseFoldingNFKCTest : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
--- CaseFoldingNFKCTest nil = _ , nil
--- CaseFoldingNFKCTest (cons (mkIListCons head₁ tail₁ bs≡)) = case inRange? 'A' 'Z' head₁ of λ where
---   (no ¬p) → appendUTF8 (_ , cons (mkIListCons head₁ nil refl)) (CaseFoldingNFKCTest tail₁)
---   (yes p) → appendUTF8 (_ , cons (mkIListCons (utf81 (mkUTF8Char1 {!!} {!!} {!!})) nil refl)) {!!}
+-- CaseFoldingNFKCTest : ∀ {@0 bs} → UTF8Char1 bs → Exists─ (List UInt8) UTF8Char1
+-- CaseFoldingNFKCTest = mapUTF8Char1Range 65 26 (ℤ.+ 32) (toWitness  {Q = _ ℤ.≤? _ } tt) (toWitness  {Q = _ ℤ.≤? _ } tt)
+
+-- -- CaseFoldingNFKCTest nil = _ , nil
+-- -- CaseFoldingNFKCTest (cons (mkIListCons head₁ tail₁ bs≡)) = case inRange? 'A' 'Z' head₁ of λ where
+-- --   (no ¬p) → appendUTF8 (_ , cons (mkIListCons head₁ nil refl)) (CaseFoldingNFKCTest tail₁)
+-- --   (yes p) → appendUTF8 (_ , cons (mkIListCons (utf81 (mkUTF8Char1 {!!} {!!} {!!})) nil refl)) {!!}
+
+
+
+
+-- 192 155 -- 192 156
+-- 192 157 --
+-- 192 159

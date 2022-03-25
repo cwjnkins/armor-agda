@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
 
@@ -30,41 +30,36 @@ module parseNCFields where
   parseExactLengthGeneralSubtrees : (n : ℕ) → Parser Dig (Logging ∘ Dec) (ExactLength Dig (X509.GeneralSubtrees) n)
   parseExactLengthGeneralSubtrees =
     parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-      (parseNonEmptySeq "aaa" _ Props.TLV.nonempty Props.TLV.nonnesting
-        (parseTLV _ "aaa" _ {!!}))
+      (parseNonEmptySeq "GeneralSubtrees" _ Props.TLV.nonempty Props.TLV.nonnesting
+        (parseTLV _ "GeneralSubtrees" _ helper))
     where
     helper : (n : ℕ) → Parser Dig (Logging ∘ Dec) (ExactLength Dig (X509.GeneralSubtreeFields) n)
-    helper n = {!parse&ᵈ!}
-
+    helper n =
+      parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&) (equivalent×ₚ _ Props.GeneralSubtreeFields.equivalent))
+        (parse&ᵈ _ (withinLength-nonnesting _ Props.GeneralName.nonnesting)
+          (withinLength-unambiguous _ Props.GeneralName.unambiguous)
+          (parse≤ _ n parseGeneralName Props.GeneralName.nonnesting (tell $ here' String.++ ": underflow"))
+          λ where
+            {bs} (singleton read read≡) _ →
+              subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
+              (parseOption₂ _ Props.TLV.nonnesting Props.TLV.nonnesting (Props.TLV.noconfusion λ ())
+                (parseTLV _ "MinBaseDistance" _ parseIntValue)
+                (parseTLV _ "MaxBaseDistance" _ parseIntValue)
+                (tell $ here' String.++ ": underflow")
+                (n - read)))
 
   parseNCFields : Parser Dig (Logging ∘ Dec) X509.NCFields
   parseNCFields =
-    parseTLV _ "aaa" _
+    parseTLV _ "NC Fields" _
       (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-        (parseTLV _ "aaa" _ helper))
+        (parseTLV _ "NC Fields" _ helper))
     where
     helper : (n : ℕ) → Parser Dig (Logging ∘ Dec) (ExactLength Dig (X509.NCFieldsSeqFields) n)
     helper n =
       parseEquivalent _ (equivalent×ₚ _ Props.NCFieldsSeqFields.equivalent)
         (parseOption₂ _ Props.TLV.nonnesting Props.TLV.nonnesting (Props.TLV.noconfusion λ ())
-          (parseTLV _ "aaa" _ parseExactLengthGeneralSubtrees)
-          (parseTLV _ "aaa" _ parseExactLengthGeneralSubtrees)
+          (parseTLV _ "GeneralSubtrees" _ parseExactLengthGeneralSubtrees)
+          (parseTLV _ "GeneralSubtrees" _ parseExactLengthGeneralSubtrees)
             (tell $ here' String.++ ": underflow") n)
 
 open parseNCFields public using (parseNCFields)
-
-
-
-
-  -- parsePolicyMapFields : Parser _ (Logging ∘ Dec) X509.PolicyMapFields
-  -- parsePolicyMapFields =
-  --   parseEquivalent _ Props.PolicyMapFields.equivalent
-  --     (parse& _ Props.TLV.nonnesting parseOID parseOID)
-
-  -- parsePMFields : Parser Dig (Logging ∘ Dec) X509.PMFields
-  -- parsePMFields =
-  --   parseTLV _ "Policy Mappings" _
-  --     (parseExactLength _  Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-  --       (parseNonEmptySeq "Policy Mappings elems" _ Props.TLV.nonempty Props.TLV.nonnesting
-  --         (parseTLV _ "aaa" _
-  --           (λ n → parseExactLength _ Props.PolicyMapFields.nonnesting (tell $ here' String.++ ": underflow") parsePolicyMapFields n))))
