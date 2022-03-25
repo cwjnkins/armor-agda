@@ -284,6 +284,9 @@ instance
   CharNumeric : Numeric Char
   Numeric.toℕ CharNumeric = Char.toℕ
 
+  SingletonNumeric : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Numeric A ⦄ {@0 x : A} → Numeric (Singleton x)
+  Numeric.toℕ SingletonNumeric = toℕ ∘ Singleton.x
+
 record Eq {ℓ} (A : Set ℓ) : Set ℓ where
   infix 4 _≟_ _≠_
   field
