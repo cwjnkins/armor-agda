@@ -80,3 +80,16 @@ InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) _ _ = ⊥
 
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
+
+instance
+  -- TODO: come back to this if there are performance issues
+  NumericUTF8Char : ∀ {@0 bs} → Numeric (UTF8Char bs)
+  Numeric.toℕ NumericUTF8Char (utf81 x) =
+     toℕ (UTF8Char1.b₁ x)
+  Numeric.toℕ NumericUTF8Char (utf82 x) =
+     toℕ (UTF8Char2.b₁ x) * (2 ^ 8) + toℕ (UTF8Char2.b₂ x)
+  Numeric.toℕ NumericUTF8Char (utf83 x) =
+     (toℕ $ UTF8Char3.b₁ x) * (2 ^ (8 * 2)) + (toℕ $ UTF8Char3.b₂ x) * (2 ^ 8) + toℕ (UTF8Char3.b₃ x)
+  Numeric.toℕ NumericUTF8Char (utf84 x) =
+      (toℕ $ UTF8Char4.b₁ x) * (2 ^ (8 * 3)) + (toℕ $ UTF8Char4.b₂ x) * 2 ^ (8 * 2)
+    + (toℕ $ UTF8Char4.b₃ x) * 2 ^ 8 + (toℕ $ UTF8Char4.b₄ x)
