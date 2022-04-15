@@ -12,11 +12,6 @@ module Aeres.Data.X509.Semantic.StringPrep.ExcludeRange where
 
 open Base256
 
--- TODO: move ths
-length∘toList : ∀ {ℓ} {A : Set ℓ} {n} → (xs : Vec A n) → length (Vec.toList xs) ≡ n
-length∘toList [] = refl
-length∘toList (x ∷ xs) = cong suc (length∘toList xs)
-
 InRangeAndFilterElemSpec : ℕ × ℕ × Σ (ℕ → Set) Decidable → UInt8 → Set
 InRangeAndFilterElemSpec (l , u , (P , _)) c = InRange l u c × P (toℕ c)
 
