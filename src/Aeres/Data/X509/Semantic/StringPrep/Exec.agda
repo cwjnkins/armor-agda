@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping --sized-types #-}
 
+open import Data.Nat.DivMod
 import      Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Properties
@@ -12,8 +13,11 @@ open import Aeres.Data.UTF8
 open import Aeres.Data.UTF8.Serializer
 open import Aeres.Data.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Combine
+open import Aeres.Data.X509.Semantic.StringPrep.ProhibitList.Combine
 import      Data.Nat.Properties as Nat
 open import Data.These.Base
+
+open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 
 module Aeres.Data.X509.Semantic.StringPrep.Exec where
 
@@ -93,7 +97,6 @@ innerSeqSpaceHelper : ∀ {@0 bs ss} → (bsname : UTF8 bs) → UTF8 ss → Exis
 innerSeqSpaceHelper bsname = innerSeqSpaceHelperWF bsname (<-wellFounded _)
   where open import Data.Nat.Induction
 
-
 Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 Transcode (X509.teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
 Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
@@ -107,7 +110,24 @@ Transcode (X509.bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len�
 
 postulate
   InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-  Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
+
+checkProhibitUTF8Char : ∀ {@0 bs} → UTF8Char bs → Bool
+checkProhibitUTF8Char (utf81 x) = false
+checkProhibitUTF8Char (utf82 x) = case (TableC.CasesForUTF82.check (utf82 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF82.check (utf82 x)
+checkProhibitUTF8Char (utf83 x) = case (TableC.CasesForUTF83.check (utf83 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF83.check (utf83 x)
+checkProhibitUTF8Char (utf84 x) = case (TableC.CasesForUTF84.check (utf84 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF84.check (utf84 x)
+
+Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
+Prohibit nil = false
+Prohibit (cons (mkIListCons head₁ tail₁ bs≡)) = case (checkProhibitUTF8Char head₁) of λ where
+  true → true
+  false → Prohibit tail₁
 
 CaseFoldingNFKC : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 CaseFoldingNFKC nil = _ , nil
@@ -142,20 +162,3 @@ Compare x x₁
   with ProcessString x₁
 ... | inj₁ err = ⊥
 ... | inj₂ b = _≋_ {A = UTF8} (proj₂ a) (proj₂ b)
-
-
-
--- CaseFoldingNFKCTest : ∀ {@0 bs} → UTF8Char1 bs → Exists─ (List UInt8) UTF8Char1
--- CaseFoldingNFKCTest = mapUTF8Char1Range 65 26 (ℤ.+ 32) (toWitness  {Q = _ ℤ.≤? _ } tt) (toWitness  {Q = _ ℤ.≤? _ } tt)
-
--- -- CaseFoldingNFKCTest nil = _ , nil
--- -- CaseFoldingNFKCTest (cons (mkIListCons head₁ tail₁ bs≡)) = case inRange? 'A' 'Z' head₁ of λ where
--- --   (no ¬p) → appendUTF8 (_ , cons (mkIListCons head₁ nil refl)) (CaseFoldingNFKCTest tail₁)
--- --   (yes p) → appendUTF8 (_ , cons (mkIListCons (utf81 (mkUTF8Char1 {!!} {!!} {!!})) nil refl)) {!!}
-
-
-
-
--- 192 155 -- 192 156
--- 192 157 --
--- 192 159

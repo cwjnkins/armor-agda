@@ -1,5 +1,5 @@
 
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
 
 open import Aeres.Binary
 open import Aeres.Prelude
