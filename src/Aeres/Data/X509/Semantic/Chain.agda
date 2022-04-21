@@ -31,8 +31,6 @@ CCP2Seq nil = ⊤
 CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
 CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = X509.Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
 
-
--- TODO: call LDAP StringPrep over val and val₁
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → X509.RDNATV bs₁ → X509.RDNATV bs₂ → Set
 MatchRDNATV (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = Generic.OID} oid oid₁ × Compare val val₁
 
@@ -74,9 +72,10 @@ CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (X50
 postulate
   InSeq-dec : ∀ {bs} (a : X509.RDNATV bs) → (b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (InSeq a b c)
   AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (AllInSeq xs b c)
+  Compare-dec : ∀ {@0 bs₁ bs₂} (xs₁ : X509.DirectoryString bs₁) → (xs₂ : X509.DirectoryString bs₂) → Dec (Compare xs₁ xs₂)
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNATV bs₁) → (m : X509.RDNATV bs₂) → Dec (MatchRDNATV n m)
-MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec {!!}
+MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec Compare-dec val val₁
 
 MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNElems bs₁) → (m : X509.RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
 MatchRDNElemsLen-dec (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)

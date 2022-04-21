@@ -9,7 +9,7 @@ import      Aeres.Grammar.IList
 
 open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 
-module Aeres.Data.X509.Semantic.StringPrep.ProhibitList.Combine where
+module Aeres.Data.X509.Semantic.StringPrep.ProhibitList.Helpers where
 
 open Base256
 open Aeres.Grammar.IList UInt8
@@ -81,8 +81,6 @@ module TableC where
       fs = case1 ∷ case2 ∷ case3 ∷ case4 ∷ case5 ∷ case6 ∷ []
 
   --- for proof, we need to use "any?"
-
-
 
 module TableA1 where
 
@@ -1405,3 +1403,16 @@ module TableA1 where
       where
       fs : List (∀ {@0 bs} → UTF8Char bs → Bool)
       fs = case1 ∷ case2 ∷ case3 ∷ case4 ∷ case5 ∷ case6 ∷ case7 ∷ case8 ∷ case9 ∷ case10 ∷ case11 ∷ case12 ∷ case13 ∷ case14 ∷ case15 ∷ case16 ∷ case17 ∷ case18 ∷ case19 ∷ case20 ∷ case21 ∷ case22 ∷ case23 ∷ case24 ∷ case25 ∷ case26 ∷ case27 ∷ case28 ∷ case29 ∷ case30 ∷ case31 ∷ case32 ∷ case33 ∷ case34 ∷ case35 ∷ case36 ∷ case37 ∷ case38 ∷ case39 ∷ case40 ∷ case41 ∷ case42 ∷ case43 ∷ case44 ∷ case45 ∷ case46 ∷ case47 ∷ case48 ∷ case49 ∷ case50 ∷ case51 ∷ case52 ∷ case53 ∷ case54 ∷ case55 ∷ case56 ∷ case57 ∷ case58 ∷ []
+
+
+checkProhibitUTF8Char : ∀ {@0 bs} → UTF8Char bs → Bool
+checkProhibitUTF8Char (utf81 x) = false
+checkProhibitUTF8Char (utf82 x) = case (TableC.CasesForUTF82.check (utf82 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF82.check (utf82 x)
+checkProhibitUTF8Char (utf83 x) = case (TableC.CasesForUTF83.check (utf83 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF83.check (utf83 x)
+checkProhibitUTF8Char (utf84 x) = case (TableC.CasesForUTF84.check (utf84 x)) of λ where
+  true → true
+  false → TableA1.CasesForUTF84.check (utf84 x)
