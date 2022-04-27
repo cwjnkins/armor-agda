@@ -9,13 +9,13 @@ import      Aeres.Grammar.Parser
 
 module Aeres.Test.X509.GeneralName where
 
-Gen₁ : List Dig
+Gen₁ : List UInt8
 Gen₁ = Tag.EightyOne ∷ # 2 ∷ # 85 ∷ [ # 87 ]
 
-Gen₂ : List Dig
+Gen₂ : List UInt8
 Gen₂ = Tag.EightyEight ∷ # 2 ∷ # 134 ∷ [ # 72 ]
 
-Gen₃ : List Dig
+Gen₃ : List UInt8
 Gen₃ = Tag.A4 ∷ # 26 ∷ # 49 ∷ # 11  ∷ # 48  ∷ # 9  ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ # 83 ∷ # 49 ∷ # 11 ∷ # 48 ∷ # 9 ∷ # 6 ∷ # 3 ∷ # 85 ∷ # 4 ∷ # 6 ∷ # 19 ∷ # 2 ∷ # 85 ∷ [ # 83 ]
 
 test₁ : X509.GeneralName Gen₁
