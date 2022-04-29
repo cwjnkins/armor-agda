@@ -15,8 +15,8 @@ certEOL    = String.toList "\r\n"
 record CertLine (n : ℕ) (@0 bs : List Char) : Set where
   constructor mkCertLine
   field
-    line : List Char
-    @0 valid64 : All (_∈ Base64.charset) line
+    @0 line : List Char
+    valid64 : All (_∈ Base64.charset) line
     @0 len≡ : length line ≡ n
     @0 bs≡ : bs ≡ line ++ certEOL
 
@@ -32,3 +32,6 @@ record Cert (@0 bs : List Char) : Set where
     
 PEM : @0 List Char → Set
 PEM = IList Cert
+
+extract : ∀ {@0 bs} → Cert bs → List UInt8
+extract (mkCert p s prefix sufLen sufLen≤ suffix bs≡) = {!!}

@@ -240,7 +240,7 @@ erased? (yes a) = yes (─ a)
 erased-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique A → Unique (Erased A)
 erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) refl
 
-Exists─ : (A : Set) (B : @0 A → Set) → Set
+Exists─ : (@0 A : Set) (B : @0 A → Set) → Set
 Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
 
 -- Typeclasses

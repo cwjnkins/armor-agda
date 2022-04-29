@@ -40,3 +40,12 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
         return ∘ no $ contraposition (mapSuccess (proj₂ equiv)) ¬parse
     return (yes
       (mapSuccess (proj₁ equiv) x))
+
+  parseErased : {A : @0 List Σ → Set} → Parser (M ∘ Dec) A → Parser (M ∘ Dec) (Erased ∘ A)
+  runParser (parseErased p) xs = do
+    yes x ← runParser p xs
+      where no ¬p → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (─ x) suffix ps≡) →
+            contradiction (success prefix _ read≡ x suffix ps≡) ¬p
+    return (yes (mapSuccess ─_ x))
