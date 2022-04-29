@@ -23,6 +23,27 @@ record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
     @0 ps≡    : prefix ∷ʳ term ≡ xs
 
 
+module Properties where
+  nonnesting : ∀ {@0 A} → NonNesting (ParseWhileₜ A)
+  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkParseWhile [] term allPrefix ¬term refl) (mkParseWhile [] term₁ allPrefix₁ ¬term₁ refl) =
+    cong (_∷ []) (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
+  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkParseWhile [] term allPrefix ¬term refl) (mkParseWhile (x ∷ prefix₁) term₁ allPrefix₁ ¬term₁ refl) =
+    contradiction (subst _ (sym x≡) (All.head allPrefix₁)) ¬term
+    where
+    x≡ : term ≡ x
+    x≡ = ∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂
+  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkParseWhile (x ∷ prefix) term allPrefix ¬term refl) (mkParseWhile [] term₁ allPrefix₁ ¬term₁ refl) =
+    contradiction (subst _ (sym x≡) (All.head allPrefix)) ¬term₁
+    where
+    x≡ : term₁ ≡ x
+    x≡ = ∷-injectiveˡ (sym xs₁++ys₁≡xs₂++ys₂)
+  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkParseWhile (x ∷ prefix) term allPrefix ¬term refl) (mkParseWhile (x₁ ∷ prefix₁) term₁ allPrefix₁ ¬term₁ refl) =
+    cong₂ _∷_
+      (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
+      (nonnesting (∷-injectiveʳ xs₁++ys₁≡xs₂++ys₂)
+        (mkParseWhile prefix term (All.tail allPrefix) ¬term refl)
+        (mkParseWhile prefix₁ term₁ (All.tail allPrefix₁) ¬term₁ refl))
+
 parseWhileₜ : ∀ {A : Σ → Set} (p : Decidable A) → Parser Dec (ParseWhileₜ A)
 runParser (parseWhileₜ p) [] = no $ ‼ go
   where
