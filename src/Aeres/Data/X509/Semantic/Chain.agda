@@ -17,7 +17,6 @@ open Aeres.Grammar.Definitions Dig
 
 ------- helper functions ------
 
-
 ChainToList : ∀ {@0 bs} → X509.Chain bs  → List (Exists─ (List Dig) X509.Cert)
 ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
   where
@@ -34,13 +33,13 @@ CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = X509.Cert.getVersion h ≡ ℤ.
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → X509.RDNATV bs₁ → X509.RDNATV bs₂ → Set
 MatchRDNATV (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = Generic.OID} oid oid₁ × Compare val val₁
 
-data InSeq {bs} (a : X509.RDNATV bs) : (b : List Dig) → SequenceOf X509.RDNATV b → Set where
-  here  : ∀ {bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (px : MatchRDNATV a x) (bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
-  there : ∀ {bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (pxs : InSeq a bs₂ xs) (bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
+data InSeq {@0 bs} (a : X509.RDNATV bs) : (@0 b : List Dig) → SequenceOf X509.RDNATV b → Set where
+  here  : ∀ {@0 bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (px : MatchRDNATV a x) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
+  there : ∀ {@0 bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (pxs : InSeq a bs₂ xs) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
 
 data AllInSeq {@0 bs} (xs : SequenceOf X509.RDNATV bs) : (@0 b : List Dig) → SequenceOf X509.RDNATV b → Set where
   []  : AllInSeq xs [] nil
-  cons : ∀ {bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs' : SequenceOf X509.RDNATV bs₂} (px : InSeq x _ xs) (pxs : AllInSeq xs _ xs') (bs≡ : bs₃ ≡ bs₁ ++ bs₂) → AllInSeq xs bs₃ (cons (mkSequenceOf x xs' bs≡))
+  cons : ∀ {@0 bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs' : SequenceOf X509.RDNATV bs₂} (px : InSeq x _ xs) (pxs : AllInSeq xs _ xs') (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → AllInSeq xs bs₃ (cons (mkSequenceOf x xs' bs≡))
 
 MatchRDNElemsLen : ∀ {@0 bs₁ bs₂} → X509.RDNElems bs₁ → X509.RDNElems bs₂ → Set
 MatchRDNElemsLen (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
@@ -65,15 +64,30 @@ CCP6Seq [] = ⊥
 CCP6Seq ((fst , snd) ∷ []) = MatchRDNSeq (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd))
 CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
-
 ----------------- helper decidables -------------------------
-
-postulate
-  InSeq-dec : ∀ {bs} (a : X509.RDNATV bs) → (b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (InSeq a b c)
-  AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (AllInSeq xs b c)
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNATV bs₁) → (m : X509.RDNATV bs₂) → Dec (MatchRDNATV n m)
 MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec Compare-dec val val₁
+
+InSeq-dec : ∀ {@0 bs} (a : X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (InSeq a b c)
+InSeq-dec a .[] nil = no (λ ())
+InSeq-dec a b (cons (mkIListCons {bs₂ = g} head₁ tail₁ bs≡)) = case MatchRDNATV-dec a head₁ of λ where
+  (no ¬p) → case (InSeq-dec a g tail₁) ret (const _) of λ where
+    (no ¬q) → no λ where
+      (here px .bs≡) → contradiction px ¬p
+      (there x .bs≡) → contradiction x ¬q
+    (yes p) → yes (there p bs≡)
+  (yes p) → yes (here p bs≡)
+
+AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (AllInSeq xs b c)
+AllInSeq-dec xs .[] nil = yes AllInSeq.[]
+AllInSeq-dec xs b (cons (mkIListCons head₁ tail₁ bs≡)) = case (InSeq-dec head₁ _ xs) of λ where
+  (no ¬p) → no λ where
+    (cons px z bs≡) → contradiction px ¬p
+  (yes p) → case AllInSeq-dec xs _ tail₁ of λ where
+    (no ¬p) → no λ where
+      (cons px z bs≡) → contradiction z ¬p
+    (yes q) → yes (cons p q bs≡)
 
 MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNElems bs₁) → (m : X509.RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
 MatchRDNElemsLen-dec (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)

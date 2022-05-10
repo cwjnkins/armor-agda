@@ -236,13 +236,13 @@ module X509 where
     SignAlg : (@0 _ : List Dig) → Set
     SignAlg xs = TLV Tag.Sequence SignAlgFields xs
 
-    postulate
-      getSignAlgOID : ∀ {@0 bs} → SignAlg bs → List UInt8
-    --getSignAlgOID (mkTLV len (mkSignAlgFields {oid} {par} signOID param bs≡₁) len≡ bs≡) = oid
-
-      getSignAlgParam : ∀ {@0 bs} → SignAlg bs → List UInt8
-    --getSignAlgParam (mkTLV len (mkSignAlgFields {oid} {par} signOID param bs≡₁) len≡ bs≡) = par
     
+    @0 getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    getSignAlgOIDbs (mkTLV len val len≡ bs≡) = SignAlgFields.o val
+
+    @0 getSignAlgParambs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    getSignAlgParambs = SignAlgFields.p ∘ TLV.val
+
   open SignAlg public using (SignAlg)
 
  --------------- RDNSeq -------------------------------------
@@ -466,7 +466,7 @@ module X509 where
   RSABitString xs = TLV Tag.BitString RSABitStringFields xs
 
   data PkVal : @0 List UInt8 → @0 List UInt8 → @0 List UInt8 → Set where
-    rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} → RSABitString bs₂ → PkVal bs bs₁ bs₂
+    rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} →  RSABitString bs₂ → PkVal bs bs₁ bs₂
     ecpkalg :  ∀ {@0 bs} → (PKOID.EcPk ≡ bs) → ∀ {@0 bs₁} → EcPkAlgParams bs₁ → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
     otherpkalg : ∀ {@0 bs bs₁} → (False ∘ (_∈?_ bs)) PKOID.Supported → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
 
@@ -475,12 +475,12 @@ module X509 where
     field
       @0 {alg pk} : List Dig
       pkalg : SignAlg alg
-      pubkey : PkVal (SignAlg.getSignAlgOID pkalg) (SignAlg.getSignAlgParam pkalg) pk
+      pubkey : PkVal (SignAlg.getSignAlgOIDbs pkalg) (SignAlg.getSignAlgParambs pkalg) pk
       @0 bs≡ : bs ≡ alg ++ pk
 
   PublicKey : (@0 _ : List Dig) → Set
   PublicKey xs = TLV Tag.Sequence PublicKeyFields xs
-
+ 
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
 

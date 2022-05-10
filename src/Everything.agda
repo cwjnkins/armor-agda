@@ -107,7 +107,7 @@ import Aeres.Data.X509.Semantic.Chain
 -- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M8
 -- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M9
 -- import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
--- import Aeres.Data.X509.Semantic.StringPrep.Exec
+import Aeres.Data.X509.Semantic.StringPrep.Exec
 import Aeres.Data.X690-DER
 import Aeres.Data.X690-DER.BitString
 import Aeres.Data.X690-DER.Int
@@ -145,7 +145,7 @@ import Aeres.Grammar.Properties
 import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
---import Aeres.Test.UTF8Trie.Combine
+-- import Aeres.Test.UTF8Trie.Combine
 -- import Aeres.Test.X509.Cert
 -- import Aeres.Test.X509.Extension
 -- import Aeres.Test.X509.GeneralName
