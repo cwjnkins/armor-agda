@@ -91,23 +91,23 @@ import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
 import Aeres.Data.X509.Semantic.Cert
 import Aeres.Data.X509.Semantic.Chain
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Combine
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M10
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M11
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M12
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M13
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M14
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M1
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M2
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M3
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M4
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M5
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M6
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M7
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M8
-import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M9
-import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
-import Aeres.Data.X509.Semantic.StringPrep.Exec
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Combine
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M10
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M11
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M12
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M13
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M14
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M1
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M2
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M3
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M4
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M5
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M6
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M7
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M8
+-- import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.M9
+-- import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
+-- import Aeres.Data.X509.Semantic.StringPrep.Exec
 import Aeres.Data.X690-DER
 import Aeres.Data.X690-DER.BitString
 import Aeres.Data.X690-DER.Int
@@ -146,11 +146,11 @@ import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
 --import Aeres.Test.UTF8Trie.Combine
-import Aeres.Test.X509.Cert
-import Aeres.Test.X509.Extension
-import Aeres.Test.X509.GeneralName
-import Aeres.Test.X509.RDN
-import Aeres.Test.X509.TBSCert
+-- import Aeres.Test.X509.Cert
+-- import Aeres.Test.X509.Extension
+-- import Aeres.Test.X509.GeneralName
+-- import Aeres.Test.X509.RDN
+-- import Aeres.Test.X509.TBSCert
 
 import summary
 
