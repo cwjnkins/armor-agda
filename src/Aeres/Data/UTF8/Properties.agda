@@ -304,3 +304,8 @@ module UTF8CharProps where
 unambiguous =
   IListProps.unambiguous
     UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
+
+
+postulate
+  instance
+    UTF8CharEq≋ : Eq≋ UTF8Char

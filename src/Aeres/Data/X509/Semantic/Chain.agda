@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping --sized-types #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509
@@ -68,11 +68,9 @@ CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (X50
 
 ----------------- helper decidables -------------------------
 
-
 postulate
   InSeq-dec : ∀ {bs} (a : X509.RDNATV bs) → (b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (InSeq a b c)
   AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (AllInSeq xs b c)
-  Compare-dec : ∀ {@0 bs₁ bs₂} (xs₁ : X509.DirectoryString bs₁) → (xs₂ : X509.DirectoryString bs₂) → Dec (Compare xs₁ xs₂)
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNATV bs₁) → (m : X509.RDNATV bs₂) → Dec (MatchRDNATV n m)
 MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec Compare-dec val val₁

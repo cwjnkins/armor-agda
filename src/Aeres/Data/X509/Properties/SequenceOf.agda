@@ -65,29 +65,6 @@ module SequenceOf where
     bs₂≡ : bs₁₂ ≡ bs₂₂
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
-  instance
-    SequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
-    Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} nil nil = yes ≋-refl
-    Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} nil (cons x) = no λ where (mk≋ refl ())
-    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (cons x) nil = no λ where (mk≋ refl ())
-    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {bs₂} (cons v₁) (cons v₂)
-      with IListCons.head v₁ ≋? IListCons.head v₂
-    ... | yes ≋-refl
-      with Eq≋._≋?_ SequenceOfEq≋ (IListCons.tail v₁) (IListCons.tail v₂)
-    ... | yes ≋-refl
-      with ‼ IListCons.bs≡ v₁
-    ... | refl =
-      yes (mk≋ (sym $ IListCons.bs≡ v₂)
-            (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ IListCons.bs₁ v₁ ++ _) →
-              subst _ (sym bs₂≡) (cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) bs≡)) ≡ cons v₂)
-              (λ bs₂≡ → subst (λ x → cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) x) ≡ cons v₂)
-                (‼ (≡-unique (IListCons.bs≡ v₂) bs₂≡)) refl)
-              (IListCons.bs≡ v₂) (IListCons.bs≡ v₁)))
-    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | yes ≋-refl | no ¬v₁≋v₂ = no λ where
-      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
-    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | no ¬v₁≋v₂ = no λ where
-      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
-
   @0 sameLength : ∀ {@0 A bs} → NonNesting A → NonEmpty A → (s₁ s₂ : SequenceOf A bs) → lengthSequence s₁ ≡ lengthSequence s₂
   sameLength nn ne nil nil = refl
   sameLength nn ne nil (cons (mkSequenceOf h t bs≡)) =
@@ -126,7 +103,31 @@ module BoundedSequenceOf where
     unambiguousΣₚ (SequenceOf.unambiguous uaₐ naₐ nnₐ)
       λ {xs} a → ≤-irrelevant
 
-  instance
+open SequenceOf public
+
+instance
+    SequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} nil nil = yes ≋-refl
+    Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} nil (cons x) = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (cons x) nil = no λ where (mk≋ refl ())
+    Eq≋._≋?_ SequenceOfEq≋ {bs₁} {bs₂} (cons v₁) (cons v₂)
+      with IListCons.head v₁ ≋? IListCons.head v₂
+    ... | yes ≋-refl
+      with Eq≋._≋?_ SequenceOfEq≋ (IListCons.tail v₁) (IListCons.tail v₂)
+    ... | yes ≋-refl
+      with ‼ IListCons.bs≡ v₁
+    ... | refl =
+      yes (mk≋ (sym $ IListCons.bs≡ v₂)
+            (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ IListCons.bs₁ v₁ ++ _) →
+              subst _ (sym bs₂≡) (cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) bs≡)) ≡ cons v₂)
+              (λ bs₂≡ → subst (λ x → cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) x) ≡ cons v₂)
+                (‼ (≡-unique (IListCons.bs≡ v₂) bs₂≡)) refl)
+              (IListCons.bs≡ v₂) (IListCons.bs≡ v₁)))
+    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | yes ≋-refl | no ¬v₁≋v₂ = no λ where
+      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+    Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | no ¬v₁≋v₂ = no λ where
+      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+
     BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
     Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
       with fstₚ v₁ ≋? fstₚ v₂
@@ -138,5 +139,3 @@ module BoundedSequenceOf where
     ... | refl | refl = yes (mk≋ refl (subst (λ x → mk×ₚ _ _ x ≡ v₂) (≡-unique (Σₚ.bs≡ v₂) (Σₚ.bs≡ v₁)) refl))
     Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
       ≋-refl → contradiction ≋-refl ¬v₁≋v₂
-
-open SequenceOf public

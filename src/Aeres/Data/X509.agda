@@ -189,7 +189,6 @@ module X509 where
 
   module SOID where
     -- NOTE: These are proven to be OIDs after the fact (see Aeres.Data.X509.Decidable.OID)
-    -- TODO: add other RSA signature algorithms
     Md5Rsa : List Dig
     Md5Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
 
@@ -211,34 +210,40 @@ module X509 where
     Sha224Rsa : List Dig
     Sha224Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
 
+  module PKOID where
     RsaEncPk : List Dig
-    RsaEncPk = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ] 
+    RsaEncPk = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]
 
-  -- RSA explicit null param case covered here
-  -- TODO : add cases for other RSA signature algorithms
-  -- TODO: The current definition fails the "Unambiguous" property
-  -- data SignParam : List Dig →  List Dig → Set where
-  --   md5rsap    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Md5Rsa)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   sha1rsap   : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha1Rsa)   → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   rsapssp    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaPss)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   sha256rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha256Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   sha384rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha384Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   sha512rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha512Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   sha224rsap : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.Sha224Rsa) → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   rsaEncPk    : ∀ {@0 bs1 bs2} → (@0 _ : bs1 ≡ SOID.RsaEncPk)    → (@0 _ : bs2 ≡ # 5 ∷ [ # 0 ]) → SignParam bs1 bs2
-  --   _ : ∀ {@0 bs1 bs2} → OctetStringValue bs2 → SignParam bs1 bs2
+    EcPk : List Dig
+    EcPk = Tag.ObjectIdentifier ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ [ # 1 ]
 
-  record SignAlgFields (@0 bs : List Dig) : Set where
-    constructor mkSignAlgFields
-    field
-      @0 {o p} : List Dig
-      signOID : Generic.OID o
-      param : Option (NotEmpty OctetStringValue) p
---      wparam : Option (SignParam o) p -- RSA implicit null param case covered here
-      @0 bs≡  : bs ≡ o ++ p
+    Supported : List (List Dig)
+    Supported = RsaEncPk ∷ [ EcPk ]
 
-  SignAlg : (@0 _ : List Dig) → Set
-  SignAlg xs = TLV Tag.Sequence SignAlgFields xs
+  ExpNull : List Dig
+  ExpNull = # 5 ∷ [ # 0 ]
+
+  module SignAlg where
+  
+    record SignAlgFields (@0 bs : List Dig) : Set where
+      constructor mkSignAlgFields
+      field
+        @0 {o p} : List Dig
+        signOID : Generic.OID o
+        param : Option (NotEmpty OctetStringValue) p
+        @0 bs≡  : bs ≡ o ++ p
+
+    SignAlg : (@0 _ : List Dig) → Set
+    SignAlg xs = TLV Tag.Sequence SignAlgFields xs
+
+    postulate
+      getSignAlgOID : ∀ {@0 bs} → SignAlg bs → List UInt8
+    --getSignAlgOID (mkTLV len (mkSignAlgFields {oid} {par} signOID param bs≡₁) len≡ bs≡) = oid
+
+      getSignAlgParam : ∀ {@0 bs} → SignAlg bs → List UInt8
+    --getSignAlgParam (mkTLV len (mkSignAlgFields {oid} {par} signOID param bs≡₁) len≡ bs≡) = par
+    
+  open SignAlg public using (SignAlg)
 
  --------------- RDNSeq -------------------------------------
 
@@ -277,12 +282,6 @@ module X509 where
     bmpString     : ∀ {@0 bs} → Σₚ BMPString     (TLVLenBounded 1 200) bs → DisplayText bs
     utf8String    : ∀ {@0 bs} → Σₚ UTF8String    (TLVLenBounded 1 200) bs → DisplayText bs
 
-
-  -- AttributeTypeAndValue ::= SEQUENCE {
-  --   type     AttributeType,
-  --   value    AttributeValue }
-  -- AttributeType ::= OBJECT IDENTIFIER
-  -- AttributeValue ::= ANY -- DEFINED BY AttributeType
   record RDNATVFields (@0 bs : List Dig) : Set where
     constructor mkRDNATVFields
     field
@@ -294,8 +293,6 @@ module X509 where
   RDNATV : (@0 _ : List Dig) → Set
   RDNATV xs = TLV Tag.Sequence RDNATVFields xs
 
- -- RelativeDistinguishedName ::=
- --   SET SIZE (1..MAX) OF AttributeTypeAndValue
   RDNElems : @0 List Dig → Set
   RDNElems = NonEmptySequenceOf RDNATV
 
@@ -415,13 +412,71 @@ module X509 where
     
   open Validity public using (Validity)
 
+-----------------------------------------Public Key------------------------------------------
+ 
+  record CurveFields (@0 bs : List Dig) : Set where
+    constructor mkCurveFields
+    field
+      @0 {p q r} : List Dig
+      a : OctetString p
+      b : OctetString q
+      seed : Option BitString r
+      @0 bs≡  : bs ≡ p ++ q ++ r
+
+  Curve : (@0 _ : List Dig) → Set
+  Curve xs = TLV Tag.Sequence CurveFields xs
+
+  record EcParamsFields (@0 bs : List Dig) : Set where
+    constructor mkEcParamsFields
+    field
+      @0 {v f c b o cf} : List Dig
+      ≡version : v ≡ # 2 ∷ # 1 ∷ [ # 1 ]
+      fieldID : TLV Tag.Sequence OctetStringValue f
+      curve : Curve c
+      base : OctetString b
+      order : Int o
+      cofactor : Option Int cf
+      @0 bs≡  : bs ≡ v ++ f ++ c ++ b ++ o ++ cf
+
+  EcParams : (@0 _ : List Dig) → Set
+  EcParams xs = TLV Tag.Sequence EcParamsFields xs
+
+  data EcPkAlgParams : @0 List Dig → Set where
+    ecparams : ∀ {@0 bs} → EcParams bs → EcPkAlgParams bs
+    namedcurve : ∀ {@0 bs} → Generic.OID bs → EcPkAlgParams bs
+    implicitlyCA : ∀ {@0 bs} → (bs ≡ ExpNull) → EcPkAlgParams bs
+
+  record RSAPkInts (@0 bs : List Dig) : Set where
+    constructor mkRSAPkInts
+    field
+      @0 {n e} : List Dig
+      nval : Int n 
+      eval : Int e
+      @0 bs≡ : bs ≡ n ++ e
+
+  record RSABitStringFields (@0 bs : List Dig) : Set where
+    constructor mkRSABitStringFields
+    field
+      @0 {o neseq} : List Dig
+      ≡zero : o ≡ [ # 0 ] 
+      rsane : TLV Tag.Sequence RSAPkInts neseq
+      @0 bs≡ : bs ≡ o ++ neseq
+
+  RSABitString : @0 List UInt8 → Set
+  RSABitString xs = TLV Tag.BitString RSABitStringFields xs
+
+  data PkVal : @0 List UInt8 → @0 List UInt8 → @0 List UInt8 → Set where
+    rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} → RSABitString bs₂ → PkVal bs bs₁ bs₂
+    ecpkalg :  ∀ {@0 bs} → (PKOID.EcPk ≡ bs) → ∀ {@0 bs₁} → EcPkAlgParams bs₁ → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
+    otherpkalg : ∀ {@0 bs bs₁} → (False ∘ (_∈?_ bs)) PKOID.Supported → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
+
   record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields
     field
       @0 {alg pk} : List Dig
-      signalg : SignAlg alg
-      pubkey : BitString pk --- needs to expand for RSA
-      @0 bs≡  : bs ≡ alg ++ pk
+      pkalg : SignAlg alg
+      pubkey : PkVal (SignAlg.getSignAlgOID pkalg) (SignAlg.getSignAlgParam pkalg) pk
+      @0 bs≡ : bs ≡ alg ++ pk
 
   PublicKey : (@0 _ : List Dig) → Set
   PublicKey xs = TLV Tag.Sequence PublicKeyFields xs

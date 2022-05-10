@@ -3,13 +3,14 @@
 open import Data.Nat.DivMod
 import      Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Properties
+import Aeres.Data.X509.Properties as Props
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 open import Aeres.Data.UTF8
+open import Aeres.Data.UTF8.Properties
 open import Aeres.Data.UTF8.Serializer
 open import Aeres.Data.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers
@@ -88,3 +89,16 @@ Compare x x₁
   with ProcessString x₁
 ... | inj₁ err = ⊥
 ... | inj₂ b = _≋_ {A = UTF8} (proj₂ a) (proj₂ b)
+
+
+--------------------------------------------- decidable proofs -------------------------------------------------------
+
+Compare-dec : ∀ {@0 bs₁ bs₂} (xs₁ : X509.DirectoryString bs₁) → (xs₂ : X509.DirectoryString bs₂) → Dec (Compare xs₁ xs₂)
+Compare-dec x₁ x₂
+  with ProcessString x₁
+... | inj₁ err = no (λ ())
+... | inj₂ a
+  with ProcessString x₂
+... | inj₁ err = no (λ ())
+--... | inj₂ b = 
+... | inj₂ b = _≋?_ {A = UTF8} (proj₂ a) (proj₂ b)

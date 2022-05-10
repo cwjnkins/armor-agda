@@ -36,7 +36,7 @@ open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.PCFields
 open import Aeres.Data.X509.Decidable.PMFields
 open import Aeres.Data.X509.Decidable.PolicyQualifierInfo
-open import Aeres.Data.X509.Decidable.PublicKey
+--open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.SKIFields
