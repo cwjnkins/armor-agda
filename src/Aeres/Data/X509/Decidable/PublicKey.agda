@@ -6,8 +6,11 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Length
+open import Aeres.Data.X509.Decidable.Octetstring
+open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.SignAlg
 open import Aeres.Data.X509.Decidable.TLV
+open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -26,7 +29,94 @@ module parsePublicKeyFields where
   open ≡-Reasoning
 
   postulate
+    parseCurveFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.CurveFields n)
+  -- parseCurveFields n =
+  --   parseExactLength _ Props.CurveFields.nonnesting (tell $ here' String.++ ": underflow")
+  --     (parseEquivalent _ Props.CurveFields.equivalent
+  --       (parse& _ Props.TLV.nonnesting parseOctetString
+  --         (parse& _ Props.TLV.nonnesting parseOctetString
+  --           {!!}))) n
+
+  parseCurve :  Parser Dig (Logging ∘ Dec) X509.Curve
+  parseCurve = parseTLV _ "Curve" _ parseCurveFields
+
+  parseFieldID :  Parser Dig (Logging ∘ Dec) X509.FieldID
+  parseFieldID = parseTLV _ "Field ID" _ parseOctetStringValue
+
+  postulate
+    parseEcParamsFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.EcParamsFields n)
+  -- parseEcParamsFields n =
+  --   parseExactLength _ Props.EcParamsFields.nonnesting (tell $ here' String.++ ": underflow")
+  --     (parseEquivalent _ Props.EcParamsFields.equivalent {!!}) n
+
+  parseEcParams :  Parser Dig (Logging ∘ Dec) X509.EcParams
+  parseEcParams = parseTLV _ "EC params" _ parseEcParamsFields
+
+  parseEcPkAlgParams : Parser Dig (Logging ∘ Dec) X509.EcPkAlgParams
+  runParser parseEcPkAlgParams xs = do
+    no ¬ecparams ← runParser parseEcParams xs
+      where yes p → return (yes (mapSuccess Dig (λ x → X509.ecparams x) p))
+    no ¬namedcurve ← runParser parseOID xs
+      where yes q → return (yes (mapSuccess Dig (λ x → X509.namedcurve x) q))
+    no ¬impca ← runParser (parseLit _ (tell $ here' String.++ ": exp null : underflow")
+      (tell $ here' String.++ ": exp null: mismatch") X509.ExpNull) xs
+      where yes r → return (yes (mapSuccess Dig (λ {bs} x → X509.implicitlyCA{bs} x ) r))
+    return ∘ no $ λ where
+     (success prefix read read≡ (X509.ecparams x) suffix ps≡) →
+       contradiction (success _ _ read≡ x _ ps≡) ¬ecparams
+     (success prefix read read≡ (X509.namedcurve x) suffix ps≡) →
+       contradiction (success _ _ read≡ x _ ps≡) ¬namedcurve
+     (success prefix read read≡ (X509.implicitlyCA x) suffix ps≡) →
+       contradiction (success _ _ read≡ x _ ps≡) ¬impca
+
+  parseRSAPkIntsFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.RSAPkIntsFields n)
+  parseRSAPkIntsFields n =
+    parseExactLength _ Props.RSAPkIntsFields.nonnesting (tell $ here' String.++ ": underflow")
+      (parseEquivalent _ Props.RSAPkIntsFields.equivalent (parse& _ Props.TLV.nonnesting parseInt parseInt)) n
+
+  parseRSAPkInts :  Parser Dig (Logging ∘ Dec) X509.RSAPkInts
+  parseRSAPkInts = parseTLV _ "RSA pk n and e" _ parseRSAPkIntsFields
+
+  parseRSABitStringFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.RSABitStringFields n)
+  parseRSABitStringFields n =
+    parseExactLength _ Props.RSABitStringFields.nonnesting (tell $ here' String.++ ": underflow")
+      (parseEquivalent _ Props.RSABitStringFields.equivalent
+        (parse& _ (λ where _ refl refl → refl)
+          (parseLit _
+            (tell $ here' String.++ ": zero bit : underflow") (tell $ here' String.++ ": zero bit: mismatch") [ # 0 ]) parseRSAPkInts)) n
+
+  parseRSABitString :  Parser Dig (Logging ∘ Dec) X509.RSABitString
+  parseRSABitString = parseTLV _ "RSA BitString" _ parseRSABitStringFields
+
+  postulate
+    parsePkVal : ∀ {@0 oid param} → Parser Dig (Logging ∘ Dec) (X509.PkVal oid param)
     parsePublicKeyFields : Parser Dig (Logging ∘ Dec) X509.PublicKeyFields
+  -- runParser parsePublicKeyFields xs = do
+  --   yes r ← runParser (parse& _ Props.TLV.nonnesting parseSignAlg {!!}) xs
+  --     where no ¬parse → do
+  --       tell here'
+  --       return ∘ no $ λ where
+  --         r →
+  --           contradiction
+  --             (mapSuccess _ (λ where (X509.mkPublicKeyFields signalg pubkey bs≡) → mk&ₚ signalg {!!} bs≡) r)
+  --             ¬parse
+  --   return (yes
+  --     (mapSuccess _ (λ where (mk&ₚ fstₚ₁ sndₚ₁ bs≡) → X509.mkPublicKeyFields fstₚ₁ {!!} bs≡) r))
+
+open parsePublicKeyFields public using (parsePublicKeyFields)
+
+parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
+parsePublicKey =
+  parseTLV _ "public key" _
+    (parseExactLength _ Props.PublicKeyFields.nonnesting (tell "public key: length mismatch") parsePublicKeyFields)
+
+
+-------------------------------------------------------------------------------------------------------
+
+  --parsePublicKeyFields : Parser Dig (Logging ∘ Dec) X509.PublicKeyFields
+  -- runParser parsePublicKeyFields xs = do
+  --   z ← {!!}
+  --   return {!!}
   -- runParser parsePublicKeyFields xs = do
   --   yes r ← runParser (parse& _ Props.TLV.nonnesting parseSignAlg parseBitstring) xs
   --     where no ¬parse → do
@@ -39,12 +129,11 @@ module parsePublicKeyFields where
   --   return (yes
   --     (mapSuccess _ (λ where (mk&ₚ fstₚ₁ sndₚ₁ bs≡) → X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡) r))
 
-open parsePublicKeyFields public using (parsePublicKeyFields)
 
-parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
-parsePublicKey =
-  parseTLV _ "public key" _
-    (parseExactLength _ Props.PublicKeyFields.nonnesting (tell "public key: length mismatch") parsePublicKeyFields)
+
+
+
+
 
 
 -- private

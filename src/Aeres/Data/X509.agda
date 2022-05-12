@@ -426,12 +426,15 @@ module X509 where
   Curve : (@0 _ : List Dig) → Set
   Curve xs = TLV Tag.Sequence CurveFields xs
 
+  FieldID : (@0 _ : List Dig) → Set
+  FieldID xs = TLV Tag.Sequence OctetStringValue xs
+ 
   record EcParamsFields (@0 bs : List Dig) : Set where
     constructor mkEcParamsFields
     field
       @0 {v f c b o cf} : List Dig
       ≡version : v ≡ # 2 ∷ # 1 ∷ [ # 1 ]
-      fieldID : TLV Tag.Sequence OctetStringValue f
+      fieldID : FieldID f
       curve : Curve c
       base : OctetString b
       order : Int o
@@ -446,20 +449,23 @@ module X509 where
     namedcurve : ∀ {@0 bs} → Generic.OID bs → EcPkAlgParams bs
     implicitlyCA : ∀ {@0 bs} → (bs ≡ ExpNull) → EcPkAlgParams bs
 
-  record RSAPkInts (@0 bs : List Dig) : Set where
-    constructor mkRSAPkInts
+  record RSAPkIntsFields (@0 bs : List Dig) : Set where
+    constructor mkRSAPkIntsFields
     field
       @0 {n e} : List Dig
       nval : Int n 
       eval : Int e
       @0 bs≡ : bs ≡ n ++ e
 
+  RSAPkInts : (@0 _ : List Dig) → Set
+  RSAPkInts xs = TLV Tag.Sequence RSAPkIntsFields xs
+  
   record RSABitStringFields (@0 bs : List Dig) : Set where
     constructor mkRSABitStringFields
     field
       @0 {o neseq} : List Dig
       ≡zero : o ≡ [ # 0 ] 
-      rsane : TLV Tag.Sequence RSAPkInts neseq
+      rsane : RSAPkInts neseq
       @0 bs≡ : bs ≡ o ++ neseq
 
   RSABitString : @0 List UInt8 → Set

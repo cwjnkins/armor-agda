@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Data.X509
+import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgFieldsProps
 import      Aeres.Data.X509.Properties.TLV            as TLVprops
@@ -13,7 +14,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.PublicKeyFields where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
 postulate

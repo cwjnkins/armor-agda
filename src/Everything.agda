@@ -58,11 +58,13 @@ import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.BitstringValue
 import Aeres.Data.X509.Properties.CertFields
+import Aeres.Data.X509.Properties.CurveFields
 import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.Extension
+import Aeres.Data.X509.Properties.EcParamsFields
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.IA5StringValue
@@ -81,6 +83,8 @@ import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.RDNSeq
+import Aeres.Data.X509.Properties.RSAPkIntsFields
+import Aeres.Data.X509.Properties.RSABitStringFields
 import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
