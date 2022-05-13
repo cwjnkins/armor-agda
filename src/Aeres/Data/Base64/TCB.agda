@@ -17,8 +17,9 @@ record Base64Char (@0 bs : List Char) : Set where
     @0 bs≡ : bs ≡ [ c ]
 
 data Pad : @0 List Char → Set where
-  pad1 : Pad (String.toList "==")
-  pad2 : Pad (String.toList "=")
+  pad0 : Pad []
+  pad1 : Pad (String.toList "=")
+  pad2 : Pad (String.toList "==")
 
 record Base64Str (@0 bs : List Char) : Set where
   constructor mk64Str

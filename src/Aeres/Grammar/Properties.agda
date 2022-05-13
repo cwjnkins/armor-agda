@@ -79,6 +79,9 @@ module NonNesting where
   noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
     ‼ (NonNesting&ₚ nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
+  erased : ∀ {@0 A} → NonNesting A → NonNesting (Erased ∘ A)
+  erased nn xs₁++ys₁≡ (─ a₁) (─ a₂) = ‼ (nn xs₁++ys₁≡ a₁ a₂)
+
 module NoConfusion where
   equivalent : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → NoConfusion A₁ B → NoConfusion A₂ B
   equivalent eqv nc {xs₁}{ys₁}{xs₂}{ys₂}++≡ a b = ‼ nc {xs₁}{xs₂ = xs₂}++≡ (proj₂ eqv a) b
