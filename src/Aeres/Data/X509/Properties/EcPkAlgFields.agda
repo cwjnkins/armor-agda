@@ -16,9 +16,9 @@ open Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Sum Dig
 open ≡-Reasoning
 
-equivalent : Equivalent (&ₚ (_≡ X509.PKOID.EcPk) X509.EcPkAlgParams) X509.EcPkAlgFields
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkEcPkAlgFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalent (X509.mkEcPkAlgFields ≡pkOID param bs≡) = mk&ₚ ≡pkOID param bs≡
+-- equivalent : Equivalent (&ₚ (_≡ X509.PKOID.EcPk) X509.EcPkAlgParams) X509.EcPkAlgFields
+-- proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkEcPkAlgFields fstₚ₁ sndₚ₁ bs≡
+-- proj₂ equivalent (X509.mkEcPkAlgFields ≡pkOID param bs≡) = mk&ₚ ≡pkOID param bs≡
 
 
 postulate

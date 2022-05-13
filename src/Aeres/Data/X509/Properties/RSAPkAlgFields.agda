@@ -19,8 +19,8 @@ open ≡-Reasoning
 
 
 equivalent : Equivalent (&ₚ (_≡ X509.PKOID.RsaEncPk) (_≡ X509.ExpNull)) X509.RSAPkAlgFields
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSAPkAlgFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalent (X509.mkRSAPkAlgFields ≡pkOID ≡param bs≡) = mk&ₚ ≡pkOID ≡param bs≡
+proj₁ equivalent (mk&ₚ refl refl refl) = X509.mkRSAPkAlgFields self self refl
+proj₂ equivalent (X509.mkRSAPkAlgFields self self refl) = mk&ₚ refl refl refl
 
 postulate
   @0 nonnesting : NonNesting X509.RSAPkAlgFields
