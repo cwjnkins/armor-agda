@@ -17,8 +17,12 @@ open Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
 
-postulate
-  nonnesting : NonNesting X509.RSAPkIntsFields
+@0 nonnesting : NonNesting X509.RSAPkIntsFields
+nonnesting x a₁ a₂ = foo
+  where
+  v2& :  ∀ {bs} → X509.RSAPkIntsFields bs → (&ₚ Int Int) bs
+  v2& (X509.mkRSAPkIntsFields n e bs≡) = mk&ₚ n e bs≡
+  foo = NonNesting&ₚ TLVprops.nonnesting TLVprops.nonnesting x (v2& a₁) (v2& a₂)
 
 equivalent : Equivalent (&ₚ Int Int) X509.RSAPkIntsFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSAPkIntsFields fstₚ₁ sndₚ₁ bs≡

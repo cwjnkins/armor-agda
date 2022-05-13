@@ -15,6 +15,7 @@ module Aeres.Data.X509.Properties.PublicKeyFields where
 
 open Base256
 open Aeres.Grammar.Definitions Dig
+open import Aeres.Grammar.Sum Dig
 open ≡-Reasoning
 
 postulate
@@ -59,3 +60,9 @@ postulate
 --                      alg ++ pk ≡⟨ cong₂ _++_ foo bar ⟩
 --                      alg₁ ++ pk₁ ≡⟨ sym bs≡₁ ⟩
 --                      xs₂ ∎))
+
+
+equivalent : Equivalent (&ₚ X509.PkAlg X509.PkVal) X509.PublicKeyFields
+proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
+

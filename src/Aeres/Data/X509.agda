@@ -235,13 +235,12 @@ module X509 where
 
     SignAlg : (@0 _ : List Dig) → Set
     SignAlg xs = TLV Tag.Sequence SignAlgFields xs
-
     
-    @0 getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
-    getSignAlgOIDbs (mkTLV len val len≡ bs≡) = SignAlgFields.o val
+    -- @0 getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    -- getSignAlgOIDbs (mkTLV len val len≡ bs≡) = SignAlgFields.o val
 
-    @0 getSignAlgParambs : ∀ {@0 bs} → SignAlg bs → List UInt8
-    getSignAlgParambs = SignAlgFields.p ∘ TLV.val
+    -- @0 getSignAlgParambs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    -- getSignAlgParambs = SignAlgFields.p ∘ TLV.val
 
   open SignAlg public using (SignAlg)
 
@@ -449,6 +448,17 @@ module X509 where
     namedcurve : ∀ {@0 bs} → Generic.OID bs → EcPkAlgParams bs
     implicitlyCA : ∀ {@0 bs} → (bs ≡ ExpNull) → EcPkAlgParams bs
 
+  record EcPkAlgFields (@0 bs : List Dig) : Set where
+    constructor mkEcPkAlgFields
+    field
+      @0 {o p} : List Dig
+      ≡pkOID : o ≡ PKOID.EcPk
+      param : EcPkAlgParams p
+      @0 bs≡  : bs ≡ o ++ p
+ 
+  EcPkAlg : (@0 _ : List Dig) → Set
+  EcPkAlg xs = TLV Tag.Sequence EcPkAlgFields xs
+
   record RSAPkIntsFields (@0 bs : List Dig) : Set where
     constructor mkRSAPkIntsFields
     field
@@ -471,17 +481,32 @@ module X509 where
   RSABitString : @0 List UInt8 → Set
   RSABitString xs = TLV Tag.BitString RSABitStringFields xs
 
-  data PkVal : @0 List UInt8 → @0 List UInt8 → @0 List UInt8 → Set where
-    rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} →  RSABitString bs₂ → PkVal bs bs₁ bs₂
-    ecpkalg :  ∀ {@0 bs} → (PKOID.EcPk ≡ bs) → ∀ {@0 bs₁} → EcPkAlgParams bs₁ → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
-    otherpkalg : ∀ {@0 bs bs₁} → (False ∘ (_∈?_ bs)) PKOID.Supported → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
+  record RSAPkAlgFields (@0 bs : List Dig) : Set where
+    constructor mkRSAPkAlgFields
+    field
+      @0 {o p} : List Dig
+      ≡pkOID : o ≡ PKOID.RsaEncPk
+      ≡param : p ≡ ExpNull
+      @0 bs≡  : bs ≡ o ++ p
+
+  RSAPkAlg : (@0 _ : List Dig) → Set
+  RSAPkAlg xs = TLV Tag.Sequence RSAPkAlgFields xs
+
+  data PkAlg : @0 List UInt8 → Set where
+    rsapkalg : ∀ {@0 bs} → RSAPkAlg bs → PkAlg bs
+    ecpkalg :  ∀ {@0 bs} → EcPkAlg bs → PkAlg bs
+    otherpkalg : ∀ {@0 bs} → SignAlg bs → PkAlg bs
+
+  data PkVal : @0 List UInt8 → Set where
+    rsapkbits : ∀ {@0 bs} → RSABitString bs → PkVal bs
+    otherpkbits :  ∀ {@0 bs} → BitString bs → PkVal bs
 
   record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields
     field
       @0 {alg pk} : List Dig
-      pkalg : SignAlg alg
-      pubkey : PkVal (SignAlg.getSignAlgOIDbs pkalg) (SignAlg.getSignAlgParambs pkalg) pk
+      pkalg : PkAlg alg
+      pubkey : PkVal pk
       @0 bs≡ : bs ≡ alg ++ pk
 
   PublicKey : (@0 _ : List Dig) → Set
@@ -1231,5 +1256,15 @@ module X509 where
     Chain = IListNonEmpty Cert
   open Chain public using (Chain)
 
-    
-  
+  -- data PkVal : @0 List UInt8 → @0 List UInt8 → @0 List UInt8 → Set where
+  --   rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} →  RSABitString bs₂ → PkVal bs bs₁ bs₂
+  --   ecpkalg :  ∀ {@0 bs} → (PKOID.EcPk ≡ bs) → ∀ {@0 bs₁} → EcPkAlgParams bs₁ → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
+  --   otherpkalg : ∀ {@0 bs bs₁} → (False ∘ (_∈?_ bs)) PKOID.Supported → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
+
+  -- record PublicKeyFields (@0 bs : List Dig) : Set where
+  --   constructor mkPublicKeyFields
+  --   field
+  --     @0 {alg pk} : List Dig
+  --     pkalg : SignAlg alg
+  --     pubkey : PkVal (SignAlg.getSignAlgOIDbs pkalg) (SignAlg.getSignAlgParambs pkalg) pk
+  --     @0 bs≡ : bs ≡ alg ++ pk

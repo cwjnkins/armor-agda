@@ -18,7 +18,12 @@ open ≡-Reasoning
 
 
 postulate
-  nonnesting : NonNesting X509.RSABitStringFields
+  @0 nonnesting : NonNesting X509.RSABitStringFields
+-- nonnesting x a₁ a₂ = foo
+--   where
+--   v2& :  ∀ {bs} → X509.RSAPkIntsFields bs → (&ₚ Int X509.RSAPkInts) bs
+--   v2& (X509.mkRSAPkIntsFields n e bs≡) = mk&ₚ n e bs≡
+--   foo = NonNesting&ₚ TLVprops.nonnesting TLVprops.nonnesting x (v2& a₁) (v2& a₂)
 
 equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSABitStringFields fstₚ₁ sndₚ₁ bs≡
