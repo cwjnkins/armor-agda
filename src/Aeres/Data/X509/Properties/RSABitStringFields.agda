@@ -16,15 +16,14 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
+@0 nonnesting : NonNesting X509.RSABitStringFields
+nonnesting x a₁ a₂ = foo
+  where
+  v2& :  ∀ {bs} → X509.RSABitStringFields bs → (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) bs
+  v2& (X509.mkRSABitStringFields self rsane bs≡) = Aeres.Grammar.Definitions.mk&ₚ refl rsane bs≡
+  foo = NonNesting&ₚ (λ xs₁++ys₁≡xs₂++ys₂ a₃ a₄ → trans a₃ (sym a₄)) TLVprops.nonnesting x (v2& a₁) (v2& a₂)
 
-postulate
-  @0 nonnesting : NonNesting X509.RSABitStringFields
--- nonnesting x a₁ a₂ = foo
---   where
---   v2& :  ∀ {bs} → X509.RSAPkIntsFields bs → (&ₚ Int X509.RSAPkInts) bs
---   v2& (X509.mkRSAPkIntsFields n e bs≡) = mk&ₚ n e bs≡
---   foo = NonNesting&ₚ TLVprops.nonnesting TLVprops.nonnesting x (v2& a₁) (v2& a₂)
 
--- equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFields
--- proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSABitStringFields fstₚ₁ sndₚ₁ bs≡
--- proj₂ equivalent (X509.mkRSABitStringFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
+equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFields
+proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ refl sndₚ₁ bs≡) = X509.mkRSABitStringFields self sndₚ₁ bs≡
+proj₂ equivalent (X509.mkRSABitStringFields self rsane bs≡) = Aeres.Grammar.Definitions.mk&ₚ refl rsane bs≡

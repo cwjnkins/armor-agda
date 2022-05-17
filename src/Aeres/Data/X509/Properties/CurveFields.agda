@@ -17,10 +17,6 @@ open Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
 
-postulate
-  nonnesting : NonNesting X509.CurveFields
-
 equivalent : Equivalent (&ₚ OctetString (&ₚ OctetString (Option BitString))) X509.CurveFields
 proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) bs≡) = X509.mkCurveFields fstₚ₁ fstₚ₂ sndₚ₁ bs≡
 proj₂ equivalent (X509.mkCurveFields fstₚ₁ fstₚ₂ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) bs≡
-

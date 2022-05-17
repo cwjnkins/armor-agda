@@ -243,7 +243,7 @@ module X509 where
     -- getSignAlgParambs = SignAlgFields.p ∘ TLV.val
     postulate
       getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
-
+   
   open SignAlg public using (SignAlg)
 
  --------------- RDNSeq -------------------------------------
@@ -1265,16 +1265,3 @@ module X509 where
     Chain : (@0 _ : List Dig) → Set
     Chain = IListNonEmpty Cert
   open Chain public using (Chain)
-
-  -- data PkVal : @0 List UInt8 → @0 List UInt8 → @0 List UInt8 → Set where
-  --   rsapkalg : ∀ {@0 bs} → (PKOID.RsaEncPk ≡ bs) → ∀ {@0 bs₁} → (ExpNull ≡ bs₁) → ∀ {@0 bs₂} →  RSABitString bs₂ → PkVal bs bs₁ bs₂
-  --   ecpkalg :  ∀ {@0 bs} → (PKOID.EcPk ≡ bs) → ∀ {@0 bs₁} → EcPkAlgParams bs₁ → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
-  --   otherpkalg : ∀ {@0 bs bs₁} → (False ∘ (_∈?_ bs)) PKOID.Supported → ∀ {@0 bs₂} → BitString bs₂ → PkVal bs bs₁ bs₂
-
-  -- record PublicKeyFields (@0 bs : List Dig) : Set where
-  --   constructor mkPublicKeyFields
-  --   field
-  --     @0 {alg pk} : List Dig
-  --     pkalg : SignAlg alg
-  --     pubkey : PkVal (SignAlg.getSignAlgOIDbs pkalg) (SignAlg.getSignAlgParambs pkalg) pk
-  --     @0 bs≡ : bs ≡ alg ++ pk
