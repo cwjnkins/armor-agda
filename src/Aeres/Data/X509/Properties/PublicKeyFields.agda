@@ -62,7 +62,7 @@ postulate
 --                      xs₂ ∎))
 
 
-equivalent : Equivalent (&ₚ X509.PkAlg X509.PkVal) X509.PublicKeyFields
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalent (X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
+-- equivalent : Equivalent (&ₚ X509.PkAlg X509.PkVal) X509.PublicKeyFields
+-- proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
+-- proj₂ equivalent (X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
 
