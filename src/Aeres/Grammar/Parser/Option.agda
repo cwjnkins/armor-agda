@@ -78,6 +78,26 @@ withinLengthDecSuccess {n = n} (yes (success prefix read read≡ (mk×ₚ fstₚ
 
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
+  parseOption₁ExactLength
+    : {@0 A : List Σ → Set}
+      → NonEmpty A → NonNesting A
+      → (underflow : M (Level.Lift _ ⊤))
+      → Parser (M ∘ Dec) A
+      → ∀ n → Parser (M ∘ Dec) (ExactLength (Option A) n)
+  runParser (parseOption₁ExactLength ne nn u p zero) xs =
+    return (yes (success [] 0 refl (mk×ₚ none (─ refl) refl) xs refl))
+  runParser (parseOption₁ExactLength ne nn u p n'@(suc n)) xs = do
+    yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len bs≡) suf₁ ps≡₁) ← runParser (parseExactLength nn u p n') xs
+      where no ¬parse → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (some x) (─ v₁Len) refl) suffix ps≡) →
+            contradiction
+              (success prefix _ read≡ (mk×ₚ x (─ v₁Len) refl) suffix ps≡)
+              ¬parse
+    return (yes
+      (success pre₁ _ r₁≡ (mk×ₚ (some v₁) v₁Len bs≡) suf₁ ps≡₁))
+
+
   parseOption₁&₁≤ : {@0 A B : List Σ → Set}
                     → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
                     → @0 NonNesting A → @0 NonNesting B
