@@ -8,10 +8,13 @@ import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.Cert
 import Aeres.Data.X509.Properties.CertFields
+import Aeres.Data.X509.Properties.CurveFields
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.DirectoryString
+import Aeres.Data.X509.Properties.EcParamsFields
+import Aeres.Data.X509.Properties.EcPkAlgFields
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
@@ -24,12 +27,16 @@ import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.OID
 import Aeres.Data.X509.Properties.OIDSub
 import Aeres.Data.X509.Properties.PCFieldsSeqFields
+import Aeres.Data.X509.Properties.PkAlg
 import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.RDNSeq
+import Aeres.Data.X509.Properties.RSAPkAlgFields
+import Aeres.Data.X509.Properties.RSAPkIntsFields
+import Aeres.Data.X509.Properties.RSABitStringFields
 import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
@@ -64,11 +71,14 @@ module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
 module CertFields                = Aeres.Data.X509.Properties.CertFields
+module CurveFields               = Aeres.Data.X509.Properties.CurveFields
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
 module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module Extension                 = Aeres.Data.X509.Properties.Extension
+module EcParamsFields            = Aeres.Data.X509.Properties.EcParamsFields
+module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
@@ -80,12 +90,16 @@ module OID                       = Aeres.Data.X509.Properties.OID
 module OIDSub                    = Aeres.Data.X509.Properties.OIDSub
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
 module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
+module PkAlg                     = Aeres.Data.X509.Properties.PkAlg
 module PolicyMapFields           = Aeres.Data.X509.Properties.PolicyMapFields
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
+module RSAPkAlgFields            = Aeres.Data.X509.Properties.RSAPkAlgFields
+module RSAPkIntsFields           = Aeres.Data.X509.Properties.RSAPkIntsFields
+module RSABitStringFields        = Aeres.Data.X509.Properties.RSABitStringFields
 module Seq                       = Aeres.Data.X509.Properties.SequenceOf
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields

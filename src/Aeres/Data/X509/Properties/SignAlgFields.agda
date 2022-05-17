@@ -18,13 +18,13 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Properties  Dig
 
-iso : Iso (&ₚ Generic.OID (Option (NotEmpty OctetStringValue))) X509.SignAlgFields
-proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
-proj₂ (proj₁ iso) (X509.mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
+iso : Iso (&ₚ Generic.OID (Option (NotEmpty OctetStringValue))) X509.SignAlg.SignAlgFields
+proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.SignAlg.mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
+proj₂ (proj₁ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
-proj₂ (proj₂ iso) (X509.mkSignAlgFields signOID param bs≡) = refl
+proj₂ (proj₂ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = refl
 
-@0 unambiguous : Unambiguous X509.SignAlgFields
+@0 unambiguous : Unambiguous X509.SignAlg.SignAlgFields
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.unambiguous-&₁option₁
@@ -34,10 +34,10 @@ unambiguous =
 
 
 instance
-  SignAlgFieldsEq : Eq≋ X509.SignAlgFields
+  SignAlgFieldsEq : Eq≋ X509.SignAlg.SignAlgFields
   Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂
-    with X509.SignAlgFields.signOID sf₁ ≋? X509.SignAlgFields.signOID sf₂
-    |    X509.SignAlgFields.param   sf₁ ≋? X509.SignAlgFields.param   sf₂
+    with X509.SignAlg.SignAlgFields.signOID sf₁ ≋? X509.SignAlg.SignAlgFields.signOID sf₂
+    |    X509.SignAlg.SignAlgFields.param   sf₁ ≋? X509.SignAlg.SignAlgFields.param   sf₂
   ... | no ¬oid₁≋oid₂ | _ = no λ where
     ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
   ... | yes ≋-refl | no ¬param₁≋param₂ = no λ where
@@ -46,7 +46,7 @@ instance
     with ‼ bs₁≡bs₂
     where
     @0 bs₁≡bs₂ : bs₁ ≡ bs₂
-    bs₁≡bs₂ = trans (X509.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlgFields.bs≡ sf₂))
+    bs₁≡bs₂ = trans (X509.SignAlg.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlg.SignAlgFields.bs≡ sf₂))
   ... | refl
-    with ‼ ≡-unique (X509.SignAlgFields.bs≡ sf₁) (X509.SignAlgFields.bs≡ sf₂)
+    with ‼ ≡-unique (X509.SignAlg.SignAlgFields.bs≡ sf₁) (X509.SignAlg.SignAlgFields.bs≡ sf₂)
   ... | refl = yes ≋-refl
