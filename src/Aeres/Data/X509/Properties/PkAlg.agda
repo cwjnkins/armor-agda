@@ -2,6 +2,7 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.TLV            as TLVprops
 open import Aeres.Prelude
@@ -14,6 +15,7 @@ module Aeres.Data.X509.Properties.PkAlg where
 
 open Base256
 open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Properties  Dig
 open import Aeres.Grammar.Sum Dig
 open ≡-Reasoning
 
@@ -26,7 +28,12 @@ proj₂ equivalent (X509.PkAlg.rsapkalg x) = Aeres.Grammar.Sum.inj₁ (Aeres.Gra
 proj₂ equivalent (X509.PkAlg.ecpkalg x) = Aeres.Grammar.Sum.inj₁ (Aeres.Grammar.Sum.inj₂ x)
 proj₂ equivalent (X509.PkAlg.otherpkalg x) = Aeres.Grammar.Sum.inj₂ x
 
+-- @0 nonnesting : NonNesting X509.PkAlg
+-- nonnesting = equivalent-nonnesting equivalent
+--   (nonnestingSum (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting (TLVprops.noconfusion {!!}) )
+--     TLVprops.nonnesting {!!})
+
+
 @0 nonnesting : NonNesting X509.PkAlg
 nonnesting = equivalent-nonnesting equivalent
-  (nonnestingSum (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting {!!})
-    TLVprops.nonnesting {!!})
+  (nonnestingSum (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting (TLVprops.noconfusion {!!})) TLVprops.nonnesting {!!})

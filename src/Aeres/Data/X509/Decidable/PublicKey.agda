@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Prelude
 
@@ -22,16 +22,37 @@ open import Data.Nat.Properties
 module Aeres.Data.X509.Decidable.PublicKey where
 
 open Aeres.Binary.Base256
+open import Aeres.Grammar.Properties  Dig
 
 module parsePublicKeyFields where
   here' = "parsePublicKeyFields"
 
   open ≡-Reasoning
 
-  postulate
-    parseCurveFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.CurveFields n)
+  parseCurveFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.CurveFields n)
+  parseCurveFields n =
+    parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&) (equivalent×ₚ _ Props.CurveFields.equivalent))
+      (parse&ᵈ _ (withinLength-nonnesting _ (NonNesting&ₚ _  Props.TLV.nonnesting  Props.TLV.nonnesting))
+        (withinLength-unambiguous _ (unambiguous&ₚ _ (TLV.unambiguous Props.OctetstringValue.unambiguous) Props.TLV.nonnesting (TLV.unambiguous Props.OctetstringValue.unambiguous)))
+          (parse≤ _ n (parse& _ Props.TLV.nonnesting  parseOctetString parseOctetString) (NonNesting&ₚ _ Props.TLV.nonnesting Props.TLV.nonnesting) ((tell $ here' String.++ ": overflow")))
+          λ where
+            {bs} (singleton read read≡) _ →
+              subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
+                (parseOption₁ExactLength _ Props.TLV.nonempty Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring (n - read)))
+
+
+
+    -- (parse&ᵈ _ (withinLength-nonnesting _ Props.TLV.nonnesting)
+    --   (withinLength-unambiguous _ (TLV.unambiguous Props.OctetstringValue.unambiguous))
+    --   (parse≤ _ n parseOctetString Props.TLV.nonnesting (tell $ here' String.++ ": overflow"))
+    --   λ where
+    --     {bs} (singleton read read≡) _ →
+    --       subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
+    --       (parseEquivalent _ (symEquivalent _  Distribute.exactLength-&) {!!}))
+
+
   -- parseCurveFields n =
-  --   parseExactLength _ Props.CurveFields.nonnesting (tell $ here' String.++ ": underflow")
+  --   parseExactLength _ {!!} (tell $ here' String.++ ": underflow")
   --     (parseEquivalent _ Props.CurveFields.equivalent
   --       (parse& _ Props.TLV.nonnesting parseOctetString
   --         (parse& _ Props.TLV.nonnesting parseOctetString

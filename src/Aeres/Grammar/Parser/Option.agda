@@ -80,7 +80,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   parseOption₁ExactLength
     : {@0 A : List Σ → Set}
-      → NonEmpty A → NonNesting A
+      → @0 NonEmpty A → @0 NonNesting A
       → (underflow : M (Level.Lift _ ⊤))
       → Parser (M ∘ Dec) A
       → ∀ n → Parser (M ∘ Dec) (ExactLength (Option A) n)

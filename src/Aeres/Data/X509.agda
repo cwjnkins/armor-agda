@@ -241,8 +241,10 @@ module X509 where
 
     -- @0 getSignAlgParambs : ∀ {@0 bs} → SignAlg bs → List UInt8
     -- getSignAlgParambs = SignAlgFields.p ∘ TLV.val
+
     postulate
       getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
+
    
   open SignAlg public using (SignAlg)
 
