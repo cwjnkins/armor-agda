@@ -17,10 +17,8 @@ open Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
 
-postulate
-  nonnesting : NonNesting X509.CurveFields
-
-equivalent : Equivalent (&ₚ OctetString (&ₚ OctetString (Option BitString))) X509.CurveFields
-proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) bs≡) = X509.mkCurveFields fstₚ₁ fstₚ₂ sndₚ₁ bs≡
-proj₂ equivalent (X509.mkCurveFields fstₚ₁ fstₚ₂ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) bs≡
-
+equivalent : Equivalent (&ₚ (&ₚ OctetString OctetString) (Option BitString)) X509.CurveFields
+proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ (Aeres.Grammar.Definitions.mk&ₚ{bs₁}{bs₂} fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) = X509.mkCurveFields fstₚ₁ sndₚ₂ sndₚ₁
+  (begin (_ ≡⟨ bs≡ ⟩ ++-assoc bs₁ bs₂ _))
+proj₂ equivalent (X509.mkCurveFields{p}{q} a b seed bs≡) = Aeres.Grammar.Definitions.mk&ₚ (Aeres.Grammar.Definitions.mk&ₚ a b refl) seed
+  (begin (_ ≡⟨ bs≡ ⟩ sym (++-assoc p q _)))

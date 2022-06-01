@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
@@ -41,8 +41,14 @@ postulate
 --   @0 pk≡ : pk₁ ≡ pk₂
 --   pk≡ = Lemmas.++-cancel≡ˡ _ _ alg≡ bs≡
 
-postulate
-  nonnesting : NonNesting X509.PublicKeyFields
+
+nonnesting : NonNesting X509.PublicKeyFields
+nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} pkalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} pkalg₁ pubkey₁ bs≡₁) = {!!}
+
+
+
+
+
 -- nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} signalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} signalg₁ pubkey₁ bs≡₁)
 --   with ‼ TLVprops.nonnesting x' signalg signalg₁
 --   | ‼ x'
@@ -61,8 +67,6 @@ postulate
 --                      alg₁ ++ pk₁ ≡⟨ sym bs≡₁ ⟩
 --                      xs₂ ∎))
 
-
--- equivalent : Equivalent (&ₚ X509.PkAlg X509.PkVal) X509.PublicKeyFields
--- proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
--- proj₂ equivalent (X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
-
+equivalent : Equivalent (&ₚᵈ X509.PkAlg λ bs₁ x → X509.PkVal (X509.PkAlg.getOID x) ) X509.PublicKeyFields
+proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (X509.mkPublicKeyFields pkalg pubkey bs≡) = Aeres.Grammar.Definitions.mk&ₚ pkalg pubkey bs≡
