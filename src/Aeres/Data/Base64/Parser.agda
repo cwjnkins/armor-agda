@@ -48,28 +48,83 @@ module parseBase64 where
                 (sym $ Erased.x bs≡)
                   (λ where refl → (─ c∈) , (singleton i i≡))
                   len≡')
-{-
-Goal: (λ { _ (─ xs)
-             → Exists─
-               ((setoid Char.Char Data.List.Membership.Setoid.∈
-                 lookupELS xs (# 0))
-                Base64.charset)
-               (λ (@0 c∈₁) → Singleton (Any.index c∈₁))
-         })
-      bs (─ mk×ₚ (singleton bs refl) (─ len≡') refl)
-
--}
-              -- let @0 els : @0 length bs ≡ 1 → ExactLengthString 1 bs
-              --     els eq = (mk×ₚ (singleton bs refl) (─ eq) refl)
-              --     @0 G : @0 length bs ≡ 1 → Set
-              --     G eq = lookupELS (els eq) (# 0) ∈ Base64.charset
-              --     @0 c∈' : Erased (G _)
-              --     c∈' = ─ (subst G (≡-unique len≡ _) c∈)
-              -- in
-              -- (─ (G len≡' ∋ Erased.x c∈'))
-              -- , singleton i (trans i≡ (begin
-              --   Any.index {P = lookupELS (els len≡) (# 0) ≡_} c∈ ≡⟨ {!!} ⟩
-              --   Any.index {P = {!!}} {!!} ≡⟨ {!!} ⟩
-              --   {!!})))
-
         (parseErased (parseExactLengthString (tell $ hereChar String.++ ": underflow") 1)))
+
+  parseBase64Str : ∀ n {n%4 : True (n % 4 ≟ 0)}  → Parser (Logging ∘ Dec) (ExactLength Base64Str n)
+  runParser (parseBase64Str n) xs = {!!}
+
+  -- runParser parseBase64Str [] =
+  --   return (yes
+  --     (success [] _ refl (mk64Str _ _ nil pad0 refl refl) _ refl))
+  -- runParser parseBase64Str xs@(c ∷ xs') = do
+  --   yes (success pre₁ r₁ r₁≡ (mkParseWhile pre₁' t allPre ¬t refl) suf₁ ps≡₁)
+  --     ← return $ runParser (parseWhileₜ (_∈? Base64.charset)) xs
+  --     where no ¬parse → {!!}
+  --   let allPre' = (Base64Char.all2IList (uneraseDec allPre (All.all? (_∈? Base64.charset) _)))
+  --   case (singleton (length pre₁' % 4) refl) of λ where
+  --     (singleton 0 x≡) →
+  --       return (yes
+  --         (success pre₁' _ refl
+  --           (mk64Str pre₁' [] {!!} pad0 {!!} (sym (++-identityʳ _)))
+  --           (t ∷ suf₁) {!!}))
+  --     (singleton 1 x≡) → {!!}
+  --     (singleton 2 x≡) →
+  --       case singleton suf₁ refl of λ where
+  --         (singleton [] s≡) → {!!}
+  --         (singleton (c' ∷ s) s≡) →
+  --           case (t ≟ '=') ,′ (c' ≟ '=') of λ where
+  --             (no ¬p , _) → {!!}
+  --             (yes _ , no ¬p) → {!!}
+  --             (yes refl , yes refl) →
+  --               let @0 %4 : length (pre₁' ++ '=' ∷ [ '=' ]) % 4 ≡ 0
+  --                   %4 = begin
+  --                          length (pre₁' ++ '=' ∷ [ '=' ]) % 4 ≡⟨ cong (_% 4) (length-++ pre₁') ⟩
+  --                          (length pre₁' + 2) % 4 ≡⟨ %-distribˡ-+ (length pre₁') _ _ ⟩
+  --                          (length pre₁' % 4 + 2) % 4 ≡⟨ cong (λ x → (x + 2) % 4) (sym x≡) ⟩
+  --                          (2 + 2) % 4 ≡⟨⟩
+  --                          0 ∎
+  --               in
+  --               return (yes
+  --                 (success (pre₁' ++ '=' ∷ [ '=' ]) _ refl
+  --                   (mk64Str pre₁' ('=' ∷ [ '=' ] ) allPre' pad2
+  --                     {!!} refl)
+  --                   {!!} {!!}))
+  --     (singleton 3 x≡) →
+  --       case t ≟ '=' of λ where
+  --         (no ¬t≡) →
+  --           return ∘ no $ λ where
+  --             (success ._ read read≡ (mk64Str s ._ str pad0 mult refl) suffix ps≡) →
+  --               contradiction
+  --                 (begin 0 ≡⟨ sym mult ⟩
+  --                        length (s ++ []) % 4 ≡⟨ {!!} ⟩
+  --                        {!!})
+  --                 (0 ≢ 3 ∋ λ ())
+  --             (success ._ read read≡ (mk64Str s ._ str pad1 mult refl) suffix ps≡) → {!!}
+  --             (success ._ read read≡ (mk64Str s ._ str pad2 mult refl) suffix ps≡) → {!!}
+  --         (yes refl) →
+  --           let @0 %4 : length (pre₁' ++ [ '=' ]) % 4 ≡ 0
+  --               %4 = begin
+  --                      (length (pre₁' ++ [ '=' ]) % 4 ≡⟨ cong (_% 4) (length-++ pre₁') ⟩
+  --                      (length pre₁' + 1) % 4 ≡⟨ %-distribˡ-+ (length pre₁') 1 4 ⟩
+  --                      ((length pre₁' % 4) + 1) % 4 ≡⟨ cong (λ x → (x + 1) % 4) (sym x≡) ⟩
+  --                      (3 + 1) % 4 ≡⟨⟩
+  --                      0 ∎)
+  --           in
+  --           return (yes
+  --             (success (pre₁' ∷ʳ '=') _ refl
+  --               (mk64Str pre₁' [ '=' ] allPre' pad1 %4 refl)
+  --               suf₁ ps≡₁))
+  --     (singleton (suc (suc (suc (suc n)))) x≡) →
+  --       contradiction (m%n<n (length pre₁') 3) (subst (λ x → ¬ x < 4) x≡ λ where
+  --         (s≤s (s≤s (s≤s (s≤s ())))))
+
+  --     -- Base64Str.equiv
+  --     -- (parse×Dec {!!} (tell "parseBase64Char: underflow") p (λ _ → _ ≟ _))
+  --   -- where
+  --   -- p : Parser (Logging ∘ Dec) (&ₚ (IList Base64Char) Pad)
+  --   -- runParser p [] =
+  --   --   return (yes
+  --   --     (success [] _ refl (mk&ₚ nil pad0 refl) _ refl))
+  --   -- runParser p (c ∷ xs) =
+  --   --   case c ∈? Base64.charset of λ where
+  --   --     x → {!!}
