@@ -2,6 +2,7 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.TLV            as TLVprops
 open import Aeres.Prelude
@@ -13,8 +14,9 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.EcParamsFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Sum         Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
 
@@ -32,9 +34,26 @@ proj₂ equivalentEcPkAlgParams (X509.namedcurve x) = Aeres.Grammar.Sum.inj₁ (
 proj₂ equivalentEcPkAlgParams (X509.implicitlyCA x) = Aeres.Grammar.Sum.inj₂ x
 
 
-postulate
-  @0 noconfusionEcPkAlgParams : NoConfusion (Sum (Sum X509.EcParams OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
-
-  @0 nonnestingEcPkAlgParams : NonNesting X509.EcPkAlgParams -- prove equivalent for EcPkAlgParams first, also need noconfusion
--- nonnestingEcPkAlgParams = equivalent-nonnesting equivalentEcPkAlgParams
---   (nonnestingSum (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting (TLVprops.noconfusion λ ())) (λ where _ refl refl → refl) {!!})
+@0 nonnestingEcPkAlgParams : NonNesting X509.EcPkAlgParams
+nonnestingEcPkAlgParams =
+  equivalent-nonnesting equivalentEcPkAlgParams
+    (nonnestingSum
+      (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting
+        (TLVprops.noconfusion (λ ())))
+      (λ where _ refl refl → refl)
+      (symNoConfusion{A = _≡ X509.ExpNull}{B = Sum X509.EcParams OID}
+        (NoConfusion.sumₚ{A = _≡ X509.ExpNull}{B = X509.EcParams}{C = OID}
+          (λ where
+            {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV{l = l}{v} len val len≡ bs≡) →
+              contradiction{P = # Tag.Null ≡ # Tag.Sequence}
+                (∷-injectiveˡ (begin X509.ExpNull ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                                     xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+                                     (Tag.Sequence ∷ l ++ v) ++ ys₂ ∎))
+                (λ ()))
+          λ where
+            {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV{l = l}{v} len val len≡ bs≡) →
+              contradiction{P = # Tag.Null ≡ # Tag.ObjectIdentifier}
+                (∷-injectiveˡ (begin X509.ExpNull ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                                     xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+                                     (# Tag.ObjectIdentifier ∷ l ++ v) ++ ys₂ ∎))
+                λ ())))
