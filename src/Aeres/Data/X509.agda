@@ -19,38 +19,6 @@ open import Aeres.Data.X690-DER public
 -------------------------------------------Generic---------------------------------------
 module Generic where
 
-  OIDLeastDigs : List Dig → Set
-  OIDLeastDigs = maybe (Fin._> # 128) ⊤ ∘ head
-
-  oidLeastDigs? : ∀ bs → Dec (OIDLeastDigs bs)
-  oidLeastDigs? [] = yes tt
-  oidLeastDigs? (x ∷ bs) = (# 128) Fin.<? x
-
-  oidLeastDigs-unique : ∀ {bs} → Unique (OIDLeastDigs bs)
-  oidLeastDigs-unique {[]} tt tt = refl
-  oidLeastDigs-unique {x ∷ bs} x₁ x₂ = ≤-irrelevant x₁ x₂
-    where open import Data.Nat.Properties
-
-  record OIDSub (@0 bs : List Dig) : Set where
-    constructor mkOIDSub
-    field
-      lₚ : List Dig
-      @0 lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
-      lₑ   : Dig
-      @0 lₑ<128 : toℕ lₑ < 128
-      @0 leastDigs : OIDLeastDigs lₚ
-      @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
-
-  mkOIDSubₛ : (lₚ : List Dig) (lₑ : Dig) {@0 _ : True (All.all ((_≥? 128) ∘ toℕ) lₚ)} {@0 _ : True (oidLeastDigs? lₚ)} {@0 _ : True (lₑ Fin.<? # 128)} → OIDSub (lₚ ∷ʳ lₑ)
-  mkOIDSubₛ lₚ lₑ {lₚ≥128}{leastDigs}{lₑ<128} = mkOIDSub lₚ (toWitness lₚ≥128) lₑ (toWitness lₑ<128) (toWitness leastDigs) refl
-
-  --private
-  --  oidsub₁ : OIDSub (# 134 ∷ [ # 72 ])
-  --  oidsub₁ = mkOIDSub [ # 134 ] (toWitness{Q = All.all ((128 ≤?_) ∘ toℕ) _} tt) (# 72) (toWitness{Q = 72 <? 128} tt) (toWitness{Q = 134 >? 128} tt) refl
-
-  OID : (@0 _ : List Dig) → Set
-  OID = TLV Tag.ObjectIdentifier (NonEmptySequenceOf OIDSub)
-
   data BoolRep : Bool → Dig → Set where
     falseᵣ : BoolRep false (# 0)
     trueᵣ  : BoolRep true  (# 255)
@@ -229,7 +197,7 @@ module X509 where
       constructor mkSignAlgFields
       field
         @0 {o p} : List Dig
-        signOID : Generic.OID o
+        signOID : OID o
         param : Option (NotEmpty OctetStringValue) p
         @0 bs≡  : bs ≡ o ++ p
 
@@ -289,7 +257,7 @@ module X509 where
     constructor mkRDNATVFields
     field
       @0 {o v} : List Dig
-      oid : Generic.OID o
+      oid : OID o
       val : DirectoryString v
       @0 bs≡  : bs ≡ o ++ v
 
@@ -340,7 +308,7 @@ module X509 where
   IpAddress xs = TLV Tag.A87 OctetStringValue xs
 
   RegID : (@0 _ : List Dig) → Set
-  RegID xs = TLV Tag.A88 (NonEmptySequenceOf Generic.OIDSub) xs
+  RegID xs = TLV Tag.A88 (NonEmptySequenceOf OIDSub) xs
 
   data GeneralName : @0 List Dig → Set where
     oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
@@ -449,7 +417,7 @@ module X509 where
 
   data EcPkAlgParams : @0 List Dig → Set where
     ecparams : ∀ {@0 bs} → EcParams bs → EcPkAlgParams bs
-    namedcurve : ∀ {@0 bs} → Generic.OID bs → EcPkAlgParams bs
+    namedcurve : ∀ {@0 bs} → OID bs → EcPkAlgParams bs
     implicitlyCA : ∀ {@0 bs} → (bs ≡ ExpNull) → EcPkAlgParams bs
 
   record EcPkAlgFields (@0 bs : List Dig) : Set where
@@ -561,7 +529,7 @@ module X509 where
 ----------------------------------- eku extension -----------------------------------
 
   EKUFieldsSeq : (@0 _ : List Dig) → Set
-  EKUFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Generic.OID) xs
+  EKUFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf OID) xs
 
   EKUFields : (@0 _ : List Dig) → Set
   EKUFields xs = TLV Tag.OctetString  EKUFieldsSeq xs
@@ -655,7 +623,7 @@ module X509 where
     constructor mkPolicyInformationFields
     field
       @0 {pid pqls} : List Dig
-      cpid : Generic.OID pid
+      cpid : OID pid
       cpqls : Option PolicyQualifiersSeq pqls
       @0 bs≡  : bs ≡ pid ++ pqls
 
@@ -807,8 +775,8 @@ module X509 where
     constructor mkPolicyMapFields
     field
       @0 {iss sub} : List Dig
-      issuerDomainPolicy : Generic.OID iss
-      subjectDomainPolicy : Generic.OID sub
+      issuerDomainPolicy : OID iss
+      subjectDomainPolicy : OID sub
       @0 bs≡  : bs ≡ iss ++ sub
 
   PolicyMap : (@0 _ : List Dig) → Set
@@ -877,7 +845,7 @@ module X509 where
     constructor mkExtensionFields
     field
       @0 {oex cex ocex} : List Dig
-      extnId : Generic.OID oex
+      extnId : OID oex
       @0 extnId≡ : P oex -- oex ≡ lit
       crit : Option Generic.Boool cex
       extension : A ocex

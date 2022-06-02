@@ -8,7 +8,8 @@ module Aeres.Data.X690-DER.Length where
 open Base256
 
 module Length where
-  open import Aeres.Data.X690-DER.TCB.Length public
+  open import Aeres.Data.X690-DER.Length.TCB        public
+  open import Aeres.Data.X690-DER.Length.Serializer public
 
   elimMinRepLong
     : ∀ {ℓ} lₕ lₜ (P : UInt8 → List UInt8 → Set ℓ) →

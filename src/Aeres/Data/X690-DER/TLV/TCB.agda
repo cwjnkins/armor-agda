@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X690-DER.TCB.Length
+open import Aeres.Data.X690-DER.Length.TCB
 open import Aeres.Prelude
 
-module Aeres.Data.X690-DER.TCB.TLV where
+module Aeres.Data.X690-DER.TLV.TCB where
 
 open Base256
 

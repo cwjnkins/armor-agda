@@ -21,42 +21,42 @@ open Base256
 module parseOIDSub where
   here' = "parseOIDSub"
 
-  parseOIDSub : Parser Dig (Logging ∘ Dec) Generic.OIDSub
+  parseOIDSub : Parser Dig (Logging ∘ Dec) OIDSub
   runParser parseOIDSub xs
     with runParser (parseWhileₜ Dig ((_≥? 128) ∘ toℕ)) xs
   ... | no  ¬parse = do
     tell $ here' String.++ ": underflow"
     return ∘ no $ ‼ go
     where
-    @0 go : ¬ Success Dig Generic.OIDSub xs
-    go (success ._ read@._ refl (Generic.mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl) suffix refl) =
+    @0 go : ¬ Success Dig OIDSub xs
+    go (success ._ read@._ refl (mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl) suffix refl) =
       contradiction (success (lₚ ∷ʳ lₑ) read refl (mkParseWhile lₚ lₑ lₚ≥128 (<⇒≱ lₑ<128) refl) suffix refl) ¬parse
   ... | yes (success ._ _ read≡ (mkParseWhile lₚ lₑ lₚ≥128 ¬lₑ≥128 refl) suffix refl)
     with lₚ
-  ... | [] = return (yes (success [ lₑ ] _ read≡ (Generic.mkOIDSub [] All.[] lₑ (≰⇒> ¬lₑ≥128) tt refl) suffix refl))
+  ... | [] = return (yes (success [ lₑ ] _ read≡ (mkOIDSub [] All.[] lₑ (≰⇒> ¬lₑ≥128) tt refl) suffix refl))
   ... | lₚ'@(l ∷ lₚ)
     with toℕ l >? 128
   ... | no  l≯128 = do
     tell $ here' String.++ ": leading byte has value 0 (non-minimal repr.)"
     return ∘ no $ ‼ go
     where
-    @0 go : ¬ Success Dig Generic.OIDSub (lₚ' ∷ʳ lₑ ++ suffix)
-    go (success .([] ∷ʳ lₑ1) _ read≡ (Generic.mkOIDSub [] lₚ1≥128 lₑ1 lₑ1<128 leastDigs1 refl) .((lₚ ++ [ lₑ ]) ++ suffix) refl) =
+    @0 go : ¬ Success Dig OIDSub (lₚ' ∷ʳ lₑ ++ suffix)
+    go (success .([] ∷ʳ lₑ1) _ read≡ (mkOIDSub [] lₚ1≥128 lₑ1 lₑ1<128 leastDigs1 refl) .((lₚ ++ [ lₑ ]) ++ suffix) refl) =
       contradiction lₑ1<128 (≤⇒≯ (proj₁ (All.uncons lₚ≥128)))
-    go (success .((x ∷ lₚ1) ∷ʳ lₑ1) _ read≡ (Generic.mkOIDSub (x ∷ lₚ1) lₚ1≥128 lₑ1 lₑ1<128 leastDigs1 refl) suffix1 ps≡1) =
+    go (success .((x ∷ lₚ1) ∷ʳ lₑ1) _ read≡ (mkOIDSub (x ∷ lₚ1) lₚ1≥128 lₑ1 lₑ1<128 leastDigs1 refl) suffix1 ps≡1) =
       contradiction (subst (λ y → 128 < toℕ y) (∷-injectiveˡ ps≡1) leastDigs1) l≯128
   ... | yes l>128 =
-    return (yes (success (lₚ' ∷ʳ lₑ) _ read≡ (Generic.mkOIDSub lₚ' lₚ≥128 lₑ (≰⇒> ¬lₑ≥128) l>128 refl) suffix refl))
+    return (yes (success (lₚ' ∷ʳ lₑ) _ read≡ (mkOIDSub lₚ' lₚ≥128 lₑ (≰⇒> ¬lₑ≥128) l>128 refl) suffix refl))
 
 open parseOIDSub public using (parseOIDSub)
 
 module parseOIDField where
   here' = "parseOIDField"
 
-  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (NonEmptySequenceOf Generic.OIDSub) n)
-  parseOIDElems n = parseBoundedSequenceOf "oid elems" Generic.OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub n 1
+  parseOIDElems : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength Dig (NonEmptySequenceOf OIDSub) n)
+  parseOIDElems n = parseBoundedSequenceOf "oid elems" OIDSub Props.OIDSub.nonempty Props.OIDSub.nonnesting parseOIDSub n 1
 
-  parseOID : Parser Dig (Logging ∘ Dec) Generic.OID
+  parseOID : Parser Dig (Logging ∘ Dec) OID
   parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDElems
 
 open parseOIDField public using (parseOIDElems ; parseOID)
@@ -66,24 +66,24 @@ private
 
     open X509.SOID
 
-    test₁ : Generic.OID Md5Rsa
+    test₁ : OID Md5Rsa
     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseOID Md5Rsa)} tt)
 
-    test₂ : Generic.OID Sha1Rsa
+    test₂ : OID Sha1Rsa
     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha1Rsa)} tt)
 
-    test₃ : Generic.OID RsaPss
+    test₃ : OID RsaPss
     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseOID RsaPss)} tt)
 
-    test₄ : Generic.OID Sha256Rsa
+    test₄ : OID Sha256Rsa
     test₄ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha256Rsa)} tt)
 
-    test₅ : Generic.OID Sha384Rsa
+    test₅ : OID Sha384Rsa
     test₅ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha384Rsa)} tt)
 
-    test₆ : Generic.OID Sha512Rsa
+    test₆ : OID Sha512Rsa
     test₆ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha512Rsa)} tt)
 
-    test₇ : Generic.OID Sha224Rsa
+    test₇ : OID Sha224Rsa
     test₇ = Success.value (toWitness {Q = Logging.val (runParser parseOID Sha224Rsa)} tt)
 

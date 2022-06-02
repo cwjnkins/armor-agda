@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.BitString   public
 open import Aeres.Data.X690-DER.Int         public
 open import Aeres.Data.X690-DER.Length      public
 open import Aeres.Data.X690-DER.Null        public
+open import Aeres.Data.X690-DER.OID         public
 open import Aeres.Data.X690-DER.OctetString public
 open import Aeres.Data.X690-DER.SequenceOf  public
 open import Aeres.Data.X690-DER.TLV         public

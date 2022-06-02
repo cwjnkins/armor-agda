@@ -13,7 +13,7 @@ open Base256
 open import Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
-iso : Iso (&ₚ Generic.OID X509.DirectoryString) X509.RDNATVFields
+iso : Iso (&ₚ OID X509.DirectoryString) X509.RDNATVFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRDNATVFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (X509.mkRDNATVFields oid val bs≡) = mk&ₚ oid val bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl

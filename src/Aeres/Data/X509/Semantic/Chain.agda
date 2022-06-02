@@ -31,7 +31,7 @@ CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
 CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = X509.Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
 
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → X509.RDNATV bs₁ → X509.RDNATV bs₂ → Set
-MatchRDNATV (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = Generic.OID} oid oid₁ × Compare val val₁
+MatchRDNATV (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = OID} oid oid₁ × Compare val val₁
 
 data InSeq {@0 bs} (a : X509.RDNATV bs) : (@0 b : List Dig) → SequenceOf X509.RDNATV b → Set where
   here  : ∀ {@0 bs₁ bs₂ bs₃} {x : X509.RDNATV bs₁} {xs : SequenceOf X509.RDNATV bs₂} (px : MatchRDNATV a x) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
@@ -67,7 +67,7 @@ CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (X50
 ----------------- helper decidables -------------------------
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNATV bs₁) → (m : X509.RDNATV bs₂) → Dec (MatchRDNATV n m)
-MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = Generic.OID} oid oid₁ ×-dec Compare-dec val val₁
+MatchRDNATV-dec (mkTLV len (X509.mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (X509.mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = OID} oid oid₁ ×-dec Compare-dec val val₁
 
 InSeq-dec : ∀ {@0 bs} (a : X509.RDNATV bs) → (@0 b : List Dig) → (c : SequenceOf X509.RDNATV b) → Dec (InSeq a b c)
 InSeq-dec a .[] nil = no (λ ())

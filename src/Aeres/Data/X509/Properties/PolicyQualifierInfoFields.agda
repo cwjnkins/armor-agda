@@ -66,20 +66,20 @@ proj₂ (proj₂ iso) (X509.userNotice x) = refl
 @0 nonnesting : NonNesting X509.PolicyQualifierInfoFields
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.cpsURI (X509.mkCPSURIQualifier {bs₁ = bs₁} {bs₂} refl cpsPointer bs≡)) (X509.cpsURI (X509.mkCPSURIQualifier {bs₁ = bs₃} {bs₄} refl cpsPointer₁ bs≡₁)) =
   begin (xs₁ ≡⟨ bs≡ ⟩
-        OID ++ bs₂ ≡⟨ cong (OID ++_) bs₂≡ ⟩
-        OID ++ bs₄ ≡⟨ sym bs≡₁ ⟩
+        oid ++ bs₂ ≡⟨ cong (oid ++_) bs₂≡ ⟩
+        oid ++ bs₄ ≡⟨ sym bs≡₁ ⟩
         xs₂ ∎)
   where
-  OID =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
-  @0 x' : OID ++ bs₂ ++ ys₁ ≡ OID ++ bs₄ ++ ys₂
-  x' = (begin (OID ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
-              (OID ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
+  oid =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
+  @0 x' : oid ++ bs₂ ++ ys₁ ≡ oid ++ bs₄ ++ ys₂
+  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+              (oid ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (OID ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
-              OID ++ bs₄ ++ ys₂ ∎))
+              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              oid ++ bs₄ ++ ys₂ ∎))
   @0 bs₂≡ : bs₂ ≡ bs₄
-  bs₂≡ = TLVProps.nonnesting (++-cancelˡ OID x') cpsPointer cpsPointer₁
+  bs₂≡ = TLVProps.nonnesting (++-cancelˡ oid x') cpsPointer cpsPointer₁
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.cpsURI (X509.mkCPSURIQualifier {bs₁ = bs₁} {bs₂} refl cpsPointer bs≡)) (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₃} {bs₄} refl unotice bs≡₁)) = case (‼ x') of λ ()
   where
   OID₁ =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
@@ -104,20 +104,20 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂}  x (X509.userNotice (X509.mkUserNotic
               OID₂ ++ bs₄ ++ ys₂ ∎))
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₁} {bs₂} refl unotice bs≡)) (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₃} {bs₄} refl unotice₁ bs≡₁)) =
   begin (xs₁ ≡⟨ bs≡ ⟩
-        OID ++ bs₂ ≡⟨ cong (OID ++_) bs₂≡ ⟩
-        OID ++ bs₄ ≡⟨ sym bs≡₁ ⟩
+        oid ++ bs₂ ≡⟨ cong (oid ++_) bs₂≡ ⟩
+        oid ++ bs₄ ≡⟨ sym bs≡₁ ⟩
         xs₂ ∎)
   where
-  OID =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
-  @0 x' : OID ++ bs₂ ++ ys₁ ≡ OID ++ bs₄ ++ ys₂
-  x' = (begin (OID ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
-              (OID ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
+  oid =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
+  @0 x' : oid ++ bs₂ ++ ys₁ ≡ oid ++ bs₄ ++ ys₂
+  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+              (oid ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (OID ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
-              OID ++ bs₄ ++ ys₂ ∎))
+              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              oid ++ bs₄ ++ ys₂ ∎))
   @0 bs₂≡ : bs₂ ≡ bs₄
-  bs₂≡ =  TLVProps.nonnesting (++-cancelˡ OID x') unotice unotice₁
+  bs₂≡ =  TLVProps.nonnesting (++-cancelˡ oid x') unotice unotice₁
 
 @0 unambiguous : Unambiguous X509.PolicyQualifierInfoFields
 unambiguous =
