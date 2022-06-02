@@ -136,11 +136,11 @@ checkCRLDistStruct (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields
 
 
 -- returns all certificate policy OIDs
-getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) Generic.OID)
+getPolicyOIDList : Exists─ (List Dig) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields)) →  List (Exists─ (List Dig) OID)
 getPolicyOIDList (─ .[] , Aeres.Grammar.Definitions.none) = []
 getPolicyOIDList (fst , Aeres.Grammar.Definitions.some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
   where
-  helper : ∀ {@0 bs} → SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) Generic.OID)
+  helper : ∀ {@0 bs} → SequenceOf X509.PolicyInformation bs → List (Exists─ (List Dig) OID)
   helper nil = []
   helper (cons (mkIListCons (mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
 
@@ -163,10 +163,10 @@ isAnyOtherExtnCritical x = helper x
     true → true
 
 
-getExtensionsOIDList : List (Exists─ (List Dig) X509.Extension) →  List (Exists─ (List Dig) Generic.OID)
+getExtensionsOIDList : List (Exists─ (List Dig) X509.Extension) →  List (Exists─ (List Dig) OID)
 getExtensionsOIDList = map helper
   where
-  helper : Exists─ (List Dig) X509.Extension → (Exists─ (List Dig) Generic.OID)
+  helper : Exists─ (List Dig) X509.Extension → (Exists─ (List Dig) OID)
   helper (fst , mkTLV len (X509.akiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.skiextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)
   helper (fst , mkTLV len (X509.kuextn x) len≡ bs≡) = _ , (X509.ExtensionFields.extnId x)

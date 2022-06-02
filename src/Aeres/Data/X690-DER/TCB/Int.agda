@@ -1,8 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import      Aeres.Data.X690-DER.TCB.Tag as Tag
-open import Aeres.Data.X690-DER.TCB.TLV
+open import Aeres.Data.X690-DER.Tag
+open import Aeres.Data.X690-DER.TLV
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.TCB.Int where

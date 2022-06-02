@@ -2,6 +2,7 @@
 
 open import Aeres.Prelude
 open import Data.Nat.Properties
+  hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Definitions (Σ : Set) where
@@ -197,6 +198,9 @@ ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
 
 ExactLengthString : ℕ → @0 List Σ → Set
 ExactLengthString n = ExactLength Singleton n
+
+mkELS : (n : ℕ) → (xs : List Σ) → (len≡ : length xs ≡ n) → ExactLengthString n xs
+mkELS n xs len≡ = mk×ₚ self (─ len≡) refl
 
 lookupELS : ∀ {@0 xs} {n} (s : ExactLengthString n xs) → Fin n → Σ
 lookupELS (mk×ₚ (singleton (x ∷ x₁) refl) _ _) Fin.zero = x

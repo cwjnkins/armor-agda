@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Prelude
 
-module Aeres.Data.X690-DER.TCB.Length where
+module Aeres.Data.X690-DER.Length.TCB where
 
 open Base256
 

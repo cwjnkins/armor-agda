@@ -47,10 +47,12 @@ private
   test₂ : toBinary (Fin.inject+ _ (Fin.fromℕ 9)) ≡ #1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ]
   test₂ = refl
 
+
+UInt8 = Fin (2 ^ 8)
+
 module Base256 where
   Byte  = Binary 8
   Dig   = Fin (2 ^ 8)
-  UInt8 = Dig
 
   twosComplement : List Dig → ℤ
   twosComplement xs = go (reverse xs) 0 0
@@ -84,6 +86,9 @@ module Base256 where
 module Base128 where
   Byte = Binary 7
   Dig  = Fin (2 ^ 7)
+
+
+UInt6 = Fin (2 ^ 6)
 
 module Base64 where
   Byte = Binary 6
@@ -199,13 +204,13 @@ module Digs where
 
 module Decode where
 
-  base64 : List Char → Maybe (List Base256.Dig)
+  base64 : List Char → Maybe (List UInt8)
   base64 cs = do
     ds ← Base64.toDigs cs
     Digs.base64To256 ds
 
-  private
-    test₀ : String
-    test₀ = String.fromList (map (Char.fromℕ ∘ toℕ) (from-just foo))
-      where
-      foo = base64 (String.toList "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu")
+  -- private
+  --   test₀ : String
+  --   test₀ = String.fromList (map (Char.fromℕ ∘ toℕ) (from-just foo))
+  --     where
+  --     foo = base64 (String.toList "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu")

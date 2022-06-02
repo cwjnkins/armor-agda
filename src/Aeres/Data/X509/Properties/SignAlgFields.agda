@@ -18,7 +18,7 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Properties  Dig
 
-iso : Iso (&ₚ Generic.OID (Option (NotEmpty OctetStringValue))) X509.SignAlg.SignAlgFields
+iso : Iso (&ₚ OID (Option (NotEmpty OctetStringValue))) X509.SignAlg.SignAlgFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.SignAlg.mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl

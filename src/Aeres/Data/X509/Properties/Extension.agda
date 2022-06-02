@@ -31,7 +31,7 @@ open ≡-Reasoning
 module ExtensionFields where
   equivalent : ∀ {@0 P} {@0 A : @0 List Dig → Set}
                → Equivalent
-                   (&ₚ (Generic.OID ×ₚ (Erased ∘ P))
+                   (&ₚ (OID ×ₚ (Erased ∘ P))
                        (&ₚ (Option Generic.Boool)
                            A))
                    (X509.ExtensionFields P A)
@@ -42,7 +42,7 @@ module ExtensionFields where
 
   iso : ∀ {@0 P} {@0 A : @0 List Dig → Set}
         → Iso
-            (&ₚ (Generic.OID ×ₚ (Erased ∘ P))
+            (&ₚ (OID ×ₚ (Erased ∘ P))
                 (&ₚ (Option Generic.Boool)
                     A))
             (X509.ExtensionFields P A)

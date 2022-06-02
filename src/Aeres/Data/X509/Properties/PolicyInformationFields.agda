@@ -18,7 +18,7 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 open Aeres.Grammar.Properties  Dig
 
-iso : Iso (&ₚ Generic.OID (Option X509.PolicyQualifiersSeq))
+iso : Iso (&ₚ OID (Option X509.PolicyQualifiersSeq))
           X509.PolicyInformationFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPolicyInformationFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (X509.mkPolicyInformationFields cpid cpqls bs≡) = mk&ₚ cpid cpqls bs≡

@@ -1,14 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X690-DER.TCB.Int
-open import Aeres.Data.X690-DER.TCB.TLV
-import      Aeres.Data.X690-DER.TCB.Tag as Tag
+open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
-module Aeres.Data.X690-DER.TCB.SequenceOf where
+module Aeres.Data.X690-DER.SequenceOf.TCB where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8

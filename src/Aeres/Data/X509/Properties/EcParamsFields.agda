@@ -1,7 +1,8 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.TLV            as TLVprops
 open import Aeres.Prelude
@@ -13,8 +14,9 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.EcParamsFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Sum         Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
 
@@ -23,7 +25,7 @@ open ≡-Reasoning
 -- proj₂ equivalent (X509.mkEcParamsFields self fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ sndₚ₁ bs≡) = mk&ₚ refl (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ sndₚ₁ refl) refl) refl) refl) bs≡
 
 
-equivalentEcPkAlgParams : Equivalent (Sum (Sum X509.EcParams Generic.OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
+equivalentEcPkAlgParams : Equivalent (Sum (Sum X509.EcParams OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
 proj₁ equivalentEcPkAlgParams (Aeres.Grammar.Sum.inj₁ (Aeres.Grammar.Sum.inj₁ x)) = X509.ecparams x
 proj₁ equivalentEcPkAlgParams (Aeres.Grammar.Sum.inj₁ (Aeres.Grammar.Sum.inj₂ x)) = X509.namedcurve x
 proj₁ equivalentEcPkAlgParams (Aeres.Grammar.Sum.inj₂ x) = X509.implicitlyCA x
@@ -32,6 +34,7 @@ proj₂ equivalentEcPkAlgParams (X509.namedcurve x) = Aeres.Grammar.Sum.inj₁ (
 proj₂ equivalentEcPkAlgParams (X509.implicitlyCA x) = Aeres.Grammar.Sum.inj₂ x
 
 
+<<<<<<< HEAD
 @0 noconfusionEcPkAlgParams : NoConfusion (Sum (Sum X509.EcParams Generic.OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
 noconfusionEcPkAlgParams = {!!}
 
@@ -58,3 +61,28 @@ postulate
 --   (begin (_ ≡⟨ bs≡ ⟩ ++-assoc bs₁ bs₂ _))
 -- proj₂ equivalent (X509.mkCurveFields{p}{q} a b seed bs≡) = Aeres.Grammar.Definitions.mk&ₚ (Aeres.Grammar.Definitions.mk&ₚ a b refl) seed
 --   (begin (_ ≡⟨ bs≡ ⟩ sym (++-assoc p q _)))
+=======
+@0 nonnestingEcPkAlgParams : NonNesting X509.EcPkAlgParams
+nonnestingEcPkAlgParams =
+  equivalent-nonnesting equivalentEcPkAlgParams
+    (nonnestingSum
+      (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting
+        (TLVprops.noconfusion (λ ())))
+      (λ where _ refl refl → refl)
+      (symNoConfusion{A = _≡ X509.ExpNull}{B = Sum X509.EcParams OID}
+        (NoConfusion.sumₚ{A = _≡ X509.ExpNull}{B = X509.EcParams}{C = OID}
+          (λ where
+            {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV{l = l}{v} len val len≡ bs≡) →
+              contradiction{P = # Tag.Null ≡ # Tag.Sequence}
+                (∷-injectiveˡ (begin X509.ExpNull ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                                     xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+                                     (Tag.Sequence ∷ l ++ v) ++ ys₂ ∎))
+                (λ ()))
+          λ where
+            {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV{l = l}{v} len val len≡ bs≡) →
+              contradiction{P = # Tag.Null ≡ # Tag.ObjectIdentifier}
+                (∷-injectiveˡ (begin X509.ExpNull ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                                     xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+                                     (# Tag.ObjectIdentifier ∷ l ++ v) ++ ys₂ ∎))
+                λ ())))
+>>>>>>> 6e97ac58367f119c43d4d0e11379d4ad56bf2646

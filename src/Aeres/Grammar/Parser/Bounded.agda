@@ -91,6 +91,34 @@ runParser (parseExactLength nn m p n) xs = do
       return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (─ sym r₀≡) refl) suf₀ ps≡₀))
   where open ≡-Reasoning
 
+parseExactLengthString
+  : {M : Set → Set} ⦃ _ : Monad M ⦄ →
+    M (Level.Lift _ ⊤) →
+    ∀ n → Parser (M ∘ Dec) (ExactLengthString n)
+runParser (parseExactLengthString m zero) xs =
+  return (yes (success [] _ refl (mk×ₚ self (─ refl) refl) xs refl))
+runParser (parseExactLengthString m (suc n)) [] = do
+  m
+  return ∘ no $ λ where
+    (success prefix read read≡ (mk×ₚ self (─ lenp) refl) suffix ps≡) → ‼
+      let @0 prefix≡ : prefix ≡ []
+          prefix≡ = ++-conicalˡ _ _ ps≡
+      in
+      contradiction lenp (subst₀ (λ x → ¬ length x ≡ suc n) (sym prefix≡) (λ ()))
+runParser (parseExactLengthString m (suc n)) (x ∷ xs) = do
+  yes (success pre₁ r₁ r₁≡ (mk×ₚ self (─ len≡) refl) suf₁ ps≡₁) ← runParser (parseExactLengthString m n) xs
+    where no ¬p → do
+      return ∘ no $ λ where
+        (success (c ∷ prefix) read read≡ (mk×ₚ self (─ len) refl) suffix ps≡) →
+          contradiction
+            (success _ _ refl
+              (mk×ₚ (singleton prefix refl) (─ (suc-injective len)) refl)
+              suffix (∷-injectiveʳ ps≡))
+            ¬p
+  return (yes
+    (success (x ∷ pre₁) _ (cong (1 +_) r₁≡)
+      (mk×ₚ self (─ cong (1 +_) len≡) refl) suf₁ (cong (x ∷_) ps≡₁)))
+
 parse≤ : ∀ {@0 A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → (@0 _ : NonNesting A) → M (Level.Lift _ ⊤) →
   Parser (M ∘ Dec) (WithinLength A n)

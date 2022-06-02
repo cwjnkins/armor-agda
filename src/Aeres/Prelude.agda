@@ -6,7 +6,7 @@ open import Data.Bool    public
 open import Data.Empty public
   hiding (⊥-elim)
 
-⊥-elim : ∀ {ℓ} {A : Set ℓ} → (@0 _ : ⊥) → A
+⊥-elim : ∀ {ℓ} {@0 A : Set ℓ} → @0 ⊥ → A
 ⊥-elim ()
 
 ⊥-irrel : (@0 _ : ⊥) → ⊥
@@ -179,7 +179,7 @@ open import Relation.Nullary public
 open import Relation.Nullary.Negation public
   hiding (contradiction)
 
-contradiction : ∀ {ℓ ℓ'} {@0 P : Set ℓ} {A : Set ℓ'} → (@0 _ : P) (@0 _ : ¬ P) → A
+contradiction : ∀ {ℓ ℓ'} {@0 P : Set ℓ} {@0 A : Set ℓ'} → @0 P → @0 ¬ P → A
 contradiction p ¬p = ⊥-elim (¬p p)
 
 open import Relation.Nullary.Decidable public
@@ -237,10 +237,14 @@ erased? (no ¬a) = no λ where
   (─ x) → contradiction x ¬a
 erased? (yes a) = yes (─ a)
 
+uneraseDec : ∀ {ℓ} {@0 A : Set ℓ} → @0 A → Dec A → A
+uneraseDec{A = A} x (no ¬p) = contradiction{A = A} x ¬p 
+uneraseDec x (yes p) = p
+
 erased-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique A → Unique (Erased A)
 erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) refl
 
-Exists─ : (A : Set) (B : @0 A → Set) → Set
+Exists─ : (@0 A : Set) (B : @0 A → Set) → Set
 Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
 
 -- Typeclasses
