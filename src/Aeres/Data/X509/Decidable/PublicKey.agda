@@ -40,24 +40,6 @@ module parsePublicKeyFields where
               subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
                 (parseOption₁ExactLength _ Props.TLV.nonempty Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring (n - read)))
 
-
-
-    -- (parse&ᵈ _ (withinLength-nonnesting _ Props.TLV.nonnesting)
-    --   (withinLength-unambiguous _ (TLV.unambiguous Props.OctetstringValue.unambiguous))
-    --   (parse≤ _ n parseOctetString Props.TLV.nonnesting (tell $ here' String.++ ": overflow"))
-    --   λ where
-    --     {bs} (singleton read read≡) _ →
-    --       subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
-    --       (parseEquivalent _ (symEquivalent _  Distribute.exactLength-&) {!!}))
-
-
-  -- parseCurveFields n =
-  --   parseExactLength _ {!!} (tell $ here' String.++ ": underflow")
-  --     (parseEquivalent _ Props.CurveFields.equivalent
-  --       (parse& _ Props.TLV.nonnesting parseOctetString
-  --         (parse& _ Props.TLV.nonnesting parseOctetString
-  --           {!!}))) n
-
   parseCurve : Parser Dig (Logging ∘ Dec) X509.Curve
   parseCurve = parseTLV _ "Curve" _ parseCurveFields
 
@@ -65,7 +47,18 @@ module parsePublicKeyFields where
   parseFieldID = parseTLV _ "Field ID" _ parseOctetStringValue
 
   parseEcParamsFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.EcParamsFields n)
-  parseEcParamsFields = {!!}
+  parseEcParamsFields n =
+    parseExactLength _ {!!} (tell $ here' String.++ ": underflow")
+      (parseEquivalent _ Props.EcParamsFields.equivalent
+        (parse& _ {!!}
+          (parse&ᵈ _ {!!} {!!} {!!} {!!}) {!!})) {!!}
+
+
+
+
+
+
+
 
   parseEcParams :  Parser Dig (Logging ∘ Dec) X509.EcParams
   parseEcParams = parseTLV _ "EC params" _ parseEcParamsFields
