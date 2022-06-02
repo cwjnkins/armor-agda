@@ -203,15 +203,9 @@ module X509 where
 
     SignAlg : (@0 _ : List Dig) → Set
     SignAlg xs = TLV Tag.Sequence SignAlgFields xs
-    
-    -- @0 getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
-    -- getSignAlgOIDbs (mkTLV len val len≡ bs≡) = SignAlgFields.o val
 
-    -- @0 getSignAlgParambs : ∀ {@0 bs} → SignAlg bs → List UInt8
-    -- getSignAlgParambs = SignAlgFields.p ∘ TLV.val
-
-    postulate
-      getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
+    getSignAlgOIDbs = Singleton.x ∘ OID.serialize ∘ SignAlgFields.signOID ∘ TLV.val
 
    
   open SignAlg public using (SignAlg)
