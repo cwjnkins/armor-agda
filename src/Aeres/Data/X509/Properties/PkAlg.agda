@@ -37,3 +37,7 @@ proj₂ equivalent (X509.PkAlg.otherpkalg x) = Aeres.Grammar.Sum.inj₂ x
 @0 nonnesting : NonNesting X509.PkAlg
 nonnesting = equivalent-nonnesting equivalent
   (nonnestingSum (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting (TLVprops.noconfusion {!!})) TLVprops.nonnesting {!!})
+
+@0 unambiguous : Unambiguous X509.PkAlg
+unambiguous {xs} a₁ a₂ = {!!}
+
