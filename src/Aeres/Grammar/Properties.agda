@@ -1,7 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
-import Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Sum
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Data.List.Properties
@@ -9,7 +10,7 @@ open import Data.List.Properties
 module Aeres.Grammar.Properties (Σ : Set) where
 
 open Aeres.Grammar.Definitions Σ
-open import Aeres.Grammar.Sum Σ
+open Aeres.Grammar.Sum Σ
 
 module Distribute where
 
@@ -81,6 +82,19 @@ module NonNesting where
 
   erased : ∀ {@0 A} → NonNesting A → NonNesting (Erased ∘ A)
   erased nn xs₁++ys₁≡ (─ a₁) (─ a₂) = ‼ (nn xs₁++ys₁≡ a₁ a₂)
+
+  Restriction : (A B : List Σ → Set) → Set
+  Restriction A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → B xs₂ → xs₁ ≡ xs₂
+
+  @0 sumRestriction : ∀ {@0 A B} → NonNesting A → NonNesting B → Restriction A B → NonNesting (Sum A B)
+  sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₁ x₁) =
+    nn₁ xs₁++ys₁≡xs₂++ys₂ x x₁
+  sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₂ x₁) =
+    r xs₁++ys₁≡xs₂++ys₂ x x₁
+  sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₂ x) (Sum.inj₁ x₁) =
+    sym (r (sym xs₁++ys₁≡xs₂++ys₂) x₁ x)
+  sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₂ x) (Sum.inj₂ x₁) =
+    nn₂ xs₁++ys₁≡xs₂++ys₂ x x₁
 
 module NoConfusion where
   equivalent : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → NoConfusion A₁ B → NoConfusion A₂ B

@@ -461,12 +461,12 @@ module X509 where
     data PkAlg : @0 List UInt8 → Set where
       rsapkalg : ∀ {@0 bs} → RSAPkAlg bs → PkAlg bs
       ecpkalg :  ∀ {@0 bs} → EcPkAlg bs → PkAlg bs
-      otherpkalg : ∀ {@0 bs} → SignAlg bs → PkAlg bs
+      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs) → ¬ SignAlg.getSignAlgOIDbs sa ∈ PKOID.Supported → PkAlg bs
 
     getOID : ∀ {@0 bs} → PkAlg bs → List UInt8
     getOID (rsapkalg x) = (Singleton.x ∘ RSAPkAlgFields.oid) ∘ TLV.val $ x
     getOID (ecpkalg x) = (Singleton.x ∘ EcPkAlgFields.oid) ∘ TLV.val $ x
-    getOID (otherpkalg x) = SignAlg.getSignAlgOIDbs x
+    getOID (otherpkalg x _) = SignAlg.getSignAlgOIDbs x
 
   open PkAlg public using (PkAlg) hiding (module PkAlg)
 

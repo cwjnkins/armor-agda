@@ -300,3 +300,6 @@ unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂} fst�
 
   @0 bs₂≡ : bs₁₂ ≡ bs₂₂
   bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (trans₀ (sym bs≡) bs≡₁)
+
+postulate
+  @0 unambiguous&ₚᵈ : ∀ {@0 A B} → Unambiguous A → NonNesting A → (∀ {@0 bs} (a : A bs) → Unambiguous (B bs a)) → Unambiguous (&ₚᵈ A B)
