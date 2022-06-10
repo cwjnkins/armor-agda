@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
@@ -33,3 +33,8 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} a (X509.mkRSAPkAlgFields (singleton x
     x₁ ++ X509.ExpNull ≡⟨ cong (x₁ ++_) (sym x≡₃) ⟩
     x₁ ++ x₃ ≡⟨ sym bs≡₁ ⟩
     xs₂ ∎)
+
+
+@0 unambiguous : Unambiguous X509.RSAPkAlgFields
+unambiguous = {!!}
+

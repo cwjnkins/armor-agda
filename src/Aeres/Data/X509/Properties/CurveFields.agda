@@ -3,6 +3,7 @@
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.TLV as TLVProps
+import      Aeres.Data.X509.Properties.BitstringValue as BSProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OCProps
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -27,11 +28,13 @@ proj₂ equivalent (X509.mkCurveFields{p}{q} a b seed bs≡) = Aeres.Grammar.Def
 
 iso : Iso (&ₚ (&ₚ OctetString OctetString) (Option BitString)) X509.CurveFields
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) = {!!}
-proj₂ (proj₂ iso) (X509.mkCurveFields a b seed bs≡) = subst₀ (λ x → X509.mkCurveFields  a b seed x ≡ X509.mkCurveFields a b seed bs≡) (≡-unique bs≡ _) refl
+proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁ refl) = {!!}
+proj₂ (proj₂ iso) (X509.mkCurveFields a b seed bs≡) = {!!}
 
 
 @0 unambiguous : Unambiguous X509.CurveFields
 unambiguous = isoUnambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (TLVProps.unambiguous OCProps.unambiguous) TLVProps.nonnesting (TLVProps.unambiguous OCProps.unambiguous))
-    (NonNesting&ₚ TLVProps.nonnesting TLVProps.nonnesting) {!!})
+    (NonNesting&ₚ TLVProps.nonnesting TLVProps.nonnesting)
+      (Unambiguous.option₁ (TLVProps.unambiguous BSProps.unambiguous) TLVProps.nonempty))
+

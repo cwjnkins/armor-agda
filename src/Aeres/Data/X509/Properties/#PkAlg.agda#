@@ -56,6 +56,18 @@ unambiguous = isoUnambiguous iso
   (unambiguousSum
     (unambiguousSum (TLVprops.unambiguous RSAPkAlgFieldsProps.unambiguous) (TLVprops.unambiguous EcPkAlgFieldsProps.unambiguous) (TLVprops.noconfusion {!!}))
       (TLVprops.unambiguous SignAlgFieldsProps.unambiguous)
-    {!!})
+      λ xs₁++ys₁≡xs₂++ys₂ a x → {!!})
 
 
+
+-- unambiguous =
+--   isoUnambiguous iso
+--     (unambiguousSum (TLVprops.NonEmptyVal.unambiguous OctetStringValueProps.unambiguous)
+--       (unambiguousSum (TLVprops.NonEmptyVal.unambiguous IA5Props.unambiguous)
+--         (unambiguousSum (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+--           (unambiguousSum (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+--             (TLVprops.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+--               (noconfusionΣₚ (TLVprops.noconfusion λ ())))
+--           noconfusion₃)
+--         noconfusion₂)
+--       noconfusion₁)
