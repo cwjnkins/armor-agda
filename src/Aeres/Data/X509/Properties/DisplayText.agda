@@ -111,7 +111,6 @@ noconfusionNoticeReference = noconfusionTLV pf
   where
   pf : Tag.Sequence ∉ _
   pf (there (there (there (there ()))))
-unambiguousSum
 
 @0 unambiguous : Unambiguous X509.DisplayText
 unambiguous =
