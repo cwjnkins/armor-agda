@@ -6,10 +6,13 @@ import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 import      Aeres.Data.Base64.TCB as Base64
+import      Data.Nat.DivMod       as Nat
+import      Data.Nat.Properties   as Nat
 
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
 open Aeres.Grammar.Sum         Char
+open ≡-Reasoning
 
 module Aeres.Data.Base64.Properties where
 
@@ -38,176 +41,168 @@ module Base64Char where
   all2IList{c ∷ cs} (c∈ All.∷ a) =
     cons (mkIListCons (Base64.mk64 c c∈ self refl) (all2IList a) refl)
 
+module Base64Pad where
+
+  @0 p%4≡0 : ∀ {@0 p} → Base64.Base64Pad p → length p % 4 ≡ 0
+  p%4≡0 (Base64.pad0 refl) = refl
+  p%4≡0 (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = refl
+  p%4≡0 (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) = refl
+
 module Base64Str where
-  Rep : @0 List Char → Set
-  Rep = (&ₚ (IList Base64.Base64Char) Base64.Pad) ×ₚ λ bs → length bs % 4 ≡ 0
+  -- Rep : @0 List Char → Set
+  -- Rep = &ₚ ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) Base64.Base64Pad
 
-  equiv : Equivalent Rep Base64.Base64Str
-  proj₁ equiv (mk×ₚ (mk&ₚ{bs₁}{bs₂} cs p refl) %4 refl) =
-    Base64.mk64Str bs₁ bs₂ cs p %4 refl
-  proj₂ equiv (Base64.mk64Str s p str pad mult refl) =
-    mk×ₚ (mk&ₚ str pad refl) (‼ mult) refl
+--   equiv : Equivalent Rep Base64.Base64Str
+--   proj₁ equiv (mk×ₚ (mk&ₚ{bs₁}{bs₂} cs p refl) %4 refl) =
+--     Base64.mk64Str bs₁ bs₂ cs p %4 refl
+--   proj₂ equiv (Base64.mk64Str s p str pad mult refl) =
+--     mk×ₚ (mk&ₚ str pad refl) (‼ mult) refl
 
-  dec : Decidable Base64.Base64Str
-  dec bs =
-    case length bs % 4 ≟ 0 of λ where
-      (no ¬%4) → no λ where
-        (Base64.mk64Str s p str pad mult bs≡) →
-          contradiction mult
-            (subst (λ x → ¬ length x % 4 ≡ 0) bs≡ ¬%4)
-      (yes %4) → helper bs %4
-    where
-    helper : ∀ bs → @0 length bs % 4 ≡ 0 → Dec (Base64.Base64Str bs)
-    helper [] %4 =
-      yes (Base64.mk64Str [] [] nil Base64.pad0 refl refl)
-    helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) %4
-      with helper bs %4
-    ... | no ¬p =
-      no λ where
-        (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad1 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad2 mult ())
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) nil refl)) () mult refl)
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) nil refl)) refl)) Base64.pad2 refl refl) →
-          contradiction (Base64.mk64Str [] [] nil Base64.pad0 refl refl) ¬p
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c∈₂ i₂ refl) nil refl)) refl)) refl)) Base64.pad1 refl refl) →
-          contradiction (Base64.mk64Str [] [] nil Base64.pad0 refl refl) ¬p
-        (Base64.mk64Str ._ p (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c₁ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 c₂ c∈₂ i₂ refl) (cons (mkIListCons{bs₂ = bs₂} (Base64.mk64 c₃ c∈₃ i₃ refl) tail₁ refl)) refl)) refl)) refl)) pad mult bs≡) → ‼
-          let @0 bs≡' : bs ≡ bs₂ ++ p
-              bs≡' = proj₂ (Lemmas.length-++-≡ _ _ (_ ∷ _ ∷ _ ∷ _ ∷ []) _ bs≡ refl)
-          in
-          contradiction
-            (Base64.mk64Str bs₂ p tail₁ pad mult bs≡')
-            ¬p
-    ... | yes (Base64.mk64Str .[] .[] nil Base64.pad0 refl refl)
-      with c₁ ∈? B64.charset
-      |    c₂ ∈? B64.charset
-    ... | no ¬p | _ =
-      no λ where
-        (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad1 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad2 mult ())
-        (Base64.mk64Str ._ p (cons (mkIListCons (Base64.mk64 c c∈ i refl) tail₁ refl)) pad mult bs≡) →
-          contradiction c∈ (subst (λ x → ¬ x ∈ B64.charset) (∷-injectiveˡ bs≡) ¬p)
-    ... | yes _ | no ¬p =
-      no λ where
-        (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad1 mult ())
-        (Base64.mk64Str .[] ._ nil Base64.pad2 mult ())
-        (Base64.mk64Str ._ .[] (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 mult ())
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad1 mult ())
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad2 mult ())
-        (Base64.mk64Str s p (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c' c∈' i' refl) tail refl)) refl)) pad mult bs≡) →
-          contradiction c∈' (subst (λ x → ¬ x ∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ bs≡)) ¬p)
-    ... | yes c₁∈ | yes c₂∈
-      with c₃ ∈? B64.charset
-    ... | no ¬c₃∈ =
-      case (c₃ ≟ '=') ,′ (c₄ ≟ '=') of λ where
-        (no ¬p , _) →
-          no λ where
-            (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-            (Base64.mk64Str .[] ._ nil Base64.pad1 () bs≡)
-            (Base64.mk64Str .[] ._ nil Base64.pad2 () bs≡)
-            (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 () bs≡)
-            (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad1 () bs≡)
-            (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad2 () bs≡)
-            (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) nil refl)) refl)) Base64.pad2 refl refl) →
-              contradiction refl ¬p
-            (Base64.mk64Str .([ c ] ++ [ c₁ ] ++ [ c₂ ] ++ _) p (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c₁ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 c₂ c∈₂ i₂ refl) tail₁ refl)) refl)) refl)) pad mult bs≡) →
-              contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡)))) c∈₂) ¬c₃∈
-        (yes refl , no ¬p) →
-          no λ where
-            (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-            (Base64.mk64Str .[] .(String.toList "=") nil Base64.pad1 () bs≡)
-            (Base64.mk64Str .[] .(String.toList "==") nil Base64.pad2 () bs≡)
-            (Base64.mk64Str .([ c ] ++ []) .[] (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 () bs≡)
-            (Base64.mk64Str .([ c ] ++ []) .(String.toList "=") (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad1 mult ())
-            (Base64.mk64Str .([ c ] ++ []) .(String.toList "==") (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad2 mult ())
-            (Base64.mk64Str .([ c₁ ] ++ [ c₂ ] ++ []) .(String.toList "==") (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) nil refl)) refl)) Base64.pad2 refl refl) →
-              contradiction refl ¬p
-            (Base64.mk64Str .([ c₁ ] ++ [ c₂ ] ++ [ '=' ] ++ []) .(String.toList "=") (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 .'=' c∈₂ i₂ refl) nil refl)) refl)) refl)) Base64.pad1 mult refl) →
-              contradiction refl ¬p
-            (Base64.mk64Str ._ p (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c₁ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 c₂ c∈₂ i₂ refl) (cons (mkIListCons (Base64.mk64 c₃ c∈₃ i₃ refl) tail₁ refl)) refl)) refl)) refl)) pad mult bs≡) →
-              case (‼ proj₁ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ [ _ ]) (_ ++ p) (‼ bs≡) (erefl 4))) ret (λ _ → _) of λ where
-                refl → contradiction c∈₂ ¬c₃∈
-        (yes refl , yes refl) →
-          yes (Base64.mk64Str (c₁ ∷ [ c₂ ]) _ (cons (mkIListCons (Base64.mk64 c₁ c₁∈ self refl) (cons (mkIListCons (Base64.mk64 c₂ c₂∈ self refl) nil refl)) refl)) Base64.pad2 refl refl)
-    ... | yes c₃∈
-      with c₄ ∈? B64.charset
-    ... | yes c₄∈ =
-      yes (Base64.mk64Str _ [] (cons (mkIListCons (Base64.mk64 c₁ c₁∈ self refl) (cons (mkIListCons (Base64.mk64 c₂ c₂∈ self refl) (cons (mkIListCons (Base64.mk64 c₃ c₃∈ self refl) (cons (mkIListCons (Base64.mk64 c₄ c₄∈ self refl) nil refl)) refl)) refl)) refl)) Base64.pad0 refl refl)
-    ... | no ¬c₄∈
-      with c₄ ≟ '='
-    ... | yes refl =
-      yes (Base64.mk64Str (c₁ ∷ c₂ ∷ [ c₃ ]) [ '=' ] (cons (mkIListCons (Base64.mk64 c₁ c₁∈ self refl) (cons (mkIListCons (Base64.mk64 c₂ c₂∈ self refl) (cons (mkIListCons (Base64.mk64 c₃ c₃∈ self refl) nil refl)) refl)) refl)) Base64.pad1 refl refl)
-    ... | no ¬c₄≡= =
-      no λ where
-        (Base64.mk64Str .([ c ] ++ []) .[] (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 () bs≡)
-        (Base64.mk64Str .([ c₁' ] ++ _) .[] (cons (mkIListCons (Base64.mk64 c₁' c₁∈' i₁' refl) (cons (mkIListCons (Base64.mk64 c₂' c₂∈' i₂' refl) tail₁ refl)) refl)) Base64.pad0 mult bs≡) →
-          case tail₁ of λ where
-            (cons (mkIListCons (Base64.mk64 c₃' c₃∈' i₃' refl) (cons (mkIListCons (Base64.mk64 c₄' c₄∈' i₄ refl) _ refl)) refl)) →
-              contradiction c₄∈' (subst₀ (λ x → ¬ x ∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡)))) ¬c₄∈)
-        (Base64.mk64Str .([ c₁' ] ++ [ c₂' ] ++ [ c₃' ] ++ []) .(String.toList "=") (cons (mkIListCons (Base64.mk64 c₁' c₁∈' i₁' refl) (cons (mkIListCons (Base64.mk64 c₂' c₂∈' i₂' refl) (cons (mkIListCons (Base64.mk64 c₃' c₃∈' i₃' refl) nil refl)) refl)) refl)) Base64.pad1 refl refl) →
-          contradiction refl ¬c₄≡=
-        (Base64.mk64Str .([ c₁' ] ++ [ c₂' ] ++ [ c₃' ] ++ [ c ] ++ _) .(String.toList "=") (cons (mkIListCons (Base64.mk64 c₁' c₁∈' i₁' refl) (cons (mkIListCons (Base64.mk64 c₂' c₂∈' i₂' refl) (cons (mkIListCons (Base64.mk64 c₃' c₃∈' i₃' refl) (cons (mkIListCons (Base64.mk64 c c∈ i refl) tail₁ refl)) refl)) refl)) refl)) Base64.pad1 mult bs≡) →
-          contradiction (subst (λ x → x ∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c∈) ¬c₄∈
-        (Base64.mk64Str ._ .(String.toList "==") (cons (mkIListCons (Base64.mk64 c₁' c₁∈' i₁' refl) (cons (mkIListCons (Base64.mk64 c₂' c₂∈' i₂' refl) nil refl)) refl)) Base64.pad2 refl refl) →
-          contradiction refl ¬c₄≡=
-        (Base64.mk64Str ._ .(String.toList "==") (cons (mkIListCons (Base64.mk64 c₁' c₁∈' i₁' refl) (cons (mkIListCons (Base64.mk64 c₂' c₂∈' i₂' refl) (cons (mkIListCons (Base64.mk64 c₃' c₃∈' i₃' refl) (cons (mkIListCons (Base64.mk64 c₄' c₄∈' i₄' refl) _ refl)) refl)) refl)) refl)) Base64.pad2 mult bs≡) →
-          contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c₄∈') ¬c₄∈
-    helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) %4 | yes (Base64.mk64Str ._ .[] str@(cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 () bs≡)
-    helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) %4 | yes (Base64.mk64Str ._ ._ str@(cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad1 () bs≡)
-    helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) %4 | yes (Base64.mk64Str ._ ._ str@(cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad2 () bs≡)
-    helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) %4 | yes (Base64.mk64Str s@._ p str@(cons (mkIListCons (Base64.mk64 c₅ c₅∈ i₅ refl) (cons (mkIListCons (Base64.mk64 c₆ c₆∈ i₆ refl) tail₁ refl)) refl)) pad mult bs≡)
-      with All.all? (_∈? B64.charset) (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ])
-    ... | no ¬p =
-      no λ where
-        (Base64.mk64Str .[] .(c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs) nil () mult refl)
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) nil refl)) () mult refl)
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c₁∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c₂∈ i₁ refl) nil refl)) refl)) Base64.pad2 refl refl) →
-          contradiction bs≡ (λ ())
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c∈₂ i₂ refl) nil refl)) refl)) refl)) Base64.pad1 refl refl) →
-          contradiction bs≡ λ ()
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c∈₁ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c∈₂ i₂ refl) nil refl)) refl)) refl)) Base64.pad2 mult' refl) →
-          contradiction bs≡ λ ()
-        (Base64.mk64Str ._ .[] (cons (mkIListCons (Base64.mk64 .c₁ c₁∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c₂∈ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c₃∈ i₂ refl) (cons (mkIListCons (Base64.mk64 .c₄ c₄∈ i₃ refl) nil refl)) refl)) refl)) refl)) Base64.pad0 refl refl) →
-          contradiction bs≡ λ ()
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c₁∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c₂∈ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c₃∈ i₂ refl) (cons (mkIListCons (Base64.mk64 .c₄ c₄∈ i₃ refl) nil refl)) refl)) refl)) refl)) Base64.pad1 () refl)
-        (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 .c₁ c₁∈ i refl) (cons (mkIListCons (Base64.mk64 .c₂ c₂∈ i₁ refl) (cons (mkIListCons (Base64.mk64 .c₃ c₃∈ i₂ refl) (cons (mkIListCons (Base64.mk64 .c₄ c₄∈ i₃ refl) nil refl)) refl)) refl)) refl)) Base64.pad2 () refl)
-        (Base64.mk64Str ._ p' (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c₁ c₁∈ i₁ refl) (cons (mkIListCons (Base64.mk64 c₂ c₂∈ i₂ refl) (cons (mkIListCons (Base64.mk64 c₃ c₃∈ i₃ refl) (cons (mkIListCons (Base64.mk64 c₄ c₄∈ i₄ refl) _ refl)) refl)) refl)) refl)) refl)) pad' mult' bs≡) →
-          contradiction
-            (subst (All (_∈ B64.charset)) (proj₁ $ Lemmas.length-++-≡ _ (c₄ ∷ _ ++ p') _ bs (sym bs≡) (erefl 4)) (c∈ All.∷ c₁∈ All.∷ (c₂∈ All.∷ (c₃∈ All.∷ All.[]))))
-            ¬p
-    ... | yes p₁ =
-      yes (Base64.mk64Str (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ s) p
-             (appendIList (Base64Char.all2IList p₁) str) pad
-             mult (cong ((c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) ++_) bs≡))
-
-    --   with c₁ ∈? B64.charset
-    --   |    c₂ ∈? B64.charset
-    -- ... | no ¬p | _ =
-    --   no λ where
-    --     (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-    --     (Base64.mk64Str .[] ._ nil Base64.pad1 mult ())
-    --     (Base64.mk64Str .[] ._ nil Base64.pad2 mult ())
-    --     (Base64.mk64Str ._ p (cons (mkIListCons (Base64.mk64 c c∈ i refl) tail₁ refl)) pad mult bs≡) →
-    --       contradiction c∈ (subst (λ x → ¬ x ∈ B64.charset) (∷-injectiveˡ bs≡) ¬p)
-    -- ... | yes _ | no ¬p = no λ where
-    --   (Base64.mk64Str .[] .[] nil Base64.pad0 mult ())
-    --   (Base64.mk64Str .[] ._ nil Base64.pad1 mult ())
-    --   (Base64.mk64Str .[] ._ nil Base64.pad2 mult ())
-    --   (Base64.mk64Str ._ .[] (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad0 mult ())
-    --   (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad1 mult ())
-    --   (Base64.mk64Str ._ ._ (cons (mkIListCons (Base64.mk64 c c∈ i refl) nil refl)) Base64.pad2 mult ())
-    --   (Base64.mk64Str s p (cons (mkIListCons (Base64.mk64 c c∈ i refl) (cons (mkIListCons (Base64.mk64 c' c∈' i' refl) tail refl)) refl)) pad mult bs≡) →
-    --     contradiction c∈' (subst (λ x → ¬ x ∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ bs≡)) ¬p)
-    -- ... | yes p | yes p₁ = {!!}
-    -- helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs'@(_ ∷ _)) %4
-    --   with All.all? (_∈? B64.charset) (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ])
-    -- ... | no ¬p = {!!}
-    -- ... | yes p
-    --   with helper bs' (begin
-    --          (4 + length bs') % 4 ≡⟨ {!!} ⟩
-    --          {!!})
-    --   where open ≡-Reasoning
-    -- ... | xxx = {!!}
+   dec : Decidable Base64.Base64Str
+   dec bs =
+     case length bs % 4 ≟ 0 of λ where
+       (no ¬≡0) →
+         no λ where
+           (Base64.mk64Str{s = s}{p} str strLen pad bs≡) →
+             contradiction
+               (subst ((_≡ 0) ∘ (_% 4) ∘ length) (sym bs≡)
+                 (begin length (s ++ p) % 4               ≡⟨ cong (_% 4) (length-++ s) ⟩
+                        (length s + length p) % 4         ≡⟨ Nat.%-distribˡ-+ (length s) _ 4 ⟩
+                        (length s % 4 + length p % 4) % 4 ≡⟨ cong (λ x → (length s % 4 + x) % 4) (Base64Pad.p%4≡0 pad) ⟩
+                        (length s % 4 + 0) % 4            ≡⟨ cong (_% 4) (Nat.+-identityʳ (length s % 4)) ⟩
+                        (length s % 4) % 4                ≡⟨ m%n%n≡m%n (length s) _ ⟩
+                        length s % 4                      ≡⟨ strLen ⟩
+                        0                                 ∎))
+               ¬≡0
+       (yes ≡0) → helper bs ≡0
+     where
+     helper : ∀ bs → @0 length bs % 4 ≡ 0 → Dec (Base64.Base64Str bs)
+     helper [] %4 = yes (Base64.mk64Str nil refl (Base64.pad0 refl) refl)
+     helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ []) refl
+       with c₁ ∈? B64.charset
+       |    c₂ ∈? B64.charset
+     ... | no c₁∉ | _ =
+       no λ where
+         (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+         (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) c₂' c₃' pad refl)) refl) →
+           contradiction c∈ c₁∉
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) c₂ pad refl)) refl) →
+           contradiction c∈ c₁∉
+         (Base64.mk64Str (cons (mkIListCons (Base64.mk64 c c∈ i refl) tail₁ refl)) strLen pad bs≡) →
+           contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (sym bs≡)) c∈) c₁∉
+     ... | yes _  | no c₂∉ =
+       no λ where
+         (Base64.mk64Str nil strLen (Base64.pad0 ()) refl)
+         (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 _ _ _ refl) (Base64.mk64 c₂' c₂∈' i₂' refl) c₃ pad refl)) bs≡) →
+           contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (sym bs≡))) c₂∈') c₂∉
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 ._ _ _ refl) (Base64.mk64 .c₂ c₂∈' i₁ refl) pad refl)) refl) →
+           contradiction c₂∈' c₂∉
+         (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₂' c₂∈' _ refl) tail₁ refl) refl) strLen pad bs≡) →
+           contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (sym bs≡))) c₂∈') c₂∉
+     ... | yes c₁∈ | yes c₂∈
+       with c₃ ∈? B64.charset
+     ... | no ¬c₃∈ =
+       case (c₃ ≟ '=') ,′ (c₄ ≟ '=') of λ where
+         (no ¬c₃≡= , _) →
+           no λ where
+             (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+             (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c₁∈' _ refl) (Base64.mk64 .c₂ c₂∈' _ refl) (Base64.mk64 .c₃ c₃∈' _ refl) pad refl)) refl) →
+               contradiction c₃∈' ¬c₃∈
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+               contradiction (erefl '=') ¬c₃≡=
+             (Base64.mk64Str (consIList (Base64.mk64 c₁' _ _ refl) (consIList (Base64.mk64 c₂' _ _ refl) (consIList (Base64.mk64 c₃' c₃'∈ _ refl) _ refl) refl) refl) strLen pad bs≡) →
+               contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡)))) c₃'∈) ¬c₃∈
+         (yes refl , no ¬c₄≡=) →
+           no λ where
+             (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+             (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .'=' c∈₂ i₂ refl) pad refl)) refl) →
+               contradiction (erefl '=') ¬c₄≡=
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+               contradiction (erefl '=') ¬c₄≡=
+             (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₃' c₃∈' _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) _ refl) refl) refl) refl) strLen pad bs≡) →
+               contradiction c₃∈' (subst (¬_ ∘ (_∈ B64.charset)) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡))) (toWitnessFalse {Q = _ ∈? _} tt))
+         (yes refl , yes refl) →
+           let i = Any.index c₂∈ in
+           case toℕ i % (2 ^ 4) ≟ 0 of λ where
+             (no ¬c₂0s) →
+               no λ where
+                 (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad0 refl) ())
+                 (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .'=' c₃∈' _ refl) pad refl)) refl) →
+                   contradiction c₃∈' (toWitnessFalse{Q = _ ∈? _} tt)
+                 (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ _ _ refl) (Base64.mk64 .c₂ c₂∈' (singleton i' i≡') refl) pad refl)) refl) →
+                   contradiction
+                     (begin toℕ (Any.index c₂∈)  % (2 ^ 4) ≡⟨ cong (λ x → toℕ (Any.index x) % (2 ^ 4)) (B64.∈charsetUnique c₂∈ c₂∈') ⟩
+                            toℕ (Any.index c₂∈') % (2 ^ 4) ≡⟨ cong (λ x → toℕ x % (2 ^ 4)) (sym i≡') ⟩
+                            toℕ i' % (2 ^ 4)               ≡⟨ pad ⟩
+                            0 ∎)
+                     ¬c₂0s
+                 (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (cons (mkIListCons (Base64.mk64 c₃' c₃∈' _ refl) _ refl)) refl) refl) strLen pad bs≡) →
+                   contradiction c₃∈' (subst (¬_ ∘ (_∈ B64.charset)) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡))) (toWitnessFalse{Q = _ ∈? _} tt))
+             (yes c₂0s) →
+               yes (Base64.mk64Str nil refl (Base64.pad2 (Base64.mk64P1 (Base64.mk64 c₁ c₁∈ self refl) (Base64.mk64 c₂ c₂∈ self refl) c₂0s refl)) refl)
+     ... | yes c₃∈
+       with c₄ ∈? B64.charset
+     ... | no ¬c₄∈ =
+       case c₄ ≟ '=' of λ where
+         (no ¬c₄≡=) →
+           no λ where
+             (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+             (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .c₃ c∈₂ i₂ refl) pad refl)) refl) →
+               contradiction refl ¬c₄≡=
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+               contradiction refl ¬c₄≡=
+             (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) _ refl) refl) refl) refl) strLen pad bs≡) →
+               contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c₄∈') ¬c₄∈
+         (yes refl) →
+           let i = Any.index c₃∈ in
+           case toℕ i % (2 ^ 2) ≟ 0 of λ where
+             (no ¬c₃0s) →
+               no λ where
+                 (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+                 (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 _ _ _ refl) (Base64.mk64 _ _ _ refl) (Base64.mk64 _ c₃∈' (singleton i' i≡') refl) pad refl)) refl) →
+                   contradiction
+                     (begin toℕ (Any.index c₃∈)  % (2 ^ 2) ≡⟨ cong (λ x → toℕ (Any.index x) % (2 ^ 2)) (B64.∈charsetUnique c₃∈ c₃∈') ⟩
+                            toℕ (Any.index c₃∈') % (2 ^ 2) ≡⟨ cong (λ x → toℕ x % (2 ^ 2)) (sym i≡') ⟩
+                            toℕ i' % (2 ^ 2) ≡⟨ pad ⟩
+                            0 ∎)
+                     ¬c₃0s
+                 (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+                   contradiction c₃∈ (toWitnessFalse{Q = _ ∈? _} tt)
+                 (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
+                   contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c₄∈') ¬c₄∈
+             (yes c₃0s) →
+               yes (Base64.mk64Str nil refl (Base64.pad1 (Base64.mk64P1 (Base64.mk64 c₁ c₁∈ self refl) (Base64.mk64 c₂ c₂∈ self refl) (Base64.mk64 c₃ c₃∈ self refl) c₃0s refl)) refl)
+     ... | yes c₄∈ =
+       yes (Base64.mk64Str (consIList (Base64.mk64 c₁ c₁∈ self refl) (consIList (Base64.mk64 c₂ c₂∈ self refl) (consIList (Base64.mk64 c₃ c₃∈ self refl) (consIList (Base64.mk64 c₄ c₄∈ self refl) nil refl) refl) refl) refl) refl (Base64.pad0 refl) (sym (++-identityʳ _)))
+     helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs@(_ ∷ _)) %4
+       with helper bs %4
+     ... | no ¬p =
+       no λ where
+         (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
+         (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) ())
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) ())
+         (Base64.mk64Str (consIList (Base64.mk64 c₁' c₁∈' i₁' refl) (consIList (Base64.mk64 c₂' c₂∈' i₂' refl) (consIList (Base64.mk64 c₃' c₃∈' i₃' refl) (consIList (Base64.mk64 c₄' c₄∈' i₄' refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
+           contradiction
+             (Base64.mk64Str tail₁ strLen pad (proj₂ $ Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) bs (_ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡ (erefl 4)))
+             ¬p
+     helper (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs@(_ ∷ _)) %4 | yes (Base64.mk64Str str₀ strLen₀ pad₀ bs≡₀)
+       with All.all? (_∈? B64.charset) (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ])
+     ... | no ¬all∈ =
+       no λ where
+         (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad0 refl) ())
+         (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad ())) refl)
+         (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) ())
+         (Base64.mk64Str (consIList (Base64.mk64 c₁' c₁∈' i₁' refl) (consIList (Base64.mk64 c₂' c₂∈' i₂' refl) (consIList (Base64.mk64 c₃' c₃∈' i₃' refl) (consIList (Base64.mk64 c₄' c₄∈' i₄' refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
+           contradiction
+             (subst (All (_∈ B64.charset))
+               (proj₁ $ Lemmas.length-++-≡ _ _ _ _ (sym bs≡) refl)
+               (c₁∈' All.∷ c₂∈' All.∷ c₃∈' All.∷ c₄∈' All.∷ All.[]))
+             ¬all∈
+     ... | yes (c₁∈ All.∷ c₂∈ All.∷ c₃∈ All.∷ c₄∈ All.∷ All.[]) = yes $
+       Base64.mk64Str
+         (consIList (Base64.mk64 c₁ c₁∈ self refl)
+           (consIList (Base64.mk64 c₂ c₂∈ self refl)
+             (consIList (Base64.mk64 c₃ c₃∈ self refl)
+               (consIList (Base64.mk64 c₄ c₄∈ self refl) str₀ refl) refl) refl) refl)
+         strLen₀ pad₀
+         (cong (λ x → c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ x) bs≡₀)
