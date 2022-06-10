@@ -218,6 +218,8 @@ record Singleton {ℓ} {@0 A : Set ℓ} (@0 a : A) : Set ℓ where
     x : A
     @0 x≡ : x ≡ a
 
+↑_ = Singleton.x
+
 pattern self {a} = singleton a refl
 
 singleSelf : ∀ {ℓ} {@0 A : Set ℓ} → {a : A} → Singleton a
