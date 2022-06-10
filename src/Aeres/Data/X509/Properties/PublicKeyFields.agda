@@ -18,8 +18,23 @@ open Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Sum Dig
 open ≡-Reasoning
 
-postulate
-  @0 unambiguous : Unambiguous X509.PublicKeyFields
+Rep : @0 List UInt8 → Set
+Rep = &ₚᵈ X509.PkAlg λ _ → X509.PkVal ∘ X509.PkAlg.getOID
+
+equivalent : Equivalent Rep X509.PublicKeyFields
+proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (X509.mkPublicKeyFields pkalg pubkey bs≡) = Aeres.Grammar.Definitions.mk&ₚ pkalg pubkey bs≡
+
+iso : Iso Rep X509.PublicKeyFields
+proj₁ iso = equivalent
+proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (X509.mkPublicKeyFields pkalg pubkey bs≡) = refl
+
+@0 unambiguous : Unambiguous X509.PublicKeyFields
+unambiguous =
+  isoUnambiguous iso
+    (unambiguous&ₚᵈ {!!} {!!} {!!} )
+
 -- unambiguous{xs} (X509.mkPublicKeyFields{alg = alg₁}{pk₁} signalg₁ pubkey₁ bs≡₁) (X509.mkPublicKeyFields{alg = alg₂}{pk₂} signalg₂ pubkey₂ bs≡₂) =
 --   ≡-elim (λ {alg₂} alg≡ → ∀ (signalg₂ : X509.SignAlg alg₂) bs≡₂ → X509.mkPublicKeyFields signalg₁ pubkey₁ bs≡₁ ≡ X509.mkPublicKeyFields signalg₂ pubkey₂ bs≡₂)
 --     (λ signalg₂' bs≡₂' →
@@ -66,7 +81,3 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.mkPublicKeyFields {alg = alg}
 --                      alg ++ pk ≡⟨ cong₂ _++_ foo bar ⟩
 --                      alg₁ ++ pk₁ ≡⟨ sym bs≡₁ ⟩
 --                      xs₂ ∎))
-
-equivalent : Equivalent (&ₚᵈ X509.PkAlg λ bs₁ x → X509.PkVal (X509.PkAlg.getOID x) ) X509.PublicKeyFields
-proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalent (X509.mkPublicKeyFields pkalg pubkey bs≡) = Aeres.Grammar.Definitions.mk&ₚ pkalg pubkey bs≡

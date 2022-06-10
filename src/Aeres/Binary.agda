@@ -97,6 +97,9 @@ module Base64 where
   charset : List Char
   charset = String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
+  postulate
+    ∈charsetUnique : ∀ {@0 c} → (c∈₁ c∈₂ : c ∈ charset) → c∈₁ ≡ c∈₂
+
   isByteRep : ∀ c → Dec (c ∈ charset)
   isByteRep c = Any.any (c ≟_) charset
 
