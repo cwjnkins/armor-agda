@@ -461,7 +461,7 @@ module X509 where
     data PkAlg : @0 List UInt8 → Set where
       rsapkalg : ∀ {@0 bs} → RSAPkAlg bs → PkAlg bs
       ecpkalg :  ∀ {@0 bs} → EcPkAlg bs → PkAlg bs
-      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs) → ¬ SignAlg.getSignAlgOIDbs sa ∈ PKOID.Supported → PkAlg bs
+      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs) → False (SignAlg.getSignAlgOIDbs sa ∈? PKOID.Supported) → PkAlg bs
 
     getOID : ∀ {@0 bs} → PkAlg bs → List UInt8
     getOID (rsapkalg x) = (Singleton.x ∘ RSAPkAlgFields.oid) ∘ TLV.val $ x
@@ -473,7 +473,7 @@ module X509 where
   data PkVal : @0 List UInt8 → @0 List UInt8 → Set where
     rsapkbits : ∀ {@0 o bs} → (o≡ : o ≡ PKOID.RsaEncPk) → RSABitString bs → PkVal o bs
     ecpkbits : ∀ {@0 o bs} → (o≡ : o ≡ PKOID.EcPk) → BitString bs → PkVal o bs
-    otherpkbits :  ∀ {@0 o bs} → (o∉ : ¬ o ∈ PKOID.Supported) → BitString bs → PkVal o bs
+    otherpkbits :  ∀ {@0 o bs} → (o∉ : False (o ∈? PKOID.Supported)) → BitString bs → PkVal o bs
 
   record PublicKeyFields (@0 bs : List Dig) : Set where
     constructor mkPublicKeyFields

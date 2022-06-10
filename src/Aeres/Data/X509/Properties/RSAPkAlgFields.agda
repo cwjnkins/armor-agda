@@ -33,3 +33,6 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} a (X509.mkRSAPkAlgFields (singleton x
     x₁ ++ X509.ExpNull ≡⟨ cong (x₁ ++_) (sym x≡₃) ⟩
     x₁ ++ x₃ ≡⟨ sym bs≡₁ ⟩
     xs₂ ∎)
+
+postulate
+  @0 unambiguous : Unambiguous X509.RSAPkAlgFields

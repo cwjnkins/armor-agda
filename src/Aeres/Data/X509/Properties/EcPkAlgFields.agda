@@ -27,3 +27,6 @@ proj₂ equivalent (X509.mkEcPkAlgFields self (X509.implicitlyCA x₁) refl) = A
 
 @0 nonnesting : NonNesting X509.EcPkAlgFields
 nonnesting = equivalent-nonnesting equivalent (NonNesting&ₚ (λ where _ refl refl → refl) EcPkAlgParamsProps.nonnestingEcPkAlgParams)
+
+postulate
+  @0 unambiguous : Unambiguous X509.EcPkAlgFields
