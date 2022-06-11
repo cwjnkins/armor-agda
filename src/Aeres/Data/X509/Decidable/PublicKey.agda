@@ -121,82 +121,99 @@ module parsePublicKeyFields where
 
   parsePkAlg : Parser Dig (Logging ∘ Dec) X509.PkAlg
   runParser parsePkAlg xs = do
-    no ¬rsapkalg ← runParser parseRSAPkAlg xs
-      where yes p → return (yes (mapSuccess Dig (λ x → X509.PkAlg.rsapkalg x) p))
-    no ¬ecpkalg ← runParser parseEcPkAlg xs
-      where yes q → return (yes (mapSuccess Dig (λ x → X509.PkAlg.ecpkalg x) q))
-    no ¬otherpkalg ← runParser parseSignAlg xs
-      where yes r → return (yes (mapSuccess Dig (λ x → X509.PkAlg.otherpkalg x) r))
-    return ∘ no $ λ where
-     (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬rsapkalg
-     (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬ecpkalg
-     (success prefix read read≡ (X509.PkAlg.otherpkalg x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬otherpkalg
-
-  parsePkVal : (bs : List UInt8) → Parser Dig (Logging ∘ Dec) (X509.PkVal bs)
-  runParser (parsePkVal o) xs
-    with (o ≟ X509.PKOID.RsaEncPk)
-  ... | yes refl = do
-    no ¬rsapkbits ← runParser parseRSABitString xs
-      where
-        (yes (success prefix read read≡ value suffix ps≡)) →
-          return (yes (success prefix read read≡ (X509.rsapkbits refl value) suffix ps≡))
-    return ∘ no $ λ where
-      (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
-        contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
-      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
-        contradiction (toWitness{Q = _ ∈? _} tt)  o∉
-  ... | no ¬rsa
-    with (o ≟ X509.PKOID.EcPk)
-  ... | yes refl = do
-    no ¬ecpkbits ← runParser parseBitstring xs
-      where
-        (yes (success prefix read read≡ value suffix ps≡)) →
-          return (yes (success prefix read read≡ (X509.ecpkbits refl value) suffix ps≡))
-    return ∘ no $ λ where
-      (success prefix read read≡ (X509.ecpkbits refl x) suffix ps≡) →
-        contradiction (success prefix read read≡ x suffix ps≡) ¬ecpkbits
-      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
-        contradiction (toWitness{Q = _ ∈? _} tt)  o∉
-  ... | no ¬ec
-    with (o ∈? X509.PKOID.Supported)
-  ... | yes supported = {!!}
-  ... | no  ¬supported = do
-    no ¬otherpkbits ← runParser parseBitstring xs
-      where
-        (yes (success prefix read read≡ value suffix ps≡)) →
-          return (yes (success prefix read read≡ (X509.otherpkbits ¬supported value) suffix ps≡))
-    return {!!}
+    yes (success pre r r≡ v suf ps≡) ← runParser parseSignAlg xs
+      where no ¬p → return {!!}
+    case (X509.SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
+      (no ¬p) → return (yes (success pre r r≡ (X509.PkAlg.otherpkalg v (fromWitnessFalse ¬p)) suf ps≡))
+      (yes (here px)) → do
+        yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseRSAPkAlg xs
+          where no ¬p → return ∘  no $ λ where
+            (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → contradiction (success {!!} {!!} {!!} {!!} {!!} {!!}) ¬p
+            (success prefix read read≡ (X509.PkAlg.ecpkalg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ refl)) suffix ps≡') → {!!}
+            (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) → {!!} --toWitnessFalse x
+        {!!}
+      (yes (there (here px))) → do
+        x ← runParser parseEcPkAlg xs
+        {!!}
 
 
-  parsePublicKeyFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.PublicKeyFields n)
-  parsePublicKeyFields n =
-    parseExactLength _ Props.PublicKeyFields.nonnesting (tell $ here' String.++ ": underflow")
-      (parseEquivalent _ Props.PublicKeyFields.equivalent
-        (parse&ᵈ _ Props.PkAlg.nonnesting Props.PkAlg.unambiguous
-          parsePkAlg λ x a → parsePkVal _)) n
+  -- runParser parsePkAlg xs = do
+  --   no ¬rsapkalg ← runParser parseRSAPkAlg xs
+  --     where yes p → return (yes (mapSuccess Dig (λ x → X509.PkAlg.rsapkalg x) p))
+  --   no ¬ecpkalg ← runParser parseEcPkAlg xs
+  --     where yes q → return (yes (mapSuccess Dig (λ x → X509.PkAlg.ecpkalg x) q))
+  --   no ¬otherpkalg ← runParser parseSignAlg xs
+  --     where yes r → return (yes (mapSuccess Dig (λ x → X509.PkAlg.otherpkalg x {!!}) r))
+  --   return ∘ no $ λ where
+  --    (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
+  --      contradiction (success _ _ read≡ x _ ps≡) ¬rsapkalg
+  --    (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) →
+  --      contradiction (success _ _ read≡ x _ ps≡) ¬ecpkalg
+  --    (success prefix read read≡ (X509.PkAlg.otherpkalg x f) suffix ps≡) →
+  --      contradiction (success _ _ read≡ x _ ps≡) ¬otherpkalg
 
-open parsePublicKeyFields public using (parsePublicKeyFields)
+--   parsePkVal : (bs : List UInt8) → Parser Dig (Logging ∘ Dec) (X509.PkVal bs)
+--   runParser (parsePkVal o) xs
+--     with (o ≟ X509.PKOID.RsaEncPk)
+--   ... | yes refl = do
+--     no ¬rsapkbits ← runParser parseRSABitString xs
+--       where
+--         (yes (success prefix read read≡ value suffix ps≡)) →
+--           return (yes (success prefix read read≡ (X509.rsapkbits refl value) suffix ps≡))
+--     return ∘ no $ λ where
+--       (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
+--         contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
+--       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
+--         contradiction {!!}  {!!}
+--   ... | no ¬rsa
+--     with (o ≟ X509.PKOID.EcPk)
+--   ... | yes refl = do
+--     no ¬ecpkbits ← runParser parseBitstring xs
+--       where
+--         (yes (success prefix read read≡ value suffix ps≡)) →
+--           return (yes (success prefix read read≡ (X509.ecpkbits refl value) suffix ps≡))
+--     return ∘ no $ λ where
+--       (success prefix read read≡ (X509.ecpkbits refl x) suffix ps≡) →
+--         contradiction (success prefix read read≡ x suffix ps≡) ¬ecpkbits
+--       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
+--         contradiction {!!} {!!}
+--   ... | no ¬ec
+--     with (o ∈? X509.PKOID.Supported)
+--   ... | yes supported = {!!}
+--   ... | no  ¬supported = do
+--     no ¬otherpkbits ← runParser parseBitstring xs
+--       where
+--         (yes (success prefix read read≡ value suffix ps≡)) →
+--           return (yes (success prefix read read≡ {!!} suffix ps≡))
+--     return {!!}
 
-parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
-parsePublicKey = parseTLV _ "Public key" _ parsePublicKeyFields
 
--------------------------------------------------------------------------------------------------------
+--   parsePublicKeyFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.PublicKeyFields n)
+--   parsePublicKeyFields n =
+--     parseExactLength _ Props.PublicKeyFields.nonnesting (tell $ here' String.++ ": underflow")
+--       (parseEquivalent _ Props.PublicKeyFields.equivalent
+--         (parse&ᵈ _ Props.PkAlg.nonnesting Props.PkAlg.unambiguous
+--           parsePkAlg λ x a → parsePkVal _)) n
 
--- private
---   module Test where
+-- open parsePublicKeyFields public using (parsePublicKeyFields)
 
---     Pk₁ : List Dig
---     Pk₁ = Tag.Sequence ∷ # 130 ∷ # 1 ∷ # 34 ∷ # 48 ∷ # 13 ∷ # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 1 ∷ # 5 ∷ # 0 ∷ # 3 ∷ # 130 ∷ # 1 ∷ # 15 ∷ # 0 ∷ # 48 ∷ # 130 ∷ # 1 ∷ # 10 ∷ # 2 ∷ # 130 ∷ # 1 ∷ # 1 ∷ # 0 ∷ # 237 ∷ # 38 ∷ # 152 ∷ # 205 ∷ # 78 ∷ # 152 ∷ # 104 ∷ # 248 ∷ # 211 ∷ # 90 ∷ # 79 ∷ # 230 ∷ # 18 ∷ # 95 ∷ # 220 ∷ # 113 ∷ # 251 ∷ # 182 ∷ # 189 ∷ # 226 ∷ # 141 ∷ # 242 ∷ # 5 ∷ # 235 ∷ # 135 ∷ # 222 ∷ # 239 ∷ # 254 ∷ # 19 ∷ # 122 ∷ # 237 ∷ # 55 ∷ # 1 ∷ # 47 ∷ # 87 ∷ # 110 ∷ # 116 ∷ # 125 ∷ # 228 ∷ # 39 ∷ # 245 ∷ # 167 ∷ # 212 ∷ # 208 ∷ # 70 ∷ # 101 ∷ # 123 ∷ # 63 ∷ # 238 ∷ # 93 ∷ # 29 ∷ # 185 ∷ # 75 ∷ # 210 ∷ # 98 ∷ # 49 ∷ # 212 ∷ # 148 ∷ # 42 ∷ # 28 ∷ # 248 ∷ # 8 ∷ # 107 ∷ # 167 ∷ # 41 ∷ # 246 ∷ # 47 ∷ # 147 ∷ # 71 ∷ # 4 ∷ # 253 ∷ # 1 ∷ # 75 ∷ # 252 ∷ # 82 ∷ # 120 ∷ # 53 ∷ # 105 ∷ # 116 ∷ # 223 ∷ # 177 ∷ # 98 ∷ # 46 ∷ # 189 ∷ # 6 ∷ # 96 ∷ # 180 ∷ # 55 ∷ # 215 ∷ # 132 ∷ # 9 ∷ # 188 ∷ # 65 ∷ # 231 ∷ # 134 ∷ # 131 ∷ # 145 ∷ # 30 ∷ # 84 ∷ # 251 ∷ # 48 ∷ # 127 ∷ # 87 ∷ # 7 ∷ # 198 ∷ # 132 ∷ # 124 ∷ # 222 ∷ # 163 ∷ # 175 ∷ # 103 ∷ # 113 ∷ # 153 ∷ # 49 ∷ # 87 ∷ # 224 ∷ # 217 ∷ # 182 ∷ # 1 ∷ # 107 ∷ # 165 ∷ # 107 ∷ # 113 ∷ # 23 ∷ # 233 ∷ # 255 ∷ # 253 ∷ # 49 ∷ # 181 ∷ # 213 ∷ # 106 ∷ # 37 ∷ # 109 ∷ # 167 ∷ # 150 ∷ # 226 ∷ # 153 ∷ # 149 ∷ # 77 ∷ # 213 ∷ # 212 ∷ # 230 ∷ # 202 ∷ # 156 ∷ # 198 ∷ # 232 ∷ # 98 ∷ # 55 ∷ # 138 ∷ # 153 ∷ # 3 ∷ # 57 ∷ # 249 ∷ # 204 ∷ # 170 ∷ # 138 ∷ # 165 ∷ # 64 ∷ # 80 ∷ # 233 ∷ # 216 ∷ # 85 ∷ # 167 ∷ # 103 ∷ # 114 ∷ # 106 ∷ # 44 ∷ # 128 ∷ # 227 ∷ # 86 ∷ # 88 ∷ # 248 ∷ # 24 ∷ # 188 ∷ # 1 ∷ # 165 ∷ # 26 ∷ # 30 ∷ # 135 ∷ # 198 ∷ # 216 ∷ # 157 ∷ # 230 ∷ # 30 ∷ # 136 ∷ # 114 ∷ # 66 ∷ # 33 ∷ # 128 ∷ # 153 ∷ # 83 ∷ # 192 ∷ # 198 ∷ # 202 ∷ # 17 ∷ # 89 ∷ # 48 ∷ # 100 ∷ # 236 ∷ # 203 ∷ # 231 ∷ # 72 ∷ # 20 ∷ # 83 ∷ # 91 ∷ # 231 ∷ # 155 ∷ # 183 ∷ # 243 ∷ # 137 ∷ # 188 ∷ # 200 ∷ # 17 ∷ # 194 ∷ # 139 ∷ # 106 ∷ # 194 ∷ # 121 ∷ # 136 ∷ # 227 ∷ # 12 ∷ # 48 ∷ # 195 ∷ # 109 ∷ # 187 ∷ # 3 ∷ # 226 ∷ # 167 ∷ # 94 ∷ # 204 ∷ # 40 ∷ # 53 ∷ # 205 ∷ # 71 ∷ # 45 ∷ # 60 ∷ # 72 ∷ # 217 ∷ # 192 ∷ # 128 ∷ # 211 ∷ # 50 ∷ # 60 ∷ # 146 ∷ # 196 ∷ # 147 ∷ # 57 ∷ # 55 ∷ # 153 ∷ # 128 ∷ # 174 ∷ # 39 ∷ # 16 ∷ # 230 ∷ # 179 ∷ # 12 ∷ # 2 ∷ # 3 ∷ # 1 ∷ # 0 ∷ [ # 1 ]
+-- parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
+-- parsePublicKey = parseTLV _ "Public key" _ parsePublicKeyFields
 
---     -- this is an example of non-RSA public key (ECDSA)
---     Pk₂ : List Dig
---     Pk₂ = Tag.Sequence ∷ # 89 ∷ # 48 ∷ # 19 ∷ # 6 ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ # 1 ∷ # 6 ∷ # 8 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 3 ∷ # 1 ∷ # 7 ∷ # 3 ∷ # 66 ∷ # 0 ∷ # 4 ∷ # 39 ∷ # 173 ∷ # 175 ∷ # 236 ∷ # 195 ∷ # 224 ∷ # 229 ∷ # 106 ∷ # 154 ∷ # 247 ∷ # 15 ∷ # 228 ∷ # 123 ∷ # 204 ∷ # 162 ∷ # 63 ∷ # 91 ∷ # 37 ∷ # 11 ∷ # 160 ∷ # 185 ∷ # 35 ∷ # 138 ∷ # 44 ∷ # 56 ∷ # 199 ∷ # 118 ∷ # 23 ∷ # 180 ∷ # 169 ∷ # 242 ∷ # 252 ∷ # 9 ∷ # 243 ∷ # 2 ∷ # 174 ∷ # 194 ∷ # 163 ∷ # 108 ∷ # 152 ∷ # 136 ∷ # 140 ∷ # 243 ∷ # 79 ∷ # 196 ∷ # 250 ∷ # 59 ∷ # 184 ∷ # 87 ∷ # 66 ∷ # 178 ∷ # 197 ∷ # 187 ∷ # 78 ∷ # 45 ∷ # 118 ∷ # 161 ∷ # 247 ∷ # 94 ∷ # 66 ∷ # 247 ∷ # 141 ∷ # 188 ∷ [ # 49 ]
+-- -------------------------------------------------------------------------------------------------------
 
---     test₁ : X509.PublicKey Pk₁
---     test₁ = Success.value (toWitness {Q = Logging.val (runParser parsePublicKey Pk₁)} tt)
+-- -- private
+-- --   module Test where
 
---     test₂ : X509.PublicKey Pk₂
---     test₂ = Success.value (toWitness {Q = Logging.val (runParser parsePublicKey Pk₂)} tt)
+-- --     Pk₁ : List Dig
+-- --     Pk₁ = Tag.Sequence ∷ # 130 ∷ # 1 ∷ # 34 ∷ # 48 ∷ # 13 ∷ # 6 ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 1 ∷ # 5 ∷ # 0 ∷ # 3 ∷ # 130 ∷ # 1 ∷ # 15 ∷ # 0 ∷ # 48 ∷ # 130 ∷ # 1 ∷ # 10 ∷ # 2 ∷ # 130 ∷ # 1 ∷ # 1 ∷ # 0 ∷ # 237 ∷ # 38 ∷ # 152 ∷ # 205 ∷ # 78 ∷ # 152 ∷ # 104 ∷ # 248 ∷ # 211 ∷ # 90 ∷ # 79 ∷ # 230 ∷ # 18 ∷ # 95 ∷ # 220 ∷ # 113 ∷ # 251 ∷ # 182 ∷ # 189 ∷ # 226 ∷ # 141 ∷ # 242 ∷ # 5 ∷ # 235 ∷ # 135 ∷ # 222 ∷ # 239 ∷ # 254 ∷ # 19 ∷ # 122 ∷ # 237 ∷ # 55 ∷ # 1 ∷ # 47 ∷ # 87 ∷ # 110 ∷ # 116 ∷ # 125 ∷ # 228 ∷ # 39 ∷ # 245 ∷ # 167 ∷ # 212 ∷ # 208 ∷ # 70 ∷ # 101 ∷ # 123 ∷ # 63 ∷ # 238 ∷ # 93 ∷ # 29 ∷ # 185 ∷ # 75 ∷ # 210 ∷ # 98 ∷ # 49 ∷ # 212 ∷ # 148 ∷ # 42 ∷ # 28 ∷ # 248 ∷ # 8 ∷ # 107 ∷ # 167 ∷ # 41 ∷ # 246 ∷ # 47 ∷ # 147 ∷ # 71 ∷ # 4 ∷ # 253 ∷ # 1 ∷ # 75 ∷ # 252 ∷ # 82 ∷ # 120 ∷ # 53 ∷ # 105 ∷ # 116 ∷ # 223 ∷ # 177 ∷ # 98 ∷ # 46 ∷ # 189 ∷ # 6 ∷ # 96 ∷ # 180 ∷ # 55 ∷ # 215 ∷ # 132 ∷ # 9 ∷ # 188 ∷ # 65 ∷ # 231 ∷ # 134 ∷ # 131 ∷ # 145 ∷ # 30 ∷ # 84 ∷ # 251 ∷ # 48 ∷ # 127 ∷ # 87 ∷ # 7 ∷ # 198 ∷ # 132 ∷ # 124 ∷ # 222 ∷ # 163 ∷ # 175 ∷ # 103 ∷ # 113 ∷ # 153 ∷ # 49 ∷ # 87 ∷ # 224 ∷ # 217 ∷ # 182 ∷ # 1 ∷ # 107 ∷ # 165 ∷ # 107 ∷ # 113 ∷ # 23 ∷ # 233 ∷ # 255 ∷ # 253 ∷ # 49 ∷ # 181 ∷ # 213 ∷ # 106 ∷ # 37 ∷ # 109 ∷ # 167 ∷ # 150 ∷ # 226 ∷ # 153 ∷ # 149 ∷ # 77 ∷ # 213 ∷ # 212 ∷ # 230 ∷ # 202 ∷ # 156 ∷ # 198 ∷ # 232 ∷ # 98 ∷ # 55 ∷ # 138 ∷ # 153 ∷ # 3 ∷ # 57 ∷ # 249 ∷ # 204 ∷ # 170 ∷ # 138 ∷ # 165 ∷ # 64 ∷ # 80 ∷ # 233 ∷ # 216 ∷ # 85 ∷ # 167 ∷ # 103 ∷ # 114 ∷ # 106 ∷ # 44 ∷ # 128 ∷ # 227 ∷ # 86 ∷ # 88 ∷ # 248 ∷ # 24 ∷ # 188 ∷ # 1 ∷ # 165 ∷ # 26 ∷ # 30 ∷ # 135 ∷ # 198 ∷ # 216 ∷ # 157 ∷ # 230 ∷ # 30 ∷ # 136 ∷ # 114 ∷ # 66 ∷ # 33 ∷ # 128 ∷ # 153 ∷ # 83 ∷ # 192 ∷ # 198 ∷ # 202 ∷ # 17 ∷ # 89 ∷ # 48 ∷ # 100 ∷ # 236 ∷ # 203 ∷ # 231 ∷ # 72 ∷ # 20 ∷ # 83 ∷ # 91 ∷ # 231 ∷ # 155 ∷ # 183 ∷ # 243 ∷ # 137 ∷ # 188 ∷ # 200 ∷ # 17 ∷ # 194 ∷ # 139 ∷ # 106 ∷ # 194 ∷ # 121 ∷ # 136 ∷ # 227 ∷ # 12 ∷ # 48 ∷ # 195 ∷ # 109 ∷ # 187 ∷ # 3 ∷ # 226 ∷ # 167 ∷ # 94 ∷ # 204 ∷ # 40 ∷ # 53 ∷ # 205 ∷ # 71 ∷ # 45 ∷ # 60 ∷ # 72 ∷ # 217 ∷ # 192 ∷ # 128 ∷ # 211 ∷ # 50 ∷ # 60 ∷ # 146 ∷ # 196 ∷ # 147 ∷ # 57 ∷ # 55 ∷ # 153 ∷ # 128 ∷ # 174 ∷ # 39 ∷ # 16 ∷ # 230 ∷ # 179 ∷ # 12 ∷ # 2 ∷ # 3 ∷ # 1 ∷ # 0 ∷ [ # 1 ]
+
+-- --     -- this is an example of non-RSA public key (ECDSA)
+-- --     Pk₂ : List Dig
+-- --     Pk₂ = Tag.Sequence ∷ # 89 ∷ # 48 ∷ # 19 ∷ # 6 ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ # 1 ∷ # 6 ∷ # 8 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 3 ∷ # 1 ∷ # 7 ∷ # 3 ∷ # 66 ∷ # 0 ∷ # 4 ∷ # 39 ∷ # 173 ∷ # 175 ∷ # 236 ∷ # 195 ∷ # 224 ∷ # 229 ∷ # 106 ∷ # 154 ∷ # 247 ∷ # 15 ∷ # 228 ∷ # 123 ∷ # 204 ∷ # 162 ∷ # 63 ∷ # 91 ∷ # 37 ∷ # 11 ∷ # 160 ∷ # 185 ∷ # 35 ∷ # 138 ∷ # 44 ∷ # 56 ∷ # 199 ∷ # 118 ∷ # 23 ∷ # 180 ∷ # 169 ∷ # 242 ∷ # 252 ∷ # 9 ∷ # 243 ∷ # 2 ∷ # 174 ∷ # 194 ∷ # 163 ∷ # 108 ∷ # 152 ∷ # 136 ∷ # 140 ∷ # 243 ∷ # 79 ∷ # 196 ∷ # 250 ∷ # 59 ∷ # 184 ∷ # 87 ∷ # 66 ∷ # 178 ∷ # 197 ∷ # 187 ∷ # 78 ∷ # 45 ∷ # 118 ∷ # 161 ∷ # 247 ∷ # 94 ∷ # 66 ∷ # 247 ∷ # 141 ∷ # 188 ∷ [ # 49 ]
+
+-- --     test₁ : X509.PublicKey Pk₁
+-- --     test₁ = Success.value (toWitness {Q = Logging.val (runParser parsePublicKey Pk₁)} tt)
+
+-- --     test₂ : X509.PublicKey Pk₂
+-- --     test₂ = Success.value (toWitness {Q = Logging.val (runParser parsePublicKey Pk₂)} tt)
