@@ -5,9 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.PolicyQualifierInfo
-open import Aeres.Data.X509.Decidable.OID
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -28,7 +25,7 @@ module parseCertPolFields where
   parsePolicyInformationFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.PolicyInformationFields n)
   runParser (parsePolicyInformationFields n) xs = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len) refl) suf₀ ps≡₀) ←
-      runParser (parse≤ _ n parseOID Props.TLV.nonnesting ((tell $ here' String.++ ": overflow"))) xs
+      runParser (parse≤ _ n parseOID TLV.nonnesting ((tell $ here' String.++ ": overflow"))) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid cpqls refl) (─ sndₚ₁) refl) suffix ps≡) →
@@ -48,7 +45,7 @@ module parseCertPolFields where
             suf₀ ps≡₀))
       (tri< r₀<n _ _) → do
         yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁)
-          ← runParser (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parsePolicyQualifiersSeq (n - r₀)) suf₀
+          ← runParser (parseExactLength _ TLV.nonnesting (tell $ here' String.++ ": underflow") parsePolicyQualifiersSeq (n - r₀)) suf₀
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix read read≡ (mk×ₚ (X509.mkPolicyInformationFields{pid = pid}{pqls} cpid none refl) (─ sndₚ₁) refl) suffix ps≡) → ‼
@@ -112,12 +109,12 @@ module parseCertPolFields where
     parseTLV _ "policy info" _ parsePolicyInformationFields
 
   parseCertPolFieldsSeq : Parser _ (Logging ∘ Dec) X509.CertPolFieldsSeq
-  parseCertPolFieldsSeq = parseNonEmptySeq "policy info" _ Props.TLV.nonempty Props.TLV.nonnesting parsePolicyInformation
+  parseCertPolFieldsSeq = parseNonEmptySeq "policy info" _ TLV.nonempty TLV.nonnesting parsePolicyInformation
 
   parseCertPolFields : Parser _ (Logging ∘ Dec) X509.CertPolFields
   parseCertPolFields =
     parseTLV _ "cert. policy" _
-      (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": overflow") parseCertPolFieldsSeq)
+      (parseExactLength _ TLV.nonnesting (tell $ here' String.++ ": overflow") parseCertPolFieldsSeq)
 
 open parseCertPolFields public using (parsePolicyInformation ; parseCertPolFieldsSeq ; parseCertPolFields)
 

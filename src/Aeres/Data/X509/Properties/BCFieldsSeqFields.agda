@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Primitives as PrimProps
-import      Aeres.Data.X509.Properties.TLV as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.BCFieldsSeqFields where
@@ -26,6 +26,6 @@ proj₂ (proj₂ iso) (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡) = refl
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.option₂&₁
-      (TLVProps.unambiguous PrimProps.BoolValue.unambiguous) TLVProps.nonnesting TLVProps.nonempty
-      (TLVProps.unambiguous (λ {xs} → PrimProps.IntegerValue.unambiguous{xs})) TLVProps.nonempty
-      (TLVProps.noconfusion λ ()))
+      (TLV.unambiguous PrimProps.BoolValue.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous (λ {xs} → PrimProps.IntegerValue.unambiguous{xs})) TLV.nonempty
+      (TLV.noconfusion λ ()))

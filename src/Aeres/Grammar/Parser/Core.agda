@@ -49,3 +49,25 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
           (success prefix read read≡ (─ x) suffix ps≡) →
             contradiction (success prefix _ read≡ x suffix ps≡) ¬p
     return (yes (mapSuccess ─_ x))
+
+  parser2dec
+    : (extract : ∀ {A} → M A → A)
+      → {A : @0 List Σ → Set} → @0 NonNesting A
+      → Parser (M ∘ Dec) A → Decidable A
+  parser2dec extract {A} nn p xs =
+    case extract (runParser p xs) of λ where
+      (no ¬p) → no λ a →
+        contradiction
+          (success xs _ refl a [] (++-identityʳ _))
+          ¬p
+      (yes (success prefix read read≡ value (c ∷ suffix) ps≡)) →
+        no λ a → ‼
+          let @0 ps≡' : prefix ++ c ∷ suffix ≡ xs ++ []
+              ps≡' = trans ps≡ (sym $ ++-identityʳ _)
+          in
+          contradiction{P = _≡_{A = List Σ} (c ∷ suffix) []}
+            (Lemmas.++-cancel≡ˡ _ _
+              (nn ps≡' value a) ps≡')
+            λ ()
+      (yes (success prefix read read≡ value [] ps≡)) →
+        yes (subst₀ A (trans (sym $ ++-identityʳ _) ps≡) value)

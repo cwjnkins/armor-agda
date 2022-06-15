@@ -4,7 +4,6 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.AccessMethod as AccessMethodProps
 import      Aeres.Data.X509.Properties.GeneralName  as GeneralNameProps
-import      Aeres.Data.X509.Properties.TLV          as TLVProps
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.AccessDescFields where

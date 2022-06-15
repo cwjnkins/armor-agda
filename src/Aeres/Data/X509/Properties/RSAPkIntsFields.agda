@@ -3,7 +3,7 @@
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
-import      Aeres.Data.X509.Properties.TLV            as TLVprops
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Data.Nat.Properties
@@ -22,7 +22,7 @@ nonnesting x a₁ a₂ = foo
   where
   v2& :  ∀ {bs} → X509.RSAPkIntsFields bs → (&ₚ Int Int) bs
   v2& (X509.mkRSAPkIntsFields n e bs≡) = mk&ₚ n e bs≡
-  foo = NonNesting&ₚ TLVprops.nonnesting TLVprops.nonnesting x (v2& a₁) (v2& a₂)
+  foo = NonNesting&ₚ TLV.nonnesting TLV.nonnesting x (v2& a₁) (v2& a₂)
 
 equivalent : Equivalent (&ₚ Int Int) X509.RSAPkIntsFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSAPkIntsFields fstₚ₁ sndₚ₁ bs≡

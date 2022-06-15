@@ -7,8 +7,8 @@ import      Aeres.Data.X509.Properties.PublicKeyFields as PKProps
 import      Aeres.Data.X509.Properties.Primitives      as PrimProps
 import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 import      Aeres.Data.X509.Properties.SignAlgFields   as SignAlgProps
-import      Aeres.Data.X509.Properties.TLV             as TLVProps
 import      Aeres.Data.X509.Properties.ValidityFields  as ValidityFieldsProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -57,26 +57,26 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ
       (Unambiguous.unambiguous-option₁&₁
-        (TLVProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
-        TLVProps.nonnesting (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
-        (TLVProps.noconfusion λ ()))
+        (TLV.unambiguous (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
+        TLV.nonnesting (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+        (TLV.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
-        TLVProps.nonnesting TLVProps.nonnesting (TLVProps.noconfusion λ ()))
+        TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
       (unambiguous&ₚ
-        (TLVProps.unambiguous SignAlgProps.unambiguous)
-        TLVProps.nonnesting
-        (unambiguous&ₚ RDNSeqProps.unambiguous TLVProps.nonnesting
+        (TLV.unambiguous SignAlgProps.unambiguous)
+        TLV.nonnesting
+        (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
           (unambiguous&ₚ
-            (TLVProps.unambiguous ValidityFieldsProps.unambiguous)
-            TLVProps.nonnesting
-            (unambiguous&ₚ RDNSeqProps.unambiguous TLVProps.nonnesting
-              (unambiguous&ₚ (TLVProps.unambiguous PKProps.unambiguous)
-                TLVProps.nonnesting
+            (TLV.unambiguous ValidityFieldsProps.unambiguous)
+            TLV.nonnesting
+            (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
+              (unambiguous&ₚ (TLV.unambiguous PKProps.unambiguous)
+                TLV.nonnesting
                 (Unambiguous.option₃&₂
-                  (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous)
-                  TLVProps.nonnesting TLVProps.nonempty
-                  (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous)
-                  TLVProps.nonnesting TLVProps.nonempty
-                  (TLVProps.unambiguous ExtensionProps.ExtensionsSeq.unambiguous)
-                  TLVProps.nonempty
-                  (TLVProps.noconfusion λ ()) (TLVProps.noconfusion λ ()) (TLVProps.noconfusion λ ()))))))))
+                  (TLV.unambiguous PrimProps.BitstringValue.unambiguous)
+                  TLV.nonnesting TLV.nonempty
+                  (TLV.unambiguous PrimProps.BitstringValue.unambiguous)
+                  TLV.nonnesting TLV.nonempty
+                  (TLV.unambiguous ExtensionProps.ExtensionsSeq.unambiguous)
+                  TLV.nonempty
+                  (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))))))

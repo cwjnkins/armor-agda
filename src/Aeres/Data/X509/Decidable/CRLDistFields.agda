@@ -5,9 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.DistPoint
-open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -28,8 +25,8 @@ module parseCRLDistFields where
   parseCRLDistFields : Parser Dig (Logging ∘ Dec) X509.CRLDistFields
   parseCRLDistFields =
     parseTLV _ "CRL Dist Fields" _
-      (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-        (parseNonEmptySeq "CRL Dist fields elems" _ Props.TLV.nonempty Props.TLV.nonnesting
+      (parseExactLength _ TLV.nonnesting (tell $ here' String.++ ": underflow")
+        (parseNonEmptySeq "CRL Dist fields elems" _ TLV.nonempty TLV.nonnesting
           parseDistPoint))
 
 

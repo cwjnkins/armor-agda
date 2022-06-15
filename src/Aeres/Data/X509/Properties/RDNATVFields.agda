@@ -2,15 +2,15 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Prelude
-import Aeres.Data.X509.Properties.OID as OIDProps
-import Aeres.Data.X509.Properties.DirectoryString as DirectoryStringProps
+import      Aeres.Data.X509.Properties.DirectoryString as DirectoryStringProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.RDNATVFields where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
 open ≡-Reasoning
 
 iso : Iso (&ₚ OID X509.DirectoryString) X509.RDNATVFields
@@ -20,4 +20,4 @@ proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (X509.mkRDNATVFields oid val bs≡) = refl
 
 @0 unambiguous : Unambiguous X509.RDNATVFields
-unambiguous = isoUnambiguous iso (unambiguous&ₚ OIDProps.unambiguous TLV.nonnesting DirectoryStringProps.unambiguous)
+unambiguous = isoUnambiguous iso (unambiguous&ₚ OID.unambiguous TLV.nonnesting DirectoryStringProps.unambiguous)

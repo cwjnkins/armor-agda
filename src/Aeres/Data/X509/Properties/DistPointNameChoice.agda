@@ -5,8 +5,7 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.GeneralName  as GNProps
 import      Aeres.Data.X509.Properties.RDNATVFields as RDNATVProps
 import      Aeres.Data.X509.Properties.RDNSeq       as RDNProps
-import      Aeres.Data.X509.Properties.SequenceOf   as SeqProps
-import      Aeres.Data.X509.Properties.TLV          as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -18,10 +17,10 @@ open import Aeres.Grammar.Definitions Dig
 open import Aeres.Grammar.Sum         Dig
 
 nonnesting : NonNesting X509.DistPointNameChoice
-nonnesting x (X509.fullname x₁) (X509.fullname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.fullname x₁) (X509.nameRTCrlissr x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.nameRTCrlissr x₁) (X509.fullname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.nameRTCrlissr x₁) (X509.nameRTCrlissr x₂) = ‼ TLVProps.nonnesting x x₁ x₂
+nonnesting x (X509.fullname x₁) (X509.fullname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.fullname x₁) (X509.nameRTCrlissr x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.nameRTCrlissr x₁) (X509.fullname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.nameRTCrlissr x₁) (X509.nameRTCrlissr x₂) = ‼ TLV.nonnesting x x₁ x₂
 
 
 equivalent : Equivalent (Sum X509.FullName X509.NameRTCrlIssuer) X509.DistPointNameChoice
@@ -41,8 +40,8 @@ proj₂ (proj₂ iso) (X509.nameRTCrlissr x) = refl
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (TLVProps.unambiguous GNProps.GeneralNamesElems.unambiguous)
-      (TLVProps.unambiguous
-        (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous RDNATVProps.unambiguous)
-          TLVProps.nonempty TLVProps.nonnesting))
-      (TLVProps.noconfusion λ ()))
+      (TLV.unambiguous GNProps.GeneralNamesElems.unambiguous)
+      (TLV.unambiguous
+        (SequenceOf.Bounded.unambiguous (TLV.unambiguous RDNATVProps.unambiguous)
+          TLV.nonempty TLV.nonnesting))
+      (TLV.noconfusion λ ()))

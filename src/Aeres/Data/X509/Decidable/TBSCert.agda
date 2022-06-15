@@ -6,11 +6,9 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Extension
-open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.SignAlg
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Validity
 open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Properties as Props
@@ -32,48 +30,48 @@ module parseTBSCert where
   parseTBSCertFields n =
     parseEquivalent _ (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.TBSCertFields.equivalent))
       (parse&ᵈ _
-        (withinLength-nonnesting (NonNesting.noconfusion-option&₁ Props.TLV.nonnesting Props.TLV.nonnesting (Props.TLV.noconfusion λ ())))
+        (withinLength-nonnesting (NonNesting.noconfusion-option&₁ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())))
         (withinLength-unambiguous
           (Unambiguous.unambiguous-option₁&₁
-            (Props.TLV.unambiguous
+            (TLV.unambiguous
               (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs}))
-            Props.TLV.nonnesting
-            (Props.TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs}) (Props.TLV.noconfusion λ ())))
-        (parseOption₁&₁≤ _ parseVersion parseInt Props.TLV.nonnesting Props.TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
+            TLV.nonnesting
+            (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs}) (TLV.noconfusion λ ())))
+        (parseOption₁&₁≤ _ parseVersion parseInt TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
         λ where
           {bs} (singleton read read≡) _ →
             subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
               (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.SignAlgFields.unambiguous))
-                  (parse≤ _ (n - read) parseSignAlg Props.TLV.nonnesting overflow)
+                (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.SignAlgFields.unambiguous))
+                  (parse≤ _ (n - read) parseSignAlg TLV.nonnesting overflow)
                     λ where
                       {bs₁} (singleton r₁ r₁≡) _ →
                         subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - x))) r₁≡
                           (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                            (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
-                              (parse≤ _ (n - read - r₁) parseRDNSeq Props.TLV.nonnesting overflow)
+                            (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
+                              (parse≤ _ (n - read - r₁) parseRDNSeq TLV.nonnesting overflow)
                               λ {_} (singleton r₂ r₂≡) _ →
                                 subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - x))) r₂≡
                                   (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                    (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.ValidityFields.unambiguous))
-                                      (parse≤ _ (n - read - r₁ - r₂) parseValidity Props.TLV.nonnesting overflow)
+                                    (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.ValidityFields.unambiguous))
+                                      (parse≤ _ (n - read - r₁ - r₂) parseValidity TLV.nonnesting overflow)
                                       λ where
                                         (singleton r₃ r₃≡) _ →
                                           subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - x))) r₃≡
                                             (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                              (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
-                                                (parse≤ _ (n - read - r₁ - r₂ - r₃) parseRDNSeq Props.TLV.nonnesting overflow)
+                                              (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
+                                                (parse≤ _ (n - read - r₁ - r₂ - r₃) parseRDNSeq TLV.nonnesting overflow)
                                                 λ where
                                                   (singleton r₄ r₄≡) _ →
                                                     subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - x))) r₄≡
                                                       (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                                        (parse&ᵈ _ (withinLength-nonnesting Props.TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.PublicKeyFields.unambiguous))
-                                                          (parse≤ _ (n - read - r₁ - r₂ - r₃ - r₄) parsePublicKey Props.TLV.nonnesting overflow)
+                                                        (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.PublicKeyFields.unambiguous))
+                                                          (parse≤ _ (n - read - r₁ - r₂ - r₃ - r₄) parsePublicKey TLV.nonnesting overflow)
                                                           λ where
                                                             (singleton r₅ r₅≡) _ →
                                                               subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - r₄ - x))) r₅≡
-                                                                (parseOption₃ _ Props.TLV.nonnesting Props.TLV.nonnesting Props.TLV.nonnesting
-                                                                  (TLV.noconfusion (λ ())) (Props.TLV.noconfusion λ ()) (Props.TLV.noconfusion λ ())
+                                                                (parseOption₃ _ TLV.nonnesting TLV.nonnesting TLV.nonnesting
+                                                                  (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
                                                                   parseIssUID parseSubUID parseExtensions (tell $ here' String.++ ": underflow") (n - read - r₁ - r₂ - r₃ - r₄ - r₅)) )))))))))))
     where
     overflow : Logging (Level.Lift _ ⊤)

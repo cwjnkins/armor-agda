@@ -14,6 +14,8 @@ module OID where
 open TCB public hiding
   (LeastBytes; leastBytes?; leastBytesUnique)
 
+open import Aeres.Data.X690-DER.OID.Parser public
+
 mkOIDSubₛ
   : (lₚ : List UInt8) (lₑ : UInt8)
     → {@0 _ : True (All.all ((_≥? 128) ∘ toℕ) lₚ)} {@0 _ : True (OID.leastBytes? lₚ)} {@0 _ : True (lₑ Fin.<? # 128)}

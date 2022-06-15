@@ -7,15 +7,15 @@ import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DisplayText as DisplayTextProps
 import      Aeres.Data.X509.Properties.NoticeReferenceFields as NRFProps
-import      Aeres.Data.X509.Properties.TLV         as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.UserNoticeFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties  Dig
-open Aeres.Grammar.Sum         Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
 equivalent : Equivalent (&ₚ (Option X509.NoticeReference) (Option X509.DisplayText)) X509.UserNoticeFields
 proj₂ equivalent (X509.mkUserNoticeFields noticeRef expText bs≡) = mk&ₚ noticeRef expText bs≡
@@ -34,17 +34,17 @@ private
            (symNoConfusion{X509.NoticeReference}{Sum _ _}
              (NoConfusion.sumₚ{X509.NoticeReference}
                (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference}
-                 (TLVProps.noconfusion λ ()))
+                 (TLV.noconfusion λ ()))
                (NoConfusion.sumₚ{X509.NoticeReference}
-                 (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ()))
+                 (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLV.noconfusion λ ()))
                  (NoConfusion.sumₚ{X509.NoticeReference}
-                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ()))
-                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLVProps.noconfusion λ ())))))))
+                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLV.noconfusion λ ()))
+                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = X509.NoticeReference} (TLV.noconfusion λ ())))))))
 
 @0 unambiguous : Unambiguous X509.UserNoticeFields
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.option₂&₁
-      (TLVProps.unambiguous NRFProps.unambiguous) TLVProps.nonnesting TLVProps.nonempty
+      (TLV.unambiguous NRFProps.unambiguous) TLV.nonnesting TLV.nonempty
       DisplayTextProps.unambiguous DisplayTextProps.nonempty
       nc)

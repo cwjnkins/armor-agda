@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.GeneralName as GeneralNameProps
 import      Aeres.Data.X509.Properties.Primitives as PrimProps
-import      Aeres.Data.X509.Properties.TLV as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.GeneralSubtreeFields where
@@ -27,5 +27,5 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ GeneralNameProps.unambiguous GeneralNameProps.nonnesting
       (Unambiguous.option₂&₁
-        (TLVProps.unambiguous  λ {xs} → PrimProps.IntegerValue.unambiguous {xs})  TLVProps.nonnesting TLVProps.nonempty
-        (TLVProps.unambiguous  λ {xs} → PrimProps.IntegerValue.unambiguous {xs})  TLVProps.nonempty (TLVProps.noconfusion λ ())))
+        (TLV.unambiguous  λ {xs} → PrimProps.IntegerValue.unambiguous {xs})  TLV.nonnesting TLV.nonempty
+        (TLV.unambiguous  λ {xs} → PrimProps.IntegerValue.unambiguous {xs})  TLV.nonempty (TLV.noconfusion λ ())))

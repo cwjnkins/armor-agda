@@ -5,14 +5,13 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Primitives    as PrimProps
 import      Aeres.Data.X509.Properties.SignAlgFields as SignAlgFieldsProps
 import      Aeres.Data.X509.Properties.TBSCertFields as TBSCertFieldsProps
-import      Aeres.Data.X509.Properties.TLV           as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
--- open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.CertFields where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
+open import Aeres.Grammar.Definitions UInt8
 open ≡-Reasoning
 
 equivalent : Equivalent (&ₚ X509.TBSCert (&ₚ X509.SignAlg BitString)) X509.CertFields
@@ -27,6 +26,6 @@ proj₂ (proj₂ iso) (X509.mkCertFields tbs signAlg signature bs≡) = refl
 @0 unambiguous : Unambiguous X509.CertFields
 unambiguous =
   isoUnambiguous iso
-    (unambiguous&ₚ (TLVProps.unambiguous TBSCertFieldsProps.unambiguous) TLVProps.nonnesting
-      (unambiguous&ₚ (TLVProps.unambiguous SignAlgFieldsProps.unambiguous) TLVProps.nonnesting
-        (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous)))
+    (unambiguous&ₚ (TLV.unambiguous TBSCertFieldsProps.unambiguous) TLV.nonnesting
+      (unambiguous&ₚ (TLV.unambiguous SignAlgFieldsProps.unambiguous) TLV.nonnesting
+        (TLV.unambiguous PrimProps.BitstringValue.unambiguous)))

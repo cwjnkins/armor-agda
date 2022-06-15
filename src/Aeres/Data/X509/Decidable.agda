@@ -25,13 +25,10 @@ open import Aeres.Data.X509.Decidable.Extension
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.IANFields
 open import Aeres.Data.X509.Decidable.INAPFields
-open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Decidable.KUFields
-open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.NCFields
 open import Aeres.Data.X509.Decidable.NoticeReference
 open import Aeres.Data.X509.Decidable.Null
-open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.PCFields
 open import Aeres.Data.X509.Decidable.PMFields
@@ -40,10 +37,8 @@ open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Decidable.SKIFields
-open import Aeres.Data.X509.Decidable.SequenceOf
 open import Aeres.Data.X509.Decidable.SignAlg
 open import Aeres.Data.X509.Decidable.TBSCert
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.Time
 open import Aeres.Data.X509.Decidable.UserNotice
 open import Aeres.Data.X509.Decidable.Validity

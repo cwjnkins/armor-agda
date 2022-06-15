@@ -5,10 +5,7 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.GeneralName
-open import Aeres.Data.X509.Decidable.Int
-open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -45,8 +42,8 @@ module parseAKIFields where
   parseAKIFieldsSeqFields n =
     parseEquivalent _ (equivalent×ₚ _ Props.AKIFieldsSeqFields.equivalent)
       (parseOption₃ _
-        Props.TLV.nonnesting Props.TLV.nonnesting Props.TLV.nonnesting
-        (TLV.noconfusion λ ()) (Props.TLV.noconfusion λ ()) (Props.TLV.noconfusion λ ())
+        TLV.nonnesting TLV.nonnesting TLV.nonnesting
+        (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseAKIKeyId parseAKIAuthCertIssuer parseAKIAuthCertSN
         (tell $ Here.AKI String.++ ": underflow") n)
 
@@ -56,7 +53,7 @@ module parseAKIFields where
 
   parseAKIFields : Parser _ (Logging ∘ Dec) X509.AKIFields
   parseAKIFields =
-    parseTLV _ Here.AKI _ (parseExactLength _ Props.TLV.nonnesting
+    parseTLV _ Here.AKI _ (parseExactLength _ TLV.nonnesting
       (tell $ Here.AKI String.++ ": overflow") parseAKIFieldsSeq)
 
 open parseAKIFields public using

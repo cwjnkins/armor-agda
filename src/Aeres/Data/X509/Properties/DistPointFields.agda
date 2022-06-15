@@ -6,7 +6,7 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DistPointNameChoice as DPNCProps
 import      Aeres.Data.X509.Properties.GeneralName         as GNProps
 import      Aeres.Data.X509.Properties.Primitives          as PrimProps
-import      Aeres.Data.X509.Properties.TLV                 as TLVProps
+open import Aeres.Data.X690-DER
 open import Data.Nat.Properties
   hiding (_≟_)
 
@@ -29,7 +29,7 @@ proj₂ (proj₂ iso) (X509.mkDistPointFields crldp crldprsn crlissr refl) = ref
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.option₃&₂
-      (TLVProps.unambiguous DPNCProps.unambiguous) TLVProps.nonnesting TLVProps.nonempty
-      (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous) TLVProps.nonnesting TLVProps.nonempty
-      (TLVProps.unambiguous GNProps.GeneralNamesElems.unambiguous) TLVProps.nonempty
-      (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ()) (TLVProps.noconfusion λ ()))
+      (TLV.unambiguous DPNCProps.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous PrimProps.BitstringValue.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous GNProps.GeneralNamesElems.unambiguous) TLV.nonempty
+      (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

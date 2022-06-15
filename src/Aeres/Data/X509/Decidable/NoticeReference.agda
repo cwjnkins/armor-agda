@@ -5,8 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.DisplayText
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -27,7 +25,7 @@ module parseNoticeReference where
   parseNoticeReferenceFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.NoticeReferenceFields n)
   runParser (parseNoticeReferenceFields n) xs = do
     yes x ←
-      runParser (parseExactLength _ (NonNesting&ₚ _ Props.DisplayText.nonnesting Props.TLV.nonnesting)
+      runParser (parseExactLength _ (NonNesting&ₚ _ Props.DisplayText.nonnesting TLV.nonnesting)
                   (tell $ here' String.++ ": underflow")
                   (parse& _ Props.DisplayText.nonnesting parseDisplayText parseIntegerSeq) n)
                 xs

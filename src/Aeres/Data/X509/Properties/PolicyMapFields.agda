@@ -2,8 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.TLV as TLVProps
-import      Aeres.Data.X509.Properties.OID as OIDProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.PolicyMapFields where
@@ -25,8 +24,8 @@ proj₂ (proj₂ iso) (X509.mkPolicyMapFields issuerDomainPolicy subjectDomainPo
 @0 unambiguous : Unambiguous X509.PolicyMapFields
 unambiguous =
   isoUnambiguous iso
-    (unambiguous&ₚ OIDProps.unambiguous TLVProps.nonnesting OIDProps.unambiguous)
+    (unambiguous&ₚ OID.unambiguous TLV.nonnesting OID.unambiguous)
 
 
 @0 nonnesting : NonNesting X509.PolicyMapFields
-nonnesting x x₁ x₂ = NonNesting&ₚ TLVProps.nonnesting TLVProps.nonnesting x (proj₂ equivalent x₁) (proj₂ equivalent x₂)
+nonnesting x x₁ x₂ = NonNesting&ₚ TLV.nonnesting TLV.nonnesting x (proj₂ equivalent x₁) (proj₂ equivalent x₂)

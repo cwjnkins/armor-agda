@@ -27,7 +27,7 @@ module parseChain where
   parseChain =
     parseIListNonEmpty
       (tell $ here' String.++ ": underflow") X509.Cert
-      Props.TLV.nonempty Props.TLV.nonnesting
+      TLV.nonempty TLV.nonnesting
       parseCert
 
 open parseChain public using (parseChain)

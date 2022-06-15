@@ -3,10 +3,8 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OID                       as OIDProps
 import      Aeres.Data.X509.Properties.PolicyQualifierInfoFields as PQIProps
-import      Aeres.Data.X509.Properties.SequenceOf                as SeqProps
-import      Aeres.Data.X509.Properties.TLV                       as TLVProps
+open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
@@ -15,8 +13,8 @@ module Aeres.Data.X509.Properties.PolicyInformationFields where
 
 open ≡-Reasoning
 open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
 
 iso : Iso (&ₚ OID (Option X509.PolicyQualifiersSeq))
           X509.PolicyInformationFields
@@ -29,8 +27,8 @@ proj₂ (proj₂ iso) (X509.mkPolicyInformationFields cpid cpqls bs≡) = refl
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.unambiguous-&₁option₁
-      OIDProps.unambiguous TLVProps.nonnesting
-      (TLVProps.unambiguous
-        (SeqProps.BoundedSequenceOf.unambiguous
-          (TLVProps.unambiguous PQIProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting))
-      TLVProps.nonempty)
+      OID.unambiguous TLV.nonnesting
+      (TLV.unambiguous
+        (SequenceOf.Bounded.unambiguous
+          (TLV.unambiguous PQIProps.unambiguous) TLV.nonempty TLV.nonnesting))
+      TLV.nonempty)

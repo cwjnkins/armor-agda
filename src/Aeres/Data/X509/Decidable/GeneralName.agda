@@ -4,12 +4,8 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.RDN
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -38,7 +34,7 @@ parseX400Address = parseTLV _ "DNS name" _ parseOctetStringValue
 parseDirName : Parser Dig (Logging ∘ Dec) X509.DirName
 parseDirName =
   parseTLV _ "Dir. name" _
-    (parseSequenceOf "RDN" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDN)
+    (parseSequenceOf "RDN" _ TLV.nonempty TLV.nonnesting parseRDN)
 
 parseEdipartyName : Parser Dig (Logging ∘ Dec) X509.EdipartyName
 parseEdipartyName = parseTLV _ "EDI party name" _ parseOctetStringValue

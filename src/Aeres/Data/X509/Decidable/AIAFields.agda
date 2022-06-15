@@ -6,8 +6,6 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -44,8 +42,8 @@ module parseAIAFields where
   parseAccessDesc = parseTLV _ "Access Description" _ parseAccessDescFields
 
   parseAIAFields : Parser Dig (Logging ∘ Dec) X509.AIAFields
-  parseAIAFields = parseTLV _ "AIA Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow")
-                     (parseNonEmptySeq "AIA fields elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseAccessDesc))
+  parseAIAFields = parseTLV _ "AIA Fields" _ (parseExactLength _ TLV.nonnesting (tell $ here' String.++ ": underflow")
+                     (parseNonEmptySeq "AIA fields elems" _ TLV.nonempty TLV.nonnesting parseAccessDesc))
 
 open parseAIAFields public using (parseAIAFields)
 

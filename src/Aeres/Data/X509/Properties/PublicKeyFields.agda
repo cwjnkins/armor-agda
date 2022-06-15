@@ -4,7 +4,6 @@ open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgFieldsProps
-import      Aeres.Data.X509.Properties.TLV            as TLVprops
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Data.Nat.Properties

@@ -4,10 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Length
-open import Aeres.Data.X509.Decidable.OID
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -26,7 +22,7 @@ module parseEKUFields where
   open ≡-Reasoning
 
   parseEKUFields : Parser Dig (Logging ∘ Dec) X509.EKUFields
-  parseEKUFields = parseTLV _ "EKU Fields" _ (parseExactLength _ Props.TLV.nonnesting (tell $ here' String.++ ": underflow") (parseNonEmptySeq "EKU Fields Elems" _ Props.TLV.nonempty Props.TLV.nonnesting parseOID))
+  parseEKUFields = parseTLV _ "EKU Fields" _ (parseExactLength _ TLV.nonnesting (tell $ here' String.++ ": underflow") (parseNonEmptySeq "EKU Fields Elems" _ TLV.nonempty TLV.nonnesting parseOID))
 
 open parseEKUFields public using (parseEKUFields)
 

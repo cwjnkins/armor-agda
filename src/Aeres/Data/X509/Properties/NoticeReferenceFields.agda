@@ -6,8 +6,7 @@ import      Aeres.Grammar.Properties
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DisplayText as DisplayTextProps
 import      Aeres.Data.X509.Properties.Primitives  as PrimProps
-import      Aeres.Data.X509.Properties.TLV         as TLVProps
-import      Aeres.Data.X509.Properties.SequenceOf  as SeqProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -16,8 +15,8 @@ module Aeres.Data.X509.Properties.NoticeReferenceFields where
 
 open Base256
 
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
 
 
 iso : Iso (&ₚ X509.DisplayText IntegerSeq) X509.NoticeReferenceFields
@@ -31,7 +30,7 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ
       DisplayTextProps.unambiguous DisplayTextProps.nonnesting
-      (TLVProps.unambiguous
-        (SeqProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
-          TLVProps.nonempty (NonNesting Int ∋ TLVProps.nonnesting))))
+      (TLV.unambiguous
+        (SequenceOf.unambiguous (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+          TLV.nonempty (NonNesting Int ∋ TLV.nonnesting))))
           

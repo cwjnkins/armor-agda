@@ -9,7 +9,6 @@ import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
-import      Aeres.Data.X509.Properties.TLV              as TLVProps
 open import Aeres.Prelude
 open import Data.List
 open import Data.Nat.Properties
@@ -59,27 +58,27 @@ proj₂ (proj₂ iso) (X509.utf8String x) = refl
 @0 nonempty : NonEmpty X509.DisplayText
 nonempty =
   equivalent-nonempty equivalent
-    (nonemptySum (nonemptyΣₚ₁ TLVProps.nonempty)
-      (nonemptySum (nonemptyΣₚ₁ TLVProps.nonempty)
-        (nonemptySum (nonemptyΣₚ₁ TLVProps.nonempty)
-          (nonemptyΣₚ₁ TLVProps.nonempty))))
+    (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
+      (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
+        (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
+          (nonemptyΣₚ₁ TLV.nonempty))))
 
 @0 nonnesting : NonNesting X509.DisplayText
 nonnesting =
   equivalent-nonnesting equivalent
-    (nonnestingSum (nonnestingΣₚ₁ TLVProps.nonnesting)
-      (nonnestingSum (nonnestingΣₚ₁ TLVProps.nonnesting)
-        (nonnestingSum (nonnestingΣₚ₁ TLVProps.nonnesting)
-          (nonnestingΣₚ₁ TLVProps.nonnesting)
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))
+    (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
+      (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
+        (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
+          (nonnestingΣₚ₁ TLV.nonnesting)
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
         (NoConfusion.sumₚ{A = Σₚ X509.VisibleString _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
       (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
-        (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
+        (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
         (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
 
 @0 noconfusionTLV : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.VisibleString ∷ Tag.BMPString ∷ [ Tag.UTF8String ]
                       → NoConfusion (TLV t A) X509.DisplayText
@@ -89,15 +88,15 @@ noconfusionTLV{t}{A} t∉ =
       (symNoConfusion{A = TLV _ A}{B = Sum _ _}
         (NoConfusion.sumₚ{A = TLV _ A}
           (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV _ A}
-            (TLVProps.noconfusion (λ where refl → t∉ (here refl))))
+            (TLV.noconfusion (λ where refl → t∉ (here refl))))
           (NoConfusion.sumₚ{A = TLV t A}
             (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
-              (TLVProps.noconfusion (λ where refl → t∉ (there (here refl)))))
+              (TLV.noconfusion (λ where refl → t∉ (there (here refl)))))
             (NoConfusion.sumₚ{A = TLV t A}
               (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
-                (TLVProps.noconfusion (λ where refl → t∉ (there (there (here refl))))))
+                (TLV.noconfusion (λ where refl → t∉ (there (there (here refl))))))
               (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
-                (TLVProps.noconfusion λ where refl → t∉ (there (there (there (here refl)))))))))))
+                (TLV.noconfusion λ where refl → t∉ (there (there (there (here refl)))))))))))
 
 @0 noconfusionSeq : ∀ {@0 A} → NoConfusion (Seq A) X509.DisplayText
 noconfusionSeq = noconfusionTLV pf
@@ -116,22 +115,22 @@ noconfusionNoticeReference = noconfusionTLV pf
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (unambiguousΣₚ (TLVProps.unambiguous IA5Props.unambiguous)
+      (unambiguousΣₚ (TLV.unambiguous IA5Props.unambiguous)
         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
       (unambiguousSum
-        (unambiguousΣₚ (TLVProps.unambiguous UTF8Props.unambiguous)
+        (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
           λ _ → inRange-unique{A =  ℕ}{B = ℕ})
         (unambiguousSum
-          (unambiguousΣₚ (TLVProps.unambiguous UTF8Props.unambiguous)
+          (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
             (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (unambiguousΣₚ (TLVProps.unambiguous UTF8Props.unambiguous)
+          (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
             (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion (λ ()))))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ()))))
         (NoConfusion.sumₚ{A = Σₚ _ _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion (λ ())))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion (λ ())))))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))))
       (NoConfusion.sumₚ {A = Σₚ _ _}
-        (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion (λ ())))
+        (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
         (NoConfusion.sumₚ{A = Σₚ _ _}
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ()))
-          (NoConfusion.sigmaₚ₁ (TLVProps.noconfusion λ ())))))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))

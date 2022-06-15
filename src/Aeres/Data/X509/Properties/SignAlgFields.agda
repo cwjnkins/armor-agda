@@ -2,11 +2,8 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OID              as OIDProps
-import      Aeres.Data.X509.Properties.OIDSub           as OIDSubProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
-import      Aeres.Data.X509.Properties.TLV              as TLVProps
-import      Aeres.Data.X509.Properties.SequenceOf       as SeqProps
+open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -28,7 +25,7 @@ proj₂ (proj₂ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = refl
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.unambiguous-&₁option₁
-      OIDProps.unambiguous TLVProps.nonnesting
+      OID.unambiguous TLV.nonnesting
       (unambiguous×ₚ OSProps.unambiguous ≤-irrelevant)
       λ where (mk×ₚ _ () refl) refl)
 

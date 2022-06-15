@@ -6,12 +6,9 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
-import      Aeres.Data.X509.Properties.OID              as OIDProps
-import      Aeres.Data.X509.Properties.OIDSub           as OIDSubProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.RDNSeq           as RDNProps
-import      Aeres.Data.X509.Properties.TLV              as TLVProps
-import      Aeres.Data.X509.Properties.SequenceOf       as SeqProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -98,150 +95,150 @@ nonempty (X509.ipadd ()) refl
 nonempty (X509.rid ()) refl
 
 @0 nonnesting : NonNesting X509.GeneralName
-nonnesting x (X509.oname x₁) (X509.oname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.oname x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.oname x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.rfcname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.rfcname x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rfcname x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.dnsname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.dnsname x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dnsname x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.x400add x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.x400add x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.x400add x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.dirname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.dirname x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.dirname x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.ediname x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.ediname x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ediname x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.uri x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.uri x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.uri x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.ipadd x₁) (X509.ipadd x₂) = ‼ TLVProps.nonnesting x x₁ x₂
-nonnesting x (X509.ipadd x₁) (X509.rid x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.oname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.rfcname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.dnsname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.x400add x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.dirname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.ediname x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.uri x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.ipadd x₂) = ⊥-elim (TLVProps.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (X509.rid x₁) (X509.rid x₂) = ‼ TLVProps.nonnesting x x₁ x₂
+nonnesting x (X509.oname x₁) (X509.oname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.oname x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.oname x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.rfcname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.rfcname x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rfcname x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.dnsname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.dnsname x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dnsname x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.x400add x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.x400add x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.x400add x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.dirname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.dirname x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.dirname x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.ediname x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.ediname x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ediname x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.uri x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.uri x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.uri x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.ipadd x₁) (X509.ipadd x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (X509.ipadd x₁) (X509.rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (X509.rid x₁) (X509.rid x₂) = ‼ TLV.nonnesting x x₁ x₂
 
 module GeneralName where
   @0 unambiguous : Unambiguous X509.GeneralName
   unambiguous =
     isoUnambiguous iso
       (unambiguousSum
-        (TLVProps.unambiguous OSProps.unambiguous)
-        (unambiguousSum (TLVProps.unambiguous IA5Props.unambiguous)
-          (unambiguousSum (TLVProps.unambiguous IA5Props.unambiguous)
-            (unambiguousSum (TLVProps.unambiguous OSProps.unambiguous)
+        (TLV.unambiguous OSProps.unambiguous)
+        (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
+          (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
+            (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
               (unambiguousSum
-                (TLVProps.unambiguous
-                  (SeqProps.unambiguous
-                    RDNProps.RDN.unambiguous TLVProps.nonempty TLVProps.nonnesting))
+                (TLV.unambiguous
+                  (SequenceOf.unambiguous
+                    RDNProps.RDN.unambiguous TLV.nonempty TLV.nonnesting))
                 (unambiguousSum
-                  (TLVProps.unambiguous OSProps.unambiguous)
-                  (unambiguousSum (TLVProps.unambiguous IA5Props.unambiguous)
-                    (unambiguousSum (TLVProps.unambiguous OSProps.unambiguous)
-                      (TLVProps.unambiguous
-                        (SeqProps.BoundedSequenceOf.unambiguous
-                          OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting))
-                        (TLVProps.noconfusion λ ()))
-                      (NoConfusion.sumₚ{A = X509.URI} (TLVProps.noconfusion λ ())
-                        (TLVProps.noconfusion λ ())))
-                    (NoConfusion.sumₚ{A = X509.EdipartyName} (TLVProps.noconfusion λ ())
-                      (NoConfusion.sumₚ{A = X509.EdipartyName} (TLVProps.noconfusion λ ())
-                        (TLVProps.noconfusion λ ()))))
-                (NoConfusion.sumₚ{A = X509.DirName} (TLVProps.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X509.DirName} (TLVProps.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = X509.DirName} (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ())))))
-              (NoConfusion.sumₚ{A = X509.X400Address} (TLVProps.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = X509.X400Address} (TLVProps.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X509.X400Address} (TLVProps.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = X509.X400Address} (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ()))))))
-            (NoConfusion.sumₚ{A = X509.DnsName} (TLVProps.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = X509.DnsName} (TLVProps.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = X509.DnsName} (TLVProps.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X509.DnsName} (TLVProps.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = X509.DnsName} (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ())))))))
-          (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ()))
-            (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = X509.RfcName} (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ()))))))))
-        (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
-          (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
-            (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X509.OtherName} (TLVProps.noconfusion (λ ()))
+                  (TLV.unambiguous OSProps.unambiguous)
+                  (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
+                    (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
+                      (TLV.unambiguous
+                        (SequenceOf.Bounded.unambiguous
+                          OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
+                        (TLV.noconfusion λ ()))
+                      (NoConfusion.sumₚ{A = X509.URI} (TLV.noconfusion λ ())
+                        (TLV.noconfusion λ ())))
+                    (NoConfusion.sumₚ{A = X509.EdipartyName} (TLV.noconfusion λ ())
+                      (NoConfusion.sumₚ{A = X509.EdipartyName} (TLV.noconfusion λ ())
+                        (TLV.noconfusion λ ()))))
+                (NoConfusion.sumₚ{A = X509.DirName} (TLV.noconfusion (λ ()))
+                  (NoConfusion.sumₚ{A = X509.DirName} (TLV.noconfusion (λ ()))
+                    (NoConfusion.sumₚ{A = X509.DirName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))
+              (NoConfusion.sumₚ{A = X509.X400Address} (TLV.noconfusion (λ ()))
+                (NoConfusion.sumₚ{A = X509.X400Address} (TLV.noconfusion (λ ()))
+                  (NoConfusion.sumₚ{A = X509.X400Address} (TLV.noconfusion (λ ()))
+                    (NoConfusion.sumₚ{A = X509.X400Address} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()))))))
+            (NoConfusion.sumₚ{A = X509.DnsName} (TLV.noconfusion (λ ()))
+              (NoConfusion.sumₚ{A = X509.DnsName} (TLV.noconfusion (λ ()))
+                (NoConfusion.sumₚ{A = X509.DnsName} (TLV.noconfusion (λ ()))
+                  (NoConfusion.sumₚ{A = X509.DnsName} (TLV.noconfusion (λ ()))
+                    (NoConfusion.sumₚ{A = X509.DnsName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))))
+          (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ()))
+            (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ()))
+              (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ()))
+                (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ()))
+                  (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ()))
+                    (NoConfusion.sumₚ{A = X509.RfcName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()))))))))
+        (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
+          (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
+            (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
+              (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
+                (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
+                  (NoConfusion.sumₚ{A = X509.OtherName} (TLV.noconfusion (λ ()))
                     (NoConfusion.sumₚ{A = X509.OtherName}
-                       (TLVProps.noconfusion (λ ())) (TLVProps.noconfusion λ ())))))))))
+                       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))))))
 
 module GeneralNamesElems where
   @0 unambiguous : Unambiguous X509.GeneralNamesElems
   unambiguous =
-    SeqProps.BoundedSequenceOf.unambiguous
+    SequenceOf.Bounded.unambiguous
       GeneralName.unambiguous nonempty nonnesting
 
 module GeneralNames where
   @0 unambiguous : Unambiguous X509.GeneralNames
-  unambiguous = TLVProps.unambiguous GeneralNamesElems.unambiguous
+  unambiguous = TLV.unambiguous GeneralNamesElems.unambiguous
 
 @0 unambiguous : _
 unambiguous = GeneralName.unambiguous

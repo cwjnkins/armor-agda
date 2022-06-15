@@ -5,8 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Decidable.UserNotice
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
@@ -54,7 +52,7 @@ module parsePolicyQualifierInfo where
 
   parsePolicyQualifiersSeq : Parser _ (Logging ∘ Dec) X509.PolicyQualifiersSeq
   parsePolicyQualifiersSeq =
-    parseNonEmptySeq "policy qualifier info" _ Props.TLV.nonempty Props.TLV.nonnesting
+    parseNonEmptySeq "policy qualifier info" _ TLV.nonempty TLV.nonnesting
       parsePolicyQualifierInfo
 
 open parsePolicyQualifierInfo public using (parsePolicyQualifierInfo ; parsePolicyQualifiersSeq)

@@ -4,8 +4,8 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
-import      Aeres.Data.X509.Properties.TLV              as TLVProps
 import      Aeres.Data.X509.Properties.UserNoticeFields as UserNoticeProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -13,8 +13,8 @@ module Aeres.Data.X509.Properties.PolicyQualifierInfoFields where
 open ≡-Reasoning
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Sum         Dig
+open import Aeres.Grammar.Definitions UInt8
+open import Aeres.Grammar.Sum         UInt8
 
 module CPSURIQualifier where
 
@@ -30,7 +30,7 @@ module CPSURIQualifier where
   @0 unambiguous : Unambiguous X509.CPSURIQualifier
   unambiguous =
     isoUnambiguous iso
-      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLVProps.unambiguous IA5Props.unambiguous))
+      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLV.unambiguous IA5Props.unambiguous))
 
 
 module UserNoticeQualifier where
@@ -47,7 +47,7 @@ module UserNoticeQualifier where
   @0 unambiguous : Unambiguous X509.UserNoticeQualifier
   unambiguous =
     isoUnambiguous iso
-      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLVProps.unambiguous UserNoticeProps.unambiguous))
+      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLV.unambiguous UserNoticeProps.unambiguous))
 
 
 equivalent : Equivalent (Sum X509.CPSURIQualifier X509.UserNoticeQualifier) X509.PolicyQualifierInfoFields
@@ -72,35 +72,35 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.cpsURI (X509.mkCPSURIQualifie
   where
   oid =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
   @0 x' : oid ++ bs₂ ++ ys₁ ≡ oid ++ bs₄ ++ ys₂
-  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
               (oid ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
               oid ++ bs₄ ++ ys₂ ∎))
   @0 bs₂≡ : bs₂ ≡ bs₄
-  bs₂≡ = TLVProps.nonnesting (++-cancelˡ oid x') cpsPointer cpsPointer₁
+  bs₂≡ = TLV.nonnesting (++-cancelˡ oid x') cpsPointer cpsPointer₁
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.cpsURI (X509.mkCPSURIQualifier {bs₁ = bs₁} {bs₂} refl cpsPointer bs≡)) (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₃} {bs₄} refl unotice bs≡₁)) = case (‼ x') of λ ()
   where
   OID₁ =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
   OID₂ =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
   @0 x' : OID₁ ++ bs₂ ++ ys₁ ≡ OID₂ ++ bs₄ ++ ys₂
-  x' = (begin (OID₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+  x' = (begin (OID₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
               (OID₁ ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (OID₂ ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              (OID₂ ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
               OID₂ ++ bs₄ ++ ys₂ ∎))
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂}  x (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₁} {bs₂} refl unotice bs≡)) (X509.cpsURI (X509.mkCPSURIQualifier {bs₁ = bs₃} {bs₄} refl cpsPointer bs≡₁)) = case (‼ x') of λ ()
   where
   OID₁ =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
   OID₂ =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
   @0 x' : OID₁ ++ bs₂ ++ ys₁ ≡ OID₂ ++ bs₄ ++ ys₂
-  x' = (begin (OID₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+  x' = (begin (OID₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
               (OID₁ ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (OID₂ ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              (OID₂ ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
               OID₂ ++ bs₄ ++ ys₂ ∎))
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₁} {bs₂} refl unotice bs≡)) (X509.userNotice (X509.mkUserNoticeQualifier {bs₁ = bs₃} {bs₄} refl unotice₁ bs≡₁)) =
   begin (xs₁ ≡⟨ bs≡ ⟩
@@ -110,14 +110,14 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.userNotice (X509.mkUserNotice
   where
   oid =  # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
   @0 x' : oid ++ bs₂ ++ ys₁ ≡ oid ++ bs₄ ++ ys₂
-  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+  x' = (begin (oid ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
               (oid ++ bs₂) ++ ys₁ ≡⟨ sym (cong (_++ ys₁) bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ x ⟩
               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+              (oid ++ bs₄) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
               oid ++ bs₄ ++ ys₂ ∎))
   @0 bs₂≡ : bs₂ ≡ bs₄
-  bs₂≡ =  TLVProps.nonnesting (++-cancelˡ oid x') unotice unotice₁
+  bs₂≡ =  TLV.nonnesting (++-cancelˡ oid x') unotice unotice₁
 
 @0 unambiguous : Unambiguous X509.PolicyQualifierInfoFields
 unambiguous =
@@ -127,11 +127,11 @@ unambiguous =
         {xs₁}{ys₁}{xs₂}{ys₂} ++≡ (X509.mkCPSURIQualifier{bs₂ = bs₂} refl cpsPointer bs≡) (X509.mkUserNoticeQualifier{bs₂ = bs₃} refl unotice bs≡₁) → ‼
           let @0 bs≡' : X509.PQOID.CPSURI ++ bs₂ ++ ys₁ ≡ X509.PQOID.USERNOTICE ++ bs₃ ++ ys₂
               bs≡' = begin
-                 X509.PQOID.CPSURI ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+                 X509.PQOID.CPSURI ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
                 (X509.PQOID.CPSURI ++ bs₂) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
                 xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
                 xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-                (X509.PQOID.USERNOTICE ++ bs₃) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+                (X509.PQOID.USERNOTICE ++ bs₃) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
                 _ ∎
           in
           case ‼ bs≡' of λ ())

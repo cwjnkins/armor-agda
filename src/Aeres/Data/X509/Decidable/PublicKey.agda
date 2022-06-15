@@ -5,13 +5,10 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
-open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.OID
 open import Aeres.Data.X509.Decidable.SignAlg
-open import Aeres.Data.X509.Decidable.TLV
-open import Aeres.Data.X509.Decidable.Int
 open import Aeres.Data.X509.Properties as Props
+open import Aeres.Data.X690-DER
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Data.List.Properties
@@ -31,13 +28,13 @@ module parsePublicKeyFields where
   parseCurveFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.CurveFields n)
   parseCurveFields n =
     parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&) (equivalent×ₚ _ Props.CurveFields.equivalent))
-      (parse&ᵈ _ (withinLength-nonnesting _ (NonNesting&ₚ _  Props.TLV.nonnesting  Props.TLV.nonnesting))
-        (withinLength-unambiguous _ (unambiguous&ₚ _ (TLV.unambiguous Props.OctetstringValue.unambiguous) Props.TLV.nonnesting (TLV.unambiguous Props.OctetstringValue.unambiguous)))
-          (parse≤ _ n (parse& _ Props.TLV.nonnesting  parseOctetString parseOctetString) (NonNesting&ₚ _ Props.TLV.nonnesting Props.TLV.nonnesting) ((tell $ here' String.++ ": overflow")))
+      (parse&ᵈ _ (withinLength-nonnesting _ (NonNesting&ₚ _  TLV.nonnesting  TLV.nonnesting))
+        (withinLength-unambiguous _ (unambiguous&ₚ _ (TLV.unambiguous Props.OctetstringValue.unambiguous) TLV.nonnesting (TLV.unambiguous Props.OctetstringValue.unambiguous)))
+          (parse≤ _ n (parse& _ TLV.nonnesting  parseOctetString parseOctetString) (NonNesting&ₚ _ TLV.nonnesting TLV.nonnesting) ((tell $ here' String.++ ": overflow")))
           λ where
             {bs} (singleton read read≡) _ →
               subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
-                (parseOption₁ExactLength _ Props.TLV.nonempty Props.TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring (n - read)))
+                (parseOption₁ExactLength _ TLV.nonempty TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring (n - read)))
 
   parseCurve : Parser Dig (Logging ∘ Dec) X509.Curve
   parseCurve = parseTLV _ "Curve" _ parseCurveFields
@@ -48,7 +45,7 @@ module parsePublicKeyFields where
   parseEcParamsFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.EcParamsFields n)
   parseEcParamsFields n = parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&)  (equivalent×ₚ _ Props.EcParamsFields.equivalent))
     (parse&ᵈ _
-      (withinLength-nonnesting _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) Props.TLV.nonnesting) Props.TLV.nonnesting) Props.TLV.nonnesting) Props.TLV.nonnesting)) (withinLength-unambiguous _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (λ where refl refl → refl) (λ where _ refl refl → refl) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (λ where _ refl refl → refl) Props.TLV.nonnesting) (TLV.unambiguous Props.CurveFields.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) Props.TLV.nonnesting) Props.TLV.nonnesting) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) Props.TLV.nonnesting) Props.TLV.nonnesting) Props.TLV.nonnesting) (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs})))
+      (withinLength-nonnesting _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)) (withinLength-unambiguous _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (λ where refl refl → refl) (λ where _ refl refl → refl) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) (TLV.unambiguous Props.CurveFields.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs})))
         (parse≤ _ n (parse& _ {!!} {!!} parseInt) {!!} (tell $ here' String.++ ": overflow"))
         λ where
           {bs} (singleton read read≡) _ →
@@ -92,7 +89,7 @@ module parsePublicKeyFields where
   parseRSAPkIntsFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.RSAPkIntsFields n)
   parseRSAPkIntsFields n =
     parseExactLength _ Props.RSAPkIntsFields.nonnesting (tell $ here' String.++ ": underflow")
-      (parseEquivalent _ Props.RSAPkIntsFields.equivalent (parse& _ Props.TLV.nonnesting parseInt parseInt)) n
+      (parseEquivalent _ Props.RSAPkIntsFields.equivalent (parse& _ TLV.nonnesting parseInt parseInt)) n
 
   parseRSAPkInts :  Parser Dig (Logging ∘ Dec) X509.RSAPkInts
   parseRSAPkInts = parseTLV _ "RSA pk n and e" _ parseRSAPkIntsFields
@@ -197,7 +194,8 @@ module parsePublicKeyFields where
 
 -- open parsePublicKeyFields public using (parsePublicKeyFields)
 
--- parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
+postulate
+  parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
 -- parsePublicKey = parseTLV _ "Public key" _ parsePublicKeyFields
 
 -- -------------------------------------------------------------------------------------------------------

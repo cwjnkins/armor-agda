@@ -12,10 +12,8 @@ import      Aeres.Data.X509.Properties.PCFieldsSeqFields  as PCProps
 import      Aeres.Data.X509.Properties.PolicyInformationFields as PIProps
 import      Aeres.Data.X509.Properties.PolicyMapFields    as PMProps
 import      Aeres.Data.X509.Properties.Primitives         as PrimProps
-import      Aeres.Data.X509.Properties.OID                as OIDProps
 import      Aeres.Data.X509.Properties.OctetstringValue   as OctetstringValueProps
-import      Aeres.Data.X509.Properties.TLV                as TLVProps
-import      Aeres.Data.X509.Properties.SequenceOf         as SeqProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -54,9 +52,9 @@ module ExtensionFields where
   unambiguous ua₁ ua₂ nc =
     isoUnambiguous iso
       (unambiguous&ₚ
-        (unambiguous×ₚ OIDProps.unambiguous (erased-unique ua₁))
-        (nonnesting×ₚ₁ TLVProps.nonnesting)
-        (Unambiguous.unambiguous-option₁&₁ (TLVProps.unambiguous PrimProps.BoolValue.unambiguous) TLVProps.nonnesting ua₂ nc))
+        (unambiguous×ₚ OID.unambiguous (erased-unique ua₁))
+        (nonnesting×ₚ₁ TLV.nonnesting)
+        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous PrimProps.BoolValue.unambiguous) TLV.nonnesting ua₂ nc))
 
 module SelectExtn where
   Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)
@@ -143,40 +141,40 @@ module SelectExtn where
   unambiguous =
     isoUnambiguous iso
       (unambiguousSum
-        (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous AKIProps.unambiguous)) (TLVProps.noconfusion λ ()))
+        (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKIProps.unambiguous)) (TLV.noconfusion λ ()))
         (unambiguousSum
-          (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous OctetstringValueProps.unambiguous)) (TLVProps.noconfusion λ ()))
+          (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetstringValueProps.unambiguous)) (TLV.noconfusion λ ()))
           (unambiguousSum
-            (ExtensionFields.unambiguous ≡-unique ((TLVProps.unambiguous (TLVProps.unambiguous PrimProps.BitstringValue.unambiguous))) (TLVProps.noconfusion λ ()))
+            (ExtensionFields.unambiguous ≡-unique ((TLV.unambiguous (TLV.unambiguous PrimProps.BitstringValue.unambiguous))) (TLV.noconfusion λ ()))
             (unambiguousSum
-              (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous OIDProps.unambiguous TLVProps.nonempty TLVProps.nonnesting))) (TLVProps.noconfusion λ ()))
+              (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous OID.unambiguous TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
               (unambiguousSum
-                (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous BCProps.unambiguous)) (TLVProps.noconfusion λ ()))
+                (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous BCProps.unambiguous)) (TLV.noconfusion λ ()))
                 (unambiguousSum
-                  (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLVProps.noconfusion λ ()))
+                  (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                   (unambiguousSum
-                    (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLVProps.noconfusion λ ()))
+                    (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                     (unambiguousSum
-                       (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous PIProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting))) (TLVProps.noconfusion λ ()))
+                       (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PIProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                       (unambiguousSum
-                        (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous DistPointFieldsProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting))) (TLVProps.noconfusion λ ()))
+                        (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous DistPointFieldsProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                         (unambiguousSum
-                          (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous NCProps.unambiguous)) (TLVProps.noconfusion λ ()))
+                          (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous NCProps.unambiguous)) (TLV.noconfusion λ ()))
                           (unambiguousSum
-                            (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous PCProps.unambiguous)) (TLVProps.noconfusion λ ()))
+                            (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous PCProps.unambiguous)) (TLV.noconfusion λ ()))
                             (unambiguousSum
-                              (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous (SeqProps.BoundedSequenceOf.unambiguous (TLVProps.unambiguous PMProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)) ) (TLVProps.noconfusion λ ()))
+                              (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PMProps.unambiguous) TLV.nonempty TLV.nonnesting)) ) (TLV.noconfusion λ ()))
                               (unambiguousSum
-                                (ExtensionFields.unambiguous ≡-unique (TLVProps.unambiguous (TLVProps.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous {xs})) (TLVProps.noconfusion λ ()))
+                                (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous {xs})) (TLV.noconfusion λ ()))
                                 (unambiguousSum
                                   (ExtensionFields.unambiguous ≡-unique
-                                    (TLVProps.unambiguous
-                                      (TLVProps.unambiguous
-                                        (SeqProps.BoundedSequenceOf.unambiguous
-                                          (TLVProps.unambiguous ADProps.unambiguous) TLVProps.nonempty TLVProps.nonnesting)))
-                                    (TLVProps.noconfusion λ ()))
+                                    (TLV.unambiguous
+                                      (TLV.unambiguous
+                                        (SequenceOf.Bounded.unambiguous
+                                          (TLV.unambiguous ADProps.unambiguous) TLV.nonempty TLV.nonnesting)))
+                                    (TLV.noconfusion λ ()))
                                 (ExtensionFields.unambiguous ua
-                                  (TLVProps.unambiguous OctetstringValueProps.unambiguous) (TLVProps.noconfusion λ ()))
+                                  (TLV.unambiguous OctetstringValueProps.unambiguous) (TLV.noconfusion λ ()))
                               noconfusion₀)
                             noconfusion₁₃)
                           noconfusion₁₂)
@@ -205,7 +203,7 @@ module SelectExtn where
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oex ≡ oex₁
-      oid≡ = TLVProps.nonnesting bs≡' extnId extnId₁
+      oid≡ = TLV.nonnesting bs≡' extnId extnId₁
 
     noconfusionOIDN : ∀ {@0 A B oid} → (oid ∈ X509.ExtensionOID.Supported) → NoConfusion (X509.ExtensionFields (_≡ oid) A) (X509.ExtensionFields (False ∘ (_∈? X509.ExtensionOID.Supported)) B)
     noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (X509.mkExtensionFields {oex = _} {cex} {ocex} extnId refl crit extension bs≡) (X509.mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
@@ -220,7 +218,7 @@ module SelectExtn where
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oid ≡ oex₁
-      oid≡ = TLVProps.nonnesting bs≡' extnId extnId₁
+      oid≡ = TLV.nonnesting bs≡' extnId extnId₁
 
     noconfusion₁ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields) (Sum _ _)
     noconfusion₁ =
@@ -455,14 +453,11 @@ module SelectExtn where
     ua = T-unique
 
 module ExtensionsSeq where
-  import Aeres.Data.X509.Properties.SequenceOf as SeqProps
-  import Aeres.Data.X509.Properties.TLV        as TLVProps
-
   @0 unambiguous : Unambiguous X509.ExtensionsSeq
   unambiguous =
-    TLVProps.unambiguous
-      (SeqProps.BoundedSequenceOf.unambiguous
-        (TLVProps.unambiguous SelectExtn.unambiguous)
-        TLVProps.nonempty TLVProps.nonnesting)
+    TLV.unambiguous
+      (SequenceOf.Bounded.unambiguous
+        (TLV.unambiguous SelectExtn.unambiguous)
+        TLV.nonempty TLV.nonnesting)
 
 

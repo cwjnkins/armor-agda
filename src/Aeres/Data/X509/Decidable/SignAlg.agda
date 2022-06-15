@@ -4,12 +4,10 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Length
 open import Aeres.Data.X509.Decidable.Null
 open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.OID
-open import Aeres.Data.X509.Decidable.TLV
 open import Aeres.Data.X509.Properties as Props
+open import Aeres.Data.X690-DER
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Aeres.Grammar.Sum
@@ -32,7 +30,7 @@ module parseSignAlg where
   parseSignAlgFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.SignAlg.SignAlgFields n)
   runParser (parseSignAlgFields n) xs = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len) refl) suf₀ ps≡₀) ←
-      runParser (parse≤ _ n parseOID Props.TLV.nonnesting (tell $ here' String.++ ": underflow" )) xs
+      runParser (parse≤ _ n parseOID TLV.nonnesting (tell $ here' String.++ ": underflow" )) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success ._ read read≡ (mk×ₚ (X509.SignAlg.mkSignAlgFields{o = o}{p} signOID param refl) sndₚ₁ refl) suffix ps≡) →

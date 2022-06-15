@@ -2,13 +2,13 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.EcPkAlgFields  as EcProps
-import      Aeres.Data.X509.Properties.Length         as LenProps
 import      Aeres.Data.X509.Properties.RSAPkAlgFields as RSAProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgProps
-import      Aeres.Data.X509.Properties.TLV            as TLVProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Data.Nat.Properties
@@ -19,6 +19,7 @@ module Aeres.Data.X509.Properties.PkAlg where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
@@ -62,7 +63,7 @@ noconfRSA-EC {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (m
     _ ∎
 
   @0 l≡ : l ≡ l₁
-  l≡ = LenProps.nonnesting (∷-injectiveʳ bs≡') len len₁
+  l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
 @0 noconfSA-RSA : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.RSAPkAlg
 noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (X509.SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁)
@@ -79,7 +80,7 @@ noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ va
                Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
 
   @0 l≡ : l ≡ l₁
-  l≡ = LenProps.nonnesting (∷-injectiveʳ bs≡') len len₁
+  l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
   @0 v≡ : v ≡ v₁
   v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
@@ -87,19 +88,54 @@ noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ va
                         o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
                         v₁ ++ ys₂     ∎)
                  (begin length v ≡⟨ sym len≡₁ ⟩
-                        getLength len ≡⟨ LenProps.unambiguous-getLength l≡ len len₁ ⟩
+                        getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
                         getLength len₁ ≡⟨ len≡ ⟩
                         length v₁ ∎)
 
   @0 o≡ : o ≡ X509.PKOID.RsaEncPk
-  o≡ = TLVProps.nonnesting (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡') signOID {!!}
+  o≡ = TLV.nonnesting
+         (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
+         signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.RsaEncPk} tt)
+
+
+@0 noconfSA-EC : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.EcPkAlg
+noconfSA-EC {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ (mkTLV{l = l}{v} len val@(X509.SignAlg.mkSignAlgFields{p = p} signOID param₁ refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkEcPkAlgFields{p = p₁} self param refl) len≡ bs≡₁)
+  with OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID $ val
+... | singleton o refl = contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _ } tt)) (toWitnessFalse o∉)
+  where
+  @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
+  bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
+               (Tag.Sequence ∷ l ++ o ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+               xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+               (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (++-assoc l₁ v₁ ys₂) ⟩
+               Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
+
+  @0 l≡ : l ≡ l₁
+  l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
+
+  @0 v≡ : v ≡ v₁
+  v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
+                 (begin v ++ ys₁      ≡⟨ solve (++-monoid UInt8) ⟩ 
+                        o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
+                        v₁ ++ ys₂     ∎)
+                 (begin length v ≡⟨ sym len≡₁ ⟩
+                        getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
+                        getLength len₁ ≡⟨ len≡ ⟩
+                        length v₁ ∎)
+
+  @0 o≡ : o ≡ X509.PKOID.EcPk
+  o≡ = TLV.nonnesting
+         (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
+         signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.EcPk} tt)
+
 
 @0 nonnesting : NonNesting X509.PkAlg
 nonnesting =
   equivalent-nonnesting equivalent
     (NonNesting.sumRestriction
-      (nonnestingSum TLVProps.nonnesting TLVProps.nonnesting noconfRSA-EC)
-      (nonnestingΣₚ₁ TLVProps.nonnesting)
+      (nonnestingSum TLV.nonnesting TLV.nonnesting noconfRSA-EC)
+      (nonnestingΣₚ₁ TLV.nonnesting)
       restr)
   where
   @0 restr : NonNesting.Restriction (Sum X509.RSAPkAlg X509.EcPkAlg) (Σₚ X509.SignAlg _)
@@ -117,14 +153,14 @@ nonnesting =
                  (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
                  Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
     @0 l≡ : l ≡ l₁
-    l≡ = LenProps.nonnesting (∷-injectiveʳ bs≡') len len₁
+    l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
     @0 v≡ : v ≡ v₁
     v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
                    (begin v ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
                           v₁ ++ ys₂ ∎)
                    (begin (length v ≡⟨ sym len≡ ⟩
-                          getLength len ≡⟨ LenProps.unambiguous-getLength l≡ len len₁ ⟩
+                          getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
                           getLength len₁ ≡⟨ len≡₁ ⟩
                           length v₁ ∎))
   restr{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ (inj₂ (mkTLV{l = l}{v} len val len≡ bs≡)) (mk×ₚ (mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) _ refl) =
@@ -142,14 +178,14 @@ nonnesting =
                  Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
 
     @0 l≡ : l ≡ l₁
-    l≡ = LenProps.nonnesting (∷-injectiveʳ bs≡') len len₁
+    l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
     @0 v≡ : v ≡ v₁
     v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
                    (begin v ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
                           v₁ ++ ys₂ ∎)
                    (begin (length v ≡⟨ sym len≡ ⟩
-                          getLength len ≡⟨ LenProps.unambiguous-getLength l≡ len len₁ ⟩
+                          getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
                           getLength len₁ ≡⟨ len≡₁ ⟩
                           length v₁ ∎))
 
@@ -158,14 +194,14 @@ unambiguous =
   isoUnambiguous iso
     (unambiguousSum
       (unambiguousSum
-        (TLVProps.unambiguous RSAProps.unambiguous)
-        (TLVProps.unambiguous EcProps.unambiguous)
+        (TLV.unambiguous RSAProps.unambiguous)
+        (TLV.unambiguous EcProps.unambiguous)
         noconfRSA-EC)
-      (unambiguousΣₚ (TLVProps.unambiguous SignAlgProps.unambiguous)
+      (unambiguousΣₚ (TLV.unambiguous SignAlgProps.unambiguous)
         λ where
           {xs} a → T-unique)
       (symNoConfusion{A = Σₚ _ λ _ sa → False _}{B = Sum X509.RSAPkAlg X509.EcPkAlg}
         (NoConfusion.sumₚ
           {A = Σₚ X509.SignAlg λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)}
           {B = X509.RSAPkAlg}{C = X509.EcPkAlg}
-          {!!} {!!})))
+          noconfSA-RSA noconfSA-EC)))

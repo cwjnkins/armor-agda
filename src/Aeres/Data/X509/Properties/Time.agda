@@ -2,8 +2,8 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.TLV as TLVprops
 import      Aeres.Data.X509.Properties.MonthDayHourMinSecFields as MDHMSProps
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -156,13 +156,13 @@ module GenTime where
     mdhms≡ = ++-cancelʳ _ _ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
 
 @0 nonnesting : NonNesting Generic.Time
-nonnesting x (Generic.utctm x₁) (Generic.utctm x₂) = ‼ TLVprops.nonnesting x x₁ x₂
-nonnesting x (Generic.utctm x₁) (Generic.gentm x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (Generic.gentm x₁) (Generic.utctm x₂) = ⊥-elim (TLVprops.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (Generic.gentm x₁) (Generic.gentm x₂) = ‼ TLVprops.nonnesting x x₁ x₂
+nonnesting x (Generic.utctm x₁) (Generic.utctm x₂) = ‼ TLV.nonnesting x x₁ x₂
+nonnesting x (Generic.utctm x₁) (Generic.gentm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (Generic.gentm x₁) (Generic.utctm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nonnesting x (Generic.gentm x₁) (Generic.gentm x₂) = ‼ TLV.nonnesting x x₁ x₂
 
 @0 unambiguous : Unambiguous Generic.Time
-unambiguous (Generic.utctm x) (Generic.utctm x₁) = cong Generic.utctm $ TLVprops.unambiguous UTC.unambiguous x x₁
-unambiguous (Generic.utctm x) (Generic.gentm x₁) = ⊥-elim (TLVprops.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
-unambiguous (Generic.gentm x) (Generic.utctm x₁) = ⊥-elim (TLVprops.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
-unambiguous (Generic.gentm x) (Generic.gentm x₁) = cong Generic.gentm $ TLVprops.unambiguous GenTime.unambiguous x x₁
+unambiguous (Generic.utctm x) (Generic.utctm x₁) = cong Generic.utctm $ TLV.unambiguous UTC.unambiguous x x₁
+unambiguous (Generic.utctm x) (Generic.gentm x₁) = ⊥-elim (TLV.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
+unambiguous (Generic.gentm x) (Generic.utctm x₁) = ⊥-elim (TLV.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
+unambiguous (Generic.gentm x) (Generic.gentm x₁) = cong Generic.gentm $ TLV.unambiguous GenTime.unambiguous x x₁

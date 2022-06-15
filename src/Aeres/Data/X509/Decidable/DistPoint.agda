@@ -7,8 +7,6 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.RDN
-open import Aeres.Data.X509.Decidable.SequenceOf
-open import Aeres.Data.X509.Decidable.TLV
 import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -28,7 +26,7 @@ module parseDistPoint where
   parseNameRTCrlIssuer : Parser _ (Logging ∘ Dec) X509.NameRTCrlIssuer
   parseNameRTCrlIssuer =
     parseTLV Tag.AA1 "RT CRL issuer" _
-      (λ n → parseBoundedSequenceOf "RDNSeq" _ Props.TLV.nonempty Props.TLV.nonnesting parseRDNATV n 1)
+      (λ n → parseBoundedSequenceOf "RDNSeq" _ TLV.nonempty TLV.nonnesting parseRDNATV n 1)
 
   parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
   parseDistPointNameChoice =
@@ -39,8 +37,8 @@ module parseDistPoint where
   parseDistPointFields n =
     parseEquivalent _
       (equivalent×ₚ _ Props.DistPointFields.equivalent)
-      (parseOption₃ _ Props.TLV.nonnesting Props.TLV.nonnesting Props.TLV.nonnesting
-        (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ())) (Props.TLV.noconfusion (λ where ()))
+      (parseOption₃ _ TLV.nonnesting TLV.nonnesting TLV.nonnesting
+        (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ()))
         (parseTLV Tag.AA0 "dist. point name" X509.DistPointNameChoice
           (parseExactLength _ Props.DistPointNameChoice.nonnesting
             (tell $ "parseDistPoint: name choice: underflow")
