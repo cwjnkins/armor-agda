@@ -1,12 +1,13 @@
 {-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
+open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Grammar.Definitions
-import      Aeres.Data.X509.Properties.TLV as TLVProps
 import      Aeres.Data.X509.Properties.BitstringValue as BSProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OCProps
+open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
-open import Aeres.Binary
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -14,8 +15,8 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.CurveFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
 open ≡-Reasoning
 
 
@@ -34,7 +35,7 @@ proj₂ (proj₂ iso) (X509.mkCurveFields a b seed bs≡) = {!!}
 
 @0 unambiguous : Unambiguous X509.CurveFields
 unambiguous = isoUnambiguous iso
-  (unambiguous&ₚ (unambiguous&ₚ (TLVProps.unambiguous OCProps.unambiguous) TLVProps.nonnesting (TLVProps.unambiguous OCProps.unambiguous))
-    (NonNesting&ₚ TLVProps.nonnesting TLVProps.nonnesting)
-      (Unambiguous.option₁ (TLVProps.unambiguous BSProps.unambiguous) TLVProps.nonempty))
+  (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OCProps.unambiguous) TLV.nonnesting (TLV.unambiguous OCProps.unambiguous))
+    (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
+      (Unambiguous.option₁ (TLV.unambiguous BSProps.unambiguous) TLV.nonempty))
 

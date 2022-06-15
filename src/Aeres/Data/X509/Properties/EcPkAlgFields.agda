@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
+open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
-import      Aeres.Data.X509.Properties.TLV          as TLVProps
 import      Aeres.Data.X509.Properties.EcParamsFields          as EcPkAlgParamsProps
+import      Aeres.Data.X690-DER
 open import Aeres.Prelude
-open import Aeres.Binary
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)

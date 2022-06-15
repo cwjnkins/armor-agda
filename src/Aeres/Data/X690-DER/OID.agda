@@ -9,6 +9,7 @@ module Aeres.Data.X690-DER.OID where
 module OID where
   open TCB public
   open import Aeres.Data.X690-DER.OID.Serializer public
+  open import Aeres.Data.X690-DER.OID.Properties public
 
 open TCB public hiding
   (LeastBytes; leastBytes?; leastBytesUnique)

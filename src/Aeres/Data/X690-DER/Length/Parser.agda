@@ -3,34 +3,36 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
-open import Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
-open import Aeres.Data.X509
+open import Aeres.Data.X690-DER.Length.TCB
+open import Aeres.Data.X690-DER.Length.Properties
 
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Data.List.Properties
 
-module Aeres.Data.X509.Decidable.Length where
+module Aeres.Data.X690-DER.Length.Parser where
 
 open Base256
+open Aeres.Grammar.Definitions UInt8
 
 module parseShortLen where
   here' = "parseShortLen"
 
-  parseShortLen : Parser Dig (Logging ∘ Dec) Length.Short
+  parseShortLen : Parser Dig (Logging ∘ Dec) Short
   runParser parseShortLen [] = do
     tell $ here' String.++ ": underflow reading length"
     return ∘ no $ λ where
-      (success .([ l ]) read read≡ (Length.mkShort l l<128 refl) suffix ())
+      (success .([ l ]) read read≡ (mkShort l l<128 refl) suffix ())
   runParser parseShortLen (l ∷ xs)
     with toℕ l <? 128
   ... | no  l≮128 =
     return ∘ no $ λ where
-      (success .([ l ]) read read≡ (Length.mkShort l l<128 refl) suffix refl) →
+      (success .([ l ]) read read≡ (mkShort l l<128 refl) suffix refl) →
         contradiction l<128 l≮128
   ... | yes l<128 =
-    return (yes (success [ l ] 1 refl (Length.mkShort l l<128 refl) xs refl))
+    return (yes (success [ l ] 1 refl (mkShort l l<128 refl) xs refl))
 
 open parseShortLen public using (parseShortLen)
 
@@ -39,28 +41,28 @@ module parseLongLen where
 
   open ≡-Reasoning
 
-  parseLongLen : Parser Dig (Logging ∘ Dec) Length.Long
+  parseLongLen : Parser Dig (Logging ∘ Dec) Long
   runParser parseLongLen [] = do
     tell $ here' String.++ ": underflow reading length"
     return ∘ no $ λ where
-      (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix ())
+      (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix ())
   runParser parseLongLen (l ∷ []) = do
     tell $ here' String.++ ": underflow reading (long) length"
     return ∘ no $ λ where
-      (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix ())
+      (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix ())
   runParser parseLongLen (l ∷ lₕ ∷ xs)
     with 128 <? toℕ l
   ... | no  l≯128 = do
     tell $ here' String.++ ": leading byte value to small for long length"
     return ∘ no $ λ where
-      (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
+      (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction l>128 l≯128
   ... | yes l>128
     with toℕ lₕ >? 0
   ... | no  lₕ≡0 = do
     tell $ here' String.++ ": first byte of length sequence must not be zero"
     return ∘ no $ λ where
-      (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
+      (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction lₕ≢0 lₕ≡0
   ... | yes lₕ≢0 = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suf₀ refl)
@@ -68,21 +70,21 @@ module parseLongLen where
       where no ¬parse → do
         tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
         return ∘ no $ λ where
-          (success .(l ∷ lₕ ∷ lₜ) read read≡ (Length.mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
+          (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
             contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suffix refl)
               ¬parse
     case lₜ ≟ [] of λ where
       (no  lₜ≢[]) →
         return (yes
           (success (l ∷ lₕ ∷ lₜ) _ (cong (2 +_) r₀≡ )
-            (Length.mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₁ lₜ≢[])})
+            (mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₁ lₜ≢[])})
             suf₀ refl))
       (yes lₜ≡[]) →
         case toℕ lₕ ≥? 128 of λ where
           (no  lₕ≱128) → do
             tell $ here' String.++ ": long length used where short length would suffice"
             return ∘ no $ λ where
-              (success prefix read read≡ (Length.mkLong l' l'>128 lₕ' lₕ'≢0 lₜ' lₜ'Len lₕₜMinRep' refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mkLong l' l'>128 lₕ' lₕ'≢0 lₜ' lₜ'Len lₕₜMinRep' refl) suffix ps≡) → ‼
                 let @0 l≡ : l' ≡ l
                     l≡ = ∷-injectiveˡ ps≡
 
@@ -96,14 +98,14 @@ module parseLongLen where
                       toℕ l - 129  ≡⟨ sym lₜLen ⟩
                       length lₜ    ∎
                 in
-                Length.elimMinRepLong lₕ' lₜ' (λ _ _ → ⊥)
+                elimMinRepLong lₕ' lₜ' (λ _ _ → ⊥)
                   (λ lₜ'≡[] lₕ'≥128 → contradiction lₕ'≥128 (subst (λ i → ¬ 128 ≤ toℕ i) (sym lₕ≡) lₕ≱128))
                   (λ lₜ'≢[] → contradiction (trans (proj₁ lₜ≡) lₜ≡[]) lₜ'≢[])
                   lₕₜMinRep'
           (yes lₕ≥128) →
             return (yes
               (success _ _ refl
-                (Length.mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₂ lₕ≥128)}) suf₀ refl))
+                (mkLongₛ l lₕ lₜ{fromWitness l>128}{fromWitness lₕ≢0}{fromWitness lₜLen}{fromWitness (inj₂ lₕ≥128)}) suf₀ refl))
 
 open parseLongLen public using (parseLongLen)
 
@@ -113,37 +115,13 @@ module parseLen where
   parseLen : Parser Dig (Logging ∘ Dec) Length
   runParser parseLen xs = do
     no ¬short ← runParser parseShortLen xs
-      where yes short → return (yes (mapSuccess _ (λ {xs'} → Length.short {xs'}) short))
+      where yes sho → return (yes (mapSuccess _ (λ {xs'} → short {xs'}) sho))
     no ¬long  ← runParser parseLongLen xs
-      where yes long → return (yes (mapSuccess _ (λ {xs'} → Length.long {xs'}) long))
+      where yes lo → return (yes (mapSuccess _ (λ {xs'} → long {xs'}) lo))
     return ∘ no $ λ where
-      (success prefix read read≡ (Length.short short) suffix ps≡) →
-        contradiction (success prefix read read≡ short suffix ps≡) ¬short
-      (success prefix read read≡ (Length.long long) suffix ps≡) →
-        contradiction (success _ _ read≡ long _ ps≡) ¬long
+      (success prefix read read≡ (short sho) suffix ps≡) →
+        contradiction (success prefix read read≡ sho suffix ps≡) ¬short
+      (success prefix read read≡ (long lo) suffix ps≡) →
+        contradiction (success _ _ read≡ lo _ ps≡) ¬long
 
 open parseLen public using (parseLen)
-
-private
-  module Test where
-
-    len₁bs : List Dig
-    len₁bs = # 130 ∷ # 13 ∷ [ # 82 ]
-
-    len₁ : Length len₁bs
-    len₁ = Length.longₛ (# 130) (# 13) [ # 82 ]
-
-    len₁p : Logging.val (runParser parseLen len₁bs) ≡ yes (success _ 3 refl (Length.longₛ (# 130) (# 13) [ # 82 ]) [] refl)
-    len₁p = refl
-
-    len₂bs : List Dig
-    len₂bs = [ # 127 ]
-
-    len₂ : Length len₂bs
-    len₂ = Length.shortₛ (# 127)
-
-    len₂p : Logging.val (runParser parseLen len₂bs) ≡ yes (success _ 1 refl (Length.shortₛ (# 127)) [] refl)
-    len₂p = refl
-
-    len₃p : isNo (Logging.val (runParser parseLen [ # 128 ])) ≡ true
-    len₃p = refl

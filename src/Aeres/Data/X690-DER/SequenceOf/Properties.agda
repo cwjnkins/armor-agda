@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509
+open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
@@ -11,7 +11,7 @@ open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-module Aeres.Data.X509.Properties.SequenceOf where
+module Aeres.Data.X690-DER.SequenceOf.Properties where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
@@ -95,7 +95,7 @@ module SequenceOf where
         (λ {ys} eq → ∀ (t' : SequenceOf _ ys) → lengthSequence (subst₀ _ (sym eq) t') ≡ lengthSequence t')
         (λ t → refl) bs₂≡ t₁
 
-module BoundedSequenceOf where
+module Bounded where
 
   @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (BoundedSequenceOf A n)
   unambiguous uaₐ naₐ nnₐ =

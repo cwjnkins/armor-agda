@@ -5,7 +5,7 @@ open import Aeres.Data.X690-DER.Tag
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Prelude
 
-module Aeres.Data.X690-DER.TCB.Int where
+module Aeres.Data.X690-DER.Int.TCB where
 
 open Base256
 

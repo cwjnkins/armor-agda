@@ -4,11 +4,10 @@ open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
-import      Aeres.Data.X509.Properties.TLV as TLVprops
 import      Aeres.Data.X509.Properties.OctetstringValue as OSprops
-import      Aeres.Data.X509.Properties.OID as OIDprops
 import      Aeres.Data.X509.Properties.CurveFields as CurveFieldsprops
 import      Aeres.Data.X509.Properties.Primitives as Primprops
+open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Data.Nat.Properties
@@ -37,14 +36,14 @@ proj₂ (proj₂ iso) (X509.mkEcParamsFields version fieldID curve base order co
 @0 unambiguous : Unambiguous X509.EcParamsFields
 unambiguous = isoUnambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
-    (TLVprops.unambiguous OSprops.unambiguous))
-      (NonNesting&ₚ (λ where _ refl refl → refl) TLVprops.nonnesting)
-    (TLVprops.unambiguous CurveFieldsprops.unambiguous))
-      (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLVprops.nonnesting) TLVprops.nonnesting)
-    (TLVprops.unambiguous OSprops.unambiguous))
-      (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLVprops.nonnesting) TLVprops.nonnesting) TLVprops.nonnesting)
-    (TLVprops.unambiguous λ {xs} → Primprops.IntegerValue.unambiguous{xs}))
-      (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLVprops.nonnesting) TLVprops.nonnesting) TLVprops.nonnesting) TLVprops.nonnesting)
+    (TLV.unambiguous OSprops.unambiguous))
+      (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
+    (TLV.unambiguous CurveFieldsprops.unambiguous))
+      (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
+    (TLV.unambiguous OSprops.unambiguous))
+      (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
+    (TLV.unambiguous λ {xs} → Primprops.IntegerValue.unambiguous{xs}))
+      (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
     {!!})
 
 @0 equivalentEcPkAlgParams : Equivalent (Sum (Sum X509.EcParams OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
@@ -60,8 +59,8 @@ proj₂ equivalentEcPkAlgParams (X509.implicitlyCA x) = Aeres.Grammar.Sum.inj₂
 nonnestingEcPkAlgParams =
   equivalent-nonnesting equivalentEcPkAlgParams
     (nonnestingSum
-      (nonnestingSum TLVprops.nonnesting TLVprops.nonnesting
-        (TLVprops.noconfusion (λ ())))
+      (nonnestingSum TLV.nonnesting TLV.nonnesting
+        (TLV.noconfusion (λ ())))
       (λ where _ refl refl → refl)
       (symNoConfusion{A = _≡ X509.ExpNull}{B = Sum X509.EcParams OID}
         (NoConfusion.sumₚ{A = _≡ X509.ExpNull}{B = X509.EcParams}{C = OID}
@@ -99,5 +98,5 @@ proj₂ (proj₂ isoEcPkAlgParams) (X509.implicitlyCA x) = refl
 unambiguousEcPkAlgParams =
   isoUnambiguous isoEcPkAlgParams
     (unambiguousSum
-      (unambiguousSum (TLVprops.unambiguous unambiguous) (OIDprops.unambiguous) (TLVprops.noconfusion (λ ())))
+      (unambiguousSum (TLV.unambiguous unambiguous) (OID.unambiguous) (TLV.noconfusion (λ ())))
       (λ where refl refl → refl) {!!})

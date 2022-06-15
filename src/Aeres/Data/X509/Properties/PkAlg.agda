@@ -68,7 +68,7 @@ noconfRSA-EC {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (m
 noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (X509.SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁)
   with OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID ∘ TLV.val $ val
 ... | singleton o refl =
-  contradiction {!!} (toWitnessFalse o∉)
+  contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _ } tt)) (toWitnessFalse o∉)
   where
   @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
   bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩

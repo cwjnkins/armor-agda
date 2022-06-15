@@ -5,7 +5,6 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.OIDSub     as OIDSubProps
 import      Aeres.Data.X509.Properties.SequenceOf as SeqProps
-import      Aeres.Data.X509.Properties.TLV        as TLVProps
 import Aeres.Grammar.Definitions
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -19,13 +18,13 @@ open Aeres.Grammar.Definitions Dig
 module OID' where
   @0 unambiguous : Unambiguous OID
   unambiguous =
-    TLVProps.unambiguous
+    TLV.unambiguous
       (SeqProps.BoundedSequenceOf.unambiguous
         OIDSubProps.unambiguous OIDSubProps.nonempty OIDSubProps.nonnesting)
 
 module OIDSeq where
   @0 unambiguous : Unambiguous (SequenceOf OID)
-  unambiguous = SeqProps.unambiguous OID'.unambiguous TLVProps.nonempty TLVProps.nonnesting
+  unambiguous = SeqProps.unambiguous OID'.unambiguous TLV.nonempty TLV.nonnesting
 
 @0 unambiguous : _
 unambiguous = OID'.unambiguous
@@ -36,4 +35,4 @@ instance
     with snd ≋? snd₁
   ... | no ¬p = no λ where
     refl → contradiction ≋-refl ¬p
-  ... | yes (Aeres.Grammar.Definitions.mk≋ refl refl) = yes refl
+  ... | yes (mk≋ refl refl) = yes refl

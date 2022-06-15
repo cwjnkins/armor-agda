@@ -19,7 +19,6 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.IA5StringValue
-import Aeres.Data.X509.Properties.Length
 import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
@@ -40,10 +39,11 @@ import Aeres.Data.X509.Properties.RSABitStringFields
 import Aeres.Data.X509.Properties.SequenceOf
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
-import Aeres.Data.X509.Properties.TLV
 import Aeres.Data.X509.Properties.Time
 import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
+import Aeres.Data.X690-DER.Length.Properties
+import Aeres.Data.X690-DER.TLV.Properties
 
 module Aeres.Data.X509.Properties where
 
@@ -82,7 +82,7 @@ module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
-module Length                    = Aeres.Data.X509.Properties.Length
+module Length                    = Aeres.Data.X690-DER.Length.Properties
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
@@ -103,7 +103,7 @@ module RSABitStringFields        = Aeres.Data.X509.Properties.RSABitStringFields
 module Seq                       = Aeres.Data.X509.Properties.SequenceOf
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
-module TLV                       = Aeres.Data.X509.Properties.TLV
+module TLV                       = Aeres.Data.X690-DER.TLV.Properties
 module Time                      = Aeres.Data.X509.Properties.Time
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields
 module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields
