@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
@@ -6,7 +6,7 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.OctetstringValue as OSprops
 import      Aeres.Data.X509.Properties.CurveFields as CurveFieldsprops
-import      Aeres.Data.X509.Properties.Primitives as Primprops
+import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -22,16 +22,39 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
+Rep = &ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)
 
+private
+  abstract
+    @0 equiv≡₁ : ∀ {@0 bs₂ bs₃ bs₄ bs₅ bs₆} → (@0 xs : _)
+               → xs ≡ (# 2 ∷ # 1 ∷ # 1 ∷ (((bs₂ ++ bs₃) ++ bs₄) ++ bs₅) ++ bs₆)
+               → _≡_{A = List UInt8}
+                   xs
+                   (# 2 ∷ # 1 ∷ # 1 ∷ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆)
+    equiv≡₁ xs xs≡ = trans xs≡ ((cong (λ x → # 2 ∷ # 1 ∷ # 1 ∷ x) (solve (++-monoid UInt8))))
 
-postulate
-  equivalent : Equivalent (&ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)) X509.EcParamsFields
+    @0 equiv≡₂ : ∀ {@0 bs₂ bs₃ bs₄ bs₅ bs₆} → (@0 xs : _)
+                 → xs ≡ (# 2 ∷ # 1 ∷ # 1 ∷ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆)
+                 → _≡_{A = List UInt8}
+                     xs
+                   (# 2 ∷ # 1 ∷ # 1 ∷ (((bs₂ ++ bs₃) ++ bs₄) ++ bs₅) ++ bs₆)
+    equiv≡₂ xs xs≡ = trans xs≡ (cong (λ x → # 2 ∷ # 1 ∷ # 1 ∷ x) (solve (++-monoid UInt8)))
 
-@0 iso : Iso (&ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)) X509.EcParamsFields
+equivalent : Equivalent Rep X509.EcParamsFields
+proj₁ equivalent{xs} (mk&ₚ{bs₂ = bs₆} (mk&ₚ{bs₂ = bs₅} (mk&ₚ{bs₂ = bs₄} (mk&ₚ{bs₂ = bs₃} (mk&ₚ{bs₂ = bs₂} refl fieldID refl) curve refl) base refl) order refl) cofactor bs≡) =
+  X509.mkEcParamsFields self fieldID curve base order cofactor (equiv≡₁{bs₂}{bs₃} xs bs≡)
+proj₂ equivalent{xs} (X509.mkEcParamsFields{f}{c}{b}{o}{cf} self fieldID curve base order cofactor bs≡) =
+  mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ refl fieldID refl) curve refl) base refl) order refl) cofactor
+    (equiv≡₂{f}{c} xs bs≡)
+
+iso : Iso (&ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)) X509.EcParamsFields
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ refl sndₚ₅ refl) sndₚ₄ refl) sndₚ₃ refl) sndₚ₂ refl) sndₚ₁ bs≡) = {!!}
-proj₂ (proj₂ iso) (X509.mkEcParamsFields version fieldID curve base order cofactor bs≡) = {!!}
-
+proj₁ (proj₂ iso){xs} a@(mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ refl fieldID refl) curve refl) base refl) order refl) cofactor refl) = ‼
+  subst₀ (λ e → mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ (mk&ₚ refl fieldID refl) curve refl) base refl) order refl) cofactor e ≡ a) (≡-unique refl _) refl
+proj₂ (proj₂ iso) a@(X509.mkEcParamsFields self fieldID curve base order cofactor refl) =
+  subst₀ (λ e → X509.mkEcParamsFields self fieldID curve base order cofactor e ≡ a)
+    (‼ (≡-unique refl _))
+    refl
 
 @0 unambiguous : Unambiguous X509.EcParamsFields
 unambiguous = isoUnambiguous iso
@@ -42,9 +65,9 @@ unambiguous = isoUnambiguous iso
       (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
     (TLV.unambiguous OSprops.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-    (TLV.unambiguous λ {xs} → Primprops.IntegerValue.unambiguous{xs}))
+    (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-    {!!})
+    (Unambiguous.option₁ (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}) TLV.nonempty))
 
 @0 equivalentEcPkAlgParams : Equivalent (Sum (Sum X509.EcParams OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
 proj₁ equivalentEcPkAlgParams (Aeres.Grammar.Sum.inj₁ (Aeres.Grammar.Sum.inj₁ x)) = X509.ecparams x
@@ -99,4 +122,19 @@ unambiguousEcPkAlgParams =
   isoUnambiguous isoEcPkAlgParams
     (unambiguousSum
       (unambiguousSum (TLV.unambiguous unambiguous) (OID.unambiguous) (TLV.noconfusion (λ ())))
-      (λ where refl refl → refl) {!!})
+      (λ where refl refl → refl)
+      (symNoConfusion{A = _≡ X509.ExpNull}{B = Sum _ _}
+        (NoConfusion.sumₚ{A = _≡ X509.ExpNull}
+          (λ where
+            {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV len val len≡ bs≡) →
+              contradiction{P = Tag.Sequence ≡ Tag.Null}
+                (∷-injectiveˡ (trans (cong (_++ ys₂) (sym bs≡)) (sym xs₁++ys₁≡xs₂++ys₂)))
+                λ ())
+           λ where
+             {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ refl (mkTLV{l = l}{v} len val len≡ bs≡) →
+               contradiction{P = Tag.ObjectIdentifier ≡ Tag.Null}
+                 (∷-injectiveˡ
+                   (begin (Tag.ObjectIdentifier ∷ l ++ v) ++ ys₂ ≡⟨ cong (_++ ys₂) (sym bs≡) ⟩
+                          xs₂ ++ ys₂ ≡⟨ sym xs₁++ys₁≡xs₂++ys₂ ⟩
+                          xs₁ ++ ys₁ ∎))
+                 (λ ()))))

@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
