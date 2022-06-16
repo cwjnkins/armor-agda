@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
 import      Aeres.Grammar.Definitions
@@ -17,11 +17,16 @@ open import Aeres.Grammar.Sum Dig
 open import Aeres.Grammar.Properties  Dig
 open ≡-Reasoning
 
+Rep = &ₚ (_≡ X509.PKOID.RsaEncPk) (_≡ X509.ExpNull)
 
-equivalent : Equivalent (&ₚ (_≡ X509.PKOID.RsaEncPk) (_≡ X509.ExpNull)) X509.RSAPkAlgFields
+equivalent : Equivalent Rep X509.RSAPkAlgFields
 proj₁ equivalent (mk&ₚ refl refl refl) = X509.mkRSAPkAlgFields self self refl
 proj₂ equivalent (X509.mkRSAPkAlgFields self self refl) = mk&ₚ refl refl refl
 
+iso : Iso Rep X509.RSAPkAlgFields
+proj₁ iso = equivalent
+proj₁ (proj₂ iso) (mk&ₚ refl refl refl) = refl
+proj₂ (proj₂ iso) (X509.mkRSAPkAlgFields self self refl) = refl
 
 @0 nonnesting : NonNesting X509.RSAPkAlgFields
 nonnesting {xs₁} {ys₁} {xs₂} {ys₂} a (X509.mkRSAPkAlgFields (singleton x x≡) (singleton x₂ x≡₂) bs≡) (X509.mkRSAPkAlgFields (singleton x₁ x≡₁) (singleton x₃ x≡₃) bs≡₁) =
@@ -34,5 +39,7 @@ nonnesting {xs₁} {ys₁} {xs₂} {ys₂} a (X509.mkRSAPkAlgFields (singleton x
     x₁ ++ x₃ ≡⟨ sym bs≡₁ ⟩
     xs₂ ∎)
 
-postulate
-  @0 unambiguous : Unambiguous X509.RSAPkAlgFields
+@0 unambiguous : Unambiguous X509.RSAPkAlgFields
+unambiguous =
+  isoUnambiguous iso
+    (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) ≡-unique)

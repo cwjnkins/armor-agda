@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -32,8 +32,12 @@ nonnesting = equivalent-nonnesting equivalent (NonNesting&ₚ (λ where _ refl r
 
 @0 iso : Iso (&ₚ (_≡ X509.PKOID.EcPk) X509.EcPkAlgParams) X509.EcPkAlgFields
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = {!!}
-proj₂ (proj₂ iso) (X509.mkEcPkAlgFields oid param bs≡) = {!refl!}
+proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ refl (X509.ecparams x) refl) = refl
+proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ refl (X509.namedcurve x) refl) = refl
+proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ refl (X509.implicitlyCA x) refl) = refl
+proj₂ (proj₂ iso) (X509.mkEcPkAlgFields self (X509.ecparams x) refl) = refl
+proj₂ (proj₂ iso) (X509.mkEcPkAlgFields self (X509.namedcurve x) refl) = refl
+proj₂ (proj₂ iso) (X509.mkEcPkAlgFields self (X509.implicitlyCA x) refl) = refl
 
 @0 unambiguous : Unambiguous X509.EcPkAlgFields
 unambiguous =

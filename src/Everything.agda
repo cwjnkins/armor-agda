@@ -69,6 +69,7 @@ import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.PCFieldsSeqFields
 import Aeres.Data.X509.Properties.PkAlg
+import Aeres.Data.X509.Properties.PkVal
 import Aeres.Data.X509.Properties.PolicyInformationFields
 import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields

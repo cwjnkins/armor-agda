@@ -25,6 +25,7 @@ import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.PCFieldsSeqFields
 import Aeres.Data.X509.Properties.PkAlg
+import Aeres.Data.X509.Properties.PkVal
 import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.Primitives
@@ -86,6 +87,7 @@ module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFie
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
 module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
 module PkAlg                     = Aeres.Data.X509.Properties.PkAlg
+module PkVal                     = Aeres.Data.X509.Properties.PkVal
 module PolicyMapFields           = Aeres.Data.X509.Properties.PolicyMapFields
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module Primitives                = Aeres.Data.X509.Properties.Primitives

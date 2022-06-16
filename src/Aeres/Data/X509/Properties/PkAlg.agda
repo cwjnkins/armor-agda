@@ -1,16 +1,16 @@
 {-# OPTIONS --subtyping #-}
 
+open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parser
-import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.EcPkAlgFields  as EcProps
 import      Aeres.Data.X509.Properties.RSAPkAlgFields as RSAProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
-open import Aeres.Binary
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)

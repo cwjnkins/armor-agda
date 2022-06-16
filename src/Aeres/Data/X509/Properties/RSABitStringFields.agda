@@ -27,3 +27,6 @@ nonnesting x a₁ a₂ = foo
 equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFields
 proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ refl sndₚ₁ bs≡) = X509.mkRSABitStringFields self sndₚ₁ bs≡
 proj₂ equivalent (X509.mkRSABitStringFields self rsane bs≡) = Aeres.Grammar.Definitions.mk&ₚ refl rsane bs≡
+
+postulate
+  @0 unambiguous : Unambiguous X509.RSABitStringFields
