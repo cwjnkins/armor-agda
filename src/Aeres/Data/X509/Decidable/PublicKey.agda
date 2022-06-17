@@ -119,70 +119,87 @@ module parsePublicKeyFields where
   parsePkAlg : Parser Dig (Logging ∘ Dec) X509.PkAlg
   runParser parsePkAlg xs = do
     yes (success pre r r≡ v suf ps≡) ← runParser parseSignAlg xs
-      where no ¬p → return {!!}
+      where no ¬p → {!!}
+      -- where no ¬p → return ∘ no $ λ where
+      --   (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → contradiction (success prefix read read≡ {!!} suffix ps≡) ¬p
+      --   (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → {!!}
+      --   (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) → {!!}
     case (X509.SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
       (no ¬p) → return (yes (success pre r r≡ (X509.PkAlg.otherpkalg v (fromWitnessFalse ¬p)) suf ps≡))
       (yes (here px)) → do
         yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseRSAPkAlg xs
           where no ¬p → return ∘  no $ λ where
-            (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → contradiction (success {!!} {!!} {!!} {!!} {!!} {!!}) ¬p
-            (success prefix read read≡ (X509.PkAlg.ecpkalg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ refl)) suffix ps≡') → {!!}
-            (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) → {!!} --toWitnessFalse x
-        {!!}
+            (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → contradiction (success prefix read read≡ x suffix ps≡) ¬p
+            (success prefix read read≡ (X509.PkAlg.ecpkalg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ refl)) suffix ps≡') →
+              contradiction{P = X509.PKOID.RsaEncPk ≡  X509.PKOID.EcPk}
+                (begin X509.PKOID.RsaEncPk ≡⟨ sym px ⟩
+                       X509.SignAlg.getSignAlgOIDbs v ≡⟨ {!!} ⟩
+                       (X509.SignAlg.SignAlgFields.o ∘ TLV.val $ v) ≡⟨ {!!} ⟩
+                       {!!} ≡⟨ {!!} ⟩ {!!})
+                (λ where ())
+            (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
+              contradiction
+                (subst (_∈ X509.PKOID.Supported) {!!} (here px))
+                (toWitnessFalse x) 
+        return (yes (success pre' r' r≡' (X509.PkAlg.rsapkalg v') suf' ps≡'))
       (yes (there (here px))) → do
-        x ← runParser parseEcPkAlg xs
-        {!!}
+        yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseEcPkAlg xs
+          where no ¬p → return ∘ no $ λ where
+            (success prefix read read≡ (X509.PkAlg.rsapkalg (mkTLV len (X509.mkRSAPkAlgFields oid param bs≡₁) len≡ bs≡)) suffix ps≡) →
+              contradiction{P = X509.PKOID.EcPk ≡ X509.PKOID.RsaEncPk}
+                {!!}
+                λ where ()
+            (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → contradiction (success prefix read read≡ x suffix ps≡) ¬p
+            (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
+              contradiction
+                (subst (_∈ X509.PKOID.Supported) {!!} (there (here px)))
+                (toWitnessFalse x) 
+        return (yes (success pre' r' r≡' (X509.PkAlg.ecpkalg v') suf' ps≡'))
 
+  parsePkVal : (bs : List UInt8) → Parser Dig (Logging ∘ Dec) (X509.PkVal bs)
+  runParser (parsePkVal o) xs
+    with (o ≟ X509.PKOID.RsaEncPk)
+  ... | yes refl = do
+    no ¬rsapkbits ← runParser parseRSABitString xs
+      where
+        (yes (success prefix read read≡ value suffix ps≡)) →
+          return (yes (success prefix read read≡ (X509.rsapkbits refl value) suffix ps≡))
+    return ∘ no $ λ where
+      (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
+        contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → contradiction {!!} {!!}
+  ... | no ¬rsa
+    with (o ≟ X509.PKOID.EcPk)
+  ... | yes refl = do
+    no ¬ecpkbits ← runParser parseBitstring xs
+      where
+        (yes (success prefix read read≡ value suffix ps≡)) →
+          return (yes (success prefix read read≡ (X509.ecpkbits refl value) suffix ps≡))
+    return ∘ no $ λ where
+      (success prefix read read≡ (X509.ecpkbits refl x) suffix ps≡) →
+        contradiction (success prefix read read≡ x suffix ps≡) ¬ecpkbits
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → contradiction {!!} {!!}
+  ... | no ¬ec
+    with isYes (o ∈? X509.PKOID.Supported)
+  ... | false = do
+    no ¬otherpkbits ← runParser parseBitstring xs
+      where
+        (yes (success prefix read read≡ value suffix ps≡)) →
+          return (yes (success prefix read read≡ (X509.otherpkbits {!!} value) suffix ps≡))
+    return ∘ no $ λ where
+      (success prefix read read≡ (X509.rsapkbits o≡ x) suffix ps≡) → ?
+      (success prefix read read≡ (X509.ecpkbits o≡ x) suffix ps≡) → ?
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → ?
+  ... | true = {!!}
 
-  -- runParser parsePkAlg xs = do
-  --   no ¬rsapkalg ← runParser parseRSAPkAlg xs
-  --     where yes p → return (yes (mapSuccess Dig (λ x → X509.PkAlg.rsapkalg x) p))
-  --   no ¬ecpkalg ← runParser parseEcPkAlg xs
-  --     where yes q → return (yes (mapSuccess Dig (λ x → X509.PkAlg.ecpkalg x) q))
-  --   no ¬otherpkalg ← runParser parseSignAlg xs
-  --     where yes r → return (yes (mapSuccess Dig (λ x → X509.PkAlg.otherpkalg x {!!}) r))
-  --   return ∘ no $ λ where
-  --    (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
-  --      contradiction (success _ _ read≡ x _ ps≡) ¬rsapkalg
-  --    (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) →
-  --      contradiction (success _ _ read≡ x _ ps≡) ¬ecpkalg
-  --    (success prefix read read≡ (X509.PkAlg.otherpkalg x f) suffix ps≡) →
-  --      contradiction (success _ _ read≡ x _ ps≡) ¬otherpkalg
-
---   parsePkVal : (bs : List UInt8) → Parser Dig (Logging ∘ Dec) (X509.PkVal bs)
---   runParser (parsePkVal o) xs
---     with (o ≟ X509.PKOID.RsaEncPk)
---   ... | yes refl = do
---     no ¬rsapkbits ← runParser parseRSABitString xs
---       where
---         (yes (success prefix read read≡ value suffix ps≡)) →
---           return (yes (success prefix read read≡ (X509.rsapkbits refl value) suffix ps≡))
---     return ∘ no $ λ where
---       (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
---         contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
---       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
---         contradiction {!!}  {!!}
---   ... | no ¬rsa
---     with (o ≟ X509.PKOID.EcPk)
---   ... | yes refl = do
---     no ¬ecpkbits ← runParser parseBitstring xs
---       where
---         (yes (success prefix read read≡ value suffix ps≡)) →
---           return (yes (success prefix read read≡ (X509.ecpkbits refl value) suffix ps≡))
---     return ∘ no $ λ where
---       (success prefix read read≡ (X509.ecpkbits refl x) suffix ps≡) →
---         contradiction (success prefix read read≡ x suffix ps≡) ¬ecpkbits
---       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
---         contradiction {!!} {!!}
---   ... | no ¬ec
---     with (o ∈? X509.PKOID.Supported)
---   ... | yes supported = {!!}
---   ... | no  ¬supported = do
---     no ¬otherpkbits ← runParser parseBitstring xs
---       where
---         (yes (success prefix read read≡ value suffix ps≡)) →
---           return (yes (success prefix read read≡ {!!} suffix ps≡))
---     return {!!}
+  --   with (o ∈? X509.PKOID.Supported)
+  -- ... | yes supported = {!!}
+  -- ... | no  ¬supported = do
+  --   no ¬otherpkbits ← runParser parseBitstring xs
+  --     where
+  --       (yes (success prefix read read≡ (mkTLV len val len≡ bs≡) suffix ps≡)) →
+  --         return (yes (success prefix read read≡ (X509.otherpkbits {!!} {!!}) suffix ps≡))
+  --   return {!!}
 
 
 --   parsePublicKeyFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.PublicKeyFields n)
