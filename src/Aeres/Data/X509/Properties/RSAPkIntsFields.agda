@@ -3,6 +3,7 @@
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
+import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -27,3 +28,15 @@ nonnesting x a₁ a₂ = foo
 equivalent : Equivalent (&ₚ Int Int) X509.RSAPkIntsFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRSAPkIntsFields fstₚ₁ sndₚ₁ bs≡
 proj₂ equivalent (X509.mkRSAPkIntsFields fstₚ₁ sndₚ₁ bs≡) = mk&ₚ fstₚ₁ sndₚ₁ bs≡
+
+iso : Iso (&ₚ Int Int) X509.RSAPkIntsFields
+proj₁ iso = equivalent
+proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (X509.mkRSAPkIntsFields nval eval bs≡) = refl
+
+@0 unambiguous : Unambiguous X509.RSAPkIntsFields
+unambiguous = isoUnambiguous iso
+                (unambiguous&ₚ
+                (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+                TLV.nonnesting
+                (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))

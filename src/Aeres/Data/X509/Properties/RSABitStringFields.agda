@@ -3,6 +3,7 @@
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
+import      Aeres.Data.X509.Properties.RSAPkIntsFields as RSAPkIntsFieldsProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -13,7 +14,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.Properties.RSABitStringFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
+open import Aeres.Grammar.Definitions Dig
 open ≡-Reasoning
 
 @0 nonnesting : NonNesting X509.RSABitStringFields
@@ -28,5 +29,14 @@ equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFi
 proj₁ equivalent (Aeres.Grammar.Definitions.mk&ₚ refl sndₚ₁ bs≡) = X509.mkRSABitStringFields self sndₚ₁ bs≡
 proj₂ equivalent (X509.mkRSABitStringFields self rsane bs≡) = Aeres.Grammar.Definitions.mk&ₚ refl rsane bs≡
 
-postulate
-  @0 unambiguous : Unambiguous X509.RSABitStringFields
+iso : Iso (&ₚ (_≡ [ # 0 ]) X509.RSAPkInts) X509.RSABitStringFields
+proj₁ iso = equivalent
+proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ refl sndₚ₁ refl) = refl
+proj₂ (proj₂ iso) (X509.mkRSABitStringFields self rsane refl) = refl
+
+@0 unambiguous : Unambiguous X509.RSABitStringFields
+unambiguous = isoUnambiguous iso
+                (unambiguous&ₚ
+                  ≡-unique
+                  (λ where _ refl refl → refl)
+                  (TLV.unambiguous RSAPkIntsFieldsProps.unambiguous))

@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -40,22 +40,3 @@ unambiguous =
 
 nonnesting : NonNesting X509.PublicKeyFields
 nonnesting{xs₁}{ys₁}{xs₂}{ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} pkalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} pkalg₁ pubkey₁ bs≡₁) = {!!}
-
-
--- nonnesting {xs₁} {ys₁} {xs₂} {ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} signalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} signalg₁ pubkey₁ bs≡₁)
---   with ‼ TLVprops.nonnesting x' signalg signalg₁
---   | ‼ x'
---   where
---   @0 x' : alg ++ pk ++ ys₁ ≡ alg₁ ++ pk₁ ++ ys₂
---   x' = begin (alg ++ pk ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩ -- assoc + identity
---              (alg ++ pk) ++ ys₁ ≡⟨ cong (_++ ys₁ ) (sym bs≡) ⟩
---              xs₁ ++ ys₁ ≡⟨ x ⟩
---              xs₂ ++ ys₂ ≡⟨  cong (_++ ys₂ ) (bs≡₁) ⟩
---              (alg₁ ++ pk₁) ++ ys₂ ≡⟨  solve (++-monoid UInt8) ⟩
---              alg₁ ++ pk₁ ++ ys₂ ∎)
--- ... | foo | x'
---   with ‼ TLVprops.nonnesting (Lemmas.++-cancel≡ˡ _ _ foo x') pubkey pubkey₁
--- ... | bar = ‼ (begin (xs₁ ≡⟨ bs≡ ⟩
---                      alg ++ pk ≡⟨ cong₂ _++_ foo bar ⟩
---                      alg₁ ++ pk₁ ≡⟨ sym bs≡₁ ⟩
---                      xs₂ ∎))
