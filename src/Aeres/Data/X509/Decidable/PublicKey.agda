@@ -187,9 +187,9 @@ module parsePublicKeyFields where
         (yes (success prefix read read≡ value suffix ps≡)) →
           return (yes (success prefix read read≡ (X509.otherpkbits {!!} value) suffix ps≡))
     return ∘ no $ λ where
-      (success prefix read read≡ (X509.rsapkbits o≡ x) suffix ps≡) → ?
-      (success prefix read read≡ (X509.ecpkbits o≡ x) suffix ps≡) → ?
-      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → ?
+      (success prefix read read≡ (X509.rsapkbits o≡ x) suffix ps≡) → {!!}
+      (success prefix read read≡ (X509.ecpkbits o≡ x) suffix ps≡) → {!!}
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → {!!}
   ... | true = {!!}
 
   --   with (o ∈? X509.PKOID.Supported)
