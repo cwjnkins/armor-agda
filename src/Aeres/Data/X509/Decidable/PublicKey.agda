@@ -46,14 +46,16 @@ module parsePublicKeyFields where
   parseEcParamsFields n = parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&)  (equivalent×ₚ _ Props.EcParamsFields.equivalent))
     (parse&ᵈ _
       (withinLength-nonnesting _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)) (withinLength-unambiguous _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (unambiguous&ₚ _ (λ where refl refl → refl) (λ where _ refl refl → refl) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) (TLV.unambiguous Props.CurveFields.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) (TLV.unambiguous Props.OctetstringValue.unambiguous)) (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs})))
-        (parse≤ _ n (parse& _ {!!} {!!} parseInt) {!!} (tell $ here' String.++ ": overflow"))
+        (parse≤ _ n (parse& _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
+          (parse& _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
+            (parse& _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting)
+              (parse& _ (λ where _ refl refl → refl) (parseLit _ (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") (# 2 ∷ # 1 ∷ [ # 1 ]))
+              parseFieldID) parseCurve) parseOctetString) parseInt)
+          (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (NonNesting&ₚ _ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) (tell $ here' String.++ ": overflow"))
         λ where
           {bs} (singleton read read≡) _ →
             subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡
-              (parseEquivalent _ {!!}
-                (parse&ᵈ _ (withinLength-nonnesting _ {!!}) {!!} {!!} {!!})))
-
-
+              (parseOption₁ExactLength _ TLV.nonempty TLV.nonnesting (tell $ here' String.++ ": underflow") parseInt (n - read)))
 
   parseEcParams :  Parser Dig (Logging ∘ Dec) X509.EcParams
   parseEcParams = parseTLV _ "EC params" _ parseEcParamsFields
@@ -119,11 +121,10 @@ module parsePublicKeyFields where
   parsePkAlg : Parser Dig (Logging ∘ Dec) X509.PkAlg
   runParser parsePkAlg xs = do
     yes (success pre r r≡ v suf ps≡) ← runParser parseSignAlg xs
-      where no ¬p → {!!}
-      -- where no ¬p → return ∘ no $ λ where
-      --   (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → contradiction (success prefix read read≡ {!!} suffix ps≡) ¬p
-      --   (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → {!!}
-      --   (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) → {!!}
+      where no ¬p → return ∘ no $ λ where
+        (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) → {!!}
+        (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → {!!}
+        (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) → {!!}
     case (X509.SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
       (no ¬p) → return (yes (success pre r r≡ (X509.PkAlg.otherpkalg v (fromWitnessFalse ¬p)) suf ps≡))
       (yes (here px)) → do
@@ -167,7 +168,8 @@ module parsePublicKeyFields where
     return ∘ no $ λ where
       (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
         contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
-      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → contradiction {!!} {!!}
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
+        contradiction {!!} {!!}
   ... | no ¬rsa
     with (o ≟ X509.PKOID.EcPk)
   ... | yes refl = do
@@ -180,40 +182,33 @@ module parsePublicKeyFields where
         contradiction (success prefix read read≡ x suffix ps≡) ¬ecpkbits
       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → contradiction {!!} {!!}
   ... | no ¬ec
-    with isYes (o ∈? X509.PKOID.Supported)
-  ... | false = do
+    with o∉
+    where
+    o∉ : o ∉ X509.PKOID.Supported
+    o∉ (here px) = contradiction px ¬rsa
+    o∉ (there (here px)) = contradiction px ¬ec
+  ... | o∉ =  do
     no ¬otherpkbits ← runParser parseBitstring xs
       where
         (yes (success prefix read read≡ value suffix ps≡)) →
-          return (yes (success prefix read read≡ (X509.otherpkbits {!!} value) suffix ps≡))
+          return (yes (success prefix read read≡ (X509.otherpkbits (fromWitnessFalse{Q = o ∈? _} o∉) value) suffix ps≡))
     return ∘ no $ λ where
       (success prefix read read≡ (X509.rsapkbits o≡ x) suffix ps≡) → {!!}
       (success prefix read read≡ (X509.ecpkbits o≡ x) suffix ps≡) → {!!}
-      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → {!!}
-  ... | true = {!!}
+      (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) → contradiction (success prefix read read≡ x suffix ps≡) ¬otherpkbits
 
-  --   with (o ∈? X509.PKOID.Supported)
-  -- ... | yes supported = {!!}
-  -- ... | no  ¬supported = do
-  --   no ¬otherpkbits ← runParser parseBitstring xs
-  --     where
-  --       (yes (success prefix read read≡ (mkTLV len val len≡ bs≡) suffix ps≡)) →
-  --         return (yes (success prefix read read≡ (X509.otherpkbits {!!} {!!}) suffix ps≡))
-  --   return {!!}
+  parsePublicKeyFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.PublicKeyFields n)
+  parsePublicKeyFields n =
+    parseExactLength _ Props.PublicKeyFields.nonnesting (tell $ here' String.++ ": underflow")
+      (parseEquivalent _ Props.PublicKeyFields.equivalent
+        (parse&ᵈ _ Props.PkAlg.nonnesting Props.PkAlg.unambiguous
+          parsePkAlg λ x a → parsePkVal _)) n
+
+open parsePublicKeyFields public using (parsePublicKeyFields)
 
 
---   parsePublicKeyFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.PublicKeyFields n)
---   parsePublicKeyFields n =
---     parseExactLength _ Props.PublicKeyFields.nonnesting (tell $ here' String.++ ": underflow")
---       (parseEquivalent _ Props.PublicKeyFields.equivalent
---         (parse&ᵈ _ Props.PkAlg.nonnesting Props.PkAlg.unambiguous
---           parsePkAlg λ x a → parsePkVal _)) n
-
--- open parsePublicKeyFields public using (parsePublicKeyFields)
-
-postulate
-  parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
--- parsePublicKey = parseTLV _ "Public key" _ parsePublicKeyFields
+parsePublicKey : Parser Dig (Logging ∘ Dec) X509.PublicKey
+parsePublicKey = parseTLV _ "Public key" _ parsePublicKeyFields
 
 -- -------------------------------------------------------------------------------------------------------
 
