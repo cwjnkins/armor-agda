@@ -59,3 +59,7 @@ unambiguous o =
             contradiction{P = X509.PKOID.RsaEncPk ∈ X509.PKOID.Supported}
              (toWitness{Q = _ ∈? _}       tt)
               (toWitnessFalse{Q = _ ∈? _} fstₚ₂)))
+
+
+postulate
+  @0 nonnesting :(@0 o : _) → NonNesting (X509.PkVal o)

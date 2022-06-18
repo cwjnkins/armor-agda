@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -38,5 +38,11 @@ unambiguous =
     (unambiguous&ₚᵈ PkAlgProps.unambiguous PkAlgProps.nonnesting
       λ _ → PkValProps.unambiguous _)
 
-nonnesting : NonNesting X509.PublicKeyFields
-nonnesting{xs₁}{ys₁}{xs₂}{ys₂} x (X509.mkPublicKeyFields {alg = alg} {pk = pk} pkalg pubkey bs≡) (X509.mkPublicKeyFields {alg = alg₁} {pk = pk₁} pkalg₁ pubkey₁ bs≡₁) = {!!}
+@0 nonnesting : NonNesting X509.PublicKeyFields
+nonnesting x x₁ x₂ = foo
+ where
+ v2& : ∀ {bs} → X509.PublicKeyFields bs → (&ₚ X509.PkAlg (X509.PkVal {!!})) bs
+ v2& (X509.mkPublicKeyFields pkalg pubkey bs≡) = Aeres.Grammar.Definitions.mk&ₚ pkalg {!!} bs≡
+   where
+   oid = X509.PkAlg.getOID pkalg
+ foo = NonNesting&ₚ PkAlgProps.nonnesting (PkValProps.nonnesting {!!}) x (v2& x₁) (v2& x₂)
