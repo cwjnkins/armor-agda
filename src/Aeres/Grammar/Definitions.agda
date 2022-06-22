@@ -164,6 +164,9 @@ noconfusionΣₚ nc₁ ++≡ (mk×ₚ fstₚ _ refl) (mk×ₚ fstₚ' _ refl) = 
 nonnesting×ₚ₁ : ∀ {@0 A B} → NonNesting A → NonNesting (A ×ₚ B)
 nonnesting×ₚ₁ nn ++≡ (mk×ₚ fstₚ₁ _ refl) (mk×ₚ fstₚ₂ _ refl) = nn ++≡ fstₚ₁ fstₚ₂
 
+nonnesting×ₚ₂ : ∀ {@0 A B} → NonNesting A → NonNesting (B ×ₚ A)
+nonnesting×ₚ₂  nn ++≡ (mk×ₚ _ sndₚ₁ refl) (mk×ₚ _ sndₚ₂ refl) = nn ++≡ sndₚ₁ sndₚ₂
+
 unambiguousΣₚ : ∀ {@0 A B} → Unambiguous A → (∀ {xs} a → (b₁ b₂ : B xs a) → b₁ ≡ b₂) → Unambiguous (Σₚ A B)
 unambiguousΣₚ{A}{B} ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) =
   subst₀ (λ o → (t : B _ o) → _ ≡ mk×ₚ o t refl) (ua₁ fstₚ₁ fstₚ₂)
@@ -249,7 +252,7 @@ open &ₚᵈ public using (fstₚ ; sndₚ)
 &ₚ : (@0 A B : List Σ → Set) (@0 bs : List Σ) → Set
 &ₚ A B = &ₚᵈ A λ _ _ → B
 
-@0 NonNesting&ₚ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NonNesting (&ₚ A B)
+@0 NonNesting&ₚ : {A B : List Σ → Set} → @0 NonNesting A → @0 NonNesting B → NonNesting (&ₚ A B)
 NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs₂₁} a₁ b₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} a₂ b₂ bs≡₁) =
   begin xs₁          ≡⟨ bs≡ ⟩
         bs₁₁ ++ bs₂₁ ≡⟨ cong (_++ bs₂₁) bs₁≡ ⟩
