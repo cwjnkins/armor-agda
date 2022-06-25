@@ -152,6 +152,7 @@ instance
   Eq≋._≋?_ NotEmptyEq{bs₁ = bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
     ≋-refl → contradiction ≋-refl ¬v₁≋v₂
 
+-- nonnesting×
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
 noconfusion×ₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) y = nc ++≡ fstₚ₁ y
 
@@ -248,6 +249,44 @@ open &ₚᵈ public using (fstₚ ; sndₚ)
 
 &ₚ : (@0 A B : List Σ → Set) (@0 bs : List Σ) → Set
 &ₚ A B = &ₚᵈ A λ _ _ → B
+
+@0 nonnesting&ₚᵈ
+  : {A : List Σ → Set} {B : (@0 bs₁ : List Σ) → A bs₁ → List Σ → Set}
+    → NonNesting A → Unambiguous A → (∀ {@0 bs} (a : A bs) → NonNesting (B bs a))
+    → NonNesting (&ₚᵈ A B)
+nonnesting&ₚᵈ{A}{B} nnA uA nnB {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
+  begin xs₁          ≡⟨ bs≡ ⟩
+        bs₁₁ ++ bs₂₁ ≡⟨ cong₂ _++_ bs₁≡ bs₂≡ ⟩
+        bs₁₂ ++ bs₂₂ ≡⟨ sym bs≡₁ ⟩
+        xs₂          ∎
+  where
+  open ≡-Reasoning
+
+  @0 xs++ys≡' : bs₁₁ ++ bs₂₁ ++ ys₁ ≡ bs₁₂ ++ bs₂₂ ++ ys₂
+  xs++ys≡' = begin bs₁₁ ++ bs₂₁ ++ ys₁   ≡⟨ solve (++-monoid Σ) ⟩
+                   (bs₁₁ ++ bs₂₁) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                   xs₁ ++ ys₁            ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                   xs₂ ++ ys₂            ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                   (bs₁₂ ++ bs₂₂) ++ ys₂ ≡⟨ solve (++-monoid Σ) ⟩
+                   bs₁₂ ++ bs₂₂ ++ ys₂   ∎
+
+  @0 bs₁≡ : bs₁₁ ≡ bs₁₂
+  bs₁≡ = nnA xs++ys≡' fstₚ₁ fstₚ₂
+
+  fstₚ≡ : fstₚ₁ ≡ subst A (sym bs₁≡) fstₚ₂
+  fstₚ≡ = uA fstₚ₁ _
+
+  B≡ : B bs₁₁ fstₚ₁ bs₂₂ ≡ B bs₁₂ fstₚ₂ bs₂₂
+  B≡ = begin B bs₁₁ fstₚ₁ bs₂₂ ≡⟨ cong (λ x → B bs₁₁ x bs₂₂) fstₚ≡ ⟩
+             B bs₁₁ (subst A (sym bs₁≡) fstₚ₂) bs₂₂ ≡⟨ ≡-elim (λ {y} e → B y (subst A e fstₚ₂) bs₂₂ ≡ B _ _ bs₂₂) refl (sym bs₁≡) ⟩
+             B bs₁₂ fstₚ₂ bs₂₂ ∎
+
+  sndₚ₂' : B bs₁₁ fstₚ₁ bs₂₂
+  sndₚ₂' = subst {A = Set} id (sym B≡) sndₚ₂
+
+  @0 bs₂≡ : bs₂₁ ≡ bs₂₂
+  bs₂≡ = nnB fstₚ₁ (Lemmas.++-cancel≡ˡ _ _ bs₁≡ xs++ys≡') sndₚ₁ sndₚ₂'
+
 
 @0 NonNesting&ₚ : {A B : List Σ → Set} → NonNesting A → NonNesting B → NonNesting (&ₚ A B)
 NonNesting&ₚ nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs₂₁} a₁ b₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} a₂ b₂ bs≡₁) =
