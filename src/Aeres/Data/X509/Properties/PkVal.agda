@@ -61,5 +61,15 @@ unambiguous o =
               (toWitnessFalse{Q = _ ∈? _} fstₚ₂)))
 
 
-postulate
-  @0 nonnesting :(@0 o : _) → NonNesting (X509.PkVal o)
+@0 nonnesting :(@0 o : _) → NonNesting (X509.PkVal o)
+nonnesting o = equivalent-nonnesting (equivalent o)
+  (nonnestingSum (nonnesting×ₚ₂ TLV.nonnesting)
+    (nonnestingSum (nonnesting×ₚ₂ TLV.nonnesting)
+      (nonnesting×ₚ₂ TLV.nonnesting)
+    λ where
+      x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction (there (here fstₚ₁)) (toWitnessFalse fstₚ₂))
+  (NoConfusion.sumₚ {A = (const $ o ≡ X509.PKOID.RsaEncPk) ×ₚ X509.RSABitString}
+    (λ where
+      x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction {P = X509.PKOID.RsaEncPk ≡ X509.PKOID.EcPk} (trans (sym fstₚ₁) fstₚ₂) λ ())
+    λ where
+      x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction (here fstₚ₁) (toWitnessFalse fstₚ₂)))

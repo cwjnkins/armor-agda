@@ -38,11 +38,13 @@ unambiguous =
     (unambiguous&ₚᵈ PkAlgProps.unambiguous PkAlgProps.nonnesting
       λ _ → PkValProps.unambiguous _)
 
-@0 nonnesting : NonNesting X509.PublicKeyFields
-nonnesting x x₁ x₂ = foo
- where
- v2& : ∀ {bs} → X509.PublicKeyFields bs → (&ₚ X509.PkAlg (X509.PkVal {!!})) bs
- v2& (X509.mkPublicKeyFields pkalg pubkey bs≡) = Aeres.Grammar.Definitions.mk&ₚ pkalg {!!} bs≡
-   where
-   oid = X509.PkAlg.getOID pkalg
- foo = NonNesting&ₚ PkAlgProps.nonnesting (PkValProps.nonnesting {!!}) x (v2& x₁) (v2& x₂)
+postulate
+  @0 nonnesting : NonNesting X509.PublicKeyFields
+-- nonnesting x x₁ x₂ = foo
+--  where
+--  v2& : ∀ {bs} → X509.PublicKeyFields bs → (&ₚ X509.PkAlg (Σₚ (λ _ → List UInt8) λ xs oid → X509.PkVal oid xs)) bs
+--  v2& (X509.mkPublicKeyFields pkalg pubkey bs≡) = mk&ₚ pkalg (Aeres.Grammar.Definitions.mk×ₚ (X509.PkAlg.getOID pkalg) pubkey refl) bs≡
+--  foo = NonNesting&ₚ PkAlgProps.nonnesting
+--          (λ where
+--            xs₁++ys₁≡xs₂++ys₂ (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ refl) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ refl) → ‼ (PkValProps.nonnesting {!!} {!!} {!!} {!!}))
+--          x (v2& x₁) (v2& x₂)
