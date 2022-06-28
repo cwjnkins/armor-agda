@@ -123,9 +123,9 @@ module parsePublicKeyFields where
     yes (success pre r r≡ v suf ps≡) ← runParser parseSignAlg xs
       where no ¬p → return ∘ no $ λ where
         (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
-          contradiction (success prefix read read≡ {!v!} suffix ps≡) ¬p
+          contradiction (success prefix read read≡ (PkAlg.RSAPkAlg2SignAlg x) suffix ps≡) ¬p
         (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) →
-          contradiction (success prefix read read≡ {!!} suffix ps≡) ¬p
+          contradiction (success prefix read read≡ (PkAlg.EcPkAlg2SignAlg x) suffix ps≡) ¬p
         (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
           contradiction (success prefix read read≡ sa suffix ps≡) ¬p
     case (X509.SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
@@ -173,7 +173,7 @@ module parsePublicKeyFields where
       (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
         contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
-        contradiction (success prefix read read≡ {!!} suffix ps≡) ¬rsapkbits
+        contradiction{P = o ∈ X509.PKOID.Supported} (here refl) (toWitnessFalse{Q = o ∈? _} o∉)
   ... | no ¬rsa
     with (o ≟ X509.PKOID.EcPk)
   ... | yes refl = do

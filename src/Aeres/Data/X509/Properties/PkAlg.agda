@@ -205,3 +205,16 @@ unambiguous =
           {A = Σₚ X509.SignAlg λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)}
           {B = X509.RSAPkAlg}{C = X509.EcPkAlg}
           noconfSA-RSA noconfSA-EC)))
+
+
+
+
+
+--- we need serializers for these two
+postulate
+  RSAPkAlg2SignAlg : ∀{@0 bs} → X509.RSAPkAlg bs → X509.SignAlg bs
+
+
+EcPkAlg2SignAlg : ∀{@0 bs} → X509.EcPkAlg bs → X509.SignAlg bs 
+EcPkAlg2SignAlg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ bs≡) =
+  mkTLV len (X509.SignAlg.mkSignAlgFields {!!} (some (mk×ₚ (mkIntegerValue {!!} refl) {!!} refl)) {!!}) {!!} bs≡
