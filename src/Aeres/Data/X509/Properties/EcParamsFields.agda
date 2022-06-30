@@ -3,6 +3,7 @@
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Serializer
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.OctetstringValue as OSprops
 import      Aeres.Data.X509.Properties.CurveFields as CurveFieldsprops
@@ -19,6 +20,7 @@ module Aeres.Data.X509.Properties.EcParamsFields where
 open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Serializer  UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
@@ -138,3 +140,6 @@ unambiguousEcPkAlgParams =
                           xs₂ ++ ys₂ ≡⟨ sym xs₁++ys₁≡xs₂++ys₂ ⟩
                           xs₁ ++ ys₁ ∎))
                  (λ ()))))
+
+postulate
+  serialize : Serializer X509.EcParamsFields

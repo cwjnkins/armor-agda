@@ -133,24 +133,26 @@ A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 -- TODO: rename
 NotEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
-NotEmpty A = A ×ₚ ((_≥ 1) ∘ length)
+NotEmpty A = A ×ₚ (Erased ∘ (_≥ 1) ∘ length)
 
 Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
 Bounded A l u = A ×ₚ (InRange l u ∘ length)
 
 instance
   NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)
-  Eq≋._≋?_ NotEmptyEq{bs₁ = bs₁}{bs₂} v₁ v₂
-    with fstₚ v₁ ≋? fstₚ v₂
-  ... | yes ≋-refl
-    with ‼ ≤-irrelevant (sndₚ v₁) (sndₚ v₂)
-  ... | refl
-    with ‼ Σₚ.bs≡ v₁
-    |    ‼ Σₚ.bs≡ v₂
-  ... | refl | refl =
-    yes (mk≋ refl (subst (λ x → mk×ₚ _ _ x ≡ v₂) (≡-unique (Σₚ.bs≡ v₂) (Σₚ.bs≡ v₁)) refl))
-  Eq≋._≋?_ NotEmptyEq{bs₁ = bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
-    ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+  Eq≋._≋?_ NotEmptyEq{bs₁ = bs₁}{bs₂} v₁ v₂ =
+     case fstₚ v₁ ≋? fstₚ v₂ of λ where
+       (no ¬v₁≋v₂) →
+         no λ where ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+       (yes ≋-refl) →
+         case (‼ erased-unique ≤-irrelevant (sndₚ v₁) (sndₚ v₂)) of λ where
+           refl →
+             case ‼ Σₚ.bs≡ v₁ ret (const _) of λ where
+               refl →
+                 case ‼ ‼ Σₚ.bs≡ v₂ ret (const _) of λ where
+                   refl →
+                     case ‼ ≡-unique (Σₚ.bs≡ v₁) (Σₚ.bs≡ v₂) ret (const _) of λ where
+                       refl → yes ≋-refl
 
 -- nonnesting×
 noconfusion×ₚ₁ : ∀ {@0 A₁ A₂ B} → NoConfusion A₁ A₂ → NoConfusion (A₁ ×ₚ B) A₂
@@ -181,7 +183,8 @@ unambiguous×ₚ ua₁ ua₂ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ�
       refl)
 
 unambiguousNotEmpty : ∀ {@0 A : @0 List Σ → Set} → Unambiguous A → Unambiguous (NotEmpty A)
-unambiguousNotEmpty ua = unambiguous×ₚ ua (λ x₁ x₂ → ≤-irrelevant x₁ x₂)
+unambiguousNotEmpty ua =
+  unambiguous×ₚ ua λ x₁ x₂ → erased-unique ≤-irrelevant x₁ x₂
 
 nonemptyΣₚ₁ : ∀ {@0 A B} → NonEmpty A → NonEmpty (Σₚ A B)
 nonemptyΣₚ₁ ne (mk×ₚ fstₚ₁ sndₚ₁ refl) xs≡[] = contradiction xs≡[] (ne fstₚ₁)

@@ -89,7 +89,7 @@ module parseSignAlg where
                 v₀
                 (some
                   (mk×ₚ v₁
-                    (subst₀ (0 <_) (sym v₁Len) (m<n⇒0<n∸m r<n))
+                    (─ subst₀ (0 <_) (sym v₁Len) (m<n⇒0<n∸m r<n))
                     refl))
                 refl)
               (─ (begin length (pre₀ ++ pre₁) ≡⟨ length-++ pre₀ ⟩

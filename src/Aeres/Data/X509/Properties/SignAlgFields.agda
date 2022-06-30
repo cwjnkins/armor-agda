@@ -26,24 +26,27 @@ unambiguous =
   isoUnambiguous iso
     (Unambiguous.unambiguous-&₁option₁
       OID.unambiguous TLV.nonnesting
-      (unambiguous×ₚ OSProps.unambiguous ≤-irrelevant)
+      (unambiguous×ₚ OSProps.unambiguous λ a₁ a₂ → erased-unique ≤-irrelevant a₁ a₂)
       λ where (mk×ₚ _ () refl) refl)
 
 
 instance
   SignAlgFieldsEq : Eq≋ X509.SignAlg.SignAlgFields
-  Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂
-    with X509.SignAlg.SignAlgFields.signOID sf₁ ≋? X509.SignAlg.SignAlgFields.signOID sf₂
-    |    X509.SignAlg.SignAlgFields.param   sf₁ ≋? X509.SignAlg.SignAlgFields.param   sf₂
-  ... | no ¬oid₁≋oid₂ | _ = no λ where
-    ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
-  ... | yes ≋-refl | no ¬param₁≋param₂ = no λ where
-    ≋-refl → contradiction ≋-refl ¬param₁≋param₂
-  ... | yes ≋-refl | yes ≋-refl
-    with ‼ bs₁≡bs₂
-    where
-    @0 bs₁≡bs₂ : bs₁ ≡ bs₂
-    bs₁≡bs₂ = trans (X509.SignAlg.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlg.SignAlgFields.bs≡ sf₂))
-  ... | refl
-    with ‼ ≡-unique (X509.SignAlg.SignAlgFields.bs≡ sf₁) (X509.SignAlg.SignAlgFields.bs≡ sf₂)
-  ... | refl = yes ≋-refl
+  Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂ =
+    case X509.SignAlg.SignAlgFields.signOID sf₁ ≋? X509.SignAlg.SignAlgFields.signOID sf₂ of λ where
+      (no ¬oid₁≋oid₂) →
+        no λ where
+          ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
+      (yes ≋-refl) →
+        case X509.SignAlg.SignAlgFields.param sf₁ ≋? X509.SignAlg.SignAlgFields.param sf₂ of λ where
+          (no ¬param₁≋param₂) →
+            no λ where
+              ≋-refl → contradiction ≋-refl ¬param₁≋param₂
+          (yes ≋-refl) → yes (‼
+            let @0 bs₁≡bs₂ : bs₁ ≡ bs₂
+                bs₁≡bs₂ = trans (X509.SignAlg.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlg.SignAlgFields.bs≡ sf₂))
+            in
+            case (‼ bs₁≡bs₂) of λ where
+              refl →
+                case (‼ ≡-unique (X509.SignAlg.SignAlgFields.bs≡ sf₁) (X509.SignAlg.SignAlgFields.bs≡ sf₂)) ret (const _) of λ where
+                  refl → ≋-refl)

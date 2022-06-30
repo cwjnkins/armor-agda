@@ -2,7 +2,9 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
+import      Aeres.Data.X509.Properties.EcParamsFields as EcParamsFieldsProps
 import      Aeres.Data.X509.Properties.EcPkAlgFields  as EcProps
+import      Aeres.Data.X509.Properties.EcPkAlgParams  as EcParamsProps
 import      Aeres.Data.X509.Properties.RSAPkAlgFields as RSAProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgProps
 open import Aeres.Data.X690-DER
@@ -66,69 +68,69 @@ noconfRSA-EC {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (m
   l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
 @0 noconfSA-RSA : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.RSAPkAlg
-noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (X509.SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁)
-  with OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID ∘ TLV.val $ val
-... | singleton o refl =
-  contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _ } tt)) (toWitnessFalse o∉)
-  where
-  @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
-  bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
-               (Tag.Sequence ∷ l ++ o ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
-               xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
-               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-               (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
-               Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
+noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (X509.SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁) =
+  (case (OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID ∘ TLV.val $ val)
+    ret (λ x → False (Singleton.x x ∈? X509.PKOID.Supported) → ⊥) of λ where
+    (singleton o refl) o∉' → ‼
+      let @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
+          bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
+                       (Tag.Sequence ∷ l ++ o ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                       xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                       xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                       (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
+                       Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
 
-  @0 l≡ : l ≡ l₁
-  l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
+          @0 l≡ : l ≡ l₁
+          l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
-  @0 v≡ : v ≡ v₁
-  v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
-                 (begin v ++ ys₁      ≡⟨ solve (++-monoid UInt8) ⟩ 
-                        o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
-                        v₁ ++ ys₂     ∎)
-                 (begin length v ≡⟨ sym len≡₁ ⟩
-                        getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
-                        getLength len₁ ≡⟨ len≡ ⟩
-                        length v₁ ∎)
+          @0 v≡ : v ≡ v₁
+          v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
+                         (begin v ++ ys₁      ≡⟨ solve (++-monoid UInt8) ⟩ 
+                                o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
+                                v₁ ++ ys₂     ∎)
+                         (begin length v ≡⟨ sym len≡₁ ⟩
+                                getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
+                                getLength len₁ ≡⟨ len≡ ⟩
+                                length v₁ ∎)
 
-  @0 o≡ : o ≡ X509.PKOID.RsaEncPk
-  o≡ = TLV.nonnesting
-         (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
-         signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.RsaEncPk} tt)
-
+          @0 o≡ : o ≡ X509.PKOID.RsaEncPk
+          o≡ = TLV.nonnesting
+                 (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
+                 signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.RsaEncPk} tt)
+      in
+      contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _} tt)) (toWitnessFalse o∉')) o∉
 
 @0 noconfSA-EC : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.EcPkAlg
-noconfSA-EC {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ (mkTLV{l = l}{v} len val@(X509.SignAlg.mkSignAlgFields{p = p} signOID param₁ refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkEcPkAlgFields{p = p₁} self param refl) len≡ bs≡₁)
-  with OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID $ val
-... | singleton o refl = contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _ } tt)) (toWitnessFalse o∉)
-  where
-  @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
-  bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
-               (Tag.Sequence ∷ l ++ o ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
-               xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
-               xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-               (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (++-assoc l₁ v₁ ys₂) ⟩
-               Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
+noconfSA-EC {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ (mkTLV{l = l}{v} len val@(X509.SignAlg.mkSignAlgFields{p = p} signOID param₁ refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkEcPkAlgFields{p = p₁} self param refl) len≡ bs≡₁) =
+  (case OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID $ val ret (λ x → False (Singleton.x x ∈? X509.PKOID.Supported) → ⊥) of λ where
+    (singleton o refl) o∉ → ‼
+      let @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
+          bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
+                       (Tag.Sequence ∷ l ++ o ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                       xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                       xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                       (Tag.Sequence ∷ l₁ ++ v₁) ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (++-assoc l₁ v₁ ys₂) ⟩
+                       Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂ ∎
+          @0 l≡ : l ≡ l₁
+          l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
-  @0 l≡ : l ≡ l₁
-  l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
+          @0 v≡ : v ≡ v₁
+          v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
+                         (begin v ++ ys₁      ≡⟨ solve (++-monoid UInt8) ⟩ 
+                                o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
+                                v₁ ++ ys₂     ∎)
+                         (begin length v ≡⟨ sym len≡₁ ⟩
+                                getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
+                                getLength len₁ ≡⟨ len≡ ⟩
+                                length v₁ ∎)
 
-  @0 v≡ : v ≡ v₁
-  v≡ = proj₁ $ Lemmas.length-++-≡ v ys₁ v₁ ys₂
-                 (begin v ++ ys₁      ≡⟨ solve (++-monoid UInt8) ⟩ 
-                        o ++ p ++ ys₁ ≡⟨ Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡' ⟩
-                        v₁ ++ ys₂     ∎)
-                 (begin length v ≡⟨ sym len≡₁ ⟩
-                        getLength len ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
-                        getLength len₁ ≡⟨ len≡ ⟩
-                        length v₁ ∎)
-
-  @0 o≡ : o ≡ X509.PKOID.EcPk
-  o≡ = TLV.nonnesting
-         (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
-         signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.EcPk} tt)
-
+          @0 o≡ : o ≡ X509.PKOID.EcPk
+          o≡ = TLV.nonnesting
+                 (Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) l≡) bs≡')
+                 signOID (toWitness{Q = parser2dec Logging.val TLV.nonnesting parseOID X509.PKOID.EcPk} tt)
+      in
+      contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _} tt)) (toWitnessFalse o∉))
+    o∉
 
 @0 nonnesting : NonNesting X509.PkAlg
 nonnesting =
@@ -206,15 +208,25 @@ unambiguous =
           {B = X509.RSAPkAlg}{C = X509.EcPkAlg}
           noconfSA-RSA noconfSA-EC)))
 
-
-
-
-
---- we need serializers for these two
-postulate
-  RSAPkAlg2SignAlg : ∀{@0 bs} → X509.RSAPkAlg bs → X509.SignAlg bs
-
+RSAPkAlg2SignAlg : ∀{@0 bs} → X509.RSAPkAlg bs → X509.SignAlg bs
+RSAPkAlg2SignAlg (mkTLV len (X509.mkRSAPkAlgFields self self refl) len≡ refl) =
+  mkTLV len
+    (X509.SignAlg.mkSignAlgFields (toWitness{Q = isOID? X509.PKOID.RsaEncPk} tt)
+      (some (mk×ₚ self (─ s≤s z≤n) refl)) refl)
+    len≡ refl
 
 EcPkAlg2SignAlg : ∀{@0 bs} → X509.EcPkAlg bs → X509.SignAlg bs 
 EcPkAlg2SignAlg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ bs≡) =
-  mkTLV len (X509.SignAlg.mkSignAlgFields {!!} (some (mk×ₚ (mkIntegerValue {!!} refl) {!!} refl)) {!!}) {!!} bs≡
+  mkTLV len
+    (X509.SignAlg.mkSignAlgFields
+      (toWitness{Q = isOID? X509.PKOID.EcPk} tt)
+      (some
+        (mk×ₚ
+          (Sum.serialize
+            (TLV.serialize EcParamsFieldsProps.serialize)
+            (Sum.serialize OID.serialize λ where refl → self)
+            (proj₂ EcParamsProps.equivalent param))
+          (─ EcParamsProps.len≥1 param)
+          refl))
+      refl)
+    len≡ bs≡
