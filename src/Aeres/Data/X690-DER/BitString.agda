@@ -1,22 +1,21 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Data.X690-DER.BitString.Properties
+import      Aeres.Data.X690-DER.BitString.Serializer
+import      Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.BitString where
 
 module BitString where
-  open import Aeres.Data.X690-DER.TCB.BitString public
+  open Aeres.Data.X690-DER.BitString.Properties
+    public
+  open Aeres.Data.X690-DER.BitString.Serializer
+    public
+  open Aeres.Data.X690-DER.BitString.TCB
+    public
+    hiding (BitString ; BitStringValue)
 
-  uniqueUnusedBits : ∀ {bₕ bₜ} → Unique (UnusedBits bₕ bₜ)
-  uniqueUnusedBits {bₜ = []} x y = ≡-unique x y
-  uniqueUnusedBits {bₜ = x₁ ∷ []} x y = ≡-unique x y
-  uniqueUnusedBits {bₜ = x₁ ∷ x₂ ∷ bₜ} x y = uniqueUnusedBits{bₜ = x₂ ∷ bₜ} x y
-
-  unusedBits? : ∀ b bs → Dec (UnusedBits b bs)
-  unusedBits? b [] = toℕ b ≟ 0
-  unusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
-  unusedBits? b (x ∷ x₁ ∷ bs) = unusedBits? b (x₁ ∷ bs)
-
-open BitString public
-  hiding (UnusedBits ; toBitRep)
-
+open Aeres.Data.X690-DER.BitString.TCB
+  public
+  using (BitString ; BitStringValue ; mkBitStringValue)

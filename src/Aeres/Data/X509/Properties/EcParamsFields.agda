@@ -2,12 +2,13 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Serializer
 import      Aeres.Grammar.Sum
-import      Aeres.Data.X509.Properties.OctetstringValue as OSprops
-import      Aeres.Data.X509.Properties.CurveFields as CurveFieldsprops
-import      Aeres.Data.X509.Properties.Primitives as PrimProps
+import      Aeres.Data.X509.Properties.OctetstringValue  as OSProps
+import      Aeres.Data.X509.Properties.CurveFields       as CurveFieldsProps
+import      Aeres.Data.X509.Properties.Primitives        as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -19,10 +20,13 @@ module Aeres.Data.X509.Properties.EcParamsFields where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+  hiding (module Option)
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Serializer  UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
+
+module Option = Aeres.Grammar.Option UInt8
 
 Rep = &ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)
 
@@ -61,11 +65,11 @@ proj₂ (proj₂ iso) a@(X509.mkEcParamsFields self fieldID curve base order cof
 @0 unambiguous : Unambiguous X509.EcParamsFields
 unambiguous = isoUnambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
-    (TLV.unambiguous OSprops.unambiguous))
+    (TLV.unambiguous OSProps.unambiguous))
       (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
-    (TLV.unambiguous CurveFieldsprops.unambiguous))
+    (TLV.unambiguous CurveFieldsProps.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
-    (TLV.unambiguous OSprops.unambiguous))
+    (TLV.unambiguous OSProps.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
     (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
@@ -141,5 +145,17 @@ unambiguousEcPkAlgParams =
                           xs₁ ++ ys₁ ∎))
                  (λ ()))))
 
-postulate
-  serialize : Serializer X509.EcParamsFields
+serialize : Serializer X509.EcParamsFields
+serialize =
+  serializeEquivalent equivalent
+    (serialize&ₚ
+      (serialize&ₚ
+        (serialize&ₚ
+          (serialize&ₚ
+            (serialize&ₚ
+              (λ where refl → self)
+              (TLV.serialize id))
+            (TLV.serialize CurveFieldsProps.serialize))
+          (TLV.serialize id))
+        Int.serialize)
+      (Option.serialize Int.serialize))

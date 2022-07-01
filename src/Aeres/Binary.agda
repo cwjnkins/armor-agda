@@ -72,6 +72,9 @@ module Base256 where
     tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
     tc₂ = refl
 
+  postulate
+    fromTwosComplement : ℤ → List UInt8
+
   -- Converts ASCII codes for '0'-'9' to the corresponding nat.
   asciiNum₁ : Dig → ℕ
   asciiNum₁ = (_- toℕ '0') ∘ toℕ

@@ -74,6 +74,15 @@ module TLVProps where
     @0 v≡ : v₁ ≡ v₂
     v≡ = Lemmas.++-cancel≡ˡ _ _ l≡ bs≡'
 
+  valBS≡ : ∀ {@0 A} {@0 t bs₁ bs₂} → @0 bs₁ ≡ bs₂
+           → (v₁ : TLV t A bs₁) (v₂ : TLV t A bs₂)
+           → TLV.v v₁ ≡ TLV.v v₂
+  valBS≡{t = t} refl (mkTLV{l}{v} len val len≡ bs≡) (mkTLV{l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) =
+    Lemmas.++-cancel≡ˡ _ _ (‼ cong (t ∷_) (Length.nonnesting (∷-injectiveʳ bs≡') len len₁)) (‼ bs≡')
+    where
+    @0 bs≡' : t ∷ l ++ v ≡ t ∷ l₁ ++ v₁
+    bs≡' = trans (sym bs≡) bs≡₁
+
 module NonEmptyVal where
   @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Σₚ (TLV t A) TLVNonEmptyVal)
   unambiguous ua = unambiguousΣₚ (TLVProps.unambiguous ua) λ tlv → ≤-irrelevant

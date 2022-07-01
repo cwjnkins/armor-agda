@@ -2,7 +2,6 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
-import      Aeres.Data.X509.Properties.BitstringValue as BitstringProps
 import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude

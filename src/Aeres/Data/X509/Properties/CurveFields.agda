@@ -2,11 +2,12 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.BitstringValue as BSProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OCProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Serializer
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -16,8 +17,12 @@ module Aeres.Data.X509.Properties.CurveFields where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+  hiding (module Option)
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Serializer  UInt8
 open ≡-Reasoning
+
+module Option = Aeres.Grammar.Option  UInt8
 
 Rep = &ₚ (&ₚ OctetString OctetString) (Option BitString)
 
@@ -44,5 +49,11 @@ proj₂ (proj₂ iso) (X509.mkCurveFields a b seed refl) = ‼
 unambiguous = isoUnambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OCProps.unambiguous) TLV.nonnesting (TLV.unambiguous OCProps.unambiguous))
     (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
-      (Unambiguous.option₁ (TLV.unambiguous BSProps.unambiguous) TLV.nonempty))
+      (Unambiguous.option₁ (TLV.unambiguous BitString.unambiguous) TLV.nonempty))
 
+serialize : Serializer X509.CurveFields
+serialize =
+  serializeEquivalent equivalent
+    (serialize&ₚ
+      (serialize&ₚ (TLV.serialize id) (TLV.serialize id))
+      (Option.serialize BitString.serialize))

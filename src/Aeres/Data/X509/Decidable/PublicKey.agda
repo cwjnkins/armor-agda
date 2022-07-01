@@ -135,12 +135,21 @@ module parsePublicKeyFields where
           where no ¬p → return ∘  no $ λ where
             (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
               contradiction (success prefix read read≡ x suffix ps≡) ¬p
-            (success prefix read read≡ (X509.PkAlg.ecpkalg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ refl)) suffix ps≡') →
+            (success prefix read read≡ (X509.PkAlg.ecpkalg v'@(mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ refl)) suffix ps≡') → ‼
+              let v“ : X509.SignAlg _
+                  v“ = PkAlg.EcPkAlg2SignAlg v'
+
+                  @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
+                  ps≡“ = trans ps≡ (sym ps≡')
+
+                  @0 pre≡ : pre ≡ prefix
+                  pre≡ = TLV.nonnesting ps≡“ v v“
+              in
               contradiction{P = X509.PKOID.RsaEncPk ≡  X509.PKOID.EcPk}
                 (begin X509.PKOID.RsaEncPk ≡⟨ sym px ⟩
-                       X509.SignAlg.getSignAlgOIDbs v ≡⟨ {!!} ⟩
+                       X509.SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID ∘ TLV.val $ v) ⟩
                        (X509.SignAlg.SignAlgFields.o ∘ TLV.val $ v) ≡⟨ {!!} ⟩
-                       {!!} ≡⟨ {!!} ⟩ {!!})
+                       {!!})
                 (λ where ())
             (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
               contradiction
