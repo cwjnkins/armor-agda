@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.RSABitStringFields as RSAProps
-import      Aeres.Data.X509.Properties.BitstringValue     as BitStringProps
+import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -46,8 +46,8 @@ unambiguous o =
       (unambiguous×ₚ (λ _ → ≡-unique _) (TLV.unambiguous RSAProps.unambiguous))
       (unambiguousSum
         (unambiguous×ₚ (λ _ → ≡-unique _)
-          (TLV.unambiguous BitStringProps.unambiguous))
-        (unambiguous×ₚ (λ _ → T-unique _) (TLV.unambiguous BitStringProps.unambiguous))
+          (TLV.unambiguous PrimProps.BitstringValue.unambiguous))
+        (unambiguous×ₚ (λ _ → T-unique _) (TLV.unambiguous  PrimProps.BitstringValue.unambiguous))
           λ where
             xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) →
               contradiction (toWitness{Q = X509.PKOID.EcPk ∈? X509.PKOID.Supported} tt) (toWitnessFalse{Q = _ ∈? _} fstₚ₂))
