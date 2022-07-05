@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.RSABitStringFields as RSAProps
+import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties

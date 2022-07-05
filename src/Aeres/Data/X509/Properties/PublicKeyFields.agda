@@ -1,7 +1,8 @@
-{-# OPTIONS --subtyping --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping --allow-unsolved-meta #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
+import      Aeres.Data.X509.Properties.Primitives as PrimProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgFieldsProps
 import      Aeres.Data.X509.Properties.PkAlg          as PkAlgProps
 import      Aeres.Data.X509.Properties.PkVal          as PkValProps

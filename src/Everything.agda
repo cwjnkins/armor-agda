@@ -51,7 +51,6 @@ import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
-import Aeres.Data.X509.Properties.BitstringValue
 import Aeres.Data.X509.Properties.CertFields
 import Aeres.Data.X509.Properties.CurveFields
 import Aeres.Data.X509.Properties.DirectoryString
