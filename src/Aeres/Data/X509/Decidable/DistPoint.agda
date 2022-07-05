@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Decidable.RDN
 import      Aeres.Data.X509.Properties as Props

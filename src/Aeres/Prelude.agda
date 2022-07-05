@@ -43,14 +43,19 @@ module List where
 
   open import Data.List.Relation.Unary.Unique.DecPropositional public
     using (Unique ; unique?)
+
+  open import Data.List.Relation.Unary.AllPairs public
+    using (AllPairs ; [] ; _∷_)
 open List public hiding (Unique ; unique? ; module List)
 
 open import Data.List.Properties public
 
-open import Data.List.Relation.Unary.All
-  using ([] ; _∷_)
-module All = Data.List.Relation.Unary.All
-All = All.All
+module All where
+  open import Data.List.Relation.Unary.All
+    public
+    hiding (module All)
+  open import Data.List.Relation.Unary.All.Properties public
+open All public using (All ; [] ; _∷_)
 
 open import Data.List.Relation.Unary.Any public
   using (here ; there)
@@ -316,6 +321,16 @@ _∉?_ = Data.List.Membership.DecPropositional._∉?_ _≟_
 
 unique? : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Eq A ⦄ → ∀ xs → Dec (List.Unique _≟_ xs)
 unique? = List.unique? _≟_
+
+∈-unique : ∀ {ℓ} {A : Set ℓ} {x : A} {xs : List A} ⦃ _ : Eq A ⦄
+           → List.Unique _≟_ xs → (x∈₁ x∈₂ : x ∈ xs) → x∈₁ ≡ x∈₂
+∈-unique _ (here refl) (here refl) = refl
+∈-unique (d ∷ u) (here refl) (there x∈₂) =
+  contradiction x∈₂ (All.All¬⇒¬Any d)
+∈-unique (d ∷ u) (there x∈₁) (here refl) =
+  contradiction x∈₁ (All.All¬⇒¬Any d)
+∈-unique (d ∷ u) (there x∈₁) (there x∈₂) =
+  cong (Any.there) (∈-unique u x∈₁ x∈₂)
 
 instance
   ℕEq : Eq ℕ

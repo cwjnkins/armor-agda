@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Extension
 open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
@@ -25,6 +24,14 @@ open import Aeres.Grammar.Properties  Dig
 
 module parseTBSCert where
   here' = "parseTBSCert"
+
+  parseIssUID : Parser _ (Logging ∘ Dec) X509.IssUID
+  parseIssUID =
+    parseTLV Tag.A81 "issUID" BitStringValue parseBitstringValue
+
+  parseSubUID : Parser _ (Logging ∘ Dec) X509.SubUID
+  parseSubUID =
+    parseTLV Tag.A82 "subUID" BitStringValue parseBitstringValue
 
   parseTBSCertFields : ExactLengthParser _ (Logging ∘ Dec) X509.TBSCertFields
   parseTBSCertFields n =

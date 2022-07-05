@@ -10,8 +10,8 @@ module Aeres.Data.X690-DER.Int.Serializer where
 
 open Aeres.Grammar.Serializer UInt8
 
-postulate
-  serializeVal : Serializer IntegerValue
+serializeVal : Serializer IntegerValue
+serializeVal = id
 
 serialize : Serializer Int
 serialize = TLV.serialize serializeVal

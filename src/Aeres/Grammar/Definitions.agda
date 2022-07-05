@@ -8,7 +8,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Grammar.Definitions (Σ : Set) where
 
 infix 4 _≋_
-record _≋_ {@0 A : @0 List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
+record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
   constructor mk≋
   field
     @0 bs≡ : bs₁ ≡ bs₂
@@ -346,5 +346,18 @@ unambiguous&ₚ{A}{B} ua₁ nn₁ ua₂ (mk&ₚ{bs₁ = bs₁₁}{bs₁₂} fst�
   @0 bs₂≡ : bs₁₂ ≡ bs₂₂
   bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (trans₀ (sym bs≡) bs≡₁)
 
-postulate
-  @0 unambiguous&ₚᵈ : ∀ {@0 A B} → Unambiguous A → NonNesting A → (∀ {@0 bs} (a : A bs) → Unambiguous (B bs a)) → Unambiguous (&ₚᵈ A B)
+@0 unambiguous&ₚᵈ : ∀ {@0 A B} → Unambiguous A → NonNesting A → (∀ {@0 bs} (a : A bs) → Unambiguous (B bs a)) → Unambiguous (&ₚᵈ A B)
+unambiguous&ₚᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
+  let @0 bs≡' : bs₁₁ ++ bs₂₁ ≡ bs₁₂ ++ bs₂₂
+      bs≡' = trans (sym bs≡) bs≡₁
+  in
+  case nna bs≡' fstₚ₁ fstₚ₂ of λ where
+    refl →
+      case ‼ ua fstₚ₁ fstₚ₂ ret (const _) of λ where
+        refl →
+          case ‼ ++-cancelˡ bs₁₁ bs≡' ret (const _) of λ where
+            refl →
+              case ‼ ub fstₚ₁ sndₚ₁ sndₚ₂ ret (const _) of λ where
+                refl →
+                  case ‼ ≡-unique bs≡ bs≡₁ ret (const _) of λ where
+                    refl → refl

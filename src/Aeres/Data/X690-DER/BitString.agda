@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Data.X690-DER.BitString.Parser
 import      Aeres.Data.X690-DER.BitString.Properties
 import      Aeres.Data.X690-DER.BitString.Serializer
 import      Aeres.Data.X690-DER.BitString.TCB
@@ -19,3 +20,6 @@ module BitString where
 open Aeres.Data.X690-DER.BitString.TCB
   public
   using (BitString ; BitStringValue ; mkBitStringValue)
+
+open Aeres.Data.X690-DER.BitString.Parser
+  public

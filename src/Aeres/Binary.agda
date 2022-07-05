@@ -9,8 +9,11 @@ open import Data.Nat.Induction
   hiding (Acc)
 open import Data.Nat.Properties
   hiding (_≟_)
+import      Data.Sign
 
 module Aeres.Binary where
+
+module Sign = Data.Sign
 
 Binary = Vec Bool
 
@@ -72,9 +75,6 @@ module Base256 where
     tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
     tc₂ = refl
 
-  postulate
-    fromTwosComplement : ℤ → List UInt8
-
   -- Converts ASCII codes for '0'-'9' to the corresponding nat.
   asciiNum₁ : Dig → ℕ
   asciiNum₁ = (_- toℕ '0') ∘ toℕ
@@ -100,8 +100,8 @@ module Base64 where
   charset : List Char
   charset = String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-  postulate
-    ∈charsetUnique : ∀ {@0 c} → (c∈₁ c∈₂ : c ∈ charset) → c∈₁ ≡ c∈₂
+  ∈charsetUnique : ∀ {c} → (c∈₁ c∈₂ : c ∈ charset) → c∈₁ ≡ c∈₂
+  ∈charsetUnique = ∈-unique (toWitness{Q = List.unique? _≟_ charset} tt)
 
   isByteRep : ∀ c → Dec (c ∈ charset)
   isByteRep c = Any.any (c ≟_) charset
