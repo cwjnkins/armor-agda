@@ -40,8 +40,6 @@ import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.Time
 import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
-import Aeres.Data.X690-DER.Length.Properties
-import Aeres.Data.X690-DER.TLV.Properties
 
 module Aeres.Data.X509.Properties where
 
@@ -80,7 +78,6 @@ module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
-module Length                    = Aeres.Data.X690-DER.Length.Properties
 module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
