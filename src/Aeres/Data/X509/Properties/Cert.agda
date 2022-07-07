@@ -13,6 +13,7 @@ module Aeres.Data.X509.Properties.Cert where
 open Base256
 open Aeres.Grammar.Definitions UInt8
 
+-- TODO: we do *not* need this!
 instance
   postulate
     CertEq : Eq (Exists─ (List Dig) X509.Cert)
