@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -16,6 +17,7 @@ module Aeres.Data.X690-DER.SequenceOf.Properties where
 open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 

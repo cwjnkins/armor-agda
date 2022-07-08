@@ -8,6 +8,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Grammar.Parser.Option (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
+open import Aeres.Grammar.Option      Σ
 open import Aeres.Grammar.Parser.Core Σ
 open import Aeres.Grammar.Parser.Bounded Σ
 

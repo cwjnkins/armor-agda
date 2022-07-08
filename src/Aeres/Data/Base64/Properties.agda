@@ -58,8 +58,8 @@ module Base64Str where
 --   proj₂ equiv (Base64.mk64Str s p str pad mult refl) =
 --     mk×ₚ (mk&ₚ str pad refl) (‼ mult) refl
 
-   dec : Decidable Base64.Base64Str
-   dec bs =
+   b64Str? : Decidable Base64.Base64Str
+   b64Str? bs =
      case length bs % 4 ≟ 0 of λ where
        (no ¬≡0) →
          no λ where

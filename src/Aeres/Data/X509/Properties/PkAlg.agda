@@ -9,6 +9,7 @@ import      Aeres.Data.X509.Properties.RSAPkAlgFields as RSAProps
 import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -21,6 +22,7 @@ module Aeres.Data.X509.Properties.PkAlg where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
