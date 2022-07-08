@@ -17,12 +17,11 @@ module Aeres.Data.X509.Properties.CurveFields where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
-  hiding (module Option)
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Serializer  UInt8
 open ≡-Reasoning
 
-module Option = Aeres.Grammar.Option  UInt8
 
 Rep = &ₚ (&ₚ OctetString OctetString) (Option BitString)
 

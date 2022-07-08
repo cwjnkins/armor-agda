@@ -5,6 +5,8 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -12,8 +14,9 @@ open import Data.Nat.Properties
 module Aeres.Data.X509.Properties.SignAlgFields where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
 
 iso : Iso (&ₚ OID (Option (NotEmpty OctetStringValue))) X509.SignAlg.SignAlgFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.SignAlg.mkSignAlgFields fstₚ₁ sndₚ₁ bs≡

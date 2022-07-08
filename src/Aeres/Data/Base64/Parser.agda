@@ -58,7 +58,7 @@ module parseBase64 where
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ str (─ strLen) bs≡) suffix ps≡) →
             contradiction (success prefix _ read≡ (mk×ₚ self (─ strLen) bs≡) suffix ps≡) ¬parse
-    case Base64Str.dec v₀ of λ where
+    case Base64Str.b64Str? v₀ of λ where
       (no ¬p) → return ∘ no $ λ where
         (success prefix read read≡ (mk×ₚ{bs} str (─ strLen) refl) suffix ps≡) →
           contradiction

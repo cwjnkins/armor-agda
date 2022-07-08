@@ -5,6 +5,7 @@ import Aeres.Binary
 import Aeres.Data.Base64.Parser
 import Aeres.Data.Base64.Properties
 import Aeres.Data.Base64.TCB
+import Aeres.Data.Base64
 import Aeres.Data.UTF8.Parser
 import Aeres.Data.UTF8.Properties
 import Aeres.Data.UTF8.Serializer
@@ -146,8 +147,10 @@ import Aeres.Data.X690-DER.TLV
 import Aeres.Data.X690-DER
 -- import Aeres.Data.X690-DER.TCB.TimeTypes
 import Aeres.Grammar.Definitions
-import Aeres.Grammar.IList
 import Aeres.Grammar.IList.Properties
+import Aeres.Grammar.IList
+import Aeres.Grammar.Option.TCB
+import Aeres.Grammar.Option
 import Aeres.Grammar.Parser
 import Aeres.Grammar.Parser.Bounded
 import Aeres.Grammar.Parser.Completeness
@@ -163,12 +166,13 @@ import Aeres.Grammar.Properties
 import Aeres.IO
 import Aeres.Main
 import Aeres.Prelude
--- import Aeres.Test.UTF8Trie.Combine
--- import Aeres.Test.X509.Cert
--- import Aeres.Test.X509.Extension
--- import Aeres.Test.X509.GeneralName
--- import Aeres.Test.X509.RDN
--- import Aeres.Test.X509.TBSCert
+import Aeres.Test.Base64.Base64
+import Aeres.Test.UTF8Trie.Combine
+import Aeres.Test.X509.Cert
+import Aeres.Test.X509.Extension
+import Aeres.Test.X509.GeneralName
+import Aeres.Test.X509.RDN
+import Aeres.Test.X509.TBSCert
 
 import summary
 

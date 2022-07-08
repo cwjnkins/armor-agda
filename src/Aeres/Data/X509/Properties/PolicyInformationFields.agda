@@ -6,14 +6,15 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.PolicyQualifierInfoFields as PQIProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.PolicyInformationFields where
 
 open ≡-Reasoning
-open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 
 iso : Iso (&ₚ OID (Option X509.PolicyQualifiersSeq))

@@ -14,20 +14,24 @@ import      Aeres.Data.X509.Properties.PolicyMapFields    as PMProps
 import      Aeres.Data.X509.Properties.Primitives         as PrimProps
 import      Aeres.Data.X509.Properties.OctetstringValue   as OctetstringValueProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties 
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.Extension where
 
-open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
-open import Aeres.Grammar.Sum Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
 open ≡-Reasoning
 
 module ExtensionFields where
-  equivalent : ∀ {@0 P} {@0 A : @0 List Dig → Set}
+  equivalent : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
                → Equivalent
                    (&ₚ (OID ×ₚ (Erased ∘ P))
                        (&ₚ (Option Generic.Boool)
@@ -38,7 +42,7 @@ module ExtensionFields where
   proj₂ equivalent (X509.mkExtensionFields extnId extnId≡ crit extension refl) =
     mk&ₚ (mk×ₚ extnId (─ extnId≡) refl) (mk&ₚ crit extension refl) refl
 
-  iso : ∀ {@0 P} {@0 A : @0 List Dig → Set}
+  iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
         → Iso
             (&ₚ (OID ×ₚ (Erased ∘ P))
                 (&ₚ (Option Generic.Boool)
@@ -48,7 +52,7 @@ module ExtensionFields where
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (X509.mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
-  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List Dig → Set} → Unambiguous P → Unambiguous A → NoConfusion Generic.Boool A → Unambiguous (X509.ExtensionFields P A)
+  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Generic.Boool A → Unambiguous (X509.ExtensionFields P A)
   unambiguous ua₁ ua₂ nc =
     isoUnambiguous iso
       (unambiguous&ₚ
@@ -195,11 +199,11 @@ module SelectExtn where
       contradiction oid≡ λ where refl → oid≢ (trans₀ (sym extnId≡) extnId≡₁)
       where
       @0 bs≡' : oex ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
-      bs≡' = begin oex ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+      bs≡' = begin oex ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
                    (oex ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
                    xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
                    xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oex ≡ oex₁
@@ -210,11 +214,11 @@ module SelectExtn where
       contradiction (subst (_∈ X509.ExtensionOID.Supported) oid≡ supported) (toWitnessFalse extnId≡₁)
       where
       @0 bs≡' : oid ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
-      bs≡' = begin oid ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid Dig) ⟩
+      bs≡' = begin oid ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
                    (oid ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
                    xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
                    xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid Dig) ⟩
+                   (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oid ≡ oex₁

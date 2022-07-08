@@ -18,15 +18,13 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.EcParamsFields where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
-  hiding (module Option)
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Serializer  UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
-module Option = Aeres.Grammar.Option UInt8
 
 Rep = &ₚ (&ₚ (&ₚ (&ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ])  X509.FieldID) X509.Curve) OctetString) Int) (Option Int)
 
