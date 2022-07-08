@@ -7,14 +7,17 @@ import      Aeres.Data.X509.Properties.DistPointNameChoice as DPNCProps
 import      Aeres.Data.X509.Properties.GeneralName         as GNProps
 import      Aeres.Data.X509.Properties.Primitives          as PrimProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Data.X509.Properties.DistPointFields where
 
-open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
 
 equivalent : Equivalent (&ₚ (Option X509.DistPointName) (&ₚ (Option X509.ReasonFlags) (Option X509.CrlIssuer))) X509.DistPointFields
 proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = X509.mkDistPointFields fstₚ₁ fstₚ₂ sndₚ₁ refl

@@ -85,40 +85,6 @@ isoUnambiguous ((a→b , b→a) , _ , id₂) ua{xs} b₁ b₂ =
   @0 b≡ : a→b (b→a b₁) ≡ a→b (b→a b₂)
   b≡ = cong a→b a≡
 
-data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
- none : Option A []
- some : ∀ {@0 xs} → A xs → Option A xs
-
-elimOption : ∀ {@0 A} {X : List Σ → Set} → X [] → (∀ {@0 xs} → A xs → X xs) → ∀ {@0 xs} → Option A xs → X xs
-elimOption n s none = n
-elimOption n s (some x) = s x
-
-isNone : ∀ {@0 A xs} →  Option A xs → Bool
-isNone none = true
-isNone (some _) = false
-
-isSome : ∀ {@0 A xs} → Option A xs → Bool
-isSome x = not (isNone x)
-
-mapOption : ∀ {@0 A B} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Option A xs → Option B xs
-mapOption f none = none
-mapOption f (some x) = some (f x)
-
-mapOptionK : ∀ {@0 A B xs} → (A xs → B xs) → Option A xs → Option B xs
-mapOptionK f none = none
-mapOptionK f (some x) = some (f x)
-
-instance
-  OptionEq : ∀ {A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (Option A)
-  Eq≋._≋?_ OptionEq {.[]} {.[]} none none = yes ≋-refl
-  Eq≋._≋?_ OptionEq {.[]} {bs₂} none (some x) = no (λ where (mk≋ refl ()))
-  Eq≋._≋?_ OptionEq {bs₁} {.[]} (some x) none = no λ where (mk≋ refl ())
-  Eq≋._≋?_ OptionEq {bs₁} {bs₂} (some v₁) (some v₂) =
-    case v₁ ≋? v₂ of λ where
-      (yes ≋-refl) → yes ≋-refl
-      (no  ¬v₁≋v₂) → no λ where
-        ≋-refl → contradiction ≋-refl ¬v₁≋v₂
-
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field

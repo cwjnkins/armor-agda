@@ -125,6 +125,7 @@ ccp2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) snd�
 
 
 -- A certificate MUST NOT appear more than once in a prospective certification path.
+-- TODO: we should be doing this based on fields (subject, etc), not checking strict equality
 CCP5 : ∀ {@0 bs} → X509.Chain bs → Set
 CCP5 c = List.Unique _≟_ (ChainToList c)
 

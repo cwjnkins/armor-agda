@@ -12,7 +12,6 @@ module Aeres.Data.X509.Decidable where
 open import Aeres.Data.X509.Decidable.AIAFields
 open import Aeres.Data.X509.Decidable.AKIFields
 open import Aeres.Data.X509.Decidable.BCFields
-open import Aeres.Data.X509.Decidable.Bitstring
 open import Aeres.Data.X509.Decidable.Boool
 open import Aeres.Data.X509.Decidable.Cert
 open import Aeres.Data.X509.Decidable.CertPolFields

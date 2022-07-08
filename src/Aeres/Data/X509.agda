@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -12,6 +13,7 @@ module Aeres.Data.X509 where
 open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Sum         UInt8
 
 open import Aeres.Data.X690-DER public

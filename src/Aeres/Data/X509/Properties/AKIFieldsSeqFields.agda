@@ -6,13 +6,17 @@ import      Aeres.Data.X509.Properties.GeneralName as GeneralNameProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
+
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.AKIFieldsSeqFields where
 
-open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
 
 equivalent : Equivalent (&ₚ (Option X509.AKIKeyId) (&ₚ (Option X509.AKIAuthCertIssuer) (Option X509.AKIAuthCertSN))) X509.AKIFieldsSeqFields
 proj₁ equivalent (mk&ₚ v₁ (mk&ₚ v₂ v₃ refl) refl) = X509.mkAKIFieldsSeqFields v₁ v₂ v₃ refl

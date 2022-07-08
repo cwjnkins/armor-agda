@@ -8,18 +8,21 @@ open import Aeres.Data.X509.Decidable.Null
 open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Data.X690-DER
-open import Aeres.Grammar.Definitions
-open import Aeres.Grammar.Parser
-open import Aeres.Grammar.Sum
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Sum
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-
 module Aeres.Data.X509.Decidable.SignAlg where
 
-open Base256
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Sum         UInt8
 
 module parseSignAlg where
 
@@ -27,23 +30,23 @@ module parseSignAlg where
 
   here' = "parseSignAlg"
 
-  parseSignAlgFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.SignAlg.SignAlgFields n)
+  parseSignAlgFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.SignAlg.SignAlgFields n)
   runParser (parseSignAlgFields n) xs = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len) refl) suf₀ ps≡₀) ←
-      runParser (parse≤ _ n parseOID TLV.nonnesting (tell $ here' String.++ ": underflow" )) xs
+      runParser (parse≤ n parseOID TLV.nonnesting (tell $ here' String.++ ": underflow" )) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success ._ read read≡ (mk×ₚ (X509.SignAlg.mkSignAlgFields{o = o}{p} signOID param refl) sndₚ₁ refl) suffix ps≡) →
             contradiction
               (success o _ refl (mk×ₚ signOID (─ ≤-trans (Lemmas.length-++-≤₁ o p) (Lemmas.≡⇒≤ $ ̂‼ sndₚ₁)) refl) (p ++ suffix)
-                (trans (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid Dig)) ps≡))
+                (trans (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid UInt8)) ps≡))
               ¬parse
     case <-cmp r₀ n of λ where
       (tri> r≮n r≢n n<r) → contradiction (≤-trans (Lemmas.≡⇒≤ r₀≡) v₀Len) (<⇒≱ n<r)
       (tri≈ _ r≡n _) →
         return (yes
           (success pre₀ _ r₀≡
-            (mk×ₚ (X509.SignAlg.mkSignAlgFields v₀ none (pre₀ ≡ pre₀ ++ [] ∋ solve (++-monoid Dig))) (─ trans₀ (sym r₀≡) r≡n) refl)
+            (mk×ₚ (X509.SignAlg.mkSignAlgFields v₀ none (pre₀ ≡ pre₀ ++ [] ∋ solve (++-monoid UInt8))) (─ trans₀ (sym r₀≡) r≡n) refl)
             suf₀ ps≡₀))
       (tri< r<n _ _) → do
         yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ v₁Len) refl) suf₁ ps≡₁) ← runParser (parseOctetStringValue (n - r₀)) suf₀
@@ -52,14 +55,14 @@ module parseSignAlg where
               (success prefix@._ read read≡ (mk×ₚ (X509.SignAlg.mkSignAlgFields{o = o}{p} signOID none refl) signAlgLen refl) suffix ps≡) →
                 contradiction
                   (begin (r₀ ≡⟨ r₀≡ ⟩
-                         length pre₀ ≡⟨ cong length (TLV.nonnesting (trans₀ ps≡₀ (trans₀ (sym ps≡) ((o ++ []) ++ suffix ≡ o ++ [] ++ suffix ∋ solve (++-monoid Dig)))) v₀ signOID) ⟩
-                         length o ≡⟨ cong length (o ≡ o ++ [] ∋ solve (++-monoid Dig)) ⟩
+                         length pre₀ ≡⟨ cong length (TLV.nonnesting (trans₀ ps≡₀ (trans₀ (sym ps≡) ((o ++ []) ++ suffix ≡ o ++ [] ++ suffix ∋ solve (++-monoid UInt8)))) v₀ signOID) ⟩
+                         length o ≡⟨ cong length (o ≡ o ++ [] ∋ solve (++-monoid UInt8)) ⟩
                          length prefix ≡⟨ ̂‼ signAlgLen ⟩
                          n ∎))
                   (<⇒≢ r<n)
               (success prefix@._ read read≡ (mk×ₚ (X509.SignAlg.mkSignAlgFields{o = o}{p} signOID (some (mk×ₚ param _ refl)) refl) signAlgLen refl) suffix ps≡) → ‼
                 let @0 ps≡' : o ++ p ++ suffix ≡ pre₀ ++ suf₀
-                    ps≡' = trans₀ (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid Dig)) (trans₀ ps≡ (sym ps≡₀))
+                    ps≡' = trans₀ (o ++ p ++ suffix ≡ (o ++ p) ++ suffix ∋ solve (++-monoid UInt8)) (trans₀ ps≡ (sym ps≡₀))
 
                     @0 pre₀≡ : pre₀ ≡ o
                     pre₀≡ = (sym $ TLV.nonnesting ps≡' signOID v₀)
@@ -99,12 +102,12 @@ module parseSignAlg where
                         n ∎))
               refl)
             suf₁
-            (begin (pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
+            (begin (pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid UInt8) ⟩
                    pre₀ ++ pre₁ ++ suf₁ ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                    pre₀ ++ suf₀ ≡⟨ ps≡₀ ⟩
                    xs ∎)))
 
-  parseSignAlg : Parser Dig (Logging ∘ Dec) X509.SignAlg
+  parseSignAlg : Parser (Logging ∘ Dec) X509.SignAlg
   parseSignAlg =
     parseTLV _ "signature algorithm" _ parseSignAlgFields
 
@@ -113,17 +116,17 @@ open parseSignAlg public using (parseSignAlg)
 private
   module Test where
 
-    Sa₁ : List Dig
+    Sa₁ : List UInt8
     Sa₁ = Tag.Sequence ∷ # 13 ∷ # Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 1 ∷ # 5 ∷ [ # 0 ]
 
-    Sa₂ : List Dig
+    Sa₂ : List UInt8
     Sa₂ = Tag.Sequence ∷ # 11 ∷ # Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]
 
-    Sa₃ : List Dig
+    Sa₃ : List UInt8
     Sa₃ = Tag.Sequence ∷ # 13 ∷ # Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ # 11 ∷ # 5 ∷ [ # 0 ]
 
     --- this is a test case for non-RSA signature algorithm (ex: ECDSA)
-    Sa₄ : List Dig
+    Sa₄ : List UInt8
     Sa₄ = Tag.Sequence ∷ # 19 ∷ # 6 ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ # 1 ∷ # 6 ∷ # 8 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 3 ∷ # 1 ∷ [ # 7 ]
 
     test₁ : X509.SignAlg Sa₁

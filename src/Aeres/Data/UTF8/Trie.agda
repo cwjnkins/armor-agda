@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --inversion-max-depth=1000 --allow-unsolved-meta #-}
+{-# OPTIONS --subtyping --sized-types --inversion-max-depth=1000 #-}
 
 open import Aeres.Binary
 open import Aeres.Prelude
@@ -34,6 +34,7 @@ private
   inRangeLemmaᵤ : ∀ {l u} (p : Σ[ n ∈ ℕ ] InRange l u n) → {wit : True (u <? 256)} → proj₁ p < 256
   inRangeLemmaᵤ p {wit} = Nat.≤-trans (s≤s $ proj₂ (proj₂ p)) (toWitness wit)
 
+{-
 mapUTF8Char2ByShiftUp
   : (prefix₁ prefix₂ : Σ[ n ∈ ℕ ] InRange 192 223 n)
     → (range offset : Fin 32)
@@ -103,3 +104,4 @@ mapUTF8Char2ByShiftUp p₁ p₂ r o l = tabulateUTF8Trie mkEntry
 
     b₂range : InRange 128 191 b₂
     b₂range = subst (InRange 128 191) (sym (Fin.toℕ-fromℕ< (inRangeLemmaᵤ (b₂ℕ , b₂ℕrange)))) b₂ℕrange
+-}

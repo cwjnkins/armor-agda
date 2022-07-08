@@ -9,14 +9,18 @@ import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 import      Aeres.Data.X509.Properties.SignAlgFields   as SignAlgProps
 import      Aeres.Data.X509.Properties.ValidityFields  as ValidityFieldsProps
 open import Aeres.Data.X690-DER
+import       Aeres.Grammar.Definitions
+import       Aeres.Grammar.Option
+import       Aeres.Grammar.Properties
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.Properties.TBSCertFields where
 
 open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
 open ≡-Reasoning
 
 equivalent : Equivalent
@@ -31,10 +35,10 @@ equivalent : Equivalent
                X509.TBSCertFields
 proj₁ equivalent (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ (mk&ₚ fstₚ₆ (mk&ₚ fstₚ₇ (mk&ₚ fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
   X509.mkTBSCertFields fstₚ₁ sndₚ₁ fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ fstₚ₆ fstₚ₇ fstₚ₈ sndₚ₂
-    (trans₀ bs≡ (solve (++-monoid Dig)))
+    (trans₀ bs≡ (solve (++-monoid UInt8)))
 proj₂ equivalent (X509.mkTBSCertFields version serial signAlg issuer validity subject pk issuerUID subjectUID extensions bs≡) =
   mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ pk (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
-    (trans₀ bs≡ (solve (++-monoid Dig)))
+    (trans₀ bs≡ (solve (++-monoid UInt8)))
 
 iso : Iso
         (&ₚ (&ₚ (Option X509.Version) Int)

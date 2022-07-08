@@ -4,13 +4,16 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.GeneralSubtreeFields as GeneralSubtreeFieldsProps
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.NCFieldsSeqFields where
 
-open Base256
-open import Aeres.Grammar.Definitions UInt8
-open import Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
 
 equivalent : Equivalent (&ₚ (Option X509.PermittedSubtrees) (Option X509.ExcludedSubtrees)) X509.NCFieldsSeqFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ refl) = X509.mkNCFieldsSeqFields fstₚ₁ sndₚ₁ refl

@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
@@ -14,6 +15,7 @@ module Aeres.Data.X509.Properties.UserNoticeFields where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
