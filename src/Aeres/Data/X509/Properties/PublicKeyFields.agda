@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --allow-unsolved-meta #-}
+{-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
