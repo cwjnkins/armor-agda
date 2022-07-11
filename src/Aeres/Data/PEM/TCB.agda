@@ -13,32 +13,67 @@ open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
 open Aeres.Grammar.Option      Char
 
-certEOL    = String.toList "\r\n"
-certHeader = (String.toList "-----BEGIN CERTIFICATE-----") ++ certEOL
-certFooter = (String.toList "-----END CERTIFICATE-----"  ) ++ certEOL
+-- For now, we only support the strict PEM encoding;
+-- see `stricttextualmsg` in Fig. 3 of RFC 7468
 
-record CertLine (@0 n : ℕ) (@0 bs : List Char) : Set where
-  constructor mkCertLine
+module RFC5234 where
+  data EOL : @0 List Char → Set where
+    crlf : EOL (String.toList "\r\n")
+    cr   : EOL (String.toList "\r")
+    lf   : EOL (String.toList "\n")
+
+--   data EOLWSP : @0 List Char → Set where
+--     wsp : ∀ {@0 c} → WSP c → EOLWSP c
+--     cr  :                    EOLWSP [ '\r' ]
+--     lf  :                    EOLWSP [ '\n' ]
+
+record CertBoundary (@0 ctrl : String) (@0 bs : List Char) : Set where
+  constructor mkCertBoundary
   field
-    @0 {l} : List Char
-    str : Base64Str l
-    @0 lenRange : InRange 1 64 (length l)
-    @0 n≡ : n ≡ length (Base64Str.s str)
-    @0 bs≡ : bs ≡ l ++ certEOL
+    @0 {e} : List Char
+    begin : Singleton ∘ String.toList $
+              "-----" String.++ ctrl String.++ " CERTIFICATE-----"
+    eol   : RFC5234.EOL e
+    bs≡   : bs ≡ ↑ begin ++ e
 
-ShortCertLine : @0 List Char → Set
-ShortCertLine bs = Σ[ sₗ ∈ Fin 64 ] CertLine (toℕ sₗ) bs 
+CertHeader = CertBoundary "BEGIN"
+CertFooter = CertBoundary "END"
+
+record CertFullLine (@0 bs : List Char) : Set where
+  constructor mkCertFullLine
+  field
+    @0 {l e} : List Char
+    line : ExactLength Base64Char 64 l
+    eol  : RFC5234.EOL e
+    @0 bs≡  : bs ≡ l ++ e
+
+record CertFinalLine (@0 bs : List Char) : Set where
+  constructor mkCertFinalLine
+  field
+    @0 {l e} : List Char
+    line : Base64Str l
+    @0 lineLen : InRange 1 64 ∘ length $ l
+    eol : RFC5234.EOL e
+    @0 bs≡ : bs ≡ l ++ e
+
+record CertText (@0 bs : List Char) : Set where
+  constructor mkCertText
+  field
+    @0 {b f} : List Char
+    body  : IList CertFullLine b
+    final : CertFinalLine      f
+    @0 bs≡ : bs ≡ b ++ f
 
 record Cert (@0 bs : List Char) : Set where
   constructor mkCert
   field
-    @0 {p s} : List Char
-    prefix : IList (CertLine 64) p
-    suffix : Option ShortCertLine s
-    @0 bs≡ : bs ≡ certHeader ++ p ++ s ++ certFooter
-    
-PEM : @0 List Char → Set
-PEM = IList Cert
+    @0 {h b f} : List Char
+    header : CertHeader h
+    body   : CertText   b
+    footer : CertFooter f
+    @0 bs≡ : bs ≡ h ++ b ++ f
+
+CertList = IList Cert
 
 -- extract : ∀ {@0 bs} → Cert bs → List UInt8
 -- extract (mkCert prefix suffix bs≡) = {!!}
