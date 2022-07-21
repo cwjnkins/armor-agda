@@ -18,23 +18,18 @@ open Aeres.Grammar.Option      Char
 
 module RFC5234 where
   data EOL : @0 List Char → Set where
-    crlf : EOL (String.toList "\r\n")
-    cr   : EOL (String.toList "\r")
-    lf   : EOL (String.toList "\n")
-
---   data EOLWSP : @0 List Char → Set where
---     wsp : ∀ {@0 c} → WSP c → EOLWSP c
---     cr  :                    EOLWSP [ '\r' ]
---     lf  :                    EOLWSP [ '\n' ]
+    crlf : EOL ('\r' ∷ [ '\n' ])
+    cr   : EOL [ '\r' ]
+    lf   : EOL [ '\n' ]
 
 record CertBoundary (@0 ctrl : String) (@0 bs : List Char) : Set where
   constructor mkCertBoundary
   field
     @0 {e} : List Char
-    begin : Singleton ∘ String.toList $
-              "-----" String.++ ctrl String.++ " CERTIFICATE-----"
-    eol   : RFC5234.EOL e
-    bs≡   : bs ≡ ↑ begin ++ e
+    @0 begin : Singleton ∘ String.toList $
+                 "-----" String.++ ctrl String.++ " CERTIFICATE-----"
+    @0 eol   : RFC5234.EOL e
+    @0 bs≡   : bs ≡ ↑ begin ++ e
 
 CertHeader = CertBoundary "BEGIN"
 CertFooter = CertBoundary "END"
@@ -43,7 +38,7 @@ record CertFullLine (@0 bs : List Char) : Set where
   constructor mkCertFullLine
   field
     @0 {l e} : List Char
-    line : ExactLength Base64Char 64 l
+    line : ExactLength (IList Base64Char) 64 l
     eol  : RFC5234.EOL e
     @0 bs≡  : bs ≡ l ++ e
 
@@ -75,8 +70,14 @@ record Cert (@0 bs : List Char) : Set where
 
 CertList = IList Cert
 
--- extract : ∀ {@0 bs} → Cert bs → List UInt8
--- extract (mkCert prefix suffix bs≡) = {!!}
---   where
---   extr : ∀ {@0 bs n} → CertLine n bs → List UInt8
---   extr (mkCertLine str _ _ _) = {!!}
+extractCert : ∀ {@0 bs} → Cert bs → List UInt8
+extractCert (mkCert _ (mkCertText body final _) _ _) =
+  eb body ++ ef final
+  where
+  eb : ∀ {@0 bs} → IList CertFullLine bs → List UInt8
+  eb nil = []
+  eb (cons (mkIListCons (mkCertFullLine (mk×ₚ line (─ len≡) refl) _ _) tail₁ _)) =
+    decodeStr (mk64Str line (subst (λ x → x % 4 ≡ 0) (sym len≡) refl) (pad0 refl) refl) ++ eb tail₁
+
+  ef : ∀ {@0 bs} → CertFinalLine bs → List UInt8
+  ef (mkCertFinalLine line lineLen _ _) = decodeStr line
