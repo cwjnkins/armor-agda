@@ -5,6 +5,7 @@ open import Aeres.Data.Base64
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 module Aeres.Data.PEM.TCB where
@@ -12,11 +13,14 @@ module Aeres.Data.PEM.TCB where
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
 open Aeres.Grammar.Option      Char
+open Aeres.Grammar.Sum         Char
 
 -- For now, we only support the strict PEM encoding;
 -- see `stricttextualmsg` in Fig. 3 of RFC 7468
 
 module RFC5234 where
+  WSP = Sum (_≡ [ ' ' ]) (_≡ [ '\t' ])
+
   data EOL : @0 List Char → Set where
     crlf : EOL ('\r' ∷ [ '\n' ])
     cr   : EOL [ '\r' ]
@@ -25,7 +29,7 @@ module RFC5234 where
 record CertBoundary (@0 ctrl : String) (@0 bs : List Char) : Set where
   constructor mkCertBoundary
   field
-    @0 {e} : List Char
+    @0 {w e} : List Char
     @0 begin : Singleton ∘ String.toList $
                  "-----" String.++ ctrl String.++ " CERTIFICATE-----"
     @0 eol   : RFC5234.EOL e

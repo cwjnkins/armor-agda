@@ -429,6 +429,9 @@ instance
   WriterLogging : Writer Logging String.String
   Writer.tell   WriterLogging w = mkLogged [ w String.++ "\n" ] (Level.lift tt)
 
+silent : ∀{ℓ} → Logging (Level.Lift ℓ ⊤)
+silent = return (Level.lift tt)
+
 -- Lemmas
 module Lemmas where
 

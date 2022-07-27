@@ -7,12 +7,68 @@ import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
+import      Data.Nat.Properties as Nat
 
 open Aeres.Grammar.IList  Char
 open Aeres.Grammar.Sum    Char
 open Aeres.Grammar.Parser Char
 
 module Aeres.Data.PEM.Parser where
+
+module parseRFC5234 where
+  parseWSP : Parser (Logging ∘ Dec) RFC5234.WSP
+  parseWSP =
+    parseSum
+      (parseLit (tell "parseWSP: EOF") (return (Level.lift tt)) [ ' ' ])
+      (parseLit (tell "parseWSP: EOF") (return (Level.lift tt)) [ '\t' ])
+
+  abstract
+    parseCRLF : Parser (Logging ∘ Dec) (_≡ '\r' ∷ [ '\n' ])
+    parseCRLF = parseLit (tell "parseCRLF: EOF") silent ('\r' ∷ [ '\n' ])
+
+    parseCR : Parser (Logging ∘ Dec) (_≡ [ '\r' ])
+    parseCR = parseLit (tell "parseCR: EOF") silent [ '\r' ]
+
+    parseLF : Parser (Logging ∘ Dec) (_≡ [ '\n' ])
+    parseLF = parseLit silent silent ([ '\n' ])
+
+  parseEOL : LogDec.MaximalParser RFC5234.EOL
+  parseEOL =
+    record { parser = mkParser (λ xs → proj₁ $ help xs)
+           ; max = λ xs → proj₂ $ help xs }
+    where
+    help : ∀ xs → Σ (Logging ∘ Dec $ (Success RFC5234.EOL xs)) (LogDec.Lift (Success RFC5234.EOL xs) LogDec.GreatestSuccess)
+    help xs =
+      case runParser parseCRLF xs of λ where
+        (mkLogged l₁ (yes p@(success pre r refl refl suf refl))) →
+          (mkLogged l₁ (yes (mapSuccess (λ where refl → RFC5234.crlf) p))) ,
+          λ where
+            .('\r' ∷ [ '\n' ]) suf' eq RFC5234.crlf → Nat.≤-refl
+            .([ '\r' ]) suf' eq RFC5234.cr → s≤s z≤n
+        (mkLogged l₁ (no ¬p₁)) →
+          case runParser parseCR xs of λ where
+            (mkLogged l₂ (yes p@(success pre r refl refl suf refl))) →
+              (mkLogged (l₁ ++ l₂) (yes (mapSuccess (λ where refl → RFC5234.cr) p))) ,
+              (λ where
+                .('\r' ∷ [ '\n' ]) suf' eq RFC5234.crlf →
+                  contradiction (success _ _ refl refl _ eq) ¬p₁
+                .([ '\r' ]) suf' eq RFC5234.cr → Nat.≤-refl)
+            (mkLogged l₂ (no ¬p₂)) →
+              case runParser parseLF xs of λ where
+                (mkLogged l₃ (yes p@(success pre r refl refl suf refl))) →
+                  (mkLogged (l₁ ++ l₂ ++ l₃) (yes (mapSuccess (λ where refl → RFC5234.lf) p)))
+                  , λ where
+                      .([ '\n' ]) suf' eq RFC5234.lf → Nat.≤-refl
+                (mkLogged l₃ (no ¬p₃)) →
+                  (mkLogged (l₁ ++ l₂ ++ l₃)
+                    (no (λ where
+                          (success .('\r' ∷ [ '\n' ]) read read≡ RFC5234.crlf suffix ps≡) →
+                            contradiction (success _ _ refl refl _ ps≡) ¬p₁
+                          (success .([ '\r' ]) read read≡ RFC5234.cr suffix ps≡) →
+                            contradiction (success _ _ refl refl _ ps≡) ¬p₂
+                          (success .([ '\n' ]) read read≡ RFC5234.lf suffix ps≡) →
+                            contradiction (success _ _ refl refl _ ps≡) ¬p₃)))
+                  , tt
 
 module parsePEM where
 
