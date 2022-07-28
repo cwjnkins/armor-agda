@@ -54,6 +54,21 @@ module LogDec where
   MaximalParser.max (mkMaximalParser {A} f) xs =
     let (_ , m) = f xs in m
 
+  equivalent : ∀ {@0 A B} → Equivalent A B → MaximalParser A → MaximalParser B
+  equivalent{A}{B} eq@(eq₁ , eq₂) p = mkMaximalParser help
+    where
+    help : ∀ xs → Sigma (Logging ∘ Dec $ Success B xs) (Lift (Success B xs) GreatestSuccess)
+    help xs =
+      case (_,e_{B = Lift (Success A xs) GreatestSuccess}
+              (runParser (MaximalParser.parser p) xs)
+              (MaximalParser.max p xs))
+      ret (const _) of λ where
+        (mkLogged l₁ (no ¬p) , _) →
+          (mkLogged l₁ (no (contraposition (mapSuccess eq₂) ¬p))) ,e tt
+        (mkLogged l₁ (yes s@(success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , m) →
+          (mkLogged l₁ (yes (mapSuccess eq₁ s))) ,e λ where
+            pre' suf' xs≡ b → m pre' suf' xs≡ (eq₂ b)
+
   @0 nonnesting : ∀ {A} → NonNesting A → Parser (Logging ∘ Dec) A → MaximalParser A
   MaximalParser.parser (nonnesting nn p) = p
   MaximalParser.max (nonnesting{A} nn p) xs

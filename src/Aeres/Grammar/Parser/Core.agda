@@ -18,7 +18,7 @@ record Success (@0 A : List Σ → Set) (@0 xs : List Σ) : Set where
     suffix : List Σ
     @0 ps≡    : prefix ++ suffix ≡ xs
 
-mapSuccess : ∀ {A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
+mapSuccess : ∀ {@0 A B : List Σ → Set} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Success A xs → Success B xs
 mapSuccess f (success prefix read read≡ value suffix ps≡ ) = success prefix read read≡ (f value) suffix ps≡
 
 record Parserᵢ (M : List Σ → Set → Set) (@0 A : List Σ → Set) : Set where
@@ -32,14 +32,14 @@ Parser M = Parserᵢ (const M)
 
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
-  parseEquivalent : {A B : (@0 _ : List Σ) → Set} → Equivalent A B
+  parseEquivalent : {@0 A B : (@0 _ : List Σ) → Set} → Equivalent A B
                     → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
-  runParser (parseEquivalent equiv p) xs = do
+  runParser (parseEquivalent (eq₁ , eq₂) p) xs = do
     yes x ← runParser p xs
       where no ¬parse → do
-        return ∘ no $ contraposition (mapSuccess (proj₂ equiv)) ¬parse
+        return ∘ no $ contraposition (mapSuccess eq₂) ¬parse
     return (yes
-      (mapSuccess (proj₁ equiv) x))
+      (mapSuccess eq₁ x))
 
   parseErased : {A : @0 List Σ → Set} → Parser (M ∘ Dec) A → Parser (M ∘ Dec) (Erased ∘ A)
   runParser (parseErased p) xs = do

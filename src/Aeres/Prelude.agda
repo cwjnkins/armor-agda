@@ -1,5 +1,8 @@
 module Aeres.Prelude where
 
+module Level where
+  open import Level public
+
 open import Data.Bool    public
   hiding (_<_ ; _<?_ ; _≟_ ; _≤_ ; _≤?_)
 
@@ -87,6 +90,11 @@ open import Agda.Builtin.Nat public
 open import Data.Product public
   hiding (map ; zip)
 
+infixr 4 _,e_
+_,e_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}{@0 B : A → Set ℓ₂} → (a : A) (b : B a) → Σ A B
+proj₁ (a ,e b) = a
+proj₂ (a ,e b) = b
+
 import Data.String
 module String where
   open Data.String public
@@ -124,9 +132,6 @@ import Induction.WellFounded
 module WellFounded where
   open Induction.WellFounded public
 Acc = WellFounded.Acc
-
-module Level where
-  open import Level public
 
 open import Relation.Binary public
   using ()
@@ -182,10 +187,13 @@ open import Relation.Nullary public
 ... | refl | refl = refl
 
 open import Relation.Nullary.Negation public
-  hiding (contradiction)
+  hiding (contradiction ; contraposition)
 
 contradiction : ∀ {ℓ ℓ'} {@0 P : Set ℓ} {@0 A : Set ℓ'} → @0 P → @0 ¬ P → A
 contradiction p ¬p = ⊥-elim (¬p p)
+
+contraposition : ∀ {ℓ₁ ℓ₂} {@0 P : Set ℓ₁} {@0 Q : Set ℓ₂} → (P → Q) → ¬ Q → ¬ P
+contraposition p⇒q ¬q p = contradiction (p⇒q p) ¬q
 
 open import Relation.Nullary.Decidable public
   hiding (map)
