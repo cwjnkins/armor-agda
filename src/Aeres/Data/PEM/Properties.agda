@@ -25,3 +25,12 @@ module EOL where
   proj₂ equiv PEM.RFC5234.crlf = Sum.inj₁ refl
   proj₂ equiv PEM.RFC5234.cr = Sum.inj₂ (Sum.inj₁ refl)
   proj₂ equiv PEM.RFC5234.lf = Sum.inj₂ (Sum.inj₂ refl)
+
+module CertBoundary where
+  Rep : (ctrl : String) → @0 List Char → Set
+  Rep ctrl = &ₚ (_≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----"))
+                (Erased ∘ PEM.RFC5234.EOL)
+
+  equiv : ∀ ctrl → Equivalent (Rep ctrl) (PEM.CertBoundary ctrl)
+  proj₁ (equiv ctrl) (mk&ₚ refl (─ sndₚ₁) bs≡) = PEM.mkCertBoundary self sndₚ₁ bs≡
+  proj₂ (equiv ctrl) (PEM.mkCertBoundary self eol bs≡) = mk&ₚ refl (─ eol) bs≡

@@ -72,8 +72,10 @@ module parseRFC5234 where
 
 module parsePEM where
 
-  -- open ≡-Reasoning
-  -- hereLine = "parseCertLine"
+  hereLine = "parseCertLine"
+
+  -- parseCertBoundary : ∀ ctrl → LogDec.MaximalParser (CertBoundary ctrl)
+  -- parseCertBoundary ctrl = {!!}
 
   -- parseCertLine : Parser (Logging ∘ Dec) λ bs → ∃[ n ] CertLine n bs
   -- runParser parseCertLine xs =

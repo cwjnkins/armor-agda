@@ -29,7 +29,7 @@ module RFC5234 where
 record CertBoundary (@0 ctrl : String) (@0 bs : List Char) : Set where
   constructor mkCertBoundary
   field
-    @0 {w e} : List Char
+    @0 {e} : List Char
     @0 begin : Singleton ∘ String.toList $
                  "-----" String.++ ctrl String.++ " CERTIFICATE-----"
     @0 eol   : RFC5234.EOL e

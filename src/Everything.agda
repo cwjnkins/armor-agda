@@ -6,6 +6,9 @@ import Aeres.Data.Base64.Parser
 import Aeres.Data.Base64.Properties
 import Aeres.Data.Base64.TCB
 import Aeres.Data.Base64
+import Aeres.Data.PEM.Parser
+import Aeres.Data.PEM.Properties
+import Aeres.Data.PEM.TCB
 import Aeres.Data.UTF8.Parser
 import Aeres.Data.UTF8.Properties
 import Aeres.Data.UTF8.Serializer
