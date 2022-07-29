@@ -74,8 +74,27 @@ module parsePEM where
 
   hereLine = "parseCertLine"
 
-  -- parseCertBoundary : ∀ ctrl → LogDec.MaximalParser (CertBoundary ctrl)
-  -- parseCertBoundary ctrl = {!!}
+  parseCertBoundary : ∀ ctrl → LogDec.MaximalParser (CertBoundary ctrl)
+  parseCertBoundary ctrl =
+    LogDec.equivalent (CertBoundary.equiv ctrl)
+      (LogDec.parse&₁
+        (parseLit
+          (tell "parseCertBoundary: underflow")
+          (tell "parseCertBoudnary: mismatch")
+          _)
+        (λ where _ refl refl → refl)
+        (LogDec.parseErased parseRFC5234.parseEOL))
+
+  parseCertHeader = parseCertBoundary "BEGIN"
+  parseCertFooter = parseCertBoundary "END"
+
+  parseCertFullLine : LogDec.MaximalParser CertFullLine
+  parseCertFullLine =
+    LogDec.equivalent CertFullLine.equiv
+      (LogDec.parse&₁
+        {!!}
+        {!!}
+        parseRFC5234.parseEOL)
 
   -- parseCertLine : Parser (Logging ∘ Dec) λ bs → ∃[ n ] CertLine n bs
   -- runParser parseCertLine xs =
