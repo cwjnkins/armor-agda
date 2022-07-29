@@ -41,6 +41,16 @@ module Base64Char where
   all2IList{c ∷ cs} (c∈ All.∷ a) =
     cons (mkIListCons (Base64.mk64 c c∈ self refl) (all2IList a) refl)
 
+  @0 nonnesting : NonNesting Base64.Base64Char
+  nonnesting{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Base64.mk64 c c∈ i bs≡) (Base64.mk64 c₁ c∈₁ i₁ bs≡₁) = {!!}
+    where
+    @0 c≡ : c ≡ c₁
+    c≡ =
+      ∷-injectiveˡ (begin [ c ] ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+                          xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+                          xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+                          [ c₁ ] ++ ys₂ ∎)
+
 module Base64Pad where
 
   @0 p%4≡0 : ∀ {@0 p} → Base64.Base64Pad p → length p % 4 ≡ 0

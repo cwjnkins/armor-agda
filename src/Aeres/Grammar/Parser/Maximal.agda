@@ -12,6 +12,7 @@ module Aeres.Grammar.Parser.Maximal
 
 open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.Parser.Core Σ
+  hiding (parseErased)
 
 module Generic (M : Set → Set) (Lift : (A : Set) (P : A → Set) → M A → Set) where
   GreatestSuccess : ∀ {A xs} → Success A xs → Set
@@ -164,3 +165,24 @@ module LogDec where
                           ⟩
                         r₁ + r₂ ≤-Reasoning.∎)
                       (_ ≤? _)
+
+  parseErased : ∀ {@0 A} → MaximalParser A → MaximalParser (Erased ∘ A)
+  parseErased{A} p = mkMaximalParser help
+    where
+    help : ∀ xs → Sigma (Logging ∘ Dec $ Success (Erased ∘ A) xs) (Lift _ GreatestSuccess)
+    help xs =
+      case
+        _,e_{B = Lift (Success A xs) GreatestSuccess}
+        (runParser (MaximalParser.parser p) xs)
+        (MaximalParser.max p xs)
+      ret (const _) of λ where
+        (mkLogged log (no ¬p) , _) →
+          (mkLogged log (no λ where
+            (success prefix read read≡ (─ value) suffix ps≡) →
+              contradiction (success prefix _ read≡ value suffix ps≡) ¬p))
+          ,e tt
+        (mkLogged log (yes p@(success prefix read read≡ value suffix ps≡)) , m) →
+          mkLogged log (yes (success prefix _ read≡ (─ value) suffix ps≡))
+          ,e λ where
+               pre' suf' xs≡ (─ v) →
+                 uneraseDec (m pre' suf' xs≡ v) (_ ≤? _)

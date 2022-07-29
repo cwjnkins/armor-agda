@@ -5,6 +5,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
+open import Aeres.Data.Base64
 import      Aeres.Data.PEM.TCB as PEM
 
 open Aeres.Grammar.Definitions Char
@@ -34,3 +35,10 @@ module CertBoundary where
   equiv : ∀ ctrl → Equivalent (Rep ctrl) (PEM.CertBoundary ctrl)
   proj₁ (equiv ctrl) (mk&ₚ refl (─ sndₚ₁) bs≡) = PEM.mkCertBoundary self sndₚ₁ bs≡
   proj₂ (equiv ctrl) (PEM.mkCertBoundary self eol bs≡) = mk&ₚ refl (─ eol) bs≡
+
+module CertFullLine where
+  Rep = &ₚ (ExactLength (IList Base64Char) 64) PEM.RFC5234.EOL
+
+  equiv : Equivalent Rep PEM.CertFullLine
+  proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = PEM.mkCertFullLine fstₚ₁ sndₚ₁ bs≡
+  proj₂ equiv (PEM.mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
