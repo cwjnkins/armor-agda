@@ -9,6 +9,7 @@ import      Aeres.Grammar.Parser.Core
 import      Aeres.Grammar.Parser.Maximal
 import      Aeres.Grammar.Parser.Sigma
 import      Aeres.Grammar.Parser.WellFounded
+import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -16,49 +17,136 @@ open import Data.Nat.Properties
 
 module Aeres.Grammar.Parser.IList (Σ : Set) where
 
-open Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.IList Σ
-open Aeres.Grammar.Properties Σ
-open Aeres.Grammar.Parser.Bounded Σ
-open Aeres.Grammar.Parser.Core Σ
-open Aeres.Grammar.Parser.Maximal Σ
-open Aeres.Grammar.Parser.Sigma Σ
-open Aeres.Grammar.Parser.WellFounded Σ
+open Aeres.Grammar.Definitions          Σ
+open Aeres.Grammar.IList                Σ
+open Aeres.Grammar.Properties           Σ
+open Aeres.Grammar.Parser.Bounded       Σ
+open Aeres.Grammar.Parser.Core          Σ
+open Aeres.Grammar.Parser.Maximal       Σ
+open Aeres.Grammar.Parser.Sigma         Σ
+open Aeres.Grammar.Parser.WellFounded   Σ
+open Aeres.Grammar.Relation.Definitions Σ
 
-module Maximal
-  (underflow : Logging ⊤)
-  {@0 A : List Σ → Set} (@0 ne : NonEmpty A)
-  (p : LogDec.MaximalParser A)
+module StrictBounday
+  {M : Set → Set} ⦃ _ : Monad M ⦄ (underflow : M (Level.Lift _ ⊤))
+  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : StrictBounday A (IList A))
+  (p : Parser (M ∘ Dec) A)
   where
 
-  open ≡-Reasoning
-  here' = "parseIListMax"
-
-  parseIListWF : ∀ n → ParserWF (Logging ∘ Dec) (ExactLength (IList A) n)
-  runParser (parseIListWF zero) xs _ =
-    return (yes (success [] _ refl (mk×ₚ nil (─ refl) refl) xs refl))
-  runParser (parseIListWF n@(suc n')) xs (WellFounded.acc rs) =
-    case (_,e_{B = LogDec.Lift (Success _ xs) LogDec.GreatestSuccess}
-           (runParser (LogDec.MaximalParser.parser p) xs)
-           (LogDec.MaximalParser.max p xs))
-    ret (const _) of λ where
-      (mkLogged l₁ (no ¬p) , m) →
-        mkLogged l₁ ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ refl)) (─ len≡) refl) suffix ps≡) →
+  parseListWF : Parserᵢ (λ xs _ → @0 Acc _<_ (length xs) → M (Dec (Success (ExactLength (IList A) (length xs)) xs))) (const ⊤)
+  runParser parseListWF [] _ =
+    return (yes (success [] _ refl (mk×ₚ nil (─ refl) refl) [] refl))
+  runParser parseListWF xs@(x₁ ∷ xs') (WellFounded.acc rs) = do
+    yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser p xs
+      where no ¬p → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (cons (mkIListCons{bs₁ = bs₁}{bs₂} head₁ tail₁ refl)) (─ len≡) refl) suffix ps≡) →
             contradiction
-              (success bs₁ _ refl head₁ (bs₂ ++ suffix)
-                (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ _ _) ⟩
-                       prefix ++ suffix ≡⟨ ps≡ ⟩
-                       xs ∎)))
+              (success bs₁ _ refl head₁ (bs₂ ++ suffix) {!!})
               ¬p
-      (mkLogged l₁ (yes p@(success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , m) →
-        case <-cmp r₁ n of λ where
-          (tri> r₁≰n r₁≠n r₁>n) →
-            mkLogged (l₁ ∷ʳ (here' String.++ ": overflow\n"))
-              (no $ λ where
-                (success prefix read read≡ (mk×ₚ value (─ len≡) refl) suffix ps≡) → {!!})
-          (tri< r₁<n r₁≠n r₁≱n) → {!!}
-          (tri≈ ¬a b ¬c) → {!!}
+    case <-cmp r₁ (length xs) of λ where
+      (tri> _ _ r₁<len) →
+        contradiction
+          (begin (r₁ ≡⟨ r₁≡ ⟩
+                 length pre₁ ≤⟨ m≤m+n (length pre₁) (length suf₁) ⟩
+                 length pre₁ + length suf₁ ≡⟨ (sym $ length-++ pre₁) ⟩
+                 length (pre₁ ++ suf₁) ≡⟨ cong length ps≡₁ ⟩
+                 length xs ∎))
+          (<⇒≱ r₁<len)
+      (tri≈ _ r₁≡len _) →
+        return (yes
+          (success xs _ refl
+            (mk×ₚ (consIList v₁ nil refl)
+              (─ (≡-Reasoning.begin
+                   length (pre₁ ++ []) ≡-Reasoning.≡⟨ cong length (++-identityʳ pre₁) ⟩
+                   length pre₁         ≡-Reasoning.≡⟨ sym r₁≡ ⟩
+                   r₁                  ≡-Reasoning.≡⟨ r₁≡len ⟩
+                   length xs           ≡-Reasoning.∎))
+              {!!})
+            [] (++-identityʳ xs)))
+      (tri< r₁<len ¬r₁≡len ¬r₁>len) → do
+        yes (success pre₂ r₂ r₂≡ (mk×ₚ v₂ (─ v₂Len) refl) suf₂ ps≡₂) ← runParser parseListWF suf₁ {!!}
+          where no ¬p → do
+            return ∘ no $ λ where
+              (success prefix read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ refl)) (─ len≡) refl) suffix ps≡) → ‼
+                let
+                    @0 ps≡' : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                    ps≡' = ≡-Reasoning.begin
+                             pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡₁ ⟩
+                             xs                     ≡-Reasoning.≡⟨ sym ps≡ ⟩
+                             (bs₁ ++ bs₂) ++ suffix ≡-Reasoning.≡⟨ solve (++-monoid Σ) ⟩
+                             bs₁ ++ bs₂ ++ suffix   ≡-Reasoning.∎
+
+                    @0 ps≡“ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ × [] ≡ suffix
+                    ps≡“ = Lemmas.length-++-≡ (pre₁ ++ suf₁) _ _ _
+                             (≡-Reasoning.begin
+                               (pre₁ ++ suf₁)++ []    ≡-Reasoning.≡⟨ ++-identityʳ _ ⟩
+                               pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡' ⟩
+                               bs₁ ++ bs₂ ++ suffix   ≡-Reasoning.≡⟨ solve (++-monoid Σ) ⟩
+                               (bs₁ ++ bs₂) ++ suffix ≡-Reasoning.∎)
+                             (≡-Reasoning.begin
+                               length (pre₁ ++ suf₁)  ≡-Reasoning.≡⟨ cong length ps≡₁ ⟩
+                               length xs              ≡-Reasoning.≡⟨ sym len≡ ⟩
+                               length (bs₁ ++ bs₂)    ≡-Reasoning.∎)
+
+                    @0 bs₁≡ : pre₁ ≡ bs₁
+                    bs₁≡ = sym $
+                      sb xs bs₁ (bs₂ ++ suffix) pre₁ suf₁
+                        (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
+                        head₁ v₁ (subst (IList A) (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“))) tail₁)
+
+                    @0 bs₂≡ : suf₁ ≡ bs₂
+                    bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (proj₁ ps≡“)
+                in
+                contradiction
+                  (success _ _ refl (mk×ₚ tail₁ (─ (cong length (sym bs₂≡))) refl) [] (trans (++-identityʳ bs₂) (sym bs₂≡)))
+                  ¬p
+        let suf₂≡ : Erased ([] ≡ suf₂)
+            suf₂≡ = ─ (proj₂
+                      (Lemmas.length-++-≡ suf₁ _ pre₂ _ (trans (++-identityʳ _) (sym ps≡₂)) (sym v₂Len)))
+
+            xs≡ : Erased (pre₁ ++ pre₂ ≡ xs)
+            xs≡ = ─ (≡-Reasoning.begin
+                    pre₁ ++ pre₂           ≡-Reasoning.≡⟨ sym (++-identityʳ _) ⟩
+                    (pre₁ ++ pre₂) ++ []   ≡-Reasoning.≡⟨ cong ((pre₁ ++ pre₂) ++_) (Erased.x suf₂≡) ⟩
+                    (pre₁ ++ pre₂) ++ suf₂ ≡-Reasoning.≡⟨ ++-assoc pre₁ _ _ ⟩
+                    pre₁ ++ pre₂ ++ suf₂   ≡-Reasoning.≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+                    pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡₁ ⟩
+                    xs                     ≡-Reasoning.∎)
+        return (yes
+          (success xs (r₁ + r₂)
+            (≡-Reasoning.begin
+              r₁ + r₂                   ≡-Reasoning.≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+              length pre₁ + length pre₂ ≡-Reasoning.≡⟨ (sym $ length-++ pre₁) ⟩
+              length (pre₁ ++ pre₂)     ≡-Reasoning.≡⟨ cong length (Erased.x xs≡) ⟩
+              length xs                 ≡-Reasoning.∎)
+            (mk×ₚ (consIList v₁ v₂ refl)
+              (─ cong length (Erased.x xs≡)) (Erased.x xs≡))
+            [] (++-identityʳ xs)))
+    where
+    open ≤-Reasoning
+    open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  -- runParser parseListWF [] _ =
+  -- runParser parseListWF xs@(x₁ ∷ xs') (WellFounded.acc rs) = do
+  --   yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser p xs
+  --     where no ¬p → do
+  --       return ∘ no $ λ where
+  --         x → {!!}
+  --   {!!}
+  -- runParser (parseListWF zero) xs _ =
+  --   return (yes (success [] _ refl (mk×ₚ nil (─ refl) refl) xs refl))
+  -- runParser (parseListWF n'@(suc n)) xs (WellFounded.acc rs) = do
+  --   yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)
+  --     ← runParser (parse≤ n p {!!} underflow) xs
+  --     where no ¬p → do
+  --       return ∘ no $ λ where
+  --         (success prefix read read≡ value suffix ps≡) → {!!}
+  --   case <-cmp r₁ n of λ where
+  --     (tri> ¬r₁<n ¬r₁≡n r₁>n) →
+  --       contradiction {!≤-trans ? !} (<⇒≱ r₁>n)
+  --     (tri< a ¬b ¬c) → {!!}
+  --     (tri≈ ¬a b ¬c) → {!!}
 
 -- module parseIList
 --   {M : Set → Set} ⦃ _ : Monad M ⦄
