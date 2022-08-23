@@ -42,7 +42,11 @@ module Base64Char where
     cons (mkIListCons (Base64.mk64 c c∈ self refl) (all2IList a) refl)
 
   @0 nonnesting : NonNesting Base64.Base64Char
-  nonnesting{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Base64.mk64 c c∈ i bs≡) (Base64.mk64 c₁ c∈₁ i₁ bs≡₁) = {!!}
+  nonnesting{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Base64.mk64 c c∈ i bs≡) (Base64.mk64 c₁ c∈₁ i₁ bs≡₁) =
+    begin xs₁ ≡⟨ bs≡ ⟩
+          [ c ] ≡⟨ cong [_] c≡ ⟩
+          [ c₁ ] ≡⟨ sym bs≡₁ ⟩
+          xs₂ ∎
     where
     @0 c≡ : c ≡ c₁
     c≡ =
