@@ -1,17 +1,21 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.Base64
 open import Aeres.Data.PEM.TCB
 open import Aeres.Data.PEM.Properties
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-open Aeres.Grammar.IList  Char
-open Aeres.Grammar.Sum    Char
-open Aeres.Grammar.Parser Char
+open Aeres.Grammar.Definitions Char
+open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Sum         Char
+open Aeres.Grammar.Parser      Char
 
 module Aeres.Data.PEM.Parser where
 
@@ -92,90 +96,70 @@ module parsePEM where
   parseCertFullLine =
     LogDec.equivalent CertFullLine.equiv
       (LogDec.parse&₁
-        {!!}
-        {!!}
+        (parseIList (tell "parseCertFullLine: underflow") Base64Char Base64.Char.nonempty
+          Base64.Char.nonnesting parseBase64Char _)
+        exactLength-nonnesting
         parseRFC5234.parseEOL)
 
-  -- parseCertLine : Parser (Logging ∘ Dec) λ bs → ∃[ n ] CertLine n bs
-  -- runParser parseCertLine xs =
-  --   case runParser (parseWhileₜ (_∈? Base64.charset)) xs of λ where
-  --     (no ¬p) → do
-  --       tell $ hereLine String.++ ": underflow"
-  --       return ∘ no $ λ where
-  --         (success prefix read read≡ (n , mkCertLine line valid64 len≡ refl) suffix ps≡) →
-  --           contradiction
-  --            (success (line ∷ʳ '\r') _ refl
-  --              (mkParseWhile line '\r' valid64 (fromWitness{Q = _ ∈? _}) refl)
-  --              ('\n' ∷ suffix)
-  --              (begin
-  --                (line ++ [ '\r' ]) ++ ('\n' ∷ suffix) ≡⟨ ++-assoc line [ '\r' ] _ ⟩
-  --                line ++ (certEOL ++ suffix) ≡⟨ (sym $ ++-assoc line certEOL _) ⟩
-  --                (line ++ certEOL) ++ suffix ≡⟨ ps≡ ⟩
-  --                xs ∎))
-  --            ¬p
-  --     (yes (success ._ r₁ r₁≡ w@(mkParseWhile pre₁' term allPre₁ ¬term refl) [] ps≡₁)) → do
-  --       tell $ hereLine String.++ ": missing ending newline"
-  --       return ∘ no $ λ where
-  --         (success prefix read read≡ (n , mkCertLine line valid64 len≡ refl) suffix ps≡) → ‼
-  --           let @0 ps≡' : (line ++ [ '\r' ]) ++ [ '\n' ] ++ suffix ≡ (pre₁' ∷ʳ term) ++ []
-  --               ps≡' = begin
-  --                 (line ++ [ '\r' ]) ++ [ '\n' ] ++ suffix ≡⟨ ++-assoc line [ '\r' ] _ ⟩
-  --                 line ++ certEOL ++ suffix ≡⟨ (sym $ ++-assoc line certEOL _) ⟩
-  --                 (line ++ certEOL) ++ suffix ≡⟨ ps≡ ⟩
-  --                 xs ≡⟨ sym ps≡₁ ⟩
-  --                 pre₁' ∷ʳ term ++ [] ∎
-  --               @0 line≡ : line ++ [ '\r' ] ≡ pre₁' ++ [ term ]
-  --               line≡ = Properties.nonnesting ps≡' (mkParseWhile _ _ valid64 (toWitnessFalse {Q = _ ∈? _} tt) refl) w
-  --           in
-  --           contradiction ([ '\n' ] ++ suffix ≡ [] ∋ Lemmas.++-cancel≡ˡ _ _ line≡ ps≡' ) λ ()
-  --     (yes (success ._ r₁ r₁≡ w@(mkParseWhile pre₁ term allPre₁ ¬term refl) (s ∷ suf₁) ps≡)) →
-  --       case (term ≟ '\r') ,′ (s ≟ '\n') of λ where
-  --         (no t≠\r , _) →
-  --           return ∘ no $ λ where
-  --             (success ._ read read≡ (n , mkCertLine line valid64 len≡ refl) suffix refl) → ‼
-  --               let @0 ps≡' : (pre₁ ++ [ term ]) ++ (s ∷ suf₁) ≡ (line ++ [ '\r' ]) ++ '\n' ∷ suffix
-  --                   ps≡' = begin
-  --                     (pre₁ ++ [ term ]) ++ (s ∷ suf₁) ≡⟨ ps≡ ⟩
-  --                     (line ++ certEOL) ++ suffix ≡⟨ ++-assoc line certEOL _ ⟩
-  --                     line ++ certEOL ++ suffix ≡⟨ (sym $ ++-assoc line [ '\r' ] _) ⟩
-  --                     (line ++ [ '\r' ]) ++ '\n' ∷ suffix ∎
+  parseCertFinalLine : LogDec.MaximalParser CertFinalLine
+  parseCertFinalLine = LogDec.mkMaximalParser help
+    where
+    open ≡-Reasoning
 
+    help : ∀ xs → Σ (Logging ∘ Dec $ Success CertFinalLine xs) _
+    help xs =
+      let p₁ : Dec $ Success (ParseWhileₜ λ x → Base64Char [ x ]) xs
+          p₁ = runParser (parseWhileₜ (base64Char? ∘ [_])) xs
+      in
+      case p₁ of λ where
+        (no ¬p) →
+          (mkLogged [ "parseCertFinalLine: underflow" ]
+            (no λ where
+              (success ._ read read≡ (mkCertFinalLine{e = e} (mk64Str{s}{p = p} str strLen (pad0 refl) refl) lineLen eol refl) suffix ps≡) → ‼
+                let f : ∀ {@0 e} → RFC5234.EOL e → ∃₂ λ c e' → e ≡ c ∷ e'
+                    f = λ where
+                      RFC5234.crlf → _ , _ , refl
+                      RFC5234.cr → _ , _ , refl
+                      RFC5234.lf → _ , _ , refl
 
-  --                   @0 pre₁≡ : pre₁ ++ [ term ] ≡ line ++ [ '\r' ]
-  --                   pre₁≡ = Properties.nonnesting ps≡' w
-  --                             (mkParseWhile _ _ valid64 (toWitnessFalse{Q = _ ∈? _} tt) refl)
-  --               in    
-  --               contradiction (proj₂ $ ∷ʳ-injective _ _ pre₁≡) t≠\r
-  --         (_ , (no  s≠\n)) →
-  --           return ∘ no $ λ where
-  --             (success ._ read read≡ (n , mkCertLine line valid64 len≡ refl) suffix refl) → ‼
-  --               let @0 ps≡' : (pre₁ ++ [ term ]) ++ (s ∷ suf₁) ≡ (line ++ [ '\r' ]) ++ '\n' ∷ suffix
-  --                   ps≡' = begin
-  --                     (pre₁ ++ [ term ]) ++ (s ∷ suf₁) ≡⟨ ps≡ ⟩
-  --                     (line ++ certEOL) ++ suffix ≡⟨ ++-assoc line certEOL _ ⟩
-  --                     line ++ certEOL ++ suffix ≡⟨ (sym $ ++-assoc line [ '\r' ] _) ⟩
-  --                     (line ++ [ '\r' ]) ++ '\n' ∷ suffix ∎
+                    @0 e≡ : ∃₂ λ c e' → e ≡ c ∷ e'
+                    e≡ = case eol of f
 
+                    @0 c : _
+                    c = proj₁ e≡
 
-  --                   @0 pre₁≡ : pre₁ ++ [ term ] ≡ line ++ [ '\r' ]
-  --                   pre₁≡ = Properties.nonnesting ps≡' w
-  --                             (mkParseWhile _ _ valid64 (toWitnessFalse{Q = _ ∈? _} tt) refl)
-  --               in    
-  --               contradiction (∷-injectiveˡ (Lemmas.++-cancel≡ˡ _ _ pre₁≡ ps≡')) s≠\n
-  --         (yes refl , yes refl) →
-  --           return (yes
-  --             (success
-  --               (pre₁ ++ '\r' ∷ [ '\n' ]) (r₁ + 1)
-  --               (begin (r₁ + 1 ≡⟨ cong (_+ 1) r₁≡ ⟩
-  --                      length (pre₁ ++ [ '\r' ]) + length [ '\n' ] ≡⟨ (sym $ length-++ (pre₁ ++ [ '\r' ]) {[ '\n' ]}) ⟩
-  --                      length (pre₁ ∷ʳ '\r' ++ [ '\n' ]) ≡⟨ cong length (++-assoc pre₁ [ '\r' ] _) ⟩
-  --                      _ ∎))
-  --               ((length pre₁) , (mkCertLine pre₁ allPre₁ refl refl))
-  --               suf₁
-  --               (begin
-  --                 (pre₁ ++ '\r' ∷ [ '\n' ]) ++ suf₁       ≡⟨ cong (_++ suf₁) (sym $ ++-assoc pre₁ _ _) ⟩
-  --                 ((pre₁ ++ [ '\r']) ++ [ '\n' ]) ++ suf₁ ≡⟨ ++-assoc _ [ '\n' ] suf₁ ⟩
-  --                 (pre₁ ++ [ '\r' ]) ++ '\n' ∷ suf₁       ≡⟨ ps≡ ⟩
-  --                 xs ∎)))
+                    @0 e' : _
+                    e' = proj₁ (proj₂ e≡)
 
+                    c∉64 : ¬ Base64Char [ c ]
+                    c∉64 = case eol ret (λ x → ¬ Base64Char [ proj₁ (f x) ]) of λ where
+                      RFC5234.crlf → λ { (mk64 c c∈ i refl) → contradiction c∈ (toWitnessFalse{Q = '\r' ∈? _} tt)}
+                      RFC5234.cr → λ { (mk64 c c∈ i refl) → contradiction c∈ (toWitnessFalse{Q = _ ∈? _} tt)}
+                      RFC5234.lf → λ { (mk64 c c∈ i refl) → contradiction c∈ (toWitnessFalse{Q = _ ∈? _} tt)}
+                in
+                contradiction
+                  (success (s ∷ʳ c) _ refl
+                    (mkParseWhile _ c (Base64.Char.iList2All str) c∉64 refl)
+                    (e' ++ suffix)
+                    (begin (s ++ [ c ]) ++ e' ++ suffix   ≡⟨ sym (++-assoc (s ++ [ c ]) e' suffix) ⟩
+                           ((s ++ [ c ]) ++ e') ++ suffix ≡⟨ cong (_++ suffix) (++-assoc s [ c ] e') ⟩
+                           (s ++ [ c ] ++ e') ++ suffix   ≡⟨ ++-assoc s ([ c ] ++ e') suffix ⟩
+                           s ++ ([ c ] ++ e') ++ suffix   ≡⟨ cong (λ x → s ++ x ++ suffix) (sym $ proj₂ (proj₂ e≡)) ⟩
+                           s ++ e ++ suffix               ≡⟨ solve (++-monoid Char) ⟩
+                           (s ++ e) ++ suffix             ≡⟨ cong (λ x → (x ++ e) ++ suffix) (sym (++-identityʳ s)) ⟩
+                           ((s ++ []) ++ e) ++ suffix     ≡⟨ ps≡ ⟩
+                           xs                             ∎))
+                  ¬p
+              (success ._ read read≡ (mkCertFinalLine{e = e} (mk64Str{s}{p = p} str strLen (pad1 (mk64P1{b₁}{b₂}{b₃} c₁@(mk64 ._ b₁∈ _ refl) c₂@(mk64 ._ b₂∈ _ refl) c₃@(mk64 ._ b₃∈ _ refl) pad refl)) refl) lineLen eol refl) suffix ps≡) →
+                contradiction
+                  (success
+                    (s ++ b₁ ∷ b₂ ∷ b₃ ∷ [ '=' ]) _ refl
+                    (mkParseWhile (s ++ b₁ ∷ b₂ ∷ [ b₃ ]) '=' (All.++⁺ (Base64.Char.iList2All str) (c₁ All.∷ c₂ All.∷ c₃ All.∷ All.[])) {!!} {!!})
+                    (e ++ suffix)
+                    {!!})
+                  ¬p
+              (success ._ read read≡ (mkCertFinalLine{e = e} (mk64Str{p = p} str strLen (pad2 x) refl) lineLen eol refl) suffix ps≡) → {!!}
+                ))
+          , tt
+        (yes (success pre₁ r₁ r₁≡ (mkParseWhile prefix term allPrefix ¬term ps≡) suf₁ ps≡₁)) → {!!}
 
