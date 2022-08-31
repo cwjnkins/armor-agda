@@ -3,6 +3,7 @@
 open import Aeres.Binary renaming (module Base64 to B64)
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 import      Aeres.Data.Base64.TCB as Base64
@@ -11,6 +12,7 @@ import      Data.Nat.Properties   as Nat
 
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Option      Char
 open Aeres.Grammar.Sum         Char
 open ≡-Reasoning
 
@@ -63,7 +65,30 @@ module Base64Char where
   @0 nonempty : NonEmpty Base64.Base64Char
   nonempty () refl
 
+  postulate
+    unambiguous : Unambiguous Base64.Base64Char
+
 module Base64Pad where
+  Rep₁ : @0 List Char → Set
+  Rep₁ =  &ₚ (&ₚ Base64.Base64Char Base64.Base64Char)
+         (&ₚ (Σₚ Base64.Base64Char (λ xs c → toℕ (↑ Base64.Base64Char.i c) % 2 ^ 2 ≡ 0))
+             (_≡ [ '=' ]))
+  postulate
+    equiv₁ : Equivalent Rep₁ Base64.Base64Pad1
+
+  Rep₂ : @0 List Char → Set
+  Rep₂ =  &ₚ Base64.Base64Char
+         (&ₚ (Σₚ Base64.Base64Char (λ xs c → toℕ (↑ Base64.Base64Char.i c) % 2 ^ 4 ≡ 0))
+             (_≡ '=' ∷ [ '=' ]))
+
+  postulate
+    equiv₂ : Equivalent Rep₂ Base64.Base64Pad2
+
+  Rep : @0 List Char → Set
+  Rep = Option (Sum Base64.Base64Pad1 Base64.Base64Pad2)
+
+  postulate
+    equiv : Equivalent Rep Base64.Base64Pad
 
   @0 p%4≡0 : ∀ {@0 p} → Base64.Base64Pad p → length p % 4 ≡ 0
   p%4≡0 (Base64.pad0 refl) = refl

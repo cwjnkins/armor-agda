@@ -17,7 +17,7 @@ open Aeres.Grammar.Parser.Core Σ
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
   parseSigma'
     : ∀ {@0 A B}
-      → NonNesting A
+      → @0 NonNesting A
       → (∀ {xs} → Decidable (B xs))
       → (∀ {@0 xs} → (a₁ a₂ : A xs) → B _ a₁ → B _ a₂)
       → Parser (M ∘ Dec) A
@@ -54,7 +54,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   parseSigma
     : ∀ {A B}
-      → NonNesting A → Unambiguous A
+      → @0 NonNesting A → @0 Unambiguous A
       → Parser (M ∘ Dec) A
       → (∀ {@0 xs} → Decidable (B xs))
       → Parser (M ∘ Dec) (Σₚ A B)
