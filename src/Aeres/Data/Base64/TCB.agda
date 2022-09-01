@@ -17,7 +17,7 @@ record Base64Char (@0 bs : List Char) : Set where
     @0 bs≡ : bs ≡ [ c ]
 
 record Base64Pad2 (@0 bs : List Char) : Set where
-  constructor mk64P1
+  constructor mk64P2
   field
     @0 {b₁ b₂} : Char
     c₁ : Base64Char [ b₁ ]
@@ -65,5 +65,5 @@ decodeStr (mk64Str str strLen pad bs≡) =
   helper₂ (pad0 x) = []
   helper₂ (pad1 (mk64P1 (mk64 _ _ i _) (mk64 _ _ i₁ _) (mk64 _ _ i₂ _) _ _)) =
     from-just (Digs.base64To256 ((↑ i) ∷ (↑ i₁) ∷ [ ↑ i₂ ]))
-  helper₂ (pad2 (mk64P1 (mk64 _ _ i _) (mk64 _ _ i₁ _) _ _)) =
+  helper₂ (pad2 (mk64P2 (mk64 _ _ i _) (mk64 _ _ i₁ _) _ _)) =
     from-just (Digs.base64To256 ((↑ i) ∷ [ ↑ i₁ ]))

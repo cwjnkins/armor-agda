@@ -93,7 +93,7 @@ module Base64Pad where
   @0 p%4≡0 : ∀ {@0 p} → Base64.Base64Pad p → length p % 4 ≡ 0
   p%4≡0 (Base64.pad0 refl) = refl
   p%4≡0 (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = refl
-  p%4≡0 (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) = refl
+  p%4≡0 (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) = refl
 
 module Base64Str where
   -- Rep : @0 List Char → Set
@@ -133,7 +133,7 @@ module Base64Str where
          (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
          (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) c₂' c₃' pad refl)) refl) →
            contradiction c∈ c₁∉
-         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) c₂ pad refl)) refl) →
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ c∈ i refl) c₂ pad refl)) refl) →
            contradiction c∈ c₁∉
          (Base64.mk64Str (cons (mkIListCons (Base64.mk64 c c∈ i refl) tail₁ refl)) strLen pad bs≡) →
            contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (sym bs≡)) c∈) c₁∉
@@ -142,7 +142,7 @@ module Base64Str where
          (Base64.mk64Str nil strLen (Base64.pad0 ()) refl)
          (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 _ _ _ refl) (Base64.mk64 c₂' c₂∈' i₂' refl) c₃ pad refl)) bs≡) →
            contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (sym bs≡))) c₂∈') c₂∉
-         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 ._ _ _ refl) (Base64.mk64 .c₂ c₂∈' i₁ refl) pad refl)) refl) →
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 ._ _ _ refl) (Base64.mk64 .c₂ c₂∈' i₁ refl) pad refl)) refl) →
            contradiction c₂∈' c₂∉
          (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₂' c₂∈' _ refl) tail₁ refl) refl) strLen pad bs≡) →
            contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (sym bs≡))) c₂∈') c₂∉
@@ -155,7 +155,7 @@ module Base64Str where
              (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
              (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c₁∈' _ refl) (Base64.mk64 .c₂ c₂∈' _ refl) (Base64.mk64 .c₃ c₃∈' _ refl) pad refl)) refl) →
                contradiction c₃∈' ¬c₃∈
-             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
                contradiction (erefl '=') ¬c₃≡=
              (Base64.mk64Str (consIList (Base64.mk64 c₁' _ _ refl) (consIList (Base64.mk64 c₂' _ _ refl) (consIList (Base64.mk64 c₃' c₃'∈ _ refl) _ refl) refl) refl) strLen pad bs≡) →
                contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡)))) c₃'∈) ¬c₃∈
@@ -164,7 +164,7 @@ module Base64Str where
              (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
              (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .'=' c∈₂ i₂ refl) pad refl)) refl) →
                contradiction (erefl '=') ¬c₄≡=
-             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
                contradiction (erefl '=') ¬c₄≡=
              (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₃' c₃∈' _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) _ refl) refl) refl) refl) strLen pad bs≡) →
                contradiction c₃∈' (subst (¬_ ∘ (_∈ B64.charset)) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡))) (toWitnessFalse {Q = _ ∈? _} tt))
@@ -176,7 +176,7 @@ module Base64Str where
                  (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad0 refl) ())
                  (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .'=' c₃∈' _ refl) pad refl)) refl) →
                    contradiction c₃∈' (toWitnessFalse{Q = _ ∈? _} tt)
-                 (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ _ _ refl) (Base64.mk64 .c₂ c₂∈' (singleton i' i≡') refl) pad refl)) refl) →
+                 (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ _ _ refl) (Base64.mk64 .c₂ c₂∈' (singleton i' i≡') refl) pad refl)) refl) →
                    contradiction
                      (begin toℕ (Any.index c₂∈)  % (2 ^ 4) ≡⟨ cong (λ x → toℕ (Any.index x) % (2 ^ 4)) (B64.∈charsetUnique c₂∈ c₂∈') ⟩
                             toℕ (Any.index c₂∈') % (2 ^ 4) ≡⟨ cong (λ x → toℕ x % (2 ^ 4)) (sym i≡') ⟩
@@ -186,7 +186,7 @@ module Base64Str where
                  (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (cons (mkIListCons (Base64.mk64 c₃' c₃∈' _ refl) _ refl)) refl) refl) strLen pad bs≡) →
                    contradiction c₃∈' (subst (¬_ ∘ (_∈ B64.charset)) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡))) (toWitnessFalse{Q = _ ∈? _} tt))
              (yes c₂0s) →
-               yes (Base64.mk64Str nil refl (Base64.pad2 (Base64.mk64P1 (Base64.mk64 c₁ c₁∈ self refl) (Base64.mk64 c₂ c₂∈ self refl) c₂0s refl)) refl)
+               yes (Base64.mk64Str nil refl (Base64.pad2 (Base64.mk64P2 (Base64.mk64 c₁ c₁∈ self refl) (Base64.mk64 c₂ c₂∈ self refl) c₂0s refl)) refl)
      ... | yes c₃∈
        with c₄ ∈? B64.charset
      ... | no ¬c₄∈ =
@@ -196,7 +196,7 @@ module Base64Str where
              (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
              (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) (Base64.mk64 .c₃ c∈₂ i₂ refl) pad refl)) refl) →
                contradiction refl ¬c₄≡=
-             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+             (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
                contradiction refl ¬c₄≡=
              (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) _ refl) refl) refl) refl) strLen pad bs≡) →
                contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c₄∈') ¬c₄∈
@@ -213,7 +213,7 @@ module Base64Str where
                             toℕ i' % (2 ^ 2) ≡⟨ pad ⟩
                             0 ∎)
                      ¬c₃0s
-                 (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
+                 (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 (Base64.mk64 .c₁ c∈ i refl) (Base64.mk64 .c₂ c∈₁ i₁ refl) pad refl)) refl) →
                    contradiction c₃∈ (toWitnessFalse{Q = _ ∈? _} tt)
                  (Base64.mk64Str (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 c₄' c₄∈' _ refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
                    contradiction (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡))))) c₄∈') ¬c₄∈
@@ -227,7 +227,7 @@ module Base64Str where
        no λ where
          (Base64.mk64Str nil strLen (Base64.pad0 refl) ())
          (Base64.mk64Str nil strLen (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) ())
-         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) ())
+         (Base64.mk64Str nil strLen (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) ())
          (Base64.mk64Str (consIList (Base64.mk64 c₁' c₁∈' i₁' refl) (consIList (Base64.mk64 c₂' c₂∈' i₂' refl) (consIList (Base64.mk64 c₃' c₃∈' i₃' refl) (consIList (Base64.mk64 c₄' c₄∈' i₄' refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
            contradiction
              (Base64.mk64Str tail₁ strLen pad (proj₂ $ Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) bs (_ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡ (erefl 4)))
@@ -238,7 +238,7 @@ module Base64Str where
        no λ where
          (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad0 refl) ())
          (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad ())) refl)
-         (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P1 c₁ c₂ pad refl)) ())
+         (Base64.mk64Str Aeres.Grammar.IList.nil strLen (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) ())
          (Base64.mk64Str (consIList (Base64.mk64 c₁' c₁∈' i₁' refl) (consIList (Base64.mk64 c₂' c₂∈' i₂' refl) (consIList (Base64.mk64 c₃' c₃∈' i₃' refl) (consIList (Base64.mk64 c₄' c₄∈' i₄' refl) tail₁ refl) refl) refl) refl) strLen pad bs≡) →
            contradiction
              (subst (All (_∈ B64.charset))

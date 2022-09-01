@@ -89,7 +89,7 @@ module parseBase64 where
                                length (pre' ++ suf')                         ≡⟨ cong length eq ⟩
                                length{A = Char} []                           ∎)
                         λ ()
-                    pre' suf' eq (pad2 (mk64P1{b₁}{b₂} c₁ c₂ pad bs≡)) →
+                    pre' suf' eq (pad2 (mk64P2{b₁}{b₂} c₁ c₂ pad bs≡)) →
                       contradiction {P = 4 + length suf' ≡ 0}
                         (begin length (b₁ ∷ b₂ ∷ '=' ∷ [ '=' ]) + length suf' ≡⟨ cong (λ x → length x + length suf') (sym bs≡) ⟩
                                length pre' + length suf'                      ≡⟨ sym (length-++ pre') ⟩
@@ -107,7 +107,7 @@ module parseBase64 where
                                length (pre' ++ suf')                 ≡⟨ cong length eq ⟩
                                length [ c₁ ]                         ∎)
                 (λ ())
-            pre' suf' eq (pad2 (mk64P1{b₁}{b₂} c₁ c₂ pad bs≡)) →
+            pre' suf' eq (pad2 (mk64P2{b₁}{b₂} c₁ c₂ pad bs≡)) →
               contradiction {P = 4 + length suf' ≡ 1}
                 (begin length (b₁ ∷ b₂ ∷ '=' ∷ [ '=' ]) + length suf' ≡⟨ cong (λ x → length x + length suf') (sym bs≡) ⟩
                                length pre' + length suf'              ≡⟨ sym (length-++ pre') ⟩
@@ -125,7 +125,7 @@ module parseBase64 where
                                length (pre' ++ suf')                 ≡⟨ cong length eq ⟩
                                length (c₁ ∷ [ c₂ ])                  ∎)
                 (λ ())
-            pre' suf' eq (pad2 (mk64P1{b₁}{b₂} c₁' c₂' pad bs≡)) →
+            pre' suf' eq (pad2 (mk64P2{b₁}{b₂} c₁' c₂' pad bs≡)) →
               contradiction {P = 4 + length suf' ≡ 2}
                 (begin length (b₁ ∷ b₂ ∷ '=' ∷ [ '=' ]) + length suf' ≡⟨ cong (λ x → length x + length suf') (sym bs≡) ⟩
                                length pre' + length suf'              ≡⟨ sym (length-++ pre') ⟩
@@ -143,7 +143,7 @@ module parseBase64 where
                                length (pre' ++ suf')                 ≡⟨ cong length eq ⟩
                                length (c₁ ∷ c₂ ∷ [ c₃ ])             ∎)
                 (λ ())
-            pre' suf' eq (pad2 (mk64P1{b₁}{b₂} c₁' c₂' pad bs≡)) →
+            pre' suf' eq (pad2 (mk64P2{b₁}{b₂} c₁' c₂' pad bs≡)) →
               contradiction {P = 4 + length suf' ≡ 3}
                 (begin length (b₁ ∷ b₂ ∷ '=' ∷ [ '=' ]) + length suf' ≡⟨ cong (λ x → length x + length suf') (sym bs≡) ⟩
                                length pre' + length suf'              ≡⟨ sym (length-++ pre') ⟩
@@ -163,11 +163,42 @@ module parseBase64 where
                     (begin (length pre' ≡⟨ ‼ (cong length bs≡) ⟩
                            4 ≡⟨ ‼ sym read≡ ⟩
                            read ∎))
-                pre' suf' eq (pad2 (mk64P1 c₁ c₂ pad bs≡)) → {!!}
-          (mkLogged log (no ¬p)) →
+                pre' suf' eq (pad2 (mk64P2 c₁ c₂ pad bs≡)) →
+                  Lemmas.≡⇒≤
+                    (begin (length pre' ≡⟨ ‼ cong length bs≡ ⟩
+                    4 ≡⟨ ‼ sym read≡ ⟩
+                    read ∎))
+          (mkLogged log (no ¬p₁)) →
             let p₂ = runParser parseBase64Pad2 xs'
             in
-            {!!}
+            case p₂ of λ where
+              (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁@(mk64P2 c₁ c₂ pad refl) suf₁ ps≡₁))) →
+                (mkLogged log (yes (success pre₁ _ r₁≡ (pad2 v₁) suf₁ ps≡₁)))
+                , λ where
+                    .[] suf' eq (pad0 refl) → z≤n
+                    pre' suf' eq (pad1 (mk64P1 c₁ c₂ c₃ pad bs≡)) →
+                      Lemmas.≡⇒≤
+                        (begin (length pre' ≡⟨ cong length (‼ bs≡) ⟩
+                               4 ≡⟨ ‼ sym r₁≡ ⟩
+                               r₁ ∎))
+                    pre' suf' eq (pad2 (mk64P2 c₁ c₂ pad bs≡)) →
+                      Lemmas.≡⇒≤ ∘ ‼_ $
+                        (begin (length pre' ≡⟨ cong length (‼ bs≡) ⟩
+                               4 ≡⟨ ‼ (sym r₁≡) ⟩
+                               r₁ ∎))
+              (mkLogged log (no ¬p₂)) →
+                (mkLogged [ "parseBase64Pad: not pad: " String.++ String.fromList (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ])]
+                  (yes (success [] _ refl (pad0 refl) xs' refl)))
+                , λ where
+                  .[] suf' eq (pad0 refl) → z≤n
+                  pre' suf' eq (pad1 v@(mk64P1{b₁'}{b₂'}{b₃'} c₁' c₂' c₃' pad bs≡)) →
+                    contradiction
+                      (success pre' _ refl v suf' eq)
+                      ¬p₁
+                  pre' suf' eq (pad2 v@(mk64P2 c₁ c₂ pad bs≡)) →
+                    contradiction
+                      (success pre' _ refl v suf' eq)
+                      ¬p₂
 
 --   parseMaxBase64Str : LogDec.MaximalParser Base64Str
 --   parseMaxBase64Str = LogDec.mkMaximalParser help
