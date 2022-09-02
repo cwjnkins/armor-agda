@@ -1,5 +1,4 @@
 {-# OPTIONS --subtyping #-}
-{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Aeres.Binary renaming (module Base64 to B64)
 import      Aeres.Grammar.Definitions
@@ -77,7 +76,7 @@ module Base64Pad where
   
   equiv₁ : Equivalent Rep₁ Base64.Base64Pad1
   proj₁ equiv₁ (mk&ₚ (mk&ₚ (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl) refl refl) refl) = Base64.mk64P1 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl
-  proj₂ equiv₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl) = mk&ₚ (mk&ₚ c₁ c₂ refl) (mk&ₚ (mk×ₚ c₃ {!!} refl) refl refl) refl
+  proj₂ equiv₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl) = mk&ₚ (mk&ₚ c₁ c₂ refl) (mk&ₚ (mk×ₚ c₃ (‼ pad) refl) refl refl) refl
 
   Rep₂ : @0 List Char → Set
   Rep₂ =  &ₚ Base64.Base64Char
@@ -86,7 +85,7 @@ module Base64Pad where
 
   equiv₂ : Equivalent Rep₂ Base64.Base64Pad2
   proj₁ equiv₂ (mk&ₚ (Base64.mk64 c c∈ i refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl) refl refl) refl) = Base64.mk64P2 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl
-  proj₂ equiv₂ (Base64.mk64P2 c₁ c₂ pad refl) = mk&ₚ c₁ (mk&ₚ (mk×ₚ c₂ {!!} refl) refl refl) refl
+  proj₂ equiv₂ (Base64.mk64P2 c₁ c₂ pad refl) = mk&ₚ c₁ (mk&ₚ (mk×ₚ c₂ (‼ pad) refl) refl refl) refl
 
   Rep : @0 List Char → Set
   Rep = Option (Sum Base64.Base64Pad1 Base64.Base64Pad2)
