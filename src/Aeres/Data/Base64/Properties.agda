@@ -65,8 +65,32 @@ module Base64Char where
   @0 nonempty : NonEmpty Base64.Base64Char
   nonempty () refl
 
-  postulate
-    unambiguous : Unambiguous Base64.Base64Char
+  unambiguous : Unambiguous Base64.Base64Char
+  unambiguous = ua
+    where
+    ua : ∀ {@0 xs} → (a₁ a₂ : Base64.Base64Char xs) → a₁ ≡ a₂
+    ua (Base64.mk64 c c∈ i@(singleton x x≡) refl) (Base64.mk64 .c c∈₁ i₁@(singleton x₁ x₁≡) refl) =
+      subst₀ (λ c∈' → ∀ i' → Base64.mk64 c c∈ i refl ≡ Base64.mk64 c c∈' i' refl)
+        c∈≡
+        (λ where
+          (singleton x' x'≡) → ‼
+            let @0 x≡x' : x ≡ x'
+                x≡x' = trans₀ x≡ (sym x'≡)
+            in
+            subst₀
+              (λ y →
+                 ∀ (y≡ : y ≡ Any.index c∈) →
+                 Base64.mk64 _ _ (singleton x x≡) _ ≡
+                 Base64.mk64 _ _ (singleton y y≡) _)
+              x≡x'
+              (λ y≡ →
+                subst₀ (λ y≡ → _ ≡ Base64.mk64 c c∈ (singleton x y≡) refl)
+                  (≡-unique x≡ _) refl)
+              x'≡)
+        i₁
+      where
+      @0 c∈≡ : c∈ ≡ c∈₁
+      c∈≡ = ∈-unique (toWitness{Q = unique? _} tt) c∈ c∈₁
 
 module Base64Pad where
   Rep₁ : @0 List Char → Set
