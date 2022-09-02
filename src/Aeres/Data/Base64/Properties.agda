@@ -73,22 +73,30 @@ module Base64Pad where
   Rep₁ =  &ₚ (&ₚ Base64.Base64Char Base64.Base64Char)
          (&ₚ (Σₚ Base64.Base64Char (λ xs c → toℕ (↑ Base64.Base64Char.i c) % 2 ^ 2 ≡ 0))
              (_≡ [ '=' ]))
-  postulate
-    equiv₁ : Equivalent Rep₁ Base64.Base64Pad1
+  
+  equiv₁ : Equivalent Rep₁ Base64.Base64Pad1
+  proj₁ equiv₁ (mk&ₚ (mk&ₚ (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl) refl refl) refl) = Base64.mk64P1 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl
+  proj₂ equiv₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl) = mk&ₚ (mk&ₚ c₁ c₂ refl) (mk&ₚ (mk×ₚ c₃ (‼ pad) refl) refl refl) refl
 
   Rep₂ : @0 List Char → Set
   Rep₂ =  &ₚ Base64.Base64Char
          (&ₚ (Σₚ Base64.Base64Char (λ xs c → toℕ (↑ Base64.Base64Char.i c) % 2 ^ 4 ≡ 0))
              (_≡ '=' ∷ [ '=' ]))
 
-  postulate
-    equiv₂ : Equivalent Rep₂ Base64.Base64Pad2
+  equiv₂ : Equivalent Rep₂ Base64.Base64Pad2
+  proj₁ equiv₂ (mk&ₚ (Base64.mk64 c c∈ i refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl) refl refl) refl) = Base64.mk64P2 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl
+  proj₂ equiv₂ (Base64.mk64P2 c₁ c₂ pad refl) = mk&ₚ c₁ (mk&ₚ (mk×ₚ c₂ (‼ pad) refl) refl refl) refl
 
   Rep : @0 List Char → Set
   Rep = Option (Sum Base64.Base64Pad1 Base64.Base64Pad2)
 
-  postulate
-    equiv : Equivalent Rep Base64.Base64Pad
+  equiv : Equivalent Rep Base64.Base64Pad
+  proj₁ equiv none = Base64.pad0 refl
+  proj₁ equiv (some (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl))) = Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)
+  proj₁ equiv (some (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl))) = Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)
+  proj₂ equiv (Base64.pad0 refl) = none
+  proj₂ equiv (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = some (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl))
+  proj₂ equiv (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) = some (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl))
 
   @0 p%4≡0 : ∀ {@0 p} → Base64.Base64Pad p → length p % 4 ≡ 0
   p%4≡0 (Base64.pad0 refl) = refl
