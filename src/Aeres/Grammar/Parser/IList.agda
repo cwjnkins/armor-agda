@@ -11,6 +11,7 @@ import      Aeres.Grammar.Parser.Sigma
 import      Aeres.Grammar.Parser.WellFounded
 import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
+  renaming (Σ to Sigma)
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -262,3 +263,95 @@ module parseIList
         (parseIList n))
 
 open parseIList public using (parseIList ; parseIListNonEmpty)
+
+module parseIListMax
+  (underflow : Logging ⊤)
+  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (p : Parser (Logging ∘ Dec) A) where
+
+  open LogDec
+  open import Data.Nat.Induction
+    hiding (Acc)
+  open ≡-Reasoning
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  parseIListMax : MaximalParser (IList A)
+  parseIListMax = mkMaximalParser (λ xs → help xs (<-wellFounded (length xs)))
+    where
+    help : ∀ xs → @0 Acc _<_ (length xs) → Sigma _ _
+    help [] a =
+      (mkLogged []
+        (yes (success [] _ refl nil [] refl)))
+      , λ where
+        pre' suf' x x₁ → subst₀ (λ x → length x ≤ 0) (sym $ ++-conicalˡ pre' suf' x) z≤n
+    help xs'@(x ∷ xs) (acc rs) =
+      let p = runParser p xs'
+      in
+      case p of λ where
+        (mkLogged log (no ¬p)) →
+          (mkLogged log (yes (success [] _ refl nil xs' refl)))
+          , λ where
+            .[] suf' eq nil → z≤n
+            pre' suf' eq (consIList{bs₁}{bs₂} head₁ tail₁ bs≡) →
+              contradiction
+                (success bs₁ _ refl head₁ (bs₂ ++ suf')
+                  (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                         (bs₁ ++ bs₂) ++ suf' ≡⟨ (sym $ cong (_++ suf') bs≡) ⟩
+                         pre' ++ suf' ≡⟨ eq ⟩
+                         xs' ∎)))
+                ¬p
+        (mkLogged log (yes (success prefix read read≡ value suffix ps≡))) →
+          let s = help suffix
+                    (rs (length suffix)
+                      (≤-Reasoning.begin
+                        suc (length suffix)
+                          ≤-Reasoning.≤⟨
+                            subst (length suffix <_) (length-++ prefix)
+                            (Lemmas.length-++-< prefix suffix (ne value)) ⟩
+                        length prefix + length suffix ≤-Reasoning.≡⟨ sym (length-++ prefix) ⟩
+                        length (prefix ++ suffix) ≤-Reasoning.≡⟨ cong length ps≡ ⟩
+                        length xs' ≤-Reasoning.∎))
+          in
+          case s of λ where
+            (mkLogged log (no ¬s) , _) →
+              contradiction (success [] _ refl nil suffix refl) ¬s
+            (mkLogged log' (yes (success prefix' read' read≡' value' suffix' ps≡')) , max) →
+              (mkLogged (log ++ log')
+                (yes
+                  (success (prefix ++ prefix') (read + read')
+                    (begin (read + read' ≡⟨ cong₂ _+_ read≡ read≡' ⟩
+                           length prefix + length prefix' ≡⟨ (sym $ length-++ prefix) ⟩
+                           length (prefix ++ prefix') ∎))
+                    (consIList value value' refl)
+                    suffix'
+                    (begin ((prefix ++ prefix') ++ suffix' ≡⟨ solve (++-monoid Σ) ⟩
+                           prefix ++ (prefix' ++ suffix') ≡⟨ cong (prefix ++_) ps≡' ⟩
+                           prefix ++ suffix ≡⟨ ps≡ ⟩
+                           xs' ∎)))))
+              , λ where
+                .[] suf' eq nil → z≤n
+                pre' suf' eq (consIList{bs₁}{bs₂} head₁ tail₁ bs≡₁) →
+                  let bs≡' : Erased (bs₁ ++ bs₂ ++ suf' ≡ prefix ++ suffix)
+                      bs≡' = ─ (begin
+                        (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                        (bs₁ ++ bs₂) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡₁) ⟩
+                        pre' ++ suf' ≡⟨ eq ⟩
+                        xs' ≡⟨ sym ps≡ ⟩
+                        prefix ++ suffix ∎))
+
+                      prefix≡ : Erased (bs₁ ≡ prefix)
+                      prefix≡ = ─ nn (Erased.x bs≡') head₁ value
+
+                      suffix≡ : Erased (bs₂ ++ suf' ≡ suffix)
+                      suffix≡ = ─ (Lemmas.++-cancel≡ˡ _ _ (Erased.x prefix≡) (Erased.x bs≡'))
+                  in
+                  uneraseDec
+                    (≤-Reasoning.begin
+                      length pre' ≤-Reasoning.≡⟨ cong length bs≡₁ ⟩
+                      length (bs₁ ++ bs₂) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
+                      length bs₁ + length bs₂ ≤-Reasoning.≡⟨ cong (λ x → length x + length bs₂) (̂‼ prefix≡) ⟩
+                      length prefix + length bs₂ ≤-Reasoning.≤⟨ +-monoʳ-≤ (length prefix) (length bs₂ ≤ read' ∋ max _ suf' (Erased.x suffix≡) tail₁) ⟩
+                      length prefix + read' ≤-Reasoning.≡⟨ cong (_+ read') (sym read≡) ⟩
+                      read + read' ≤-Reasoning.∎)
+                    (_ ≤? _)
+

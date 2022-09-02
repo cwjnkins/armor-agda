@@ -14,26 +14,31 @@ open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.Parser.Core Σ
   hiding (parseErased)
 
-module Generic (M : Set → Set) (Lift : (A : Set) (P : A → Set) → M A → Set) where
+module Generic (M : List Σ → Set → Set) (Lift : (A : Set) (P : A → Set) → (xs : List Σ) → M xs A → Set) where
   GreatestSuccess : ∀ {A xs} → Success A xs → Set
   GreatestSuccess{A}{xs} s =
     ∀ pre' suf' → pre' ++ suf' ≡ xs → A pre'
     → length pre' ≤ Success.read s
 
-  Maximal : ∀ {A} → Parser M A → Set
-  Maximal{A} p = ∀ xs → Lift (Success A xs) GreatestSuccess (runParser p xs)
+  Maximal : ∀ {A} → Parserᵢ M A → Set
+  Maximal{A} p = ∀ xs → Lift (Success A xs) GreatestSuccess xs (runParser p xs)
 
   record MaximalParser (@0 A : List Σ → Set) : Set where
     field
-      parser : Parser M A
+      parser : Parserᵢ M A
       max    : Maximal parser
+
+module GenericSimple
+  (M : Set → Set) (Lift : (A : Set) (P : A → Set) → M A → Set) where
+
+  open Generic (const M) (λ A P _ → Lift A P) public
 
 module LogDec where
   Lift : (A : Set) (P : A → Set) → Logging (Dec A) → Set
   Lift A P (mkLogged _ (no  _)) = ⊤
   Lift A P (mkLogged _ (yes x)) = P x
 
-  open Generic (Logging ∘ Dec) Lift public
+  open GenericSimple (Logging ∘ Dec) Lift public
   open ≡-Reasoning
 
   unlift : ∀ {@0 A} → (p : MaximalParser A)
