@@ -1,4 +1,5 @@
 {-# OPTIONS --subtyping #-}
+{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Aeres.Binary renaming (module Base64 to B64)
 import      Aeres.Grammar.Definitions
