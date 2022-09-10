@@ -118,8 +118,9 @@ module LogDec where
             (nn (trans eq (sym (Success.ps≡ p₁))) a (Success.value p₁)))
           (sym $ Success.read≡ p₁))
 
-  parse&o₂ : ∀ {@0 A B} → MaximalParser A → MaximalParser (Option B) → @0 StrictBoundary A B → MaximalParser (&ₚ A (Option B))
-  parse&o₂{A}{B} pa pb sb = mkMaximalParser help
+  parse&o₂ : ∀ {@0 A B} → MaximalParser A → MaximalParser (Option B) → @0 NoOverlap A B → @0 NonEmpty B
+             → MaximalParser (&ₚ A (Option B))
+  parse&o₂{A}{B} pa pb noo ne = mkMaximalParser help
     where
     help : ∀ xs
            → Sigma (Logging ∘ Dec $ Success (&ₚ A (Option B)) xs)
@@ -161,35 +162,71 @@ module LogDec where
                                       r₁ + r₂ ≤-Reasoning.∎)
                     (_ ≤? _)
                 pre' suf' ps'≡ (mk&ₚ{bs₁}{bs₂} fstₚ₁ (some sndₚ₁) bs≡) →
-                  let bs₁≡ : Erased (bs₁ ≡ pre₁)
-                      bs₁≡ = ─ sb xs bs₁ bs₂ suf' pre₁ pre₂ suf₂
-                                 {!!}
-                                 {!!}
-                                 fstₚ₁ v₁ sndₚ₁ {!v₂!}
-                      -- bs₁≡ = ─ sb xs bs₁ bs₂ suf' _ suf₁
-                      --            (begin (xs ≡⟨ sym ps'≡ ⟩
-                      --                   pre' ++ suf' ≡⟨ cong (_++ suf') bs≡ ⟩
-                      --                   (bs₁ ++ bs₂) ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
-                      --                   bs₁ ++ bs₂ ++ suf' ∎))
-                      --            (sym ps≡₁) fstₚ₁ v₁ sndₚ₁
-                      bs₂++suf'≡ : Erased (bs₂ ++ suf' ≡ suf₁)
-                      bs₂++suf'≡ = ─ Lemmas.++-cancel≡ˡ bs₁ pre₁ (Erased.x bs₁≡)
-                                       (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
-                                              (bs₁ ++ bs₂) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡) ⟩
-                                              pre' ++ suf' ≡⟨ ps'≡ ⟩
-                                              xs ≡⟨ sym ps≡₁ ⟩
-                                              pre₁ ++ suf₁ ∎))
-                      bs₂≤ : Erased (length bs₂ ≤ r₂)
-                      bs₂≤ = ─ max₂ _ _ (Erased.x bs₂++suf'≡) (some sndₚ₁)
+                  let xs≡ : Erased (bs₁ ++ bs₂ ++ suf' ≡ pre₁ ++ suf₁)
+                      xs≡ = ─ (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                   (bs₁ ++ bs₂) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡) ⟩
+                                   pre' ++ suf' ≡⟨ ps'≡ ⟩
+                                   xs ≡⟨ sym ps≡₁ ⟩
+                                   pre₁ ++ suf₁ ∎))
+
+                      bs₁≤ : Erased (length bs₁ ≤ r₁)
+                      bs₁≤ = ─ max₁ _ (bs₂ ++ suf') (trans (Erased.x xs≡) ps≡₁) fstₚ₁
+
+                      pre₁≡ : Erased (pre₁ ≡ bs₁ ++ drop (length bs₁) pre₁)
+                      pre₁≡ =
+                        ─ Lemmas.drop-length-≤
+                            bs₁ (bs₂ ++ suf') _ suf₁ (Erased.x xs≡)
+                            (≤-trans (Erased.x bs₁≤) (Lemmas.≡⇒≤ r₁≡))
                   in
                   uneraseDec
-                    (≤-Reasoning.begin
-                      (length pre' ≤-Reasoning.≡⟨ cong length bs≡ ⟩
-                      length (bs₁ ++ bs₂) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
-                      length bs₁ + length bs₂ ≤-Reasoning.≤⟨ +-mono-≤ (Lemmas.≡⇒≤ (trans (cong length (Erased.x bs₁≡)) (sym r₁≡))) (Erased.x bs₂≤) ⟩
-                      r₁ + r₂ ≤-Reasoning.∎))
+                    (case (noo bs₁ (drop (length bs₁) pre₁) suf₁ _ suf'
+                            ((++-cancelˡ bs₁ (sym (begin
+                              (bs₁ ++ bs₂ ++ suf' ≡⟨ Erased.x xs≡ ⟩ 
+                              pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (Erased.x pre₁≡) ⟩
+                              (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ ++-assoc bs₁ _ suf₁ ⟩
+                              bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ∎)))))
+                            (subst A (Erased.x pre₁≡) v₁) fstₚ₁)
+                     of λ where
+                      (inj₁ ≡[]) →
+                        let pre₁≡' : Erased (pre₁ ≡ bs₁)
+                            pre₁≡' = ─ (begin (pre₁ ≡⟨ Erased.x pre₁≡ ⟩
+                                              bs₁ ++ drop (length bs₁) pre₁ ≡⟨ cong (bs₁ ++_) ≡[] ⟩
+                                              bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
+                                              bs₁ ∎))
+                            suf₁≡ : Erased (suf₁ ≡ bs₂ ++ suf')
+                            suf₁≡ = ─ ++-cancelˡ pre₁ (begin
+                                        (pre₁ ++ suf₁ ≡⟨ sym (Erased.x xs≡) ⟩
+                                        bs₁ ++ bs₂ ++ suf' ≡⟨ cong (_++ bs₂ ++ suf') (sym (Erased.x pre₁≡')) ⟩
+                                        pre₁ ++ bs₂ ++ suf' ∎))
+                            bs₂≤ : Erased (length bs₂ ≤ r₂)
+                            bs₂≤ = ─ max₂ _ _ (sym $ Erased.x suf₁≡) (some sndₚ₁)
+                        in
+                        uneraseDec
+                          (≤-Reasoning.begin
+                            (length pre' ≤-Reasoning.≡⟨ cong length bs≡ ⟩
+                            length (bs₁ ++ bs₂) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
+                            length bs₁ + length bs₂ ≤-Reasoning.≤⟨ +-mono-≤ (Erased.x bs₁≤) (Erased.x bs₂≤) ⟩
+                            r₁ + r₂ ≤-Reasoning.∎))
+                          (_ ≤? _)
+                        -- uneraseDec
+                        --   (≤-Reasoning.begin
+                        --     length pre' ≤-Reasoning.≡⟨ cong length bs≡ ⟩
+                        --     length (bs₁ ++ bs₂) ≤-Reasoning.≡⟨ cong (λ x → length (x ++ bs₂)) (++-conicalˡ bs₁ _ ≡[] ) ⟩
+                        --     length bs₂
+                        --       ≤-Reasoning.≤⟨
+                        --         max₂ _ suf'
+                        --           (begin (bs₂ ++ suf' ≡⟨ cong (_++ bs₂ ++ suf') (sym (++-conicalˡ bs₁ _ ≡[])) ⟩
+                        --                  bs₁ ++ bs₂ ++ suf' ≡⟨ Erased.x xs≡ ⟩
+                        --                  pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (Erased.x pre₁≡) ⟩
+                        --                  (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ cong (_++ suf₁) ≡[] ⟩
+                        --                  suf₁ ∎))
+                        --           (some sndₚ₁)
+                        --       ⟩
+                        --     r₂ ≤-Reasoning.≤⟨ m≤n+m r₂ r₁ ⟩
+                        --     r₁ + r₂ ≤-Reasoning.∎)
+                        --   (_ ≤? _)
+                      (inj₂ x) → contradiction sndₚ₁ x)
                     (_ ≤? _)
-
 
   parse&₁ : ∀ {@0 A B} → Parser (Logging ∘ Dec) A → NonNesting A → MaximalParser B → MaximalParser (&ₚ A B)
   parse&₁{A}{B} p₁ nn p₂ = mkMaximalParser help

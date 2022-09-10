@@ -129,6 +129,18 @@ module Base64Pad where
   p%4≡0 (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = refl
   p%4≡0 (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) = refl
 
+  forcebs : ∀ {@0 xs₁ bs₁ ys₁ xs₂ ys₂ c₁ c₂ c₃ c₄}
+            → Sum Base64.Base64Pad1 Base64.Base64Pad2 xs₂
+            → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+            → xs₁ ≡ c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₁
+            → xs₂ ≡ c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]
+  forcebs{bs₁ = bs₁}{ys₁} (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) ++≡ refl = ‼ proj₁ (Lemmas.length-++-≡ _ _ _ (bs₁ ++ ys₁) (sym ++≡) refl)
+  forcebs (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) ++≡ refl = ‼ proj₁ (Lemmas.length-++-≡ _ _ _ _ (sym ++≡) refl)
+
+  c₄∉ : ∀ {@0 c₁ c₂ c₃ c₄} → Sum Base64.Base64Pad1 Base64.Base64Pad2 (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) → c₄ ∉ B64.charset
+  c₄∉ (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = toWitnessFalse {Q = _ ∈? _} tt
+  c₄∉ (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) = toWitnessFalse{Q = _ ∈? _} tt
+
 module Base64Str where
   Rep : @0 List Char → Set
   Rep = &ₚ (IList (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char Base64.Base64Char)))) Base64Pad.Rep
@@ -166,84 +178,107 @@ module Base64Str where
     where
     l = proj₂ equivₛ (mk×ₚ str (‼ strLen) refl)
 
-  strictBoundary : StrictBoundary Repₛ (Sum Base64.Base64Pad1 Base64.Base64Pad2)
-  strictBoundary xs .[] zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ nil nil _ _ = refl
-  strictBoundary xs .[] zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ nil (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (Sum.inj₁ (Base64.mk64P1{b₁'}{b₂'}{b₃'} c₁' c₂' c₃' _ bs'≡)) _ =
-    contradiction {P = '=' ∈ B64.charset}
-      (subst (_∈ B64.charset) c₄≡ c₄∈)
-      (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
-    where
-    @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₂ ++ ws₂) (b₁' ∷ b₂' ∷ b₃' ∷ '=' ∷ ws₁)
-    xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) (sym bs≡₁) ⟩
-                 ys₂ ++ zs₂ ++ ws₂ ≡⟨ sym xs≡₂ ⟩
-                 xs ≡⟨ xs≡₁ ⟩
-                 zs₁ ++ ws₁ ≡⟨ cong (_++ ws₁) bs'≡ ⟩
-                 (b₁' ∷ b₂' ∷ b₃' ∷ [ '=' ]) ++ ws₁ ∎)
-    @0 c₄≡ : c₄ ≡ '='
-    c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
-  strictBoundary xs .[] zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ nil (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (Sum.inj₂ (Base64.mk64P2{b₁'}{b₂'} c₁' c₂' _ bs'≡)) _ =
-    contradiction{P = '=' ∈ B64.charset}
-      (subst (_∈ B64.charset) c₄≡ c₄∈)
-      (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
-    where
-    @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₂ ++ ws₂) (b₁' ∷ b₂' ∷ '=' ∷ '=' ∷ ws₁)
-    xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) (sym bs≡₁) ⟩
-                 ys₂ ++ zs₂ ++ ws₂ ≡⟨ sym xs≡₂ ⟩
-                 xs ≡⟨ xs≡₁ ⟩
-                 zs₁ ++ ws₁ ≡⟨ cong (_++ ws₁) bs'≡ ⟩
-                 (b₁' ∷ b₂' ∷ '=' ∷ [ '=' ]) ++ ws₁ ∎)
-    @0 c₄≡ : c₄ ≡ '='
-    c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
-  strictBoundary xs ys₁ zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) nil _ (Sum.inj₁ (Base64.mk64P1{b₁'}{b₂'}{b₃'} c₁' c₂' c₃' _ bs'≡)) =
-    contradiction{P = '=' ∈ B64.charset}
-      (subst (_∈ B64.charset) c₄≡ c₄∈)
-      (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
-    where
-    @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁) (b₁' ∷ b₂' ∷ b₃' ∷ '=' ∷ ws₂)
-    xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
-                 ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
-                 xs ≡⟨ xs≡₂ ⟩
-                 zs₂ ++ ws₂ ≡⟨ cong (_++ ws₂) bs'≡ ⟩
-                 (b₁' ∷ b₂' ∷ b₃' ∷ [ '=' ]) ++ ws₂ ∎)
-    @0 c₄≡ : c₄ ≡ '='
-    c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
-  strictBoundary xs ys₁ zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) nil _ (Sum.inj₂ (Base64.mk64P2{b₁'}{b₂'} c₁' c₂' _ bs'≡)) =
-    contradiction{P = '=' ∈ B64.charset}
-      (subst (_∈ B64.charset) c₄≡ c₄∈)
-      (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
-    where
-    @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁) (b₁' ∷ b₂' ∷ '=' ∷ '=' ∷ ws₂)
-    xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
-                 ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
-                 xs ≡⟨ xs≡₂ ⟩
-                 zs₂ ++ ws₂ ≡⟨ cong (_++ ws₂) bs'≡ ⟩
-                 (b₁' ∷ b₂' ∷ '=' ∷ [ '=' ]) ++ ws₂ ∎)
-    @0 c₄≡ : c₄ ≡ '='
-    c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
-  strictBoundary xs ys₁ zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (consIList{bs₂ = bs₂'} (mk&ₚ (Base64.mk64 c₁' c₁∈' _ refl) (mk&ₚ (Base64.mk64 c₂' c₂∈' _ refl) (mk&ₚ (Base64.mk64 c₃' c₃∈' _ refl) (Base64.mk64 c₄' c₄∈' _ refl)  refl) refl) refl) tail₁' bs≡₁') p₁ p₂ =
-    ‼ (begin ys₁ ≡⟨ bs≡₁ ⟩
-          c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ] ++ bs₂
-            ≡⟨ cong₂ _++_
-                 (proj₁ (Lemmas.length-++-≡ (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) (bs₂ ++ zs₁ ++ ws₁) _ (bs₂' ++ zs₂ ++ ws₂)
-                          (begin (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
-                                 ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
-                                 xs ≡⟨ xs≡₂ ⟩
-                                 ys₂ ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) bs≡₁' ⟩
-                                 _ ∎))
-                          refl))
-                 sb' ⟩
-          c₁' ∷ c₂' ∷ c₃' ∷ [ c₄' ] ++ bs₂' ≡⟨ sym bs≡₁' ⟩
-          ys₂ ∎)
-    where
-    @0 sb' : bs₂ ≡ bs₂'
-    sb' = strictBoundary (drop 4 xs) bs₂ zs₁ ws₁ bs₂' zs₂ ws₂
-            (begin drop 4 xs ≡⟨ cong (drop 4) xs≡₁ ⟩
-                   drop 4 (ys₁ ++ zs₁ ++ ws₁) ≡⟨ cong (λ x → drop 4 (x ++ zs₁ ++ ws₁)) bs≡₁ ⟩
-                   bs₂ ++ zs₁ ++ ws₁ ∎)
-            (begin (drop 4 xs ≡⟨ cong (drop 4) xs≡₂ ⟩
-                   drop 4 (ys₂ ++ zs₂ ++ ws₂) ≡⟨ cong (λ x → drop 4 (x ++ zs₂ ++ ws₂)) bs≡₁' ⟩
-                   bs₂' ++ zs₂ ++ ws₂ ∎))
-            tail₁ tail₁' p₁ p₂
+  -- TODO: equality for List Char is decidable, so guard against ≡ [] first and then handle the negation case separately
+  {-# TERMINATING #-}
+  noOverlap : NoOverlap Repₛ (Sum Base64.Base64Pad1 Base64.Base64Pad2)
+  noOverlap .[] .[] ys₁ xs₂ ys₂ ++≡ nil nil = inj₁ refl
+  noOverlap .[] xs₁ ys₁ xs₂ ys₂ ++≡ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) nil =
+    inj₂ λ where
+      p → contradiction c₄∈ (Base64Pad.c₄∉ (subst (Sum _ _) (Base64Pad.forcebs p ++≡ bs≡₁) p))
+  noOverlap ws xs₁ ys₁ xs₂ ys₂ ++≡ r₁ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) =
+    case (subst₀ (Repₛ ∘ (_++ xs₁)) bs≡₁ r₁) ret (const _) of λ where
+      (consIList{bs₂ = bs₂'} (mk&ₚ (Base64.mk64 c₁' c₁∈' _ refl) (mk&ₚ (Base64.mk64 c₂' c₂∈' _ refl) (mk&ₚ (Base64.mk64 c₃' c₃∈' _ refl) (Base64.mk64 c₄' c₄∈' _ refl)  refl) refl) refl) tail₁' bs≡₁') →
+        let bs₂≡ : Erased (bs₂ ≡ drop 4 ws)
+            bs₂≡ = ─ subst ((bs₂ ≡_) ∘ (drop 4)) (sym bs≡₁) refl
+
+            bs₂'≡ : Erased (bs₂' ≡ drop 4 ws ++ xs₁)
+            bs₂'≡ = ─ proj₂ (Lemmas.length-++-≡ _ _ (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) _
+                              (begin ((c₁' ∷ c₂' ∷ c₃' ∷ [ c₄' ]) ++ bs₂' ≡⟨ sym bs≡₁' ⟩
+                                     c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ] ++ bs₂ ++ xs₁ ≡⟨ cong (λ x → (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) ++ x ++ xs₁) (Erased.x bs₂≡) ⟩
+                                     c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ] ++ (drop 4 ws) ++ xs₁ ∎))
+                              refl)
+        in
+        noOverlap (drop 4 ws) xs₁ ys₁ xs₂ ys₂ ++≡
+          (subst₀ Repₛ (Erased.x bs₂'≡) tail₁') (subst₀ Repₛ (Erased.x bs₂≡) tail₁)
+
+  -- strictBoundary : StrictBoundary Repₛ (Sum Base64.Base64Pad1 Base64.Base64Pad2)
+  -- strictBoundary xs .[] zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ nil nil _ _ = refl
+  -- strictBoundary xs .[] zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ nil (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (Sum.inj₁ (Base64.mk64P1{b₁'}{b₂'}{b₃'} c₁' c₂' c₃' _ bs'≡)) _ =
+  --   contradiction {P = '=' ∈ B64.charset}
+  --     (subst (_∈ B64.charset) c₄≡ c₄∈)
+  --     (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
+  --   where
+  --   @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₂ ++ ws₂) (b₁' ∷ b₂' ∷ b₃' ∷ '=' ∷ ws₁)
+  --   xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) (sym bs≡₁) ⟩
+  --                ys₂ ++ zs₂ ++ ws₂ ≡⟨ sym xs≡₂ ⟩
+  --                xs ≡⟨ xs≡₁ ⟩
+  --                zs₁ ++ ws₁ ≡⟨ cong (_++ ws₁) bs'≡ ⟩
+  --                (b₁' ∷ b₂' ∷ b₃' ∷ [ '=' ]) ++ ws₁ ∎)
+  --   @0 c₄≡ : c₄ ≡ '='
+  --   c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
+  -- strictBoundary xs .[] zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ nil (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (Sum.inj₂ (Base64.mk64P2{b₁'}{b₂'} c₁' c₂' _ bs'≡)) _ =
+  --   contradiction{P = '=' ∈ B64.charset}
+  --     (subst (_∈ B64.charset) c₄≡ c₄∈)
+  --     (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
+  --   where
+  --   @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₂ ++ ws₂) (b₁' ∷ b₂' ∷ '=' ∷ '=' ∷ ws₁)
+  --   xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) (sym bs≡₁) ⟩
+  --                ys₂ ++ zs₂ ++ ws₂ ≡⟨ sym xs≡₂ ⟩
+  --                xs ≡⟨ xs≡₁ ⟩
+  --                zs₁ ++ ws₁ ≡⟨ cong (_++ ws₁) bs'≡ ⟩
+  --                (b₁' ∷ b₂' ∷ '=' ∷ [ '=' ]) ++ ws₁ ∎)
+  --   @0 c₄≡ : c₄ ≡ '='
+  --   c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
+  -- strictBoundary xs ys₁ zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) nil _ (Sum.inj₁ (Base64.mk64P1{b₁'}{b₂'}{b₃'} c₁' c₂' c₃' _ bs'≡)) =
+  --   contradiction{P = '=' ∈ B64.charset}
+  --     (subst (_∈ B64.charset) c₄≡ c₄∈)
+  --     (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
+  --   where
+  --   @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁) (b₁' ∷ b₂' ∷ b₃' ∷ '=' ∷ ws₂)
+  --   xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
+  --                ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
+  --                xs ≡⟨ xs≡₂ ⟩
+  --                zs₂ ++ ws₂ ≡⟨ cong (_++ ws₂) bs'≡ ⟩
+  --                (b₁' ∷ b₂' ∷ b₃' ∷ [ '=' ]) ++ ws₂ ∎)
+  --   @0 c₄≡ : c₄ ≡ '='
+  --   c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
+  -- strictBoundary xs ys₁ zs₁ ws₁ .[] zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) nil _ (Sum.inj₂ (Base64.mk64P2{b₁'}{b₂'} c₁' c₂' _ bs'≡)) =
+  --   contradiction{P = '=' ∈ B64.charset}
+  --     (subst (_∈ B64.charset) c₄≡ c₄∈)
+  --     (toWitnessFalse {Q = '=' ∈? B64.charset} tt)
+  --   where
+  --   @0 xs≡' : _≡_{A = List Char} (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁) (b₁' ∷ b₂' ∷ '=' ∷ '=' ∷ ws₂)
+  --   xs≡' = begin ((c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂) ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
+  --                ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
+  --                xs ≡⟨ xs≡₂ ⟩
+  --                zs₂ ++ ws₂ ≡⟨ cong (_++ ws₂) bs'≡ ⟩
+  --                (b₁' ∷ b₂' ∷ '=' ∷ [ '=' ]) ++ ws₂ ∎)
+  --   @0 c₄≡ : c₄ ≡ '='
+  --   c₄≡ = ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ xs≡')))
+  -- strictBoundary xs ys₁ zs₁ ws₁ ys₂ zs₂ ws₂ xs≡₁ xs≡₂ (consIList{bs₂ = bs₂} (mk&ₚ (Base64.mk64 c₁ c₁∈ _ refl) (mk&ₚ (Base64.mk64 c₂ c₂∈ _ refl) (mk&ₚ (Base64.mk64 c₃ c₃∈ _ refl) (Base64.mk64 c₄ c₄∈ _ refl)  refl) refl) refl) tail₁ bs≡₁) (consIList{bs₂ = bs₂'} (mk&ₚ (Base64.mk64 c₁' c₁∈' _ refl) (mk&ₚ (Base64.mk64 c₂' c₂∈' _ refl) (mk&ₚ (Base64.mk64 c₃' c₃∈' _ refl) (Base64.mk64 c₄' c₄∈' _ refl)  refl) refl) refl) tail₁' bs≡₁') p₁ p₂ =
+  --   ‼ (begin ys₁ ≡⟨ bs≡₁ ⟩
+  --         c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ] ++ bs₂
+  --           ≡⟨ cong₂ _++_
+  --                (proj₁ (Lemmas.length-++-≡ (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) (bs₂ ++ zs₁ ++ ws₁) _ (bs₂' ++ zs₂ ++ ws₂)
+  --                         (begin (c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ bs₂ ++ zs₁ ++ ws₁ ≡⟨ cong (_++ zs₁ ++ ws₁) (sym bs≡₁) ⟩
+  --                                ys₁ ++ zs₁ ++ ws₁ ≡⟨ sym xs≡₁ ⟩
+  --                                xs ≡⟨ xs≡₂ ⟩
+  --                                ys₂ ++ zs₂ ++ ws₂ ≡⟨ cong (_++ zs₂ ++ ws₂) bs≡₁' ⟩
+  --                                _ ∎))
+  --                         refl))
+  --                sb' ⟩
+  --         c₁' ∷ c₂' ∷ c₃' ∷ [ c₄' ] ++ bs₂' ≡⟨ sym bs≡₁' ⟩
+  --         ys₂ ∎)
+  --   where
+  --   @0 sb' : bs₂ ≡ bs₂'
+  --   sb' = strictBoundary (drop 4 xs) bs₂ zs₁ ws₁ bs₂' zs₂ ws₂
+  --           (begin drop 4 xs ≡⟨ cong (drop 4) xs≡₁ ⟩
+  --                  drop 4 (ys₁ ++ zs₁ ++ ws₁) ≡⟨ cong (λ x → drop 4 (x ++ zs₁ ++ ws₁)) bs≡₁ ⟩
+  --                  bs₂ ++ zs₁ ++ ws₁ ∎)
+  --           (begin (drop 4 xs ≡⟨ cong (drop 4) xs≡₂ ⟩
+  --                  drop 4 (ys₂ ++ zs₂ ++ ws₂) ≡⟨ cong (λ x → drop 4 (x ++ zs₂ ++ ws₂)) bs≡₁' ⟩
+  --                  bs₂' ++ zs₂ ++ ws₂ ∎))
+  --           tail₁ tail₁' p₁ p₂
 
   b64Str? : Decidable Base64.Base64Str
   b64Str? bs =

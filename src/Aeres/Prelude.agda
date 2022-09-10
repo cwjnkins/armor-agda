@@ -470,6 +470,13 @@ module Lemmas where
   take-length-++ [] ys = refl
   take-length-++ (x ∷ xs) ys = cong (x ∷_) (take-length-++ xs ys)
 
+  drop-length-≤ : ∀ {ℓ} {A : Set ℓ} (xs₁ ys₁ xs₂ ys₂ : List A) → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+                  → length xs₁ ≤ length xs₂
+                  → xs₂ ≡ xs₁ ++ drop (length xs₁) xs₂
+  drop-length-≤ [] ys₁ xs₂ ys₂ xs≡ z≤n = refl
+  drop-length-≤ (x ∷ xs₁) ys₁ (x₁ ∷ xs₂) ys₂ xs≡ (s≤s xs₁≤) =
+    cong₂ _∷_ (∷-injectiveˡ (sym xs≡)) (drop-length-≤ xs₁ ys₁ xs₂ ys₂ (∷-injectiveʳ xs≡) xs₁≤)
+
   length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
   length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
   length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
