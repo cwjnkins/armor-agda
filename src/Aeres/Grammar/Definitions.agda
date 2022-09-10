@@ -222,6 +222,9 @@ open &ₚᵈ public using (fstₚ ; sndₚ)
 &ₚ : (@0 A B : List Σ → Set) (@0 bs : List Σ) → Set
 &ₚ A B = &ₚᵈ A λ _ _ → B
 
+@0 nonempty&₁ : ∀ {@0 A B} → NonEmpty A → NonEmpty (&ₚ A B)
+nonempty&₁ ne (mk&ₚ fstₚ₁ sndₚ₁ bs≡) refl = ne fstₚ₁ (++-conicalˡ _ _ (sym bs≡))
+
 @0 nonnesting&ₚᵈ
   : {A : List Σ → Set} {B : (@0 bs₁ : List Σ) → A bs₁ → List Σ → Set}
     → NonNesting A → Unambiguous A → (∀ {@0 bs} (a : A bs) → NonNesting (B bs a))

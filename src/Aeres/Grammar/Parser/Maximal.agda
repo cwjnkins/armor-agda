@@ -1,18 +1,24 @@
 {-# OPTIONS --subtyping #-}
 
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser.Core
+import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
   renaming (Σ to Sigma)
 open import Data.Nat.Properties
   hiding (_≟_)
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Parser.Maximal
   (Σ : Set) where
 
-open Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.Parser.Core Σ
+open Aeres.Grammar.Definitions          Σ
+open Aeres.Grammar.Relation.Definitions Σ
+open Aeres.Grammar.Option               Σ
+open Aeres.Grammar.Parser.Core          Σ
   hiding (parseErased)
+
 
 module Generic (M : List Σ → Set → Set) (Lift : (A : Set) (P : A → Set) → (xs : List Σ) → M xs A → Set) where
   GreatestSuccess : ∀ {A xs} → Success A xs → Set
@@ -27,6 +33,10 @@ module Generic (M : List Σ → Set → Set) (Lift : (A : Set) (P : A → Set) �
     field
       parser : Parserᵢ M A
       max    : Maximal parser
+
+  runMaximalParser : ∀ {@0 A} → (p : MaximalParser A) → ∀ xs → Sigma (M xs (Success A xs)) (Lift (Success A xs) GreatestSuccess xs)
+  proj₁ (runMaximalParser p xs) = runParser (MaximalParser.parser p) xs
+  proj₂ (runMaximalParser p xs) = MaximalParser.max p xs
 
 module GenericSimple
   (M : Set → Set) (Lift : (A : Set) (P : A → Set) → M A → Set) where
@@ -75,6 +85,24 @@ module LogDec where
           (mkLogged l₁ (yes (mapSuccess eq₁ s))) ,e λ where
             pre' suf' xs≡ b → m pre' suf' xs≡ (eq₂ b)
 
+  option : ∀ {@0 A} → MaximalParser A → MaximalParser (Option A)
+  option p = mkMaximalParser help
+    where
+    help : ∀ xs → Sigma _ _
+    help xs =
+      case runMaximalParser p xs ret (const _) of λ where
+        (mkLogged log (no ¬p) , snd) →
+          (mkLogged log (yes (success [] _ refl none xs refl)))
+          , λ where
+            .[] suf' ps'≡ none → z≤n
+            pre' suf' ps'≡ (some x) → contradiction (success pre' _ refl x suf' ps'≡) ¬p
+        (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max) →
+          (mkLogged log (yes (success pre₁ _ r₁≡ (some v₁) suf₁ ps≡₁)))
+          , λ where
+            .[] suf' ps'≡ none → z≤n
+            pre' suf' ps'≡ (some x) →
+              max _ _ ps'≡ x
+
   @0 nonnesting : ∀ {A} → NonNesting A → Parser (Logging ∘ Dec) A → MaximalParser A
   MaximalParser.parser (nonnesting nn p) = p
   MaximalParser.max (nonnesting{A} nn p) xs
@@ -89,6 +117,79 @@ module LogDec where
           (‼ cong length
             (nn (trans eq (sym (Success.ps≡ p₁))) a (Success.value p₁)))
           (sym $ Success.read≡ p₁))
+
+  parse&o₂ : ∀ {@0 A B} → MaximalParser A → MaximalParser (Option B) → @0 StrictBoundary A B → MaximalParser (&ₚ A (Option B))
+  parse&o₂{A}{B} pa pb sb = mkMaximalParser help
+    where
+    help : ∀ xs
+           → Sigma (Logging ∘ Dec $ Success (&ₚ A (Option B)) xs)
+                   (Lift _ _)
+    help xs =
+      case runMaximalParser pa xs ret (const _) of λ where
+        (mkLogged log₁ (no ¬p) , max₁) →
+          (mkLogged log₁ (no (λ where
+            (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} v₁ v₂ refl) suffix ps≡) →
+              contradiction
+                (success bs₁ _ refl v₁ (bs₂ ++ suffix)
+                  (begin bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
+                         (bs₁ ++ bs₂) ++ suffix ≡⟨⟩
+                         prefix ++ suffix ≡⟨ ps≡ ⟩
+                         xs ∎))
+                ¬p)))
+          , tt
+        (mkLogged log₁ (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max₁) →
+          case runMaximalParser pb suf₁ ret (const _) of λ where
+            (mkLogged log₂ (no ¬p) , snd) →
+              contradiction (success [] _ refl none suf₁ refl) ¬p
+            (mkLogged log₂ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) , max₂) →
+              (mkLogged (log₁ ++ log₂)
+                (yes (success (pre₁ ++ pre₂) (r₁ + r₂)
+                       (begin (r₁ + r₂ ≡⟨ ‼ (cong₂ _+_ r₁≡ r₂≡) ⟩
+                              length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+                              length (pre₁ ++ pre₂) ∎ ))
+                       (mk&ₚ v₁ v₂ refl) suf₂
+                       (begin ((pre₁ ++ pre₂) ++ suf₂ ≡⟨ solve (++-monoid Σ) ⟩
+                              pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+                              pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                              xs ∎)))))
+              , λ where
+                pre' suf' ps'≡ (mk&ₚ {bs₁} {.[]} fstₚ₁ none bs≡) →
+                  uneraseDec
+                    (≤-Reasoning.begin length pre' ≤-Reasoning.≡⟨ ‼ cong length (trans bs≡ (++-identityʳ bs₁)) ⟩
+                                      length bs₁ ≤-Reasoning.≤⟨ max₁ bs₁ suf' (trans (cong (_++ suf') (trans (sym (++-identityʳ bs₁)) (sym bs≡))) ps'≡) fstₚ₁  ⟩
+                                      r₁ ≤-Reasoning.≤⟨ ≤-stepsʳ r₂ ≤-refl ⟩
+                                      r₁ + r₂ ≤-Reasoning.∎)
+                    (_ ≤? _)
+                pre' suf' ps'≡ (mk&ₚ{bs₁}{bs₂} fstₚ₁ (some sndₚ₁) bs≡) →
+                  let bs₁≡ : Erased (bs₁ ≡ pre₁)
+                      bs₁≡ = ─ sb xs bs₁ bs₂ suf' pre₁ pre₂ suf₂
+                                 {!!}
+                                 {!!}
+                                 fstₚ₁ v₁ sndₚ₁ {!v₂!}
+                      -- bs₁≡ = ─ sb xs bs₁ bs₂ suf' _ suf₁
+                      --            (begin (xs ≡⟨ sym ps'≡ ⟩
+                      --                   pre' ++ suf' ≡⟨ cong (_++ suf') bs≡ ⟩
+                      --                   (bs₁ ++ bs₂) ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                      --                   bs₁ ++ bs₂ ++ suf' ∎))
+                      --            (sym ps≡₁) fstₚ₁ v₁ sndₚ₁
+                      bs₂++suf'≡ : Erased (bs₂ ++ suf' ≡ suf₁)
+                      bs₂++suf'≡ = ─ Lemmas.++-cancel≡ˡ bs₁ pre₁ (Erased.x bs₁≡)
+                                       (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                              (bs₁ ++ bs₂) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡) ⟩
+                                              pre' ++ suf' ≡⟨ ps'≡ ⟩
+                                              xs ≡⟨ sym ps≡₁ ⟩
+                                              pre₁ ++ suf₁ ∎))
+                      bs₂≤ : Erased (length bs₂ ≤ r₂)
+                      bs₂≤ = ─ max₂ _ _ (Erased.x bs₂++suf'≡) (some sndₚ₁)
+                  in
+                  uneraseDec
+                    (≤-Reasoning.begin
+                      (length pre' ≤-Reasoning.≡⟨ cong length bs≡ ⟩
+                      length (bs₁ ++ bs₂) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
+                      length bs₁ + length bs₂ ≤-Reasoning.≤⟨ +-mono-≤ (Lemmas.≡⇒≤ (trans (cong length (Erased.x bs₁≡)) (sym r₁≡))) (Erased.x bs₂≤) ⟩
+                      r₁ + r₂ ≤-Reasoning.∎))
+                    (_ ≤? _)
+
 
   parse&₁ : ∀ {@0 A B} → Parser (Logging ∘ Dec) A → NonNesting A → MaximalParser B → MaximalParser (&ₚ A B)
   parse&₁{A}{B} p₁ nn p₂ = mkMaximalParser help

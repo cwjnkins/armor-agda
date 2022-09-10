@@ -30,7 +30,7 @@ open Aeres.Grammar.Relation.Definitions Σ
 
 module StrictBounday
   {M : Set → Set} ⦃ _ : Monad M ⦄ (underflow : M (Level.Lift _ ⊤))
-  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : StrictBounday A (IList A))
+  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : StrictBoundary A (IList A))
   (p : Parser (M ∘ Dec) A)
   where
 
@@ -113,10 +113,14 @@ module StrictBounday
                                length (bs₁ ++ bs₂)    ≡-Reasoning.∎)
 
                     @0 bs₁≡ : pre₁ ≡ bs₁
-                    bs₁≡ = sym $
-                      sb xs bs₁ (bs₂ ++ suffix) pre₁ suf₁
-                        (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
-                        head₁ v₁ (subst (IList A) (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“))) tail₁)
+                    bs₁≡ =
+                      sym $
+                        sb xs bs₁ (bs₂ ++ suffix) [] pre₁ suf₁
+                          (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
+                          head₁ v₁
+                          (subst (IList A)
+                            (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“)))
+                            tail₁)
 
                     @0 bs₂≡ : suf₁ ≡ bs₂
                     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (proj₁ ps≡“)
@@ -266,7 +270,7 @@ open parseIList public using (parseIList ; parseIListNonEmpty)
 
 module parseIListMax
   (underflow : Logging ⊤)
-  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
   (p : Parser (Logging ∘ Dec) A) where
 
   open LogDec
