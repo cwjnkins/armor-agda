@@ -2,18 +2,25 @@
 
 import      Aeres.Data.Base64.Parser
 import      Aeres.Data.Base64.Properties
+import      Aeres.Data.Base64.Serializer
 import      Aeres.Data.Base64.TCB
 open import Aeres.Grammar.Parser
 open import Aeres.Prelude
+  hiding (module Char)
 
 module Aeres.Data.Base64 where
 
 open Aeres.Data.Base64.Parser       public
 module Base64 where
-  open Aeres.Data.Base64.Properties public
-    renaming ( module Base64Char to Char
-             ; module Base64Pad  to Pad
-             ; module Base64Str  to Str)
+  module Char where
+    open Aeres.Data.Base64.Properties.Base64Char public
+    open Aeres.Data.Base64.Serializer.Base64Char public
+  module Pad where
+    open Aeres.Data.Base64.Properties.Base64Pad public
+    open Aeres.Data.Base64.Serializer.Base64Pad public
+  module Str where
+    open Aeres.Data.Base64.Properties.Base64Str public
+    open Aeres.Data.Base64.Serializer.Base64Str public    
 open Aeres.Data.Base64.TCB          public
 
 base64Char? : Decidable Base64Char

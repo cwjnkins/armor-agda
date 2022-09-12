@@ -19,12 +19,12 @@ open Aeres.Grammar.Option               Σ
 open Aeres.Grammar.Parser.Core          Σ
   hiding (parseErased)
 
+GreatestSuccess : ∀ {A xs} → Success A xs → Set
+GreatestSuccess{A}{xs} s =
+  ∀ pre' suf' → pre' ++ suf' ≡ xs → A pre'
+  → length pre' ≤ Success.read s
 
 module Generic (M : List Σ → Set → Set) (Lift : (A : Set) (P : A → Set) → (xs : List Σ) → M xs A → Set) where
-  GreatestSuccess : ∀ {A xs} → Success A xs → Set
-  GreatestSuccess{A}{xs} s =
-    ∀ pre' suf' → pre' ++ suf' ≡ xs → A pre'
-    → length pre' ≤ Success.read s
 
   Maximal : ∀ {A} → Parserᵢ M A → Set
   Maximal{A} p = ∀ xs → Lift (Success A xs) GreatestSuccess xs (runParser p xs)

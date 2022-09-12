@@ -1,12 +1,15 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Serializer
 open import Aeres.Prelude
   hiding (head ; tail)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList (Σ : Set) where
 
-open import Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Serializer  Σ
 
 data IList (@0 A : List Σ → Set) : @0 List Σ → Set
 
@@ -47,3 +50,14 @@ IListNonEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
 IListNonEmpty A = IListLowerBounded A 1
 
 pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
+
+serializeIList : ∀ {@0 A} → Serializer A → Serializer (IList A)
+serializeIList s nil = self
+serializeIList s (consIList{bs₁}{bs₂} head tail bs≡) =
+  let tl@(singleton t t≡) = serializeIList s tail
+  in
+  singleton ((↑ s head) ++ t)
+    (begin ↑ s head ++ t ≡⟨ cong₂ _++_ (Singleton.x≡ (s head)) t≡ ⟩
+           bs₁ ++ bs₂ ≡⟨ sym bs≡ ⟩
+           _ ∎)
+  where open ≡-Reasoning

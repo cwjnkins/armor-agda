@@ -3,14 +3,16 @@
 open import Aeres.Binary
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Relation.Definitions
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Aeres.Data.Base64
 import      Aeres.Data.PEM.TCB as PEM
 
-open Aeres.Grammar.Definitions Char
-open Aeres.Grammar.IList Char
-open Aeres.Grammar.Sum   Char
+open Aeres.Grammar.Definitions          Char
+open Aeres.Grammar.IList                Char
+open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Sum                  Char
 
 module Aeres.Data.PEM.Properties where
 
@@ -42,3 +44,13 @@ module CertFullLine where
   equiv : Equivalent Rep PEM.CertFullLine
   proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = PEM.mkCertFullLine fstₚ₁ sndₚ₁ bs≡
   proj₂ equiv (PEM.mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
+
+module CertFinalLine where
+
+  Rep : @0 List Char → Set
+  Rep = Σₚ (&ₚ Base64Str PEM.RFC5234.EOL)
+           (λ _ → Erased ∘ InRange 1 64 ∘ length ∘ &ₚᵈ.bs₁ )
+
+  postulate
+    equiv : Equivalent Rep PEM.CertFinalLine
+    noOverlap : NoOverlap Base64Str PEM.RFC5234.EOL

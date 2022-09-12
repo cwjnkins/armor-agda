@@ -123,6 +123,7 @@ open import Function     public
   hiding (_∋_)
 
 infix  0 case_ret_of_
+infix  0 caseErased_ret_of_
 infixl 0 _∋_
 
 case_ret_of_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}
@@ -255,6 +256,11 @@ record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
 infix 100 ¡_
 @0 ¡_ : _
 ¡_ = Erased.x
+
+@0 caseErased_ret_of_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}
+                        → (x : A) (@0 B : A → Set ℓ₂)
+                        → ((x : A) → Erased (B x)) → B x
+caseErased x ret _ of f = ¡ f x
 
 erased? : ∀ {ℓ} {@0 A : Set ℓ} → Dec A → Dec (Erased A)
 erased? (no ¬a) = no λ where
@@ -553,3 +559,9 @@ module Lemmas where
   ∷ʳ⇒≢[] : ∀ {ℓ} {A : Set ℓ} {xs : List A} {y} → xs ∷ʳ y ≢ []
   ∷ʳ⇒≢[] {xs = []} ()
   ∷ʳ⇒≢[] {xs = x ∷ xs} ()
+
+  lookup-index : ∀ {ℓ} {@0 A : Set ℓ} {x : A} {xs : List A}
+                 → (x∈ : x ∈ xs)
+                 → lookup xs (Any.index x∈) ≡ x
+  lookup-index (here refl) = refl
+  lookup-index (there x∈) = lookup-index x∈

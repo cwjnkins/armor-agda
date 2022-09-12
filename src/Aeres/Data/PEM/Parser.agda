@@ -67,7 +67,63 @@ open parseCertFullLine public
 module parseCertFinalLine where
 
   parseCertFinalLine : LogDec.MaximalParser CertFinalLine
-  parseCertFinalLine = {!!}
+  parseCertFinalLine =
+    LogDec.equivalent CertFinalLine.equiv
+      (LogDec.mkMaximalParser help)
+    where
+    help : ∀ xs → Σ _ _
+    help xs =
+      case LogDec.runMaximalParser
+             (LogDec.parse& parseMaxBase64Str parseMaxEOL CertFinalLine.noOverlap) xs
+      of λ where
+        (mkLogged log (no ¬p) , max) →
+          (mkLogged log (no λ where
+            x → {!!}))
+          , tt
+        (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁@(mk&ₚ{bs₁}{bs₂} str eol refl) suf₁ ps≡₁)) , max₁) →
+          let bs₁' : Singleton bs₁
+              bs₁' = Base64.Str.serialize str
+          in
+          case inRange? 1 64 (length (↑ bs₁')) ret (const _) of λ where
+            (no ¬p) →
+              (mkLogged (log ++ ["parseMaxCertFinalLine: overrun"]) (no λ where
+                (success prefix read read≡ (mk×ₚ v₁'@(mk&ₚ{bs₁'}{bs₂'} str' eol' refl) _ refl) suffix ps≡) → ‼
+                  let
+                    xs≡ : Erased (pre₁ ++ suf₁ ≡ prefix ++ suffix)
+                    xs≡ = ─ {!!}
+
+                    prefix≤ : Erased (length prefix ≤ r₁)
+                    prefix≤ = ─ max₁ _ _ ps≡ v₁'
+
+                    pre₁≡ : Erased (pre₁ ≡ prefix ++ drop (length prefix) pre₁)
+                    pre₁≡ = ─ Lemmas.drop-length-≤ prefix suffix _ suf₁ (sym $ ¡ xs≡) (Nat.≤-trans (¡ prefix≤) (Lemmas.≡⇒≤ r₁≡))
+
+                    bs₁'≡ : Erased (bs₁ ≡ bs₁' ++ drop (length bs₁') bs₁)
+                    bs₁'≡ = ─ Lemmas.drop-length-≤ bs₁' (bs₂' ++ suffix) _ (bs₂ ++ suf₁)
+                                {!!}
+                                (caseErased (Nat.<-cmp (length bs₁') (length bs₁)) ret (const _) of λ where
+                                  (tri< bs₁'< _ _) → ─ Nat.<⇒≤{x = length bs₁'} bs₁'<
+                                  (tri≈ _ bs₁'≡ _) → ─ Lemmas.≡⇒≤ bs₁'≡
+                                  (tri> _ _ bs₁'>) → {!!})
+                  in
+                  case
+                    CertFinalLine.noOverlap _ _ (bs₂ ++ suf₁) bs₂' suffix {!!} (subst Base64Str (¡ bs₁'≡) str) str'
+                  ret (const _) of λ where
+                    (inj₁ x) → {!!}
+                    (inj₂ y) → contradiction eol' y
+                  ))
+
+              , tt
+            (yes p) →
+              let ir : Erased (InRange 1 64 (length bs₁))
+                  ir = ─ subst (InRange 1 64 ∘ length) (Singleton.x≡ bs₁') p
+              in
+              (mkLogged log (yes
+                (success pre₁ _ r₁≡ (mk×ₚ v₁ ir refl) suf₁ ps≡₁)))
+              , λ where
+                pre' suf' ps≡' (mk×ₚ{.pre'} v' _ refl) →
+                  max₁ _ _ ps≡' v'
+
 -- module parsePEM where
 
 --   hereLine = "parseCertLine"
