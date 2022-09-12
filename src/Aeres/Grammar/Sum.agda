@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+import      Aeres.Grammar.Sum.Parser
 import      Aeres.Grammar.Sum.Properties
 import      Aeres.Grammar.Sum.Serializer
 import      Aeres.Grammar.Sum.TCB
@@ -14,8 +15,9 @@ open Aeres.Grammar.Sum.Properties Σ
            ; nonnesting   to nonnestingSum
            ; unambiguous' to unambiguousSum'
            ; unambiguous  to unambiguousSum)
-open Aeres.Grammar.Sum.TCB        Σ public
+open Aeres.Grammar.Sum.TCB    Σ public
   hiding (module Sum)
+open Aeres.Grammar.Sum.Parser Σ public
 
 module Sum where
   open Aeres.Grammar.Sum.Serializer Σ public

@@ -137,6 +137,10 @@ module Base64Pad where
   forcebs{bs₁ = bs₁}{ys₁} (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) ++≡ refl = ‼ proj₁ (Lemmas.length-++-≡ _ _ _ (bs₁ ++ ys₁) (sym ++≡) refl)
   forcebs (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) ++≡ refl = ‼ proj₁ (Lemmas.length-++-≡ _ _ _ _ (sym ++≡) refl)
 
+  nonempty : NonEmpty (Sum Base64.Base64Pad1 Base64.Base64Pad2)
+  nonempty (Sum.inj₁ ()) refl
+  nonempty (Sum.inj₂ ()) refl
+
   c₄∉ : ∀ {@0 c₁ c₂ c₃ c₄} → Sum Base64.Base64Pad1 Base64.Base64Pad2 (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ]) → c₄ ∉ B64.charset
   c₄∉ (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = toWitnessFalse {Q = _ ∈? _} tt
   c₄∉ (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) = toWitnessFalse{Q = _ ∈? _} tt

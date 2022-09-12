@@ -95,6 +95,11 @@ _,e_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}{@0 B : A → Set ℓ₂} → (a :
 proj₁ (a ,e b) = a
 proj₂ (a ,e b) = b
 
+infixr 4 _,′e_
+_,′e_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : Set ℓ₂} → (a : A) (b : B) → A × B
+proj₁ (a ,′e b) = a
+proj₂ (a ,′e b) = b
+
 import Data.String
 module String where
   open Data.String public
@@ -246,6 +251,10 @@ record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
   constructor ─_
   field
     @0 x : A
+
+infix 100 ¡_
+@0 ¡_ : _
+¡_ = Erased.x
 
 erased? : ∀ {ℓ} {@0 A : Set ℓ} → Dec A → Dec (Erased A)
 erased? (no ¬a) = no λ where

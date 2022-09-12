@@ -26,7 +26,7 @@ module RFC5234 where
     cr   : EOL [ '\r' ]
     lf   : EOL [ '\n' ]
 
-record CertBoundary (@0 ctrl : String) (@0 bs : List Char) : Set where
+record CertBoundary (ctrl : String) (@0 bs : List Char) : Set where
   constructor mkCertBoundary
   field
     @0 {e} : List Char
