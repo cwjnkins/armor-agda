@@ -66,6 +66,8 @@ open parseCertFullLine public
 
 module parseCertFinalLine where
 
+  open ≡-Reasoning
+
   parseCertFinalLine : LogDec.MaximalParser CertFinalLine
   parseCertFinalLine =
     LogDec.equivalent CertFinalLine.equiv
@@ -78,7 +80,10 @@ module parseCertFinalLine where
       of λ where
         (mkLogged log (no ¬p) , max) →
           (mkLogged log (no λ where
-            x → {!!}))
+            (success prefix read read≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) suffix ps≡) →
+              contradiction
+                (success prefix _ read≡ fstₚ₁ suffix ps≡)
+                ¬p))
           , tt
         (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁@(mk&ₚ{bs₁}{bs₂} str eol refl) suf₁ ps≡₁)) , max₁) →
           let bs₁' : Singleton bs₁
@@ -87,10 +92,19 @@ module parseCertFinalLine where
           case inRange? 1 64 (length (↑ bs₁')) ret (const _) of λ where
             (no ¬p) →
               (mkLogged (log ++ ["parseMaxCertFinalLine: overrun"]) (no λ where
-                (success prefix read read≡ (mk×ₚ v₁'@(mk&ₚ{bs₁'}{bs₂'} str' eol' refl) _ refl) suffix ps≡) → ‼
+                (success prefix read read≡ (mk×ₚ v₁'@(mk&ₚ{bs₁'}{bs₂'} str' eol' refl) ir refl) suffix ps≡) → ‼
                   let
                     xs≡ : Erased (pre₁ ++ suf₁ ≡ prefix ++ suffix)
-                    xs≡ = ─ {!!}
+                    xs≡ = ─ (begin (pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                                   xs ≡⟨ sym ps≡ ⟩
+                                   prefix ++ suffix ∎))
+
+                    xs≡' : Erased (bs₁ ++ bs₂ ++ suf₁ ≡ bs₁' ++ bs₂' ++ suffix)
+                    xs≡' = ─ (begin
+                      bs₁ ++ bs₂ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+                      (bs₁ ++ bs₂) ++ suf₁ ≡⟨ ¡ xs≡ ⟩
+                      (bs₁' ++ bs₂') ++ suffix ≡⟨ solve (++-monoid Char) ⟩
+                      bs₁' ++ bs₂' ++ suffix ∎)
 
                     prefix≤ : Erased (length prefix ≤ r₁)
                     prefix≤ = ─ max₁ _ _ ps≡ v₁'
@@ -100,19 +114,50 @@ module parseCertFinalLine where
 
                     bs₁'≡ : Erased (bs₁ ≡ bs₁' ++ drop (length bs₁') bs₁)
                     bs₁'≡ = ─ Lemmas.drop-length-≤ bs₁' (bs₂' ++ suffix) _ (bs₂ ++ suf₁)
-                                {!!}
+                                (sym (¡ xs≡'))
                                 (caseErased (Nat.<-cmp (length bs₁') (length bs₁)) ret (const _) of λ where
                                   (tri< bs₁'< _ _) → ─ Nat.<⇒≤{x = length bs₁'} bs₁'<
                                   (tri≈ _ bs₁'≡ _) → ─ Lemmas.≡⇒≤ bs₁'≡
-                                  (tri> _ _ bs₁'>) → {!!})
+                                  (tri> _ _ bs₁'>) →
+                                    let bs₁'≡ : Erased (bs₁' ≡ bs₁ ++ drop (length bs₁) bs₁')
+                                        bs₁'≡ = ─ (Lemmas.drop-length-≤ bs₁ (bs₂ ++ suf₁) _ (bs₂' ++ suffix) (¡ xs≡') (Nat.<⇒≤ bs₁'>))
+                                    in
+                                    ─ (caseErased CertFinalLine.noOverlap bs₁ (drop (length bs₁) bs₁') (bs₂' ++ suffix) bs₂ suf₁
+                                         (++-cancelˡ bs₁ (begin
+                                           bs₁ ++ drop (length bs₁) bs₁' ++ bs₂' ++ suffix ≡⟨ solve (++-monoid Char) ⟩
+                                           (bs₁ ++ drop (length bs₁) bs₁') ++ bs₂' ++ suffix ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
+                                           bs₁' ++ bs₂' ++ suffix ≡⟨ (sym $ ¡ xs≡') ⟩
+                                           bs₁ ++ bs₂ ++ suf₁ ∎))
+                                         (subst Base64Str (¡ bs₁'≡) str') str
+                                       ret (const _) of λ where
+                                      (inj₁ x) → ─ contradiction
+                                                     (begin (length bs₁ ≡⟨ cong length (sym $ ++-identityʳ bs₁) ⟩
+                                                            length (bs₁ ++ []) ≡⟨ cong (λ x → length (bs₁ ++ x)) (sym x) ⟩
+                                                            length (bs₁ ++ drop (length bs₁) bs₁') ≡⟨ cong length $ sym (¡ bs₁'≡) ⟩
+                                                            length bs₁' ∎))
+                                                     (Nat.<⇒≢ bs₁'>)
+                                      (inj₂ y) → ─ contradiction eol y))
                   in
                   case
-                    CertFinalLine.noOverlap _ _ (bs₂ ++ suf₁) bs₂' suffix {!!} (subst Base64Str (¡ bs₁'≡) str) str'
+                    CertFinalLine.noOverlap _ _ (bs₂ ++ suf₁) bs₂' suffix
+                      (++-cancelˡ bs₁' (begin
+                        bs₁' ++ drop (length bs₁') bs₁ ++ bs₂ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+                        (bs₁' ++ drop (length bs₁') bs₁) ++ bs₂ ++ suf₁ ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
+                        bs₁ ++ bs₂ ++ suf₁ ≡⟨ ¡ xs≡' ⟩
+                        bs₁' ++ bs₂' ++ suffix ∎))
+                      (subst Base64Str (¡ bs₁'≡) str) str'
                   ret (const _) of λ where
-                    (inj₁ x) → {!!}
-                    (inj₂ y) → contradiction eol' y
-                  ))
-
+                    (inj₁ x) → contradiction
+                                 (subst (InRange 1 64 ∘ length)
+                                   (bs₁' ≡ ↑ Base64.Str.serialize str ∋ (begin
+                                     (bs₁' ≡⟨ sym (++-identityʳ bs₁') ⟩
+                                     bs₁' ++ [] ≡⟨ cong (bs₁' ++_) (sym x) ⟩
+                                     bs₁' ++ drop (length bs₁') bs₁ ≡⟨ sym (¡ bs₁'≡) ⟩
+                                     bs₁ ≡⟨ (sym ∘ Singleton.x≡ ∘ Base64.Str.serialize $ str) ⟩
+                                     ↑ Base64.Str.serialize str ∎)))
+                                   (¡ ir))
+                                 ¬p
+                    (inj₂ y) → contradiction eol' y))
               , tt
             (yes p) →
               let ir : Erased (InRange 1 64 (length bs₁))
