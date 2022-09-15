@@ -30,7 +30,7 @@ open Aeres.Grammar.Relation.Definitions Σ
 
 -- module StrictBounday
 --   {M : Set → Set} ⦃ _ : Monad M ⦄ (underflow : M (Level.Lift _ ⊤))
---   (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : StrictBoundary A (IList A))
+--   (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : NoOverlap A A)
 --   (p : Parser (M ∘ Dec) A)
 --   where
 
@@ -113,14 +113,14 @@ open Aeres.Grammar.Relation.Definitions Σ
 --                                length (bs₁ ++ bs₂)    ≡-Reasoning.∎)
 
 --                     @0 bs₁≡ : pre₁ ≡ bs₁
---                     bs₁≡ =
---                       sym $
---                         sb xs bs₁ (bs₂ ++ suffix) [] pre₁ suf₁
---                           (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
---                           head₁ v₁
---                           (subst (IList A)
---                             (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“)))
---                             tail₁)
+--                     bs₁≡ = {!!}
+--                       -- sym $
+--                       --   sb xs bs₁ (bs₂ ++ suffix) [] pre₁ suf₁
+--                       --     (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
+--                       --     head₁ v₁
+--                       --     (subst (IList A)
+--                       --       (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“)))
+--                       --       tail₁)
 
 --                     @0 bs₂≡ : suf₁ ≡ bs₂
 --                     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (proj₁ ps≡“)
@@ -357,5 +357,134 @@ module parseIListMax
                       length prefix + read' ≤-Reasoning.≡⟨ cong (_+ read') (sym read≡) ⟩
                       read + read' ≤-Reasoning.∎)
                     (_ ≤? _)
+
+module parseIListMaxNoOverlap
+  (underflow : Logging ⊤)
+  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 noo : NoOverlap A A)
+  (p : LogDec.MaximalParser A) where
+
+  open import Data.Nat.Induction
+    hiding (Acc)
+  open ≡-Reasoning
+  open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+  parseIListMax : LogDec.MaximalParser (IList A)
+  parseIListMax = LogDec.mkMaximalParser (λ xs → help xs (<-wellFounded (length xs)))
+    where
+    help : ∀ xs → @0 Acc _<_ (length xs) → Sigma _ _
+    help [] a =
+      (mkLogged []
+        (yes (success [] _ refl nil [] refl)))
+      , λ where
+        pre' suf' x x₁ → subst₀ (λ x → length x ≤ 0) (sym $ ++-conicalˡ pre' suf' x) z≤n
+    help xs'@(x ∷ xs) (acc rs) =
+      case LogDec.runMaximalParser p xs' ret (const _) of λ where
+        (mkLogged log (no ¬p) , tt) →
+          (mkLogged log (yes (success [] _ refl nil xs' refl)))
+          , λ where
+            .[] suf' eq nil → z≤n
+            pre' suf' eq (consIList{bs₁}{bs₂} head₁ tail₁ bs≡) →
+              contradiction
+                (success bs₁ _ refl head₁ (bs₂ ++ suf')
+                  (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                         (bs₁ ++ bs₂) ++ suf' ≡⟨ (sym $ cong (_++ suf') bs≡) ⟩
+                         pre' ++ suf' ≡⟨ eq ⟩
+                         xs' ∎)))
+                ¬p
+        (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max₁) →
+          let @0 a' : Acc _<_ (length suf₁)
+              a' = rs _ $ ≤-Reasoning.begin
+                     1 + length suf₁
+                       ≤-Reasoning.≤⟨
+                         subst (length suf₁ <_) (length-++ pre₁)
+                           (Lemmas.length-++-< pre₁ suf₁ (ne v₁))
+                       ⟩
+                     length pre₁ + length suf₁ ≤-Reasoning.≡⟨ sym (length-++ pre₁) ⟩
+                     length (pre₁ ++ suf₁) ≤-Reasoning.≡⟨ cong length ps≡₁ ⟩
+                     length xs' ≤-Reasoning.∎
+          in
+          case help suf₁ a' ret (const _) of λ where
+            (mkLogged log (no ¬p) , snd) →
+              contradiction (success [] _ refl nil suf₁ refl) ¬p
+            (mkLogged log₁ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) , max₂) →
+              (mkLogged (log ++ log₁)
+                (yes
+                  (success (pre₁ ++ pre₂) (r₁ + r₂)
+                    (r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+                    length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+                    length (pre₁ ++ pre₂) ∎)
+                    (consIList v₁ v₂ refl) suf₂
+                    ((pre₁ ++ pre₂) ++ suf₂ ≡⟨ solve (++-monoid Σ) ⟩
+                    pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+                    pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                    xs' ∎))))
+              , λ where
+                .[] suf' ps≡' nil → z≤n
+                pre' suf' ps≡' (consIList{bs₁} head₁ nil bs≡₁) →
+                  uneraseDec
+                    (≤-Reasoning.begin length pre' ≤-Reasoning.≡⟨ cong length bs≡₁ ⟩
+                                      length (bs₁ ++ []) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
+                                      length bs₁ + 0
+                                        ≤-Reasoning.≤⟨
+                                          +-mono-≤
+                                            (max₁ _ suf'
+                                              (bs₁ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                              (bs₁ ++ []) ++ suf' ≡⟨ (cong (_++ suf') ∘ sym $ bs≡₁) ⟩
+                                              pre' ++ suf' ≡⟨ ps≡' ⟩
+                                              xs' ∎)
+                                              head₁)
+                                            z≤n ⟩
+                                      r₁ + r₂ ≤-Reasoning.∎)
+                    (_ ≤? _)
+                pre' suf' ps≡' (consIList{bs₁} head₁ (consIList{bs₂}{bs₃} head₂ tail₂ refl) bs≡₁) →
+                  let xs≡ : Erased (bs₁ ++ bs₂ ++ bs₃ ++ suf' ≡ pre₁ ++ suf₁)
+                      xs≡ = ─ (begin bs₁ ++ bs₂ ++ bs₃ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                     (bs₁ ++ bs₂ ++ bs₃) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡₁) ⟩
+                                     pre' ++ suf' ≡⟨ ps≡' ⟩
+                                     xs' ≡⟨ sym ps≡₁ ⟩
+                                     pre₁ ++ suf₁ ∎)
+
+                      bs₁≤ : Erased (length bs₁ ≤ r₁)
+                      bs₁≤ = ─ max₁ bs₁ (bs₂ ++ bs₃ ++ suf')
+                                 (begin (_ ≡⟨ ¡ xs≡ ⟩
+                                        pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                                        xs' ∎))
+                                 head₁
+
+                      pre₁≡ : Erased (pre₁ ≡ bs₁ ++ drop (length bs₁) pre₁)
+                      pre₁≡ = ─ Lemmas.drop-length-≤ bs₁  (bs₂ ++ bs₃ ++ suf') _ _ (¡ xs≡) (≤-trans (¡ bs₁≤) (Lemmas.≡⇒≤ r₁≡))
+
+                      bs₁≡ : Erased (pre₁ ≡ bs₁)
+                      bs₁≡ = ─ (caseErased noo bs₁ (drop (length bs₁) pre₁) suf₁ bs₂ (bs₃ ++ suf')
+                                  (++-cancelˡ bs₁ (begin
+                                    (bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ≡⟨ solve (++-monoid Σ) ⟩
+                                    (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ (cong (_++ suf₁) ∘ sym $ ¡ pre₁≡) ⟩
+                                    pre₁ ++ suf₁ ≡⟨ (sym $ ¡ xs≡) ⟩
+                                    _ ∎)))
+                                  (subst A (¡ pre₁≡) v₁) head₁
+                                ret (const _) of λ where
+                        (inj₁ x) → ─ (begin pre₁ ≡⟨ ¡ pre₁≡ ⟩
+                                            bs₁ ++ drop (length bs₁) pre₁ ≡⟨ cong (bs₁ ++_) x ⟩
+                                            bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
+                                            bs₁ ∎)
+                        (inj₂ y) → contradiction head₂ y)
+
+                      bs₂++bs₃≤ : Erased (length (bs₂ ++ bs₃) ≤ r₂)
+                      bs₂++bs₃≤ = ─ max₂ (bs₂ ++ bs₃) suf'
+                                      (++-cancelˡ bs₁ (begin
+                                        (bs₁ ++ (bs₂ ++ bs₃) ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                        bs₁ ++ bs₂ ++ bs₃ ++ suf' ≡⟨ ¡ xs≡ ⟩
+                                        pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (¡ bs₁≡) ⟩
+                                        bs₁ ++ suf₁ ∎)))
+                                      (consIList head₂ tail₂ refl)
+                  in
+                  uneraseDec
+                    (≤-Reasoning.begin (length pre' ≤-Reasoning.≡⟨ cong length bs≡₁ ⟩
+                                      length (bs₁ ++ bs₂ ++ bs₃) ≤-Reasoning.≡⟨ length-++ bs₁ ⟩
+                                      length bs₁ + length (bs₂ ++ bs₃) ≤-Reasoning.≤⟨ +-monoˡ-≤ (length (bs₂ ++ bs₃)) (¡ bs₁≤) ⟩
+                                      r₁ + length (bs₂ ++ bs₃) ≤-Reasoning.≤⟨ +-monoʳ-≤ r₁ (¡ bs₂++bs₃≤) ⟩
+                                      r₁ + r₂ ≤-Reasoning.∎))
+                    (_ ≤? _)
+  
 open parseIListMax public
   using (parseIListMax)
