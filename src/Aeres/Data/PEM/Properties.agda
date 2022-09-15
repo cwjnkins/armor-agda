@@ -45,6 +45,10 @@ module CertFullLine where
   proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = PEM.mkCertFullLine fstₚ₁ sndₚ₁ bs≡
   proj₂ equiv (PEM.mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
 
+  postulate
+    nonempty   : NonEmpty PEM.CertFullLine
+
+
 module CertFinalLine where
 
   Rep : @0 List Char → Set
@@ -54,3 +58,24 @@ module CertFinalLine where
   postulate
     equiv : Equivalent Rep PEM.CertFinalLine
     noOverlap : NoOverlap Base64Str PEM.RFC5234.EOL
+    fromCertFullLine : ∀ {@0 bs} → PEM.CertFullLine bs → PEM.CertFinalLine bs
+
+module CertText where
+  open ≡-Reasoning
+
+  finalLineFromLines : ∀ {@0 bs} → IList PEM.CertFullLine bs → bs ≡ [] ⊎ &ₚ (IList PEM.CertFullLine) PEM.CertFinalLine bs
+  finalLineFromLines nil = inj₁ refl
+  finalLineFromLines (consIList{bs₁}{.[]} head₁ nil bs≡) =
+    inj₂ (mk&ₚ nil (CertFinalLine.fromCertFullLine head₁)
+            (begin (_ ≡⟨ bs≡ ⟩
+                   bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
+                   bs₁ ∎)))
+  finalLineFromLines (consIList{bs₁}{bs₂} head₁ tail₁@(consIList{bs₁ = bs₃} head₂ tail₂ bs≡₂) bs≡₁) =
+    case finalLineFromLines tail₁ ret (const _) of λ where
+      (inj₁ refl) →
+        contradiction{P = bs₃ ≡ []} (++-conicalˡ bs₃ _ (sym bs≡₂)) (CertFullLine.nonempty head₂)
+      (inj₂ (mk&ₚ{bs₅}{bs₆} fstₚ₁ sndₚ₁ refl)) →
+        inj₂ (mk&ₚ (consIList head₁ fstₚ₁ refl) sndₚ₁
+                      (begin _ ≡⟨ bs≡₁ ⟩
+                             bs₁ ++ bs₅ ++ bs₆ ≡⟨ sym (++-assoc bs₁ bs₅ _) ⟩
+                             (bs₁ ++ bs₅) ++ bs₆ ∎))
