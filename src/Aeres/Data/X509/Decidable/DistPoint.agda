@@ -9,12 +9,14 @@ open import Aeres.Data.X509.Decidable.RDN
 import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
+import      Aeres.Grammar.Sum
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Data.X509.Decidable.DistPoint where
 
+open Aeres.Grammar.Sum UInt8
 open Base256
 
 module parseDistPoint where
@@ -30,7 +32,7 @@ module parseDistPoint where
   parseDistPointNameChoice : Parser _ (Logging ∘ Dec) X509.DistPointNameChoice
   parseDistPointNameChoice =
     parseEquivalent _ Props.DistPointNameChoice.equivalent
-      (parseSum _ parseFullName parseNameRTCrlIssuer)
+      (parseSum parseFullName parseNameRTCrlIssuer)
 
   parseDistPointFields : ∀ n → Parser _ (Logging ∘ Dec) (ExactLength _ X509.DistPointFields n)
   parseDistPointFields n =

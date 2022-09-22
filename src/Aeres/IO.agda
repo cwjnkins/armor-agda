@@ -1,10 +1,12 @@
 {-# OPTIONS --guardedness #-}
 
+import      Aeres.Foreign.ByteString as ByteString
 open import Aeres.Prelude
 import      System.Exit
 
 module Aeres.IO where
 
+{-# FOREIGN GHC import qualified Data.ByteString as ByteString #-}
 {-# FOREIGN GHC import qualified System.Environment #-}
 {-# FOREIGN GHC import qualified System.IO #-}
 {-# FOREIGN GHC import qualified Data.Text          #-}
@@ -18,10 +20,14 @@ module Primitive where
     stderr  : Handle
     hPutStrLn : Handle → String → IO ⊤
 
+    getContents : IO ByteString.ByteString
+
 {-# COMPILE GHC Primitive.getArgs = fmap Data.Text.pack <$> System.Environment.getArgs #-}
 {-# COMPILE GHC Primitive.Handle = type System.IO.Handle #-}
 {-# COMPILE GHC Primitive.stderr = System.IO.stderr #-}
 {-# COMPILE GHC Primitive.hPutStrLn = TIO.hPutStrLn #-}
+
+{-# COMPILE GHC Primitive.getContents = ByteString.getContents #-}
 
 open import IO
 open System.Exit public using (exitFailure ; exitSuccess)

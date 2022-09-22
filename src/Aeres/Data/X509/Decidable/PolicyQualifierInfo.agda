@@ -9,12 +9,14 @@ open import Aeres.Data.X509.Decidable.UserNotice
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
+import      Aeres.Grammar.Sum
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Data.X509.Decidable.PolicyQualifierInfo where
 
+open Aeres.Grammar.Sum UInt8
 open Base256
 
 module parsePolicyQualifierInfo where
@@ -41,7 +43,7 @@ module parsePolicyQualifierInfo where
   parsePolicyQualifierInfoFields : Parser _ (Logging ∘ Dec) X509.PolicyQualifierInfoFields
   parsePolicyQualifierInfoFields =
     parseEquivalent _ Props.PolicyQualifierInfoFields.equivalent
-      (parseSum _ parseCPSURIQualifier parseUserNoticeQualifier)
+      (parseSum parseCPSURIQualifier parseUserNoticeQualifier)
 
   parsePolicyQualifierInfo : Parser _ (Logging ∘ Dec) X509.PolicyQualifierInfo
   parsePolicyQualifierInfo =

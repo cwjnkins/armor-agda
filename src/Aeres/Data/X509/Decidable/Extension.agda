@@ -24,12 +24,14 @@ open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
 open import Aeres.Grammar.Properties
+import      Aeres.Grammar.Sum
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Data.X509.Decidable.Extension where
 
+open Aeres.Grammar.Sum UInt8
 open Base256
 
 module parseExtension where
@@ -65,46 +67,46 @@ module parseExtension where
   parseSelectExtn n =
     parseEquivalent _
       (transEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _)) (equivalent×ₚ _ Props.Extension.SelectExtn.equivalent))
-      (parseSum _
+      (parseSum
         (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion (λ ())) (λ where refl refl → refl)  parseAKIFields n)
         (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-          (parseSum _
+          (parseSum
             (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion (λ ())) (λ where refl refl → refl) parseSKIFields n)
             (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-               (parseSum _
+               (parseSum
                  (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseKUFields n)
                  (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                    (parseSum _
+                    (parseSum
                       (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseEKUFields n)
                       (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                         (parseSum _
+                         (parseSum
                            (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseBCFields n)
                            (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                              (parseSum _
+                              (parseSum
                                 (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseIANFields n)
                                 (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                   (parseSum _
+                                   (parseSum
                                      (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseSANFields n)
                                      (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                        (parseSum _
+                                        (parseSum
                                           (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseCertPolFields n)
                                           (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                             (parseSum _
+                                             (parseSum
                                                (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseCRLDistFields n)
                                                (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                 (parseSum _
+                                                 (parseSum
                                                    (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseNCFields n)
                                                    (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                     (parseSum _
+                                                     (parseSum
                                                        (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parsePCFields n)
                                                        (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                         (parseSum _
+                                                         (parseSum
                                                            (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parsePMFields n)
                                                            (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                             (parseSum _
+                                                             (parseSum
                                                                (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseINAPFields n)
                                                                (parseEquivalent _ (symEquivalent _ (Distribute.exactLength-Sum _))
-                                                                 (parseSum _
+                                                                 (parseSum
                                                                    (parseExtensionFields (_≟ _) TLV.nonnesting (TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
                                                                    (parseExtensionFields (λ bs → T-dec) TLV.nonnesting (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetString n))))))))))))))))))))))))))))
 
