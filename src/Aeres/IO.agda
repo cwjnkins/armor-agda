@@ -37,3 +37,6 @@ getArgs = lift Primitive.getArgs
 
 putStrLnErr : String → IO (Level.Lift Level.zero ⊤)
 putStrLnErr str = Level.lift IO.<$> (lift (Primitive.hPutStrLn Primitive.stderr str))
+
+getByteStringContents : IO ByteString.ByteString
+getByteStringContents = lift Primitive.getContents
