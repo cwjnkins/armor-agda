@@ -74,7 +74,9 @@ module CertText where
   open ≡-Reasoning
 
   postulate
-    noOverlapLines : NoOverlap PEM.CertFullLine PEM.CertFinalLine
+    noOverlapLines  : NoOverlap PEM.CertFullLine PEM.CertFinalLine
+    noOverlapLemma₁ : NoOverlap PEM.CertFinalLine (&ₚ (IList PEM.CertFullLine) PEM.CertFinalLine)
+
 
   finalLineFromLines : ∀ {@0 bs} → IList PEM.CertFullLine bs → bs ≡ [] ⊎ &ₚ (IList PEM.CertFullLine) PEM.CertFinalLine bs
   finalLineFromLines nil = inj₁ refl
@@ -150,16 +152,34 @@ module CertText where
              xs≡' : f₁ ++ suf₁ ≡ bs₃ ++ bs₄ ++ f₂ ++ suf₂
              xs≡' = Lemmas.++-cancel≡ˡ _ _ bs₂≡ xs≡
 
-             f₁≡ : f₁ ≡ bs₃
-             f₁≡ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
-                     (tri< f₁< f₁≢ _) → ─
-                       (let bs₃≡ : bs₃ ≡ f₁ ++ drop (length f₁) bs₃
-                            bs₃≡ = Lemmas.drop-length-≤ f₁ suf₁ _ _ xs≡' (Nat.<⇒≤ f₁<)
-                        in
-                        {!!}
-                       )
-                     (tri> _ f₁≢ f₁>) → {!!}
-                     (tri≈ _ f₁≡ _) → ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡' f₁≡)
+             f₁≤ : length f₁ ≤ length bs₃
+             f₁≤ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
+               (tri< f₁< _ _) → ─ (Nat.<⇒≤ f₁<)
+               (tri≈ _ f₁≡ _) → ─ (Lemmas.≡⇒≤ f₁≡)
+               (tri> _ _ f₁>) → ─
+                 (let f₁≡ : f₁ ≡ bs₃ ++ drop (length bs₃) f₁
+                      f₁≡ = Lemmas.drop-length-≤ bs₃ (bs₄ ++ f₂ ++ suf₂) _ _ (sym xs≡') (Nat.<⇒≤ f₁>)
+                  in
+                  caseErased noOverlapLemma₁ bs₃ (drop (length bs₃) f₁) suf₁ (bs₄ ++ f₂) suf₂
+                               {!!}
+                               (subst PEM.CertFinalLine f₁≡ fin₁) (CertFinalLine.fromCertFullLine head₃)
+                  ret (const _) of λ where
+                    (inj₁ x) → ─ contradiction{P = f₁ ≡ bs₃} {!!} λ where refl → ‼ Nat.<⇒≢ f₁> refl
+                    (inj₂ y) → ─ contradiction (mk&ₚ tail₃ fin₂ refl) y)
+             -- f₁≡ : f₁ ≡ bs₃
+             -- f₁≡ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
+             --         (tri< f₁< f₁≢ _) → ─
+             --           (let bs₃≡ : bs₃ ≡ f₁ ++ drop (length f₁) bs₃
+             --                bs₃≡ = Lemmas.drop-length-≤ f₁ suf₁ _ _ xs≡' (Nat.<⇒≤ f₁<)
+             --            in
+             --            caseErased noOverlapLemma₁ f₁ (drop (length f₁) bs₃) (bs₄ ++ f₂ ++ suf₂) {!!} {!!}
+             --                         {!!}
+             --                         (subst PEM.CertFinalLine bs₃≡ (CertFinalLine.fromCertFullLine head₃)) fin₁
+             --            ret (const _) of λ where
+             --              x → {!!}
+             --           )
+             --         (tri> _ f₁≢ f₁>) → {!!}
+             --         (tri≈ _ f₁≡ _) → ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡' f₁≡)
          in
          ≤.begin (length (bs₁ ++ []) + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) (++-identityʳ bs₁) ⟩
                  length bs₁ + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) bs₂≡ ⟩
