@@ -3,6 +3,9 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Chain
+open import Aeres.Data.X509.Semantic.Cert
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 open import Aeres.Grammar.Parser
 import      Aeres.IO
 open import Aeres.Foreign.ByteString
@@ -12,6 +15,8 @@ import      IO
 
 module Aeres.Main where
 
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
 open Base256
 
 usage : String
@@ -32,6 +37,37 @@ main = IO.run $
       Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
       Aeres.IO.exitFailure
 
-  -- where
-  -- runChecks : ∀ {@0 bs} → X509.Chain bs → IO.Main
-  -- runChecks chain = {!!}
+  where
+  runCheck : ∀ {@0 bs} → X509.Chain bs → String
+             → {P : ∀ {@0 bs} → X509.Cert bs → Set}
+             → (∀ {@0 bs} → (c : X509.Cert bs) → Dec (P c))
+             → IO.IO ⊤
+  runCheck c m d
+    with IList.all? d (fstₚ c)
+  ... | no ¬p =
+    Aeres.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    Aeres.IO.exitFailure
+  ... | yes p = IO.return tt
+
+  runCertChecks : ∀ {@0 bs} → X509.Chain bs → IO.Main
+  runCertChecks c = IO.run $
+    runCheck c "SCP1" scp1 IO.>>
+    runCheck c "SCP2" scp2 IO.>>
+    runCheck c "SCP3" scp3 IO.>>
+    runCheck c "SCP4" scp4 IO.>>
+    runCheck c "SCP5" scp5 IO.>>
+    runCheck c "SCP6" scp6 IO.>>
+    runCheck c "SCP7(1)" scp7₁ IO.>>
+    runCheck c "SCP7(2)" scp7₂ IO.>>
+    runCheck c "SP8" scp8 IO.>>
+    runCheck c "SP9" scp9 IO.>>
+    runCheck c "SP10" scp10 IO.>>
+    runCheck c "SP11" scp11 IO.>>
+    runCheck c "SP12" scp12 IO.>>
+    runCheck c "SP13" scp13 IO.>>
+    runCheck c "SP14" scp14 IO.>>
+    runCheck c "SP15" scp15 IO.>>
+    runCheck c "SP16" scp16 IO.>>
+    runCheck c "SP17" scp17 IO.>>
+--    runCheck c "SP18" scp18 IO.>>
+    Aeres.IO.exitSuccess
