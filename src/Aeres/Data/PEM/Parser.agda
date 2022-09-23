@@ -169,14 +169,70 @@ module parseCertFinalLine where
                 pre' suf' ps≡' (mk×ₚ{.pre'} v' _ refl) →
                   max₁ _ _ ps≡' v'
 
+open parseCertFinalLine using (parseCertFinalLine)
+
 module parseCertText where
-  
+
+  open ≡-Reasoning
+
   parseMaxCertText : LogDec.MaximalParser CertText
   parseMaxCertText = LogDec.mkMaximalParser help
     where
     help : ∀ xs → Σ _ _
     help xs =
-      case LogDec.runMaximalParser (parseIListMax (mkLogged ["parseCertMaxText: underflow"] tt) _ CertFullLine.nonempty {!!} {!!}) {!!} ret (const _) of λ where
-        x → {!!}
+      case LogDec.runMaximalParser
+             (parseIListMaxNoOverlap.parseIListMax
+               (mkLogged [ "parseMaxCertText: underflow" ] tt)
+               _ CertFullLine.nonempty CertFullLine.nooverlap parseCertFullLine)
+             xs
+        ret (const _) of λ where
+        (mkLogged _ (no ¬p) , _) →
+          contradiction (success _ _ refl nil _ refl) ¬p
+        (mkLogged log₁ (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max₁) →
+          case LogDec.runMaximalParser parseCertFinalLine suf₁ of λ where
+            (mkLogged log₂ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) , max₂) →
+              mkLogged (log₁ ++ log₂)
+                (yes (success (pre₁ ++ pre₂) (r₁ + r₂) {!!} (mkCertText v₁ v₂ refl) suf₂ {!!}))
+              , λ where
+                pre' suf' ps≡' (mkCertText{b}{f} body final bs≡) →
+                  let xs≡ : Erased (b ++ f ++ suf' ≡ pre₁ ++ pre₂ ++ suf₂)
+                      xs≡ = ─ (begin (b ++ f ++ suf' ≡⟨ solve (++-monoid Char) ⟩
+                                     (b ++ f) ++ suf' ≡⟨ (cong (_++ suf') ∘ sym $ bs≡) ⟩
+                                     pre' ++ suf' ≡⟨ ps≡' ⟩
+                                     xs ≡⟨ sym ps≡₁ ⟩
+                                     pre₁ ++ suf₁ ≡⟨ cong (pre₁ ++_) (sym ps≡₂) ⟩
+                                     pre₁ ++ pre₂ ++ suf₂ ∎))
+                  in
+                    uneraseDec
+                      (caseErased (Nat.<-cmp (length b) r₁) ret (const _) of λ where
+                        (tri> b₁≮ _ b₁>) → ─
+                          (contradiction b₁> (Nat.≤⇒≯
+                            (max₁ _ (f ++ suf')
+                              (begin (b ++ f ++ suf' ≡⟨ solve (++-monoid Char) ⟩
+                                     (b ++ f) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡) ⟩
+                                     pre' ++ suf' ≡⟨ ps≡' ⟩
+                                     xs ∎))
+                              body)))
+                        (tri≈ _ b≡ _) →
+                          let pre₁≡ : Erased (pre₁ ≡ b)
+                              pre₁≡ = ─ proj₁ (Lemmas.length-++-≡ _ (pre₂ ++ suf₂) _ (f ++ suf')
+                                                 (sym (¡ xs≡) )
+                                                 (trans (sym r₁≡) (sym b≡)))
+                          in
+                          ─ (Nat.≤-Reasoning.begin length pre' Nat.≤-Reasoning.≡⟨ cong length bs≡ ⟩
+                                                   length (b ++ f) Nat.≤-Reasoning.≡⟨ length-++ b ⟩
+                                                   length b + length f
+                                                     Nat.≤-Reasoning.≤⟨
+                                                       Nat.+-mono-≤ (Lemmas.≡⇒≤ b≡)
+                                                         (max₂ _ suf'
+                                                           (Lemmas.++-cancel≡ˡ _ _
+                                                             (sym (¡ pre₁≡)) (trans (¡ xs≡) (cong (pre₁ ++_) ps≡₂)))
+                                                           final)
+                                                     ⟩
+                                                   r₁ + r₂ Nat.≤-Reasoning.∎)
+                        (tri< b< _ _) → {!!}
+                      )
+                      (_ ≤? _)
+            (mkLogged log (no ¬p) , snd) → {!!}
 -- module parsePEM where
 
