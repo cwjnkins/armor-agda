@@ -1,6 +1,7 @@
 {-# OPTIONS --guardedness #-}
 
 import      Aeres.Foreign.ByteString as ByteString
+open import Aeres.Foreign.Time
 open import Aeres.Prelude
 import      System.Exit
 
@@ -11,6 +12,7 @@ module Aeres.IO where
 {-# FOREIGN GHC import qualified System.IO #-}
 {-# FOREIGN GHC import qualified Data.Text          #-}
 {-# FOREIGN GHC import qualified Data.Text.IO as TIO #-}
+{-# FOREIGN GHC import           Data.Time.Clock #-}
 
 module Primitive where
   open import IO.Primitive
@@ -20,7 +22,8 @@ module Primitive where
     stderr  : Handle
     hPutStrLn : Handle → String → IO ⊤
 
-    getContents : IO ByteString.ByteString
+    getContents    : IO ByteString.ByteString
+    getCurrentTime : IO UTCTime
 
 {-# COMPILE GHC Primitive.getArgs = fmap Data.Text.pack <$> System.Environment.getArgs #-}
 {-# COMPILE GHC Primitive.Handle = type System.IO.Handle #-}
@@ -28,6 +31,7 @@ module Primitive where
 {-# COMPILE GHC Primitive.hPutStrLn = TIO.hPutStrLn #-}
 
 {-# COMPILE GHC Primitive.getContents = ByteString.getContents #-}
+{-# COMPILE GHC Primitive.getCurrentTime = getCurrentTime #-}
 
 open import IO
 open System.Exit public using (exitFailure ; exitSuccess)
@@ -40,3 +44,6 @@ putStrLnErr str = Level.lift IO.<$> (lift (Primitive.hPutStrLn Primitive.stderr 
 
 getByteStringContents : IO ByteString.ByteString
 getByteStringContents = lift Primitive.getContents
+
+getCurrentTime : IO UTCTime
+getCurrentTime = lift Primitive.getCurrentTime
