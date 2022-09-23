@@ -2,7 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Cert
+open import Aeres.Data.X509.Decidable.Chain
 open import Aeres.Grammar.Parser
 import      Aeres.IO
 open import Aeres.Foreign.ByteString
@@ -26,8 +26,12 @@ usage = "usage: 'aeres [CERT]'"
 main : IO.Main
 main = IO.run $
   Aeres.IO.getByteStringContents IO.>>= λ bs →
-  case runParser parseCert (toUInt8 bs) of λ where
+  case runParser parseChain (toUInt8 bs) of λ where
     (mkLogged _ (yes _)) → Aeres.IO.exitSuccess
     (mkLogged log (no _)) →
       Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
       Aeres.IO.exitFailure
+
+  -- where
+  -- runChecks : ∀ {@0 bs} → X509.Chain bs → IO.Main
+  -- runChecks chain = {!!}

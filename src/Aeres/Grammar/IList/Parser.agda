@@ -1,8 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
-import      Aeres.Grammar.IList.Properties as IList
+import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.IList.Properties
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Parser.Bounded
 import      Aeres.Grammar.Parser.Core
@@ -16,10 +16,11 @@ open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Grammar.Parser.IList (Σ : Set) where
+module Aeres.Grammar.IList.Parser (Σ : Set) where
 
 open Aeres.Grammar.Definitions          Σ
-open Aeres.Grammar.IList                Σ
+open Aeres.Grammar.IList.TCB            Σ
+open Aeres.Grammar.IList.Properties     Σ
 open Aeres.Grammar.Properties           Σ
 open Aeres.Grammar.Parser.Bounded       Σ
 open Aeres.Grammar.Parser.Core          Σ
@@ -27,132 +28,6 @@ open Aeres.Grammar.Parser.Maximal       Σ
 open Aeres.Grammar.Parser.Sigma         Σ
 open Aeres.Grammar.Parser.WellFounded   Σ
 open Aeres.Grammar.Relation.Definitions Σ
-
--- module StrictBounday
---   {M : Set → Set} ⦃ _ : Monad M ⦄ (underflow : M (Level.Lift _ ⊤))
---   (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 sb : NoOverlap A A)
---   (p : Parser (M ∘ Dec) A)
---   where
-
---   parseListWF : Parserᵢ (λ xs _ → @0 Acc _<_ (length xs) → M (Dec (Success (ExactLength (IList A) (length xs)) xs))) (const ⊤)
---   runParser parseListWF [] _ =
---     return (yes (success [] _ refl (mk×ₚ nil (─ refl) refl) [] refl))
---   runParser parseListWF xs@(x₁ ∷ xs') (WellFounded.acc rs) = do
---     yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser p xs
---       where no ¬p → do
---         return ∘ no $ λ where
---           (success prefix read read≡ (mk×ₚ (cons (mkIListCons{bs₁ = bs₁}{bs₂} head₁ tail₁ refl)) (─ len≡) refl) suffix ps≡) →
---             contradiction
---               (success bs₁ _ refl head₁ (bs₂ ++ suffix)
---                 (≡-Reasoning.begin bs₁ ++ bs₂ ++ suffix   ≡-Reasoning.≡⟨ solve (++-monoid Σ) ⟩
---                                    (bs₁ ++ bs₂) ++ suffix ≡-Reasoning.≡⟨ ps≡ ⟩
---                                    xs                     ≡-Reasoning.∎))
---               ¬p
---     case <-cmp r₁ (length xs) of λ where
---       (tri> _ _ r₁<len) →
---         contradiction
---           (begin (r₁ ≡⟨ r₁≡ ⟩
---                  length pre₁ ≤⟨ m≤m+n (length pre₁) (length suf₁) ⟩
---                  length pre₁ + length suf₁ ≡⟨ (sym $ length-++ pre₁) ⟩
---                  length (pre₁ ++ suf₁) ≡⟨ cong length ps≡₁ ⟩
---                  length xs ∎))
---           (<⇒≱ r₁<len)
---       (tri≈ _ r₁≡len _) →
---         let @0 pre₁≡“ : Erased (pre₁ ≡ xs × suf₁ ≡ [])
---             pre₁≡“ = ─ (Lemmas.length-++-≡ pre₁ suf₁ xs [] (trans ps≡₁ (sym (++-identityʳ xs))) (trans (sym r₁≡) r₁≡len))
---         in
---         return (yes
---           (success xs _ refl
---             (mk×ₚ (consIList v₁ nil refl)
---               (─ (≡-Reasoning.begin
---                    length (pre₁ ++ []) ≡-Reasoning.≡⟨ cong length (++-identityʳ pre₁) ⟩
---                    length pre₁         ≡-Reasoning.≡⟨ sym r₁≡ ⟩
---                    r₁                  ≡-Reasoning.≡⟨ r₁≡len ⟩
---                    length xs           ≡-Reasoning.∎))
---               (≡-Reasoning.begin
---                 pre₁ ++ []
---                   ≡-Reasoning.≡⟨ cong (_++ []) (proj₁ ∘ Erased.x $ pre₁≡“) ⟩
---                 xs ++ []
---                   ≡-Reasoning.≡⟨ ++-identityʳ xs ⟩
---                 xs
---                   ≡-Reasoning.∎))
---             [] (++-identityʳ xs)))
---       (tri< r₁<len ¬r₁≡len ¬r₁>len) → do
---         yes (success pre₂ r₂ r₂≡ (mk×ₚ v₂ (─ v₂Len) refl) suf₂ ps≡₂)
---           ← runParser parseListWF suf₁
---               (rs (length suf₁)
---                 (begin (suc (length suf₁)
---                          ≤⟨ subst (length suf₁ <_) (length-++ pre₁)
---                               (Lemmas.length-++-< pre₁ suf₁ (ne v₁)) ⟩
---                        length pre₁ + length suf₁
---                          ≡⟨ sym (length-++ pre₁) ⟩
---                        length (pre₁ ++ suf₁)
---                          ≡⟨ cong length ps≡₁ ⟩
---                        length xs ∎)))
---           where no ¬p → do
---             return ∘ no $ λ where
---               (success prefix read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ refl)) (─ len≡) refl) suffix ps≡) → ‼
---                 let
---                     @0 ps≡' : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
---                     ps≡' = ≡-Reasoning.begin
---                              pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡₁ ⟩
---                              xs                     ≡-Reasoning.≡⟨ sym ps≡ ⟩
---                              (bs₁ ++ bs₂) ++ suffix ≡-Reasoning.≡⟨ solve (++-monoid Σ) ⟩
---                              bs₁ ++ bs₂ ++ suffix   ≡-Reasoning.∎
-
---                     @0 ps≡“ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ × [] ≡ suffix
---                     ps≡“ = Lemmas.length-++-≡ (pre₁ ++ suf₁) _ _ _
---                              (≡-Reasoning.begin
---                                (pre₁ ++ suf₁)++ []    ≡-Reasoning.≡⟨ ++-identityʳ _ ⟩
---                                pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡' ⟩
---                                bs₁ ++ bs₂ ++ suffix   ≡-Reasoning.≡⟨ solve (++-monoid Σ) ⟩
---                                (bs₁ ++ bs₂) ++ suffix ≡-Reasoning.∎)
---                              (≡-Reasoning.begin
---                                length (pre₁ ++ suf₁)  ≡-Reasoning.≡⟨ cong length ps≡₁ ⟩
---                                length xs              ≡-Reasoning.≡⟨ sym len≡ ⟩
---                                length (bs₁ ++ bs₂)    ≡-Reasoning.∎)
-
---                     @0 bs₁≡ : pre₁ ≡ bs₁
---                     bs₁≡ = {!!}
---                       -- sym $
---                       --   sb xs bs₁ (bs₂ ++ suffix) [] pre₁ suf₁
---                       --     (trans (sym ps≡) (solve (++-monoid Σ))) (sym ps≡₁)
---                       --     head₁ v₁
---                       --     (subst (IList A)
---                       --       (trans (sym $ ++-identityʳ bs₂) (cong (bs₂ ++_) (proj₂ ps≡“)))
---                       --       tail₁)
-
---                     @0 bs₂≡ : suf₁ ≡ bs₂
---                     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (proj₁ ps≡“)
---                 in
---                 contradiction
---                   (success _ _ refl (mk×ₚ tail₁ (─ (cong length (sym bs₂≡))) refl) [] (trans (++-identityʳ bs₂) (sym bs₂≡)))
---                   ¬p
---         let suf₂≡ : Erased ([] ≡ suf₂)
---             suf₂≡ = ─ (proj₂
---                       (Lemmas.length-++-≡ suf₁ _ pre₂ _ (trans (++-identityʳ _) (sym ps≡₂)) (sym v₂Len)))
-
---             xs≡ : Erased (pre₁ ++ pre₂ ≡ xs)
---             xs≡ = ─ (≡-Reasoning.begin
---                     pre₁ ++ pre₂           ≡-Reasoning.≡⟨ sym (++-identityʳ _) ⟩
---                     (pre₁ ++ pre₂) ++ []   ≡-Reasoning.≡⟨ cong ((pre₁ ++ pre₂) ++_) (Erased.x suf₂≡) ⟩
---                     (pre₁ ++ pre₂) ++ suf₂ ≡-Reasoning.≡⟨ ++-assoc pre₁ _ _ ⟩
---                     pre₁ ++ pre₂ ++ suf₂   ≡-Reasoning.≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
---                     pre₁ ++ suf₁           ≡-Reasoning.≡⟨ ps≡₁ ⟩
---                     xs                     ≡-Reasoning.∎)
---         return (yes
---           (success xs (r₁ + r₂)
---             (≡-Reasoning.begin
---               r₁ + r₂                   ≡-Reasoning.≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
---               length pre₁ + length pre₂ ≡-Reasoning.≡⟨ (sym $ length-++ pre₁) ⟩
---               length (pre₁ ++ pre₂)     ≡-Reasoning.≡⟨ cong length (Erased.x xs≡) ⟩
---               length xs                 ≡-Reasoning.∎)
---             (mk×ₚ (consIList v₁ v₂ refl)
---               (─ cong length (Erased.x xs≡)) (Erased.x xs≡))
---             [] (++-identityʳ xs)))
---     where
---     open ≤-Reasoning
---     open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module parseIList
   {M : Set → Set} ⦃ _ : Monad M ⦄
@@ -261,8 +136,8 @@ module parseIList
       (symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
       (parseSigma' exactLength-nonnesting (λ _ → _ ≥? 1)
         (λ where
-           (mk×ₚ l₁ sndₚ₁ refl) (mk×ₚ l₂ sndₚ₂ refl) ≥1 →
-             subst₀ (_≥ 1) (IList.lengthIList≡ _ ne nn l₁ l₂) ≥1)
+          (mk×ₚ l₁ sndₚ₁ refl) (mk×ₚ l₂ sndₚ₂ refl) ≥1 →
+            subst₀ (_≥ 1) (lengthIList≡ ne nn l₁ l₂) ≥1)
         (parseIList n))
 
 open parseIList public using (parseIList ; parseIListNonEmpty)
@@ -357,6 +232,36 @@ module parseIListMax
                       length prefix + read' ≤-Reasoning.≡⟨ cong (_+ read') (sym read≡) ⟩
                       read + read' ≤-Reasoning.∎)
                     (_ ≤? _)
+
+  parseIListLowerBounded : ∀ n → LogDec.MaximalParser (IListLowerBounded A n)
+  parseIListLowerBounded n = LogDec.mkMaximalParser help
+    where
+    module ≤ = ≤-Reasoning
+
+    help : ∀ xs → Sigma _ _
+    help xs =
+      case LogDec.runMaximalParser parseIListMax xs of λ where
+        (mkLogged log (no ¬p) , tt) →
+          contradiction (success [] _ refl nil xs refl) ¬p
+        (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max₁) →
+          case n ≤? lengthIList v₁ of λ where
+            (no  n≰v₁) →
+              (mkLogged (log ++ ["parseIListLowerBounded: lower bound violated"])
+                 (no λ where
+                   (success prefix read read≡ (mk×ₚ v vLen refl) suffix ps≡) →
+                     contradiction
+                       (≤.begin n ≤.≤⟨ vLen ⟩
+                                lengthIList v
+                                  ≤.≤⟨ lengthIList≤ ne nn prefix pre₁ (trans ps≡ (sym ps≡₁))
+                                         (≤-trans (max₁ prefix suffix ps≡ v) (Lemmas.≡⇒≤ r₁≡))
+                                         v v₁ ⟩
+                                lengthIList v₁ ≤.∎)
+                       n≰v₁))
+              , tt
+            (yes n≤v₁) →
+              (mkLogged log (yes (success pre₁ _ r₁≡ (mk×ₚ v₁ n≤v₁ refl) suf₁ ps≡₁)))
+              , λ where
+                pre' suf' ps'≡ (mk×ₚ fstₚ₁ _ refl) → max₁ _ _ ps'≡ fstₚ₁
 
 module parseIListMaxNoOverlap
   (underflow : Logging ⊤)
@@ -485,6 +390,6 @@ module parseIListMaxNoOverlap
                                       r₁ + length (bs₂ ++ bs₃) ≤-Reasoning.≤⟨ +-monoʳ-≤ r₁ (¡ bs₂++bs₃≤) ⟩
                                       r₁ + r₂ ≤-Reasoning.∎))
                     (_ ≤? _)
-  
+ 
 open parseIListMax public
   using (parseIListMax)

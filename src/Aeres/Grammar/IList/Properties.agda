@@ -1,14 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Grammar.IList.TCB
 open import Aeres.Prelude
   hiding (head ; tail)
-
-import Aeres.Grammar.IList
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList.Properties (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
-open        Aeres.Grammar.IList       Σ
+open        Aeres.Grammar.IList.TCB   Σ
 open import Aeres.Grammar.Sum         Σ
 
 Rep : (List Σ → Set) → @0 List Σ → Set
@@ -80,3 +80,48 @@ lengthIList≡{A} ne nn (cons (mkIListCons{bs₂ = bs₂} head tail refl)) (cons
 
   tail' : IList A bs₂
   tail' = subst₀ (IList A) bs₂≡ tail₁
+
+lengthIList≤
+  : ∀ {@0 A} → NonEmpty A → NonNesting A
+    → (@0 xs₁ xs₂ : List Σ) {@0 ys₁ ys₂ : List Σ}
+    → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+    → @0 length xs₁ ≤ length xs₂
+    → (v₁ : IList A xs₁) (v₂ : IList A xs₂)
+    → lengthIList v₁ ≤ lengthIList v₂
+lengthIList≤ ne nn .[] xs₂ ++≡ xs₁≤ nil v₂ = z≤n
+lengthIList≤ ne nn .(bs₁ ++ bs₂) .[] ++≡ xs₁≤ (consIList{bs₁}{bs₂} head₁ tail₁ refl) nil =
+  contradiction bs₁≡ (ne head₁)
+  where
+  @0 bs₁≡ : bs₁ ≡ []
+  bs₁≡ = case (singleton bs₁ refl) of λ where
+    (singleton [] refl) → refl
+    (singleton (x ∷ x₁) refl) →
+      contradiction xs₁≤ λ where ()
+lengthIList≤ ne nn .(bs₁ ++ bs₂) xs₂{ys₁ = ys₁}{ys₂} ++≡ xs₁≤ (consIList{bs₁}{bs₂} head₁ tail₁ refl) (consIList{bs₁'}{bs₂'} head₂ tail₂ refl) =
+  ≤.begin (1 + lengthIList tail₁
+            ≤.≤⟨ +-monoʳ-≤ 1 (lengthIList≤ ne nn bs₂ bs₂'
+                   (‼ Lemmas.++-cancel≡ˡ _ _ bs₁≡ ++≡')
+                   bs₂≤ tail₁ tail₂) ⟩
+          1 + lengthIList tail₂ ≤.∎)
+  where
+  open import Data.Nat.Properties
+  open ≡-Reasoning
+  module ≤ = ≤-Reasoning
+
+  @0 ++≡' : bs₁ ++ bs₂ ++ ys₁ ≡ bs₁' ++ bs₂' ++ ys₂
+  ++≡' =
+    (begin bs₁ ++ bs₂ ++ ys₁ ≡⟨ solve (++-monoid Σ) ⟩
+           (bs₁ ++ bs₂) ++ ys₁ ≡⟨ ++≡ ⟩
+           (bs₁' ++ bs₂') ++ ys₂ ≡⟨ solve (++-monoid Σ) ⟩
+           bs₁' ++ bs₂' ++ ys₂ ∎)
+
+  @0 bs₁≡ : bs₁ ≡ bs₁'
+  bs₁≡ = nn ++≡' head₁ head₂
+
+  @0 bs₂≤ : length bs₂ ≤ length bs₂'
+  bs₂≤ = +-cancelˡ-≤ (length bs₁)
+           (≤.begin (length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+                    length (bs₁ ++ bs₂) ≤.≤⟨ xs₁≤ ⟩
+                    length (bs₁' ++ bs₂') ≤.≡⟨ length-++ bs₁' ⟩
+                    length bs₁' + length bs₂' ≤.≡⟨ cong ((_+ _) ∘ length) (sym bs₁≡) ⟩
+                    length bs₁ + length bs₂' ≤.∎))
