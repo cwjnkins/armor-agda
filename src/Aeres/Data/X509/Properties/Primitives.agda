@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
+  hiding (module BoolValue)
 open import Aeres.Data.X690-DER.Int
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -11,20 +12,6 @@ module Aeres.Data.X509.Properties.Primitives where
 
 open Base256
 open import Aeres.Grammar.Definitions Dig
-
-module BoolValue where
-  nonempty : NonEmpty Generic.BoolValue
-  nonempty () refl
-
-  @0 nonnesting : NonNesting Generic.BoolValue
-  nonnesting x (Generic.mkBoolValue v b vᵣ bs≡) (Generic.mkBoolValue v₁ b₁ vᵣ₁ bs≡₁) =
-    proj₁ $ Lemmas.length-++-≡ _ _ _ _ x (trans (cong length bs≡) (cong length (sym bs≡₁)))
-
-  @0 unambiguous : Unambiguous Generic.BoolValue
-  unambiguous (Generic.mkBoolValue .#0 .(# 0) Generic.falseᵣ refl) (Generic.mkBoolValue .#0 .(# 0) Generic.falseᵣ refl) = refl
-  unambiguous (Generic.mkBoolValue .#0 .(# 0) Generic.falseᵣ refl) (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ ())
-  unambiguous (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ refl) (Generic.mkBoolValue .#0 .(# 0) Generic.falseᵣ ())
-  unambiguous (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ refl) (Generic.mkBoolValue .#1 .(# 255) Generic.trueᵣ refl) = refl
 
 module IntegerValue where
   @0 unambiguous : Unambiguous IntegerValue

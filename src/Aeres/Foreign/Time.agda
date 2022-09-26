@@ -49,5 +49,3 @@ module UTC where
 {-# COMPILE GHC UTC.hour   = hour  #-}
 {-# COMPILE GHC UTC.minute = minute  #-}
 {-# COMPILE GHC UTC.second = second  #-}
-
--- {- COMPILE GHC UTC.month = fst . dayOfYearToMonthAndDay . snd . toOrdinalDate . utctDay -}

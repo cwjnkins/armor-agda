@@ -39,7 +39,7 @@ module parseExtension where
 
   parseExtensionFields
     : ∀ {@0 P} {@0 A : @0 List Dig → Set} (P? : ∀ bs → Dec (P bs))
-      → @0  NonNesting _ A → @0 NoConfusion _ Generic.Boool A → Unambiguous _ P
+      → @0  NonNesting _ A → @0 NoConfusion _ Boool A → Unambiguous _ P
       → Parser _ (Logging ∘ Dec) A
       → ExactLengthParser _ (Logging ∘ Dec) (X509.ExtensionFields P A)
   parseExtensionFields P? nn nc ua p n =

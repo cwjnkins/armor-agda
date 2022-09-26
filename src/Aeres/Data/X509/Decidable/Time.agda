@@ -59,7 +59,7 @@ module parseMonthDayHourMinSecFields where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ _ _ _ _ minRange _ _ refl) ._ refl) →
         contradiction minRange ¬miᵣ
     ... | yes miᵣ
-      with inRange? '0' '5' s1 ×-dec inRange? '0' '9' s2
+      with (inRange? '0' '5' s1 ×-dec inRange? '0' '9' s2) ⊎-dec (toℕ s1 ≟ toℕ '6' ×-dec toℕ s2 ≟ toℕ '0')
     ... | no ¬sᵣ = "sec" , no λ where
       (success ._ ._ refl (Generic.mkMDHMSFields _ _ _ _ _ _ _ _ _ secRange refl) ._ refl) →
         contradiction secRange ¬sᵣ

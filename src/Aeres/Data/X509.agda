@@ -20,22 +20,6 @@ open import Aeres.Data.X690-DER public
 
 -------------------------------------------Generic---------------------------------------
 module Generic where
-
-  data BoolRep : Bool → Dig → Set where
-    falseᵣ : BoolRep false (# 0)
-    trueᵣ  : BoolRep true  (# 255)
-
-  record BoolValue (@0 bs : List Dig) : Set where
-    constructor mkBoolValue
-    field
-      v : Bool
-      @0 b : Dig
-      @0 vᵣ : BoolRep v b
-      @0 bs≡ : bs ≡ [ b ]
-
-  Boool : (@0 _ : List Dig) → Set
-  Boool = TLV Tag.Boolean BoolValue
-
 ------------------------------Time------------------------------------------------------------
 
   MonthRange : (mo₁ mo₂ : Dig) → Set
@@ -53,7 +37,8 @@ module Generic where
   MinuteRange : (mi₁ mi₂ : Dig) → Set
   MinuteRange mi₁ mi₂ = InRange '0' '5' mi₁ × InRange '0' '9' mi₂
 
-  SecRange = MinuteRange
+  SecRange : (s₁ s₂ : UInt8) → Set
+  SecRange s₁ s₂ = MinuteRange s₁ s₂ ⊎ (toℕ s₁ ≡ toℕ '6' × toℕ s₂ ≡ toℕ '0')
 
   record MonthDayHourMinSecFields (@0 bs : List Dig) : Set where
     constructor mkMDHMSFields
@@ -536,7 +521,7 @@ module X509 where
     constructor mkBCFieldsSeqFields
     field
       @0 {ca pl} : List Dig
-      bcca : Option Generic.Boool ca
+      bcca : Option Boool ca
       bcpathlen : Option Int pl
       @0 bs≡  : bs ≡ ca ++ pl
 
@@ -843,7 +828,7 @@ module X509 where
       @0 {oex cex ocex} : List Dig
       extnId : OID oex
       @0 extnId≡ : P oex -- oex ≡ lit
-      crit : Option Generic.Boool cex
+      crit : Option Boool cex
       extension : A ocex
       @0 bs≡ : bs ≡ oex ++ cex ++ ocex
 

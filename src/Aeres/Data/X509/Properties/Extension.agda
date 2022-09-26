@@ -34,7 +34,7 @@ module ExtensionFields where
   equivalent : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
                → Equivalent
                    (&ₚ (OID ×ₚ (Erased ∘ P))
-                       (&ₚ (Option Generic.Boool)
+                       (&ₚ (Option Boool)
                            A))
                    (X509.ExtensionFields P A)
   proj₁ equivalent (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
@@ -45,20 +45,20 @@ module ExtensionFields where
   iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
         → Iso
             (&ₚ (OID ×ₚ (Erased ∘ P))
-                (&ₚ (Option Generic.Boool)
+                (&ₚ (Option Boool)
                     A))
             (X509.ExtensionFields P A)
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (X509.mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
-  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Generic.Boool A → Unambiguous (X509.ExtensionFields P A)
+  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (X509.ExtensionFields P A)
   unambiguous ua₁ ua₂ nc =
     isoUnambiguous iso
       (unambiguous&ₚ
         (unambiguous×ₚ OID.unambiguous (erased-unique ua₁))
         (nonnesting×ₚ₁ TLV.nonnesting)
-        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous PrimProps.BoolValue.unambiguous) TLV.nonnesting ua₂ nc))
+        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nonnesting ua₂ nc))
 
 module SelectExtn where
   Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)

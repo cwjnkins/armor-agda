@@ -46,7 +46,27 @@ module MinuteRange where
   unambiguous = ×-unique (inRange-unique{B = Dig}{l = '0'}{'5'}) (inRange-unique{B = Dig}{l = '0'}{'9'})
 
 module SecRange where
-  unambiguous = MinuteRange.unambiguous
+  unambiguous : ∀ {@0 s₁ s₂} → (x y : Generic.SecRange s₁ s₂) → x ≡ y
+  unambiguous{s₁}{s₂} (inj₁ x) (inj₁ x₁) = ‼ cong (inj₁{B = toℕ s₁ ≡ toℕ '6' × toℕ s₂ ≡ toℕ '0'}) (MinuteRange.unambiguous x x₁)
+  unambiguous{s₁}{s₂} (inj₁ (fst₁ , snd₁)) (inj₂ (fst , snd)) =
+    contradiction{P = toℕ '6' ≤ toℕ '5'}
+      (begin toℕ '6' ≡⟨ sym fst ⟩
+             toℕ s₁ ≤⟨ proj₂ fst₁ ⟩
+             toℕ '5' ∎)
+      (toWitnessFalse{Q = _ ≤? _} tt)
+    where
+    open ≤-Reasoning
+  unambiguous{s₁} (inj₂ (fst , snd)) (inj₁ (fst₁ , snd₁)) =
+    contradiction{P = toℕ '6' ≤ toℕ '5'}
+      (begin (toℕ '6' ≡⟨ sym fst ⟩
+             toℕ s₁ ≤⟨ proj₂ fst₁ ⟩
+             toℕ '5' ∎))
+      (toWitnessFalse{Q = _ ≤? _} tt)
+    where
+    open ≤-Reasoning
+  unambiguous{s₁}{s₂} (inj₂ y) (inj₂ y₁) =
+    ‼ (cong (inj₂{A = Generic.MinuteRange s₁ s₂})
+         (×-unique ≡-unique ≡-unique y y₁))
 
 @0 unambiguous : Unambiguous Generic.MonthDayHourMinSecFields
 unambiguous (Generic.mkMDHMSFields{mo₁}{mo₂}{d₁}{d₂}{h₁}{h₂}{mi₁}{mi₂}{s₁}{s₂} mon monRange day dayRange hour hourRange min minRange sec secRange bs≡) (Generic.mkMDHMSFields{mo₁'}{mo₂'}{d₁'}{d₂'}{h₁'}{h₂'}{mi₁'}{mi₂'}{s₁'}{s₂'} mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ bs≡₁) =

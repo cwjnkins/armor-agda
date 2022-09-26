@@ -61,7 +61,7 @@ checkTwoTimes yr₁ mn₁ da₁ hr₁ mi₁ se₁ yr₂ mn₂ da₂ hr₂ mi₂ 
 isCA : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
 isCA (─ .[] , none) = false
 isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields (some (mkTLV len₂ (Generic.mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
 
 
 -- returns BCPathLen if exists
@@ -105,7 +105,7 @@ getKUBits (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (
 isSANCritical : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
 isSANCritical (─ .[] , none) = false
 isSANCritical (fst , some (X509.mkExtensionFields extnId extnId≡ none extension bs≡)) = false
-isSANCritical (fst , some (X509.mkExtensionFields extnId extnId≡ (some (mkTLV len (Generic.mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
+isSANCritical (fst , some (X509.mkExtensionFields extnId extnId≡ (some (mkTLV len (mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
 
 
 -- get SAN length
@@ -148,7 +148,7 @@ getPolicyOIDList (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTL
 -- returns true only if the extension is unknown and has critical bit = true
 isUnkwnCriticalExtension : Exists─ (List UInt8) X509.Extension → Bool
 isUnkwnCriticalExtension (fst , mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ none extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ (some (mkTLV len₁ (Generic.mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (X509.other (X509.mkExtensionFields extnId extnId≡ (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
 isUnkwnCriticalExtension (fst , mkTLV len _ len≡ bs≡) = false
 
 -- is any unknown extention critical from the list ?
