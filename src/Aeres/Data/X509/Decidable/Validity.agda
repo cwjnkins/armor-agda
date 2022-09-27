@@ -26,7 +26,7 @@ module parseValidityFields where
   parseValidityFields : Parser Dig (Logging ∘ Dec) X509.ValidityFields
   runParser parseValidityFields xs = do
     yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)
-      ← runParser (parse& Dig Props.Time.nonnesting parseTime parseTime) xs
+      ← runParser (parse& Dig Time.nonnesting parseTime parseTime) xs
       where no ¬parse → do
         tell $ here'
         return ∘ no $ λ where

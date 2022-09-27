@@ -14,3 +14,4 @@ open import Aeres.Data.X690-DER.OctetString public
 open import Aeres.Data.X690-DER.SequenceOf  public
 open import Aeres.Data.X690-DER.TLV         public
 open import Aeres.Data.X690-DER.Tag         public
+open import Aeres.Data.X690-DER.Time        public

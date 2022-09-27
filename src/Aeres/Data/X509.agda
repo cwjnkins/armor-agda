@@ -18,120 +18,6 @@ open Aeres.Grammar.Sum         UInt8
 
 open import Aeres.Data.X690-DER public
 
--------------------------------------------Generic---------------------------------------
-module Generic where
-------------------------------Time------------------------------------------------------------
-
-  MonthRange : (mo₁ mo₂ : Dig) → Set
-  MonthRange mo₁ mo₂ =   mo₁ ≡ # '0' × InRange '0' '9' mo₂
-                       ⊎ mo₁ ≡ # '1' × InRange '0' '2' mo₂
-
-  DayRange : (d₁ d₂ : Dig) → Set
-  DayRange d₁ d₂ =   InRange '0' '2' d₁ × InRange '0' '9' d₂
-                   ⊎ toℕ d₁ ≡ toℕ '3' × InRange '0' '1' d₂
-
-  HourRange : (h₁ h₂ : Dig) → Set
-  HourRange h₁ h₂ =    InRange '0' '1' h₁ × InRange '0' '9' h₂
-                     ⊎ toℕ h₁ ≡ toℕ '2' × InRange '0' '3' h₂
-
-  MinuteRange : (mi₁ mi₂ : Dig) → Set
-  MinuteRange mi₁ mi₂ = InRange '0' '5' mi₁ × InRange '0' '9' mi₂
-
-  SecRange : (s₁ s₂ : UInt8) → Set
-  SecRange s₁ s₂ = MinuteRange s₁ s₂ ⊎ (toℕ s₁ ≡ toℕ '6' × toℕ s₂ ≡ toℕ '0')
-
-  record MonthDayHourMinSecFields (@0 bs : List Dig) : Set where
-    constructor mkMDHMSFields
-    field
-      @0 {mo₁ mo₂ d₁ d₂ h₁ h₂ mi₁ mi₂ s₁ s₂} : Dig
-
-      mon : Singleton (asciiNum (mo₁ ∷ [ mo₂ ]))
-      @0 monRange  : MonthRange mo₁ mo₂
-
-      -- TODO: where do we check valid dom? (Feb, leap year, etc)
-      day : Singleton (asciiNum (d₁ ∷ [ d₂ ]))
-      @0 dayRange  : DayRange d₁ d₂
-
-      hour : Singleton (asciiNum (h₁ ∷ [ h₂ ]))
-      @0 hourRange : HourRange h₁ h₂
-
-      min : Singleton (asciiNum (mi₁ ∷ [ mi₂ ]))
-      @0 minRange : MinuteRange mi₁ mi₂
-
-      sec : Singleton (asciiNum (s₁ ∷ [ s₂ ]))
-      @0 secRange : SecRange s₁ s₂
-
-      @0 bs≡ : bs ≡ mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]
-
-  record UTCTimeFields (@0 bs : List Dig) : Set where
-    constructor mkUTCTimeFields
-    field
-      @0 {y1 y2 mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 z} : Dig
-
-      year : Singleton (asciiNum (y1 ∷ [ y2 ]))
-      @0 yearRange : All (InRange '0' '9') (y1 ∷ [ y2 ])
-
-      mmddhhmmss : MonthDayHourMinSecFields (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ [ s2 ])
-
-      @0 term : z ≡ # toℕ 'Z'
-      @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ z ]
-
-  UTCTime : (@0 _ : List Dig) → Set
-  UTCTime xs = TLV Tag.UTCTime UTCTimeFields xs
-
-  record GenTimeFields (@0 bs : List Dig) : Set where
-    constructor mkGenTimeFields
-    field
-      @0 {y1 y2 y3 y4 z} : Dig
-      @0 {mdhms} : List Dig
-
-      year : Singleton (asciiNum (y1 ∷ y2 ∷ y3 ∷ [ y4 ]))
-      @0 yearRange : All (InRange '0' '9') (y1 ∷ y2 ∷ y3 ∷ [ y4 ])
-
-      mmddhhmmss : MonthDayHourMinSecFields mdhms
-
-      @0 z≡ : z ≡ # 'Z'
-
-      @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ∷ʳ z
-
-  GenTime : (@0 _ : List Dig) → Set
-  GenTime = TLV Tag.GeneralizedTime GenTimeFields
-
-  module Time where
-    data Time : @0 List Dig → Set where
-      utctm : ∀ {@0 bs} → UTCTime bs → Time bs
-      gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
-
-    getYear : ∀ {@0 bs} →  Time bs → ℕ
-    getYear (utctm x) = 
-      let year = Singleton.x (UTCTimeFields.year (TLV.val x)) in
-        case year <? 50 of λ where
-          (yes _) → 2000 + year
-          (no  _) → 1900 + year
-    getYear (gentm x) = Singleton.x (GenTimeFields.year (TLV.val x))
-
-    getMonth : ∀ {@0 bs} → Time bs → ℕ
-    getMonth (utctm x) = Singleton.x (MonthDayHourMinSecFields.mon (UTCTimeFields.mmddhhmmss (TLV.val x)))
-    getMonth (gentm x) = Singleton.x (MonthDayHourMinSecFields.mon (GenTimeFields.mmddhhmmss (TLV.val x)))
-
-    getDay : ∀ {@0 bs} → Time bs → ℕ
-    getDay (utctm x) = Singleton.x (MonthDayHourMinSecFields.day (UTCTimeFields.mmddhhmmss (TLV.val x)))
-    getDay (gentm x) = Singleton.x (MonthDayHourMinSecFields.day (GenTimeFields.mmddhhmmss (TLV.val x)))
-
-    getHour : ∀ {@0 bs} → Time bs → ℕ
-    getHour (utctm x) = Singleton.x (MonthDayHourMinSecFields.hour (UTCTimeFields.mmddhhmmss (TLV.val x)))
-    getHour (gentm x) = Singleton.x (MonthDayHourMinSecFields.hour (GenTimeFields.mmddhhmmss (TLV.val x)))
-
-    getMin : ∀ {@0 bs} → Time bs → ℕ
-    getMin (utctm x) = Singleton.x (MonthDayHourMinSecFields.min (UTCTimeFields.mmddhhmmss (TLV.val x)))
-    getMin (gentm x) = Singleton.x (MonthDayHourMinSecFields.min (GenTimeFields.mmddhhmmss (TLV.val x)))
-
-    getSec : ∀ {@0 bs} → Time bs → ℕ
-    getSec (utctm x) = Singleton.x (MonthDayHourMinSecFields.sec (UTCTimeFields.mmddhhmmss (TLV.val x)))
-    getSec (gentm x) = Singleton.x (MonthDayHourMinSecFields.sec (GenTimeFields.mmddhhmmss (TLV.val x)))
-    
-
-  open Time public using (Time ; utctm ; gentm) hiding (module Time)
 ------------------------------X.509-----------------------------------------------------------
 
 module X509 where
@@ -313,7 +199,6 @@ module X509 where
 
     getVal : ∀ {@0 bs} → Version bs → ℤ
     getVal v = Int.getVal (TLV.val v)
-      where open Generic
   open Version public using (Version)
 
   IssUID : (@0 _ : List Dig) → Set
@@ -328,8 +213,8 @@ module X509 where
     constructor mkValidityFields
     field
       @0 {nb na} : List Dig
-      start : Generic.Time nb
-      end : Generic.Time na
+      start : Time nb
+      end : Time na
       @0 bs≡  : bs ≡ nb ++ na
 
   module Validity where
@@ -337,30 +222,30 @@ module X509 where
     Validity xs = TLV Tag.Sequence ValidityFields xs
 
     getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear start
+    getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear start
     getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth start
+    getMonthNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth start
     getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay start
+    getDayNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay start
     getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour start
+    getHourNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour start
     getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin start
+    getMinNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin start
     getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec start
+    getSecNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec start
 
     getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getYear end
+    getYearNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear end
     getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMonth end
+    getMonthNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth end
     getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getDay end
+    getDayNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay end
     getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getHour end
+    getHourNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour end
     getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getMin end
+    getMinNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin end
     getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Generic.Time.getSec end
+    getSecNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec end
     
   open Validity public using (Validity)
 

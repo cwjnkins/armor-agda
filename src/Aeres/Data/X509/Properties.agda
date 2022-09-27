@@ -19,7 +19,6 @@ import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.IA5StringValue
-import Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
@@ -37,7 +36,6 @@ import Aeres.Data.X509.Properties.RSAPkIntsFields
 import Aeres.Data.X509.Properties.RSABitStringFields
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
-import Aeres.Data.X509.Properties.Time
 import Aeres.Data.X509.Properties.UserNoticeFields
 import Aeres.Data.X509.Properties.ValidityFields
 
@@ -78,7 +76,6 @@ module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
-module MonthDayHourMinSecFields  = Aeres.Data.X509.Properties.MonthDayHourMinSecFields
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
@@ -96,6 +93,5 @@ module RSAPkIntsFields           = Aeres.Data.X509.Properties.RSAPkIntsFields
 module RSABitStringFields        = Aeres.Data.X509.Properties.RSABitStringFields
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
-module Time                      = Aeres.Data.X509.Properties.Time
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields
 module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields
