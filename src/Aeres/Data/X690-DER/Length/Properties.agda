@@ -131,3 +131,6 @@ nonnesting xs₁++ys₁≡xs₂++ys₂ (long (mkLong l l>128 lₕ lₕ≢0 lₜ 
   lₜ≡ =
     proj₁ $ Lemmas.length-++-≡ _ _ _ _ lₜ++ys₁≡
               (trans lₜLen (trans (cong (λ x → toℕ x ∸ 129) l≡) (sym lₜLen₁)))
+
+getLength∘toLength-short : (n : Fin 128) → getLength (toLength n) ≡ toℕ n
+getLength∘toLength-short n = Fin.toℕ-inject≤ n (toWitness{Q = _ ≤? _} tt)

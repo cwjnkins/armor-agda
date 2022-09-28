@@ -1,9 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Prelude
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Tag
+open import Aeres.Prelude
+import      Data.Nat.Properties as Nat
 
 module Aeres.Data.X690-DER.Time.TCB where
 
@@ -115,3 +116,33 @@ getMin (gentm x) = Singleton.x (MonthDayHourMinSecFields.min (GenTimeFields.mmdd
 getSec : ∀ {@0 bs} → Time bs → ℕ
 getSec (utctm x) = Singleton.x (MonthDayHourMinSecFields.sec (UTCTimeFields.mmddhhmmss (TLV.val x)))
 getSec (gentm x) = Singleton.x (MonthDayHourMinSecFields.sec (GenTimeFields.mmddhhmmss (TLV.val x)))
+
+lessEq : ∀ {@0 bs₁ bs₂} → Time bs₁ → Time bs₂ → Bool
+lessEq t₁ t₂
+  with Nat.<-cmp (getYear t₁) (getYear t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _
+  with Nat.<-cmp (getMonth t₁) (getMonth t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _
+  with Nat.<-cmp (getDay t₁) (getDay t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _
+  with Nat.<-cmp (getHour t₁) (getHour t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _
+  with Nat.<-cmp (getMin t₁) (getMin t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _
+  with Nat.<-cmp (getSec t₁) (getSec t₂)
+... | tri< _ _ _ = true
+... | tri> _ _ _ = false
+... | tri≈ _ _ _ = true
+
+--  with Base256.showFixed 2 (Foreign.Primitive.year u) = {!!}
+--  just (mkGenTimeFields (singleton {!!} refl) {!!} {!!} {!!} {!!})

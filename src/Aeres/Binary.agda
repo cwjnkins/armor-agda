@@ -1,13 +1,13 @@
 {-# OPTIONS --inversion-max-depth=100 #-}
 
-open import Aeres.Arith using (divmod2 ; 2^n≢0)
+open import Aeres.Arith using (divmod2 ; 2^n≢0 ; 1≤10^n)
 open import Aeres.Prelude
-open import Data.Fin.Properties
+open import Data.Fin.Properties as Fin
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
   hiding   (_≟_)
 open import Data.Nat.Induction
   hiding (Acc)
-open import Data.Nat.Properties
+open import Data.Nat.Properties as Nat
   hiding (_≟_)
 import      Data.Sign
 
@@ -85,6 +85,25 @@ module Base256 where
     go : List Dig → ℕ
     go [] = 0
     go (x ∷ xs) = asciiNum₁ x + 10 * go xs
+
+  showFixed : (w n : ℕ) → Vec UInt8 w
+  showFixed zero n = Vec.[]
+  showFixed w@(suc w') n =
+    c₁'
+    ∷ showFixed w'
+        (toℕ $ _mod_ n (10 ^ w'){fromWitnessFalse (Nat.>⇒≢ (1≤10^n w'))})
+    where
+    c₁ : Fin 10
+    c₁ = ((n div (10 ^ w)){fromWitnessFalse (>⇒≢ (1≤10^n w))}) mod 10
+
+    c₁' : UInt8
+    c₁' = Fin.inject≤ (c₁ Fin.+ (#_ '0' {suc $ toℕ '0'}))
+            (≤.begin (toℕ c₁ + suc (toℕ '0') ≤.≤⟨ +-monoˡ-≤ (suc (toℕ '0')) (Fin.toℕ≤n c₁) ⟩
+                     10 + suc (toℕ '0') ≤.≤⟨ toWitness{Q = _ Nat.≤? _} tt ⟩
+                     256 ≤.∎))
+      where
+      module ≤ = ≤-Reasoning
+
 
 module Base128 where
   Byte = Binary 7

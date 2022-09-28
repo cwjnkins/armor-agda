@@ -26,6 +26,9 @@ module MonthRange where
   unambiguous (inj₂ y) (inj₁ x) = case trans₀ (sym (proj₁ y)) (proj₁ x) of λ ()
   unambiguous{mo₂ = mo₂} (inj₂ y) (inj₂ y₁) = cong inj₂ (×-unique ≡-unique (inRange-unique{l = '0'}{'2'}{mo₂}) y y₁)
 
+  monthRange? : ∀ mo₁ mo₂ → Dec (MonthRange mo₁ mo₂)
+  monthRange? mo₁ mo₂ = mo₁ ≟ # '0' ×-dec inRange? '0' '9' mo₂ ⊎-dec mo₁ ≟ # '1' ×-dec inRange? '0' '2' mo₂
+
 module DayRange where
   unambiguous : ∀ {d₁ d₂} → (x y : DayRange d₁ d₂) → x ≡ y
   unambiguous{d₁}{d₂} (inj₁ x) (inj₁ x₁) =
@@ -34,6 +37,9 @@ module DayRange where
   unambiguous (inj₂ y) (inj₁ x) = contradiction (proj₁ y) (<⇒≢ (s≤s (proj₂ (proj₁ x))))
   unambiguous{d₂ = d₂} (inj₂ y) (inj₂ y₁) =
     cong inj₂ (×-unique ≡-unique (inRange-unique{l = '0'}{'1'}{d₂}) y y₁)
+
+  dayRange? : ∀ d₁ d₂ → Dec (DayRange d₁ d₂)
+  dayRange? d₁ d₂ = inRange? '0' '2' d₁ ×-dec inRange? '0' '9' d₂ ⊎-dec toℕ d₁ ≟ toℕ '3' ×-dec inRange? '0' '1' d₂
 
 module HourRange where
   unambiguous : ∀ {h₁ h₂} → (x y : HourRange h₁ h₂) → x ≡ y
@@ -44,9 +50,16 @@ module HourRange where
   unambiguous{h₂ = h₂} (inj₂ y) (inj₂ y₁) =
     cong inj₂ (×-unique ≡-unique (inRange-unique{l = '0'}{'3'}{h₂}) y y₁)
 
+  hourRange? : ∀ h₁ h₂ → Dec (HourRange h₁ h₂)
+  hourRange? h₁ h₂ = inRange? '0' '1' h₁ ×-dec inRange? '0' '9' h₂ ⊎-dec toℕ h₁ ≟ toℕ '2' ×-dec inRange? '0' '3' h₂
+
 module MinuteRange where
   unambiguous : ∀ {mi₁ mi₂} → (x y : MinuteRange mi₁ mi₂) → x ≡ y
   unambiguous = ×-unique (inRange-unique{B = Dig}{l = '0'}{'5'}) (inRange-unique{B = Dig}{l = '0'}{'9'})
+
+  minuteRange? : ∀ mi₁ mi₂ → Dec (MinuteRange mi₁ mi₂)
+  minuteRange? mi₁ mi₂ = inRange? '0' '5' mi₁ ×-dec inRange? '0' '9' mi₂
+
 
 module SecRange where
   unambiguous : ∀ {@0 s₁ s₂} → (x y : SecRange s₁ s₂) → x ≡ y
@@ -70,6 +83,10 @@ module SecRange where
   unambiguous{s₁}{s₂} (inj₂ y) (inj₂ y₁) =
     ‼ (cong (inj₂{A = MinuteRange s₁ s₂})
          (×-unique ≡-unique ≡-unique y y₁))
+
+  secondRange? : ∀ s₁ s₂ → Dec (SecRange s₁ s₂)
+  secondRange? s₁ s₂ = (inRange? '0' '5' s₁ ×-dec inRange? '0' '9' s₂) ⊎-dec toℕ s₁ ≟ toℕ '6' ×-dec toℕ s₂ ≟ toℕ '0'
+
 
 module MonthDayHourMinSecFields where
   @0 unambiguous : Unambiguous MonthDayHourMinSecFields
@@ -275,6 +292,12 @@ module GenTime where
 
     @0 mdhms≡ : mdhms ≡ mdhms'
     mdhms≡ = ++-cancelʳ _ _ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
+
+  serialLength : ∀ {bs} → GenTimeFields bs → length bs ≡ 15
+  serialLength{bs} (mkGenTimeFields{y₁}{y₂}{y₃}{y₄} year yearRange (mkMDHMSFields{mo₁}{mo₂}{d₁}{d₂}{h₁}{h₂}{mi₁}{mi₂}{s₁}{s₂} mon monRange day dayRange hour hourRange min minRange sec secRange refl) refl bs≡) =
+    ‼ (begin length bs ≡⟨ cong length bs≡ ⟩
+             length (y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ (mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]) ∷ʳ (# 'Z')) ∎)
+    where open ≡-Reasoning
 
 @0 nonnesting : NonNesting Time
 nonnesting x (utctm x₁) (utctm x₂) = ‼ TLV.nonnesting x x₁ x₂

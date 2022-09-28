@@ -221,6 +221,12 @@ module X509 where
     Validity : (@0 _ : List Dig) → Set
     Validity xs = TLV Tag.Sequence ValidityFields xs
 
+    getStartTime getEndTime : ∀ {@0 bs} → Validity bs → Exists─ (List UInt8) Time
+
+    getStartTime v = _ , (ValidityFields.start ∘ TLV.val $ v)
+
+    getEndTime v = _ , (ValidityFields.end ∘ TLV.val $ v)
+
     getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
     getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear start
     getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
@@ -863,6 +869,11 @@ module X509 where
     getSerial : ℤ
     getSerial = Int.getVal serial
 
+    getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+
+    getValidityStartTime = Validity.getStartTime validity
+    getValidityEndTime   = Validity.getEndTime validity
+
     getYearNB :  ℕ
     getYearNB = Validity.getYearNB validity
     getMonthNB :  ℕ
@@ -941,6 +952,11 @@ module X509 where
 
     getSerial : ℤ
     getSerial = TBSCertFields.getSerial (TLV.val tbs)
+
+    getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+
+    getValidityStartTime = TBSCertFields.getValidityStartTime ∘ TLV.val $ tbs
+    getValidityEndTime   = TBSCertFields.getValidityEndTime  ∘ TLV.val $ tbs 
 
     getYearNB :  ℕ
     getYearNB = TBSCertFields.getYearNB (TLV.val tbs)
@@ -1023,6 +1039,11 @@ module X509 where
 
       getSerial : ℤ
       getSerial = CertFields.getSerial (TLV.val c)
+
+      getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+
+      getValidityStartTime = CertFields.getValidityStartTime ∘ TLV.val $ c
+      getValidityEndTime   = CertFields.getValidityEndTime   ∘ TLV.val $ c
 
       getYearNB :  ℕ
       getYearNB = CertFields.getYearNB (TLV.val c)

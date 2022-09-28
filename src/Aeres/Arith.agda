@@ -26,6 +26,10 @@ divmod2-≤ (suc (suc n))
 1≤2^n zero = ≤-refl
 1≤2^n (suc n) = ≤-stepsʳ ((2 ^ n) + zero) (1≤2^n n)
 
+1≤10^n : ∀ n → 1 ≤ 10 ^ n
+1≤10^n zero = ≤-refl
+1≤10^n (suc n) = ≤-stepsʳ _ (1≤10^n n)
+
 1<2^n+1 : ∀ n → 1 < 2 ^ (1 + n)
 1<2^n+1 zero = s≤s (s≤s z≤n)
 1<2^n+1 (suc n) = ≤-stepsʳ _ (1<2^n+1 n)

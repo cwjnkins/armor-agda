@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
+import      Data.Nat.Properties as Nat
 
 module Aeres.Data.X690-DER.Length.TCB where
 
@@ -44,3 +45,15 @@ getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = go (
   go [] = 0
   go (b ∷ bs') = toℕ b + 256 * go bs'
 
+toLength : (n : Fin 128) → Length ([ Fin.inject≤ n (toWitness{Q = _ ≤? _} tt) ])
+toLength n = short (mkShort c c< refl)
+  where
+  c : UInt8
+  c = Fin.inject≤ n (toWitness{Q = _ ≤? _} tt)
+
+  c< : toℕ c < 128
+  c< = Nat.≤-trans
+         (s≤s (Lemmas.≡⇒≤ (Fin.toℕ-inject≤ n (toWitness{Q = _ ≤? _} tt))))
+         (Nat.≤-trans
+           (Fin.toℕ<n n)
+           Nat.≤-refl)

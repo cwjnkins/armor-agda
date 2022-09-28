@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Chain
 open import Aeres.Data.X509.Semantic.Cert
+open import Aeres.Data.X509.Semantic.Chain
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 open import Aeres.Grammar.Parser
@@ -11,6 +12,7 @@ import      Aeres.IO
 open import Aeres.Foreign.ByteString
   hiding (foldl)
 open import Aeres.Prelude
+import      Data.Nat.Properties as Nat
 import      IO
 
 module Aeres.Main where
@@ -49,6 +51,17 @@ main = IO.run $
     Aeres.IO.exitFailure
   ... | yes p = IO.return tt
 
+  runChainCheck : ∀ {@0 bs} → X509.Chain bs → String
+                  → {P : ∀ {@0 bs} → X509.Chain bs → Set}
+                  → (∀ {@0 bs} → (c : X509.Chain bs) → Dec (P c))
+                  → IO.IO ⊤
+  runChainCheck c m d
+    with d c
+  ... | no ¬p =
+    Aeres.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    Aeres.IO.exitFailure
+  ... | yes p = IO.return tt
+
   runCertChecks : ∀ {@0 bs} → X509.Chain bs → IO.Main
   runCertChecks c = IO.run $
     runCheck c "SCP1" scp1 IO.>>
@@ -69,5 +82,18 @@ main = IO.run $
     runCheck c "SP15" scp15 IO.>>
     runCheck c "SP16" scp16 IO.>>
     runCheck c "SP17" scp17 IO.>>
+    Aeres.IO.getCurrentTime IO.>>= λ now →
+    case Time.fromFFI now of λ where
+      nothing →
+        Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+        Aeres.IO.exitFailure
+      (just (bs , t)) →
+        runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
+        runChainCheck c "CCP2" ccp2 IO.>>
+        runChainCheck c "CCP5" ccp5 IO.>>
+        runChainCheck c "CCP6" ccp6 IO.>>
+        IO.return (Level.lift tt)
+    where
+    open ≡-Reasoning
 --    runCheck c "SP18" scp18 IO.>>
-    Aeres.IO.exitSuccess
+--    Aeres.IO.exitSuccess

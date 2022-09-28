@@ -399,19 +399,12 @@ scp17 c
 
 
 -- The certificate Validity period includes the current time
-SCP18 : ∀ {@0 bs} → X509.Cert bs → ℕ → ℕ → ℕ → ℕ → ℕ → ℕ → Set
-SCP18 x x₁ x₂ x₃ x₄ x₅ x₆
-  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) x₁ x₂ x₃ x₄ x₅ x₆
-... | false = T false
-... | true with checkTwoTimes x₁ x₂ x₃ x₄ x₅ x₆ (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
-...        | false = T false
-...        | true = T true
+SCP18 : ∀ {@0 bs₁ bs₂} → X509.Cert bs₁ → Time bs₂ → Set
+SCP18 c t = T (Time.lessEq (proj₂ (X509.Cert.getValidityStartTime c)) t ∧ Time.lessEq t (proj₂ (X509.Cert.getValidityEndTime c)))
 
-scp18 : ∀ {@0 bs} (x : X509.Cert bs) → (cyr : ℕ) → (cmn : ℕ) → (cda : ℕ) → (chr : ℕ) → (cmi : ℕ) → (csec : ℕ) → Dec (SCP18 x cyr cmn cda chr cmi csec)
-scp18 x cyr cmn cda chr cmi csec
-  with checkTwoTimes (X509.Cert.getYearNB x) (X509.Cert.getMonthNB x) (X509.Cert.getDayNB x) (X509.Cert.getHourNB x) (X509.Cert.getMinNB x) (X509.Cert.getSecNB x) cyr cmn cda chr cmi csec
-... | false = no λ ()
-... | true with checkTwoTimes cyr cmn cda chr cmi csec (X509.Cert.getYearNA x) (X509.Cert.getMonthNA x) (X509.Cert.getDayNA x) (X509.Cert.getHourNA x) (X509.Cert.getMinNA x) (X509.Cert.getSecNA x)
-...        | false = no λ ()
-...        | true = yes tt
+scp18 : ∀ {@0 bs₁ bs₂} → (c : X509.Cert bs₁) → (t : Time bs₂) → Dec (SCP18 c t)
+scp18 c t
+  with Time.lessEq (proj₂ (X509.Cert.getValidityStartTime c)) t ∧ Time.lessEq t (proj₂ (X509.Cert.getValidityEndTime c))
+... | false = no id
+... | true  = yes tt
 
