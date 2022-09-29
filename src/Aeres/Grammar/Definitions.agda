@@ -85,6 +85,49 @@ isoUnambiguous ((a→b , b→a) , _ , id₂) ua{xs} b₁ b₂ =
   @0 b≡ : a→b (b→a b₁) ≡ a→b (b→a b₂)
   b≡ = cong a→b a≡
 
+isoEq : ∀ {@0 A B} → Iso A B → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B)
+Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
+  case _≟_ ⦃ eq ⦄ x“ y“ ret (const _) of λ where
+    (no ¬p) →
+      no₀ λ where
+        refl →
+          contradiction refl ¬p
+    (yes p) →
+      case (‼ cong (proj₁₀{B = A ∘ Erased.x}) p) ret (const _) of λ where
+        refl →
+          yes₀ (‼ (begin
+            (─ bs₁ , x) ≡⟨ cong (λ z → ─ bs₁ , z) (sym (proj₂₀ (proj₂₀ iso) x)) ⟩
+            (─ bs₁ , proj₁ (proj₁₀ iso) x')
+              ≡⟨ cong (λ z → ─ bs₁ , proj₁ (proj₁₀ iso) z)
+                   (‼ ≡-elim{A = Exists─ (List Σ) A}
+                     (λ {z“} eq →
+                         x' ≡ subst (A ∘ Erased.x) (trans (sym (erasedEta (proj₁₀ z“))) (cong proj₁₀ (sym eq))) (proj₂₀ z“))
+                     refl p)
+               ⟩
+            (─ bs₁
+            , proj₁ (proj₁₀ iso)
+                (subst (A ∘ Erased.x) (─ bs₁ ≡ ─ bs₁ ∋ cong proj₁₀ (sym p)) y'))
+              ≡⟨ ≡-elimₖ
+                   (λ eq → (─ bs₁ , proj₁ (proj₁₀ iso) (subst (A ∘ Erased.x) eq y')) ≡ _)
+                   refl (cong proj₁₀ (sym p)) ⟩
+            (─ bs₁ , proj₁ (proj₁₀ iso) y') ≡⟨ cong (λ z → ─ bs₁ , z) (proj₂ (proj₂₀ iso) y) ⟩
+            (─ bs₁ , y) ∎))
+
+  where
+  open ≡-Reasoning
+
+  x' : A bs₁
+  x' = proj₂₀ (proj₁₀{A = Equivalent A B} iso){bs₁} x
+
+  x“ : Exists─ (List Σ) A
+  x“ = (─ bs₁) , x'
+
+  y' : A bs₂
+  y' = proj₂₀ (proj₁₀{A = Equivalent A B} iso){bs₂} y
+
+  y“ : Exists─ (List Σ) A
+  y“ = (─ bs₂) , y'
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field

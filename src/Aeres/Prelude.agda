@@ -100,6 +100,12 @@ _,′e_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : Set ℓ₂} → (a : A
 proj₁ (a ,′e b) = a
 proj₂ (a ,′e b) = b
 
+proj₁₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : A → Set ℓ₂} → Σ A B → A
+proj₁₀ (a , b) = a
+
+proj₂₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : A → Set ℓ₂} → (x : Σ A B) → B (proj₁₀ x)
+proj₂₀ (a , b) = b
+
 import Data.String
 module String where
   open Data.String public
@@ -167,8 +173,13 @@ module Reveal = Reveal_·_is_
 cong : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (f : A → B) {@0 x y : A} → x ≡ y → f x ≡ f y
 cong f refl = refl
 
+
 subst₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} (@0 P : A → Set ℓ₂) {@0 x y : A} → (@0 _ : x ≡ y) → P x → P y
 subst₀ P refl x = x
+
+transp : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : A → Set ℓ₂} (f : (a : A) → B a)
+         → {@0 x y : A} (eq : x ≡ y) → subst B eq (f x) ≡ f y
+transp f refl = refl
 
 trans₀ : ∀ {ℓ} {@0 A : Set ℓ} {@0 x y z : A} → (@0 _ : x ≡ y) (@0 _ : y ≡ z) → x ≡ z
 trans₀ refl refl = refl
@@ -182,6 +193,12 @@ open import Relation.Binary.Definitions public
 
 open import Relation.Nullary public
   renaming (Irrelevant to Unique)
+
+yes₀ : ∀ {ℓ} {@0 P : Set ℓ} → P → Dec P
+yes₀ p = true because (ofʸ p)
+
+no₀ : ∀ {ℓ} {@0 P : Set ℓ} → ¬ P → Dec P
+no₀ p = false because (ofⁿ p)
 
 ⊤-unique : Unique ⊤
 ⊤-unique tt tt = refl
@@ -257,6 +274,10 @@ infix 100 ¡_
 @0 ¡_ : _
 ¡_ = Erased.x
 
+erasedEta : ∀ {ℓ} {@0 A : Set ℓ} (x : Erased A)
+            → x ≡ ─ Erased.x x
+erasedEta (─ x) = refl
+
 @0 caseErased_ret_of_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}
                         → (x : A) (@0 B : A → Set ℓ₂)
                         → ((x : A) → Erased (B x)) → B x
@@ -321,7 +342,7 @@ instance
   SingletonNumeric : ∀ {ℓ} {A : Set ℓ} ⦃ _ : Numeric A ⦄ {@0 x : A} → Numeric (Singleton x)
   Numeric.toℕ SingletonNumeric = toℕ ∘ Singleton.x
 
-record Eq {ℓ} (A : Set ℓ) : Set ℓ where
+record Eq {ℓ} (@0 A : Set ℓ) : Set ℓ where
   infix 4 _≟_ _≠_
   field
     _≟_ : (x y : A) → Dec (x ≡ y)
@@ -330,7 +351,7 @@ record Eq {ℓ} (A : Set ℓ) : Set ℓ where
   x ≠ y
     with x ≟ y
   ... | no  ≠  = yes ≠
-  ... | yes pf = no (_$ pf)
+  ... | yes pf = no λ ≢ → ≢ pf
 
 open Eq ⦃ ... ⦄ public
 
