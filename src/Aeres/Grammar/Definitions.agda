@@ -30,6 +30,18 @@ record Eq≋ (@0 A : @0 List Σ → Set) : Set where
 
 open Eq≋ ⦃ ... ⦄ public
 
+Eq≋⇒Eq : ∀ {@0 A : @0 List Σ → Set} → Eq≋ A → Eq (Exists─ (List Σ) A)
+Eq._≟_ (Eq≋⇒Eq eq≋) (─ bs₁ , a₁) (─ bs₂ , a₂) =
+  case Eq≋._≋?_ eq≋ a₁ a₂ ret (const _) of λ where
+    (no ¬p) → no₀ λ where refl → contradiction ≋-refl ¬p
+    (yes (mk≋ refl refl)) → yes₀ (‼ (refl{x = ─ bs₁ ,e a₁}))
+
+Eq⇒Eq≋ : ∀ {@0 A : @0 List Σ → Set} → Eq (Exists─ (List Σ) A) → Eq≋ A
+Eq≋._≋?_ (Eq⇒Eq≋ eq) a₁ a₂ =
+  case Eq._≟_ eq (─ _ , a₁) (─ _ , a₂) ret (const _) of λ where
+    (no ¬p) → no₀ λ where ≋-refl → contradiction refl ¬p
+    (yes refl) → yes₀ ≋-refl
+
 -- TODO: rename to "Unique"
 Unambiguous : (A : List Σ → Set) → Set
 Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
@@ -146,6 +158,17 @@ NotEmpty A = A ×ₚ (Erased ∘ (_≥ 1) ∘ length)
 
 Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
 Bounded A l u = A ×ₚ (InRange l u ∘ length)
+
+eqΣₚ : ∀ {@0 A B} → Eq (Exists─ (List Σ) A)
+       → (∀ {@0 bs} → (a : A bs) → Eq (B bs a))
+       → Eq (Exists─ (List Σ) (Σₚ A B))
+Eq._≟_ (eqΣₚ eq₁ eq₂) (─ bs₁ , mk×ₚ a₁ b₁ refl) (─ bs₂ , mk×ₚ a₂ b₂ refl) =
+  case Eq._≟_ eq₁ (─ bs₁ , a₁) (─ bs₂ , a₂) ret (const _) of λ where
+    (no ¬p) → no (λ where refl → contradiction refl ¬p)
+    (yes refl) →
+      case Eq._≟_ (eq₂ a₁) b₁ b₂ ret (const _) of λ where
+        (no ¬p) → no λ where refl → contradiction refl ¬p
+        (yes refl) → yes refl
 
 instance
   NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)
@@ -373,3 +396,24 @@ unambiguous&ₚᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ�
                 refl →
                   case ‼ ≡-unique bs≡ bs≡₁ ret (const _) of λ where
                     refl → refl
+
+eq&ₚᵈ : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs₁ : List Σ) → A bs₁ → @0 List Σ → Set}
+        → Eq (Exists─ (List Σ) A)
+        → (∀ {@0 bs₁} → (a : A bs₁) → Eq (Exists─ (List Σ) (B _ a)))
+        → Eq (Exists─ (List Σ) (&ₚᵈ A B))
+Eq._≟_ (eq&ₚᵈ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁ refl)) (─ bs₂ , mk&ₚ{bs₂₁}{bs₂₂} a₂ b₂ refl) =
+  case Eq._≟_ eq₁ (─ bs₁₁ , a₁) (─ bs₂₁ , a₂) ret (const _) of λ where
+    (no ¬p) → no λ where refl → contradiction refl ¬p
+    (yes refl) →
+      case Eq._≟_ (eq₂ a₁) (─ bs₁₂ , b₁) (─ bs₂₂ , b₂) ret (const _) of λ where
+        (no ¬p) → no λ where refl → contradiction refl ¬p
+        (yes refl) → yes refl
+
+eq&ₚ : ∀ {@0 A B} → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B) → Eq (Exists─ (List Σ) (&ₚ A B))
+Eq._≟_ (eq&ₚ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁ refl)) (─ bs₂ , mk&ₚ{bs₂₁}{bs₂₂} a₂ b₂ refl) =
+  case Eq._≟_ eq₁ (─ bs₁₁ , a₁) (─ bs₂₁ , a₂) ret (const _) of λ where
+    (no ¬p) → no λ where
+      refl → contradiction refl ¬p
+    (yes refl) → case Eq._≟_ eq₂ (─ bs₁₂ , b₁) (─ bs₂₂ , b₂) ret (const _) of λ where
+      (no ¬p) → no λ where refl → contradiction refl ¬p
+      (yes refl) → yes refl

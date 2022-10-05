@@ -14,7 +14,7 @@ UnusedBits bₕ (bₜ ∷ x ∷ bₜ') = UnusedBits bₕ (x ∷ bₜ')
 
 toBitRep : UInt8 → List UInt8 → List Bool
 toBitRep bₕ [] = []
-toBitRep bₕ (bₜ ∷ []) = take (8 - toℕ bₜ) (Vec.toList{n = 8} (toBinary bₜ))
+toBitRep bₕ (bₜ ∷ [])= take (8 - toℕ bₕ) (Vec.toList{n = 8} (toBinary bₜ))
 toBitRep bₕ (bₜ ∷ x ∷ bₜ') = Vec.toList{n = 8} (toBinary bₜ) ++ toBitRep bₕ (x ∷ bₜ')
 
 record BitStringValue (@0 bs : List UInt8) : Set where

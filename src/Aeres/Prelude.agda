@@ -87,6 +87,10 @@ open import Data.Nat.DivMod public
 open import Agda.Builtin.Nat public
   using (_-_)
 
+headSafe : ∀ {ℓ} {@0 A : Set ℓ} → (xs : List A) → @0 length xs ≥ 1 → A
+headSafe (x₁ ∷ xs) x = x₁
+
+
 open import Data.Product public
   hiding (map ; zip)
 
@@ -586,3 +590,7 @@ module Lemmas where
                  → lookup xs (Any.index x∈) ≡ x
   lookup-index (here refl) = refl
   lookup-index (there x∈) = lookup-index x∈
+
+  toListLength : ∀ {ℓ} {@0 A : Set ℓ} {n} → (xs : Vec A n) → length (Vec.toList xs) ≡ n
+  toListLength [] = refl
+  toListLength (x ∷ xs) = cong suc (toListLength xs)

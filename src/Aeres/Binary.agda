@@ -41,7 +41,14 @@ fromBinary bits = go (Vec.reverse bits)
   go {n@.(suc _)} (#1 ∷ bits) rewrite sym (suc[pred[n]]≡n{2 ^ n} (2^n≢0 n)) =
     Fin.fromℕ 1 Fin.+ (Fin.2* (go bits))
 
+-- TODO: postulate
+toBinary-injective : ∀ {n} → (i₁ i₂ : Fin (2 ^ n)) → toBinary{n} i₁ ≡ toBinary{n} i₂ → i₁ ≡ i₂
+toBinary-injective i₁ i₂ i≡ = primTrustMe
+  where
+  open import Agda.Builtin.TrustMe
+
 -- TODO: prove `fromBinary` and `toBinary` form an isomorphism
+
 
 private
   test₁ : toℕ (fromBinary (#1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ])) ≡ 9

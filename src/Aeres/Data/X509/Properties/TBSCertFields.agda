@@ -56,6 +56,10 @@ proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} fstₚ₁ sndₚ₁ 
 proj₂ (proj₂ iso) (X509.mkTBSCertFields version serial signAlg issuer validity subject pk issuerUID subjectUID extensions bs≡) =
   subst₀ (λ eq → X509.mkTBSCertFields version serial signAlg issuer validity subject pk issuerUID subjectUID extensions eq ≡ X509.mkTBSCertFields _ _ _ _ _ _ _ _ _ _ bs≡) (≡-unique bs≡ _) refl
 
+postulate
+  instance
+    TBSEq : Eq (Exists─ (List UInt8) X509.TBSCert)
+
 @0 unambiguous : Unambiguous X509.TBSCertFields
 unambiguous =
   isoUnambiguous iso
