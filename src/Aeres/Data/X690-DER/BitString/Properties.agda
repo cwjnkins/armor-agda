@@ -22,6 +22,14 @@ unusedBits? b [] = toℕ b ≟ 0
 unusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
 unusedBits? b (x ∷ x₁ ∷ bs) = unusedBits? b (x₁ ∷ bs)
 
+postulate
+  bitRepUnusedBits₁
+    : ∀ {@0 bₕ bₜ : UInt8} → toℕ bₜ %2^ (toℕ bₕ) ≡ 0
+      → @0 toℕ bₕ < 8
+      → drop (8 - toℕ bₕ) (Vec.toList (toBinary{8} bₜ))
+        ≡ replicate (toℕ bₕ) #0
+  
+
 @0 toBitRep-injective
   : ∀ (@0 bₕ₁ bₕ₂ bₜ₁ bₜ₂)
     → @0 toℕ bₕ₁ < 8 → @0 toℕ bₕ₂ < 8
@@ -62,10 +70,179 @@ toBitRep-injective bₕ₁ bₕ₂ [] (b₂₁ ∷ b₂₂ ∷ bₜ₂) bₕ₁<
     length (Vec.toList $ toBinary{8} b₂₁) + length (toBitRep bₕ₂ (b₂₂ ∷ bₜ₂)) ≤.≡⟨ sym (length-++ (Vec.toList $ toBinary{8} b₂₁)) ⟩
     length (Vec.toList (toBinary{8} b₂₁) ++ toBitRep bₕ₂ (b₂₂ ∷ bₜ₂)) ≤.≡⟨⟩
     (length xs ≤.∎)
-toBitRep-injective bₕ₁ bₕ₂ (x ∷ bₜ₁) bₜ₂ bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ = TODO
+toBitRep-injective bₕ₁ bₕ₂ (x ∷ []) [] bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+  contradiction{P = length xs ≡ 0}
+    (cong length rep≡)
+    (>⇒≢ takeLen₄)
   where
-  postulate
-    TODO : _
+  len₂ : length (Vec.toList (toBinary{8} x)) ≡ 8
+  len₂ = Lemmas.toListLength (toBinary x)
+
+  xs = take (8 - toℕ bₕ₁) (Vec.toList (toBinary{8} x))
+
+  takeLen₂ : length xs ≡ (8 - toℕ bₕ₁) ⊓ 8
+  takeLen₂ = trans (length-take (8 - toℕ bₕ₁) (Vec.toList (toBinary{8} x)))
+               (cong ((8 - toℕ bₕ₁) ⊓_) len₂)
+
+  takeLen₃ : length xs ≡ 8 - toℕ bₕ₁
+  takeLen₃ = trans takeLen₂ (m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ₁)))
+
+  takeLen₄ : length xs > 0
+  takeLen₄ = ≤-trans (0 < 8 - toℕ bₕ₁ ∋ m<n⇒0<n∸m bₕ₁<8) (Lemmas.≡⇒≤ (sym takeLen₃))
+
+toBitRep-injective bₕ₁ bₕ₂ (x ∷ []) (x₁ ∷ []) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+  ‼ (cong₂ _,′_ bₕ≡
+      (cong (_∷ [])
+        (toBinary-injective x x₁
+          (Lemmas.toList-injective (toBinary{8} x) (toBinary{8} x₁) xs'≡))))
+  where
+  xs₁' = Vec.toList (toBinary{8} x)
+  xs₂' = Vec.toList (toBinary{8} x₁)
+
+  len₁ : length xs₁' ≡ 8
+  len₁ = Lemmas.toListLength (toBinary x)
+
+  len₂ : length xs₂' ≡ 8
+  len₂ = Lemmas.toListLength (toBinary x₁)
+
+  xs₁ = take (8 ∸ Fin.toℕ bₕ₁) xs₁'
+  xs₂ = take (8 ∸ Fin.toℕ bₕ₂) xs₂'
+
+  len₁≡ : length xs₁ ≡ 8 - toℕ bₕ₁
+  len₁≡ = begin
+    (length xs₁ ≡⟨ length-take (8 - toℕ bₕ₁) xs₁' ⟩
+    (8 - toℕ bₕ₁) ⊓ length xs₁' ≡⟨ cong ((8 ∸ toℕ bₕ₁) ⊓_) len₁ ⟩
+    (8 - toℕ bₕ₁) ⊓ 8 ≡⟨ m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ₁)) ⟩
+    8 - toℕ bₕ₁ ∎)
+
+  len₂≡ : length xs₂ ≡ 8 - toℕ bₕ₂
+  len₂≡ = begin
+    (length xs₂ ≡⟨ length-take (8 - toℕ bₕ₂) xs₂' ⟩
+    (8 - toℕ bₕ₂) ⊓ length xs₂' ≡⟨ cong ((8 ∸ toℕ bₕ₂) ⊓_) len₂ ⟩
+    (8 - toℕ bₕ₂) ⊓ 8 ≡⟨ m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ₂)) ⟩
+    8 - toℕ bₕ₂ ∎)
+
+  8-≡ : 8 - toℕ bₕ₁ ≡ 8 - toℕ bₕ₂
+  8-≡ = trans (sym len₁≡) (trans (‼ cong length rep≡) len₂≡)
+
+  @0 bₕ≡ : bₕ₁ ≡ bₕ₂
+  bₕ≡ =
+    Fin.toℕ-injective
+      (∸-cancelˡ-≡ (<⇒≤ bₕ₁<8) (<⇒≤ bₕ₂<8) 8-≡)
+
+  @0 xs'≡ : xs₁' ≡ xs₂'
+  xs'≡ = begin
+    xs₁' ≡⟨ (sym $ take++drop (8 - toℕ bₕ₁) xs₁') ⟩
+    xs₁ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (_++ (drop (8 - toℕ bₕ₁) xs₁')) rep≡ ⟩
+    xs₂ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (xs₂ ++_) (bitRepUnusedBits₁ u₁ bₕ₁<8) ⟩
+    xs₂ ++ replicate (toℕ bₕ₁) #0 ≡⟨ cong (λ x → xs₂ ++ replicate x #0) (cong toℕ bₕ≡) ⟩
+    xs₂ ++ replicate (toℕ bₕ₂) #0 ≡⟨ cong (xs₂ ++_) (sym (bitRepUnusedBits₁ u₂ bₕ₂<8)) ⟩
+    xs₂ ++ drop (8 - toℕ bₕ₂) xs₂' ≡⟨ take++drop (8 - toℕ bₕ₂) xs₂' ⟩
+    xs₂' ∎
+
+toBitRep-injective bₕ₁ bₕ₂ (x ∷ []) (x₁ ∷ x₂ ∷ []) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+  contradiction{P = length xs₁ ≤ 8}
+    xs₁Len
+    (<⇒≱ (≤.begin (9 ≤.≤⟨ xs₂Len ⟩
+                  length (xs₂₁ ++ xs₂₂) ≤.≡⟨ cong length (sym rep≡) ⟩
+                  length xs₁ ≤.∎)))
+  where
+  module ≤ = ≤-Reasoning
+
+  xs₁' = Vec.toList (toBinary{8} x)
+  xs₁  = take (8 ∸ Fin.toℕ bₕ₁) xs₁'
+
+  xs₁Len : length xs₁ ≤ 8
+  xs₁Len = ≤.begin
+    length xs₁ ≤.≡⟨ length-take (8 - toℕ bₕ₁) _ ⟩
+    (8 - toℕ bₕ₁) ⊓ length xs₁' ≤.≡⟨ cong ((8 ∸ toℕ bₕ₁) ⊓_) (Lemmas.toListLength (toBinary{8} x)) ⟩
+    (8 - toℕ bₕ₁) ⊓ 8 ≤.≡⟨ m≤n⇒m⊓n≡m (m∸n≤m _ (toℕ bₕ₁)) ⟩
+    8 - toℕ bₕ₁ ≤.≤⟨ m∸n≤m _ (toℕ bₕ₁) ⟩
+    8 ≤.∎
+
+  xs₂₁  = Vec.toList (toBinary{8} x₁)
+
+  xs₂₂' = Vec.toList (toBinary{8} x₂)
+  xs₂₂  = take (8 - toℕ bₕ₂) xs₂₂'
+
+  xs₂₂Len : length xs₂₂ > 0
+  xs₂₂Len = ≤.begin
+    (1 ≤.≤⟨ m<n⇒0<n∸m bₕ₂<8 ⟩
+    8 - toℕ bₕ₂ ≤.≡⟨ sym (m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ₂))) ⟩
+    (8 - toℕ bₕ₂) ⊓ 8 ≤.≡⟨ cong ((8 ∸ toℕ bₕ₂) ⊓_) (sym $ Lemmas.toListLength (toBinary{8} x₂)) ⟩
+    (8 - toℕ bₕ₂) ⊓ length xs₂₂' ≤.≡⟨ sym (length-take (8 ∸ toℕ bₕ₂) _) ⟩
+    length xs₂₂ ≤.∎)
+
+  xs₂Len : length (xs₂₁ ++ xs₂₂) > 8
+  xs₂Len = ≤.begin
+    8 + 1 ≤.≡⟨ cong (_+ 1) (sym (Lemmas.toListLength (toBinary{8} x₁))) ⟩
+    length xs₂₁ + 1 ≤.≤⟨ +-monoʳ-≤ (length xs₂₁) xs₂₂Len ⟩
+    length xs₂₁ + length xs₂₂ ≤.≡⟨ sym (length-++ xs₂₁) ⟩
+    length (xs₂₁ ++ xs₂₂) ≤.∎
+toBitRep-injective bₕ₁ bₕ₂ (x ∷ []) (x₁ ∷ x₂ ∷ x₃ ∷ bₜ₂) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+  contradiction{P = length xs₁ ≤ 8}
+    xs₁Len
+    (<⇒≱ (≤.begin
+      (9 ≤.≤⟨ xs₂Len ⟩
+      length (xs₂₁ ++ xs₂₂ ++ xs₂₃) ≤.≡⟨ cong length (sym rep≡) ⟩
+      length xs₁ ≤.∎)))
+  where
+  module ≤ = ≤-Reasoning
+
+  xs₁' = Vec.toList (toBinary{8} x)
+  xs₁  = take (8 ∸ Fin.toℕ bₕ₁) xs₁'
+
+  xs₁Len : length xs₁ ≤ 8
+  xs₁Len = ≤.begin
+    length xs₁ ≤.≡⟨ length-take (8 - toℕ bₕ₁) _ ⟩
+    (8 - toℕ bₕ₁) ⊓ length xs₁' ≤.≡⟨ cong ((8 ∸ toℕ bₕ₁) ⊓_) (Lemmas.toListLength (toBinary{8} x)) ⟩
+    (8 - toℕ bₕ₁) ⊓ 8 ≤.≡⟨ m≤n⇒m⊓n≡m (m∸n≤m _ (toℕ bₕ₁)) ⟩
+    8 - toℕ bₕ₁ ≤.≤⟨ m∸n≤m _ (toℕ bₕ₁) ⟩
+    8 ≤.∎
+
+  xs₂₁ = Vec.toList (toBinary{8} x₁)
+  xs₂₂ = Vec.toList (toBinary{8} x₂)
+  xs₂₃ = toBitRep bₕ₂ (x₃ ∷ bₜ₂)
+
+  xs₂Len : length (xs₂₁ ++ xs₂₂ ++ xs₂₃) > 8
+  xs₂Len = ≤.begin
+    8 + 1 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+    8 + 8 ≤.≡⟨ cong₂ _+_ (sym $ Lemmas.toListLength (toBinary{8} x₁)) (sym $ Lemmas.toListLength (toBinary{8} x₂)) ⟩
+    length xs₂₁ + length xs₂₂ ≤.≡⟨ sym (length-++ xs₂₁) ⟩
+    length (xs₂₁ ++ xs₂₂) ≤.≤⟨ m≤m+n (length (xs₂₁ ++ xs₂₂)) _ ⟩
+    length (xs₂₁ ++ xs₂₂) + length xs₂₃ ≤.≡⟨ sym (length-++ (xs₂₁ ++ xs₂₂)) ⟩
+    length ((xs₂₁ ++ xs₂₂) ++ xs₂₃) ≤.≡⟨ cong length (++-assoc xs₂₁ xs₂₂ _) ⟩
+    length (xs₂₁ ++ xs₂₂ ++ xs₂₃) ≤.∎
+
+toBitRep-injective bₕ₁ bₕ₂ (x ∷ x₁ ∷ bₜ₁) = help
+  where
+  module ≤ = ≤-Reasoning
+
+  toBitRepLen : ∀ bₜ → (toℕ bₕ₁ < 8) → length (toBitRep bₕ₁ (x₁ ∷ bₜ)) > 0
+  toBitRepLen [] bₕ₁<8 = xsLen
+    where
+    xs' = Vec.toList (toBinary{8} x₁)
+    xs  = take (8 - toℕ bₕ₁) xs'
+
+    xsLen : length xs > 0
+    xsLen = ≤.begin
+      (1 ≤.≤⟨ m<n⇒0<n∸m bₕ₁<8 ⟩
+      8 - toℕ bₕ₁ ≤.≡⟨ sym (m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ₁))) ⟩
+      (8 - toℕ bₕ₁) ⊓ 8 ≤.≡⟨ cong ((8 ∸ toℕ bₕ₁) ⊓_) (sym $ Lemmas.toListLength (toBinary{8} x₁)) ⟩
+      (8 - toℕ bₕ₁) ⊓ length xs' ≤.≡⟨ sym (length-take (8 ∸ toℕ bₕ₁) _) ⟩
+      length xs ≤.∎)
+
+  toBitRepLen (x ∷ bₜ) bₕ₁<8 = {!!}
+
+
+  help : (@0 bₜ₂ : List UInt8)
+         → @0 Fin.toℕ bₕ₁ < 8 → @0 Fin.toℕ bₕ₂ < 8
+         → @0 UnusedBits bₕ₁ (x₁ ∷ bₜ₁) → @0 UnusedBits bₕ₂ bₜ₂
+         → Vec.toList (toBinary x) ++ toBitRep bₕ₁ (x₁ ∷ bₜ₁) ≡ toBitRep bₕ₂ bₜ₂
+         → (bₕ₁ ,′ x ∷ x₁ ∷ bₜ₁) ≡ (bₕ₂ ,′ bₜ₂)
+  help [] bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ = {!!}
+  help (x ∷ bₜ₂) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ = {!!}
+
 
 instance
   eq : Eq (Exists─ (List UInt8) BitStringValue)

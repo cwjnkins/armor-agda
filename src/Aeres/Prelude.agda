@@ -594,3 +594,10 @@ module Lemmas where
   toListLength : ∀ {ℓ} {@0 A : Set ℓ} {n} → (xs : Vec A n) → length (Vec.toList xs) ≡ n
   toListLength [] = refl
   toListLength (x ∷ xs) = cong suc (toListLength xs)
+
+  toList-injective : ∀ {ℓ} {@0 A : Set ℓ} {n} → (xs₁ xs₂ : Vec A n)
+                     → Vec.toList xs₁ ≡ Vec.toList xs₂
+                     → xs₁ ≡ xs₂
+  toList-injective [] [] xs≡ = refl
+  toList-injective (x ∷ xs₁) (x₁ ∷ xs₂) xs≡ =
+    ‼ cong₂ Vec._∷_ (∷-injectiveˡ xs≡) (toList-injective xs₁ xs₂ (∷-injectiveʳ xs≡))
