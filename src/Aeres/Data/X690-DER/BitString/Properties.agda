@@ -19,17 +19,10 @@ uniqueUnusedBits {bₜ = x₁ ∷ x₂ ∷ bₜ} x y = uniqueUnusedBits{bₜ = x
 
 unusedBits? : ∀ b bs → Dec (UnusedBits b bs)
 unusedBits? b [] = toℕ b ≟ 0
-unusedBits? b (x ∷ []) = toℕ x %2^ (toℕ b) ≟ 0
+unusedBits? b (x ∷ []) = drop (8 - toℕ b) (Vec.toList (toBinary{8} x)) ≟ replicate (toℕ b) #0
 unusedBits? b (x ∷ x₁ ∷ bs) = unusedBits? b (x₁ ∷ bs)
 
-postulate
-  bitRepUnusedBits₁
-    : ∀ {@0 bₕ bₜ : UInt8} → toℕ bₜ %2^ (toℕ bₕ) ≡ 0
-      → @0 toℕ bₕ < 8
-      → drop (8 - toℕ bₕ) (Vec.toList (toBinary{8} bₜ))
-        ≡ replicate (toℕ bₕ) #0
-  
-
+{-# TERMINATING #-}
 @0 toBitRep-injective
   : ∀ (@0 bₕ₁ bₕ₂ bₜ₁ bₜ₂)
     → @0 toℕ bₕ₁ < 8 → @0 toℕ bₕ₂ < 8
@@ -134,9 +127,9 @@ toBitRep-injective bₕ₁ bₕ₂ (x ∷ []) (x₁ ∷ []) bₕ₁<8 bₕ₂<8 
   xs'≡ = begin
     xs₁' ≡⟨ (sym $ take++drop (8 - toℕ bₕ₁) xs₁') ⟩
     xs₁ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (_++ (drop (8 - toℕ bₕ₁) xs₁')) rep≡ ⟩
-    xs₂ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (xs₂ ++_) (bitRepUnusedBits₁ u₁ bₕ₁<8) ⟩
+    xs₂ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (xs₂ ++_) u₁ ⟩
     xs₂ ++ replicate (toℕ bₕ₁) #0 ≡⟨ cong (λ x → xs₂ ++ replicate x #0) (cong toℕ bₕ≡) ⟩
-    xs₂ ++ replicate (toℕ bₕ₂) #0 ≡⟨ cong (xs₂ ++_) (sym (bitRepUnusedBits₁ u₂ bₕ₂<8)) ⟩
+    xs₂ ++ replicate (toℕ bₕ₂) #0 ≡⟨ cong (xs₂ ++_) (sym u₂) ⟩
     xs₂ ++ drop (8 - toℕ bₕ₂) xs₂' ≡⟨ take++drop (8 - toℕ bₕ₂) xs₂' ⟩
     xs₂' ∎
 
@@ -232,17 +225,91 @@ toBitRep-injective bₕ₁ bₕ₂ (x ∷ x₁ ∷ bₜ₁) = help
       (8 - toℕ bₕ₁) ⊓ length xs' ≤.≡⟨ sym (length-take (8 ∸ toℕ bₕ₁) _) ⟩
       length xs ≤.∎)
 
-  toBitRepLen (x ∷ bₜ) bₕ₁<8 = {!!}
+  toBitRepLen (x ∷ bₜ) bₕ₁<8 =
+    ≤.begin
+      1 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+      8 ≤.≡⟨ sym xsLen ⟩
+      length xs ≤.≤⟨ m≤m+n (length xs) (length (toBitRep bₕ₁ (x ∷ bₜ))) ⟩
+      length xs + length (toBitRep bₕ₁ (x ∷ bₜ)) ≤.≡⟨ sym (length-++ xs) ⟩
+      length (xs ++ _) ≤.∎
+    where
+    xs = Vec.toList (toBinary{8} x₁)
 
+    xsLen : length xs ≡ 8
+    xsLen = Lemmas.toListLength (toBinary{8} x₁)
 
   help : (@0 bₜ₂ : List UInt8)
          → @0 Fin.toℕ bₕ₁ < 8 → @0 Fin.toℕ bₕ₂ < 8
          → @0 UnusedBits bₕ₁ (x₁ ∷ bₜ₁) → @0 UnusedBits bₕ₂ bₜ₂
          → Vec.toList (toBinary x) ++ toBitRep bₕ₁ (x₁ ∷ bₜ₁) ≡ toBitRep bₕ₂ bₜ₂
          → (bₕ₁ ,′ x ∷ x₁ ∷ bₜ₁) ≡ (bₕ₂ ,′ bₜ₂)
-  help [] bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ = {!!}
-  help (x ∷ bₜ₂) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ = {!!}
+  help [] bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+    contradiction{P = 8 ≡ 0}
+      (begin (8 ≡⟨ (sym $ Lemmas.toListLength (toBinary{8} x)) ⟩
+             length xs ≡⟨ cong length (++-conicalˡ xs _ rep≡) ⟩
+             length{A = Bool} [] ≡⟨⟩
+             0 ∎))
+      λ ()
+    where
+    xs = Vec.toList (toBinary{8} x)
+  help (x' ∷ []) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+    contradiction{P = length xs₁ ≤ 8}
+      xs₁Len
+      (<⇒≱ (≤.begin
+        9 ≤.≤⟨ xs₂Len ⟩
+        length (xs₂₁ ++ xs₂₂) ≤.≡⟨ sym $ cong length (sym rep≡) ⟩
+        length xs₁ ≤.∎))
+    where
+    xs₁' = Vec.toList (toBinary{8} x')
+    xs₁  = take (8 - toℕ bₕ₂) xs₁'
 
+    xs₁Len : length xs₁ ≤ 8
+    xs₁Len = ≤.begin
+      length xs₁ ≤.≡⟨ length-take (8 - toℕ bₕ₂) _ ⟩
+      (8 - toℕ bₕ₂) ⊓ length xs₁' ≤.≡⟨ cong ((8 ∸ toℕ bₕ₂) ⊓_) (Lemmas.toListLength (toBinary{8} x')) ⟩
+      (8 - toℕ bₕ₂) ⊓ 8 ≤.≡⟨ m≤n⇒m⊓n≡m (m∸n≤m _ (toℕ bₕ₂)) ⟩
+      8 - toℕ bₕ₂ ≤.≤⟨ m∸n≤m _ (toℕ bₕ₂) ⟩
+      8 ≤.∎
+
+    xs₂₁ = Vec.toList (toBinary{8} x)
+    xs₂₂ = toBitRep bₕ₁ (x₁ ∷ bₜ₁)
+
+    xs₂Len : length (xs₂₁ ++ xs₂₂) > 8
+    xs₂Len = ≤.begin
+      (8 + 1 ≤.≡⟨ cong (_+ 1) (sym $ Lemmas.toListLength (toBinary{8} x)) ⟩
+      length xs₂₁ + 1 ≤.≤⟨ +-monoʳ-≤ (length xs₂₁) (toBitRepLen bₜ₁ bₕ₁<8) ⟩
+      length xs₂₁ + length xs₂₂ ≤.≡⟨ sym (length-++ xs₂₁) ⟩
+      length (xs₂₁ ++ xs₂₂) ≤.∎)
+  help (x' ∷ x₁' ∷ bₜ₂) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
+    ‼ cong₂ _,′_ ih₁ (cong₂ _∷_ (toBinary-injective{n = 8} x x' (Lemmas.toList-injective _ _ xs≡)) ih₂)
+      
+    where
+    xs₁ = Vec.toList (toBinary{8} x)
+    xs₂ = Vec.toList (toBinary{8} x')
+
+    xs₁Len : length xs₁ ≡ 8
+    xs₁Len = Lemmas.toListLength (toBinary{8} x)
+
+    xs₂Len : length xs₂ ≡ 8
+    xs₂Len = Lemmas.toListLength (toBinary{8} x')
+
+    rep≡' : toBitRep bₕ₁ (x₁ ∷ bₜ₁) ≡ toBitRep bₕ₂ (x₁' ∷ bₜ₂)
+    rep≡' = begin
+      (toBitRep bₕ₁ (x₁ ∷ bₜ₁) ≡⟨ sym (Lemmas.drop-length-++ xs₁ _) ⟩
+      drop (length xs₁) (xs₁ ++ toBitRep bₕ₁ (x₁ ∷ bₜ₁)) ≡⟨ cong (drop (length xs₁)) rep≡ ⟩
+      drop (length xs₁) (xs₂ ++ toBitRep bₕ₂ (x₁' ∷ bₜ₂)) ≡⟨ cong (λ x → drop x _) xs₁Len ⟩
+      drop 8 (xs₂ ++ toBitRep bₕ₂ (x₁' ∷ bₜ₂)) ≡⟨ cong (λ x → drop x (xs₂ ++ _)) (sym xs₂Len) ⟩
+      drop (length xs₂) (xs₂ ++ toBitRep bₕ₂ (x₁' ∷ bₜ₂)) ≡⟨ Lemmas.drop-length-++ xs₂ _ ⟩
+      toBitRep bₕ₂ (x₁' ∷ bₜ₂) ∎)
+
+    ih : (bₕ₁ ,′ (x₁ ∷ bₜ₁)) ≡ (bₕ₂ ,′ x₁' ∷ bₜ₂)
+    ih = toBitRep-injective bₕ₁ bₕ₂ (x₁ ∷ bₜ₁) (x₁' ∷ bₜ₂) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡'
+
+    ih₁ = cong proj₁ ih
+    ih₂ = cong proj₂ ih
+
+    xs≡ : xs₁ ≡ xs₂
+    xs≡ = proj₁ (Lemmas.length-++-≡ xs₁ _ _ _ rep≡ (trans xs₁Len (sym xs₂Len)))
 
 instance
   eq : Eq (Exists─ (List UInt8) BitStringValue)

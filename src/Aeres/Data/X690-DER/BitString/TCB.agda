@@ -9,7 +9,7 @@ module Aeres.Data.X690-DER.BitString.TCB where
 
 UnusedBits : UInt8 → List UInt8 → Set
 UnusedBits bₕ [] = toℕ bₕ ≡ 0
-UnusedBits bₕ (bₜ ∷ []) = toℕ bₜ %2^ (toℕ bₕ) ≡ 0
+UnusedBits bₕ (bₜ ∷ []) = drop (8 - toℕ bₕ) (Vec.toList (toBinary{8} bₜ)) ≡ replicate (toℕ bₕ) #0
 UnusedBits bₕ (bₜ ∷ x ∷ bₜ') = UnusedBits bₕ (x ∷ bₜ')
 
 toBitRep : UInt8 → List UInt8 → List Bool

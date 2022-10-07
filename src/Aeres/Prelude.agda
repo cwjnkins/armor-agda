@@ -510,6 +510,13 @@ module Lemmas where
   take-length-++ [] ys = refl
   take-length-++ (x ∷ xs) ys = cong (x ∷_) (take-length-++ xs ys)
 
+  drop-length-++ : ∀ {ℓ} {@0 A : Set ℓ} (xs ys : List A) → drop (length xs) (xs ++ ys) ≡ ys
+  drop-length-++ [] ys = refl
+  drop-length-++ (x ∷ xs) ys = drop-length-++ xs ys
+
+  drop-length : ∀ {ℓ} {@0 A : Set ℓ} (xs : List A) → drop (length xs) xs ≡ []
+  drop-length xs = trans₀ (cong (λ x → drop (length xs) x) (sym (++-identityʳ xs))) (drop-length-++ xs [])
+
   drop-length-≤ : ∀ {ℓ} {A : Set ℓ} (xs₁ ys₁ xs₂ ys₂ : List A) → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
                   → length xs₁ ≤ length xs₂
                   → xs₂ ≡ xs₁ ++ drop (length xs₁) xs₂
@@ -601,3 +608,8 @@ module Lemmas where
   toList-injective [] [] xs≡ = refl
   toList-injective (x ∷ xs₁) (x₁ ∷ xs₂) xs≡ =
     ‼ cong₂ Vec._∷_ (∷-injectiveˡ xs≡) (toList-injective xs₁ xs₂ (∷-injectiveʳ xs≡))
+
+  replicate-+ : ∀ {ℓ} {@0 A : Set ℓ} (m n : ℕ) → (x : A) → replicate (m + n) x ≡ replicate m x ++ replicate n x
+  replicate-+ zero n x = refl
+  replicate-+ (suc m) n x = ‼ cong (x ∷_) (replicate-+ m n x)
+
