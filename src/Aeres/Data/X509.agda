@@ -361,8 +361,14 @@ module X509 where
       pubkey : PkVal (PkAlg.getOID pkalg) pk
       @0 bs≡ : bs ≡ alg ++ pk
 
-  PublicKey : (@0 _ : List Dig) → Set
-  PublicKey xs = TLV Tag.Sequence PublicKeyFields xs
+  module PublicKey where
+    PublicKey : (@0 _ : List Dig) → Set
+    PublicKey xs = TLV Tag.Sequence PublicKeyFields xs
+
+    getPkAlgOIDbs : ∀ {@0 bs} → PublicKey bs → List UInt8
+    getPkAlgOIDbs pk = PkAlg.getOID ∘ PublicKeyFields.pkalg ∘ TLV.val $ pk
+
+  open PublicKey public using (PublicKey)
  
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
@@ -900,6 +906,9 @@ module X509 where
     getSecNA :  ℕ
     getSecNA = Validity.getSecNA validity
 
+    getPublicKeyOIDbs : List UInt8
+    getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
+
     getIssuerLen : ℕ
     getIssuerLen = RDNSeq.getRDNSeqLen issuer
 
@@ -1094,6 +1103,9 @@ module X509 where
 
       getCertSignAlg : Exists─ (List Dig) SignAlg
       getCertSignAlg = CertFields.getCertSignAlg (TLV.val c)
+
+      getPublicKeyOIDbs : List UInt8
+      getPublicKeyOIDbs = TBSCertFields.getPublicKeyOIDbs (TLV.val (CertFields.tbs (TLV.val c)))
 
       getBC : Exists─ (List Dig) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
       getBC = CertFields.getBC (TLV.val c)
