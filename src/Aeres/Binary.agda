@@ -101,7 +101,7 @@ module Base256 where
         (toℕ $ _mod_ n (10 ^ w'){fromWitnessFalse (Nat.>⇒≢ (1≤10^n w'))})
     where
     c₁ : Fin 10
-    c₁ = ((n div (10 ^ w)){fromWitnessFalse (>⇒≢ (1≤10^n w))}) mod 10
+    c₁ = ((n div (10 ^ w')){fromWitnessFalse (>⇒≢ (1≤10^n w'))}) mod 10
 
     c₁' : UInt8
     c₁' = Fin.inject≤ (c₁ Fin.+ (#_ '0' {suc $ toℕ '0'}))
