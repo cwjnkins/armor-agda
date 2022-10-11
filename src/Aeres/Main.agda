@@ -40,6 +40,17 @@ main = IO.run $
       Aeres.IO.exitFailure
 
   where
+  record Output : Set where
+    field
+      hashAlgOID : List UInt8
+      sigAlgOID  : List UInt8
+      pubKeyOID  : List UInt8
+
+  certOutput : ∀ {@0 bs} → X509.Cert bs → Output
+  Output.hashAlgOID (certOutput x) = ↑ (OID.serialize {!!})
+  Output.sigAlgOID (certOutput x) = X509.SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
+  Output.pubKeyOID (certOutput x) = {!!}
+
   runCheck : ∀ {@0 bs} → X509.Chain bs → String
              → {P : ∀ {@0 bs} → X509.Cert bs → Set}
              → (∀ {@0 bs} → (c : X509.Cert bs) → Dec (P c))
