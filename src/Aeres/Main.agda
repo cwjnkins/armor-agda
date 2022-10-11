@@ -102,16 +102,16 @@ main = IO.run $
     runCheck c "SCP6" scp6 IO.>>
     runCheck c "SCP7(1)" scp7₁ IO.>>
     runCheck c "SCP7(2)" scp7₂ IO.>>
-    runCheck c "SP8" scp8 IO.>>
-    runCheck c "SP9" scp9 IO.>>
-    runCheck c "SP10" scp10 IO.>>
-    runCheck c "SP11" scp11 IO.>>
-    runCheck c "SP12" scp12 IO.>>
-    runCheck c "SP13" scp13 IO.>>
-    runCheck c "SP14" scp14 IO.>>
-    runCheck c "SP15" scp15 IO.>>
-    runCheck c "SP16" scp16 IO.>>
-    runCheck c "SP17" scp17 IO.>>
+    runCheck c "SCP8" scp8 IO.>>
+    runCheck c "SCP9" scp9 IO.>>
+    runCheck c "SCP10" scp10 IO.>>
+    runCheck c "SCP11" scp11 IO.>>
+    runCheck c "SCP12" scp12 IO.>>
+    runCheck c "SCP13" scp13 IO.>>
+    runCheck c "SCP14" scp14 IO.>>
+    runCheck c "SCP15" scp15 IO.>>
+    runCheck c "SCP16" scp16 IO.>>
+    runCheck c "SCP17" scp17 IO.>>
     Aeres.IO.getCurrentTime IO.>>= λ now →
     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
     case Time.fromFFI now of λ where
