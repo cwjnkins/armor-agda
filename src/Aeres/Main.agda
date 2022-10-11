@@ -11,6 +11,7 @@ open import Aeres.Grammar.Parser
 import      Aeres.IO
 open import Aeres.Foreign.ByteString
   hiding (foldl)
+import      Aeres.Foreign.Time as FFI
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 open import Data.Nat.Show renaming (show to showℕ) 
@@ -111,14 +112,22 @@ main = IO.run $
     runCheck c "SCP15" scp15 IO.>>
     runCheck c "SCP16" scp16 IO.>>
     runCheck c "SCP17" scp17 IO.>>
-    runChecks' (n + 1) tail
+    Aeres.IO.getCurrentTime IO.>>= λ now →
+    Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+    case Time.fromFFI now of λ where
+      nothing →
+        Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+        Aeres.IO.exitFailure
+      (just (bs , t)) →
+        Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (showTime t)) IO.>>
+        runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
+        runChecks' (n + 1) tail
 
   runCertChecks : ∀ {@0 bs} → X509.Chain bs → _
   runCertChecks c =
     runChecks' 1 (fstₚ c) IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
     runChainCheck c "CCP5" ccp5 IO.>>
-    -- runChainCheck c "CCP6" ccp6 IO.>>
     Aeres.IO.exitSuccess
     -- runCheck c "SCP1" scp1 IO.>>
     -- runCheck c "SCP2" scp2 IO.>>

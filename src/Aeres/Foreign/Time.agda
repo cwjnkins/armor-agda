@@ -2,6 +2,7 @@ open import Aeres.Prelude
 
 module Aeres.Foreign.Time where
 
+{-# FOREIGN GHC import qualified Data.Text #-}
 {-# FOREIGN GHC import Data.Time #-}
 {-# FOREIGN GHC import Data.Time.Clock #-}
 {-# FOREIGN GHC import Data.Time.Calendar.OrdinalDate #-}
@@ -27,6 +28,9 @@ minute = toInteger . todMin . timeToTimeOfDay . utctDayTime
 
 second :: UTCTime -> Integer
 second = fst . properFraction . todSec . timeToTimeOfDay . utctDayTime
+
+showTime :: UTCTime -> Data.Text.Text
+showTime = Data.Text.pack . show
 #-}
 
 postulate
@@ -39,6 +43,7 @@ postulate
   hour   : UTCTime → ℕ
   minute : UTCTime → ℕ
   second : UTCTime → ℕ
+  showTime : UTCTime → String
 
 {-# COMPILE GHC UTCTime    = type UTCTime #-}
 {-# COMPILE GHC Day        = type Day #-}
@@ -48,3 +53,4 @@ postulate
 {-# COMPILE GHC hour   = hour  #-}
 {-# COMPILE GHC minute = minute  #-}
 {-# COMPILE GHC second = second  #-}
+{-# COMPILE GHC showTime = showTime  #-}
