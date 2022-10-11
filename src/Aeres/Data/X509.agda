@@ -65,7 +65,7 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
   module SignAlg where
-  
+
     record SignAlgFields (@0 bs : List Dig) : Set where
       constructor mkSignAlgFields
       field
@@ -863,7 +863,7 @@ module X509 where
       issuer  : RDNSeq i
       validity : Validity va
       subject  : RDNSeq u
-      pk       : PublicKey p
+      pk       : PublicKey p -- need whole thing for cert verification
       issuerUID : Option IssUID u₁ -- if this takes a lot of time, this and the lower can be dropped
       subjectUID : Option SubUID u₂
       extensions : Option Extensions e
@@ -951,9 +951,10 @@ module X509 where
     constructor mkCertFields
     field
       @0 {t sa sig} : List Dig
-      tbs : TBSCert t
-      signAlg : SignAlg sa
-      signature : BitString sig
+      tbs : TBSCert t           -- need whole signature, TLV included
+                                -- also need PKS in fields
+      signAlg : SignAlg sa      -- need sign OID from this (TLV or no)
+      signature : BitString sig -- either whole or value portion is fine (value is preferred)
       @0 bs≡  : bs ≡ t ++ sa ++ sig
 
     getVersion : ℤ
