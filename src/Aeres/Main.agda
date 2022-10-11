@@ -128,6 +128,7 @@ main = IO.run $
     runChecks' 1 (fstₚ c) IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
     runChainCheck c "CCP5" ccp5 IO.>>
+    runChainCheck c "CCP6" ccp6 IO.>>
     Aeres.IO.exitSuccess
     -- runCheck c "SCP1" scp1 IO.>>
     -- runCheck c "SCP2" scp2 IO.>>
