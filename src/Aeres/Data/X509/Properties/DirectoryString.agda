@@ -5,7 +5,6 @@ import      Aeres.Grammar.Sum
 open import Aeres.Data.UTF8
 import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
 import      Aeres.Data.X509.Properties.OctetstringValue as OctetStringValueProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
@@ -47,7 +46,7 @@ nonnesting x (X509.bmpString x₁) (X509.utf8String x₂)             = ⊥-elim
 nonnesting x (X509.bmpString x₁) (X509.bmpString x₂)              = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 
 @0 noconfusion₁ : NoConfusion (Σₚ X509.TeletexString TLVNonEmptyVal)
-                    (Sum (Σₚ X509.PrintableString TLVNonEmptyVal)
+                    (Sum (Σₚ PrintableString TLVNonEmptyVal)
                     (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
                     (Sum (Σₚ X509.UTF8String TLVNonEmptyVal)
                          (Σₚ X509.BMPString TLVNonEmptyVal))))
@@ -56,7 +55,7 @@ noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) = noconfusionΣₚ (TLV.noc
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
-@0 noconfusion₂ : NoConfusion (Σₚ X509.PrintableString TLVNonEmptyVal)
+@0 noconfusion₂ : NoConfusion (Σₚ PrintableString TLVNonEmptyVal)
                               (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
                               (Sum (Σₚ X509.UTF8String      TLVNonEmptyVal)
                                    (Σₚ X509.BMPString       TLVNonEmptyVal)))
@@ -71,7 +70,7 @@ noconfusion₃ x x₁ (Sum.inj₂ x₂) = noconfusionΣₚ (TLV.noconfusion (λ 
 
 @0 iso :
          Iso (Sum (Σₚ X509.TeletexString   TLVNonEmptyVal)
-             (Sum (Σₚ X509.PrintableString TLVNonEmptyVal)
+             (Sum (Σₚ PrintableString TLVNonEmptyVal)
              (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
              (Sum (Σₚ X509.UTF8String      TLVNonEmptyVal)
                   (Σₚ X509.BMPString       TLVNonEmptyVal)))))
@@ -102,7 +101,7 @@ proj₂ (proj₂ iso) (X509.bmpString x) = refl
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetStringValueProps.unambiguous)
-      (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5Props.unambiguous)
+      (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
         (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
           (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
             (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)

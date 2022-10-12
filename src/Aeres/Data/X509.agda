@@ -16,17 +16,12 @@ open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Sum         UInt8
 
-open import Aeres.Data.X690-DER public
+open import Aeres.Data.X690-DER       public
+open import Aeres.Data.X509.IA5String public
 
 ------------------------------X.509-----------------------------------------------------------
 
 module X509 where
-
-  record IA5StringValue (@0 bs : List UInt8) : Set where
-    constructor mkIA5StringValue
-    field
-      str : OctetStringValue bs
-      @0 all<128 : All (Fin._< # 128) (Singleton.x str)
 
   module SOID where
     -- NOTE: These are proven to be OIDs after the fact (see Aeres.Data.X509.Decidable.OID)
@@ -88,9 +83,6 @@ module X509 where
   TeletexString : (@0 _ : List UInt8) → Set
   TeletexString xs = TLV Tag.TeletexString  OctetStringValue xs
 
-  PrintableString : (@0 _ : List UInt8) → Set
-  PrintableString xs = TLV Tag.PrintableString  IA5StringValue xs
-
   UniversalString : (@0 _ : List UInt8) → Set
   UniversalString xs = TLV Tag.UniversalString  UTF8 xs
 
@@ -99,9 +91,6 @@ module X509 where
 
   BMPString : (@0 _ : List UInt8) → Set
   BMPString xs = TLV Tag.BMPString  UTF8 xs
-
-  IA5String : (@0 _ : List UInt8) → Set
-  IA5String xs = TLV Tag.IA5String  IA5StringValue xs
 
   -- TODO: check this (is it UTF8?)
   VisibleString : (@0 _ : List UInt8) → Set
@@ -863,7 +852,8 @@ module X509 where
       issuer  : RDNSeq i
       validity : Validity va
       subject  : RDNSeq u
-      pk       : PublicKey p -- need whole thing for cert verification
+      pk       : PublicKey p
+      pkBytes  : Singleton p -- TODO: eventually this should come from serialization
       issuerUID : Option IssUID u₁ -- if this takes a lot of time, this and the lower can be dropped
       subjectUID : Option SubUID u₂
       extensions : Option Extensions e
@@ -951,10 +941,11 @@ module X509 where
     constructor mkCertFields
     field
       @0 {t sa sig} : List UInt8
-      tbs : TBSCert t           -- also need PKS in fields
+      tbs : TBSCert t
       tbsBytes : Singleton t    -- TODO: eventually this should come from serialization
       signAlg : SignAlg sa      -- need sign OID from this (TLV or no)
       signature : BitString sig -- either whole or value portion is fine (value is preferred)
+      signatureBytes : Singleton sig
       @0 bs≡  : bs ≡ t ++ sa ++ sig
 
     getVersion : ℤ
@@ -1038,6 +1029,9 @@ module X509 where
     
     getExtensionsList : List (Exists─ (List UInt8) Extension)
     getExtensionsList = TBSCertFields.getExtensionsList (TLV.val tbs)
+
+    getPublicKeyBytes : List UInt8
+    getPublicKeyBytes = ↑ (TBSCertFields.pkBytes (TLV.val tbs))
 
   module Cert where
     Cert : (@0 _ : List UInt8) → Set
@@ -1131,6 +1125,9 @@ module X509 where
  
       getExtensionsList : List (Exists─ (List UInt8) Extension)
       getExtensionsList = CertFields.getExtensionsList (TLV.val c)
+
+      getPublicKeyBytes : List UInt8
+      getPublicKeyBytes = CertFields.getPublicKeyBytes (TLV.val c)
 
   open Cert public using (Cert)
 

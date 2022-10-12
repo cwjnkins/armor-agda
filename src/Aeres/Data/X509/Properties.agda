@@ -17,7 +17,6 @@ import Aeres.Data.X509.Properties.EcPkAlgFields
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
-import Aeres.Data.X509.Properties.IA5StringValue
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
@@ -70,7 +69,6 @@ module EcParamsFields            = Aeres.Data.X509.Properties.EcParamsFields
 module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
-module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue

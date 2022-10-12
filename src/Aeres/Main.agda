@@ -52,16 +52,15 @@ main = IO.run $
   where
   record Output : Set where
     field
-      hashAlgOID : List UInt8
       sigAlgOID  : List UInt8
-      pubKeyOID  : List UInt8
       tbsBytes   : List UInt8
+      pkBytes    : List UInt8
 
   certOutput : ∀ {@0 bs} → X509.Cert bs → Output
-  Output.hashAlgOID (certOutput x) = ↑ (OID.serialize {!!})
   Output.sigAlgOID (certOutput x) = X509.SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
-  Output.pubKeyOID (certOutput x) = {!!}
   Output.tbsBytes  (certOutput x) = X509.Cert.getTBSBytes x
+  Output.pkBytes   (certOutput x) = X509.Cert.getPublicKeyBytes x
+
 
   runCheck : ∀ {@0 bs} → X509.Cert bs → String
              → {P : ∀ {@0 bs} → X509.Cert bs → Set}

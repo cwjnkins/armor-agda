@@ -3,7 +3,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
 import      Aeres.Data.X509.Properties.UserNoticeFields as UserNoticeProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
@@ -18,11 +17,11 @@ open import Aeres.Grammar.Sum         UInt8
 
 module CPSURIQualifier where
 
-  equivalent : Equivalent (&ₚ (_≡ X509.PQOID.CPSURI) X509.IA5String) X509.CPSURIQualifier
+  equivalent : Equivalent (&ₚ (_≡ X509.PQOID.CPSURI) IA5String) X509.CPSURIQualifier
   proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkCPSURIQualifier fstₚ₁ sndₚ₁ bs≡
   proj₂ equivalent (X509.mkCPSURIQualifier ≡cpsuri cpsPointer bs≡) = mk&ₚ ≡cpsuri cpsPointer bs≡
 
-  iso : Iso (&ₚ (_≡ X509.PQOID.CPSURI) X509.IA5String) X509.CPSURIQualifier
+  iso : Iso (&ₚ (_≡ X509.PQOID.CPSURI) IA5String) X509.CPSURIQualifier
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
   proj₂ (proj₂ iso) (X509.mkCPSURIQualifier ≡cpsuri cpsPointer bs≡) = refl
@@ -30,7 +29,7 @@ module CPSURIQualifier where
   @0 unambiguous : Unambiguous X509.CPSURIQualifier
   unambiguous =
     isoUnambiguous iso
-      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLV.unambiguous IA5Props.unambiguous))
+      (unambiguous&ₚ ≡-unique (λ where _ refl refl → refl) (TLV.unambiguous IA5String.unambiguous))
 
 
 module UserNoticeQualifier where

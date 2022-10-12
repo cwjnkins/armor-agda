@@ -5,7 +5,6 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.RDNSeq           as RDNProps
 open import Aeres.Data.X690-DER
@@ -15,10 +14,9 @@ open import Data.Nat.Properties
 
 module Aeres.Data.X509.Properties.GeneralName where
 
-open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties Dig
-open Aeres.Grammar.Sum Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
 equivalent
   : Equivalent
@@ -183,8 +181,8 @@ module GeneralName where
     isoUnambiguous iso
       (unambiguousSum
         (TLV.unambiguous OSProps.unambiguous)
-        (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
-          (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
+        (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+          (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
             (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
               (unambiguousSum
                 (TLV.unambiguous
@@ -192,7 +190,7 @@ module GeneralName where
                     RDNProps.RDN.unambiguous TLV.nonempty TLV.nonnesting))
                 (unambiguousSum
                   (TLV.unambiguous OSProps.unambiguous)
-                  (unambiguousSum (TLV.unambiguous IA5Props.unambiguous)
+                  (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
                     (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
                       (TLV.unambiguous
                         (SequenceOf.Bounded.unambiguous

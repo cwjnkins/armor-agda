@@ -30,7 +30,8 @@ module parseCert where
       (transEquivalent
         (symEquivalent Distribute.exactLength-&)
         (equivalent×ₚ Props.CertFields.equiv))
-      (parse&ᵈ (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
+      (parse&ᵈ
+        (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
         (withinLength-unambiguous
           (unambiguous×ₚ
             (TLV.unambiguous Props.TBSCertFields.unambiguous)
@@ -40,9 +41,10 @@ module parseCert where
           (singleton r₀ r₀≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r₀≡
               (parseExactLength
-                (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
+                (NonNesting&ₚ TLV.nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
                 (tell $ here' String.++ ": length mismatch")
-                (parse& TLV.nonnesting parseSignAlg parseBitstring) (n - r₀)))
+                (parse& TLV.nonnesting parseSignAlg (parse×Singleton parseBitstring))
+                (n - r₀)))
 
   parseCert : Parser (Logging ∘ Dec) X509.Cert
   parseCert =

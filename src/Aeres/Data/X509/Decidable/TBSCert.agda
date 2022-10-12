@@ -72,14 +72,15 @@ module parseTBSCert where
                                                   (singleton r₄ r₄≡) _ →
                                                     subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - x))) r₄≡
                                                       (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                                        (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.PublicKeyFields.unambiguous))
-                                                          (parse≤ _ (n - read - r₁ - r₂ - r₃ - r₄) parsePublicKey TLV.nonnesting overflow)
+                                                        (parse&ᵈ _ (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
+                                                          (withinLength-unambiguous (unambiguous×ₚ (TLV.unambiguous Props.PublicKeyFields.unambiguous) λ where self self → refl))
+                                                          (parse≤ _ (n - read - r₁ - r₂ - r₃ - r₄) (parse×Singleton _ parsePublicKey) (nonnestingΣₚ₁ TLV.nonnesting) overflow)
                                                           λ where
                                                             (singleton r₅ r₅≡) _ →
                                                               subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - r₄ - x))) r₅≡
                                                                 (parseOption₃ _ TLV.nonnesting TLV.nonnesting TLV.nonnesting
                                                                   (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
-                                                                  parseIssUID parseSubUID parseExtensions (tell $ here' String.++ ": underflow") (n - read - r₁ - r₂ - r₃ - r₄ - r₅)) )))))))))))
+                                                                  parseIssUID parseSubUID parseExtensions (tell $ here' String.++ ": underflow") (n - read - r₁ - r₂ - r₃ - r₄ - r₅)))))))))))))
     where
     overflow : Logging (Level.Lift _ ⊤)
     overflow = tell $ here' String.++ ": overflow"
