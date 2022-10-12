@@ -12,6 +12,26 @@ open import Aeres.Grammar.Parser.Core Σ
 
 open ≡-Reasoning
 
+parse×Singleton
+  : {M : Set → Set} ⦃ _ : Monad M ⦄ {@0 A : List Σ → Set}
+    → Parser (M ∘ Dec) A
+    → Parser (M ∘ Dec) (A ×ₚ Singleton)
+runParser (parse×Singleton p) xs = do
+  yes (success pre r r≡ v suf ps≡) ← runParser p xs
+    where no ¬p → return ∘ no $ λ where
+      (success pre r r≡ (mk×ₚ v _ refl) suf ps≡) →
+        contradiction (success pre _ r≡ v suf ps≡) ¬p
+  return (yes (success
+    pre r r≡
+      (mk×ₚ v
+        (singleton (take r xs)
+          (begin take r xs ≡⟨ cong (take r) (sym ps≡) ⟩
+                 take r (pre ++ suf) ≡⟨ cong (λ x → take x (pre ++ suf)) r≡ ⟩
+                 take (length pre) (pre ++ suf) ≡⟨ Lemmas.take-length-++ pre suf ⟩
+                 pre ∎))
+        refl)
+      suf ps≡))
+
 parse×Dec : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
             → @0 NonNesting A
             → (decNo : M (Level.Lift _ ⊤))

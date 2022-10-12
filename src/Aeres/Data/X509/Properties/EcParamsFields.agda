@@ -8,7 +8,6 @@ import      Aeres.Grammar.Serializer
 import      Aeres.Grammar.Sum
 import      Aeres.Data.X509.Properties.OctetstringValue  as OSProps
 import      Aeres.Data.X509.Properties.CurveFields       as CurveFieldsProps
-import      Aeres.Data.X509.Properties.Primitives        as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -69,9 +68,9 @@ unambiguous = isoUnambiguous iso
       (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
     (TLV.unambiguous OSProps.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-    (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
+    (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-    (Unambiguous.option₁ (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}) TLV.nonempty))
+    (Unambiguous.option₁ (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty))
 
 @0 equivalentEcPkAlgParams : Equivalent (Sum (Sum X509.EcParams OID) (_≡ X509.ExpNull)) X509.EcPkAlgParams
 proj₁ equivalentEcPkAlgParams (Aeres.Grammar.Sum.inj₁ (Aeres.Grammar.Sum.inj₁ x)) = X509.ecparams x

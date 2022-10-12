@@ -5,7 +5,6 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DisplayText as DisplayTextProps
-import      Aeres.Data.X509.Properties.Primitives  as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -31,6 +30,6 @@ unambiguous =
     (unambiguous&ₚ
       DisplayTextProps.unambiguous DisplayTextProps.nonnesting
       (TLV.unambiguous
-        (SequenceOf.unambiguous (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+        (SequenceOf.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
           TLV.nonempty (NonNesting Int ∋ TLV.nonnesting))))
           

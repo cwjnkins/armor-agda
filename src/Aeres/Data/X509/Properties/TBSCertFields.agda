@@ -4,7 +4,6 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Extension       as ExtensionProps
 import      Aeres.Data.X509.Properties.PublicKeyFields as PKProps
-import      Aeres.Data.X509.Properties.Primitives      as PrimProps
 import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 import      Aeres.Data.X509.Properties.SignAlgFields   as SignAlgProps
 import      Aeres.Data.X509.Properties.ValidityFields  as ValidityFieldsProps
@@ -65,8 +64,8 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ
       (Unambiguous.unambiguous-option₁&₁
-        (TLV.unambiguous (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
-        TLV.nonnesting (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+        (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
+        TLV.nonnesting (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
         (TLV.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
         TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
@@ -81,9 +80,9 @@ unambiguous =
               (unambiguous&ₚ (TLV.unambiguous PKProps.unambiguous)
                 TLV.nonnesting
                 (Unambiguous.option₃&₂
-                  (TLV.unambiguous PrimProps.BitstringValue.unambiguous)
+                  (TLV.unambiguous BitString.unambiguous)
                   TLV.nonnesting TLV.nonempty
-                  (TLV.unambiguous PrimProps.BitstringValue.unambiguous)
+                  (TLV.unambiguous BitString.unambiguous)
                   TLV.nonnesting TLV.nonempty
                   (TLV.unambiguous ExtensionProps.ExtensionsSeq.unambiguous)
                   TLV.nonempty

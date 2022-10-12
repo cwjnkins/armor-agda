@@ -5,6 +5,7 @@ open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Tag
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
+import      Data.Nat.Show       as Nat using (show)
 
 module Aeres.Data.X690-DER.Time.TCB where
 
@@ -51,6 +52,13 @@ record MonthDayHourMinSecFields (@0 bs : List UInt8) : Set where
 
     @0 bs≡ : bs ≡ mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]
 
+  show : String
+  show =           Nat.show (↑ mon)  String.++ " "
+         String.++ Nat.show (↑ day)  String.++ " "
+         String.++ Nat.show (↑ hour) String.++ " "
+         String.++ Nat.show (↑ min)  String.++ " "
+         String.++ Nat.show (↑ sec)
+
 record UTCTimeFields (@0 bs : List UInt8) : Set where
   constructor mkUTCTimeFields
   field
@@ -63,6 +71,10 @@ record UTCTimeFields (@0 bs : List UInt8) : Set where
 
     @0 term : z ≡ # toℕ 'Z'
     @0 bs≡  : bs ≡ y1 ∷ y2 ∷ mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ [ z ]
+
+  show : String
+  show = Nat.show (↑ year)   String.++ " "
+         String.++ MonthDayHourMinSecFields.show mmddhhmmss
 
 UTCTime : (@0 _ : List UInt8) → Set
 UTCTime xs = TLV Tag.UTCTime UTCTimeFields xs
@@ -82,12 +94,20 @@ record GenTimeFields (@0 bs : List UInt8) : Set where
 
     @0 bs≡ : bs ≡ y1 ∷ y2 ∷ y3 ∷ y4 ∷ mdhms ∷ʳ z
 
+  show : String
+  show = Nat.show (↑ year) String.++ " "
+         String.++ MonthDayHourMinSecFields.show mmddhhmmss
+
 GenTime : (@0 _ : List UInt8) → Set
 GenTime = TLV Tag.GeneralizedTime GenTimeFields
 
 data Time : @0 List UInt8 → Set where
   utctm : ∀ {@0 bs} → UTCTime bs → Time bs
   gentm  : ∀ {@0 bs} → GenTime  bs → Time bs
+
+showTime : ∀ {@0 bs} → Time bs → String
+showTime (utctm x) = UTCTimeFields.show (TLV.val x)
+showTime (gentm x) = GenTimeFields.show (TLV.val x)
 
 getYear : ∀ {@0 bs} →  Time bs → ℕ
 getYear (utctm x) = 

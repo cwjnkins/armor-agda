@@ -399,6 +399,9 @@ instance
   BoolEq : Eq Bool
   Eq._≟_ BoolEq = Data.Bool._≟_
 
+  SingletonEq : ∀ {ℓ} {@0 A : Set ℓ} → {@0 a : A} → Eq (Singleton a)
+  Eq._≟_ SingletonEq self self = yes refl
+
 record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
   field
     sizeOf : A → ℕ

@@ -41,9 +41,9 @@ module parseTBSCert where
         (withinLength-unambiguous
           (Unambiguous.unambiguous-option₁&₁
             (TLV.unambiguous
-              (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs}))
+              (TLV.unambiguous λ{xs} → Int.unambiguous{xs}))
             TLV.nonnesting
-            (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs}) (TLV.noconfusion λ ())))
+            (TLV.unambiguous λ{xs} → Int.unambiguous{xs}) (TLV.noconfusion λ ())))
         (parseOption₁&₁≤ _ parseVersion parseInt TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
         λ where
           {bs} (singleton read read≡) _ →

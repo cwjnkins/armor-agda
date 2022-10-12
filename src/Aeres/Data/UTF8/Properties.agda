@@ -9,6 +9,7 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
+  hiding (_≟_)
 open import Relation.Binary
   hiding (NonEmpty)
 
@@ -305,7 +306,99 @@ unambiguous =
   IListProps.unambiguous
     UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
 
+instance
+  UTF8Char1Eq≋ : Eq≋ UTF8Char1
+  Eq≋._≋?_ UTF8Char1Eq≋ (mkUTF8Char1 b₁₁ b₁range₁ refl) (mkUTF8Char1 b₁₂ b₁range₂ refl) =
+    case b₁₁ ≟ b₁₂ ret (const _) of λ where
+      (yes refl) →
+        let b₁range≡ : Erased (b₁range₁ ≡ b₁range₂)
+            b₁range≡ = ─ ≤-unique b₁range₁ b₁range₂
+        in
+        yes (mk≋ refl
+               (subst (λ x → mkUTF8Char1 b₁₁ b₁range₁ refl ≡ mkUTF8Char1 b₁₁ x refl)
+                 (‼ (¡ b₁range≡))
+                 refl))
+      (no b≢)    →
+        no λ where ≋-refl → contradiction refl b≢
 
-postulate
-  instance
-    UTF8CharEq≋ : Eq≋ UTF8Char
+  UTF8Char2Eq≋ : Eq≋ UTF8Char2
+  Eq≋._≋?_ UTF8Char2Eq≋ (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) =
+    case (b₁ ∷ [ b₂ ] ≟ b₃ ∷ [ b₄ ]) ret (const _) of λ where
+      (yes refl) →
+        let b₁range≡ : Erased (b₁range ≡ b₁range₁)
+            b₁range≡ = ─ inRange-unique{l = 192}{x = b₁} b₁range b₁range₁
+
+            b₂range≡ : Erased (b₂range ≡ b₂range₁)
+            b₂range≡ = ─ inRange-unique{l = 128}{x = b₂} b₂range b₂range₁
+        in
+        yes (mk≋ refl
+          (subst₂ (λ x y → mkUTF8Char2 b₁ b₂ b₁range b₂range refl ≡ mkUTF8Char2 b₁ b₂ x y refl)
+            (‼ (¡ b₁range≡)) (‼ (¡ b₂range≡)) refl))
+      (no  b≢)   → no λ where ≋-refl → contradiction refl b≢
+
+  UTF8Char3Eq≋ : Eq≋ UTF8Char3
+  Eq≋._≋?_ UTF8Char3Eq≋ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (mkUTF8Char3 b₁' b₂' b₃' b₁range' b₂range' b₃range' refl) =
+    case (b₁ ∷ b₂ ∷ [ b₃ ] ≟ b₁' ∷ b₂' ∷ [ b₃' ]) ret (const _) of λ where
+      (no b≢) → no λ where ≋-refl → contradiction refl b≢
+      (yes refl) →
+        yes (mk≋ refl
+          (subst₂
+             (λ x y →
+                mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
+                mkUTF8Char3 b₁ b₂ b₃ x y b₃range' refl)
+             (inRange-unique{l = 224}{x = b₁} b₁range b₁range')
+             (inRange-unique{l = 128}{x = b₂} b₂range b₂range')
+             (subst
+                (λ x →
+                   mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
+                   mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range x refl)
+                (inRange-unique{l = 128}{x = b₃} b₃range b₃range') refl)))
+
+  UTF8Char4Eq≋ : Eq≋ UTF8Char4
+  Eq≋._≋?_ UTF8Char4Eq≋ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) (mkUTF8Char4 b₁' b₂' b₃' b₄' b₁range' b₂range' b₃range' b₄range' refl) =
+    case (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ] ≟ b₁' ∷ b₂' ∷ b₃' ∷ [ b₄' ]) ret (const _) of λ where
+      (no b≢) → no λ where ≋-refl → contradiction refl b≢
+      (yes refl) →
+        yes (mk≋ refl
+          (subst₂
+            (λ x y →
+                mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range  b₄range refl ≡
+                mkUTF8Char4 b₁ b₂ b₃ b₄ x       y       b₃range' b₄range' refl)
+            (inRange-unique{l = 240}{x = b₁} b₁range b₁range')
+            (inRange-unique{l = 128}{x = b₂} b₂range b₂range')
+            (subst₂
+              (λ x y → mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range  b₄range refl ≡
+                       mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range x        y       refl)
+              (inRange-unique{l = 128}{x = b₃} b₃range b₃range')
+              (inRange-unique{l = 128}{x = b₄} b₄range b₄range')
+              refl)))
+
+  UTF8CharEq≋ : Eq≋ UTF8Char
+  (UTF8CharEq≋ Eq≋.≋? utf81 x) (utf81 x₁)
+    with x ≋? x₁
+  ... | yes ≋-refl = yes ≋-refl
+  ... | no ≢ = no λ where ≋-refl → contradiction ≋-refl ≢
+  (UTF8CharEq≋ Eq≋.≋? utf81 x) (utf82 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf81 x) (utf83 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf81 x) (utf84 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf82 x) (utf81 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf82 x) (utf82 x₁)
+    with x ≋? x₁
+  ... | yes ≋-refl = yes ≋-refl
+  ... | no  ≢      = no λ where ≋-refl → contradiction ≋-refl ≢
+  (UTF8CharEq≋ Eq≋.≋? utf82 x) (utf83 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf82 x) (utf84 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf83 x) (utf81 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf83 x) (utf82 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf83 x) (utf83 x₁)
+    with x ≋? x₁
+  ... | yes ≋-refl = yes ≋-refl
+  ... | no ≢       = no λ where ≋-refl → contradiction ≋-refl ≢
+  (UTF8CharEq≋ Eq≋.≋? utf83 x) (utf84 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf84 x) (utf81 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf84 x) (utf82 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf84 x) (utf83 x₁) = no λ { (mk≋ refl ())}
+  (UTF8CharEq≋ Eq≋.≋? utf84 x) (utf84 x₁)
+    with x ≋? x₁
+  ... | yes ≋-refl = yes ≋-refl
+  ... | no ≢       = no λ where ≋-refl → contradiction ≋-refl ≢
