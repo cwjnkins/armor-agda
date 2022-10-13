@@ -402,10 +402,16 @@ instance
   SingletonEq : ∀ {ℓ} {@0 A : Set ℓ} → {@0 a : A} → Eq (Singleton a)
   Eq._≟_ SingletonEq self self = yes refl
 
-record Sized {ℓ} (@0 A : Set ℓ) : Set ℓ where
+record Show {ℓ} (@0 A : Set ℓ) : Set ℓ where
+import      Data.Nat.Show       as Nat using (show)
   field
-    sizeOf : A → ℕ
-open Sized ⦃ ... ⦄ public
+    show : A → String
+open Show ⦃ ... ⦄ public
+
+instance
+  showNat : Show ℕ
+  Show.show showNat = Nat.show
+    where import Data.Nat.Show as Nat
 
 record Irrel {ℓ} (@0 A : Set ℓ) : Set ℓ where
   infix 10 ‼_

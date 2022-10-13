@@ -943,8 +943,8 @@ module X509 where
       @0 {t sa sig} : List UInt8
       tbs : TBSCert t
       tbsBytes : Singleton t    -- TODO: eventually this should come from serialization
-      signAlg : SignAlg sa      -- need sign OID from this (TLV or no)
-      signature : BitString sig -- either whole or value portion is fine (value is preferred)
+      signAlg : SignAlg sa
+      signature : BitString sig
       signatureBytes : Singleton sig
       @0 bs≡  : bs ≡ t ++ sa ++ sig
 
@@ -1128,6 +1128,9 @@ module X509 where
 
       getPublicKeyBytes : List UInt8
       getPublicKeyBytes = CertFields.getPublicKeyBytes (TLV.val c)
+
+      getSignatureBytes : List UInt8
+      getSignatureBytes = ↑ CertFields.signatureBytes (TLV.val c)
 
   open Cert public using (Cert)
 
