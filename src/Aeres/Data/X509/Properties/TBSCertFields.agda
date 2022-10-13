@@ -6,11 +6,10 @@ import      Aeres.Data.X509.Properties.Extension       as ExtensionProps
 import      Aeres.Data.X509.Properties.PublicKeyFields as PKProps
 import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 import      Aeres.Data.X509.Properties.SignAlgFields   as SignAlgProps
-import      Aeres.Data.X509.Properties.ValidityFields  as ValidityFieldsProps
 open import Aeres.Data.X690-DER
-import       Aeres.Grammar.Definitions
-import       Aeres.Grammar.Option
-import       Aeres.Grammar.Properties
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -26,7 +25,7 @@ Rep : @0 List UInt8 → Set
 Rep = (&ₚ (&ₚ (Option X509.Version) Int)
       (&ₚ X509.SignAlg
       (&ₚ X509.RDNSeq
-      (&ₚ X509.Validity
+      (&ₚ Validity
       (&ₚ X509.RDNSeq
       (&ₚ (X509.PublicKey ×ₚ Singleton)
       (&ₚ (Option X509.IssUID)
@@ -51,7 +50,7 @@ proj₂ (proj₂ iso) (X509.mkTBSCertFields version serial signAlg issuer validi
 
 postulate
   instance
-    TBSEq : Eq (Exists─ (List UInt8) X509.TBSCert)
+    TBSEq : Eq (Exists─ (List UInt8) X509.TBSCertFields)
 
 @0 unambiguous : Unambiguous X509.TBSCertFields
 unambiguous =
@@ -68,7 +67,7 @@ unambiguous =
         TLV.nonnesting
         (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
           (unambiguous&ₚ
-            (TLV.unambiguous ValidityFieldsProps.unambiguous)
+            (TLV.unambiguous Validity.unambiguous)
             TLV.nonnesting
             (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
               (unambiguous&ₚ

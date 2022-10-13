@@ -27,8 +27,8 @@ proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s refl) (mk&ₚ fstₚ₂ (mk×
 proj₂ (proj₂ iso) (X509.mkCertFields tbs tbsBytes signAlg signature sbytes refl) = refl
 
 instance
-  CertEq : Eq (Exists─ (List UInt8) X509.Cert)
-  CertEq = Eq≋⇒Eq (TLV.EqTLV ⦃ Eq⇒Eq≋ (isoEq iso eq) ⦄)
+  CertEq : Eq (Exists─ (List UInt8) X509.CertFields)
+  CertEq = (isoEq iso eq)
     where
     eq : Eq (Exists─ (List UInt8) Rep)
     eq = eq&ₚ (eqΣₚ it λ _ → it)
