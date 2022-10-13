@@ -2,7 +2,6 @@
 
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
-import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Aeres.Binary
@@ -36,6 +35,6 @@ proj₂ (proj₂ iso) (X509.mkRSAPkIntsFields nval eval bs≡) = refl
 @0 unambiguous : Unambiguous X509.RSAPkIntsFields
 unambiguous = isoUnambiguous iso
                 (unambiguous&ₚ
-                (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs})
+                (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
                 TLV.nonnesting
-                (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}))
+                (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))

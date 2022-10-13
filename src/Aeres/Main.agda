@@ -50,18 +50,30 @@ main = IO.run $
       Aeres.IO.exitFailure
 
   where
-  -- runCheck : ∀ {@0 bs} → X509.Chain bs → String
-  --            → {P : ∀ {@0 bs} → X509.Cert bs → Set}
-  --            → (∀ {@0 bs} → (c : X509.Cert bs) → Dec (P c))
-  --            → IO.IO ⊤
-  -- runCheck c m d
-  --   with IList.all? d (fstₚ c)
-  -- ... | no ¬p =
-  --   Aeres.IO.putStrLnErr (m String.++ ": failed") IO.>>
-  --   Aeres.IO.exitFailure
-  -- ... | yes p =
-  --   Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
-  --   IO.return tt
+  record Output : Set where
+    field
+      sigAlgOID  : List UInt8
+      tbsBytes   : List UInt8
+      pkBytes    : List UInt8
+      sigBytes   : List UInt8
+
+  certOutput : ∀ {@0 bs} → X509.Cert bs → Output
+  Output.sigAlgOID (certOutput x) = X509.SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
+  Output.tbsBytes  (certOutput x) = X509.Cert.getTBSBytes x
+  Output.pkBytes   (certOutput x) = X509.Cert.getPublicKeyBytes x
+  Output.sigBytes  (certOutput x) = X509.Cert.getSignatureBytes x
+
+  showOutput : Output → String
+  showOutput o =
+              (showBytes tbsBytes)  String.++ "\n"
+    String.++ (showBytes sigBytes)  String.++ "\n"
+    String.++ (showBytes pkBytes)   String.++ "\n"
+    String.++ (showBytes sigAlgOID) String.++ "\n"
+    where
+    open Output o
+    showBytes : List UInt8 → String
+    showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
+
 
   runCheck : ∀ {@0 bs} → X509.Cert bs → String
              → {P : ∀ {@0 bs} → X509.Cert bs → Set}
@@ -119,8 +131,9 @@ main = IO.run $
         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
         Aeres.IO.exitFailure
       (just (bs , t)) →
-        Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (showTime t)) IO.>>
+        Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (show t)) IO.>>
         runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
+        IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
 
   runCertChecks : ∀ {@0 bs} → X509.Chain bs → _

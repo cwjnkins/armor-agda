@@ -8,7 +8,7 @@ open import Aeres.Data.X509
 module Aeres.Data.X509.Properties.OctetstringValue where
 
 open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
 
 
 @0 unambiguous : Unambiguous OctetStringValue

@@ -35,7 +35,7 @@ appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , (appendIList _ snd snd₁)
 
 Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 Transcode (X509.teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
-Transcode (X509.printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (X509.mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
+Transcode (X509.printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
   where
   helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
   helper [] All.[] = _ , nil

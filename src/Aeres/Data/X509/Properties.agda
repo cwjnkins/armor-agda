@@ -6,7 +6,6 @@ import Aeres.Data.X509.Properties.AKIFieldsSeqFields
 import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
-import Aeres.Data.X509.Properties.Cert
 import Aeres.Data.X509.Properties.CertFields
 import Aeres.Data.X509.Properties.CurveFields
 import Aeres.Data.X509.Properties.DisplayText
@@ -18,7 +17,6 @@ import Aeres.Data.X509.Properties.EcPkAlgFields
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
-import Aeres.Data.X509.Properties.IA5StringValue
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
 import Aeres.Data.X509.Properties.OctetstringValue
@@ -27,7 +25,6 @@ import Aeres.Data.X509.Properties.PkAlg
 import Aeres.Data.X509.Properties.PkVal
 import Aeres.Data.X509.Properties.PolicyMapFields
 import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
-import Aeres.Data.X509.Properties.Primitives
 import Aeres.Data.X509.Properties.PublicKeyFields
 import Aeres.Data.X509.Properties.RDNATVFields
 import Aeres.Data.X509.Properties.RDNSeq
@@ -56,9 +53,6 @@ module NonNesting where
   open import Aeres.Grammar.Definitions Dig
   open import Aeres.Data.X509
 
--- Unfinished lemmas
-module Cert               = Aeres.Data.X509.Properties.Cert
-
 -- Finished lemmas
 module AKIFieldsSeqFields        = Aeres.Data.X509.Properties.AKIFieldsSeqFields
 module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
@@ -75,7 +69,6 @@ module EcParamsFields            = Aeres.Data.X509.Properties.EcParamsFields
 module EcPkAlgFields             = Aeres.Data.X509.Properties.EcPkAlgFields
 module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
-module IA5StringValue            = Aeres.Data.X509.Properties.IA5StringValue
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
 module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
@@ -84,7 +77,6 @@ module PkAlg                     = Aeres.Data.X509.Properties.PkAlg
 module PkVal                     = Aeres.Data.X509.Properties.PkVal
 module PolicyMapFields           = Aeres.Data.X509.Properties.PolicyMapFields
 module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
-module Primitives                = Aeres.Data.X509.Properties.Primitives
 module PublicKeyFields           = Aeres.Data.X509.Properties.PublicKeyFields
 module RDNATVFields              = Aeres.Data.X509.Properties.RDNATVFields
 module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq

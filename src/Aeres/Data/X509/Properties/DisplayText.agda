@@ -7,7 +7,6 @@ import      Aeres.Grammar.Sum
 open import Aeres.Data.UTF8
 import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.IA5StringValue   as IA5Props
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 open import Aeres.Prelude
 open import Data.List
@@ -25,7 +24,7 @@ open Aeres.Grammar.Properties  Dig
 open Aeres.Grammar.Sum         Dig
 
 equivalent : Equivalent
-               (Sum (Σₚ X509.IA5String     (TLVLenBounded 1 200))
+               (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
                (Sum (Σₚ X509.VisibleString (TLVLenBounded 1 200))
                (Sum (Σₚ X509.BMPString     (TLVLenBounded 1 200))
                     (Σₚ X509.UTF8String    (TLVLenBounded 1 200)))))
@@ -40,7 +39,7 @@ proj₂ equivalent (X509.bmpString x) = inj₂ (inj₂ (inj₁ x))
 proj₂ equivalent (X509.utf8String x) = inj₂ (inj₂ (inj₂ x))
 
 iso : Iso
-        (Sum (Σₚ X509.IA5String     (TLVLenBounded 1 200))
+        (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
         (Sum (Σₚ X509.VisibleString (TLVLenBounded 1 200))
         (Sum (Σₚ X509.BMPString     (TLVLenBounded 1 200))
              (Σₚ X509.UTF8String    (TLVLenBounded 1 200)))))
@@ -74,9 +73,9 @@ nonnesting =
         (NoConfusion.sumₚ{A = Σₚ X509.VisibleString _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
-      (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
+      (NoConfusion.sumₚ{A = Σₚ IA5String _}
         (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
-        (NoConfusion.sumₚ{A = Σₚ X509.IA5String _}
+        (NoConfusion.sumₚ{A = Σₚ IA5String _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
 
@@ -115,7 +114,7 @@ noconfusionNoticeReference = noconfusionTLV pf
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (unambiguousΣₚ (TLV.unambiguous IA5Props.unambiguous)
+      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous)
         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
       (unambiguousSum
         (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)

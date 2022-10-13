@@ -4,7 +4,6 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.GeneralName as GeneralNameProps
 import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
-import      Aeres.Data.X509.Properties.Primitives as PrimProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -33,5 +32,5 @@ unambiguous =
     (Unambiguous.option₃&₂
       (TLV.unambiguous OSProps.unambiguous) TLV.nonnesting TLV.nonempty
       (TLV.unambiguous GeneralNameProps.GeneralNamesElems.unambiguous) TLV.nonnesting TLV.nonempty
-      (TLV.unambiguous λ {xs} → PrimProps.IntegerValue.unambiguous{xs}) TLV.nonempty
+      (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

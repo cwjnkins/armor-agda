@@ -66,7 +66,7 @@ module parsePublicKeyFields where
             (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
             (TLV.unambiguous Props.OctetstringValue.unambiguous))
           (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-          (TLV.unambiguous λ{xs} → Props.Primitives.IntegerValue.unambiguous{xs})))
+          (TLV.unambiguous λ{xs} → Int.unambiguous{xs})))
         (parse≤ n (parse& (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
           (parse& (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
             (parse& (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
