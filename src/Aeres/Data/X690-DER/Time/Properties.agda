@@ -29,6 +29,13 @@ module MonthRange where
   monthRange? : ∀ mo₁ mo₂ → Dec (MonthRange mo₁ mo₂)
   monthRange? mo₁ mo₂ = mo₁ ≟ # '0' ×-dec inRange? '0' '9' mo₂ ⊎-dec mo₁ ≟ # '1' ×-dec inRange? '0' '2' mo₂
 
+  monthRange⇒asciinum : ∀ {mo₁ mo₂} → MonthRange mo₁ mo₂ → All (InRange '0' '9') (mo₁ ∷ [ mo₂ ])
+  monthRange⇒asciinum {mo₁} {mo₂} (inj₁ (refl , snd)) =
+    (≤-refl , toWitness{Q = _ ≤? _} tt) ∷ _∷_{x = mo₂} snd []
+  monthRange⇒asciinum {.(# '1')} {mo₂} (inj₂ (refl , snd)) =
+      (toWitness{Q = inRange? '0' '9' '1'} tt)
+    ∷ inRange-relax{B = UInt8}{l = '0'}{'0'}{'2'}{'9'} snd ≤-refl (toWitness{Q = toℕ '2' ≤? _} tt) ∷ []
+
 module DayRange where
   unambiguous : ∀ {d₁ d₂} → (x y : DayRange d₁ d₂) → x ≡ y
   unambiguous{d₁}{d₂} (inj₁ x) (inj₁ x₁) =
@@ -40,6 +47,16 @@ module DayRange where
 
   dayRange? : ∀ d₁ d₂ → Dec (DayRange d₁ d₂)
   dayRange? d₁ d₂ = inRange? '0' '2' d₁ ×-dec inRange? '0' '9' d₂ ⊎-dec toℕ d₁ ≟ toℕ '3' ×-dec inRange? '0' '1' d₂
+
+  asciinum : ∀ {d₁ d₂} → DayRange d₁ d₂ → All (InRange '0' '9') (d₁ ∷ [ d₂ ])
+  asciinum (inj₁ x) =   inRange-relax{B = UInt8}{l = '0'}{'0'}{'2'}{'9'} (proj₁ x) ≤-refl (toWitness{Q = _ ≤? _} tt)
+                      ∷ proj₂ x
+                      ∷ []
+  asciinum (inj₂ (x , y)) =
+      (≤-trans (toWitness{Q = _ ≤? _} tt) (Lemmas.≡⇒≤ (sym x))
+      , ≤-trans (Lemmas.≡⇒≤ x) (toWitness{Q = _ ≤? _} tt))
+    ∷ inRange-relax {B = UInt8} {l = '0'} {'0'} {'1'} {'9'} y ≤-refl (toWitness{Q = _ ≤? _} tt)
+    ∷ []
 
 module HourRange where
   unambiguous : ∀ {h₁ h₂} → (x y : HourRange h₁ h₂) → x ≡ y
@@ -53,6 +70,17 @@ module HourRange where
   hourRange? : ∀ h₁ h₂ → Dec (HourRange h₁ h₂)
   hourRange? h₁ h₂ = inRange? '0' '1' h₁ ×-dec inRange? '0' '9' h₂ ⊎-dec toℕ h₁ ≟ toℕ '2' ×-dec inRange? '0' '3' h₂
 
+  asciinum : ∀ {h₁ h₂} → HourRange h₁ h₂ → All (InRange '0' '9') (h₁ ∷ [ h₂ ])
+  asciinum (inj₁ x) =
+      inRange-relax {B = UInt8} {l = '0'} {'0'} {'1'} {'9'} (proj₁ x) ≤-refl (toWitness{Q = _ ≤? _} tt)
+    ∷ proj₂ x
+    ∷ []
+  asciinum (inj₂ y) =
+      ((≤-trans (toWitness{Q = _ ≤? _} tt) (Lemmas.≡⇒≤ (sym $ proj₁ y)))
+      , (≤-trans (Lemmas.≡⇒≤ (proj₁ y)) (toWitness{Q = _ ≤? _} tt)))
+    ∷ inRange-relax {B = UInt8} {l = '0'} {'0'} {'3'} {'9'} (proj₂ y) ≤-refl (toWitness{Q = _ ≤? _} tt)
+    ∷ []
+
 module MinuteRange where
   unambiguous : ∀ {mi₁ mi₂} → (x y : MinuteRange mi₁ mi₂) → x ≡ y
   unambiguous = ×-unique (inRange-unique{B = Dig}{l = '0'}{'5'}) (inRange-unique{B = Dig}{l = '0'}{'9'})
@@ -60,6 +88,11 @@ module MinuteRange where
   minuteRange? : ∀ mi₁ mi₂ → Dec (MinuteRange mi₁ mi₂)
   minuteRange? mi₁ mi₂ = inRange? '0' '5' mi₁ ×-dec inRange? '0' '9' mi₂
 
+  asciinum : ∀ {mi₁ mi₂} → MinuteRange mi₁ mi₂ → All (InRange '0' '9') (mi₁ ∷ [ mi₂ ])
+  asciinum mr =
+      inRange-relax{B = UInt8}{l = '0'}{'0'}{'5'}{'9'} (proj₁ mr) ≤-refl (toWitness{Q = _ ≤? _} tt)
+    ∷ proj₂ mr
+    ∷ []
 
 module SecRange where
   unambiguous : ∀ {@0 s₁ s₂} → (x y : SecRange s₁ s₂) → x ≡ y
@@ -87,6 +120,13 @@ module SecRange where
   secondRange? : ∀ s₁ s₂ → Dec (SecRange s₁ s₂)
   secondRange? s₁ s₂ = (inRange? '0' '5' s₁ ×-dec inRange? '0' '9' s₂) ⊎-dec toℕ s₁ ≟ toℕ '6' ×-dec toℕ s₂ ≟ toℕ '0'
 
+  asciinum : ∀ {s₁ s₂} → SecRange s₁ s₂ → All (InRange '0' '9') (s₁ ∷ [ s₂ ])
+  asciinum (inj₁ x) = MinuteRange.asciinum x
+  asciinum (inj₂ y) =
+      ((≤-trans (toWitness{Q = _ ≤? _} tt) (Lemmas.≡⇒≤ (sym (proj₁ y))))
+      , (≤-trans (Lemmas.≡⇒≤ (proj₁ y)) (toWitness{Q = _ ≤? _} tt)))
+    ∷ (Lemmas.≡⇒≤ (sym (proj₂ y)) , ≤-trans (Lemmas.≡⇒≤ (proj₂ y)) (toWitness{Q = _ ≤? _} tt))
+    ∷ []
 
 module MonthDayHourMinSecFields where
   @0 unambiguous : Unambiguous MonthDayHourMinSecFields
@@ -155,7 +195,113 @@ module MonthDayHourMinSecFields where
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
+  instance
+    eqMonthDayHourMinSecFields : Eq (Exists─ (List UInt8) MonthDayHourMinSecFields)
+    Eq._≟_ eqMonthDayHourMinSecFields
+      (─ bs  , mkMDHMSFields{mo₁}{mo₂}{d₁}{d₂}{h₁}{h₂}{mi₁}{mi₂}{s₁}{s₂}
+                 (singleton mon mon≡) monRange
+                 (singleton day day≡) dayRange
+                 (singleton hour hour≡) hourRange
+                 (singleton min min≡) minRange
+                 (singleton sec sec≡) secRange
+                 refl)
+      (─ bs₁ , mkMDHMSFields{mo₁'}{mo₂'}{d₁'}{d₂'}{h₁'}{h₂'}{mi₁'}{mi₂'}{s₁'}{s₂'}
+                 (singleton mon₁ mon≡₁) monRange₁
+                 (singleton day₁ day≡₁) dayRange₁
+                 (singleton hour₁ hour≡₁) hourRange₁
+                 (singleton min₁ min≡₁) minRange₁
+                 (singleton sec₁ sec≡₁) secRange₁
+                 refl) =
+      case mon ≟ mon₁ ret (const _) of λ where
+        (no ¬eq) → no λ where refl → contradiction refl ¬eq
+        (yes refl) →
+          case (─ asciiNum-injective (mo₁ ∷ [ mo₂ ]) (mo₁' ∷ [ mo₂' ])
+                    (MonthRange.monthRange⇒asciinum monRange) (MonthRange.monthRange⇒asciinum monRange₁)
+                    (λ ()) (λ ())
+                    (trans (sym mon≡) mon≡₁))
+          ret (const _) of λ where
+            (─ refl) →
+              case (─ ≡-unique mon≡ mon≡₁ ,′ ─ MonthRange.unambiguous monRange monRange₁)
+              ret (const _) of λ where
+                (─ refl , ─ refl) →
+                  case day ≟ day₁ ret (const _) of λ where
+                    (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+                    (yes refl) →
+                      case ─ asciiNum-injective (d₁ ∷ [ d₂ ]) (d₁' ∷ [ d₂' ])
+                                 (DayRange.asciinum dayRange) (DayRange.asciinum dayRange₁)
+                                 (λ ()) (λ ())
+                                 (trans (sym day≡) day≡₁)
+                      ret (const _) of λ where
+                        (─ refl) →
+                          case (─ ≡-unique day≡ day≡₁ ,′ ─ DayRange.unambiguous dayRange dayRange₁) ret (const _) of λ where
+                            (─ refl , ─ refl) →
+                              case hour ≟ hour₁ of λ where
+                                (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+                                (yes refl) →
+                                  case ─ asciiNum-injective (h₁ ∷ [ h₂ ]) (h₁' ∷ [ h₂' ])
+                                    (HourRange.asciinum hourRange) (HourRange.asciinum hourRange₁)
+                                    (λ ()) (λ ())
+                                    (trans (sym hour≡) hour≡₁)
+                                  ret (const _) of λ where
+                                    (─ refl) →
+                                      case (─ ≡-unique hour≡ hour≡₁ ,′ ─ HourRange.unambiguous hourRange hourRange₁)
+                                      ret (const _) of λ where
+                                        (─ refl , ─ refl) →
+                                          case min ≟ min₁ of λ where
+                                            (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+                                            (yes refl) →
+                                              case ─ asciiNum-injective (mi₁ ∷ [ mi₂ ]) (mi₁' ∷ [ mi₂' ])
+                                                (MinuteRange.asciinum minRange) (MinuteRange.asciinum minRange₁)
+                                                (λ ()) (λ ())
+                                                (trans (sym min≡) min≡₁)
+                                              ret (const _) of λ where
+                                                (─ refl) →
+                                                  case (─ ≡-unique min≡ min≡₁ ,′ ─ MinuteRange.unambiguous minRange minRange₁)
+                                                  ret (const _) of λ where
+                                                    (─ refl , ─ refl) →
+                                                      case sec ≟ sec₁ of λ where
+                                                        (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+                                                        (yes refl) →
+                                                          case ─ asciiNum-injective (s₁ ∷ [ s₂ ]) (s₁' ∷ [ s₂' ])
+                                                            (SecRange.asciinum secRange) (SecRange.asciinum secRange₁)
+                                                            (λ ()) (λ ())
+                                                            (trans (sym sec≡) sec≡₁)
+                                                          ret (const _)
+                                                          of λ where
+                                                            (─ refl) →
+                                                              case (─ ≡-unique sec≡ sec≡₁ ,′ ─ SecRange.unambiguous secRange secRange₁)
+                                                              ret (const _) of λ where
+                                                                (─ refl , ─ refl) →
+                                                                  yes refl
+      where
+      open ≡-Reasoning
+
 module UTC where
+  instance
+    eqUTC : Eq (Exists─ (List UInt8) UTCTimeFields)
+    Eq._≟_ eqUTC
+      (─ bs₁ , mkUTCTimeFields{y₁}{y₂}
+                 (singleton year year≡) yearRange
+                 mmddhhmmss refl refl)
+      (─ bs₂ , mkUTCTimeFields{y₁'}{y₂'}
+                 (singleton year₁ year₁≡) yearRange₁
+                 mmddhhmmss₁ refl refl) =
+      case year ≟ year₁ of λ where
+        (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+        (yes refl) →
+          case (─ asciiNum-injective
+                    (y₁ ∷ [ y₂ ]) (y₁' ∷ [ y₂' ])
+                    yearRange yearRange₁
+                    (λ ()) (λ ())
+                    (trans (sym year≡) year₁≡))
+          ret (const _) of λ where
+            (─ refl) →
+              case (─ ≡-unique year≡ year₁≡ ,′ ─ All.irrelevant (inRange-unique{A = Char}{B = UInt8}{l = '0'}{u = '9'}) yearRange yearRange₁) ret (const _) of λ where
+                (─ refl , ─ refl) →
+                  case (─ _ , mmddhhmmss) ≟ (─ _ , mmddhhmmss₁) ret (const _) of λ where
+                    (no ¬eq) → no λ where refl → contradiction refl ¬eq
+                    (yes refl) → yes refl
+
   @0 nonnesting : NonNesting UTCTimeFields
   nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (mkUTCTimeFields year yearRange mmddhhmmss term bs≡) (mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
@@ -248,6 +394,31 @@ module UTC where
     s2≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
 
 module GenTime where
+  instance
+    eqGenTime : Eq (Exists─ (List UInt8) GenTimeFields)
+    Eq._≟_ eqGenTime
+      (─ bs₁ , mkGenTimeFields{y₁}{y₂}{y₃}{y₄}
+                 (singleton year year≡) yearRange
+                 mmddhhmmss refl refl)
+      (─ bs₂ , mkGenTimeFields{y₁'}{y₂'}{y₃'}{y₄'}
+                 (singleton year₁ year₁≡) yearRange₁
+                 mmddhhmmss₁ refl refl) =
+      case year ≟ year₁ of λ where
+        (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+        (yes refl) →
+          case (─ asciiNum-injective
+                    (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ])
+                    yearRange yearRange₁
+                    (λ ()) (λ ())
+                    (trans (sym year≡) year₁≡))
+          ret (const _) of λ where
+            (─ refl) →
+              case (─ ≡-unique year≡ year₁≡ ,′ ─ All.irrelevant (inRange-unique{A = Char}{B = UInt8}{l = '0'}{u = '9'}) yearRange yearRange₁) ret (const _) of λ where
+                (─ refl , ─ refl) →
+                  case (─ _ , mmddhhmmss) ≟ (─ _ , mmddhhmmss₁) ret (const _) of λ where
+                    (no ¬eq) → no λ where refl → contradiction refl ¬eq
+                    (yes refl) → yes refl
+
   @0 nonnesting : NonNesting GenTimeFields
   nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (mkGenTimeFields year yearRange (mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange refl) z≡ bs≡) (mkGenTimeFields year₁ yearRange₁ (mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ refl) z≡₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
@@ -310,3 +481,17 @@ unambiguous (utctm x) (utctm x₁) = cong utctm $ TLV.unambiguous UTC.unambiguou
 unambiguous (utctm x) (gentm x₁) = ⊥-elim (TLV.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
 unambiguous (gentm x) (utctm x₁) = ⊥-elim (TLV.noconfusion (λ ()) (cong (_++ []) refl) x x₁)
 unambiguous (gentm x) (gentm x₁) = cong gentm $ TLV.unambiguous GenTime.unambiguous x x₁
+
+instance
+  eqTime : Eq (Exists─ (List UInt8) Time)
+  (eqTime Eq.≟ (─ bs₁ , utctm x)) (─ bs₂ , utctm x₁) =
+    case (─ _ , x) ≟ (─ _ , x₁) of λ where
+      (no ¬eq)   → no λ where refl → contradiction refl ¬eq
+      (yes refl) → yes refl
+
+  (eqTime Eq.≟ (─ bs₁ , utctm x)) (─ bs₂ , gentm x₁) = no λ ()
+  (eqTime Eq.≟ (─ bs₁ , gentm x)) (─ bs₂ , utctm x₁) = no λ ()
+  (eqTime Eq.≟ (─ bs₁ , gentm x)) (─ bs₂ , gentm x₁) =
+    case (─ _ , x) ≟ (─ _ , x₁) of λ where
+      (no ¬eq) → no λ where refl → contradiction refl ¬eq
+      (yes refl) → yes refl

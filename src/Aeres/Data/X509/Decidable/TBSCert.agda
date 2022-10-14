@@ -8,7 +8,6 @@ open import Aeres.Data.X509.Decidable.Extension
 open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.SignAlg
-open import Aeres.Data.X509.Decidable.Validity
 open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Parser
@@ -60,7 +59,7 @@ module parseTBSCert where
                               λ {_} (singleton r₂ r₂≡) _ →
                                 subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - x))) r₂≡
                                   (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                    (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Props.ValidityFields.unambiguous))
+                                    (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Validity.unambiguous))
                                       (parse≤ _ (n - read - r₁ - r₂) parseValidity TLV.nonnesting overflow)
                                       λ where
                                         (singleton r₃ r₃≡) _ →

@@ -86,12 +86,18 @@ module Base256 where
   asciiNum₁ : Dig → ℕ
   asciiNum₁ = (_- toℕ '0') ∘ toℕ
 
-  asciiNum : List Dig → ℕ
+  asciiNum : List UInt8 → ℕ
   asciiNum xs = go (reverse xs)
     where
     go : List Dig → ℕ
     go [] = 0
     go (x ∷ xs) = asciiNum₁ x + 10 * go xs
+
+  postulate
+    asciiNum-injective : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
+                         → xs₁ ≢ [] → xs₂ ≢ []
+                         → asciiNum xs₁ ≡ asciiNum xs₂
+                         → xs₁ ≡ xs₂
 
   showFixed : (w n : ℕ) → Vec UInt8 w
   showFixed zero n = Vec.[]

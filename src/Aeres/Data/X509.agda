@@ -18,6 +18,7 @@ open Aeres.Grammar.Sum         UInt8
 
 open import Aeres.Data.X690-DER       public
 open import Aeres.Data.X509.IA5String public
+open import Aeres.Data.X509.Validity  public
 
 ------------------------------X.509-----------------------------------------------------------
 
@@ -195,54 +196,6 @@ module X509 where
 
   SubUID : (@0 _ : List UInt8) → Set
   SubUID xs = TLV Tag.A82 BitStringValue xs
-
---------------------------------------------------------- Validity --------------------------------
-  record ValidityFields (@0 bs : List UInt8) : Set where
-    --- move getter in Generic.Time
-    constructor mkValidityFields
-    field
-      @0 {nb na} : List UInt8
-      start : Time nb
-      end : Time na
-      @0 bs≡  : bs ≡ nb ++ na
-
-  module Validity where
-    Validity : (@0 _ : List UInt8) → Set
-    Validity xs = TLV Tag.Sequence ValidityFields xs
-
-    getStartTime getEndTime : ∀ {@0 bs} → Validity bs → Exists─ (List UInt8) Time
-
-    getStartTime v = _ , (ValidityFields.start ∘ TLV.val $ v)
-
-    getEndTime v = _ , (ValidityFields.end ∘ TLV.val $ v)
-
-    getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear start
-    getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth start
-    getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay start
-    getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour start
-    getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin start
-    getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec start
-
-    getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getYearNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear end
-    getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMonthNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth end
-    getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getDayNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay end
-    getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getHourNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour end
-    getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getMinNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin end
-    getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
-    getSecNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec end
-    
-  open Validity public using (Validity)
 
 -----------------------------------------Public Key------------------------------------------
  

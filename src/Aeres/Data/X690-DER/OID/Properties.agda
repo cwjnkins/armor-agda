@@ -104,9 +104,9 @@ module OIDSeq where
 open OID public
 
 instance
-  OIDEq : Eq (Exists─ (List UInt8) OID)
+  OIDEq : Eq (Exists─ (List UInt8) (NonEmptySequenceOf OIDSub))
   (OIDEq Eq.≟ (─ x , snd)) (─ x₁ , snd₁)
     with snd ≋? snd₁
   ... | no ¬p = no λ where
     refl → contradiction ≋-refl ¬p
-  ... | yes (mk≋ refl refl) = yes refl
+  ... | yes ≋-refl = yes refl

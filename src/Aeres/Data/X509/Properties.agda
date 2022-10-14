@@ -34,7 +34,6 @@ import Aeres.Data.X509.Properties.RSABitStringFields
 import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.UserNoticeFields
-import Aeres.Data.X509.Properties.ValidityFields
 
 module Aeres.Data.X509.Properties where
 
@@ -86,4 +85,3 @@ module RSABitStringFields        = Aeres.Data.X509.Properties.RSABitStringFields
 module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields
-module ValidityFields            = Aeres.Data.X509.Properties.ValidityFields

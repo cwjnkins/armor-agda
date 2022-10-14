@@ -90,7 +90,7 @@ module NonEmptyVal where
 open TLVProps public
 
 instance
-  EqTLV : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (TLV t A)
+  EqTLV : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (TLV t A)
   Eq≋._≋?_ (EqTLV{t = t}) {bs₁} {bs₂} t₁ t₂
     with TLV.len t₁ ≋? TLV.len t₂
     |    TLV.val t₁ ≋? TLV.val t₂
@@ -108,6 +108,9 @@ instance
   ... | refl
     with ‼ ≡-unique (TLV.bs≡ t₁) (TLV.bs≡ t₂)
   ... | refl = yes ≋-refl
+
+  eqTLV : ∀ {@0 A} {t} ⦃ _ : Eq (Exists─ (List UInt8) A) ⦄ → Eq (Exists─ (List UInt8) (TLV t A))
+  eqTLV{A} = Eq≋⇒Eq (EqTLV{A} ⦃ Eq⇒Eq≋ it ⦄)
 
 @0 getLengthLen≡ : ∀ {t} {A : List UInt8 → Set} {@0 xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
                    → (v₁ : TLV t A xs₁) (v₂ : TLV t A xs₂) → getLength (TLV.len v₁) ≡ getLength (TLV.len v₂)

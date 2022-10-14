@@ -1,14 +1,17 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import Aeres.Data.X690-DER.Time.Properties
-import Aeres.Data.X690-DER.Time.TCB
-import Aeres.Foreign.Time as Foreign
+import      Aeres.Data.X690-DER.Time.Parser
+import      Aeres.Data.X690-DER.Time.Properties
+import      Aeres.Data.X690-DER.Time.TCB
+import      Aeres.Foreign.Time as Foreign
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Time where
 
-open import Aeres.Data.X690-DER.Time.TCB
+open Aeres.Data.X690-DER.Time.Parser public
+
+open Aeres.Data.X690-DER.Time.TCB
   public
   hiding (getYear ; getMonth ; getDay ; getHour ; getMin ; getSec ; lessEq ; module Time)
 

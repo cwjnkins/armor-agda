@@ -130,7 +130,11 @@ module Vec = Data.Vec
 Vec = Vec.Vec
 
 open import Function     public
-  hiding (_∋_)
+  hiding (_∋_ ; it)
+
+it : ∀ {ℓ} {@0 A : Set ℓ} → ⦃ A ⦄ → A
+it ⦃ x ⦄ = x
+
 
 infix  0 case_ret_of_
 infix  0 caseErased_ret_of_
@@ -329,6 +333,14 @@ inRange-unique : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : N
 inRange-unique = ×-unique ≤-irrelevant ≤-irrelevant
   where open import Data.Nat.Properties
 
+inRange-relax
+  : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {B : Set ℓ₂} ⦃ _ : Numeric A ⦄ ⦃ _ : Numeric B ⦄
+    → ∀ {l l' u u' : A} {x : B}
+    → (pf : InRange l u x) → toℕ l' ≤ toℕ l → toℕ u ≤ toℕ u'
+    → InRange l' u' x
+inRange-relax pf l'≤l u≤u' = ≤-trans l'≤l (proj₁ pf) , ≤-trans (proj₂ pf) u≤u'
+  where open import Data.Nat.Properties
+
 instance
   ℕNumeric : Numeric ℕ
   Numeric.toℕ ℕNumeric = id
@@ -403,7 +415,6 @@ instance
   Eq._≟_ SingletonEq self self = yes refl
 
 record Show {ℓ} (@0 A : Set ℓ) : Set ℓ where
-import      Data.Nat.Show       as Nat using (show)
   field
     show : A → String
 open Show ⦃ ... ⦄ public
