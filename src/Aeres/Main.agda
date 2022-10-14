@@ -69,6 +69,7 @@ main = IO.run $
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes pkBytes)   String.++ "\n"
     String.++ (showBytes sigAlgOID) String.++ "\n"
+    String.++ "***************"
     where
     open Output o
     showBytes : List UInt8 → String
