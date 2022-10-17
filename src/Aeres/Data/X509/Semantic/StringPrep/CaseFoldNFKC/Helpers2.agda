@@ -32,3 +32,9 @@ lookupB2Map₂ x
 ... | this x₂ = x₂
 ... | that x₃ = _ , (cons (mkIListCons x nil refl))
 ... | these x₂ x₃ = x₂
+
+lookupB2Map₂Flag : ∀ {@0 bs} → UTF8Char bs → Bool
+lookupB2Map₂Flag x
+  with lookupUTF8Trie (serializeUTF8Char' x) B2Map₂
+... | just x₁ = true
+... | nothing = false

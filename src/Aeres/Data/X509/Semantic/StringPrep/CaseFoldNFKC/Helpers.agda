@@ -20,6 +20,12 @@ open Aeres.Grammar.IList UInt8
 
 lookupB2Map : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupB2Map x 
-  with lookupB2Map₁ x
-... | ─ .[] , nil = {!!}
-... | fst , cons x₁ = {!fst, cons x₁!}
+  with lookupB2Map₁Flag x
+... | true = lookupB2Map₁ x
+... | false
+  with lookupB2Map₂Flag x
+... | true = lookupB2Map₂ x
+... | false
+  with lookupB2Map₃Flag x
+... | true = lookupB2Map₃ x
+... | false = _ , (cons (mkIListCons x nil refl))

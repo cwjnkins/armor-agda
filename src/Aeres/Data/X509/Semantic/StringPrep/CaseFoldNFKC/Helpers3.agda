@@ -21,7 +21,6 @@ open Aeres.Grammar.IList UInt8
 B2Map₃ : UTF8Trie
 B2Map₃ = fromList (trie₁₂ ++ trie₁₃ ++ trie₁₄₁ ++ trie₁₄₂)
 
-
 lookupB2Map₃ : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupB2Map₃ x 
   with lookupUTF8Trie (serializeUTF8Char' x) B2Map₃
@@ -31,3 +30,9 @@ lookupB2Map₃ x
 ... | this x₂ = x₂
 ... | that x₃ = _ , (cons (mkIListCons x nil refl))
 ... | these x₂ x₃ = x₂
+
+lookupB2Map₃Flag : ∀ {@0 bs} → UTF8Char bs → Bool
+lookupB2Map₃Flag x
+  with lookupUTF8Trie (serializeUTF8Char' x) B2Map₃
+... | just x₁ = true
+... | nothing = false
