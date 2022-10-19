@@ -61,7 +61,7 @@ main = IO.run $
   Output.sigAlgOID (certOutput x) = X509.SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
   Output.tbsBytes  (certOutput x) = X509.Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = X509.Cert.getPublicKeyBytes x
-  Output.sigBytes  (certOutput x) = X509.Cert.getSignatureBytes x
+  Output.sigBytes  (certOutput x) = X509.Cert.getSignatureValueBytes x
 
   showOutput : Output → String
   showOutput o =

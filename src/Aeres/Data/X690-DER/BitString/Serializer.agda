@@ -29,9 +29,10 @@ Singleton.x (serializeValue x) =
     let b         = fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ Vec.[ x₇ ])
         (bₕ , bₜ) = help xs
     in bₕ , b ∷ bₜ
-Singleton.x≡ (serializeValue x) = TODO
+Singleton.x≡ (serializeValue x) = primTrustMe
+  -- postulate
   where
-  postulate TODO : _
+  open import Agda.Builtin.TrustMe
 
 serialize : Serializer BitString
 serialize = TLV.serialize serializeValue

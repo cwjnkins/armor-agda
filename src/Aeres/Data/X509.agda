@@ -1085,6 +1085,9 @@ module X509 where
       getSignatureBytes : List UInt8
       getSignatureBytes = ↑ CertFields.signatureBytes (TLV.val c)
 
+      getSignatureValueBytes : List UInt8
+      getSignatureValueBytes = ↑ (BitString.serializeValue (TLV.val (CertFields.signature (TLV.val c))))
+
   open Cert public using (Cert)
 
   module Chain where
