@@ -69,6 +69,7 @@ main = IO.run $
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes pkBytes)   String.++ "\n"
     String.++ (showBytes sigAlgOID) String.++ "\n"
+    String.++ "***************"
     where
     open Output o
     showBytes : List UInt8 → String
@@ -131,7 +132,7 @@ main = IO.run $
         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
         Aeres.IO.exitFailure
       (just (bs , t)) →
-        Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (show t)) IO.>>
+        -- Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (show t)) IO.>>
         runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
         IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
