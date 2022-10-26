@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509
+open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -10,7 +10,7 @@ open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.Properties.SignAlgFields where
+module Aeres.Data.X509.SignAlg.Properties where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
@@ -18,37 +18,37 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 
 iso : Iso (&ₚ OID (Option (NotEmpty OctetStringValue))) SignAlgFields
-proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.SignAlg.mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
-proj₂ (proj₁ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
+proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
+proj₂ (proj₁ iso) (mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
-proj₂ (proj₂ iso) (X509.SignAlg.mkSignAlgFields signOID param bs≡) = refl
+proj₂ (proj₂ iso) (mkSignAlgFields signOID param bs≡) = refl
 
-@0 unambiguous : Unambiguous X509.SignAlg.SignAlgFields
+@0 unambiguous : Unambiguous SignAlgFields
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.unambiguous-&₁option₁
       OID.unambiguous TLV.nonnesting
-      (unambiguous×ₚ OSProps.unambiguous λ a₁ a₂ → erased-unique ≤-irrelevant a₁ a₂)
+      (unambiguous×ₚ OctetString.unambiguous λ a₁ a₂ → erased-unique ≤-irrelevant a₁ a₂)
       λ where (mk×ₚ _ () refl) refl)
 
 
 instance
-  SignAlgFieldsEq : Eq≋ X509.SignAlg.SignAlgFields
+  SignAlgFieldsEq : Eq≋ SignAlgFields
   Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂ =
-    case X509.SignAlg.SignAlgFields.signOID sf₁ ≋? X509.SignAlg.SignAlgFields.signOID sf₂ of λ where
+    case SignAlgFields.signOID sf₁ ≋? SignAlgFields.signOID sf₂ of λ where
       (no ¬oid₁≋oid₂) →
         no λ where
           ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
       (yes ≋-refl) →
-        case X509.SignAlg.SignAlgFields.param sf₁ ≋? X509.SignAlg.SignAlgFields.param sf₂ of λ where
+        case SignAlgFields.param sf₁ ≋? SignAlgFields.param sf₂ of λ where
           (no ¬param₁≋param₂) →
             no λ where
               ≋-refl → contradiction ≋-refl ¬param₁≋param₂
           (yes ≋-refl) → yes (‼
             let @0 bs₁≡bs₂ : bs₁ ≡ bs₂
-                bs₁≡bs₂ = trans (X509.SignAlg.SignAlgFields.bs≡ sf₁) (sym (X509.SignAlg.SignAlgFields.bs≡ sf₂))
+                bs₁≡bs₂ = trans (SignAlgFields.bs≡ sf₁) (sym (SignAlgFields.bs≡ sf₂))
             in
             case (‼ bs₁≡bs₂) of λ where
               refl →
-                case (‼ ≡-unique (X509.SignAlg.SignAlgFields.bs≡ sf₁) (X509.SignAlg.SignAlgFields.bs≡ sf₂)) ret (const _) of λ where
+                case (‼ ≡-unique (SignAlgFields.bs≡ sf₁) (SignAlgFields.bs≡ sf₂)) ret (const _) of λ where
                   refl → ≋-refl)

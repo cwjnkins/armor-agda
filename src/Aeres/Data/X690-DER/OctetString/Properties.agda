@@ -1,15 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Prelude
 open import Aeres.Binary
+open import Aeres.Data.X690-DER.OctetString.TCB
 import      Aeres.Grammar.Definitions
-open import Aeres.Data.X509
+open import Aeres.Prelude
 
-module Aeres.Data.X509.Properties.OctetstringValue where
+module Aeres.Data.X690-DER.OctetString.Properties where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
-
 
 @0 unambiguous : Unambiguous OctetStringValue
 unambiguous (singleton x refl) (singleton .x refl) = refl

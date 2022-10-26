@@ -11,7 +11,7 @@ open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.SequenceOf.Properties as SequenceOf
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)

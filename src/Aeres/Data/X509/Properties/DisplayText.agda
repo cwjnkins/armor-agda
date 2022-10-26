@@ -7,7 +7,6 @@ import      Aeres.Grammar.Sum
 open import Aeres.Data.UTF8
 import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 open import Aeres.Prelude
 open import Data.List
 open import Data.Nat.Properties

@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.GeneralName as GeneralNameProps
-import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -30,7 +29,7 @@ proj₂ (proj₂ iso) (X509.mkAKIFieldsSeqFields akeyid authcertiss authcertsn r
 unambiguous =
   isoUnambiguous iso
     (Unambiguous.option₃&₂
-      (TLV.unambiguous OSProps.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting TLV.nonempty
       (TLV.unambiguous GeneralNameProps.GeneralNamesElems.unambiguous) TLV.nonnesting TLV.nonempty
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

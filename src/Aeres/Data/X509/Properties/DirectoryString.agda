@@ -5,7 +5,6 @@ import      Aeres.Grammar.Sum
 open import Aeres.Data.UTF8
 import      Aeres.Data.UTF8.Properties                  as UTF8Props
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OctetstringValue as OctetStringValueProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -100,7 +99,7 @@ proj₂ (proj₂ iso) (X509.bmpString x) = refl
 @0 unambiguous : Unambiguous X509.DirectoryString
 unambiguous =
   isoUnambiguous iso
-    (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetStringValueProps.unambiguous)
+    (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
       (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
         (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
           (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)

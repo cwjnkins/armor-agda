@@ -18,6 +18,7 @@ open Aeres.Grammar.Sum         UInt8
 
 open import Aeres.Data.X690-DER       public
 open import Aeres.Data.X509.IA5String public
+open import Aeres.Data.X509.SignAlg   public
 open import Aeres.Data.X509.Validity  public
 
 ------------------------------X.509-----------------------------------------------------------
@@ -59,25 +60,6 @@ module X509 where
 
   ExpNull : List UInt8
   ExpNull = # 5 ∷ [ # 0 ]
-
-  module SignAlg where
-
-    record SignAlgFields (@0 bs : List UInt8) : Set where
-      constructor mkSignAlgFields
-      field
-        @0 {o p} : List UInt8
-        signOID : OID o
-        param : Option (NotEmpty OctetStringValue) p
-        @0 bs≡  : bs ≡ o ++ p
-
-    SignAlg : (@0 _ : List UInt8) → Set
-    SignAlg xs = TLV Tag.Sequence SignAlgFields xs
-
-    getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
-    getSignAlgOIDbs = Singleton.x ∘ OID.serialize ∘ SignAlgFields.signOID ∘ TLV.val
-
-   
-  open SignAlg public using (SignAlg)
 
  --------------- RDNSeq -------------------------------------
 

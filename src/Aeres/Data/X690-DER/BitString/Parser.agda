@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.BitString.Properties
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude

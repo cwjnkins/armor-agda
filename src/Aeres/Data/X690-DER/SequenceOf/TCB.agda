@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 open import Aeres.Prelude

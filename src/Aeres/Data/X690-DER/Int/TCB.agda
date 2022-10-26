@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Prelude
 

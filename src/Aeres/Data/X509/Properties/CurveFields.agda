@@ -2,7 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OctetstringValue as OCProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -46,7 +45,7 @@ proj₂ (proj₂ iso) (X509.mkCurveFields a b seed refl) = ‼
 
 @0 unambiguous : Unambiguous X509.CurveFields
 unambiguous = isoUnambiguous iso
-  (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OCProps.unambiguous) TLV.nonnesting (TLV.unambiguous OCProps.unambiguous))
+  (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting (TLV.unambiguous OctetString.unambiguous))
     (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
       (Unambiguous.option₁ (TLV.unambiguous BitString.unambiguous) TLV.nonempty))
 

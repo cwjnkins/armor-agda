@@ -5,7 +5,6 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.OctetstringValue as OSProps
 import      Aeres.Data.X509.Properties.RDNSeq           as RDNProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
@@ -180,18 +179,18 @@ module GeneralName where
   unambiguous =
     isoUnambiguous iso
       (unambiguousSum
-        (TLV.unambiguous OSProps.unambiguous)
+        (TLV.unambiguous OctetString.unambiguous)
         (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
           (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-            (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
+            (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
               (unambiguousSum
                 (TLV.unambiguous
                   (SequenceOf.unambiguous
                     RDNProps.RDN.unambiguous TLV.nonempty TLV.nonnesting))
                 (unambiguousSum
-                  (TLV.unambiguous OSProps.unambiguous)
+                  (TLV.unambiguous OctetString.unambiguous)
                   (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-                    (unambiguousSum (TLV.unambiguous OSProps.unambiguous)
+                    (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
                       (TLV.unambiguous
                         (SequenceOf.Bounded.unambiguous
                           OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))

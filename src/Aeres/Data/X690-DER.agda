@@ -13,5 +13,6 @@ open import Aeres.Data.X690-DER.OID         public
 open import Aeres.Data.X690-DER.OctetString public
 open import Aeres.Data.X690-DER.SequenceOf  public
 open import Aeres.Data.X690-DER.TLV         public
-open import Aeres.Data.X690-DER.Tag         public
+module Tag where
+  open import Aeres.Data.X690-DER.Tag public
 open import Aeres.Data.X690-DER.Time        public

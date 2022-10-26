@@ -11,7 +11,6 @@ import      Aeres.Data.X509.Properties.NCFieldsSeqFields  as NCProps
 import      Aeres.Data.X509.Properties.PCFieldsSeqFields  as PCProps
 import      Aeres.Data.X509.Properties.PolicyInformationFields as PIProps
 import      Aeres.Data.X509.Properties.PolicyMapFields    as PMProps
-import      Aeres.Data.X509.Properties.OctetstringValue   as OctetstringValueProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -146,7 +145,7 @@ module SelectExtn where
       (unambiguousSum
         (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKIProps.unambiguous)) (TLV.noconfusion λ ()))
         (unambiguousSum
-          (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetstringValueProps.unambiguous)) (TLV.noconfusion λ ()))
+          (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetString.unambiguous)) (TLV.noconfusion λ ()))
           (unambiguousSum
             (ExtensionFields.unambiguous ≡-unique ((TLV.unambiguous (TLV.unambiguous BitString.unambiguous))) (TLV.noconfusion λ ()))
             (unambiguousSum
@@ -177,7 +176,7 @@ module SelectExtn where
                                           (TLV.unambiguous ADProps.unambiguous) TLV.nonempty TLV.nonnesting)))
                                     (TLV.noconfusion λ ()))
                                 (ExtensionFields.unambiguous ua
-                                  (TLV.unambiguous OctetstringValueProps.unambiguous) (TLV.noconfusion λ ()))
+                                  (TLV.unambiguous OctetString.unambiguous) (TLV.noconfusion λ ()))
                               noconfusion₀)
                             noconfusion₁₃)
                           noconfusion₁₂)

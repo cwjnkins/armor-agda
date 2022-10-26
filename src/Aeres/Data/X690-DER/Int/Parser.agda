@@ -4,7 +4,7 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Int.TCB
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser

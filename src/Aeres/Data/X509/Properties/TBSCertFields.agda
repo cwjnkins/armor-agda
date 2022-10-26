@@ -5,7 +5,6 @@ open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Extension       as ExtensionProps
 import      Aeres.Data.X509.Properties.PublicKeyFields as PKProps
 import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
-import      Aeres.Data.X509.Properties.SignAlgFields   as SignAlgProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -23,7 +22,7 @@ open ≡-Reasoning
 
 Rep : @0 List UInt8 → Set
 Rep = (&ₚ (&ₚ (Option X509.Version) Int)
-      (&ₚ X509.SignAlg
+      (&ₚ SignAlg
       (&ₚ X509.RDNSeq
       (&ₚ Validity
       (&ₚ X509.RDNSeq
@@ -63,7 +62,7 @@ unambiguous =
       (NonNesting.noconfusion-option&₁
         TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
       (unambiguous&ₚ
-        (TLV.unambiguous SignAlgProps.unambiguous)
+        (TLV.unambiguous SignAlg.unambiguous)
         TLV.nonnesting
         (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
           (unambiguous&ₚ

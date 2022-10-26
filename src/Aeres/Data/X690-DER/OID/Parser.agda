@@ -8,7 +8,7 @@ open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OID.Properties
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X690-DER.Tag
+import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Data.Nat.Properties

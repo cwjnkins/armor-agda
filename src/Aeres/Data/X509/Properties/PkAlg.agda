@@ -6,7 +6,6 @@ import      Aeres.Data.X509.Properties.EcParamsFields as EcParamsFieldsProps
 import      Aeres.Data.X509.Properties.EcPkAlgFields  as EcProps
 import      Aeres.Data.X509.Properties.EcPkAlgParams  as EcParamsProps
 import      Aeres.Data.X509.Properties.RSAPkAlgFields as RSAProps
-import      Aeres.Data.X509.Properties.SignAlgFields  as SignAlgProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -30,7 +29,7 @@ open ≡-Reasoning
 
 Rep : @0 List UInt8 → Set
 Rep = Sum (Sum X509.RSAPkAlg X509.EcPkAlg)
-          (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)))
+          (Σₚ SignAlg (λ _ sa → False (SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)))
 
 equivalent : Equivalent Rep X509.PkAlg
 proj₁ equivalent (inj₁ (inj₁ x)) = X509.PkAlg.rsapkalg x
@@ -69,9 +68,9 @@ noconfRSA-EC {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (m
   @0 l≡ : l ≡ l₁
   l≡ = Length.nonnesting (∷-injectiveʳ bs≡') len len₁
 
-@0 noconfSA-RSA : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.RSAPkAlg
-noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (X509.SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁) =
-  (case (OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID ∘ TLV.val $ val)
+@0 noconfSA-RSA : NoConfusion (Σₚ SignAlg (λ _ sa → False (SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.RSAPkAlg
+noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ val@(mkTLV{l = l}{v} len (SignAlg.mkSignAlgFields{p = p} signOID param refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkRSAPkAlgFields self self refl) len≡ bs≡₁) =
+  (case (OID.serialize ∘ SignAlg.SignAlgFields.signOID ∘ TLV.val $ val)
     ret (λ x → False (Singleton.x x ∈? X509.PKOID.Supported) → ⊥) of λ where
     (singleton o refl) o∉' → ‼
       let @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
@@ -102,9 +101,9 @@ noconfSA-RSA{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ va
       in
       contradiction (subst (_∈ X509.PKOID.Supported) (sym o≡) (toWitness{Q = _ ∈? _} tt)) (toWitnessFalse o∉')) o∉
 
-@0 noconfSA-EC : NoConfusion (Σₚ X509.SignAlg (λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.EcPkAlg
-noconfSA-EC {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ (mkTLV{l = l}{v} len val@(X509.SignAlg.mkSignAlgFields{p = p} signOID param₁ refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkEcPkAlgFields{p = p₁} self param refl) len≡ bs≡₁) =
-  (case OID.serialize ∘ X509.SignAlg.SignAlgFields.signOID $ val ret (λ x → False (Singleton.x x ∈? X509.PKOID.Supported) → ⊥) of λ where
+@0 noconfSA-EC : NoConfusion (Σₚ SignAlg (λ _ sa → False (SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported))) X509.EcPkAlg
+noconfSA-EC {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (mk×ₚ (mkTLV{l = l}{v} len val@(SignAlg.mkSignAlgFields{p = p} signOID param₁ refl) len≡₁ bs≡) o∉ refl) (mkTLV{l = l₁}{v₁} len₁ (X509.mkEcPkAlgFields{p = p₁} self param refl) len≡ bs≡₁) =
+  (case OID.serialize ∘ SignAlg.SignAlgFields.signOID $ val ret (λ x → False (Singleton.x x ∈? X509.PKOID.Supported) → ⊥) of λ where
     (singleton o refl) o∉ → ‼
       let @0 bs≡' : _≡_{A = List UInt8} (Tag.Sequence ∷ l ++ o ++ p ++ ys₁) (Tag.Sequence ∷ l₁ ++ v₁ ++ ys₂)
           bs≡' = begin Tag.Sequence ∷ l ++ o ++ p ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (solve (++-monoid UInt8)) ⟩
@@ -142,7 +141,7 @@ nonnesting =
       (nonnestingΣₚ₁ TLV.nonnesting)
       restr)
   where
-  @0 restr : NonNesting.Restriction (Sum X509.RSAPkAlg X509.EcPkAlg) (Σₚ X509.SignAlg _)
+  @0 restr : NonNesting.Restriction (Sum X509.RSAPkAlg X509.EcPkAlg) (Σₚ SignAlg _)
   restr{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ (inj₁ (mkTLV{l = l}{v} len val len≡ bs≡)) (mk×ₚ (mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) _ refl) =
     begin (xs₁ ≡⟨ bs≡ ⟩
           Tag.Sequence ∷ l  ++ v  ≡⟨ cong₂ (λ x y → Tag.Sequence ∷ x ++ y) l≡ v≡ ⟩
@@ -201,26 +200,26 @@ unambiguous =
         (TLV.unambiguous RSAProps.unambiguous)
         (TLV.unambiguous EcProps.unambiguous)
         noconfRSA-EC)
-      (unambiguousΣₚ (TLV.unambiguous SignAlgProps.unambiguous)
+      (unambiguousΣₚ (TLV.unambiguous SignAlg.unambiguous)
         λ where
           {xs} a → T-unique)
       (symNoConfusion{A = Σₚ _ λ _ sa → False _}{B = Sum X509.RSAPkAlg X509.EcPkAlg}
         (NoConfusion.sumₚ
-          {A = Σₚ X509.SignAlg λ _ sa → False (X509.SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)}
+          {A = Σₚ SignAlg λ _ sa → False (SignAlg.getSignAlgOIDbs sa ∈? X509.PKOID.Supported)}
           {B = X509.RSAPkAlg}{C = X509.EcPkAlg}
           noconfSA-RSA noconfSA-EC)))
 
-RSAPkAlg2SignAlg : ∀{@0 bs} → X509.RSAPkAlg bs → X509.SignAlg bs
+RSAPkAlg2SignAlg : ∀{@0 bs} → X509.RSAPkAlg bs → SignAlg bs
 RSAPkAlg2SignAlg (mkTLV len (X509.mkRSAPkAlgFields self self refl) len≡ refl) =
   mkTLV len
-    (X509.SignAlg.mkSignAlgFields (toWitness{Q = isOID? X509.PKOID.RsaEncPk} tt)
+    (SignAlg.mkSignAlgFields (toWitness{Q = isOID? X509.PKOID.RsaEncPk} tt)
       (some (mk×ₚ self (─ s≤s z≤n) refl)) refl)
     len≡ refl
 
-EcPkAlg2SignAlg : ∀{@0 bs} → X509.EcPkAlg bs → X509.SignAlg bs 
+EcPkAlg2SignAlg : ∀{@0 bs} → X509.EcPkAlg bs → SignAlg bs 
 EcPkAlg2SignAlg (mkTLV len (X509.mkEcPkAlgFields self param refl) len≡ bs≡) =
   mkTLV len
-    (X509.SignAlg.mkSignAlgFields
+    (SignAlg.mkSignAlgFields
       (toWitness{Q = isOID? X509.PKOID.EcPk} tt)
       (some
         (mk×ₚ

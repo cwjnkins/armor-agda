@@ -6,7 +6,6 @@ import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Serializer
 import      Aeres.Grammar.Sum
-import      Aeres.Data.X509.Properties.OctetstringValue  as OSProps
 import      Aeres.Data.X509.Properties.CurveFields       as CurveFieldsProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
@@ -62,11 +61,11 @@ proj₂ (proj₂ iso) a@(X509.mkEcParamsFields self fieldID curve base order cof
 @0 unambiguous : Unambiguous X509.EcParamsFields
 unambiguous = isoUnambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
-    (TLV.unambiguous OSProps.unambiguous))
+    (TLV.unambiguous OctetString.unambiguous))
       (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
     (TLV.unambiguous CurveFieldsProps.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
-    (TLV.unambiguous OSProps.unambiguous))
+    (TLV.unambiguous OctetString.unambiguous))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
     (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
       (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
