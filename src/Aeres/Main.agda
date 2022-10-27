@@ -58,7 +58,7 @@ main = IO.run $
       sigBytes   : List UInt8
 
   certOutput : ∀ {@0 bs} → X509.Cert bs → Output
-  Output.sigAlgOID (certOutput x) = X509.SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
+  Output.sigAlgOID (certOutput x) = SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
   Output.tbsBytes  (certOutput x) = X509.Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = X509.Cert.getPublicKeyBytes x
   Output.sigBytes  (certOutput x) = X509.Cert.getSignatureValueBytes x

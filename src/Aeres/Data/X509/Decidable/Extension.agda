@@ -15,7 +15,6 @@ open import Aeres.Data.X509.Decidable.IANFields
 open import Aeres.Data.X509.Decidable.INAPFields
 open import Aeres.Data.X509.Decidable.KUFields
 open import Aeres.Data.X509.Decidable.NCFields
-open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.PCFields
 open import Aeres.Data.X509.Decidable.PMFields
 open import Aeres.Data.X509.Decidable.SANFields

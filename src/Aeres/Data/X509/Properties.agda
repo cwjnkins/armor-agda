@@ -19,7 +19,6 @@ import Aeres.Data.X509.Properties.GeneralName
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.NoticeReferenceFields
-import Aeres.Data.X509.Properties.OctetstringValue
 import Aeres.Data.X509.Properties.PCFieldsSeqFields
 import Aeres.Data.X509.Properties.PkAlg
 import Aeres.Data.X509.Properties.PkVal
@@ -31,7 +30,6 @@ import Aeres.Data.X509.Properties.RDNSeq
 import Aeres.Data.X509.Properties.RSAPkAlgFields
 import Aeres.Data.X509.Properties.RSAPkIntsFields
 import Aeres.Data.X509.Properties.RSABitStringFields
-import Aeres.Data.X509.Properties.SignAlgFields
 import Aeres.Data.X509.Properties.TBSCertFields
 import Aeres.Data.X509.Properties.UserNoticeFields
 
@@ -70,7 +68,6 @@ module GeneralName               = Aeres.Data.X509.Properties.GeneralName
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module NoticeReferenceFields     = Aeres.Data.X509.Properties.NoticeReferenceFields
-module OctetstringValue          = Aeres.Data.X509.Properties.OctetstringValue
 module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
 module PkAlg                     = Aeres.Data.X509.Properties.PkAlg
 module PkVal                     = Aeres.Data.X509.Properties.PkVal
@@ -82,6 +79,5 @@ module RDNSeq                    = Aeres.Data.X509.Properties.RDNSeq
 module RSAPkAlgFields            = Aeres.Data.X509.Properties.RSAPkAlgFields
 module RSAPkIntsFields           = Aeres.Data.X509.Properties.RSAPkIntsFields
 module RSABitStringFields        = Aeres.Data.X509.Properties.RSABitStringFields
-module SignAlgFields             = Aeres.Data.X509.Properties.SignAlgFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
 module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields

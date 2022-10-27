@@ -1,10 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Binary
-open import Aeres.Data.X690-DER.TLV
-import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Prelude
+import Aeres.Data.X690-DER.Null.TCB
+import Aeres.Data.X690-DER.Null.Parser
 
 module Aeres.Data.X690-DER.Null where
 
-Null = TLV Tag.Null (_≡ [])
+open Aeres.Data.X690-DER.Null.TCB    public
+open Aeres.Data.X690-DER.Null.Parser public

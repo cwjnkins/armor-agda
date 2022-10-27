@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Properties
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -42,19 +41,19 @@ module parseDisplayText where
 
 open parseDisplayText public using (parseDisplayText)
 
-private                         
-  module Test where
+-- private                         
+--   module Test where
 
-  Dis₁ : List Dig
-  Dis₁ = Tag.IA5String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+--   Dis₁ : List Dig
+--   Dis₁ = Tag.IA5String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
 
-  Dis₂ : List Dig
-  Dis₂ = Tag.UTF8String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
+--   Dis₂ : List Dig
+--   Dis₂ = Tag.UTF8String ∷ # 2 ∷ # 85 ∷ [ # 87 ]
 
 
-  test₁ : X509.DisplayText Dis₁
-  test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₁)} tt)
+--   test₁ : X509.DisplayText Dis₁
+--   test₁ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₁)} tt)
 
-  test₂ : X509.DisplayText Dis₂
-  test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₂)} tt)
+--   test₂ : X509.DisplayText Dis₂
+--   test₂ = Success.value (toWitness {Q = Logging.val (runParser parseDisplayText Dis₂)} tt)
 

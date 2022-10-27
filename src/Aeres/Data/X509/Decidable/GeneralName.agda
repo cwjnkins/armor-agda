@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions

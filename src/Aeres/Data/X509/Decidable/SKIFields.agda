@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -28,11 +27,11 @@ module parseSKIFields where
 open parseSKIFields public using (parseSKIFields)
 
 
-private
-  module Test where
+-- private
+--   module Test where
 
-    val₁ : List Dig
-    val₁ = # 4 ∷ # 22 ∷ # 4 ∷ # 20 ∷ # 147 ∷ # 61 ∷ # 128 ∷ # 160 ∷ # 120 ∷ # 95 ∷ # 164 ∷ # 18 ∷ # 101 ∷ # 194 ∷ # 57 ∷ # 173 ∷ # 54 ∷ # 77 ∷ # 116 ∷ # 177 ∷ # 171 ∷ # 84 ∷ # 108 ∷ [ # 167 ]
+--     val₁ : List Dig
+--     val₁ = # 4 ∷ # 22 ∷ # 4 ∷ # 20 ∷ # 147 ∷ # 61 ∷ # 128 ∷ # 160 ∷ # 120 ∷ # 95 ∷ # 164 ∷ # 18 ∷ # 101 ∷ # 194 ∷ # 57 ∷ # 173 ∷ # 54 ∷ # 77 ∷ # 116 ∷ # 177 ∷ # 171 ∷ # 84 ∷ # 108 ∷ [ # 167 ]
 
-    test₁ : X509.SKIFields val₁
-    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseSKIFields val₁)} tt)
+--     test₁ : X509.SKIFields val₁
+--     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseSKIFields val₁)} tt)

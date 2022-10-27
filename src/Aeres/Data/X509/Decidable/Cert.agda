@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.SignAlg
 open import Aeres.Data.X509.Decidable.TBSCert
 open import Aeres.Data.X509.Properties as Props
 import      Aeres.Grammar.Definitions

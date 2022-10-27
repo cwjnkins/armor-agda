@@ -44,35 +44,35 @@ nonnesting x (X509.bmpString x₁) (X509.universalString x₂)        = ⊥-elim
 nonnesting x (X509.bmpString x₁) (X509.utf8String x₂)             = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (X509.bmpString x₁) (X509.bmpString x₂)              = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 
-@0 noconfusion₁ : NoConfusion (Σₚ X509.TeletexString TLVNonEmptyVal)
+@0 noconfusion₁ : NoConfusion (Σₚ TeletexString TLVNonEmptyVal)
                     (Sum (Σₚ PrintableString TLVNonEmptyVal)
-                    (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
-                    (Sum (Σₚ X509.UTF8String TLVNonEmptyVal)
-                         (Σₚ X509.BMPString TLVNonEmptyVal))))
+                    (Sum (Σₚ UniversalString TLVNonEmptyVal)
+                    (Sum (Σₚ UTF8String TLVNonEmptyVal)
+                         (Σₚ BMPString TLVNonEmptyVal))))
 noconfusion₁ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
 @0 noconfusion₂ : NoConfusion (Σₚ PrintableString TLVNonEmptyVal)
-                              (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
-                              (Sum (Σₚ X509.UTF8String      TLVNonEmptyVal)
-                                   (Σₚ X509.BMPString       TLVNonEmptyVal)))
+                              (Sum (Σₚ UniversalString TLVNonEmptyVal)
+                              (Sum (Σₚ UTF8String      TLVNonEmptyVal)
+                                   (Σₚ BMPString       TLVNonEmptyVal)))
 noconfusion₂ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₂ x₂)) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
-@0 noconfusion₃ : NoConfusion (Σₚ X509.UniversalString TLVNonEmptyVal) (Sum (Σₚ X509.UTF8String TLVNonEmptyVal) (Σₚ X509.BMPString TLVNonEmptyVal))
+@0 noconfusion₃ : NoConfusion (Σₚ UniversalString TLVNonEmptyVal) (Sum (Σₚ UTF8String TLVNonEmptyVal) (Σₚ BMPString TLVNonEmptyVal))
 noconfusion₃ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₃ x x₁ (Sum.inj₂ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
 
 @0 iso :
-         Iso (Sum (Σₚ X509.TeletexString   TLVNonEmptyVal)
+         Iso (Sum (Σₚ TeletexString   TLVNonEmptyVal)
              (Sum (Σₚ PrintableString TLVNonEmptyVal)
-             (Sum (Σₚ X509.UniversalString TLVNonEmptyVal)
-             (Sum (Σₚ X509.UTF8String      TLVNonEmptyVal)
-                  (Σₚ X509.BMPString       TLVNonEmptyVal)))))
+             (Sum (Σₚ UniversalString TLVNonEmptyVal)
+             (Sum (Σₚ UTF8String      TLVNonEmptyVal)
+                  (Σₚ BMPString       TLVNonEmptyVal)))))
              X509.DirectoryString
 proj₁ (proj₁ iso) (Sum.inj₁ x) = X509.teletexString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₁ x)) = X509.printableString x

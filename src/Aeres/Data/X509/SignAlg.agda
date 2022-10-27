@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
+import Aeres.Data.X509.SignAlg.Parser
 import Aeres.Data.X509.SignAlg.Properties
 import Aeres.Data.X509.SignAlg.TCB
 
@@ -10,3 +11,4 @@ module SignAlg where
   open Aeres.Data.X509.SignAlg.TCB        public
 open SignAlg public using (SignAlg ; SignAlgFields)
 
+open Aeres.Data.X509.SignAlg.Parser public

@@ -4,8 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Octetstring
-open import Aeres.Data.X509.Decidable.SignAlg
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -31,7 +29,7 @@ module parsePublicKeyFields where
   parseCurveFields n =
     parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.CurveFields.equivalent))
       (parse&ᵈ (withinLength-nonnesting (NonNesting&ₚ TLV.nonnesting  TLV.nonnesting))
-        (withinLength-unambiguous (unambiguous&ₚ (TLV.unambiguous Props.OctetstringValue.unambiguous) TLV.nonnesting (TLV.unambiguous Props.OctetstringValue.unambiguous)))
+        (withinLength-unambiguous (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting (TLV.unambiguous OctetString.unambiguous)))
           (parse≤ n (parse& TLV.nonnesting  parseOctetString parseOctetString) (NonNesting&ₚ TLV.nonnesting TLV.nonnesting) ((tell $ here' String.++ ": overflow")))
           λ where
             {bs} (singleton read read≡) _ →
@@ -60,11 +58,11 @@ module parsePublicKeyFields where
           (unambiguous&ₚ
             (unambiguous&ₚ
               (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
-                (TLV.unambiguous Props.OctetstringValue.unambiguous))
+                (TLV.unambiguous OctetString.unambiguous))
               (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
               (TLV.unambiguous Props.CurveFields.unambiguous))
             (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
-            (TLV.unambiguous Props.OctetstringValue.unambiguous))
+            (TLV.unambiguous OctetString.unambiguous))
           (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
           (TLV.unambiguous λ{xs} → Int.unambiguous{xs})))
         (parse≤ n (parse& (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
@@ -141,7 +139,7 @@ module parsePublicKeyFields where
 
   parsePkAlg : Parser (Logging ∘ Dec) X509.PkAlg
   runParser parsePkAlg xs = do
-    yes (success pre r r≡ v@(mkTLV{l = l} len (X509.SignAlg.mkSignAlgFields{o = o}{p} so par refl) len≡ refl) suf ps≡) ← runParser parseSignAlg xs
+    yes (success pre r r≡ v@(mkTLV{l = l} len (SignAlg.mkSignAlgFields{o = o}{p} so par refl) len≡ refl) suf ps≡) ← runParser parseSignAlg xs
       where no ¬p → return ∘ no $ λ where
         (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
           contradiction (success prefix read read≡ (PkAlg.RSAPkAlg2SignAlg x) suffix ps≡) ¬p
@@ -149,7 +147,7 @@ module parsePublicKeyFields where
           contradiction (success prefix read read≡ (PkAlg.EcPkAlg2SignAlg x) suffix ps≡) ¬p
         (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
           contradiction (success prefix read read≡ sa suffix ps≡) ¬p
-    case (X509.SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
+    case (SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
       (no ¬p) → return (yes (success pre r r≡ (X509.PkAlg.otherpkalg v (fromWitnessFalse ¬p)) suf ps≡))
       (yes (here px)) → do
         yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseRSAPkAlg xs
@@ -157,7 +155,7 @@ module parsePublicKeyFields where
             (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
               contradiction (success prefix read read≡ x suffix ps≡) ¬p
             (success prefix read read≡ (X509.PkAlg.ecpkalg v'@(mkTLV{l = l'} len' (X509.mkEcPkAlgFields{p = p'} self param refl) len≡' refl)) suffix ps≡') → ‼
-              let v“ : X509.SignAlg _
+              let v“ : SignAlg _
                   v“ = PkAlg.EcPkAlg2SignAlg v'
 
                   @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
@@ -174,11 +172,11 @@ module parsePublicKeyFields where
               in
               contradiction{P = X509.PKOID.RsaEncPk ≡  X509.PKOID.EcPk}
                 (begin X509.PKOID.RsaEncPk            ≡⟨ sym px ⟩
-                       X509.SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
+                       SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                        o                              ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? X509.PKOID.EcPk} tt) ⟩
                        X509.PKOID.EcPk                ∎)
                 (λ where ())
-            (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (X509.SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
+            (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
               let @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
                   ps≡“ = trans ps≡ (sym ps≡')
 
@@ -192,10 +190,10 @@ module parsePublicKeyFields where
               in
               contradiction
                 (subst (_∈ X509.PKOID.Supported)
-                  (begin X509.SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
+                  (begin SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                          o ≡⟨ TLV.nonnesting o++p≡ so so' ⟩
                          o' ≡⟨ sym (Singleton.x≡ (OID.serialize so')) ⟩
-                         X509.SignAlg.getSignAlgOIDbs sa ∎)
+                         SignAlg.getSignAlgOIDbs sa ∎)
                   (here px))
                 (toWitnessFalse o∉) 
         return (yes (success pre' r' r≡' (X509.PkAlg.rsapkalg v') suf' ps≡'))
@@ -206,7 +204,7 @@ module parsePublicKeyFields where
               let @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
                   ps≡“ = trans ps≡ (sym ps≡')
 
-                  v“ : X509.SignAlg _
+                  v“ : SignAlg _
                   v“ = PkAlg.RSAPkAlg2SignAlg v'
 
                   @0 pre≡ : pre ≡ prefix
@@ -220,12 +218,12 @@ module parsePublicKeyFields where
               in
               contradiction{P = X509.PKOID.EcPk ≡ X509.PKOID.RsaEncPk}
                 (begin (X509.PKOID.EcPk ≡⟨ sym px ⟩
-                       X509.SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
+                       SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                        o ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? X509.PKOID.RsaEncPk} tt) ⟩
                        X509.PKOID.RsaEncPk ∎))
                 λ where ()
             (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → contradiction (success prefix read read≡ x suffix ps≡) ¬p
-            (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (X509.SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
+            (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
               let @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
                   ps≡“ = trans ps≡ (sym ps≡')
 
@@ -239,10 +237,10 @@ module parsePublicKeyFields where
               in
               contradiction
                 (subst (_∈ X509.PKOID.Supported)
-                  (begin (X509.SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
+                  (begin (SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                          o ≡⟨ TLV.nonnesting o++p≡ so so' ⟩
                          o' ≡⟨ sym (Singleton.x≡ (OID.serialize so')) ⟩
-                         X509.SignAlg.getSignAlgOIDbs sa ∎))
+                         SignAlg.getSignAlgOIDbs sa ∎))
                   (there (here px)))
                 (toWitnessFalse o∉) 
         return (yes (success pre' r' r≡' (X509.PkAlg.ecpkalg v') suf' ps≡'))

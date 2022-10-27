@@ -2,7 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.SignAlgFields as SignAlgFieldsProps
 import      Aeres.Data.X509.Properties.TBSCertFields as TBSCertFieldsProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
@@ -13,7 +12,7 @@ open import Aeres.Grammar.Definitions UInt8
 open ≡-Reasoning
 
 Rep : @0 List UInt8 → Set
-Rep = &ₚ (X509.TBSCert ×ₚ Singleton) (&ₚ X509.SignAlg (BitString ×ₚ Singleton))
+Rep = &ₚ (X509.TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
 
 equiv : Equivalent Rep X509.CertFields
 proj₁ equiv (mk&ₚ (mk×ₚ fstₚ₁ s refl) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s' refl) refl) bs≡) =
@@ -40,5 +39,5 @@ unambiguous =
   isoUnambiguous iso
     (unambiguous&ₚ (unambiguous×ₚ (TLV.unambiguous TBSCertFieldsProps.unambiguous) (λ where self self → refl))
       (nonnestingΣₚ₁ TLV.nonnesting)
-      (unambiguous&ₚ (TLV.unambiguous SignAlgFieldsProps.unambiguous) TLV.nonnesting
+      (unambiguous&ₚ (TLV.unambiguous SignAlg.unambiguous) TLV.nonnesting
         (unambiguous×ₚ (TLV.unambiguous BitString.unambiguous) (λ where self self → refl))))

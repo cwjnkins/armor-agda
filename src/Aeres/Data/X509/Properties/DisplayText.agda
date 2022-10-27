@@ -24,9 +24,9 @@ open Aeres.Grammar.Sum         Dig
 
 equivalent : Equivalent
                (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-               (Sum (Σₚ X509.VisibleString (TLVLenBounded 1 200))
-               (Sum (Σₚ X509.BMPString     (TLVLenBounded 1 200))
-                    (Σₚ X509.UTF8String    (TLVLenBounded 1 200)))))
+               (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
+               (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
+                    (Σₚ UTF8String    (TLVLenBounded 1 200)))))
                X509.DisplayText
 proj₁ equivalent (Sum.inj₁ x) = X509.ia5String x
 proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = X509.visibleString x
@@ -39,9 +39,9 @@ proj₂ equivalent (X509.utf8String x) = inj₂ (inj₂ (inj₂ x))
 
 iso : Iso
         (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-        (Sum (Σₚ X509.VisibleString (TLVLenBounded 1 200))
-        (Sum (Σₚ X509.BMPString     (TLVLenBounded 1 200))
-             (Σₚ X509.UTF8String    (TLVLenBounded 1 200)))))
+        (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
+        (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
+             (Σₚ UTF8String    (TLVLenBounded 1 200)))))
         X509.DisplayText
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (Aeres.Grammar.Sum.inj₁ x) = refl
@@ -69,7 +69,7 @@ nonnesting =
         (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
           (nonnestingΣₚ₁ TLV.nonnesting)
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
-        (NoConfusion.sumₚ{A = Σₚ X509.VisibleString _}
+        (NoConfusion.sumₚ{A = Σₚ VisibleString _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
       (NoConfusion.sumₚ{A = Σₚ IA5String _}

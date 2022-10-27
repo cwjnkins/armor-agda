@@ -19,6 +19,7 @@ open Aeres.Grammar.Sum         UInt8
 open import Aeres.Data.X690-DER       public
 open import Aeres.Data.X509.IA5String public
 open import Aeres.Data.X509.SignAlg   public
+open import Aeres.Data.X509.Strings   public
 open import Aeres.Data.X509.Validity  public
 
 ------------------------------X.509-----------------------------------------------------------
@@ -62,22 +63,6 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
  --------------- RDNSeq -------------------------------------
-
-  TeletexString : (@0 _ : List UInt8) → Set
-  TeletexString xs = TLV Tag.TeletexString  OctetStringValue xs
-
-  UniversalString : (@0 _ : List UInt8) → Set
-  UniversalString xs = TLV Tag.UniversalString  UTF8 xs
-
-  UTF8String : (@0 _ : List UInt8) → Set
-  UTF8String xs = TLV Tag.UTF8String  UTF8 xs
-
-  BMPString : (@0 _ : List UInt8) → Set
-  BMPString xs = TLV Tag.BMPString  UTF8 xs
-
-  -- TODO: check this (is it UTF8?)
-  VisibleString : (@0 _ : List UInt8) → Set
-  VisibleString xs = TLV Tag.VisibleString  UTF8 xs
 
   data DirectoryString : @0 List UInt8 → Set where
     teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs

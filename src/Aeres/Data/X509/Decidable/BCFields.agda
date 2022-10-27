@@ -5,7 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Boool
-open import Aeres.Data.X509.Decidable.Octetstring
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -37,23 +36,23 @@ module parseBCFields where
 
 open parseBCFields public using (parseBCFields)
 
-private
-  module Test where
+-- private
+--   module Test where
 
-    val₁ : List Dig
-    val₁ = # 4 ∷ # 2 ∷ # 48 ∷ [ # 0 ]
+--     val₁ : List Dig
+--     val₁ = # 4 ∷ # 2 ∷ # 48 ∷ [ # 0 ]
 
-    val₂ : List Dig
-    val₂ = # 4 ∷ # 5 ∷ # 48 ∷ # 3 ∷ # 1 ∷ # 1 ∷ [ # 255 ]
+--     val₂ : List Dig
+--     val₂ = # 4 ∷ # 5 ∷ # 48 ∷ # 3 ∷ # 1 ∷ # 1 ∷ [ # 255 ]
 
-    val₃ : List Dig
-    val₃ = # 4 ∷ # 8 ∷ # 48 ∷ # 6 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 2 ∷ # 1 ∷ [ # 0 ]
+--     val₃ : List Dig
+--     val₃ = # 4 ∷ # 8 ∷ # 48 ∷ # 6 ∷ # 1 ∷ # 1 ∷ # 255 ∷ # 2 ∷ # 1 ∷ [ # 0 ]
 
-    test₁ : X509.BCFields val₁
-    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₁)} tt)
+--     test₁ : X509.BCFields val₁
+--     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₁)} tt)
 
-    test₂ : X509.BCFields val₂
-    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₂)} tt)
+--     test₂ : X509.BCFields val₂
+--     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₂)} tt)
 
-    test₃ : X509.BCFields val₃
-    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₃)} tt)
+--     test₃ : X509.BCFields val₃
+--     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseBCFields val₃)} tt)
