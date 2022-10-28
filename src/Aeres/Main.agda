@@ -40,13 +40,16 @@ main = IO.run $
     (mkLogged _ (yes (success _ r r≡ chain suf ps≡))) →
       case suf ≟ [] of λ where
         (no  _) →
-          case runParser parseCert suf of λ where
+          Aeres.IO.putStrLnErr
+            ("Only read " String.++ (showℕ (lengthIList (fstₚ chain)))
+             String.++ " certificate(s), but more bytes remain") IO.>>
+          (case runParser parseCert suf of λ where
             (mkLogged log (no _)) →
               Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
               Aeres.IO.exitFailure
             (mkLogged _ (yes _)) →
               Aeres.IO.putStrLnErr "aeres: THIS SHOULD NOT HAPPEN" IO.>>
-              Aeres.IO.exitFailure
+              Aeres.IO.exitFailure)
         (yes _) → runCertChecks chain
     (mkLogged log (no _)) →
       Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
