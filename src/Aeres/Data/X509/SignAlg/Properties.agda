@@ -33,8 +33,8 @@ unambiguous =
 
 
 instance
-  SignAlgFieldsEq : Eq≋ SignAlgFields
-  Eq≋._≋?_ SignAlgFieldsEq{bs₁} {bs₂} sf₁ sf₂ =
+  SignAlgFieldsEq≋ : Eq≋ SignAlgFields
+  Eq≋._≋?_ SignAlgFieldsEq≋{bs₁} {bs₂} sf₁ sf₂ =
     case SignAlgFields.signOID sf₁ ≋? SignAlgFields.signOID sf₂ of λ where
       (no ¬oid₁≋oid₂) →
         no λ where
@@ -52,3 +52,6 @@ instance
               refl →
                 case (‼ ≡-unique (SignAlgFields.bs≡ sf₁) (SignAlgFields.bs≡ sf₂)) ret (const _) of λ where
                   refl → ≋-refl)
+
+  SignAlgFieldsEq : Eq (Exists─ (List UInt8) SignAlgFields)
+  SignAlgFieldsEq = Eq≋⇒Eq it

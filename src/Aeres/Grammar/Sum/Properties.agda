@@ -28,3 +28,17 @@ unambiguous' ua₁ ua₂ nc (inj₂ x) (inj₂ x₁) = ‼ cong Sum.inj₂ (ua�
 
 unambiguous : ∀ {@0 A B} → Unambiguous A → Unambiguous B → NoConfusion A B → Unambiguous (Sum A B)
 unambiguous ua₁ ua₂ nc = unambiguous' ua₁ ua₂ λ {xs} → nc (refl {x = xs ++ []})
+
+sumEq : ∀ {@0 A B : @0 List Σ → Set} → ⦃ _ : Eq (Exists─ (List Σ) A) ⦄ ⦃ _ : Eq (Exists─ (List Σ) B) ⦄
+        → Eq (Exists─ (List Σ) (Sum A B))
+Eq._≟_ sumEq (─ bs₁ , inj₁ x) (─ bs₂ , inj₁ x') =
+  case (─ bs₁ ,e x) ≟ (─ bs₂ ,e x') ret (const _) of λ where
+    (no ¬p) → no λ where refl → contradiction refl ¬p
+    (yes refl) → yes refl
+    
+Eq._≟_ sumEq (─ bs₁ , inj₁ x) (─ bs₂ , inj₂ y) = no λ ()
+Eq._≟_ sumEq (─ bs₁ , inj₂ x) (─ bs₂ , inj₁ y) = no λ ()
+Eq._≟_ sumEq (─ bs₁ , inj₂ x) (─ bs₂ , inj₂ y) =
+  case (─ bs₁ ,e x) ≟ (─ bs₂ ,e y) ret (const _) of λ where
+    (no ¬p) → no λ where refl → contradiction refl ¬p
+    (yes refl) → yes refl

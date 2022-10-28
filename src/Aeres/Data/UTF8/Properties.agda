@@ -402,3 +402,6 @@ instance
     with x ≋? x₁
   ... | yes ≋-refl = yes ≋-refl
   ... | no ≢       = no λ where ≋-refl → contradiction ≋-refl ≢
+
+  UTF8CharEq : Eq (Exists─ (List UInt8) UTF8Char)
+  UTF8CharEq = Eq≋⇒Eq it

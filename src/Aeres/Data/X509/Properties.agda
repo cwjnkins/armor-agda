@@ -11,7 +11,6 @@ import Aeres.Data.X509.Properties.CurveFields
 import Aeres.Data.X509.Properties.DisplayText
 import Aeres.Data.X509.Properties.DistPointFields
 import Aeres.Data.X509.Properties.DistPointNameChoice
-import Aeres.Data.X509.Properties.DirectoryString
 import Aeres.Data.X509.Properties.EcParamsFields
 import Aeres.Data.X509.Properties.EcPkAlgFields
 import Aeres.Data.X509.Properties.Extension
@@ -59,7 +58,6 @@ module CertFields                = Aeres.Data.X509.Properties.CertFields
 module CurveFields               = Aeres.Data.X509.Properties.CurveFields
 module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
 module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
-module DirectoryString           = Aeres.Data.X509.Properties.DirectoryString
 module DisplayText               = Aeres.Data.X509.Properties.DisplayText
 module Extension                 = Aeres.Data.X509.Properties.Extension
 module EcParamsFields            = Aeres.Data.X509.Properties.EcParamsFields

@@ -18,8 +18,9 @@ module Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers3 where
 open Base256
 open Aeres.Grammar.IList UInt8
 
-B2Map₃ : UTF8Trie
-B2Map₃ = fromList (trie₁₂ ++ trie₁₃ ++ trie₁₄₁ ++ trie₁₄₂)
+abstract
+  B2Map₃ : UTF8Trie
+  B2Map₃ = fromList (trie₁₂ ++ trie₁₃ ++ trie₁₄₁ ++ trie₁₄₂)
 
 lookupB2Map₃ : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupB2Map₃ x 

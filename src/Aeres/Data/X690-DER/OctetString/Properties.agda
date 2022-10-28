@@ -20,3 +20,6 @@ instance
   ... | yes refl = yes ≋-refl
   ... | no ¬bs₁≡bs₂ = no λ where
     ≋-refl → contradiction refl ¬bs₁≡bs₂
+
+  OctetStringValueEq : Eq (Exists─ (List UInt8) OctetStringValue)
+  OctetStringValueEq = Eq≋⇒Eq it

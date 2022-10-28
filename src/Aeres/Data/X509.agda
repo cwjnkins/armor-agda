@@ -16,11 +16,12 @@ open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Sum         UInt8
 
-open import Aeres.Data.X690-DER       public
-open import Aeres.Data.X509.IA5String public
-open import Aeres.Data.X509.SignAlg   public
-open import Aeres.Data.X509.Strings   public
-open import Aeres.Data.X509.Validity  public
+open import Aeres.Data.X690-DER             public
+open import Aeres.Data.X509.DirectoryString public
+open import Aeres.Data.X509.IA5String       public
+open import Aeres.Data.X509.SignAlg         public
+open import Aeres.Data.X509.Strings         public
+open import Aeres.Data.X509.Validity        public
 
 ------------------------------X.509-----------------------------------------------------------
 
@@ -63,13 +64,6 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
  --------------- RDNSeq -------------------------------------
-
-  data DirectoryString : @0 List UInt8 → Set where
-    teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs
-    printableString : ∀ {@0 bs} → Σₚ PrintableString TLVNonEmptyVal bs → DirectoryString bs
-    universalString : ∀ {@0 bs} → Σₚ UniversalString TLVNonEmptyVal bs → DirectoryString bs
-    utf8String : ∀ {@0 bs} → Σₚ UTF8String TLVNonEmptyVal bs → DirectoryString bs
-    bmpString  : ∀ {@0 bs} → Σₚ BMPString  TLVNonEmptyVal bs → DirectoryString bs
 
   data DisplayText : @0 List UInt8 → Set where
     ia5String     : ∀ {@0 bs} → Σₚ IA5String     (TLVLenBounded 1 200) bs → DisplayText bs

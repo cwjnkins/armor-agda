@@ -39,5 +39,6 @@ trie = ((# 9 ∷ []) , (─ ([ # 32 ]) , cons (mkIListCons (utf81 (mkUTF8Char1 _
   ((# 227 ∷ # 128 ∷ # 128 ∷ []) , (─ ([ # 32 ]) , cons (mkIListCons (utf81 (mkUTF8Char1 _ (toWitness {Q = 32 <? 128 } tt) refl)) nil refl))) ∷ []
 
 
-IMap : UTF8Trie
-IMap = fromList (trie)
+abstract
+  IMap : UTF8Trie
+  IMap = fromList (trie)

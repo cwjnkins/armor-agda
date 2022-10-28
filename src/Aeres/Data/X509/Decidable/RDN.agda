@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.DirectoryString
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -24,7 +23,7 @@ module parseRDN where
   runParser (parseRDNATVFields n) xs = do
     yes (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} oid ds refl) valLen refl) suffix ps≡)
       ← runParser (parseExactLength Dig
-                    (NonNesting&ₚ Dig TLV.nonnesting Props.DirectoryString.nonnesting)
+                    (NonNesting&ₚ Dig TLV.nonnesting DirectoryString.nonnesting)
                     (tell $ here₁ String.++ ": underflow")
                     (parse& Dig TLV.nonnesting parseOID parseDirectoryString) n) xs
       where no ¬parse → do

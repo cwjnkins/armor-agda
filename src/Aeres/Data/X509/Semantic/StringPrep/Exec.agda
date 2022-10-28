@@ -33,16 +33,16 @@ open Aeres.Grammar.Definitions Dig
 appendUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8
 appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , (appendIList _ snd snd₁)
 
-Transcode : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
-Transcode (X509.teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
-Transcode (X509.printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
+Transcode : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
+Transcode (teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
+Transcode (printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x all<128)
   where
   helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
   helper [] All.[] = _ , nil
   helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
-Transcode (X509.universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
-Transcode (X509.utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
-Transcode (X509.bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 
 InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 InitialMapping nil = _ , nil
@@ -68,7 +68,7 @@ InsigCharHandling x
   ---- else, ensure one space at start and end, two space per seq of inner spaces
 ... | false = _ , appendIList _ (appendIList _ (proj₂ spaceUTF8) (proj₂ (innerSeqSpaceHelper (proj₂ (stripUTF8 x)) nil))) (proj₂ spaceUTF8)
 
-ProcessString : ∀ {@0 bs} → X509.DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
+ProcessString : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 ProcessString str
   with Transcode str
 ... | inj₁ err = inj₁ err
@@ -81,7 +81,7 @@ ProcessString str
 ... | true = inj₁ "error in stringprep : prohibitted unicode character present"
 ... | false = inj₂ (InsigCharHandling (proj₂ ms))
 
-Compare : ∀ {@0 bs₁ bs₂} → X509.DirectoryString bs₁ → X509.DirectoryString bs₂ → Set
+Compare : ∀ {@0 bs₁ bs₂} → DirectoryString bs₁ → DirectoryString bs₂ → Set
 Compare x x₁
   with ProcessString x
 ... | inj₁ err = ⊥
@@ -93,7 +93,7 @@ Compare x x₁
 
 --------------------------------------------- decidable proofs -------------------------------------------------------
 
-Compare-dec : ∀ {@0 bs₁ bs₂} (xs₁ : X509.DirectoryString bs₁) → (xs₂ : X509.DirectoryString bs₂) → Dec (Compare xs₁ xs₂)
+Compare-dec : ∀ {@0 bs₁ bs₂} (xs₁ : DirectoryString bs₁) → (xs₂ : DirectoryString bs₂) → Dec (Compare xs₁ xs₂)
 Compare-dec x₁ x₂
   with ProcessString x₁
 ... | inj₁ err = no (λ ())
