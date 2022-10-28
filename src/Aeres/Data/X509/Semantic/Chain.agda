@@ -90,10 +90,10 @@ AllInSeq-dec xs b (cons (mkIListCons head₁ tail₁ bs≡)) = case (InSeq-dec h
     (yes q) → yes (cons p q bs≡)
 
 MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDNElems bs₁) → (m : X509.RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
-MatchRDNElemsLen-dec (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
+MatchRDNElemsLen-dec (mk×ₚ fstₚ₁ sndₚ₁ bs≡) (mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
 
 MatchRDN-dec : ∀ {@0 bs₁ bs₂} → (n : X509.RDN bs₁) → (m : X509.RDN bs₂) → Dec (MatchRDN n m)
-MatchRDN-dec (mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ bs₂' fstₚ₂
+MatchRDN-dec (mkTLV len x@(mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ bs₂' fstₚ₂
 
 MatchRDNSeq-dec : ∀ {@0 bs₁ bs₂} → (a : X509.RDNSeq bs₁) → (b : X509.RDNSeq bs₂) → Dec (MatchRDNSeq a b)
 MatchRDNSeq-dec (mkTLV len nil len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = yes tt
@@ -144,3 +144,17 @@ ccp6 c = helper (ChainToList c)
   helper [] = no (λ ())
   helper ((fst , snd) ∷ []) = MatchRDNSeq-dec (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd))
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
+
+testCCP6 : ∀ {@0 bs} (c : X509.Chain bs) → Dec (T true)
+testCCP6 c = helper (ChainToList c)
+  where
+  helper : (c : List (Exists─ (List Dig) X509.Cert)) → Dec (T true)
+  helper [] = yes tt
+  helper ((fst , snd) ∷ []) = yes tt
+  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂)
+    with proj₂ (X509.Cert.getIssuer snd)
+    |    proj₂ (X509.Cert.getSubject snd₁)
+  ... | issuer@(mkTLV len val len≡ bs≡) | subject@(mkTLV len₁ val₁ len≡₁ bs≡₁) =
+    case (MatchRDNSeq-dec issuer subject) ret (const _) of λ where
+      (yes p) → yes tt
+      (no ¬p) → yes tt

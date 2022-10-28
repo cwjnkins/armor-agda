@@ -81,6 +81,29 @@ ProcessString str
 ... | true = inj₁ "error in stringprep : prohibitted unicode character present"
 ... | false = inj₂ (InsigCharHandling (proj₂ ms))
 
+private
+  -- remove the UTF8 tries from the abstract block
+  open import Aeres.Grammar.Parser UInt8
+
+  s₁bytes : List UInt8
+  s₁bytes = Tag.UTF8String ∷ (# 1) ∷ [ # 65 ]
+
+  s₁ : DirectoryString s₁bytes
+  s₁ = Success.value (toWitness{Q = Logging.val h} tt)
+    where
+    h = runParser parseDirectoryString s₁bytes
+
+  -- test : ProcessString s₁ ≡ inj₂ (─ _ , _)
+  -- test = refl
+
+  -- s₁ : Exists─ (List UInt8) DirectoryString
+  -- s₁ =
+  --     (─ {!!})
+  --   , (utf8String
+  --       (mk×ₚ (mkTLV (Length.shortₛ (# 1)) (consIList (utf81 (mkUTF8Char1 (# 65) (toWitness{Q = _ ≤? _} tt) refl)) nil refl) refl refl)
+  --             {!!}
+  --             refl))
+
 Compare : ∀ {@0 bs₁ bs₂} → DirectoryString bs₁ → DirectoryString bs₂ → Set
 Compare x x₁
   with ProcessString x
