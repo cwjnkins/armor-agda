@@ -119,6 +119,10 @@ isSANPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.E
 isSANPresent (─ .[] , none) = false
 isSANPresent (fst , some x) = true
 
+-- is KU present in Cert ?
+isKUPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isKUPresent (─ .[] , none) = false
+isKUPresent (fst , some x) = true
 
 -- helper for SCP17 :  While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
@@ -308,11 +312,16 @@ scp9 c
 
 -- When the Key Usage extension appears in a certificate, at least one of the bits MUST be set to 1.
 SCP10 : ∀ {@0 bs} → X509.Cert bs → Set
-SCP10 c = true ∈ getKUBits (X509.Cert.getKU c)
+SCP10 c = T (isKUPresent (X509.Cert.getKU c)) → (true ∈ getKUBits (X509.Cert.getKU c))
 
 scp10 : ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP10 c)
-scp10 c = true ∈? getKUBits (X509.Cert.getKU c)
-
+scp10 c
+  with isKUPresent (X509.Cert.getKU c)
+... | false = yes (λ ())
+... | true
+  with true ∈? getKUBits (X509.Cert.getKU c)
+... | no ¬p =  no (λ x → contradiction (x tt) ¬p)
+... | yes p = yes (λ x → p)
 
 -- If subject naming information is present only in the Subject Alternative Name extension ,
 -- then the Subject name MUST be an empty sequence and the Subject Alternative Name extension MUST be critical.
