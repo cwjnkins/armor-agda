@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
+open import Aeres.Data.X509.Decidable.Cert
 open import Aeres.Data.X509.Decidable.Chain
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Chain
@@ -39,11 +40,13 @@ main = IO.run $
     (mkLogged _ (yes (success _ r r≡ chain suf ps≡))) →
       case suf ≟ [] of λ where
         (no  _) →
-          Aeres.IO.putStrLnErr
-            ("Only read "
-             String.++ (showℕ (lengthIList (fstₚ chain)))
-             String.++ " certificate(s), but more bytes remain") IO.>>
-          Aeres.IO.exitFailure
+          case runParser parseCert suf of λ where
+            (mkLogged log (no _)) →
+              Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
+              Aeres.IO.exitFailure
+            (mkLogged _ (yes _)) →
+              Aeres.IO.putStrLnErr "aeres: THIS SHOULD NOT HAPPEN" IO.>>
+              Aeres.IO.exitFailure
         (yes _) → runCertChecks chain
     (mkLogged log (no _)) →
       Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
@@ -141,7 +144,7 @@ main = IO.run $
   runCertChecks c =
     runChecks' 1 (fstₚ c) IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
-    runChainCheck c "CCP5" ccp5 IO.>>
+    -- runChainCheck c "CCP5" ccp5 IO.>>
     runChainCheck c "CCP6" ccp6 IO.>>
     Aeres.IO.exitSuccess
     -- runCheck c "SCP1" scp1 IO.>>

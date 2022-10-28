@@ -5,7 +5,7 @@ open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-open import Aeres.Grammar.Parser
+import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -14,19 +14,19 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.TLV.Parser where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parser      UInt8
 
 module parseTLV
   (t : UInt8) (tName : String) (A : List UInt8 → Set)
-  (p : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength A n))
+  (p : ∀ n → Parser (Logging ∘ Dec) (ExactLength A n))
   where
 
   here' = "TLV: " String.++ tName
 
   open ≡-Reasoning
 
-  parseTLV : Parser Dig (Logging ∘ Dec) (TLV t A)
+  parseTLV : Parser (Logging ∘ Dec) (TLV t A)
   runParser parseTLV [] = do
     tell $ here' String.++ ": underflow reading tag"
     return ∘ no $ λ where
@@ -34,7 +34,7 @@ module parseTLV
   runParser parseTLV (x ∷ xs) = do
     case x ≟ t of λ where
       (no  x≢) → do
-        tell $ here' String.++ ": tag mismatch, got " String.++ String.fromList [ Char.fromℕ (toℕ x) ]
+        tell $ here' String.++ ": tag mismatch, got " String.++ show (toℕ x)
         return ∘ no $ λ where
           (success .(t ∷ l ++ v) read read≡ (mkTLV{l}{v} len val len≡ refl) suffix ps≡) →
             contradiction (sym (∷-injectiveˡ ps≡)) x≢
@@ -46,7 +46,7 @@ module parseTLV
               (success .(x ∷ l ++ v) read read≡ (mkTLV{l}{v} len val len≡ refl) suffix ps≡) → ‼
                 contradiction
                   (success l (length l) refl len (v ++ suffix)
-                    (∷-injectiveʳ (begin (x ∷ l ++ v ++ suffix  ≡⟨ cong (x ∷_) (solve (++-monoid Dig)) ⟩
+                    (∷-injectiveʳ (begin (x ∷ l ++ v ++ suffix  ≡⟨ cong (x ∷_) (solve (++-monoid UInt8)) ⟩
                                          x ∷ (l ++ v) ++ suffix ≡⟨ ps≡ ⟩
                                          x ∷ xs                 ∎))))
                   ¬parse
@@ -59,7 +59,7 @@ module parseTLV
                     xs≡ = begin
                       pre₀ ++ suf₀       ≡⟨ ps≡₀ ⟩
                       xs                 ≡⟨ (sym $ ∷-injectiveʳ ps≡) ⟩
-                      (l ++ v) ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
+                      (l ++ v) ++ suffix ≡⟨ solve (++-monoid UInt8) ⟩
                       l ++ v ++ suffix   ∎
 
                     @0 pre₀≡ : pre₀ ≡ l
@@ -73,7 +73,7 @@ module parseTLV
                     (mk×ₚ val (─ trans (sym len≡) len≡') refl) suffix
                     (++-cancelˡ pre₀
                       (begin (pre₀ ++ v ++ suffix ≡⟨ cong (λ x → x ++ v ++ suffix) pre₀≡ ⟩
-                              l ++ v ++ suffix    ≡⟨ solve (++-monoid Dig) ⟩
+                              l ++ v ++ suffix    ≡⟨ solve (++-monoid UInt8) ⟩
                               (l ++ v) ++ suffix  ≡⟨ ∷-injectiveʳ ps≡ ⟩
                               xs                  ≡⟨ sym ps≡₀ ⟩
                               pre₀ ++ suf₀        ∎))))
@@ -88,7 +88,7 @@ module parseTLV
                       length (pre₀ ++ pre₁)     ∎)))
             (mkTLV len₀ val (sym lenVal) refl) suf₁
             (cong (x ∷_)
-              (begin ((pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid Dig) ⟩
+              (begin ((pre₀ ++ pre₁) ++ suf₁ ≡⟨ solve (++-monoid UInt8) ⟩
                       pre₀ ++ pre₁ ++ suf₁   ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                       pre₀ ++ suf₀           ≡⟨ ps≡₀ ⟩
                       xs                      ∎)))))
@@ -96,8 +96,8 @@ module parseTLV
 open parseTLV public using (parseTLV)
 
 parseTLVLenBound
-  : ∀ {t A} l u → Parser Dig (Logging ∘ Dec) (TLV t A)
-    → Parser Dig (Logging ∘ Dec) (Σₚ (TLV t A) (TLVLenBounded l u))
+  : ∀ {t A} l u → Parser (Logging ∘ Dec) (TLV t A)
+    → Parser (Logging ∘ Dec) (Σₚ (TLV t A) (TLVLenBounded l u))
 runParser (parseTLVLenBound l u p) xs = do
   yes (success pre r r≡ v suf bs≡) ← runParser p xs
     where no ¬parse → do
@@ -118,8 +118,8 @@ runParser (parseTLVLenBound l u p) xs = do
           contradiction (subst (InRange l u) (sym len≡) l≤len≤u) ¬l≤len≤u
 
 parseTLVNonEmpty
-  : ∀ {t A} → Parser Dig (Logging ∘ Dec) (TLV t A)
-    → Parser Dig (Logging ∘ Dec) (Σₚ (TLV t A) TLVNonEmptyVal)
+  : ∀ {t A} → Parser (Logging ∘ Dec) (TLV t A)
+    → Parser (Logging ∘ Dec) (Σₚ (TLV t A) TLVNonEmptyVal)
 runParser (parseTLVNonEmpty p) xs = do
   yes (success pre r r≡ v suf bs≡) ← runParser p xs
     where no ¬parse → do

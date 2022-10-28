@@ -28,6 +28,7 @@ module parseRDN where
                     (tell $ here₁ String.++ ": underflow")
                     (parse& Dig TLV.nonnesting parseOID parseDirectoryString) n) xs
       where no ¬parse → do
+        tell $ here₁
         return ∘ no $ λ where
           (success prefix@.(bs₁ ++ bs₂) read read≡ (mk×ₚ (X509.mkRDNATVFields{bs₁}{bs₂} oid ds refl) valLen refl) suffix ps≡) →
             contradiction
