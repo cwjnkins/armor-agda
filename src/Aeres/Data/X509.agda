@@ -18,7 +18,11 @@ open Aeres.Grammar.Sum         UInt8
 
 open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
+open import Aeres.Data.X509.EcPkAlg         public
 open import Aeres.Data.X509.IA5String       public
+import      Aeres.Data.X509.PkOID
+module PkOID = Aeres.Data.X509.PkOID
+open import Aeres.Data.X509.RSAPkAlg        public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.Strings         public
 open import Aeres.Data.X509.Validity        public
@@ -49,16 +53,6 @@ module X509 where
 
     Sha224Rsa : List UInt8
     Sha224Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
-
-  module PKOID where
-    RsaEncPk : List UInt8
-    RsaEncPk = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]
-
-    EcPk : List UInt8
-    EcPk = Tag.ObjectIdentifier ∷ # 7 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ [ # 1 ]
-
-    Supported : List (List UInt8)
-    Supported = RsaEncPk ∷ [ EcPk ]
 
   ExpNull : List UInt8
   ExpNull = # 5 ∷ [ # 0 ]
@@ -160,52 +154,6 @@ module X509 where
 
 -----------------------------------------Public Key------------------------------------------
  
-  record CurveFields (@0 bs : List UInt8) : Set where
-    constructor mkCurveFields
-    field
-      @0 {p q r} : List UInt8
-      a : OctetString p
-      b : OctetString q
-      seed : Option BitString r
-      @0 bs≡  : bs ≡ p ++ q ++ r
-
-  Curve : (@0 _ : List UInt8) → Set
-  Curve xs = TLV Tag.Sequence CurveFields xs
-
-  FieldID : (@0 _ : List UInt8) → Set
-  FieldID xs = TLV Tag.Sequence OctetStringValue xs
- 
-  record EcParamsFields (@0 bs : List UInt8) : Set where
-    constructor mkEcParamsFields
-    field
-      @0 {f c b o cf} : List UInt8
-      version : Singleton (# 2 ∷ # 1 ∷ [ # 1 ])
-      fieldID : FieldID f
-      curve : Curve c
-      base : OctetString b
-      order : Int o
-      cofactor : Option Int cf
-      @0 bs≡  : bs ≡ Singleton.x version ++ f ++ c ++ b ++ o ++ cf
-
-  EcParams : (@0 _ : List UInt8) → Set
-  EcParams xs = TLV Tag.Sequence EcParamsFields xs
-
-  data EcPkAlgParams : @0 List UInt8 → Set where
-    ecparams : ∀ {@0 bs} → EcParams bs → EcPkAlgParams bs
-    namedcurve : ∀ {@0 bs} → OID bs → EcPkAlgParams bs
-    implicitlyCA : ∀ {@0 bs} → (bs ≡ ExpNull) → EcPkAlgParams bs
-
-  record EcPkAlgFields (@0 bs : List UInt8) : Set where
-    constructor mkEcPkAlgFields
-    field
-      @0 {p} : List UInt8
-      oid : Singleton PKOID.EcPk
-      param : EcPkAlgParams p
-      @0 bs≡  : bs ≡ (Singleton.x oid) ++ p
-
-  EcPkAlg : (@0 _ : List UInt8) → Set
-  EcPkAlg xs = TLV Tag.Sequence EcPkAlgFields xs
-
   record RSAPkIntsFields (@0 bs : List UInt8) : Set where
     constructor mkRSAPkIntsFields
     field
@@ -228,21 +176,11 @@ module X509 where
   RSABitString : @0 List UInt8 → Set
   RSABitString xs = TLV Tag.BitString RSABitStringFields xs
 
-  record RSAPkAlgFields (@0 bs : List UInt8) : Set where
-    constructor mkRSAPkAlgFields
-    field
-      oid : Singleton PKOID.RsaEncPk
-      param : Singleton ExpNull
-      @0 bs≡  : bs ≡ (Singleton.x oid) ++ (Singleton.x param)
-
-  RSAPkAlg : (@0 _ : List UInt8) → Set
-  RSAPkAlg xs = TLV Tag.Sequence RSAPkAlgFields xs
-
   module PkAlg where
     data PkAlg : @0 List UInt8 → Set where
       rsapkalg : ∀ {@0 bs} → RSAPkAlg bs → PkAlg bs
       ecpkalg :  ∀ {@0 bs} → EcPkAlg bs → PkAlg bs
-      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs) → False (SignAlg.getSignAlgOIDbs sa ∈? PKOID.Supported) → PkAlg bs
+      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs) → False (SignAlg.getSignAlgOIDbs sa ∈? PkOID.Supported) → PkAlg bs
 
     getOID : ∀ {@0 bs} → PkAlg bs → List UInt8
     getOID (rsapkalg x) = (Singleton.x ∘ RSAPkAlgFields.oid) ∘ TLV.val $ x
@@ -252,9 +190,9 @@ module X509 where
   open PkAlg public using (PkAlg) hiding (module PkAlg)
 
   data PkVal : @0 List UInt8 → @0 List UInt8 → Set where
-    rsapkbits : ∀ {@0 o bs} → (o≡ : o ≡ PKOID.RsaEncPk) → RSABitString bs → PkVal o bs
-    ecpkbits : ∀ {@0 o bs} → (o≡ : o ≡ PKOID.EcPk) → BitString bs → PkVal o bs
-    otherpkbits :  ∀ {@0 o bs} → (o∉ : False (o ∈? PKOID.Supported)) → BitString bs → PkVal o bs
+    rsapkbits : ∀ {@0 o bs} → (o≡ : o ≡ PkOID.RsaEncPk) → RSABitString bs → PkVal o bs
+    ecpkbits : ∀ {@0 o bs} → (o≡ : o ≡ PkOID.EcPk) → BitString bs → PkVal o bs
+    otherpkbits :  ∀ {@0 o bs} → (o∉ : False (o ∈? PkOID.Supported)) → BitString bs → PkVal o bs
 
   record PublicKeyFields (@0 bs : List UInt8) : Set where
     constructor mkPublicKeyFields

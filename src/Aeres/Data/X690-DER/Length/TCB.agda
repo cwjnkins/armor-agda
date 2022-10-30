@@ -37,13 +37,13 @@ data Length : (@0 _ : List UInt8) → Set where
   long  : ∀ {@0 bs} → Long  bs → Length bs
 
 -- read the value of a length field
+getLengthRaw : List UInt8 → ℕ
+getLengthRaw [] = 0
+getLengthRaw (b ∷ bs) = toℕ b + 256 * getLengthRaw bs
+
 getLength : ∀ {@0 bs} → Length bs → ℕ
 getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
-getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = go (reverse (lₕ ∷ lₜ))
-  where
-  go : List Dig → ℕ
-  go [] = 0
-  go (b ∷ bs') = toℕ b + 256 * go bs'
+getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = getLengthRaw (reverse (lₕ ∷ lₜ))
 
 toLength : (n : Fin 128) → Length ([ Fin.inject≤ n (toWitness{Q = _ ≤? _} tt) ])
 toLength n = short (mkShort c c< refl)

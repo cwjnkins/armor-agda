@@ -17,9 +17,9 @@ open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
 Rep : (@0 o bs : List UInt8) → Set
-Rep o =  Sum ((const $ o ≡ X509.PKOID.RsaEncPk)           ×ₚ X509.RSABitString)
-        (Sum ((const $ o ≡ X509.PKOID.EcPk)               ×ₚ BitString)
-             ((const $ False (o ∈? X509.PKOID.Supported)) ×ₚ BitString))
+Rep o =  Sum ((const $ o ≡ PkOID.RsaEncPk)           ×ₚ X509.RSABitString)
+        (Sum ((const $ o ≡ PkOID.EcPk)               ×ₚ BitString)
+             ((const $ False (o ∈? PkOID.Supported)) ×ₚ BitString))
 
 equivalent : (@0 o : _) → Equivalent (Rep o) (X509.PkVal o)
 proj₁ (equivalent o) (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = X509.rsapkbits fstₚ₁ sndₚ₁
@@ -49,13 +49,13 @@ unambiguous o =
         (unambiguous×ₚ (λ _ → T-unique _) (TLV.unambiguous BitString.unambiguous))
           λ where
             xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) →
-              contradiction (toWitness{Q = X509.PKOID.EcPk ∈? X509.PKOID.Supported} tt) (toWitnessFalse{Q = _ ∈? _} fstₚ₂))
+              contradiction (toWitness{Q = PkOID.EcPk ∈? PkOID.Supported} tt) (toWitnessFalse{Q = _ ∈? _} fstₚ₂))
       (NoConfusion.sumₚ{A = _ ×ₚ _}
         (λ where
           xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl sndₚ₁ refl) (mk×ₚ () sndₚ₂ refl))
         λ where
           xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) →
-            contradiction{P = X509.PKOID.RsaEncPk ∈ X509.PKOID.Supported}
+            contradiction{P = PkOID.RsaEncPk ∈ PkOID.Supported}
              (toWitness{Q = _ ∈? _}       tt)
               (toWitnessFalse{Q = _ ∈? _} fstₚ₂)))
 
@@ -67,8 +67,8 @@ nonnesting o = equivalent-nonnesting (equivalent o)
       (nonnesting×ₚ₂ TLV.nonnesting)
     λ where
       x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction (there (here fstₚ₁)) (toWitnessFalse fstₚ₂))
-  (NoConfusion.sumₚ {A = (const $ o ≡ X509.PKOID.RsaEncPk) ×ₚ X509.RSABitString}
+  (NoConfusion.sumₚ {A = (const $ o ≡ PkOID.RsaEncPk) ×ₚ X509.RSABitString}
     (λ where
-      x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction {P = X509.PKOID.RsaEncPk ≡ X509.PKOID.EcPk} (trans (sym fstₚ₁) fstₚ₂) λ ())
+      x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction {P = PkOID.RsaEncPk ≡ PkOID.EcPk} (trans (sym fstₚ₁) fstₚ₂) λ ())
     λ where
       x (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) → contradiction (here fstₚ₁) (toWitnessFalse fstₚ₂)))

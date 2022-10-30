@@ -544,6 +544,12 @@ module Lemmas where
   drop-length-≤ (x ∷ xs₁) ys₁ (x₁ ∷ xs₂) ys₂ xs≡ (s≤s xs₁≤) =
     cong₂ _∷_ (∷-injectiveˡ (sym xs≡)) (drop-length-≤ xs₁ ys₁ xs₂ ys₂ (∷-injectiveʳ xs≡) xs₁≤)
 
+  drop-length-≤-++ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) (n : ℕ)
+                     → n ≤ length xs
+                     → drop n xs ++ ys ≡ drop n (xs ++ ys)
+  drop-length-≤-++ xs ys zero n≤ = refl
+  drop-length-≤-++ (x ∷ xs) ys (suc n) (s≤s n≤) = drop-length-≤-++ xs ys n n≤
+
   length-++-≡ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → length ws ≡ length ys → ws ≡ ys × xs ≡ zs
   length-++-≡ [] xs [] zs ++-≡ len≡ = refl , ++-≡
   length-++-≡ (x ∷ ws) xs (x₁ ∷ ys) zs ++-≡ len≡
@@ -656,3 +662,26 @@ module Lemmas where
   replicate-+ zero n x = refl
   replicate-+ (suc m) n x = ‼ cong (x ∷_) (replicate-+ m n x)
 
+  reverse-take : ∀ {ℓ} {@0 A : Set ℓ} (n : ℕ) (xs : List A)
+                 → reverse (take n xs) ≡ drop (length xs - n) (reverse xs)
+  reverse-take zero xs = ‼ (begin
+    [] ≡⟨ sym (drop-length (reverse xs)) ⟩
+    drop (length (reverse xs)) (reverse xs)
+      ≡⟨ cong (λ x → drop x (reverse xs)) (length-reverse xs) ⟩
+    drop (length xs) (reverse xs) ∎)
+    where
+    open ≡-Reasoning
+  reverse-take (suc n) [] = refl
+  reverse-take (suc n) (x ∷ xs) = ‼ (begin
+    reverse (x ∷ take n xs) ≡⟨ unfold-reverse x (take n xs) ⟩
+    reverse (take n xs) ++ [ x ] ≡⟨ cong (_++ [ x ]) (reverse-take n xs) ⟩
+    drop (length xs - n) (reverse xs) ++ [ x ] ≡⟨⟩
+    drop (length (x ∷ xs) - (suc n)) (reverse xs) ++ [ x ]
+      ≡⟨ drop-length-≤-++ (reverse xs) [ x ] ((length (x ∷ xs) - (suc n)))
+           (≤-trans (m∸n≤m (length xs) n) (≡⇒≤ (sym (length-reverse xs)))) ⟩
+    drop (length (x ∷ xs) - (suc n)) (reverse xs ++ [ x ])
+      ≡⟨ cong (λ y → drop (length xs ∸ n) y) (sym (unfold-reverse x xs)) ⟩
+    drop (length (x ∷ xs) - (suc n)) (reverse (x ∷ xs)) ∎)
+    where
+    open ≡-Reasoning
+    open import Data.Nat.Properties
