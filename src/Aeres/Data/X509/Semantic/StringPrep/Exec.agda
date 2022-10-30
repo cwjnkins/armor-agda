@@ -72,21 +72,23 @@ ProcessString : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (Lis
 ProcessString str
   with Transcode str
 ... | inj₁ err = inj₁ err
-... | inj₂ ts
-  with InitialMapping (proj₂ ts)
-... | ims
-  with CaseFoldingNFKC (proj₂ ims)
-... | ms
-  with Prohibit (proj₂ ms)
-... | true = inj₁ "error in stringprep : prohibitted unicode character present"
-... | false = inj₂ (InsigCharHandling (proj₂ ms))
+... | inj₂ ts = inj₂ ts
+--   with InitialMapping (proj₂ ts)
+-- ... | ims
+--   with CaseFoldingNFKC (proj₂ ims)
+-- ... | ms
+--   with Prohibit (proj₂ ms)
+-- ... | true = inj₁ "error in stringprep : prohibitted unicode character present"
+-- ... | false = inj₂ (InsigCharHandling (proj₂ ms))
 
 private
   -- remove the UTF8 tries from the abstract block
   open import Aeres.Grammar.Parser UInt8
 
   s₁bytes : List UInt8
-  s₁bytes = Tag.UTF8String ∷ (# 1) ∷ [ # 65 ]
+  -- s₁bytes = Tag.UTF8String ∷ # 9 ∷ # 232 ∷ # 161 ∷ # 140 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 233 ∷ # 153 ∷ [ # 162 ]
+
+  s₁bytes = Tag.UTF8String ∷ # 44 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ # 32 ∷ # 71 ∷ [ # 49 ]
 
   s₁ : DirectoryString s₁bytes
   s₁ = Success.value (toWitness{Q = Logging.val h} tt)
