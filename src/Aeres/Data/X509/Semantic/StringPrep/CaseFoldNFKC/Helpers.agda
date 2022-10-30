@@ -18,14 +18,14 @@ module Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers where
 open Base256
 open Aeres.Grammar.IList UInt8
 
-lookupB2Map : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
-lookupB2Map x 
-  with lookupB2Map₁Flag x
-... | true = lookupB2Map₁ x
-... | false
-  with lookupB2Map₂Flag x
-... | true = lookupB2Map₂ x
-... | false
-  with lookupB2Map₃Flag x
-... | true = lookupB2Map₃ x
-... | false = _ , (cons (mkIListCons x nil refl))
+-- lookupB2Map : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
+-- lookupB2Map x 
+--   with lookupB2Map₁Flag x
+-- ... | true = lookupB2Map₁ x
+-- ... | false
+--   with lookupB2Map₂Flag x
+-- ... | true = lookupB2Map₂ x
+-- ... | false
+--   with lookupB2Map₃Flag x
+-- ... | true = lookupB2Map₃ x
+-- ... | false = _ , (cons (mkIListCons x nil refl))

@@ -44,29 +44,29 @@ Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len
 Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 
-InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-InitialMapping nil = _ , nil
-InitialMapping (cons (mkIListCons head₁ tail₁ bs≡)) = case (checkDeleteList head₁) of λ where
-  true → appendUTF8 (_ , nil) (InitialMapping tail₁)
-  false → appendUTF8 (lookupInitMap head₁) (InitialMapping tail₁)
+-- InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
+-- InitialMapping nil = _ , nil
+-- InitialMapping (cons (mkIListCons head₁ tail₁ bs≡)) = case (checkDeleteList head₁) of λ where
+--   true → appendUTF8 (_ , nil) (InitialMapping tail₁)
+--   false → appendUTF8 (lookupInitMap head₁) (InitialMapping tail₁)
 
-Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
-Prohibit nil = false
-Prohibit (cons (mkIListCons head₁ tail₁ bs≡)) = case (checkProhibitUTF8Char head₁) of λ where
-  true → true
-  false → Prohibit tail₁
+-- Prohibit : ∀ {@0 bs} → UTF8 bs → Bool
+-- Prohibit nil = false
+-- Prohibit (cons (mkIListCons head₁ tail₁ bs≡)) = case (checkProhibitUTF8Char head₁) of λ where
+--   true → true
+--   false → Prohibit tail₁
 
-CaseFoldingNFKC : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-CaseFoldingNFKC nil = _ , nil
-CaseFoldingNFKC (cons (mkIListCons head₁ tail₁ bs≡)) = appendUTF8 (lookupB2Map head₁) (CaseFoldingNFKC tail₁)
+-- CaseFoldingNFKC : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
+-- CaseFoldingNFKC nil = _ , nil
+-- CaseFoldingNFKC (cons (mkIListCons head₁ tail₁ bs≡)) = appendUTF8 (lookupB2Map head₁) (CaseFoldingNFKC tail₁)
 
-InsigCharHandling : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
-InsigCharHandling x
-  with checkOnlySpaces x
-  ---- output only two spaces
-... | true = _ , appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)
-  ---- else, ensure one space at start and end, two space per seq of inner spaces
-... | false = _ , appendIList _ (appendIList _ (proj₂ spaceUTF8) (proj₂ (innerSeqSpaceHelper (proj₂ (stripUTF8 x)) nil))) (proj₂ spaceUTF8)
+-- InsigCharHandling : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
+-- InsigCharHandling x
+--   with checkOnlySpaces x
+--   ---- output only two spaces
+-- ... | true = _ , appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)
+--   ---- else, ensure one space at start and end, two space per seq of inner spaces
+-- ... | false = _ , appendIList _ (appendIList _ (proj₂ spaceUTF8) (proj₂ (innerSeqSpaceHelper (proj₂ (stripUTF8 x)) nil))) (proj₂ spaceUTF8)
 
 ProcessString : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
 ProcessString str
@@ -88,23 +88,17 @@ private
   s₁bytes : List UInt8
   -- s₁bytes = Tag.UTF8String ∷ # 9 ∷ # 232 ∷ # 161 ∷ # 140 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 233 ∷ # 153 ∷ [ # 162 ]
 
-  s₁bytes = Tag.UTF8String ∷ # 44 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ # 32 ∷ # 71 ∷ [ # 49 ]
+  -- s₁bytes = Tag.UTF8String ∷ # 44 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ # 32 ∷ # 71 ∷ [ # 49 ]
+
+  s₁bytes = Tag.UTF8String ∷ # 42 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ [ # 32 ]
 
   s₁ : DirectoryString s₁bytes
   s₁ = Success.value (toWitness{Q = Logging.val h} tt)
     where
     h = runParser parseDirectoryString s₁bytes
 
-  -- test : ProcessString s₁ ≡ inj₂ (─ _ , _)
-  -- test = refl
-
-  -- s₁ : Exists─ (List UInt8) DirectoryString
-  -- s₁ =
-  --     (─ {!!})
-  --   , (utf8String
-  --       (mk×ₚ (mkTLV (Length.shortₛ (# 1)) (consIList (utf81 (mkUTF8Char1 (# 65) (toWitness{Q = _ ≤? _} tt) refl)) nil refl) refl refl)
-  --             {!!}
-  --             refl))
+  test : ProcessString s₁ ≡ inj₂ (─ _ , _)
+  test = refl
 
 Compare : ∀ {@0 bs₁ bs₂} → DirectoryString bs₁ → DirectoryString bs₂ → Set
 Compare x x₁
