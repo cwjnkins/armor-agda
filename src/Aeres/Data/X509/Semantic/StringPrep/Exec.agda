@@ -81,24 +81,24 @@ ProcessString str
 -- ... | true = inj₁ "error in stringprep : prohibitted unicode character present"
 -- ... | false = inj₂ (InsigCharHandling (proj₂ ms))
 
-private
-  -- remove the UTF8 tries from the abstract block
-  open import Aeres.Grammar.Parser UInt8
+-- private
+--   -- remove the UTF8 tries from the abstract block
+--   open import Aeres.Grammar.Parser UInt8
 
-  s₁bytes : List UInt8
-  -- s₁bytes = Tag.UTF8String ∷ # 9 ∷ # 232 ∷ # 161 ∷ # 140 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 233 ∷ # 153 ∷ [ # 162 ]
+--   s₁bytes : List UInt8
+--   -- s₁bytes = Tag.UTF8String ∷ # 9 ∷ # 232 ∷ # 161 ∷ # 140 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 233 ∷ # 153 ∷ [ # 162 ]
 
   -- s₁bytes = Tag.UTF8String ∷ # 44 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ # 32 ∷ # 71 ∷ [ # 49 ]
 
-  s₁bytes = Tag.UTF8String ∷ # 42 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ [ # 32 ]
+  -- s₁bytes = Tag.UTF8String ∷ # 42 ∷ # 230 ∷ # 148 ∷ # 191 ∷ # 229 ∷ # 186 ∷ # 156 ∷ # 228 ∷ # 188 ∷ # 186 ∷ # 230 ∷ # 156 ∷ # 141 ∷ # 229 ∷ # 153 ∷ # 168 ∷ # 230 ∷ # 149 ∷ # 184 ∷ # 228 ∷ # 189 ∷ # 141 ∷ # 230 ∷ # 134 ∷ # 145 ∷ # 232 ∷ # 173 ∷ # 137 ∷ # 231 ∷ # 174 ∷ # 161 ∷ # 231 ∷ # 144 ∷ # 134 ∷ # 228 ∷ # 184 ∷ # 173 ∷ # 229 ∷ # 191 ∷ # 131 ∷ # 32 ∷ # 45 ∷ [ # 32 ]
 
-  s₁ : DirectoryString s₁bytes
-  s₁ = Success.value (toWitness{Q = Logging.val h} tt)
-    where
-    h = runParser parseDirectoryString s₁bytes
+  -- s₁ : DirectoryString s₁bytes
+  -- s₁ = Success.value (toWitness{Q = Logging.val h} tt)
+  --   where
+  --   h = runParser parseDirectoryString s₁bytes
 
-  test : ProcessString s₁ ≡ inj₂ (─ _ , _)
-  test = refl
+  -- test : ProcessString s₁ ≡ inj₂ (─ _ , _)
+  -- test = refl
 
 Compare : ∀ {@0 bs₁ bs₂} → DirectoryString bs₁ → DirectoryString bs₂ → Set
 Compare x x₁
