@@ -1,12 +1,15 @@
 {-# OPTIONS --subtyping --guardedness --sized-types #-}
 
 open import Aeres.Binary
+open import Aeres.Data.UTF8
+open import Aeres.Data.UTF8.Properties
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Cert
 open import Aeres.Data.X509.Decidable.Chain
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Chain
+open import Aeres.Data.X509.Strings
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
@@ -38,17 +41,17 @@ usage = "usage: 'aeres [CERT]'"
 main : IO.Main
 main = IO.run $
   Aeres.IO.getByteStringContents IO.>>= λ bs →
-  case runParser (parse& TLV.nonnesting parseRDNSeq parseRDNSeq) (toUInt8 bs) of λ where
+  case runParser (parse& TLV.nonnesting parseUTF8String parseUTF8String) (toUInt8 bs) of λ where
     (mkLogged log (no _)) →
       Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
       Aeres.IO.exitFailure
     (mkLogged log (yes (success prefix read read≡ (mk&ₚ r₁ r₂ _) suffix ps≡))) →
-      case MatchRDNSeq-dec r₁ r₂ of λ where
+      case r₁ ≋? r₂ of λ where
         (no _) →
-          Aeres.IO.putStrLnErr "RDN sequences don't match" IO.>>
+          Aeres.IO.putStrLnErr "strings don't match" IO.>>
           Aeres.IO.exitFailure
         (yes _) →
-          Aeres.IO.putStrLnErr "RDN sequences match" IO.>>
+          Aeres.IO.putStrLnErr "strings match" IO.>>
           Aeres.IO.exitSuccess
 
 --   case runParser parseChain (toUInt8 bs) of λ where
