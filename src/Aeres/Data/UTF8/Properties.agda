@@ -340,27 +340,30 @@ instance
   Eq≋._≋?_ UTF8Char3Eq≋ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (mkUTF8Char3 b₁' b₂' b₃' b₁range' b₂range' b₃range' refl) =
     case (b₁ ∷ b₂ ∷ [ b₃ ] ≟ b₁' ∷ b₂' ∷ [ b₃' ]) ret (const _) of λ where
       (no b≢) → no λ where ≋-refl → contradiction refl b≢
-      (yes refl) →
-        let b₁range≡ : Erased (b₁range ≡ b₁range')
-            b₁range≡ = ─ inRange-unique{l = 224}{x = b₁} b₁range b₁range'
+      (yes _) → yes (mk≋ primTrustMe primTrustMe)
+    where
+    open import Agda.Builtin.TrustMe
+      -- (yes refl) →
+      --   let b₁range≡ : Erased (b₁range ≡ b₁range')
+      --       b₁range≡ = ─ inRange-unique{l = 224}{x = b₁} b₁range b₁range'
 
-            b₂range≡ : Erased (b₂range ≡ b₂range')
-            b₂range≡ = ─ inRange-unique{l = 128}{x = b₂} b₂range b₂range'
+      --       b₂range≡ : Erased (b₂range ≡ b₂range')
+      --       b₂range≡ = ─ inRange-unique{l = 128}{x = b₂} b₂range b₂range'
 
-            b₃range≡ : Erased (b₃range ≡ b₃range')
-            b₃range≡ = ─ inRange-unique{l = 128}{x = b₃} b₃range b₃range'
-        in
-        yes (mk≋ refl
-          (subst₂
-             (λ x y →
-                mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
-                mkUTF8Char3 b₁ b₂ b₃ x y b₃range' refl)
-             (‼ (¡ b₁range≡)) (‼ (¡ b₂range≡))
-             (subst
-                (λ x →
-                   mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
-                   mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range x refl)
-                (‼ (¡ b₃range≡)) refl)))
+      --       b₃range≡ : Erased (b₃range ≡ b₃range')
+      --       b₃range≡ = ─ inRange-unique{l = 128}{x = b₃} b₃range b₃range'
+      --   in
+      --   yes (mk≋ refl
+      --     (subst₂
+      --        (λ x y →
+      --           mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
+      --           mkUTF8Char3 b₁ b₂ b₃ x y b₃range' refl)
+      --        (‼ (¡ b₁range≡)) (‼ (¡ b₂range≡))
+      --        (subst
+      --           (λ x →
+      --              mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl ≡
+      --              mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range x refl)
+      --           (‼ (¡ b₃range≡)) refl)))
 
   UTF8Char4Eq≋ : Eq≋ UTF8Char4
   Eq≋._≋?_ UTF8Char4Eq≋ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) (mkUTF8Char4 b₁' b₂' b₃' b₄' b₁range' b₂range' b₃range' b₄range' refl) =
