@@ -98,3 +98,51 @@ instance
   Numeric.toℕ NumericUTF8Char (utf84 x) =
       (toℕ $ UTF8Char4.b₁ x) * (2 ^ (8 * 3)) + (toℕ $ UTF8Char4.b₂ x) * 2 ^ (8 * 2)
     + (toℕ $ UTF8Char4.b₃ x) * 2 ^ 8 + (toℕ $ UTF8Char4.b₄ x)
+
+eqUTF8Char₁ᵇ : ∀ {@0 bs₁ bs₂} → UTF8Char1 bs₁ → UTF8Char1 bs₂ → Bool
+eqUTF8Char₁ᵇ c₁ c₂ = ⌊ UTF8Char1.b₁ c₁ ≟ UTF8Char1.b₁ c₂ ⌋
+
+eqUTF8Char₂ᵇ : ∀ {@0 bs₁ bs₂} → UTF8Char2 bs₁ → UTF8Char2 bs₂ → Bool
+eqUTF8Char₂ᵇ c₁ c₂ = ⌊ UTF8Char2.b₁ c₁ ≟ UTF8Char2.b₁ c₂ ×-dec UTF8Char2.b₂ c₁ ≟ UTF8Char2.b₂ c₂ ⌋
+
+eqUTF8Char₃ᵇ : ∀ {@0 bs₁ bs₂} → UTF8Char3 bs₁ → UTF8Char3 bs₂ → Bool
+eqUTF8Char₃ᵇ
+  (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range bs≡)
+  (mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ bs≡₁) = true
+
+
+  -- ⌊ UTF8Char3.b₁ c₁ ≟ UTF8Char3.b₁ c₂
+  --   ×-dec UTF8Char3.b₂ c₁ ≟ UTF8Char3.b₂ c₂
+  --   ×-dec UTF8Char3.b₃ c₁ ≟ UTF8Char3.b₃ c₂ ⌋
+
+eqUTF8Char₄ᵇ : ∀ {@0 bs₁ bs₂} → UTF8Char4 bs₁ → UTF8Char4 bs₂ → Bool
+eqUTF8Char₄ᵇ c₁ c₂ =
+  ⌊ UTF8Char4.b₁ c₁ ≟ UTF8Char4.b₁ c₂
+    ×-dec UTF8Char4.b₂ c₁ ≟ UTF8Char4.b₂ c₂
+    ×-dec UTF8Char4.b₃ c₁ ≟ UTF8Char4.b₃ c₂
+    ×-dec UTF8Char4.b₄ c₁ ≟ UTF8Char4.b₄ c₂ ⌋
+
+eqUTF8Charᵇ : ∀ {@0 bs₁ bs₂} → UTF8Char bs₁ → UTF8Char bs₂ → Bool
+eqUTF8Charᵇ (utf81 x) (utf81 x₁) = eqUTF8Char₁ᵇ x x₁
+eqUTF8Charᵇ (utf81 x) (utf82 x₁) = false
+eqUTF8Charᵇ (utf81 x) (utf83 x₁) = false
+eqUTF8Charᵇ (utf81 x) (utf84 x₁) = false
+eqUTF8Charᵇ (utf82 x) (utf81 x₁) = false
+eqUTF8Charᵇ (utf82 x) (utf82 x₁) = eqUTF8Char₂ᵇ x x₁
+eqUTF8Charᵇ (utf82 x) (utf83 x₁) = false
+eqUTF8Charᵇ (utf82 x) (utf84 x₁) = false
+eqUTF8Charᵇ (utf83 x) (utf81 x₁) = false
+eqUTF8Charᵇ (utf83 x) (utf82 x₁) = false
+eqUTF8Charᵇ (utf83 x) (utf83 x₁) = eqUTF8Char₃ᵇ x x₁
+eqUTF8Charᵇ (utf83 x) (utf84 x₁) = false
+eqUTF8Charᵇ (utf84 x) (utf81 x₁) = false
+eqUTF8Charᵇ (utf84 x) (utf82 x₁) = false
+eqUTF8Charᵇ (utf84 x) (utf83 x₁) = false
+eqUTF8Charᵇ (utf84 x) (utf84 x₁) = eqUTF8Char₄ᵇ x x₁
+
+eqUTF8ᵇ : ∀ {@0 bs₁ bs₂} → UTF8 bs₁ → UTF8 bs₂ → Bool
+eqUTF8ᵇ nil nil = #1
+eqUTF8ᵇ nil (cons x) = #0
+eqUTF8ᵇ (cons x) nil = #0
+eqUTF8ᵇ (consIList h₁ t₁ _) (consIList h₂ t₂ _) =
+  eqUTF8Charᵇ h₁ h₂ ∧ eqUTF8ᵇ t₁ t₂
