@@ -21,91 +21,8 @@ open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 
 module parsePublicKeyFields where
-  here' = "parsePublicKeyFields"
-
   open ≡-Reasoning
-
-  parseCurveFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.CurveFields n)
-  parseCurveFields n =
-    parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.CurveFields.equivalent))
-      (parse&ᵈ (withinLength-nonnesting (NonNesting&ₚ TLV.nonnesting  TLV.nonnesting))
-        (withinLength-unambiguous (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting (TLV.unambiguous OctetString.unambiguous)))
-          (parse≤ n (parse& TLV.nonnesting  parseOctetString parseOctetString) (NonNesting&ₚ TLV.nonnesting TLV.nonnesting) ((tell $ here' String.++ ": overflow")))
-          λ where
-            {bs} (singleton read read≡) _ →
-              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
-                (parseOption₁ExactLength TLV.nonempty TLV.nonnesting (tell $ here' String.++ ": underflow") parseBitstring (n - read)))
-
-  parseCurve : Parser (Logging ∘ Dec) X509.Curve
-  parseCurve = parseTLV _ "Curve" _ parseCurveFields
-
-  parseFieldID :  Parser (Logging ∘ Dec) X509.FieldID
-  parseFieldID = parseTLV _ "Field ID" _ parseOctetStringValue
-
-  parseEcParamsFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.EcParamsFields n)
-  parseEcParamsFields n = parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&)  (equivalent×ₚ Props.EcParamsFields.equivalent))
-    (parse&ᵈ 
-      (withinLength-nonnesting
-        (NonNesting&ₚ
-          (NonNesting&ₚ
-            (NonNesting&ₚ
-              (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
-              TLV.nonnesting)
-            TLV.nonnesting)
-          TLV.nonnesting))
-      (withinLength-unambiguous
-        (unambiguous&ₚ
-          (unambiguous&ₚ
-            (unambiguous&ₚ
-              (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
-                (TLV.unambiguous OctetString.unambiguous))
-              (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
-              (TLV.unambiguous Props.CurveFields.unambiguous))
-            (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
-            (TLV.unambiguous OctetString.unambiguous))
-          (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-          (TLV.unambiguous λ{xs} → Int.unambiguous{xs})))
-        (parse≤ n (parse& (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
-          (parse& (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
-            (parse& (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
-              (parse& (λ where _ refl refl → refl) (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") (# 2 ∷ # 1 ∷ [ # 1 ]))
-              parseFieldID) parseCurve) parseOctetString) parseInt)
-          (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) (tell $ here' String.++ ": overflow"))
-        λ where
-          {bs} (singleton read read≡) _ →
-            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
-              (parseOption₁ExactLength TLV.nonempty TLV.nonnesting (tell $ here' String.++ ": underflow") parseInt (n - read)))
-
-  parseEcParams :  Parser (Logging ∘ Dec) X509.EcParams
-  parseEcParams = parseTLV _ "EC params" _ parseEcParamsFields
-
-  parseEcPkAlgParams : Parser (Logging ∘ Dec) X509.EcPkAlgParams
-  runParser parseEcPkAlgParams xs = do
-    no ¬ecparams ← runParser parseEcParams xs
-      where yes p → return (yes (mapSuccess (λ x → X509.ecparams x) p))
-    no ¬namedcurve ← runParser parseOID xs
-      where yes q → return (yes (mapSuccess (λ x → X509.namedcurve x) q))
-    no ¬impca ← runParser (parseLit (tell $ here' String.++ ": exp null : underflow")
-      (tell $ here' String.++ ": exp null: mismatch") X509.ExpNull) xs
-      where yes r → return (yes (mapSuccess (λ {bs} x → X509.implicitlyCA{bs} x ) r))
-    return ∘ no $ λ where
-     (success prefix read read≡ (X509.ecparams x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬ecparams
-     (success prefix read read≡ (X509.namedcurve x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬namedcurve
-     (success prefix read read≡ (X509.implicitlyCA x) suffix ps≡) →
-       contradiction (success _ _ read≡ x _ ps≡) ¬impca
-
-  parseEcPkAlgFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.EcPkAlgFields n)
-  parseEcPkAlgFields n =
-    parseExactLength Props.EcPkAlgFields.nonnesting (tell $ here' String.++ ": underflow")
-      (parseEquivalent Props.EcPkAlgFields.equivalent
-        (parse& (λ ≡xys a₁ a₂ → trans a₁ (sym a₂))
-          (parseLit (tell $ here' String.++ ": EcPKOID : underflow") (tell $ here' String.++ ": EcPKOID: mismatch") X509.PKOID.EcPk)
-            parseEcPkAlgParams)) n
-
-  parseEcPkAlg :  Parser (Logging ∘ Dec) X509.EcPkAlg
-  parseEcPkAlg = parseTLV _ "Ec PK Algorithm" _ parseEcPkAlgFields
+  here' = "parsePublicKeyFields"
 
   parseRSAPkIntsFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.RSAPkIntsFields n)
   parseRSAPkIntsFields n =
@@ -126,17 +43,6 @@ module parsePublicKeyFields where
   parseRSABitString :  Parser (Logging ∘ Dec) X509.RSABitString
   parseRSABitString = parseTLV _ "RSA BitString" _ parseRSABitStringFields
 
-  parseRSAPkAlgFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.RSAPkAlgFields n)
-  parseRSAPkAlgFields n =
-    parseExactLength Props.RSAPkAlgFields.nonnesting (tell $ here' String.++ ": underflow")
-      (parseEquivalent Props.RSAPkAlgFields.equivalent
-        (parse& (λ ≡xys a₁ a₂ → trans a₁ (sym a₂))
-          (parseLit (tell $ here' String.++ ": RSAPKOID : underflow") (tell $ here' String.++ ": RSAPKOID: mismatch") X509.PKOID.RsaEncPk)
-          (parseLit (tell $ here' String.++ ": RSAPK Param: underflow") (tell $ here' String.++ ": RSAPK Param: mismatch") X509.ExpNull))) n
-
-  parseRSAPkAlg :  Parser (Logging ∘ Dec) X509.RSAPkAlg
-  parseRSAPkAlg = parseTLV _ "RSA PK Algorithm" _ parseRSAPkAlgFields
-
   parsePkAlg : Parser (Logging ∘ Dec) X509.PkAlg
   runParser parsePkAlg xs = do
     yes (success pre r r≡ v@(mkTLV{l = l} len (SignAlg.mkSignAlgFields{o = o}{p} so par refl) len≡ refl) suf ps≡) ← runParser parseSignAlg xs
@@ -147,14 +53,14 @@ module parsePublicKeyFields where
           contradiction (success prefix read read≡ (PkAlg.EcPkAlg2SignAlg x) suffix ps≡) ¬p
         (success prefix read read≡ (X509.PkAlg.otherpkalg sa x) suffix ps≡) →
           contradiction (success prefix read read≡ sa suffix ps≡) ¬p
-    case (SignAlg.getSignAlgOIDbs v ∈? X509.PKOID.Supported) of λ where
+    case (SignAlg.getSignAlgOIDbs v ∈? PkOID.Supported) of λ where
       (no ¬p) → return (yes (success pre r r≡ (X509.PkAlg.otherpkalg v (fromWitnessFalse ¬p)) suf ps≡))
       (yes (here px)) → do
         yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseRSAPkAlg xs
           where no ¬p → return ∘  no $ λ where
             (success prefix read read≡ (X509.PkAlg.rsapkalg x) suffix ps≡) →
               contradiction (success prefix read read≡ x suffix ps≡) ¬p
-            (success prefix read read≡ (X509.PkAlg.ecpkalg v'@(mkTLV{l = l'} len' (X509.mkEcPkAlgFields{p = p'} self param refl) len≡' refl)) suffix ps≡') → ‼
+            (success prefix read read≡ (X509.PkAlg.ecpkalg v'@(mkTLV{l = l'} len' (mkEcPkAlgFields{p = p'} self param refl) len≡' refl)) suffix ps≡') → ‼
               let v“ : SignAlg _
                   v“ = PkAlg.EcPkAlg2SignAlg v'
 
@@ -164,17 +70,17 @@ module parsePublicKeyFields where
                   @0 pre≡ : pre ≡ prefix
                   pre≡ = TLV.nonnesting ps≡“ v v“
 
-                  @0 o++p≡ : o ++ p ≡ X509.PKOID.EcPk ++ p'
+                  @0 o++p≡ : o ++ p ≡ PkOID.EcPk ++ p'
                   o++p≡ = Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) $ Length.nonnesting (∷-injectiveʳ pre≡) len len')
                             (cong (Tag.Sequence ∷_) $ begin
                               l ++ o ++ p ≡⟨ ∷-injectiveʳ pre≡ ⟩
-                              l' ++ X509.PKOID.EcPk ++ p' ∎)
+                              l' ++ PkOID.EcPk ++ p' ∎)
               in
-              contradiction{P = X509.PKOID.RsaEncPk ≡  X509.PKOID.EcPk}
-                (begin X509.PKOID.RsaEncPk            ≡⟨ sym px ⟩
+              contradiction{P = PkOID.RsaEncPk ≡  PkOID.EcPk}
+                (begin PkOID.RsaEncPk            ≡⟨ sym px ⟩
                        SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
-                       o                              ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? X509.PKOID.EcPk} tt) ⟩
-                       X509.PKOID.EcPk                ∎)
+                       o                              ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? PkOID.EcPk} tt) ⟩
+                       PkOID.EcPk                ∎)
                 (λ where ())
             (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
               let @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
@@ -189,7 +95,7 @@ module parsePublicKeyFields where
                             pre≡
               in
               contradiction
-                (subst (_∈ X509.PKOID.Supported)
+                (subst (_∈ PkOID.Supported)
                   (begin SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                          o ≡⟨ TLV.nonnesting o++p≡ so so' ⟩
                          o' ≡⟨ sym (Singleton.x≡ (OID.serialize so')) ⟩
@@ -200,7 +106,7 @@ module parsePublicKeyFields where
       (yes (there (here px))) → do
         yes (success pre' r' r≡' v' suf' ps≡') ← runParser parseEcPkAlg xs
           where no ¬p → return ∘ no $ λ where
-            (success prefix read read≡ (X509.PkAlg.rsapkalg v'@(mkTLV{l = l'} len' (X509.mkRSAPkAlgFields self (singleton p' refl) refl) len≡' refl)) suffix ps≡') → ‼
+            (success prefix read read≡ (X509.PkAlg.rsapkalg v'@(mkTLV{l = l'} len' (mkRSAPkAlgFields{n = n} self null refl) len≡' refl)) suffix ps≡') → ‼
               let @0 ps≡“ : pre ++ suf ≡ prefix ++ suffix
                   ps≡“ = trans ps≡ (sym ps≡')
 
@@ -210,17 +116,19 @@ module parsePublicKeyFields where
                   @0 pre≡ : pre ≡ prefix
                   pre≡ = TLV.nonnesting ps≡“ v v“
 
-                  @0 o++p≡ : o ++ p ≡ X509.PKOID.RsaEncPk ++ p'
-                  o++p≡ = Lemmas.++-cancel≡ˡ _ _ (cong (Tag.Sequence ∷_) $ Length.nonnesting (∷-injectiveʳ pre≡) len len')
-                            (cong (Tag.Sequence ∷_) $ begin
-                              l ++ o ++ p ≡⟨ ∷-injectiveʳ pre≡ ⟩
-                              l' ++ X509.PKOID.RsaEncPk ++ p' ∎)
+                  @0 o++p≡ : o ++ p ≡ PkOID.RsaEncPk ++ n
+                  o++p≡ =
+                    Lemmas.++-cancel≡ˡ _ _
+                      (cong (Tag.Sequence ∷_) (Length.nonnesting (∷-injectiveʳ pre≡) len len'))
+                      (cong (Tag.Sequence ∷_) (begin
+                        l ++ o ++ p ≡⟨ ∷-injectiveʳ pre≡ ⟩
+                        l' ++ PkOID.RsaEncPk ++ n ∎))
               in
-              contradiction{P = X509.PKOID.EcPk ≡ X509.PKOID.RsaEncPk}
-                (begin (X509.PKOID.EcPk ≡⟨ sym px ⟩
+              contradiction{P = PkOID.EcPk ≡ PkOID.RsaEncPk}
+                (begin (PkOID.EcPk ≡⟨ sym px ⟩
                        SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
-                       o ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? X509.PKOID.RsaEncPk} tt) ⟩
-                       X509.PKOID.RsaEncPk ∎))
+                       o ≡⟨ TLV.nonnesting o++p≡ so (toWitness{Q = isOID? PkOID.RsaEncPk} tt) ⟩
+                       PkOID.RsaEncPk ∎))
                 λ where ()
             (success prefix read read≡ (X509.PkAlg.ecpkalg x) suffix ps≡) → contradiction (success prefix read read≡ x suffix ps≡) ¬p
             (success prefix read read≡ (X509.PkAlg.otherpkalg sa@(mkTLV{l = l'} len' (SignAlg.mkSignAlgFields{o = o'}{p'} so' _ refl) leb≡ refl) o∉) suffix ps≡') → ‼
@@ -236,7 +144,7 @@ module parsePublicKeyFields where
                             pre≡
               in
               contradiction
-                (subst (_∈ X509.PKOID.Supported)
+                (subst (_∈ PkOID.Supported)
                   (begin (SignAlg.getSignAlgOIDbs v ≡⟨ Singleton.x≡ (OID.serialize so) ⟩
                          o ≡⟨ TLV.nonnesting o++p≡ so so' ⟩
                          o' ≡⟨ sym (Singleton.x≡ (OID.serialize so')) ⟩
@@ -247,7 +155,7 @@ module parsePublicKeyFields where
 
   parsePkVal : (bs : List UInt8) → Parser (Logging ∘ Dec) (X509.PkVal bs)
   runParser (parsePkVal o) xs
-    with (o ≟ X509.PKOID.RsaEncPk)
+    with (o ≟ PkOID.RsaEncPk)
   ... | yes refl = do
     no ¬rsapkbits ← runParser parseRSABitString xs
       where
@@ -257,9 +165,9 @@ module parsePublicKeyFields where
       (success prefix read read≡ (X509.rsapkbits refl x) suffix ps≡) →
         contradiction (success prefix read read≡ x suffix ps≡) ¬rsapkbits
       (success prefix read read≡ (X509.otherpkbits o∉ x) suffix ps≡) →
-        contradiction{P = o ∈ X509.PKOID.Supported} (here refl) (toWitnessFalse{Q = o ∈? _} o∉)
+        contradiction{P = o ∈ PkOID.Supported} (here refl) (toWitnessFalse{Q = o ∈? _} o∉)
   ... | no ¬rsa
-    with (o ≟ X509.PKOID.EcPk)
+    with (o ≟ PkOID.EcPk)
   ... | yes refl = do
     no ¬ecpkbits ← runParser parseBitstring xs
       where
@@ -273,7 +181,7 @@ module parsePublicKeyFields where
   ... | no ¬ec
     with o∉
     where
-    o∉ : o ∉ X509.PKOID.Supported
+    o∉ : o ∉ PkOID.Supported
     o∉ (here px) = contradiction px ¬rsa
     o∉ (there (here px)) = contradiction px ¬ec
   ... | o∉ =  do

@@ -272,6 +272,11 @@ singleSelf{a = a} = singleton a refl
 uniqueSingleton : ∀ {ℓ} {@0 A : Set ℓ} {a : A} → Unique (Singleton a)
 uniqueSingleton self self = refl
 
+mapSingleton : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : Set ℓ₂}
+               → (f : A → B) {@0 a : A}
+               → Singleton a → Singleton (f a)
+mapSingleton f (singleton x x≡) = singleton (f x) (cong f x≡)
+
 infix 100 ─_
 record Erased {ℓ} (@0 A : Set ℓ) : Set ℓ where
   constructor ─_

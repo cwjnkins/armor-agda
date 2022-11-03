@@ -208,11 +208,11 @@ unambiguous =
           noconfSA-RSA noconfSA-EC)))
 
 RSAPkAlg2SignAlg : ∀{@0 bs} → RSAPkAlg bs → SignAlg bs
-RSAPkAlg2SignAlg (mkTLV len (mkRSAPkAlgFields{n} self param refl) len≡ refl) =
+RSAPkAlg2SignAlg (mkTLV len (mkRSAPkAlgFields{n} self (mkTLV len' refl len≡' refl) refl) len≡ refl) =
   mkTLV len
     (SignAlg.mkSignAlgFields{p = n} (toWitness{Q = isOID? PkOID.RsaEncPk} tt)
-      (some (mk×ₚ{bs = n} {!!} (─ {!!}) refl)) refl)
-    {!!} {- len≡ -} {!!} -- refl
+      (some (mk×ₚ{bs = n} (mapSingleton (λ x → Tag.Null ∷ x ++ []) (Length.serialize len')) (─ s≤s z≤n) refl)) refl)
+    len≡ refl
 
 EcPkAlg2SignAlg : ∀{@0 bs} → EcPkAlg bs → SignAlg bs 
 EcPkAlg2SignAlg (mkTLV len (mkEcPkAlgFields self param refl) len≡ bs≡) =
@@ -223,7 +223,7 @@ EcPkAlg2SignAlg (mkTLV len (mkEcPkAlgFields self param refl) len≡ bs≡) =
         (mk×ₚ
           (Sum.serialize
             (TLV.serialize EcPkAlg.Params.serializeFields)
-            (Sum.serialize OID.serialize {!!} {- λ where refl → self -})
+            (Sum.serialize OID.serialize (TLV.serialize (λ where refl → self)))
             (proj₂ EcPkAlg.Params.equivalent param))
           (─ EcPkAlg.Params.len≥1 param)
           refl))

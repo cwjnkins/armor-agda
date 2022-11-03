@@ -2,7 +2,7 @@
 
 open import Aeres.Binary
 import      Aeres.Data.X509.PkOID       as PkOID
-open import Aeres.Data.X690-DER.Null
+open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag     as Tag
 open import Aeres.Prelude
@@ -19,5 +19,3 @@ record RSAPkAlgFields (@0 bs : List UInt8) : Set where
 
 RSAPkAlg : @0 List UInt8 → Set
 RSAPkAlg xs = TLV Tag.Sequence RSAPkAlgFields xs
-
-
