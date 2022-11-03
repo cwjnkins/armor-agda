@@ -31,5 +31,9 @@ record OIDSub (@0 bs : List UInt8) : Set where
     @0 leastDigs : LeastBytes lₚ
     @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
+OIDValue : @0 List UInt8 → Set
+OIDValue = NonEmptySequenceOf OIDSub
+
 OID : @0 List UInt8 → Set
-OID = TLV Tag.ObjectIdentifier (NonEmptySequenceOf OIDSub)
+OID = TLV Tag.ObjectIdentifier OIDValue
+

@@ -5,6 +5,7 @@ open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -12,8 +13,8 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.OID.Properties where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
 
 module Sub where
   nonempty : NonEmpty OIDSub
@@ -55,11 +56,11 @@ module Sub where
   @0 nonnesting : NonNesting OIDSub
   nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
     with Lemmas.++-≡-⊆ (lₚ₁ ∷ʳ lₑ₁) _ (lₚ₂ ∷ʳ lₑ₂) _ ++≡
-  ... | 0 , inj₁ xs₁⊆xs₂ = trans₀ (lₚ₁ ++ lₑ₁ ∷ [] ≡ (lₚ₁ ++ lₑ₁ ∷ []) ++ [] ∋ solve (++-monoid Dig)) xs₁⊆xs₂
-  ... | 0 , inj₂ xs₂⊆xs₁ = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid Dig))
+  ... | 0 , inj₁ xs₁⊆xs₂ = trans₀ (lₚ₁ ++ lₑ₁ ∷ [] ≡ (lₚ₁ ++ lₑ₁ ∷ []) ++ [] ∋ solve (++-monoid UInt8)) xs₁⊆xs₂
+  ... | 0 , inj₂ xs₂⊆xs₁ = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid UInt8))
   ... | suc n , inj₁ xs₁⊆xs₂
     with ys₁
-  ... | [] = trans₀ (lₚ₁ ++ lₑ₁ ∷ [] ≡ (lₚ₁ ++ lₑ₁ ∷ []) ++ [] ∋ solve (++-monoid Dig)) xs₁⊆xs₂
+  ... | [] = trans₀ (lₚ₁ ++ lₑ₁ ∷ [] ≡ (lₚ₁ ++ lₑ₁ ∷ []) ++ [] ∋ solve (++-monoid UInt8)) xs₁⊆xs₂
   ... | y₁ ∷ ys₁ =
     contradiction
       (lem xs₁⊆xs₂ lₚ₂≥128)
@@ -74,9 +75,9 @@ module Sub where
         (++-conicalˡ _ _ (∷-injectiveʳ ++≡))
         (Lemmas.∷ʳ⇒≢[]{xs = ws}{w})
     lem {x ∷ ws} {xs = xs} {x₁ ∷ ys} ++≡ (_ All.∷ ys≤128) = lem (∷-injectiveʳ ++≡) ys≤128
-  nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl) | suc n , inj₂ xs₂⊆xs₁
+  nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastUInt8s₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastUInt8s₂ refl) | suc n , inj₂ xs₂⊆xs₁
     with ys₂
-  ... | [] = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid Dig))
+  ... | [] = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid UInt8))
   ... | y₂ ∷ ys₂ =
     contradiction
       (lem (sym xs₂⊆xs₁) lₚ₁≥128)

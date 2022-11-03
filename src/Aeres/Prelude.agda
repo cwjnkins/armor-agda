@@ -663,13 +663,6 @@ module Lemmas where
     x ∷ xs ∎)
     where
     open ≡-Reasoning
-  -- fromList : ∀ {ℓ} {@0 A : Set ℓ} (xs : List A) (n : ℕ) → @0 length xs ≡ n → Vec A n
-  -- fromList [] zero n≡ = []
-  -- fromList (x ∷ xs) (suc n) n≡ = x ∷ fromList xs n (suc-injective n≡)
-
-  -- fromList∘toList : ∀ {ℓ} {@0 A : Set ℓ} {n} (xs : Vec A n) → fromList (Vec.toList xs) n (toListLength xs) ≡ xs
-  -- fromList∘toList [] = refl
-  -- fromList∘toList (x ∷ xs) = cong (x ∷_) {!fromList∘toList!}
 
   replicate-+ : ∀ {ℓ} {@0 A : Set ℓ} (m n : ℕ) → (x : A) → replicate (m + n) x ≡ replicate m x ++ replicate n x
   replicate-+ zero n x = refl

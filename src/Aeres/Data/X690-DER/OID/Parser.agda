@@ -56,13 +56,13 @@ open parseOIDSub public using (parseOIDSub)
 module parseOIDField where
   here' = "parseOIDField"
 
-  parseOIDElems : ∀ n → Parser (Logging ∘ Dec) (ExactLength (NonEmptySequenceOf OIDSub) n)
-  parseOIDElems n = parseBoundedSequenceOf "oid elems" OIDSub Sub.nonempty Sub.nonnesting parseOIDSub n 1
+  parseOIDValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength OIDValue n)
+  parseOIDValue n = parseBoundedSequenceOf "oid elems" OIDSub Sub.nonempty Sub.nonnesting parseOIDSub n 1
 
   parseOID : Parser (Logging ∘ Dec) OID
-  parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDElems
+  parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDValue
 
-open parseOIDField public using (parseOIDElems ; parseOID)
+open parseOIDField public using (parseOIDValue ; parseOID)
 
 -- private
 --   module Test where
