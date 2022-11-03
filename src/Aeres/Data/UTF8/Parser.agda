@@ -97,32 +97,83 @@ module parseUTF8 where
           (success (b₁ ∷ [ b₂ ]) _ refl (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) xs refl))
 
   parseUTF8Char3 : Parser (Logging ∘ Dec) UTF8Char3
-  parseUTF8Char3 =
-    parseEquivalent (proj₁ UTF8Props.UTF8Char3Props.iso)
-      (parseSigma exactLength-nonnesting exactLengthString-unambiguous
-        (parseN 3 (tell $ hereChar String.++ ": underflow (3)"))
-        λ els →
-          let b₁ = lookupELS els (# 0)
-              b₂ = lookupELS els (# 1)
-              b₃ = lookupELS els (# 2)
-          in
-          erased? (inRange? 224 239 b₁
-                   ×-dec inRange? 128 191 b₂
-                   ×-dec inRange? 128 191 b₃))
+  runParser parseUTF8Char3 [] = do
+    tell "parseUTF8Char3: underflow(0)"
+    return ∘ no $ λ where
+      (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix ())
+  runParser parseUTF8Char3 (x ∷ []) = do
+    tell "parseUTF8Char3: underflow(1)"
+    return ∘ no $ λ where
+      (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix ())
+  runParser parseUTF8Char3 (x ∷ x₁ ∷ []) = do
+    tell "parseUTF8Char3: underflow(2)"
+    return ∘ no $ λ where
+      (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix ())
+  runParser parseUTF8Char3 (x ∷ x₁ ∷ x₂ ∷ x₃) =
+    case inRange? 224 239 x ,′ inRange? 128 191 x₁ ,′ inRange? 128 191 x₂ of λ where
+      (no ¬p , _) → do
+        tell $ "parseUTF8Char3: bad char range (1: " String.++ (show ∘ toℕ $ x) String.++ ")"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix refl) →
+            contradiction b₁range ¬p
+      (yes p , no ¬p , _) → do
+        tell $ "parseUTF8Char3: bad char range (2: " String.++ (show ∘ toℕ $ x₁) String.++ ")"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix refl) →
+            contradiction b₂range ¬p
+      (yes p , yes p₁ , no ¬p) → do
+        tell $ "parseUTF8Char3: bad char range (3: " String.++ (show ∘ toℕ $ x₂) String.++ ")"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix refl) →
+            contradiction b₃range ¬p
+      (yes p , yes p₁ , yes p₂) →
+        return (yes
+          (success (x ∷ x₁ ∷ [ x₂ ]) _ refl (mkUTF8Char3 x p x₁ p₁ x₂ p₂ refl) x₃ refl))
 
   parseUTF8Char4 : Parser (Logging ∘ Dec) UTF8Char4
-  parseUTF8Char4 =
-    parseEquivalent UTF8Props.UTF8Char4Props.equiv
-      (parseSigma exactLength-nonnesting exactLengthString-unambiguous
-        (parseN 4 (tell $ hereChar String.++ ": underflow (4)"))
-        λ els →
-          let b₁ = lookupELS els (# 0)
-              b₂ = lookupELS els (# 1)
-              b₃ = lookupELS els (# 2)
-              b₄ = lookupELS els (# 3)
-          in
-          erased? (      inRange? 240 247 b₁ ×-dec inRange? 128 191 b₂
-                   ×-dec inRange? 128 191 b₃ ×-dec inRange? 128 191 b₄))
+  runParser parseUTF8Char4 [] = do
+    tell $ "parseUTF8Char4: underflow(0)"
+    return ∘ no $ λ where
+      (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ _ _ _ _ refl) _ ())
+  runParser parseUTF8Char4 (x ∷ []) = do
+    tell $ "parseUTF8Char4: underflow(1)"
+    return ∘ no $ λ where
+      (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ _ _ _ _ refl) _ ())
+  runParser parseUTF8Char4 (x ∷ x₁ ∷ []) = do
+    tell $ "parseUTF8Char4: underflow(2)"
+    return ∘ no $ λ where
+      (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ _ _ _ _ refl) _ ())
+  runParser parseUTF8Char4 (x ∷ x₁ ∷ x₂ ∷ []) = do
+    tell $ "parseUTF8Char4: underflow(3)"
+    return ∘ no $ λ where
+      (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ _ _ _ _ refl) _ ())
+  runParser parseUTF8Char4 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ xs) =
+    case    inRange? 240 247 x  ,′ inRange? 128 191 x₁
+         ,′ inRange? 128 191 x₂ ,′ inRange? 128 191 x₃
+    of λ where
+      (no ¬p , _) → do
+        tell $ "parseUTF8Char4: bad char range (1: " String.++ (show ∘ toℕ $ x) String.++ ")"
+        return ∘ no $ λ where
+          (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range _ _ _ refl) _ refl) →
+            contradiction b₁range ¬p
+      (yes p , no ¬p , _) → do
+        tell $ "parseUTF8Char4: bad char range (2: " String.++ (show ∘ toℕ $ x₁) String.++ ")"
+        return ∘ no $ λ where
+          (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range _ _ refl) _ refl) →
+            contradiction b₂range ¬p
+      (yes p , yes p₁ , no ¬p , _) → do
+        tell $ "parseUTF8Char4: bad char range (3: " String.++ (show ∘ toℕ $ x₂) String.++ ")"
+        return ∘ no $ λ where
+          (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range _ refl) _ refl) →
+            contradiction b₃range ¬p
+      (yes p , yes p₁ , yes p₂ , no ¬p) → do
+        tell $ "parseUTF8Char4: bad char range (4: " String.++ (show ∘ toℕ $ x₃) String.++ ")"
+        return ∘ no $ λ where
+          (success _ _ _ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) _ refl) →
+            contradiction b₄range ¬p
+      (yes p , yes p₁ , yes p₂ , yes p₃) →
+        return (yes
+          (success _ _ refl (mkUTF8Char4 x x₁ x₂ x₃ p p₁ p₂ p₃ refl) _ refl))
 
   parseUTF8Char : Parser (Logging ∘ Dec) UTF8Char
   parseUTF8Char =

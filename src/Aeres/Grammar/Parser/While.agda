@@ -24,6 +24,7 @@ record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
 
 
 module Properties where
+  {-# TERMINATING #-}
   nonnesting : ∀ {@0 A} → NonNesting (ParseWhileₜ A)
   nonnesting xs₁++ys₁≡xs₂++ys₂ (mkParseWhile [] term allPrefix ¬term refl) (mkParseWhile [] term₁ allPrefix₁ ¬term₁ refl) =
     cong (_∷ []) (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
