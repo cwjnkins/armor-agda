@@ -429,6 +429,14 @@ instance
   Show.show showNat = Nat.show
     where import Data.Nat.Show as Nat
 
+  showList : ∀ {ℓ} {@0 A : Set ℓ} ⦃ _ : Show A ⦄ → Show (List A)
+  Show.show (showList{A = A}) xs = "[ " String.++ help xs String.++ " ]"
+    where
+    help : (xs : List A) → String
+    help [] = ""
+    help (x ∷ []) = show x String.++ " "
+    help (x ∷ xs) = show x String.++ " , " String.++ help xs
+
 record Irrel {ℓ} (@0 A : Set ℓ) : Set ℓ where
   infix 10 ‼_
   field

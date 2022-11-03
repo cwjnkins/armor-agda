@@ -148,7 +148,9 @@ module UTF8Char2Props where
 
 module UTF8Char3Props where
   nonnesting : NonNesting UTF8Char3
-  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ refl) =
+  nonnesting xs₁++ys₁≡xs₂++ys₂
+    (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl)
+    (mkUTF8Char3 b₄ b₁range₁ b₅ b₂range₁ b₆ b₃range₁ refl) =
     proj₁ (Lemmas.length-++-≡ (b₁ ∷ b₂ ∷ [ b₃ ]) _ (b₄ ∷ b₅ ∷ [ b₆ ]) _ xs₁++ys₁≡xs₂++ys₂ refl)
 
   Rep : @0 List UInt8 → Set
@@ -162,9 +164,11 @@ module UTF8Char3Props where
 
   iso : Iso Rep UTF8Char3
   proj₁ (proj₁ iso) (mk×ₚ els@(mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [] ) refl) sndₚ₂ refl) (─ (b₁range , b₂range , b₃range)) refl) =
-    mkUTF8Char3 (lookupELS els (# 0)) (lookupELS els (# 1)) (lookupELS els (# 2))
-      b₁range b₂range b₃range refl
-  proj₂ (proj₁ iso) (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) =
+    mkUTF8Char3
+      (lookupELS els (# 0)) b₁range
+      (lookupELS els (# 1)) b₂range
+      (lookupELS els (# 2)) b₃range refl
+  proj₂ (proj₁ iso) (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) =
     mk×ₚ (mk×ₚ self (─ refl) refl) (─ (b₁range , b₂range , b₃range)) refl
   proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [] ) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range)) refl) =
     refl
@@ -337,7 +341,7 @@ instance
       (no  b≢)   → no λ where ≋-refl → contradiction refl b≢
 
   UTF8Char3Eq≋ : Eq≋ UTF8Char3
-  Eq≋._≋?_ UTF8Char3Eq≋ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (mkUTF8Char3 b₁' b₂' b₃' b₁range' b₂range' b₃range' refl) =
+  Eq≋._≋?_ UTF8Char3Eq≋ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) (mkUTF8Char3 b₁' b₁range' b₂' b₂range' b₃' b₃range' refl) =
     case (b₁ ∷ b₂ ∷ [ b₃ ] ≟ b₁' ∷ b₂' ∷ [ b₃' ]) ret (const _) of λ where
       (no b≢) → no λ where ≋-refl → contradiction refl b≢
       (yes refl) →
