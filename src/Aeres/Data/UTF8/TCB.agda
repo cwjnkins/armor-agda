@@ -33,13 +33,9 @@ InRangeUTF8Char2 l₁ u₁ l₂ u₂ x = InRange l₁ u₁ b₁ × InRange l₂ 
 record UTF8Char3 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char3
   field
-    b₁ : UInt8
+    b₁ b₂ b₃ : UInt8
     @0 b₁range : InRange 224 239 b₁
-
-    b₂ : UInt8
     @0 b₂range : InRange 128 191 b₂
-
-    b₃ : UInt8
     @0 b₃range : InRange 128 191 b₃
 
     @0 bs≡ : bs ≡ b₁ ∷ b₂ ∷ [ b₃ ]

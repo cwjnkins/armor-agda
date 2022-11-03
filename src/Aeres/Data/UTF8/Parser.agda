@@ -114,12 +114,12 @@ module parseUTF8 where
       (no ¬p , _) → do
         tell $ "parseUTF8Char3: bad char range (1: " String.++ (show ∘ toℕ $ x) String.++ ")"
         return ∘ no $ λ where
-          (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix refl) →
+          (success prefix read read≡ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) suffix refl) →
             contradiction b₁range ¬p
       (yes p , no ¬p , _) → do
         tell $ "parseUTF8Char3: bad char range (2: " String.++ (show ∘ toℕ $ x₁) String.++ ")"
         return ∘ no $ λ where
-          (success prefix read read≡ (mkUTF8Char3 b₁ b₁range b₂ b₂range b₃ b₃range refl) suffix refl) →
+          (success prefix read read≡ (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) suffix refl) →
             contradiction b₂range ¬p
       (yes p , yes p₁ , no ¬p) → do
         tell $ "parseUTF8Char3: bad char range (3: " String.++ (show ∘ toℕ $ x₂) String.++ ")"
@@ -128,7 +128,7 @@ module parseUTF8 where
             contradiction b₃range ¬p
       (yes p , yes p₁ , yes p₂) →
         return (yes
-          (success (x ∷ x₁ ∷ [ x₂ ]) _ refl (mkUTF8Char3 x p x₁ p₁ x₂ p₂ refl) x₃ refl))
+          (success (x ∷ x₁ ∷ [ x₂ ]) _ refl (mkUTF8Char3 x x₁ x₂ p p₁ p₂ refl) x₃ refl))
 
   parseUTF8Char4 : Parser (Logging ∘ Dec) UTF8Char4
   runParser parseUTF8Char4 [] = do
