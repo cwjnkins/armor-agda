@@ -7,10 +7,64 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
-module Aeres.Data.X690-DER.OID.Reference where
+module Aeres.Data.X509.SignAlg.TCB.OIDs where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
+
+module Hash where
+{-
+https://datatracker.ietf.org/doc/html/rfc4055#section-2.1
+
+These one-way hash functions are identified by the following object
+identifiers:
+
+      id-sha1  OBJECT IDENTIFIER  ::=  { iso(1)
+                           identified-organization(3) oiw(14)
+                           secsig(3) algorithms(2) 26 }
+      id-sha224  OBJECT IDENTIFIER  ::=  {{ joint-iso-itu-t(2)
+                           country(16) us(840) organization(1) gov(101)
+                           csor(3) nistalgorithm(4) hashalgs(2) 4 }
+      id-sha256  OBJECT IDENTIFIER  ::=  { joint-iso-itu-t(2)
+                           country(16) us(840) organization(1) gov(101)
+                           csor(3) nistalgorithm(4) hashalgs(2) 1 }
+      id-sha384  OBJECT IDENTIFIER  ::=  { joint-iso-itu-t(2)
+                           country(16) us(840) organization(1) gov(101)
+                           csor(3) nistalgorithm(4) hashalgs(2) 2 }
+      id-sha512  OBJECT IDENTIFIER  ::=  { joint-iso-itu-t(2)
+                           country(16) us(840) organization(1) gov(101)
+                           csor(3) nistalgorithm(4) hashalgs(2) 3 }
+-}
+
+  SHA1Lit SHA224Lit SHA256Lit SHA384Lit SHA512Lit : List UInt8
+
+  SHA1Lit = # 43 ∷ # 14 ∷ # 3 ∷ # 2 ∷ [ # 26 ]
+
+  SHA1 : OIDValue SHA1Lit
+  SHA1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
+
+  SHA224Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 4 ] 
+
+  SHA224 : OIDValue SHA224Lit
+  SHA224 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
+
+  SHA256Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 1 ] 
+
+  SHA256 : OIDValue SHA256Lit
+  SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+
+  SHA384Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 2 ]
+
+  SHA384 : OIDValue SHA384Lit
+  SHA384 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
+
+  SHA512Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 3 ]
+
+  SHA512 : OIDValue SHA512Lit
+  SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+
+  PSSSupported : List (∃ OIDValue)
+  PSSSupported = (-, SHA1) ∷ (-, SHA224) ∷ (-, SHA256) ∷ (-, SHA384) ∷ [ -, SHA512 ]
 
 module RSA where
 
@@ -33,16 +87,16 @@ ASN.1 OID used to identify this signature algorithm is:
         iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1)
         pkcs-1(1) 4  }
 
-   The ASN.1 object identifier used to identify this signature algorithm
-   is:
+The ASN.1 object identifier used to identify this signature algorithm
+is:
 
       sha-1WithRSAEncryption OBJECT IDENTIFIER  ::=  {
           iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1)
           pkcs-1(1) 5  }
 
-   When any of these three OIDs appears within the ASN.1 type
-   AlgorithmIdentifier, the parameters component of that type SHALL be
-   the ASN.1 type NULL.
+When any of these three OIDs appears within the ASN.1 type
+AlgorithmIdentifier, the parameters component of that type SHALL be
+the ASN.1 type NULL.
 -}
 
   MD2Lit : List UInt8
@@ -170,6 +224,12 @@ When SHA-256 is used, the OID is:
    id-dsa-with-sha256 OBJECT IDENTIFIER  ::=  { joint-iso-ccitt(2)
        country(16) us(840) organization(1) gov(101) csor(3)
        algorithms(4) id-dsa-with-sha2(3) 2 }.
+
+When the id-dsa-with-sha224 or id-dsa-with-sha256 algorithm
+identifier appears in the algorithm field as an AlgorithmIdentifier,
+the encoding SHALL omit the parameters field.  That is, the
+AlgorithmIdentifier SHALL be a SEQUENCE of one component, the OID id-
+dsa-with-sha224 or id-dsa-with-sha256.
 -}
 
   SHA224Lit : List UInt8
@@ -263,3 +323,15 @@ SHA384, or ecdsa-with-SHA512.
 
   SHA512 : OIDValue SHA512Lit
   SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+
+NullOrAbsentParam : List (∃ OIDValue)
+NullOrAbsentParam =
+  (-, RSA.MD2) ∷ (-, RSA.MD5) ∷ (-, RSA.SHA1) ∷ (-, RSA.SHA224) ∷ (-, RSA.SHA256) ∷ [ -, RSA.SHA384 ]
+
+AbsentParam : List (∃ OIDValue)
+AbsentParam =
+    (-, DSA.SHA1) ∷ (-, DSA.SHA224) ∷ (-, DSA.SHA256) ∷ (-, ECDSA.SHA1)
+  ∷ (-, ECDSA.SHA224) ∷ (-, ECDSA.SHA256) ∷ (-, ECDSA.SHA384) ∷ [ (-, ECDSA.SHA512) ]
+
+SupportedParam : List (∃ OIDValue)
+SupportedParam = NullOrAbsentParam ++ AbsentParam ++ [ -, RSA.PSS ]
