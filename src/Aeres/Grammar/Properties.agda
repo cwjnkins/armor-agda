@@ -56,6 +56,41 @@ module Distribute where
     proj₂ exactLength-Sum (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₁ fstₚ₁) sndₚ₁ refl
     proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁ refl
 
+  exactLength-&ᵈ
+    : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → @0 List Σ → Set} {n}
+      → Equivalent (ExactLength (&ₚᵈ A B) n)
+                   (&ₚᵈ (WithinLength A n)
+                        λ bs₁ a → ExactLength (B _ (fstₚ a)) (n - length bs₁))
+  proj₁ (exactLength-&ᵈ{A}{B}{n}) (mk×ₚ (mk&ₚ{bs₁}{bs₂} a b refl) (─ len≡) refl) =
+    mk&ₚ (mk×ₚ a len≤ refl) (mk×ₚ b len-≡ refl) refl
+    where
+    module ≤ = ≤-Reasoning
+
+    len≤ : Erased (length bs₁ ≤ n)
+    len≤ = ─ (≤.begin
+      length bs₁ ≤.≤⟨ m≤m+n (length bs₁) (length bs₂) ⟩
+      length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂) ≤.≡⟨ len≡ ⟩
+      n ≤.∎)
+
+    len-≡ : Erased (length bs₂ ≡ n - length bs₁)
+    len-≡ = ─ (begin
+      (length bs₂ ≡⟨ sym (m+n∸m≡n (length bs₁) (length bs₂)) ⟩
+      length bs₁ + length bs₂ - length bs₁ ≡⟨ cong (_- length bs₁) (sym (length-++ bs₁)) ⟩
+      length (bs₁ ++ bs₂) - length bs₁ ≡⟨ cong (_∸ length bs₁) len≡ ⟩
+      n - length bs₁ ∎))
+  proj₂ (exactLength-&ᵈ{A}{B}{n}) (mk&ₚ{bs₁}{bs₂} (mk×ₚ a (─ len≤) refl) (mk×ₚ b (─ len≡) refl) refl) =
+    mk×ₚ (mk&ₚ a b refl) len≡' refl
+
+    where
+    len≡' : Erased (length (bs₁ ++ bs₂) ≡ n)
+    len≡' = ─ (begin
+      (length (bs₁ ++ bs₂) ≡⟨ length-++ bs₁ ⟩
+      length bs₁ + length bs₂ ≡⟨ cong (length bs₁ +_) len≡ ⟩
+      length bs₁ + (n - length bs₁) ≡⟨ m+[n∸m]≡n len≤ ⟩
+      n ∎))
+
+
 module NonNesting where
 
   open ≡-Reasoning

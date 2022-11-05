@@ -238,6 +238,98 @@ module LogDec where
                       (inj₂ ¬b) → contradiction sndₚ₁ ¬b)
                     (_ ≤? _)
 
+  parse&ᵈ : {@0 A : @0 List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → List Σ → Set}
+            → @0 NonNesting A → @0 Unambiguous A
+            → Parser (Logging ∘ Dec) A
+            → (∀ {@0 bs} → Singleton (length bs) → (a : A bs) → MaximalParser (B bs a))
+            → MaximalParser (&ₚᵈ A B)
+  parse&ᵈ{A}{B} nn ua p₁ p₂ = mkMaximalParser help
+    where
+    module ≤ = ≤-Reasoning
+
+    help : ∀ xs → Sigma _ _
+    help xs =
+      case runParser p₁ xs ret (const _) of λ where
+        (mkLogged log (no ¬p)) →
+          (mkLogged log (no (λ where
+            (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} v₁ v₂ refl) suffix ps≡) →
+              contradiction
+                (success bs₁ _ refl v₁ (bs₂ ++ suffix)
+                  (begin bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
+                         (bs₁ ++ bs₂) ++ suffix ≡⟨⟩
+                         prefix ++ suffix ≡⟨ ps≡ ⟩
+                         xs ∎))
+                ¬p)))
+          , tt
+        (mkLogged log₁ (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁))) →
+          case runMaximalParser (p₂ (singleton r₁ r₁≡) v₁) suf₁ ret (const _) of λ where
+            (mkLogged log₂ (no ¬p) , max) →
+                mkLogged (log₁ ++ log₂) (no λ where
+                  (success prefix read read≡ (mk&ₚ{bs₁'}{bs₂'} v₁' v₂' refl) suffix ps≡) →
+                    let
+                      xs≡ : Erased (pre₁ ++ suf₁ ≡ bs₁' ++ bs₂' ++ suffix)
+                      xs≡ = ─ (begin
+                        (pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩ 
+                        xs ≡⟨ sym ps≡ ⟩
+                        (bs₁' ++ bs₂') ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
+                        bs₁' ++ bs₂' ++ suffix ∎))
+
+                      pre₁≡ : Erased (pre₁ ≡ bs₁')
+                      pre₁≡ = ─ nn (¡ xs≡) v₁ v₁'
+
+                      v₁≋ : _≋_{A = A} v₁ v₁'
+                      v₁≋ = mk≋ (‼ (¡ pre₁≡)) (ua _ _)
+                    in
+                    case v₁≋ of λ where
+                      ≋-refl →
+                        contradiction (success bs₂' _ refl v₂' suffix (++-cancelˡ pre₁ (sym (¡ xs≡)))) ¬p)
+              , tt
+            (mkLogged log₂ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) , max) →
+                mkLogged (log₁ ++ log₂) (yes
+                  (success (pre₁ ++ pre₂) (r₁ + r₂)
+                    (begin (r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+                           length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+                           length (pre₁ ++ pre₂) ∎))
+                    (mk&ₚ v₁ v₂ refl) suf₂
+                    (begin (pre₁ ++ pre₂) ++ suf₂ ≡⟨ solve (++-monoid Σ) ⟩
+                         pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+                         pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                         xs ∎)))
+              , λ where
+                pre' suf' ps≡' (mk&ₚ{bs₁}{bs₂} fstₚ₁ sndₚ₁ bs≡) →
+                  let
+                    xs≡ : Erased (bs₁ ++ bs₂ ++ suf' ≡ pre₁ ++ suf₁)
+                    xs≡ = ─ (begin (bs₁ ++ bs₂ ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
+                                   (bs₁ ++ bs₂) ++ suf' ≡⟨ cong (_++ suf') ∘ sym $ bs≡ ⟩
+                                   pre' ++ suf' ≡⟨ ps≡' ⟩
+                                   xs ≡⟨ sym ps≡₁ ⟩
+                                   pre₁ ++ suf₁ ∎))
+
+                    bs₁≡ : Erased (bs₁ ≡ pre₁)
+                    bs₁≡ = ─ (nn (¡ xs≡) fstₚ₁ v₁)
+
+                    v₁≡ : Erased ((bs₁ , fstₚ₁) ≡ (pre₁ , v₁))
+                    v₁≡ = case bs₁≡ ret (const _) of λ where
+                      (─ refl) →
+                        case (‼ ua v₁ fstₚ₁) ret (const _) of λ where
+                          refl → ─ refl
+                  in
+                  uneraseDec
+                    (≤.begin
+                      length pre' ≤.≡⟨ cong length bs≡ ⟩
+                      length (bs₁ ++ bs₂) ≤.≡⟨ length-++ bs₁ ⟩
+                      length bs₁ + length bs₂ ≤.≡⟨ cong (_+ length bs₂) (cong length (¡ bs₁≡)) ⟩
+                      length pre₁ + length bs₂ ≤.≡⟨ cong (_+ length bs₂) (sym r₁≡) ⟩
+                      r₁ + length bs₂
+                        ≤.≤⟨ +-monoʳ-≤ r₁
+                               (max bs₂ suf'
+                                  (Lemmas.++-cancel≡ˡ bs₁ pre₁ (¡ bs₁≡) (¡ xs≡))
+                                  (subst {A = Sigma (List Σ) A} (λ p → B (proj₁ p) (proj₂ p) bs₂ ) (¡ v₁≡) sndₚ₁))
+                        ⟩
+                      r₁ + r₂ ≤.∎)
+                    (_ ≤? _)
+        
+
   parse&o₂ : ∀ {@0 A B} → MaximalParser A → MaximalParser (Option B) → @0 NoOverlap A B
              → MaximalParser (&ₚ A (Option B))
   parse&o₂{A}{B} pa pb noo = mkMaximalParser help
