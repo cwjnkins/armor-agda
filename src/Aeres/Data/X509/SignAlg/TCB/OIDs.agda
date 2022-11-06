@@ -110,6 +110,12 @@ The object identifier used to identify the PKCS #1 version 1.5
   SHA384 : OIDValue SHA384Lit
   SHA384 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
 
+  SHA512Lit : List UInt8
+  SHA512Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
+
+  SHA512 : OIDValue SHA512Lit
+  SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+
 {-
 https://datatracker.ietf.org/doc/html/rfc4055#section-3.1
 
