@@ -111,3 +111,6 @@ instance
   ... | no ¬p = no λ where
     refl → contradiction ≋-refl ¬p
   ... | yes ≋-refl = yes refl
+
+  OIDEq≋ : Eq≋ OIDValue
+  OIDEq≋ = Eq⇒Eq≋ it

@@ -3,13 +3,14 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.HashAlg.TCB.OIDs as OIDs
-import      Aeres.Data.X509.HashAlg.TCB
+open import Aeres.Data.X509.HashAlg.TCB
 open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
 module Aeres.Data.X509.HashAlg.Parser where
@@ -17,35 +18,26 @@ module Aeres.Data.X509.HashAlg.Parser where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Properties  UInt8
 
-module RSASSA-PSS where
-  open Aeres.Data.X509.HashAlg.TCB.RSASSA-PSS
+parseSHA-Like
+  : ∀ {@0 bs} (o : OIDValue bs) → String → Parser (Logging ∘ Dec) (SHA-Like o)
+parseSHA-Like o s =
+  parseAlgorithmIdentifier s help
+  where
+  help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
+  help n o =
+    parseEquivalent
+      (symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{A = Option Null}{B = _}{C = _})))
+      (parse×Dec exactLength-nonnesting
+        (tell $ "X509: HashAlg: " String.++ s String.++ ": OID mismatch")
+        (parseOption₁ExactLength TLV.nonempty TLV.nonnesting
+          (tell $ "X509: HashAlg:" String.++ s String.++ ": Param: underflow")
+          parseNull _)
+        λ x → _ ≋? _)
 
-  parser : Parser (Logging ∘ Dec) HashAlg
-  parser = parseAlgorithmIdentifier "Hash" help
-    where
-    help : ∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (Param o) n)
-    runParser (help n o) xs =
-      case (-, TLV.val o) ∈? OIDs.NullOrAbsent ret (const _) of λ where
-        (yes p) → do
-          yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len refl) suf₁ ps≡₁) ←
-            runParser
-              (parseOption₁ExactLength TLV.nonempty TLV.nonnesting
-                (tell "X509: HashAlg: RSASSA-PSS: underflow")
-                parseNull n)
-              xs
-            where no ¬p → do
-              tell "X509: HashAlg: RSASSA-PSS: failed to parse parameter"
-              return ∘ no $ λ where
-                (success prefix read read≡ (mk×ₚ (mk×ₚ p p∈ refl) vLen refl) suffix ps≡) →
-                  contradiction
-                    (success prefix _ read≡ (mk×ₚ p vLen refl) suffix ps≡)
-                    ¬p
-          return (yes
-            (success pre₁ r₁ r₁≡ (mk×ₚ (mk×ₚ v₁ (fromWitness p) refl) v₁Len refl) suf₁ ps≡₁))
-        (no ¬p) → do
-          tell $ "X509: HashAlg: RSASSA-PSS: unknown OID: "
-                 String.++ show (map toℕ (↑ (OID.serialize o)))
-          return ∘ no $ λ where
-            (success prefix read read≡ (mk×ₚ (mk×ₚ _ o∈ refl) vLen refl) suffix ps≡) →
-              contradiction (toWitness o∈) ¬p
+parseSHA1   = parseSHA-Like OIDs.SHA1   "SHA1"
+parseSHA224 = parseSHA-Like OIDs.SHA224 "SHA224"
+parseSHA256 = parseSHA-Like OIDs.SHA256 "SHA256"
+parseSHA384 = parseSHA-Like OIDs.SHA384 "SHA384"
+parseSHA512 = parseSHA-Like OIDs.SHA512 "SHA512"

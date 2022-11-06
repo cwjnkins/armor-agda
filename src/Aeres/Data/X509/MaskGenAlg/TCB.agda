@@ -51,7 +51,7 @@ module MGF1 where
          HashAlg.SHA512)))
 
   Param : {@0 bs : List UInt8} (o : OID bs) → @0 List UInt8 → Set
-  Param o =    const (_≋_{A = OIDValue} (TLV.val o) OIDs.MGF1)
-            ×ₚ SupportedHashAlg
+  Param o =    SupportedHashAlg
+            ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.MGF1)
 
   MaskGenAlg = AlgorithmIdentifier Param
