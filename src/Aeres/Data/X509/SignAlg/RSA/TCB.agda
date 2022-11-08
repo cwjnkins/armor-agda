@@ -40,6 +40,16 @@ SHA512 = HashAlg.SHA-Like OIDs.RSA.SHA512
          saltLength         [2] INTEGER DEFAULT 20,
          trailerField       [3] INTEGER DEFAULT 1  }
 -}
+module PSS where
+  SupportedHashAlg : @0 List UInt8 → Set
+  SupportedHashAlg =
+     Sum HashAlg.SHA1
+    (Sum HashAlg.SHA224
+    (Sum HashAlg.SHA256
+    (Sum HashAlg.SHA384
+         HashAlg.SHA512)))
+
+
 record PSSParamFields (@0 bs : List UInt8) : Set where
   constructor mkPSSParam
   field
@@ -58,16 +68,9 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    absent hashAlgorithm field as an indication that SHA-1 was
 --    used.
 --
-  SupportedHashAlg : @0 List UInt8 → Set
-  SupportedHashAlg =
-     Sum HashAlg.SHA1
-    (Sum HashAlg.SHA224
-    (Sum HashAlg.SHA256
-    (Sum HashAlg.SHA384
-         HashAlg.SHA512)))
 
   field
-    hashAlg : Option SupportedHashAlg h
+    hashAlg : Option PSS.SupportedHashAlg h
 
 -- maskGenAlgorithm
 
@@ -93,7 +96,7 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    this field, implementations MUST accept both the default value
 --    encoding (i.e., an absent field) and mfg1SHA1Identifier to be
 --    explicitly present in the encoding.
-    maskGenAlgo : MaskGenAlg.MGF1.MaskGenAlg m
+    maskGenAlgo : Option MaskGenAlg.MGF1.MaskGenAlg m
 
 -- saltLength
 
@@ -119,3 +122,10 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    recognize both a present trailerField field with value 1 and an
 --    absent trailerField field.
     trailerField : Option (Σₚ Int λ _ i → getVal i ≡ ℤ.1ℤ) t
+
+PSSParam : {@0 bs : List UInt8} → OID bs → @0 List UInt8 → Set
+PSSParam o =
+     PSSParamFields
+  ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.RSA.PSS)
+
+PSS = AlgorithmIdentifier PSSParam

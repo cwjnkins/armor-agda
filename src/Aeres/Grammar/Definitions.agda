@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+  renaming (Σ to Sigma)
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -15,6 +16,19 @@ record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : 
     @0 a≡  : subst A bs≡ a₁ ≡ a₂
 
 pattern ≋-refl = mk≋ refl refl
+
+trans≋ : ∀ {@0 A : List Σ → Set} {@0 bs₁ bs₂ bs₃} → {a₁ : A bs₁} {a₂ : A bs₂} {a₃ : A bs₃}
+         → _≋_{A} a₁ a₂ → _≋_{A} a₂ a₃ → _≋_{A} a₁ a₃
+trans≋ ≋-refl ≋-refl = ≋-refl
+
+sym≋ : ∀ {@0 A : List Σ → Set} {@0 bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂}
+       → _≋_{A} a₁ a₂ → _≋_{A} a₂ a₁
+sym≋ ≋-refl = ≋-refl
+
+cong≋ : ∀ {@0 A B : List Σ → Set} {@0 bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂}
+        → (f : ∀ {@0 bs} → A bs → Sigma (List Σ) B)
+        → _≋_{A} a₁ a₂ → _≋_{B} (proj₂ (f a₁)) (proj₂ (f a₂))
+cong≋ f ≋-refl = ≋-refl
 
 instance
   Irrel≋ : ∀ {@0 A bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂} → Irrel (_≋_{A} a₁ a₂)

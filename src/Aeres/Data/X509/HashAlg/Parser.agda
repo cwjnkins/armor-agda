@@ -31,7 +31,7 @@ parseSHA-Like o s =
       (symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{A = Option Null}{B = _}{C = _})))
       (parse×Dec exactLength-nonnesting
         (tell $ "X509: HashAlg: " String.++ s String.++ ": OID mismatch")
-        (parseOption₁ExactLength TLV.nonempty TLV.nonnesting
+        (parseOption₁ExactLength TLV.nonnesting
           (tell $ "X509: HashAlg:" String.++ s String.++ ": Param: underflow")
           parseNull _)
         λ x → _ ≋? _)
