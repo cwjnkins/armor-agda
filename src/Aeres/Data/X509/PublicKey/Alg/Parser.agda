@@ -42,8 +42,8 @@ parseUnsupported =
                 (‼ r≡)
                 (parseOctetStringValue (n - r)))
 
-parseSignAlg : Parser (Logging ∘ Dec) PublicKeyAlg
-parseSignAlg =
+parsePublicKeyAlg : Parser (Logging ∘ Dec) PublicKeyAlg
+parsePublicKeyAlg =
    parseSum parseRSA
   (parseSum parseEC
             parseUnsupported)

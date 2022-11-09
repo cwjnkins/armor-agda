@@ -391,3 +391,47 @@ unambiguous (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs
 
   @0 bₜ≡ : _
   bₜ≡ = ∷-injectiveʳ bs≡
+
+-- getUnusedBits
+--   : ∀ {@0 bₕ bₜ}
+--     → Singleton (toBitRep bₕ bₜ) → @0 toℕ bₕ < 8 → @0 UnusedBits bₕ bₜ
+--     → Singleton bₕ
+-- getUnusedBits {bₕ} {bₜ} (singleton [] bits≡) bₕ<8 u =
+--   singleton (# 0) bₕ≡0
+--   where
+--   module ≤ = ≤-Reasoning
+
+--   @0 bₕ≡0 : # 0 ≡ bₕ
+--   bₕ≡0 = caseErased (singleton bₜ refl) ret (const _) of λ where
+--     (singleton [] refl) → ─ Fin.toℕ-injective (sym u)
+--     (singleton (bₜ₁ ∷ []) refl) →
+--       contradiction {P = 0 < 0}
+--         (≤.begin
+--           1 ≤.≤⟨ m<n⇒0<n∸m bₕ<8 ⟩
+--           8 - toℕ bₕ ≤.≡⟨ sym (m≤n⇒m⊓n≡m (m∸n≤m 8 (toℕ bₕ))) ⟩
+--           (8 - toℕ bₕ) ⊓ 8 ≤.≡⟨ cong ((8 ∸ toℕ bₕ) ⊓_) (sym (Lemmas.toListLength (toBinary bₜ₁))) ⟩
+--           (8 - toℕ bₕ) ⊓ length (Vec.toList (toBinary{8} bₜ₁)) ≤.≡⟨ (sym $ length-take (8 - toℕ bₕ) (Vec.toList (toBinary{8} bₜ₁))) ⟩
+--           length (toBitRep bₕ (bₜ₁ ∷ [])) ≤.≡⟨ cong length (sym bits≡) ⟩
+--           length{A = Bool} [] ≤.∎)
+--         λ ()
+--     (singleton (bₜ₁ ∷ bₜ₂ ∷ bₜ) refl) →
+--       contradiction{P = 0 < 0}
+--         (≤.begin
+--           1 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+--           8 ≤.≡⟨ (sym $ Lemmas.toListLength (toBinary{8} bₜ₁)) ⟩
+--           length (Vec.toList (toBinary{8} bₜ₁)) ≤.≤⟨ m≤m+n _ _ ⟩
+--           length (Vec.toList (toBinary{8} bₜ₁)) + length (toBitRep bₕ (bₜ₂ ∷ bₜ))
+--             ≤.≡⟨ sym (length-++ ((Vec.toList (toBinary{8} bₜ₁)))) ⟩
+--           length (Vec.toList (toBinary{8} bₜ₁) ++ toBitRep bₕ (bₜ₂ ∷ bₜ)) ≤.≡⟨ cong length (sym bits≡) ⟩
+--           0 ≤.∎)
+--         λ ()
+
+-- getUnusedBits {bₕ} {bₜ} (singleton (x ∷ []) bits≡) bₕ<8 u =
+--   singleton (# 7) {!!}
+--   where
+--   @0 bₕ≡7 : # 7 ≡ bₕ
+--   bₕ≡7 = caseErased (singleton bₜ refl) ret (const _) of λ where
+--     (singleton [] refl) → contradiction bits≡ λ ()
+--     (singleton (x ∷ []) refl) → {!!}
+--     (singleton (x ∷ x₁ ∷ bₜ') refl) → {!!}
+-- getUnusedBits {bₕ} {bₜ} (singleton (x ∷ x₁ ∷ bits) bits≡) bₕ<8 u = {!!}
