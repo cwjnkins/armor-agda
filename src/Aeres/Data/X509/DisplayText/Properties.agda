@@ -1,59 +1,63 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.UTF8
+import      Aeres.Data.UTF8.Properties as UTF8
+open import Aeres.Data.X509.DisplayText.TCB
+open import Aeres.Data.X509.IA5String
+open import Aeres.Data.X509.Strings
+open import Aeres.Data.X690-DER.TLV
+import      Aeres.Data.X690-DER.Tag as Tag
+open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
-open import Aeres.Data.UTF8
-import      Aeres.Data.UTF8.Properties                  as UTF8Props
-open import Aeres.Data.X509
 open import Aeres.Prelude
 open import Data.List
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-module Aeres.Data.X509.Properties.DisplayText where
+module Aeres.Data.X509.DisplayText.Properties where
 
-open ≡-Reasoning
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
-open Base256
-open Aeres.Grammar.Definitions Dig
-open Aeres.Grammar.Properties  Dig
-open Aeres.Grammar.Sum         Dig
+equivalent
+  : Equivalent
+      (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
+      (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
+      (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
+           (Σₚ UTF8String    (TLVLenBounded 1 200)))))
+      DisplayText
+proj₁ equivalent (Sum.inj₁ x) = ia5String x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = visibleString x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = bmpString x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))) = utf8String x
+proj₂ equivalent (ia5String x) = inj₁ x
+proj₂ equivalent (visibleString x) = inj₂ (inj₁ x)
+proj₂ equivalent (bmpString x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equivalent (utf8String x) = inj₂ (inj₂ (inj₂ x))
 
-equivalent : Equivalent
-               (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-               (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
-               (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
-                    (Σₚ UTF8String    (TLVLenBounded 1 200)))))
-               X509.DisplayText
-proj₁ equivalent (Sum.inj₁ x) = X509.ia5String x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = X509.visibleString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = X509.bmpString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))) = X509.utf8String x
-proj₂ equivalent (X509.ia5String x) = inj₁ x
-proj₂ equivalent (X509.visibleString x) = inj₂ (inj₁ x)
-proj₂ equivalent (X509.bmpString x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (X509.utf8String x) = inj₂ (inj₂ (inj₂ x))
-
-iso : Iso
-        (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-        (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
-        (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
-             (Σₚ UTF8String    (TLVLenBounded 1 200)))))
-        X509.DisplayText
+iso
+  : Iso
+      (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
+      (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
+      (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
+           (Σₚ UTF8String    (TLVLenBounded 1 200)))))
+      DisplayText
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (Aeres.Grammar.Sum.inj₁ x) = refl
-proj₁ (proj₂ iso) (Aeres.Grammar.Sum.inj₂ (Aeres.Grammar.Sum.inj₁ x)) = refl
-proj₁ (proj₂ iso) (Aeres.Grammar.Sum.inj₂ (Aeres.Grammar.Sum.inj₂ (Aeres.Grammar.Sum.inj₁ x))) = refl
-proj₁ (proj₂ iso) (Aeres.Grammar.Sum.inj₂ (Aeres.Grammar.Sum.inj₂ (Aeres.Grammar.Sum.inj₂ x))) = refl
-proj₂ (proj₂ iso) (X509.ia5String x) = refl
-proj₂ (proj₂ iso) (X509.visibleString x) = refl
-proj₂ (proj₂ iso) (X509.bmpString x) = refl
-proj₂ (proj₂ iso) (X509.utf8String x) = refl
+proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
+proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
+proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = refl
+proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))) = refl
+proj₂ (proj₂ iso) (ia5String x) = refl
+proj₂ (proj₂ iso) (visibleString x) = refl
+proj₂ (proj₂ iso) (bmpString x) = refl
+proj₂ (proj₂ iso) (utf8String x) = refl
 
-@0 nonempty : NonEmpty X509.DisplayText
+@0 nonempty : NonEmpty DisplayText
 nonempty =
   equivalent-nonempty equivalent
     (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
@@ -61,7 +65,7 @@ nonempty =
         (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
           (nonemptyΣₚ₁ TLV.nonempty))))
 
-@0 nonnesting : NonNesting X509.DisplayText
+@0 nonnesting : NonNesting DisplayText
 nonnesting =
   equivalent-nonnesting equivalent
     (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
@@ -78,10 +82,11 @@ nonnesting =
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
 
-@0 noconfusionTLV : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.VisibleString ∷ Tag.BMPString ∷ [ Tag.UTF8String ]
-                      → NoConfusion (TLV t A) X509.DisplayText
+@0 noconfusionTLV
+  : ∀ {t} {@0 A} → t ∉ Tag.IA5String ∷ Tag.VisibleString ∷ Tag.BMPString ∷ [ Tag.UTF8String ]
+    → NoConfusion (TLV t A) DisplayText
 noconfusionTLV{t}{A} t∉ =
-  symNoConfusion{A = X509.DisplayText}{B = TLV _ A}
+  symNoConfusion{A = DisplayText}{B = TLV _ A}
     (NoConfusion.equivalent{B = TLV _ A} equivalent
       (symNoConfusion{A = TLV _ A}{B = Sum _ _}
         (NoConfusion.sumₚ{A = TLV _ A}
@@ -96,32 +101,31 @@ noconfusionTLV{t}{A} t∉ =
               (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
                 (TLV.noconfusion λ where refl → t∉ (there (there (there (here refl)))))))))))
 
-@0 noconfusionSeq : ∀ {@0 A} → NoConfusion (Seq A) X509.DisplayText
+@0 noconfusionSeq : ∀ {@0 A} → NoConfusion (Seq A) DisplayText
 noconfusionSeq = noconfusionTLV pf
   where
   pf : Tag.Sequence  ∉ _
   pf (there (there (there (there ()))))
 
+-- @0 noconfusionNoticeReference : NoConfusion X509.NoticeReference DisplayText
+-- noconfusionNoticeReference = noconfusionTLV pf
+--   where
+--   pf : Tag.Sequence ∉ _
+--   pf (there (there (there (there ()))))
 
-@0 noconfusionNoticeReference : NoConfusion X509.NoticeReference X509.DisplayText
-noconfusionNoticeReference = noconfusionTLV pf
-  where
-  pf : Tag.Sequence ∉ _
-  pf (there (there (there (there ()))))
-
-@0 unambiguous : Unambiguous X509.DisplayText
+@0 unambiguous : Unambiguous DisplayText
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
       (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous)
         (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
       (unambiguousSum
-        (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
+        (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
           λ _ → inRange-unique{A =  ℕ}{B = ℕ})
         (unambiguousSum
-          (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
+          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
             (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (unambiguousΣₚ (TLV.unambiguous UTF8Props.unambiguous)
+          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
             (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ()))))
         (NoConfusion.sumₚ{A = Σₚ _ _}

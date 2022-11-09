@@ -23,16 +23,14 @@ open Aeres.Grammar.Sum         UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
 
-SupportedSignAlgOIDs : List (Exists─ _ OIDValue)
-SupportedSignAlgOIDs =
+supportedSignAlgOIDs : List (Exists─ _ OIDValue)
+supportedSignAlgOIDs =
     (-, OIDs.ECDSA.SHA1) ∷ (-, OIDs.ECDSA.SHA224) ∷ (-, OIDs.ECDSA.SHA256) ∷ (-, OIDs.ECDSA.SHA384) ∷ (-, OIDs.ECDSA.SHA512)
   ∷ (-, OIDs.DSA.SHA1) ∷ (-, OIDs.DSA.SHA224) ∷ (-, OIDs.DSA.SHA256)
   ∷ (-, OIDs.RSA.MD2) ∷ (-, OIDs.RSA.MD5) ∷ (-, OIDs.RSA.SHA1) ∷ (-, OIDs.RSA.SHA224) ∷ (-, OIDs.RSA.SHA256) ∷ (-, OIDs.RSA.SHA384) ∷ [ (-, OIDs.RSA.SHA512) ]
 
 UnsupportedSignAlg =
-  AlgorithmIdentifier
-    λ o →    OctetString
-          ×ₚ const (False ((-, TLV.val o) ∈? SupportedSignAlgOIDs))
+  TLV Tag.Sequence (&ₚ (Σₚ OID (λ _ o → False ((-, TLV.val o) ∈? supportedSignAlgOIDs))) OctetStringValue)
 
 SignAlg : @0 List UInt8 → Set
 SignAlg =
@@ -53,3 +51,39 @@ SignAlg =
   (Sum RSA.SHA512
   (Sum RSA.PSS
        UnsupportedSignAlg)))))))))))))))
+
+getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID
+getOID (Sum.inj₁ x) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₁ x)) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))))) =
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))))) =
+  -, fstₚ (fstₚ (TLV.val x))

@@ -1,9 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.EcPkAlg.Params.Curve
-open import Aeres.Data.X509.EcPkAlg.Params.Properties
-open import Aeres.Data.X509.EcPkAlg.Params.TCB
+open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve
+open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Properties
+open import Aeres.Data.X509.PublicKey.Alg.EC.Params.TCB
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
@@ -14,7 +14,7 @@ import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
-module Aeres.Data.X509.EcPkAlg.Params.Parser where
+module Aeres.Data.X509.PublicKey.Alg.EC.Params.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
