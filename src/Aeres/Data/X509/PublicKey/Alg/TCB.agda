@@ -2,8 +2,8 @@
 
 open import Aeres.Binary
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
-open import Aeres.Data.X509.PublicKey.Alg.EC.TCB
-open import Aeres.Data.X509.PublicKey.Alg.RSA.TCB
+import      Aeres.Data.X509.PublicKey.Alg.EC.TCB   as EC
+import      Aeres.Data.X509.PublicKey.Alg.RSA.TCB  as RSA
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -16,6 +16,8 @@ module Aeres.Data.X509.PublicKey.Alg.TCB where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum         UInt8
+open EC  using (EC)
+open RSA using (RSA)
 
 supportedPublicKeyAlgs : List (Exists─ _ OIDValue)
 supportedPublicKeyAlgs =
@@ -31,3 +33,9 @@ PublicKeyAlg =
    Sum RSA
   (Sum EC
        UnsupportedPublicKeyAlg)
+
+getOID : ∀ {@0 bs} → PublicKeyAlg bs → Exists─ _ OID
+getOID (Sum.inj₁ x) = RSA.getOID x
+getOID (Sum.inj₂ (Sum.inj₁ x)) = EC.getOID x
+getOID (Sum.inj₂ (Sum.inj₂ x)) =
+  -, (fstₚ (fstₚ (TLV.val x)))

@@ -20,39 +20,30 @@ open Aeres.Grammar.Option      UInt8
 
 module SHA-Like where
 
-  noConfusion : ∀ {@0 bs₁ bs₂} → (o₁ : OIDValue bs₁) (o₂ : OIDValue bs₂)
+  @0 noConfusion : ∀ {@0 bs₁ bs₂} → (o₁ : OIDValue bs₁) (o₂ : OIDValue bs₂)
                 → {t : False (o₁ ≋? o₂)}
                 → NoConfusion (SHA-Like o₁) (SHA-Like o₂)
-  noConfusion o₁ o₂ {t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂
-    (mkTLV{l}{v}   len  (mkAlgIDFields{bs₁}{p}   o  (mk×ₚ _ o≡  refl) refl) len≡  bs≡)
-    (mkTLV{l'}{v'} len₁ (mkAlgIDFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) refl) len≡₁ bs≡₁) =
-    contradiction
-      (trans≋ (sym≋ o≡) (trans≋ (cong≋ (λ x → -, TLV.val x) o≋o') o'≡))
-      (toWitnessFalse t)
+  noConfusion o₁ o₂ {t} =
+    TLV.noconfusionVal λ where
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkAlgIDFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+       let
+         @0 ++≡ : bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂
+         ++≡ = begin
+           bs₁ ++ p ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
+           (bs₁ ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+           xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+           xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs'≡ ⟩
+           (bs₁' ++ p') ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
+           bs₁' ++ p' ++ ys₂ ∎
+
+         @0 bs₁≡ : bs₁ ≡ bs₁'
+         bs₁≡ = TLV.nonnesting ++≡ o o'
+
+         @0 o≋o' : _≋_{OID} o o'
+         o≋o' = mk≋ bs₁≡ (OID.unambiguous _ o')
+       in
+       contradiction
+         (trans≋ (sym≋ o≡) (trans≋ (cong≋ (λ x → -, TLV.val x) o≋o') o'≡))
+         (toWitnessFalse t)
     where
     open ≡-Reasoning
-
-    @0 ++≡' : l ++ v ++ ys₁ ≡ l' ++ v' ++ ys₂
-    ++≡' = ∷-injectiveʳ (begin
-      Tag.Sequence ∷ l ++ v ++ ys₁ ≡⟨ cong (Tag.Sequence ∷_) (sym (++-assoc l v ys₁)) ⟩
-      (Tag.Sequence ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
-      xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
-      xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
-      (Tag.Sequence ∷ l' ++ v') ++ ys₂ ≡⟨ cong (Tag.Sequence ∷_) (++-assoc l' v' ys₂) ⟩
-      Tag.Sequence ∷ l' ++ v' ++ ys₂ ∎)
-
-    @0 l≡ : l ≡ l'
-    l≡ = Length.nonnesting ++≡' len len₁
-
-    @0 ++≡“ : bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂
-    ++≡“ = Lemmas.++-cancel≡ˡ _ _ l≡
-      (begin l ++ bs₁ ++ p ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
-             l ++ v ++ ys₁ ≡⟨ ++≡' ⟩
-             l' ++ v' ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
-             l' ++ bs₁' ++ p' ++ ys₂ ∎)
-
-    @0 bs₁≡ : bs₁ ≡ bs₁'
-    bs₁≡ = TLV.nonnesting ++≡“ o o'
-
-    @0 o≋o' : _≋_{OID} o o'
-    o≋o' = mk≋ bs₁≡ (OID.unambiguous _ o')

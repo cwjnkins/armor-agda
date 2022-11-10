@@ -49,6 +49,32 @@ nonnesting{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (m
 noconfusion t₁≢t₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkTLV len val len≡ bs≡) (mkTLV len₁ val₁ len≡₁ bs≡₁) =
  contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡₁)))) t₁≢t₂
 
+@0 noconfusionVal
+  : ∀ {t} {@0 A B} → @0 NoConfusion A B
+    → NoConfusion (TLV t A) (TLV t B)
+noconfusionVal{t} nc {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkTLV{l}{v} len val len≡ bs≡) (mkTLV{l'}{v'} len₁ val₁ len≡₁ bs≡₁) =
+  nc ++≡“ val val₁
+  where
+  open ≡-Reasoning
+
+  @0 ++≡' : l ++ v ++ ys₁ ≡ l' ++ v' ++ ys₂
+  ++≡' = ∷-injectiveʳ (begin
+    t ∷ l ++ v ++ ys₁ ≡⟨ cong (t ∷_) (sym (++-assoc l v ys₁)) ⟩
+    (t ∷ l ++ v) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+    xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
+    xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
+    (t ∷ l' ++ v') ++ ys₂ ≡⟨ cong (t ∷_) (++-assoc l' v' ys₂) ⟩
+    t ∷ l' ++ v' ++ ys₂ ∎)
+
+  @0 l≡ : l ≡ l'
+  l≡ = Length.nonnesting ++≡' len len₁
+
+  @0 ++≡“ : v ++ ys₁ ≡ v' ++ ys₂
+  ++≡“ = Lemmas.++-cancel≡ˡ _ _ l≡
+    (begin l ++ v ++ ys₁ ≡⟨ ++≡' ⟩
+           l' ++ v' ++ ys₂ ∎)
+
+
 module TLVProps where
   @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (TLV t A)
   unambiguous{t}{A} ua (mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) (mkTLV{l = l₂}{v₂} len₂ val₂ len≡₂ bs≡₂) =

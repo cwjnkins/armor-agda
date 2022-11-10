@@ -19,11 +19,8 @@ open Aeres.Grammar.Sum         UInt8
 open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
-open import Aeres.Data.X509.EcPkAlg         public
 open import Aeres.Data.X509.IA5String       public
-import      Aeres.Data.X509.PkOID
-module PkOID = Aeres.Data.X509.PkOID
-open import Aeres.Data.X509.RSAPkAlg        public
+open import Aeres.Data.X509.PublicKey       public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.Strings         public
 open import Aeres.Data.X509.Validity        public
@@ -147,66 +144,6 @@ module X509 where
   SubUID : (@0 _ : List UInt8) → Set
   SubUID xs = TLV Tag.A82 BitStringValue xs
 
------------------------------------------Public Key------------------------------------------
- 
-  record RSAPkIntsFields (@0 bs : List UInt8) : Set where
-    constructor mkRSAPkIntsFields
-    field
-      @0 {n e} : List UInt8
-      nval : Int n 
-      eval : Int e
-      @0 bs≡ : bs ≡ n ++ e
-
-  RSAPkInts : (@0 _ : List UInt8) → Set
-  RSAPkInts xs = TLV Tag.Sequence RSAPkIntsFields xs
-  
-  record RSABitStringFields (@0 bs : List UInt8) : Set where
-    constructor mkRSABitStringFields
-    field
-      @0 {neseq} : List UInt8
-      z : Singleton ([ # 0 ]) 
-      rsane : RSAPkInts neseq
-      @0 bs≡ : bs ≡ (Singleton.x z) ++ neseq
-
-  RSABitString : @0 List UInt8 → Set
-  RSABitString xs = TLV Tag.BitString RSABitStringFields xs
-
-  module PkAlg where
-    data PkAlg : @0 List UInt8 → Set where
-      rsapkalg : ∀ {@0 bs} → RSAPkAlg bs → PkAlg bs
-      ecpkalg :  ∀ {@0 bs} → EcPkAlg bs → PkAlg bs
-      otherpkalg : ∀ {@0 bs} → (sa : SignAlg bs)
-                   → {!!} {- False (SignAlg.getSignAlgOIDbs sa ∈? PkOID.Supported) -} → PkAlg bs
-
-    getOID : ∀ {@0 bs} → PkAlg bs → List UInt8
-    getOID (rsapkalg x) = (Singleton.x ∘ RSAPkAlgFields.oid) ∘ TLV.val $ x
-    getOID (ecpkalg x) = (Singleton.x ∘ EcPkAlgFields.oid) ∘ TLV.val $ x
-    getOID (otherpkalg x _) = {!!} {- SignAlg.getSignAlgOIDbs x -}
-
-  open PkAlg public using (PkAlg) hiding (module PkAlg)
-
-  data PkVal : @0 List UInt8 → @0 List UInt8 → Set where
-    rsapkbits : ∀ {@0 o bs} → (o≡ : o ≡ PkOID.RsaEncPk) → RSABitString bs → PkVal o bs
-    ecpkbits : ∀ {@0 o bs} → (o≡ : o ≡ PkOID.EcPk) → BitString bs → PkVal o bs
-    otherpkbits :  ∀ {@0 o bs} → (o∉ : False (o ∈? PkOID.Supported)) → BitString bs → PkVal o bs
-
-  record PublicKeyFields (@0 bs : List UInt8) : Set where
-    constructor mkPublicKeyFields
-    field
-      @0 {alg pk} : List UInt8
-      pkalg : PkAlg alg
-      pubkey : PkVal (PkAlg.getOID pkalg) pk
-      @0 bs≡ : bs ≡ alg ++ pk
-
-  module PublicKey where
-    PublicKey : (@0 _ : List UInt8) → Set
-    PublicKey xs = TLV Tag.Sequence PublicKeyFields xs
-
-    getPkAlgOIDbs : ∀ {@0 bs} → PublicKey bs → List UInt8
-    getPkAlgOIDbs pk = PkAlg.getOID ∘ PublicKeyFields.pkalg ∘ TLV.val $ pk
-
-  open PublicKey public using (PublicKey)
- 
 -----------------------------------------Extensions------------------------------------------
  ----------------------- aki extension -------------------
 
@@ -744,8 +681,8 @@ module X509 where
     getSecNA :  ℕ
     getSecNA = Validity.getSecNA validity
 
-    getPublicKeyOIDbs : List UInt8
-    getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
+    -- getPublicKeyOIDbs : List UInt8
+    -- getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
 
     getIssuerLen : ℕ
     getIssuerLen = RDNSeq.getRDNSeqLen issuer
@@ -950,8 +887,8 @@ module X509 where
       getCertSignAlg : Exists─ (List UInt8) SignAlg
       getCertSignAlg = CertFields.getCertSignAlg (TLV.val c)
 
-      getPublicKeyOIDbs : List UInt8
-      getPublicKeyOIDbs = TBSCertFields.getPublicKeyOIDbs (TLV.val (CertFields.tbs (TLV.val c)))
+      -- getPublicKeyOIDbs : List UInt8
+      -- getPublicKeyOIDbs = TBSCertFields.getPublicKeyOIDbs (TLV.val (CertFields.tbs (TLV.val c)))
 
       getBC : Exists─ (List UInt8) (Option (ExtensionFields (_≡ ExtensionOID.BC) BCFields))
       getBC = CertFields.getBC (TLV.val c)

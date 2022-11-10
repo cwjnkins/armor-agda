@@ -1,0 +1,26 @@
+{-# OPTIONS --subtyping #-}
+
+open import Aeres.Binary
+open import Aeres.Data.X509.PublicKey.Alg.TCB
+open import Aeres.Data.X509.PublicKey.Val.EC
+open import Aeres.Data.X509.PublicKey.Val.RSA
+open import Aeres.Data.X509.PublicKey.Val.TCB
+open import Aeres.Data.X690-DER.BitString.TCB
+open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.TLV
+import      Aeres.Grammar.Definitions
+open import Aeres.Prelude
+
+module Aeres.Data.X509.PublicKey.Val.Properties where
+
+open Aeres.Grammar.Definitions UInt8
+
+@0 nonnesting : ∀ {@0 bs} → (o : OID bs) → NonNesting (PublicKeyVal o)
+nonnesting o = help o (_ ∈? _)
+  where
+  help : ∀ {@0 bs} → (o : OID bs)
+         → (d : Dec ((-, TLV.val o) ∈ supportedPublicKeyAlgs))
+         → NonNesting (PublicKeyVal' o d)
+  help o (yes (here px)) = TLV.nonnesting
+  help o (yes (there (here px))) = nonnesting×ₚ₁ TLV.nonnesting
+  help o (no ¬p) = TLV.nonnesting

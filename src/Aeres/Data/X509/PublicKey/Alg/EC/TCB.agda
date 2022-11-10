@@ -21,3 +21,6 @@ Params o =
 
 EC : @0 List UInt8 → Set
 EC = AlgorithmIdentifier Params
+
+getOID : ∀ {@0 bs} → EC bs → Exists─ _ OID
+getOID ec = -, (AlgorithmIdentifierFields.algOID (TLV.val ec))

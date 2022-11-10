@@ -246,7 +246,7 @@ equivalent×ₚ : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → Equivalent (
 proj₁ (equivalent×ₚ (f , g)) = map×ₚ f
 proj₂ (equivalent×ₚ (f , g)) = map×ₚ g
 
-ExactLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
+ExactLength : (@0 A : List Σ → Set) → @0 ℕ → @0 List Σ → Set
 ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
 
 ExactLengthString : ℕ → @0 List Σ → Set

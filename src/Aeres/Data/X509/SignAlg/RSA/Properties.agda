@@ -36,7 +36,7 @@ module PSS where
 
   module SupportedHashAlg where
 
-    nonnesting : NonNesting RSA.PSS.SupportedHashAlg
+    @0 nonnesting : NonNesting RSA.PSS.SupportedHashAlg
     nonnesting =
       nonnestingSum TLV.nonnesting
         (nonnestingSum TLV.nonnesting
