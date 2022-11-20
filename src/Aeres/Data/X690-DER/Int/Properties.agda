@@ -16,3 +16,6 @@ instance
     with s₁ ≟ s₂
   ... | yes refl = yes refl
   ... | no ¬eq = no λ where refl → contradiction refl ¬eq
+
+  eq≋ : Eq≋ IntegerValue
+  eq≋ = Eq⇒Eq≋ it

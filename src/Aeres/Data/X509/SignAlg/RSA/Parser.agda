@@ -9,6 +9,7 @@ import      Aeres.Data.X509.HashAlg.Parser as HashAlg
 open import Aeres.Data.X509.MaskGenAlg.Parser
 open import Aeres.Data.X509.SignAlg.RSA.TCB
 import      Aeres.Data.X509.SignAlg.RSA.Properties as RSA
+open import Aeres.Data.X509.SignAlg.RSA.PSS
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
@@ -33,31 +34,13 @@ parseSHA256  = parseSHA-Like OIDs.RSA.SHA256 "RSA (SHA256)"
 parseSHA384  = parseSHA-Like OIDs.RSA.SHA384 "RSA (SHA384)"
 parseSHA512  = parseSHA-Like OIDs.RSA.SHA512 "RSA (SHA512)"
 
-parsePSS : Parser (Logging ∘ Dec) PSS
-parsePSS =
-  parseAlgorithmIdentifier "RSA (SSA-PSS)" help
-  where
-  help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
-  help n o =
-    parseEquivalent
-      (symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
-      (parse×Dec exactLength-nonnesting
-        (tell $ "X509: SignAlg: RSA: PSS: mismatched OID")
-        (parseEquivalent (equivalent×ₚ RSA.PSS.equiv)
-          (parse&Option{M = Logging}
-            (parseSum HashAlg.parseSHA1
-              (parseSum HashAlg.parseSHA224
-                (parseSum HashAlg.parseSHA256
-                  (parseSum HashAlg.parseSHA384 HashAlg.parseSHA512))))
-            (parse&Option{M = Logging}
-              parseMGF1
-              (parse&Option {M = Logging} parseInt
-                (parseOption₁ExactLength (nonnestingΣₚ₁ TLV.nonnesting)
-                  (tell "X509: SignAlg: RSA: trailerField: underflow")
-                  (parseSigma TLV.nonnesting
-                    (TLV.unambiguous Int.unambiguous) parseInt
-                    (λ _ → _ ≟ _)))
-                TLV.nonnesting)
-              TLV.nonnesting)
-            RSA.PSS.SupportedHashAlg.nonnesting _))
-        λ x → _ ≋? _)
+parseSupported : Parser (Logging ∘ Dec) Supported
+parseSupported =
+   parseSum parseMD2
+  (parseSum parseMD5
+  (parseSum parseSHA1
+  (parseSum parseSHA224
+  (parseSum parseSHA256
+  (parseSum parseSHA384
+  (parseSum parseSHA512
+            parsePSS))))))

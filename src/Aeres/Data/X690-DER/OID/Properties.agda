@@ -106,11 +106,7 @@ open OID public
 
 instance
   OIDEq : Eq (Exists─ (List UInt8) OIDValue)
-  (OIDEq Eq.≟ (─ x , snd)) (─ x₁ , snd₁)
-    with snd ≋? snd₁
-  ... | no ¬p = no λ where
-    refl → contradiction ≋-refl ¬p
-  ... | yes ≋-refl = yes refl
+  OIDEq = Eq≋⇒Eq SequenceOf.BoundedSequenceOfEq≋
 
   OIDEq≋ : Eq≋ OIDValue
   OIDEq≋ = Eq⇒Eq≋ it

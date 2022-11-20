@@ -45,7 +45,7 @@ parseIpAddress : Parser Dig (Logging ∘ Dec) X509.IpAddress
 parseIpAddress = parseTLV _ "IP address" _ parseOctetStringValue
 
 parseRegID : Parser Dig (Logging ∘ Dec) X509.RegID
-parseRegID = parseTLV _ "registered name" _ parseOIDElems
+parseRegID = parseTLV _ "registered name" _ parseOIDValue
 
 module parseGeneralName where
 

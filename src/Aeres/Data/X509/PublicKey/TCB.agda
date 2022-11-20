@@ -19,6 +19,7 @@ record PublicKeyFields (@0 bs : List UInt8) : Set where
     @0 {a p} : List UInt8
     alg : PublicKeyAlg a
     key : PublicKeyVal (proj₂ (Alg.getOID alg)) p
+    @0 bs≡ : bs ≡ a ++ p
 
 PublicKey = TLV Tag.Sequence PublicKeyFields
 

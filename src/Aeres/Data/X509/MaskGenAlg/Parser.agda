@@ -30,9 +30,9 @@ parseMGF1 =
   help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
   help n o =
     parseExactLength
-      (nonnesting×ₚ₁ MGF1.nonnestingSupported)
+      (nonnesting×ₚ₁ MGF1.SupportedHashAlg.nonnesting)
       (tell $ "X509: MaskGenAlg: MGF1: length mismatch")
-      (parse×Dec MGF1.nonnestingSupported
+      (parse×Dec MGF1.SupportedHashAlg.nonnesting
         (tell $ "X509: MaskGenAlg: MGF1: mismatched maskgen OID")
         ( parseSum parseSHA1
          (parseSum parseSHA224

@@ -194,11 +194,10 @@ SCP1 : ∀ {@0 bs} → X509.Cert bs → Set
 SCP1 c = X509.Cert.getTBSCertSignAlg c ≡ X509.Cert.getCertSignAlg c
 
 scp1 :  ∀ {@0 bs} (c : X509.Cert bs) → Dec (SCP1 c)
-scp1 c
-  with proj₂ (X509.Cert.getTBSCertSignAlg c) ≋? proj₂ (X509.Cert.getCertSignAlg c)
-... | no ¬p = no (λ { refl → contradiction (mk≋ refl refl) ¬p})
-... | yes (mk≋ refl refl) = yes refl
-
+scp1 c =
+  case (proj₂ (X509.Cert.getTBSCertSignAlg c) ≋? proj₂ (X509.Cert.getCertSignAlg c)) ret (const _) of λ where
+      (yes ≋-refl) → yes refl
+      (no ¬eq) → no λ where refl → contradiction ≋-refl ¬eq
 
 -- Extension field MUST only appear if the Version is 3(2).
 SCP2 : ∀ {@0 bs} → X509.Cert bs → Set

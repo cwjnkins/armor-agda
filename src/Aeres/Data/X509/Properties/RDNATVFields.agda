@@ -8,9 +8,7 @@ open import Aeres.Prelude
 
 module Aeres.Data.X509.Properties.RDNATVFields where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
-open ≡-Reasoning
 
 iso : Iso (&ₚ OID DirectoryString) X509.RDNATVFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkRDNATVFields fstₚ₁ sndₚ₁ bs≡

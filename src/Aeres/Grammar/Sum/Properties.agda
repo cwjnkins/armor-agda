@@ -26,7 +26,7 @@ unambiguous' ua₁ ua₂ nc (inj₁ x) (inj₂ x₁) = ⊥-elim (nc x x₁)
 unambiguous' ua₁ ua₂ nc (inj₂ x) (inj₁ x₁) = ⊥-elim (nc x₁ x)
 unambiguous' ua₁ ua₂ nc (inj₂ x) (inj₂ x₁) = ‼ cong Sum.inj₂ (ua₂ x x₁)
 
-unambiguous : ∀ {@0 A B} → Unambiguous A → Unambiguous B → NoConfusion A B → Unambiguous (Sum A B)
+@0 unambiguous : ∀ {@0 A B} → Unambiguous A → Unambiguous B → NoConfusion A B → Unambiguous (Sum A B)
 unambiguous ua₁ ua₂ nc = unambiguous' ua₁ ua₂ λ {xs} → nc (refl {x = xs ++ []})
 
 sumEq : ∀ {@0 A B : @0 List Σ → Set} → ⦃ _ : Eq (Exists─ (List Σ) A) ⦄ ⦃ _ : Eq (Exists─ (List Σ) B) ⦄
@@ -42,3 +42,7 @@ Eq._≟_ sumEq (─ bs₁ , inj₂ x) (─ bs₂ , inj₂ y) =
   case (─ bs₁ ,e x) ≟ (─ bs₂ ,e y) ret (const _) of λ where
     (no ¬p) → no λ where refl → contradiction refl ¬p
     (yes refl) → yes refl
+
+sumEq≋ : ∀ {@0 A B : @0 List Σ → Set} → ⦃ eq₁ : Eq≋ A ⦄ → ⦃ eq₂ : Eq≋ B ⦄
+         → Eq≋ (Sum A B)
+sumEq≋ ⦃ eq₁ ⦄ ⦃ eq₂ ⦄ = Eq⇒Eq≋ (sumEq ⦃ Eq≋⇒Eq eq₁ ⦄ ⦃ Eq≋⇒Eq eq₂ ⦄)

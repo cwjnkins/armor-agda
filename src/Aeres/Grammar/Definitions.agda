@@ -154,6 +154,9 @@ Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
   y“ : Exists─ (List Σ) A
   y“ = (─ bs₂) , y'
 
+isoEq≋ : ∀ {@0 A B} → Iso A B → Eq≋ A → Eq≋ B
+isoEq≋ iso eq = Eq⇒Eq≋ (isoEq iso (Eq≋⇒Eq eq))
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
@@ -167,7 +170,7 @@ _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 -- TODO: rename
-NotEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
+NotEmpty : (A : List Σ → Set) → @0 List Σ → Set
 NotEmpty A = A ×ₚ (Erased ∘ (_≥ 1) ∘ length)
 
 Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
@@ -183,6 +186,11 @@ Eq._≟_ (eqΣₚ eq₁ eq₂) (─ bs₁ , mk×ₚ a₁ b₁ refl) (─ bs₂ ,
       case Eq._≟_ (eq₂ a₁) b₁ b₂ ret (const _) of λ where
         (no ¬p) → no λ where refl → contradiction refl ¬p
         (yes refl) → yes refl
+
+eq≋Σₚ : ∀ {@0 A B} → Eq≋ A
+        → (∀ {@0 bs} → (a : A bs) → Eq (B bs a))
+        → Eq≋ (Σₚ A B)
+eq≋Σₚ eq₁ eq₂ = Eq⇒Eq≋ (eqΣₚ (Eq≋⇒Eq eq₁) eq₂)
 
 instance
   NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)

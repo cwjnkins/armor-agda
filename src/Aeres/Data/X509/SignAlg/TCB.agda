@@ -17,6 +17,7 @@ import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
+import      Data.List.Relation.Unary.Any.Properties as Any
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum         UInt8
@@ -25,65 +26,42 @@ module Aeres.Data.X509.SignAlg.TCB where
 
 supportedSignAlgOIDs : List (Exists─ _ OIDValue)
 supportedSignAlgOIDs =
-    (-, OIDs.ECDSA.SHA1) ∷ (-, OIDs.ECDSA.SHA224) ∷ (-, OIDs.ECDSA.SHA256) ∷ (-, OIDs.ECDSA.SHA384) ∷ (-, OIDs.ECDSA.SHA512)
-  ∷ (-, OIDs.DSA.SHA1) ∷ (-, OIDs.DSA.SHA224) ∷ (-, OIDs.DSA.SHA256)
-  ∷ (-, OIDs.RSA.MD2) ∷ (-, OIDs.RSA.MD5) ∷ (-, OIDs.RSA.SHA1) ∷ (-, OIDs.RSA.SHA224) ∷ (-, OIDs.RSA.SHA256) ∷ (-, OIDs.RSA.SHA384) ∷ [ (-, OIDs.RSA.SHA512) ]
+  DSA.supportedSignAlgOIDs ++ ECDSA.supportedSignAlgOIDs ++ RSA.supportedSignAlgOIDs
+
+UnsupportedParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
+UnsupportedParam o =
+     OctetStringValue
+  ×ₚ const (False ((-, TLV.val o) ∈? supportedSignAlgOIDs))
 
 UnsupportedSignAlg =
-  TLV Tag.Sequence (&ₚ (Σₚ OID (λ _ o → False ((-, TLV.val o) ∈? supportedSignAlgOIDs))) OctetStringValue)
+  AlgorithmIdentifier UnsupportedParam
 
-SignAlg : @0 List UInt8 → Set
-SignAlg =
-   Sum ECDSA.SHA1
-  (Sum ECDSA.SHA224
-  (Sum ECDSA.SHA256
-  (Sum ECDSA.SHA384
-  (Sum ECDSA.SHA512
-  (Sum DSA.SHA1
-  (Sum DSA.SHA224
-  (Sum DSA.SHA256
-  (Sum RSA.MD2
-  (Sum RSA.MD5
-  (Sum RSA.SHA1
-  (Sum RSA.SHA224
-  (Sum RSA.SHA256
-  (Sum RSA.SHA384
-  (Sum RSA.SHA512
-  (Sum RSA.PSS
-       UnsupportedSignAlg)))))))))))))))
+data SignAlg (@0 bs : List UInt8) : Set where
+  dsa : DSA.Supported bs → SignAlg bs
+  ecdsa : ECDSA.Supported bs → SignAlg bs
+  rsa   : RSA.Supported bs → SignAlg bs
+  unsupported : UnsupportedSignAlg bs → SignAlg bs
+
+erase
+  : ∀ {@0 bs} → SignAlg bs
+    → AlgorithmIdentifier (const (Erased ∘ OctetStringValue)) bs
+erase (dsa x) =
+  case DSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (ecdsa x) =
+  case ECDSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (rsa x) =
+  case RSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (unsupported (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ _ refl) bs≡₁) len≡ bs≡)) =
+  mkTLV len (mkAlgIDFields algOID (─ p₁) bs≡₁) len≡ bs≡
 
 getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID
-getOID (Sum.inj₁ x) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₁ x)) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))))) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
-getOID (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))))) =
-  -, fstₚ (fstₚ (TLV.val x))
+getOID s = -, AlgorithmIdentifierFields.algOID (TLV.val (erase s))
+
+getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
+getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID

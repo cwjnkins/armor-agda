@@ -2,7 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.UTF8
-import      Aeres.Data.UTF8.Properties as UTF8
 open import Aeres.Data.X509.DisplayText.TCB
 open import Aeres.Data.X509.IA5String
 open import Aeres.Data.X509.Strings
@@ -136,3 +135,12 @@ unambiguous =
         (NoConfusion.sumₚ{A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
+
+instance
+  DisplayTextEq : Eq (Exists─ _ DisplayText)
+  DisplayTextEq =
+    isoEq iso
+      (sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+        ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+            ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+                ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)

@@ -4,7 +4,6 @@ open import Aeres.Binary
 open import Aeres.Data.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.IList.Properties
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -20,8 +19,6 @@ open Aeres.Grammar.Definitions      UInt8
 open Aeres.Grammar.IList            UInt8
 open Aeres.Grammar.Properties       UInt8
 open Aeres.Grammar.Sum              UInt8
-
-module IListProps = Aeres.Grammar.IList.Properties UInt8
 
 module UTF8Char1Props where
   @0 unambiguous : Unambiguous UTF8Char1
@@ -305,7 +302,7 @@ module UTF8CharProps where
 
 @0 unambiguous : Unambiguous UTF8
 unambiguous =
-  IListProps.unambiguous
+  IList.unambiguous
     UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
 
 instance
@@ -407,3 +404,6 @@ instance
 
   UTF8CharEq : Eq (Exists─ (List UInt8) UTF8Char)
   UTF8CharEq = Eq≋⇒Eq it
+
+  -- UTF8Eq : Eq (Exists─ _ UTF8)
+  -- UTF8Eq = IList.IListEq

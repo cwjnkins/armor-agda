@@ -15,11 +15,13 @@ module Aeres.Data.X509.HashAlg.TCB where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+SHA-Like-Param : ∀ {@0 bs} → (o : OIDValue bs) → ∀ {@0 bs'} → (o' : OID bs') → @0 List UInt8 → Set
+SHA-Like-Param o o' =
+      Option Null
+  ×ₚ const (_≋_{A = OIDValue} (TLV.val o') o)
+
 SHA-Like : {@0 bs : List UInt8} → OIDValue bs → @0 List UInt8 → Set
-SHA-Like o =
-  AlgorithmIdentifier
-    λ o' →    Option Null
-          ×ₚ const (_≋_{A = OIDValue} (TLV.val o') o)
+SHA-Like o = AlgorithmIdentifier (SHA-Like-Param o)
 
 SHA1   = SHA-Like OIDs.SHA1
 SHA224 = SHA-Like OIDs.SHA224

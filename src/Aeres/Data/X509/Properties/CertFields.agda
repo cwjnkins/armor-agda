@@ -37,7 +37,8 @@ instance
 @0 unambiguous : Unambiguous X509.CertFields
 unambiguous =
   isoUnambiguous iso
-    (unambiguous&ₚ (unambiguous×ₚ (TLV.unambiguous TBSCertFieldsProps.unambiguous) (λ where self self → refl))
+    (unambiguous&ₚ
+      (unambiguous×ₚ (TLV.unambiguous TBSCertFieldsProps.unambiguous) (λ where self self → refl))
       (nonnestingΣₚ₁ TLV.nonnesting)
-      (unambiguous&ₚ (TLV.unambiguous SignAlg.unambiguous) TLV.nonnesting
+      (unambiguous&ₚ SignAlg.unambiguous SignAlg.nonnesting
         (unambiguous×ₚ (TLV.unambiguous BitString.unambiguous) (λ where self self → refl))))

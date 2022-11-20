@@ -33,11 +33,11 @@ runParser (parseIA5StringValue n) xs = do
                   (trans ps≡₀ (sym ps≡))
                   (trans osLen (sym strLen))
           in
-          contradiction (subst (All _) (sym pre₀≡) all<128) all≮128
+          contradiction (subst (All _) (sym pre₀≡) (toWitness all<128)) all≮128
     (yes all<128) →
       return (yes
         (success pre₀ _ r₀≡
-          (mk×ₚ (mkIA5StringValue (singleton os₀ refl) all<128) (─ osLen) refl)
+          (mk×ₚ (mkIA5StringValue (singleton os₀ refl) (fromWitness all<128)) (─ osLen) refl)
           suf₀ ps≡₀))
   where here' = "parseIA5StringValue"
 

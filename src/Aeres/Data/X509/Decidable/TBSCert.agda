@@ -5,36 +5,39 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Extension
-open import Aeres.Data.X509.Decidable.PublicKey
 open import Aeres.Data.X509.Decidable.RDN
 open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Properties as Props
-open import Aeres.Grammar.Parser
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Parser
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Data.X509.Decidable.TBSCert where
 
-open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Properties  Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Parser      UInt8
 
 module parseTBSCert where
-  here' = "parseTBSCert"
+  here' = "X509: TBSCert"
 
-  parseIssUID : Parser _ (Logging ∘ Dec) X509.IssUID
+  parseIssUID : Parser (Logging ∘ Dec) X509.IssUID
   parseIssUID =
-    parseTLV Tag.A81 "issUID" BitStringValue parseBitstringValue
+    parseTLV Tag.A81 (here' String.++ ": IssUID") BitStringValue parseBitstringValue
 
-  parseSubUID : Parser _ (Logging ∘ Dec) X509.SubUID
+  parseSubUID : Parser (Logging ∘ Dec) X509.SubUID
   parseSubUID =
-    parseTLV Tag.A82 "subUID" BitStringValue parseBitstringValue
+    parseTLV Tag.A82 (here' String.++ ": SubUID") BitStringValue parseBitstringValue
 
-  parseTBSCertFields : ExactLengthParser _ (Logging ∘ Dec) X509.TBSCertFields
+  parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.TBSCertFields n)
   parseTBSCertFields n =
-    parseEquivalent _ (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.TBSCertFields.equivalent))
-      (parse&ᵈ _
+    parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.TBSCertFields.equivalent))
+      (parse&ᵈ{A = WithinLength (&ₚ (Option X509.Version) Int) n}
         (withinLength-nonnesting (NonNesting.noconfusion-option&₁ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())))
         (withinLength-unambiguous
           (Unambiguous.unambiguous-option₁&₁
@@ -42,48 +45,88 @@ module parseTBSCert where
               (TLV.unambiguous λ{xs} → Int.unambiguous{xs}))
             TLV.nonnesting
             (TLV.unambiguous λ{xs} → Int.unambiguous{xs}) (TLV.noconfusion λ ())))
-        (parseOption₁&₁≤ _ parseVersion parseInt TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
+        (parseOption₁&₁≤ parseVersion parseInt TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
         λ where
-          {bs} (singleton read read≡) _ →
-            subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
-              (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous SignAlg.unambiguous))
-                  (parse≤ _ (n - read) parseSignAlg TLV.nonnesting overflow)
-                    λ where
-                      {bs₁} (singleton r₁ r₁≡) _ →
-                        subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - x))) r₁≡
-                          (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                            (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
-                              (parse≤ _ (n - read - r₁) parseRDNSeq TLV.nonnesting overflow)
-                              λ {_} (singleton r₂ r₂≡) _ →
-                                subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - x))) r₂≡
-                                  (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                    (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous (TLV.unambiguous Validity.unambiguous))
-                                      (parse≤ _ (n - read - r₁ - r₂) parseValidity TLV.nonnesting overflow)
-                                      λ where
-                                        (singleton r₃ r₃≡) _ →
-                                          subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - x))) r₃≡
-                                            (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                              (parse&ᵈ _ (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous Props.RDNSeq.unambiguous)
-                                                (parse≤ _ (n - read - r₁ - r₂ - r₃) parseRDNSeq TLV.nonnesting overflow)
-                                                λ where
-                                                  (singleton r₄ r₄≡) _ →
-                                                    subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - x))) r₄≡
-                                                      (parseEquivalent _ (symEquivalent Distribute.exactLength-&)
-                                                        (parse&ᵈ _ (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
-                                                          (withinLength-unambiguous (unambiguous×ₚ (TLV.unambiguous Props.PublicKeyFields.unambiguous) λ where self self → refl))
-                                                          (parse≤ _ (n - read - r₁ - r₂ - r₃ - r₄) (parse×Singleton _ parsePublicKey) (nonnestingΣₚ₁ TLV.nonnesting) overflow)
-                                                          λ where
-                                                            (singleton r₅ r₅≡) _ →
-                                                              subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ (n - read - r₁ - r₂ - r₃ - r₄ - x))) r₅≡
-                                                                (parseOption₃ _ TLV.nonnesting TLV.nonnesting TLV.nonnesting
-                                                                  (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
-                                                                  parseIssUID parseSubUID parseExtensions (tell $ here' String.++ ": underflow") (n - read - r₁ - r₂ - r₃ - r₄ - r₅)))))))))))))
+          (singleton r₁ r₁≡) _ →
+            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₇ (n - x)))
+              r₁≡ (p₁ (n - r₁)))
     where
     overflow : Logging (Level.Lift _ ⊤)
     overflow = tell $ here' String.++ ": overflow"
 
-  parseTBSCert : Parser _ (Logging ∘ Dec) X509.TBSCert
+
+    p₆ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₂ n)
+    p₆ n =
+        parseOption₃{A = X509.IssUID}{B = X509.SubUID}{C = X509.Extensions}
+          TLV.nonnesting TLV.nonnesting TLV.nonnesting
+          (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
+          parseIssUID parseSubUID parseExtensions
+          (tell $ here' String.++ ": underflow (issUID, subUID, extensions)")
+          _
+
+    p₅ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₃ n)
+    p₅ n =
+      parseEquivalent (symEquivalent Distribute.exactLength-&)
+        (parse&ᵈ {A = WithinLength (PublicKey ×ₚ Singleton) n}
+          (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
+          (withinLength-unambiguous (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl)))
+          (parse≤ _ (parse×Singleton parsePublicKey)
+          (nonnesting×ₚ₁ TLV.nonnesting) overflow)
+          λ where
+            (singleton r r≡) _ →
+              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₂ (n - x)))
+                r≡ (p₆ (n - r)))
+
+    p₄ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₄ n)
+    p₄ n =
+      parseEquivalent (symEquivalent Distribute.exactLength-&)
+        (parse&ᵈ {A = WithinLength X509.RDNSeq n}
+          (withinLength-nonnesting TLV.nonnesting)
+          (withinLength-unambiguous Props.RDNSeq.unambiguous)
+          (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
+          λ where
+            (singleton r r≡) _ →
+              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₃ (n ∸ x)))
+                r≡
+                (p₅ (n - r)))
+
+    p₃ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₅ n)
+    p₃ n =
+      parseEquivalent (symEquivalent Distribute.exactLength-&)
+        (parse&ᵈ {A = WithinLength Validity n}
+          (withinLength-nonnesting TLV.nonnesting)
+          (withinLength-unambiguous (TLV.unambiguous Validity.unambiguous))
+          (parse≤ _ parseValidity TLV.nonnesting overflow)
+          λ where
+            (singleton r r≡) _ →
+              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₄ (n ∸ x)))
+                r≡ (p₄ (n - r)))
+
+    p₂ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₆ n)
+    p₂ n  =
+      parseEquivalent (symEquivalent Distribute.exactLength-&)
+        (parse&ᵈ{A = WithinLength X509.RDNSeq n}
+          (withinLength-nonnesting TLV.nonnesting)
+          (withinLength-unambiguous Props.RDNSeq.unambiguous)
+          (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
+          λ where
+            (singleton r r≡) _ →
+              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₅ (n ∸ x)))
+                r≡ (p₃ (n - r)))
+
+    p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₇ n)
+    p₁ n =
+      parseEquivalent (symEquivalent Distribute.exactLength-&)
+        (parse&ᵈ{A = WithinLength SignAlg n}
+          (withinLength-nonnesting{A = SignAlg} SignAlg.nonnesting)
+          (withinLength-unambiguous SignAlg.unambiguous)
+          (parse≤ _ parseSignAlg SignAlg.nonnesting overflow)
+          λ where
+            (singleton r r≡) _ →
+              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₆ (n - x)))
+                r≡ (p₂ (n - r)))
+
+  parseTBSCert : Parser (Logging ∘ Dec) X509.TBSCert
   parseTBSCert = parseTLV _ "TBS cert." _ parseTBSCertFields
 
 open parseTBSCert public using (parseTBSCert)

@@ -21,7 +21,7 @@ open Aeres.Grammar.Properties  UInt8
 
 module parseCert where
 
-  here' = "parseCert"
+  here' = "X509: Cert"
 
   parseCertFields : ExactLengthParser (Logging ∘ Dec) X509.CertFields
   parseCertFields n =
@@ -29,21 +29,27 @@ module parseCert where
       (transEquivalent
         (symEquivalent Distribute.exactLength-&)
         (equivalent×ₚ Props.CertFields.equiv))
-      (parse&ᵈ
-        (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
+      (parse&ᵈ{A = WithinLength (X509.TBSCert ×ₚ Singleton) n}
+        (withinLength-nonnesting (nonnesting×ₚ₁ TLV.nonnesting))
         (withinLength-unambiguous
           (unambiguous×ₚ
             (TLV.unambiguous Props.TBSCertFields.unambiguous)
             (λ where self self → refl)))
-        (parse≤ n (parse×Singleton parseTBSCert) (nonnestingΣₚ₁ TLV.nonnesting) (tell $ here' String.++ ": overflow"))
+        (parse≤ _ (parse×Singleton parseTBSCert)
+          (nonnesting×ₚ₁ TLV.nonnesting)
+          (tell $ here' String.++ ": overflow (TBS cert)"))
         λ where
-          (singleton r₀ r₀≡) _ →
-            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r₀≡
-              (parseExactLength
-                (NonNesting&ₚ TLV.nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
-                (tell $ here' String.++ ": length mismatch")
-                (parse& TLV.nonnesting parseSignAlg (parse×Singleton parseBitstring))
-                (n - r₀)))
+          (singleton r r≡) a →
+            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - x)))
+              r≡ (p₁ (n - r)))
+    where
+    p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) n)
+    p₁ n =
+      parseExactLength
+        (NonNesting&ₚ SignAlg.nonnesting (nonnesting×ₚ₁ TLV.nonnesting))
+        (tell $ here' String.++ ": length mismatch (sign alg, signature)")
+        (parse& SignAlg.nonnesting parseSignAlg
+          (parse×Singleton parseBitstring)) _
 
   parseCert : Parser (Logging ∘ Dec) X509.Cert
   parseCert =

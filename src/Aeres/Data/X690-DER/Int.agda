@@ -13,6 +13,6 @@ module Int where
   open Aeres.Data.X690-DER.Int.TCB        public
 
 open Int public
-  hiding (getVal ; serialize ; serializeVal; unambiguous)
+  hiding (getVal ; serialize ; serializeVal; unambiguous; eq≋)
 
 open Aeres.Data.X690-DER.Int.Parser public

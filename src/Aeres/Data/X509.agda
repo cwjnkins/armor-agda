@@ -20,6 +20,7 @@ open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.IA5String       public
+open import Aeres.Data.X509.NoticeReference public
 open import Aeres.Data.X509.PublicKey       public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.Strings         public
@@ -222,17 +223,6 @@ module X509 where
 
     USERNOTICE : List UInt8
     USERNOTICE = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
-
-  record NoticeReferenceFields (@0 bs : List UInt8) : Set where
-    constructor mkNoticeReferenceFields
-    field
-      @0 {org nn} : List UInt8
-      organization : DisplayText org
-      noticenums : IntegerSeq nn
-      @0 bs≡  : bs ≡ org ++ nn
-
-  NoticeReference : (@0 _ : List UInt8) → Set
-  NoticeReference xs = TLV Tag.Sequence NoticeReferenceFields xs
 
   record UserNoticeFields (@0 bs : List UInt8) : Set where
     constructor mkUserNoticeFields

@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Extension       as ExtensionProps
-import      Aeres.Data.X509.Properties.PublicKeyFields as PKProps
 import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -20,15 +19,16 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open ≡-Reasoning
 
+Rep₁ = &ₚ (Option X509.SubUID) (Option X509.Extensions)
+Rep₂ = &ₚ (Option X509.IssUID) Rep₁
+Rep₃ = &ₚ (PublicKey ×ₚ Singleton) Rep₂
+Rep₄ = &ₚ X509.RDNSeq Rep₃
+Rep₅ = &ₚ Validity Rep₄
+Rep₆ = &ₚ X509.RDNSeq Rep₅
+Rep₇ = &ₚ SignAlg Rep₆
+
 Rep : @0 List UInt8 → Set
-Rep = (&ₚ (&ₚ (Option X509.Version) Int)
-      (&ₚ SignAlg
-      (&ₚ X509.RDNSeq
-      (&ₚ Validity
-      (&ₚ X509.RDNSeq
-      (&ₚ (X509.PublicKey ×ₚ Singleton)
-      (&ₚ (Option X509.IssUID)
-      (&ₚ (Option X509.SubUID) (Option X509.Extensions)))))))))
+Rep = (&ₚ (&ₚ (Option X509.Version) Int) Rep₇)
 
 equivalent : Equivalent
                Rep
@@ -57,26 +57,20 @@ unambiguous =
     (unambiguous&ₚ
       (Unambiguous.unambiguous-option₁&₁
         (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
-        TLV.nonnesting (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
+        TLV.nonnesting
+        (TLV.unambiguous Int.unambiguous)
         (TLV.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
         TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
-      (unambiguous&ₚ
-        (TLV.unambiguous SignAlg.unambiguous)
-        TLV.nonnesting
+      (unambiguous&ₚ SignAlg.unambiguous SignAlg.nonnesting
         (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
-          (unambiguous&ₚ
-            (TLV.unambiguous Validity.unambiguous)
-            TLV.nonnesting
+          (unambiguous&ₚ (TLV.unambiguous Validity.unambiguous) TLV.nonnesting
             (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
               (unambiguous&ₚ
-                (unambiguous×ₚ (TLV.unambiguous PKProps.unambiguous) (λ where self self → refl))
-                (nonnestingΣₚ₁ TLV.nonnesting)
-                (Unambiguous.option₃&₂
-                  (TLV.unambiguous BitString.unambiguous)
-                  TLV.nonnesting TLV.nonempty
-                  (TLV.unambiguous BitString.unambiguous)
-                  TLV.nonnesting TLV.nonempty
-                  (TLV.unambiguous ExtensionProps.ExtensionsSeq.unambiguous)
-                  TLV.nonempty
-                  (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))))))
+                (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
+                  (nonnesting×ₚ₁ TLV.nonnesting)
+                  (Unambiguous.option₃&₂
+                    (TLV.unambiguous BitString.unambiguous) TLV.nonnesting TLV.nonempty
+                    (TLV.unambiguous BitString.unambiguous) TLV.nonnesting TLV.nonempty
+                    (TLV.unambiguous ExtensionProps.ExtensionsSeq.unambiguous)
+                    TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))
