@@ -58,30 +58,30 @@ module X509 where
 
  --------------- RDNSeq -------------------------------------
 
-  record RDNATVFields (@0 bs : List UInt8) : Set where
-    constructor mkRDNATVFields
-    field
-      @0 {o v} : List UInt8
-      oid : OID o
-      val : DirectoryString v
-      @0 bs≡  : bs ≡ o ++ v
+  -- record RDNATVFields (@0 bs : List UInt8) : Set where
+  --   constructor mkRDNATVFields
+  --   field
+  --     @0 {o v} : List UInt8
+  --     oid : OID o
+  --     val : DirectoryString v
+  --     @0 bs≡  : bs ≡ o ++ v
 
-  RDNATV : (@0 _ : List UInt8) → Set
-  RDNATV xs = TLV Tag.Sequence RDNATVFields xs
+  -- RDNATV : (@0 _ : List UInt8) → Set
+  -- RDNATV xs = TLV Tag.Sequence RDNATVFields xs
 
-  RDNElems : @0 List UInt8 → Set
-  RDNElems = NonEmptySequenceOf RDNATV
+  -- RDNElems : @0 List UInt8 → Set
+  -- RDNElems = NonEmptySequenceOf RDNATV
 
-  RDN : (@0 _ : List UInt8) → Set
-  RDN = TLV Tag.Sett RDNElems
+  -- RDN : (@0 _ : List UInt8) → Set
+  -- RDN = TLV Tag.Sett RDNElems
 
-  module RDNSeq where
-    RDNSeq : (@0 _ : List UInt8) → Set
-    RDNSeq = Seq RDN
+  -- module RDNSeq where
+  --   RDNSeq : (@0 _ : List UInt8) → Set
+  --   RDNSeq = Seq RDN
 
-    getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
-    getRDNSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val
-  open RDNSeq public using (RDNSeq)
+  --   getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
+  --   getRDNSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val
+  -- open RDNSeq public using (RDNSeq)
 
 ----------------------- Generalnames --------------------
 

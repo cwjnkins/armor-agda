@@ -88,9 +88,16 @@ module Fields where
         (&ₚ (TLV Tag.AA2 (Option Int))
             (TLV Tag.AA3 (Option (Σₚ Int λ _ i → Int.getVal i ≡ ℤ.1ℤ)))))
 
-  postulate
-    equiv : Equivalent Rep PSSParamFields
-    iso   : Iso Rep PSSParamFields
+  equiv : Equivalent Rep PSSParamFields
+  proj₁ equiv (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ sndₚ₁ refl) refl) bs≡) =
+    mkPSSParam fstₚ₁ fstₚ₂ fstₚ₃ sndₚ₁ bs≡
+  proj₂ equiv (mkPSSParam hashAlg maskGenAlgo saltLength trailerField bs≡) =
+    mk&ₚ hashAlg (mk&ₚ maskGenAlgo (mk&ₚ saltLength trailerField refl) refl) bs≡
+
+  iso   : Iso Rep PSSParamFields
+  proj₁ iso = equiv
+  proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ sndₚ₁ refl) refl) bs≡) = refl
+  proj₂ (proj₂ iso) (mkPSSParam hashAlg maskGenAlgo saltLength trailerField bs≡) = refl
 
   @0 unambiguous : Unambiguous PSSParamFields
   unambiguous =

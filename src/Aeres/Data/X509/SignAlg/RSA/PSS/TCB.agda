@@ -128,6 +128,8 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    absent trailerField field.
     trailerField : TLV Tag.AA3 (Option (Σₚ Int λ _ i → getVal i ≡ ℤ.1ℤ)) t
 
+    @0 bs≡ : bs ≡ h ++ m ++ s ++ t
+
 PSSParam : {@0 bs : List UInt8} → OID bs → @0 List UInt8 → Set
 PSSParam o =
      PSSParamFields

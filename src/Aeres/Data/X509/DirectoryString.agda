@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
+import Aeres.Data.X509.DirectoryString.Eq
 import Aeres.Data.X509.DirectoryString.Parser
 import Aeres.Data.X509.DirectoryString.Properties
 import Aeres.Data.X509.DirectoryString.TCB
@@ -11,4 +12,5 @@ open Aeres.Data.X509.DirectoryString.TCB public
   hiding (module DirectoryString)
 
 module DirectoryString where
+  open Aeres.Data.X509.DirectoryString.Eq         public
   open Aeres.Data.X509.DirectoryString.Properties public
