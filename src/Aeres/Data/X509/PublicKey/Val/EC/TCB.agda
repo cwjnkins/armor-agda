@@ -27,4 +27,4 @@ open Aeres.Grammar.Definitions UInt8
 
 -- TODO: it would be nicer to say "BitString such that unused bits is 0"
 ECBitString : @0 List UInt8 → Set
-ECBitString = BitString ×ₚ &ₚ (_≡ [ # 0 ]) OctetStringValue
+ECBitString = BitString ×ₚ (Erased ∘ TLV Tag.BitString (&ₚ (_≡ [ # 0 ]) OctetStringValue))

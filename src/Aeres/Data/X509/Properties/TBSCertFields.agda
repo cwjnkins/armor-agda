@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.Extension       as ExtensionProps
-import      Aeres.Data.X509.Properties.RDNSeq          as RDNSeqProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -19,16 +18,16 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open ≡-Reasoning
 
-Rep₁ = &ₚ (Option X509.SubUID) (Option X509.Extensions)
-Rep₂ = &ₚ (Option X509.IssUID) Rep₁
+Rep₁ = &ₚ (Option SubUID) (Option X509.Extensions)
+Rep₂ = &ₚ (Option IssUID) Rep₁
 Rep₃ = &ₚ (PublicKey ×ₚ Singleton) Rep₂
-Rep₄ = &ₚ X509.RDNSeq Rep₃
+Rep₄ = &ₚ RDNSeq Rep₃
 Rep₅ = &ₚ Validity Rep₄
-Rep₆ = &ₚ X509.RDNSeq Rep₅
+Rep₆ = &ₚ RDNSeq Rep₅
 Rep₇ = &ₚ SignAlg Rep₆
 
 Rep : @0 List UInt8 → Set
-Rep = (&ₚ (&ₚ (Option X509.Version) Int) Rep₇)
+Rep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
 
 equivalent : Equivalent
                Rep
@@ -63,9 +62,9 @@ unambiguous =
       (NonNesting.noconfusion-option&₁
         TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
       (unambiguous&ₚ SignAlg.unambiguous SignAlg.nonnesting
-        (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
+        (unambiguous&ₚ RDN.Seq.unambiguous TLV.nonnesting
           (unambiguous&ₚ (TLV.unambiguous Validity.unambiguous) TLV.nonnesting
-            (unambiguous&ₚ RDNSeqProps.unambiguous TLV.nonnesting
+            (unambiguous&ₚ RDN.Seq.unambiguous TLV.nonnesting
               (unambiguous&ₚ
                 (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
                   (nonnesting×ₚ₁ TLV.nonnesting)

@@ -31,7 +31,7 @@ instance
     where
     eq : Eq (Exists─ (List UInt8) Rep)
     eq = eq&ₚ (eqΣₚ it λ _ → it)
-           (eq&ₚ (Eq≋⇒Eq it)
+           (eq&ₚ (Eq≋⇒Eq SignAlg.eq≋)
              (eqΣₚ (Eq≋⇒Eq (TLV.EqTLV ⦃ Eq⇒Eq≋ BitString.eq ⦄)) λ _ → it))
 
 @0 unambiguous : Unambiguous X509.CertFields

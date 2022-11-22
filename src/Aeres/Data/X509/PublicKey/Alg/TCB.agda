@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.PublicKey.Alg.EC.TCB   as EC
 import      Aeres.Data.X509.PublicKey.Alg.RSA.TCB  as RSA
@@ -23,10 +24,13 @@ supportedPublicKeyAlgs : List (Exists─ _ OIDValue)
 supportedPublicKeyAlgs =
   (-, OIDs.RSA) ∷ [ -, OIDs.EC ]
 
+UnsupportedParam : ∀ {@0 bs} → (o : OID bs) → @0 List UInt8 → Set
+UnsupportedParam o =
+     OctetStringValue
+  ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))
+
 UnsupportedPublicKeyAlg =
-  TLV Tag.Sequence
-    (&ₚ (Σₚ OID (λ _ o → False ((-, TLV.val o) ∈? supportedPublicKeyAlgs)))
-        OctetStringValue)
+  AlgorithmIdentifier UnsupportedParam
 
 PublicKeyAlg : @0 List UInt8 → Set
 PublicKeyAlg =
@@ -35,7 +39,9 @@ PublicKeyAlg =
        UnsupportedPublicKeyAlg)
 
 getOID : ∀ {@0 bs} → PublicKeyAlg bs → Exists─ _ OID
-getOID (Sum.inj₁ x) = RSA.getOID x
-getOID (Sum.inj₂ (Sum.inj₁ x)) = EC.getOID x
+getOID (Sum.inj₁ x) =
+  RSA.getOID x
+getOID (Sum.inj₂ (Sum.inj₁ x)) =
+  EC.getOID x
 getOID (Sum.inj₂ (Sum.inj₂ x)) =
-  -, (fstₚ (fstₚ (TLV.val x)))
+  -, AlgorithmIdentifierFields.algOID (TLV.val x)

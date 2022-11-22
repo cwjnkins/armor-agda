@@ -21,3 +21,6 @@ instance
   eq≋ATV =
     isoEq≋ ATV.iso
       (Eq⇒Eq≋ (eq&ₚ it (Eq≋⇒Eq it)))
+
+  eq≋Elems : Eq≋ RDNElems
+  eq≋Elems = SequenceOf.BoundedSequenceOfEq≋

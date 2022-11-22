@@ -3,10 +3,8 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.AccessDescFields   as ADProps
-import      Aeres.Data.X509.Properties.AKIFieldsSeqFields as AKIProps
 import      Aeres.Data.X509.Properties.BCFieldsSeqFields  as BCProps
 import      Aeres.Data.X509.Properties.DistPointFields    as DistPointFieldsProps
-import      Aeres.Data.X509.Properties.GeneralName        as GeneralNameProps
 import      Aeres.Data.X509.Properties.NCFieldsSeqFields  as NCProps
 import      Aeres.Data.X509.Properties.PCFieldsSeqFields  as PCProps
 import      Aeres.Data.X509.Properties.PolicyInformationFields as PIProps
@@ -59,7 +57,7 @@ module ExtensionFields where
         (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nonnesting ua₂ nc))
 
 module SelectExtn where
-  Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            X509.AKIFields)
+  Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            AKIFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            X509.SKIFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            X509.KUFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            X509.EKUFields)
@@ -143,7 +141,7 @@ module SelectExtn where
   unambiguous =
     isoUnambiguous iso
       (unambiguousSum
-        (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKIProps.unambiguous)) (TLV.noconfusion λ ()))
+        (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKI.unambiguous)) (TLV.noconfusion λ ()))
         (unambiguousSum
           (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetString.unambiguous)) (TLV.noconfusion λ ()))
           (unambiguousSum
@@ -153,9 +151,9 @@ module SelectExtn where
               (unambiguousSum
                 (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous BCProps.unambiguous)) (TLV.noconfusion λ ()))
                 (unambiguousSum
-                  (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
+                  (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                   (unambiguousSum
-                    (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralNameProps.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
+                    (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                     (unambiguousSum
                        (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PIProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                       (unambiguousSum
@@ -222,33 +220,33 @@ module SelectExtn where
       @0 oid≡ : oid ≡ oex₁
       oid≡ = TLV.nonnesting bs≡' extnId extnId₁
 
-    noconfusion₁ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields) (Sum _ _)
+    noconfusion₁ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields) (Sum _ _)
     noconfusion₁ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                             (noconfusionOIDS λ ())
-                            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                               (noconfusionOIDS λ ())
-                              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) X509.AKIFields}
+                              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                                 (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))))
 
     noconfusion₂ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields) (Sum _ _)

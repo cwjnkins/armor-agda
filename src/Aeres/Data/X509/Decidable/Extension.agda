@@ -5,7 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.AIAFields
-open import Aeres.Data.X509.Decidable.AKIFields
 open import Aeres.Data.X509.Decidable.BCFields
 open import Aeres.Data.X509.Decidable.Boool
 open import Aeres.Data.X509.Decidable.CRLDistFields

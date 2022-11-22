@@ -39,3 +39,6 @@ instance
             { _≟_ = λ where
               (─ x) (─ y) → yes (cong ─_ (‼ T-unique x y))
             })
+
+  IA5StringEq≋ : Eq≋ IA5StringValue
+  IA5StringEq≋ = Eq⇒Eq≋ it

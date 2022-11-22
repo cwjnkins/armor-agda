@@ -19,11 +19,15 @@ open Aeres.Grammar.Sum         UInt8
 open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
+open import Aeres.Data.X509.Extension.AKI   public
+open import Aeres.Data.X509.GeneralName     public
 open import Aeres.Data.X509.IA5String       public
 open import Aeres.Data.X509.NoticeReference public
 open import Aeres.Data.X509.PublicKey       public
+open import Aeres.Data.X509.RDN             public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.Strings         public
+open import Aeres.Data.X509.TBSCert         public
 open import Aeres.Data.X509.Validity        public
 
 ------------------------------X.509-----------------------------------------------------------
@@ -56,121 +60,8 @@ module X509 where
   ExpNull : List UInt8
   ExpNull = # 5 ∷ [ # 0 ]
 
- --------------- RDNSeq -------------------------------------
-
-  -- record RDNATVFields (@0 bs : List UInt8) : Set where
-  --   constructor mkRDNATVFields
-  --   field
-  --     @0 {o v} : List UInt8
-  --     oid : OID o
-  --     val : DirectoryString v
-  --     @0 bs≡  : bs ≡ o ++ v
-
-  -- RDNATV : (@0 _ : List UInt8) → Set
-  -- RDNATV xs = TLV Tag.Sequence RDNATVFields xs
-
-  -- RDNElems : @0 List UInt8 → Set
-  -- RDNElems = NonEmptySequenceOf RDNATV
-
-  -- RDN : (@0 _ : List UInt8) → Set
-  -- RDN = TLV Tag.Sett RDNElems
-
-  -- module RDNSeq where
-  --   RDNSeq : (@0 _ : List UInt8) → Set
-  --   RDNSeq = Seq RDN
-
-  --   getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
-  --   getRDNSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val
-  -- open RDNSeq public using (RDNSeq)
-
------------------------ Generalnames --------------------
-
-  --- we do not support OtherName since very rarely used
-  OtherName : (@0 _ : List UInt8) → Set
-  OtherName xs = TLV Tag.AA0 OctetStringValue xs --abstracted
-
-  RfcName : (@0 _ : List UInt8) → Set
-  RfcName xs = TLV Tag.A81 IA5StringValue xs
-
-  DnsName : (@0 _ : List UInt8) → Set
-  DnsName xs = TLV Tag.A82 IA5StringValue xs
-
-  --- we do not support X400Address since very rarely used
-  X400Address : (@0 _ : List UInt8) → Set
-  X400Address xs = TLV Tag.AA3 OctetStringValue xs --abstracted
-
-  DirName : (@0 _ : List UInt8) → Set
-  DirName xs = TLV Tag.AA4 (SequenceOf RDN) xs
-
-  --- we do not support EdipartyName since very rarely used
-  EdipartyName : (@0 _ : List UInt8) → Set
-  EdipartyName xs = TLV Tag.AA5 OctetStringValue xs --abstracted
-
-  URI : (@0 _ : List UInt8) → Set
-  URI xs = TLV Tag.A86 IA5StringValue xs
-
-  IpAddress : (@0 _ : List UInt8) → Set
-  IpAddress xs = TLV Tag.A87 OctetStringValue xs
-
-  RegID : (@0 _ : List UInt8) → Set
-  RegID xs = TLV Tag.A88 (NonEmptySequenceOf OIDSub) xs
-
-  data GeneralName : @0 List UInt8 → Set where
-    oname : ∀ {@0 bs} → OtherName bs → GeneralName bs
-    rfcname : ∀ {@0 bs} → RfcName bs → GeneralName bs
-    dnsname : ∀ {@0 bs} → DnsName bs → GeneralName bs
-    x400add : ∀ {@0 bs} → X400Address bs → GeneralName bs
-    dirname : ∀ {@0 bs} → DirName bs → GeneralName bs
-    ediname : ∀ {@0 bs} → EdipartyName bs → GeneralName bs
-    uri : ∀ {@0 bs} → URI bs → GeneralName bs
-    ipadd : ∀ {@0 bs} → IpAddress bs → GeneralName bs
-    rid : ∀ {@0 bs} → RegID bs → GeneralName bs
-
-  GeneralNamesElems = NonEmptySequenceOf GeneralName
-  GeneralNames = TLV Tag.Sequence GeneralNamesElems
-
-  --------------------------TBSCert-----------------------------------------------------------------
-
-  module Version where
-    Version : (@0 _ : List UInt8) → Set
-    Version xs = TLV Tag.AA0 Int xs
-
-    getVal : ∀ {@0 bs} → Version bs → ℤ
-    getVal v = Int.getVal (TLV.val v)
-  open Version public using (Version)
-
-  IssUID : (@0 _ : List UInt8) → Set
-  IssUID xs = TLV Tag.A81 BitStringValue xs
-
-  SubUID : (@0 _ : List UInt8) → Set
-  SubUID xs = TLV Tag.A82 BitStringValue xs
-
 -----------------------------------------Extensions------------------------------------------
- ----------------------- aki extension -------------------
 
-  AKIKeyId : (@0 _ : List UInt8) → Set
-  AKIKeyId xs = TLV Tag.A80 OctetStringValue xs
-
-  AKIAuthCertIssuer : (@0 _ : List UInt8) → Set
-  AKIAuthCertIssuer xs = TLV Tag.AA1 GeneralNamesElems xs
-
-  AKIAuthCertSN : (@0 _ : List UInt8) → Set
-  AKIAuthCertSN xs = TLV Tag.A82  IntegerValue xs
-
-  record AKIFieldsSeqFields (@0 bs : List UInt8) : Set where
-    constructor mkAKIFieldsSeqFields
-    field
-      @0 {akid ci csn} : List UInt8
-      akeyid : Option AKIKeyId akid
-      authcertiss : Option AKIAuthCertIssuer ci
-      authcertsn : Option AKIAuthCertSN csn
-      @0 bs≡  : bs ≡ akid ++ ci ++ csn
-
-  AKIFieldsSeq : (@0 _ : List UInt8) → Set
-  AKIFieldsSeq xs = TLV Tag.Sequence  AKIFieldsSeqFields xs
-
-  AKIFields : (@0 _ : List UInt8) → Set
-  AKIFields xs = TLV Tag.OctetString  AKIFieldsSeq xs
 ------------------------------------------------------------------------------------------
 
   SKIFields : (@0 _ : List UInt8) → Set
@@ -675,10 +566,10 @@ module X509 where
     -- getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
 
     getIssuerLen : ℕ
-    getIssuerLen = RDNSeq.getRDNSeqLen issuer
+    getIssuerLen = RDN.getSeqLen issuer
 
     getSubjectLen :  ℕ
-    getSubjectLen = RDNSeq.getRDNSeqLen subject
+    getSubjectLen = RDN.getSeqLen subject
 
     getIssuer : Exists─ (List UInt8) RDNSeq
     getIssuer = _ , issuer

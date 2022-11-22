@@ -19,6 +19,12 @@ nonnesting = nonnesting×ₚ₁ TLV.nonnesting
 unambiguous =
   unambiguous×ₚ
     (TLV.unambiguous BitString.unambiguous)
-    (unambiguous&ₚ (λ where refl refl → refl)
-      (λ where _ refl refl → refl)
-      OctetString.unambiguous)
+    λ where
+      (─ a₁) (─ a₂) →
+        cong ─_
+          (‼ TLV.unambiguous
+            (unambiguous&ₚ
+              (λ where refl refl → refl)
+              (λ where _ refl refl → refl)
+              OctetString.unambiguous)
+            a₁ a₂)

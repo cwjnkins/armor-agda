@@ -4,8 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.GeneralName
-open import Aeres.Data.X509.Decidable.RDN
 import      Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -45,7 +43,7 @@ module parseDistPoint where
             (tell $ "parseDistPoint: name choice: underflow")
             parseDistPointNameChoice))
         (parseTLV Tag.A81 "reason flags" _ parseBitstringValue)
-        (parseTLV Tag.AA2 "CRL issuer" X509.GeneralNamesElems
+        (parseTLV Tag.AA2 "CRL issuer" GeneralNamesElems
           parseGeneralNamesElems)
         (tell $ here' String.++ ": failed")
         n)

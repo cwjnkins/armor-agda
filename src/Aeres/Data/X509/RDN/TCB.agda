@@ -30,5 +30,5 @@ RDN = TLV Tag.Sett RDNElems
 RDNSeq : @0 List UInt8 → Set
 RDNSeq = Seq RDN
 
-getRDNSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
-getRDNSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val
+getSeqLen : ∀ {@0 bs} → RDNSeq bs → ℕ
+getSeqLen (mkTLV len val len≡ bs≡) = lengthSequence val

@@ -16,10 +16,19 @@ module Aeres.Data.X509.PublicKey.Val.Parser where
 open Aeres.Grammar.Parser UInt8
 
 parsePublicKeyVal : ∀ {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (PublicKeyVal o)
-parsePublicKeyVal{bs} o =
-  case (-, TLV.val o) ∈? supportedPublicKeyAlgs
-  ret (λ x → Parser (Logging ∘ Dec) (PublicKeyVal' o x))
-  of λ where
-    (yes (here px)) → parseRSABitString
-    (yes (there (here px))) → parseECBitString
-    (no ¬p) → parseBitstring
+runParser (parsePublicKeyVal{bs} o) xs = do
+  yes s ← runParser (p₁ o (_ ∈? _)) xs
+    where no ¬p → do
+      return ∘ no $ λ where
+        x → contradiction (mapSuccess (λ where (mkPKVal x) → x) x) ¬p
+  return (yes (mapSuccess mkPKVal s))
+  where
+  p₁ : ∀ {@0 bs} → (o : OID bs) (d : Dec ((-, TLV.val o) ∈ supportedPublicKeyAlgs))
+       → Parser (Logging ∘ Dec) (PublicKeyVal' o d)
+  p₁ o d =
+    case d
+    ret (λ x → Parser (Logging ∘ Dec) (PublicKeyVal' o x))
+    of λ where
+      (yes (here px)) → parseRSABitString
+      (yes (there (here px))) → parseECBitString
+      (no ¬p) → parseBitstring

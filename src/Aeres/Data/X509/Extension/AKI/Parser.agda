@@ -1,58 +1,61 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Prelude
-
 open import Aeres.Binary
-open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.GeneralName
-open import Aeres.Data.X509.Properties as Props
-open import Aeres.Grammar.Definitions
-open import Aeres.Grammar.Parser
+open import Aeres.Data.X509.Extension.AKI.Properties
+import      Aeres.Data.X509.Extension.AKI.TCB as AKI
+open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.TLV
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parser
+open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
-open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-module Aeres.Data.X509.Decidable.AKIFields where
+module Aeres.Data.X509.Extension.AKI.Parser where
 
-open Base256
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parser      UInt8
 
 module parseAKIFields where
   module Here where
-    AKIKeyId = "AKI key id"
-    AKIAuthCertIssuer = "AKI auth. cert. issuer"
-    AKIAuthCertSN = "AKI auth. cert. SN"
-    AKI = "AKI"
+    AKIKeyId = "X509: Extension: AKI: key id"
+    AKIAuthCertIssuer = "X509: Extension: AKI: authority key issuer"
+    AKIAuthCertSN = "X509: Extension: AKI: authority certificate serial number"
+    AKI = "X509: Extension: AKI"
 
+  open AKI
   open ≡-Reasoning
 
-  parseAKIKeyId : Parser Dig (Logging ∘ Dec) X509.AKIKeyId
+  parseAKIKeyId : Parser (Logging ∘ Dec) AKIKeyId
   parseAKIKeyId = parseTLV _ Here.AKIKeyId _ parseOctetStringValue
 
-  parseAKIAuthCertIssuer : Parser Dig (Logging ∘ Dec) X509.AKIAuthCertIssuer
+  parseAKIAuthCertIssuer : Parser (Logging ∘ Dec) AKIAuthCertIssuer
   parseAKIAuthCertIssuer = parseTLV _ Here.AKIAuthCertIssuer _ parseGeneralNamesElems
 
-  parseAKIAuthCertSN : Parser Dig (Logging ∘ Dec) X509.AKIAuthCertSN
+  parseAKIAuthCertSN : Parser (Logging ∘ Dec) AKIAuthCertSN
   parseAKIAuthCertSN = parseTLV _ Here.AKIAuthCertSN _ parseIntValue
 
   -- NOTE: The proof effort caught a bug in my original implementation :)
   -- (Try to parse all, then check lengths)
-  parseAKIFieldsSeqFields : ∀ n → Parser Dig (Logging ∘ Dec) (ExactLength _ X509.AKIFieldsSeqFields n)
+  parseAKIFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength AKIFieldsSeqFields n)
   parseAKIFieldsSeqFields n =
-    parseEquivalent _ (equivalent×ₚ _ Props.AKIFieldsSeqFields.equivalent)
-      (parseOption₃ _
+    parseEquivalent (equivalent×ₚ equivalent)
+      (parseOption₃
         TLV.nonnesting TLV.nonnesting TLV.nonnesting
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseAKIKeyId parseAKIAuthCertIssuer parseAKIAuthCertSN
         (tell $ Here.AKI String.++ ": underflow") n)
 
-  parseAKIFieldsSeq : Parser _ (Logging ∘ Dec) X509.AKIFieldsSeq
+  parseAKIFieldsSeq : Parser (Logging ∘ Dec) AKIFieldsSeq
   parseAKIFieldsSeq =
     parseTLV _ Here.AKI _ parseAKIFieldsSeqFields
 
-  parseAKIFields : Parser _ (Logging ∘ Dec) X509.AKIFields
+  parseAKIFields : Parser (Logging ∘ Dec) AKIFields
   parseAKIFields =
-    parseTLV _ Here.AKI _ (parseExactLength _ TLV.nonnesting
+    parseTLV _ Here.AKI _ (parseExactLength TLV.nonnesting
       (tell $ Here.AKI String.++ ": overflow") parseAKIFieldsSeq)
 
 open parseAKIFields public using
@@ -74,14 +77,14 @@ open parseAKIFields public using
 --     val₄ : List Dig
 --     val₄ = # 4 ∷ # 24 ∷ # 48 ∷ # 22 ∷ # 128 ∷ # 20 ∷ # 138 ∷ # 116 ∷ # 127 ∷ # 175 ∷ # 133 ∷ # 205 ∷ # 238 ∷ # 149 ∷ # 205 ∷ # 61 ∷ # 156 ∷ # 208 ∷ # 226 ∷ # 70 ∷ # 20 ∷ # 243 ∷ # 113 ∷ # 53 ∷ # 29 ∷ [ # 39 ]
 
---     test₁ : X509.AKIKeyId val₁
+--     test₁ : AKIKeyId val₁
 --     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseAKIKeyId val₁)} tt)
 
---     test₂ : X509.AKIAuthCertIssuer val₂
+--     test₂ : AKIAuthCertIssuer val₂
 --     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertIssuer val₂)} tt)
 
---     test₃ : X509.AKIAuthCertSN val₃
+--     test₃ : AKIAuthCertSN val₃
 --     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseAKIAuthCertSN val₃)} tt)
 
---     test₄ : X509.AKIFields val₄
+--     test₄ : AKIFields val₄
 --     test₄ = Success.value (toWitness {Q = Logging.val (runParser parseAKIFields val₄)} tt)

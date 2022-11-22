@@ -29,37 +29,37 @@ module parseVersion where
 
 open parseVersion public using (parseVersion)
 
-private
-  module Test where
+-- private
+--   module Test where
 
-    Version₁ : List Dig
-    Version₁ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 0 ]
+--     Version₁ : List Dig
+--     Version₁ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 0 ]
 
-    Version₂ : List Dig
-    Version₂ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 1 ]
+--     Version₂ : List Dig
+--     Version₂ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 1 ]
 
-    Version₃ : List Dig
-    Version₃ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 2 ]
+--     Version₃ : List Dig
+--     Version₃ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 2 ]
 
-    Version₄ : List Dig
-    Version₄ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
+--     Version₄ : List Dig
+--     Version₄ = Tag.AA0 ∷ # 3 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
 
-    VersionBadLen : List Dig
-    VersionBadLen = Tag.AA0 ∷ # 4 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
+--     VersionBadLen : List Dig
+--     VersionBadLen = Tag.AA0 ∷ # 4 ∷ Tag.Integer ∷ # 1 ∷ [ # 3 ]
 
-    test₁ : X509.Version Version₁
-    test₁ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₁)} tt)
+--     test₁ : X509.Version Version₁
+--     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₁)} tt)
 
-    test₂ : X509.Version Version₂
-    test₂ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₂)} tt)
+--     test₂ : X509.Version Version₂
+--     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₂)} tt)
 
-    test₃ : X509.Version Version₃
-    test₃ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₃)} tt)
+--     test₃ : X509.Version Version₃
+--     test₃ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₃)} tt)
 
-    test₄ : X509.Version Version₄
-    test₄ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₄)} tt)
+--     test₄ : X509.Version Version₄
+--     test₄ = Success.value (toWitness {Q = Logging.val (runParser parseVersion Version₄)} tt)
 
-    test₅ : ¬ Success _ X509.Version VersionBadLen
-    test₅ = toWitnessFalse {Q = Logging.val (runParser parseVersion VersionBadLen)} tt
+--     test₅ : ¬ Success _ X509.Version VersionBadLen
+--     test₅ = toWitnessFalse {Q = Logging.val (runParser parseVersion VersionBadLen)} tt
 
 

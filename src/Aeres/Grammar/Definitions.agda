@@ -439,3 +439,12 @@ Eq._≟_ (eq&ₚ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁
     (yes refl) → case Eq._≟_ eq₂ (─ bs₁₂ , b₁) (─ bs₂₂ , b₂) ret (const _) of λ where
       (no ¬p) → no λ where refl → contradiction refl ¬p
       (yes refl) → yes refl
+
+eq≋&ₚ : ∀ {@0 A B} → Eq≋ A → Eq≋ B → Eq≋ (&ₚ A B)
+eq≋&ₚ eq₁ eq₂ = Eq⇒Eq≋ (eq&ₚ (Eq≋⇒Eq eq₁) (Eq≋⇒Eq eq₂))
+
+eq≋&ₚᵈ : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs₁ : List Σ) → A bs₁ → @0 List Σ → Set}
+         → Eq≋ A 
+         → (∀ {@0 bs₁} → (a : A bs₁) → Eq≋ (B bs₁ a))
+         → Eq≋ (&ₚᵈ A B)
+eq≋&ₚᵈ eq₁ eq₂ = Eq⇒Eq≋ (eq&ₚᵈ (Eq≋⇒Eq eq₁) (λ a → Eq≋⇒Eq (eq₂ a)))

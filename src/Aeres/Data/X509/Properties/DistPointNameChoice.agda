@@ -2,9 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.GeneralName  as GNProps
-import      Aeres.Data.X509.Properties.RDNATVFields as RDNATVProps
-import      Aeres.Data.X509.Properties.RDNSeq       as RDNProps
 open import Aeres.Data.X690-DER
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -12,9 +9,8 @@ open import Data.Nat.Properties
 
 module Aeres.Data.X509.Properties.DistPointNameChoice where
 
-open Base256
-open import Aeres.Grammar.Definitions Dig
-open import Aeres.Grammar.Sum         Dig
+open import Aeres.Grammar.Definitions UInt8
+open import Aeres.Grammar.Sum         UInt8
 
 nonnesting : NonNesting X509.DistPointNameChoice
 nonnesting x (X509.fullname x₁) (X509.fullname x₂) = ‼ TLV.nonnesting x x₁ x₂
@@ -40,8 +36,8 @@ proj₂ (proj₂ iso) (X509.nameRTCrlissr x) = refl
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (TLV.unambiguous GNProps.GeneralNamesElems.unambiguous)
+      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
       (TLV.unambiguous
-        (SequenceOf.Bounded.unambiguous (TLV.unambiguous RDNATVProps.unambiguous)
+        (SequenceOf.Bounded.unambiguous (TLV.unambiguous RDN.ATV.unambiguous)
           TLV.nonempty TLV.nonnesting))
       (TLV.noconfusion λ ()))

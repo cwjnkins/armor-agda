@@ -45,3 +45,4 @@ module Seq where
       (SequenceOf.unambiguous
         RDN.unambiguous TLV.nonempty TLV.nonnesting)
 
+open RDN public

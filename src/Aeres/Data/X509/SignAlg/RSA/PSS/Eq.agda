@@ -10,7 +10,7 @@ open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID.TCB
-open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions

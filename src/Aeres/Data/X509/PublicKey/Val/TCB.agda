@@ -16,5 +16,7 @@ PublicKeyVal' o (yes (here px)) = RSABitString
 PublicKeyVal' o (yes (there (here px))) = ECBitString
 PublicKeyVal' o (no ¬p) = BitString
 
-PublicKeyVal : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
-PublicKeyVal o = PublicKeyVal' o (_ ∈? _)
+record PublicKeyVal {@0 bs₁ : List UInt8} (o : OID bs₁) (@0 bs : List UInt8) : Set where
+  constructor mkPKVal
+  field
+    val : PublicKeyVal' o (_ ∈? _) bs

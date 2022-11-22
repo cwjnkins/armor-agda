@@ -4,7 +4,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Properties.DistPointNameChoice as DPNCProps
-import      Aeres.Data.X509.Properties.GeneralName         as GNProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -33,5 +32,5 @@ unambiguous =
     (Unambiguous.option₃&₂
       (TLV.unambiguous DPNCProps.unambiguous) TLV.nonnesting TLV.nonempty
       (TLV.unambiguous BitString.unambiguous) TLV.nonnesting TLV.nonempty
-      (TLV.unambiguous GNProps.GeneralNamesElems.unambiguous) TLV.nonempty
+      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

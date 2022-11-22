@@ -5,8 +5,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.Extension
-open import Aeres.Data.X509.Decidable.RDN
-open import Aeres.Data.X509.Decidable.Version
 open import Aeres.Data.X509.Properties as Props
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -26,18 +24,10 @@ open Aeres.Grammar.Parser      UInt8
 module parseTBSCert where
   here' = "X509: TBSCert"
 
-  parseIssUID : Parser (Logging ∘ Dec) X509.IssUID
-  parseIssUID =
-    parseTLV Tag.A81 (here' String.++ ": IssUID") BitStringValue parseBitstringValue
-
-  parseSubUID : Parser (Logging ∘ Dec) X509.SubUID
-  parseSubUID =
-    parseTLV Tag.A82 (here' String.++ ": SubUID") BitStringValue parseBitstringValue
-
   parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength X509.TBSCertFields n)
   parseTBSCertFields n =
     parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ Props.TBSCertFields.equivalent))
-      (parse&ᵈ{A = WithinLength (&ₚ (Option X509.Version) Int) n}
+      (parse&ᵈ{A = WithinLength (&ₚ (Option Version) Int) n}
         (withinLength-nonnesting (NonNesting.noconfusion-option&₁ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())))
         (withinLength-unambiguous
           (Unambiguous.unambiguous-option₁&₁
@@ -57,7 +47,7 @@ module parseTBSCert where
 
     p₆ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₂ n)
     p₆ n =
-        parseOption₃{A = X509.IssUID}{B = X509.SubUID}{C = X509.Extensions}
+        parseOption₃{A = IssUID}{B = SubUID}{C = X509.Extensions}
           TLV.nonnesting TLV.nonnesting TLV.nonnesting
           (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
           parseIssUID parseSubUID parseExtensions
@@ -80,9 +70,9 @@ module parseTBSCert where
     p₄ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₄ n)
     p₄ n =
       parseEquivalent (symEquivalent Distribute.exactLength-&)
-        (parse&ᵈ {A = WithinLength X509.RDNSeq n}
+        (parse&ᵈ {A = WithinLength RDNSeq n}
           (withinLength-nonnesting TLV.nonnesting)
-          (withinLength-unambiguous Props.RDNSeq.unambiguous)
+          (withinLength-unambiguous RDN.Seq.unambiguous)
           (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
           λ where
             (singleton r r≡) _ →
@@ -105,9 +95,9 @@ module parseTBSCert where
     p₂ : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields.Rep₆ n)
     p₂ n  =
       parseEquivalent (symEquivalent Distribute.exactLength-&)
-        (parse&ᵈ{A = WithinLength X509.RDNSeq n}
+        (parse&ᵈ{A = WithinLength RDNSeq n}
           (withinLength-nonnesting TLV.nonnesting)
-          (withinLength-unambiguous Props.RDNSeq.unambiguous)
+          (withinLength-unambiguous RDN.Seq.unambiguous)
           (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
           λ where
             (singleton r r≡) _ →

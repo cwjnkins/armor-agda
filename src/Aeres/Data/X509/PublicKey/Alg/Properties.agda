@@ -8,7 +8,7 @@ import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey.Alg.EC
 open import Aeres.Data.X509.PublicKey.Alg.RSA
 open import Aeres.Data.X690-DER.OID
-open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -49,7 +49,7 @@ noConfusion-RSA-EC =
 @0 noConfusion-RSA-Unsupported : NoConfusion RSA UnsupportedPublicKeyAlg
 noConfusion-RSA-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mk&ₚ{a'}{p'} (mk×ₚ o o∉ refl) sndₚ₁ bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
         @0 ++≡ : a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂
         ++≡ = begin
@@ -77,7 +77,7 @@ noConfusion-RSA-Unsupported =
 @0 noConfusion-EC-Unsupported : NoConfusion EC UnsupportedPublicKeyAlg
 noConfusion-EC-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mk&ₚ{a'}{p'} (mk×ₚ o o∉ refl) sndₚ₁ bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
         @0 ++≡ : a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂
         ++≡ = begin
@@ -118,12 +118,9 @@ unambiguous =
   unambiguousSum
     RSA.unambiguous
     (unambiguousSum EC.unambiguous
-      (TLV.unambiguous{t = Tag.Sequence}
-        (unambiguous&ₚᵈ
-          (unambiguousΣₚ OID.unambiguous (λ a → T-unique))
-          (nonnestingΣₚ₁ TLV.nonnesting)
-          λ a → uniqueSingleton))
+      (TLV.unambiguous
+        (AlgorithmIdentifier.unambiguous
+          UnsupportedParam λ o →
+            unambiguous×ₚ OctetString.unambiguous T-unique))
       noConfusion-EC-Unsupported)
-    (NoConfusion.sumₚ{A = RSA}
-      noConfusion-RSA-EC
-      noConfusion-RSA-Unsupported)
+    (NoConfusion.sumₚ{A = RSA} noConfusion-RSA-EC noConfusion-RSA-Unsupported)

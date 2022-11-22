@@ -4,7 +4,6 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.GeneralName
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser
@@ -32,9 +31,9 @@ module parseNCFields where
     helper : (n : ℕ) → Parser Dig (Logging ∘ Dec) (ExactLength Dig (X509.GeneralSubtreeFields) n)
     helper n =
       parseEquivalent _ (transEquivalent _ (symEquivalent _ Distribute.exactLength-&) (equivalent×ₚ _ Props.GeneralSubtreeFields.equivalent))
-        (parse&ᵈ _ (withinLength-nonnesting _ Props.GeneralName.nonnesting)
-          (withinLength-unambiguous _ Props.GeneralName.unambiguous)
-          (parse≤ _ n parseGeneralName Props.GeneralName.nonnesting (tell $ here' String.++ ": underflow"))
+        (parse&ᵈ _ (withinLength-nonnesting _ GeneralName.nonnesting)
+          (withinLength-unambiguous _ GeneralName.unambiguous)
+          (parse≤ _ n parseGeneralName GeneralName.nonnesting (tell $ here' String.++ ": underflow"))
           λ where
             {bs} (singleton read read≡) _ →
               subst₀ (λ x → Parser _ (Logging ∘ Dec) (ExactLength _ _ (n - x))) read≡

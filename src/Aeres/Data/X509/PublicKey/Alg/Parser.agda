@@ -3,6 +3,7 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
+open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.PublicKey.Alg.EC
 open import Aeres.Data.X509.PublicKey.Alg.RSA
 open import Aeres.Data.X509.PublicKey.Alg.TCB
@@ -23,24 +24,13 @@ open Aeres.Grammar.Sum         UInt8
 
 parseUnsupported : Parser (Logging ∘ Dec) UnsupportedPublicKeyAlg
 parseUnsupported =
-  parseTLV _ "X509: PublicKey: Alg: unsupported" _
-    λ n →
-      parseEquivalent (symEquivalent Distribute.exactLength-&)
-        (parse&ᵈ
-          (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
-          (unambiguousΣₚ
-            (unambiguousΣₚ OID.unambiguous (λ _ → T-unique))
-            λ _ _ _ → erased-unique ≤-unique _ _ )
-          (parse≤ _
-            (parseSigma TLV.nonnesting OID.unambiguous parseOID
-              (λ x → T-dec))
-            (nonnestingΣₚ₁ TLV.nonnesting)
-            (tell $ "X509: SignAlg: unsupported: OID overflow"))
-          λ where
-            (singleton r r≡) (mk×ₚ o o∉ refl) →
-              subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength OctetStringValue (n - x)))
-                (‼ r≡)
-                (parseOctetStringValue (n - r)))
+  parseAlgorithmIdentifier "X509: PublicKey: Alg: unsupported" λ n o →
+    parseEquivalent{A = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
+      (symEquivalent{B = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
+        (proj₁ (Distribute.×ₚ-Σₚ-iso{A = OctetStringValue}{C = λ _ _ → False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs)})))
+      (parse×Dec{A = ExactLength OctetStringValue n}
+        exactLength-nonnesting (tell $ "X509: PublicKey: Alg: supported failed to parse")
+        (parseOctetStringValue n) λ x → T-dec)
 
 parsePublicKeyAlg : Parser (Logging ∘ Dec) PublicKeyAlg
 parsePublicKeyAlg =

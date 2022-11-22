@@ -2,7 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.GeneralName as GeneralNameProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -15,11 +14,11 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 
-equivalent : Equivalent (&ₚ X509.GeneralName (&ₚ (Option X509.MinBaseDistance) (Option X509.MaxBaseDistance))) X509.GeneralSubtreeFields
+equivalent : Equivalent (&ₚ GeneralName (&ₚ (Option X509.MinBaseDistance) (Option X509.MaxBaseDistance))) X509.GeneralSubtreeFields
 proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = X509.mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
 proj₂ equivalent (X509.mkGeneralSubtreeFields base minimum maximum refl) = (mk&ₚ base (mk&ₚ minimum maximum refl) refl)
 
-iso : Iso (&ₚ X509.GeneralName (&ₚ (Option X509.MinBaseDistance) (Option X509.MaxBaseDistance))) X509.GeneralSubtreeFields
+iso : Iso (&ₚ GeneralName (&ₚ (Option X509.MinBaseDistance) (Option X509.MaxBaseDistance))) X509.GeneralSubtreeFields
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (X509.mkGeneralSubtreeFields base minimum maximum refl) = refl
@@ -27,7 +26,7 @@ proj₂ (proj₂ iso) (X509.mkGeneralSubtreeFields base minimum maximum refl) = 
 @0 unambiguous : Unambiguous X509.GeneralSubtreeFields
 unambiguous =
   isoUnambiguous iso
-    (unambiguous&ₚ GeneralNameProps.unambiguous GeneralNameProps.nonnesting
+    (unambiguous&ₚ GeneralName.unambiguous GeneralName.nonnesting
       (Unambiguous.option₂&₁
         (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonnesting TLV.nonempty
         (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonempty (TLV.noconfusion λ ())))

@@ -16,7 +16,7 @@ module Aeres.Data.X509.PublicKey.Val.Properties where
 open Aeres.Grammar.Definitions UInt8
 
 @0 nonnesting : ∀ {@0 bs} → (o : OID bs) → NonNesting (PublicKeyVal o)
-nonnesting o = help o (_ ∈? _)
+nonnesting o ++≡ (mkPKVal v₁) (mkPKVal v₂) = help o (_ ∈? _) ++≡ v₁ v₂
   where
   help : ∀ {@0 bs} → (o : OID bs)
          → (d : Dec ((-, TLV.val o) ∈ supportedPublicKeyAlgs))
@@ -26,7 +26,7 @@ nonnesting o = help o (_ ∈? _)
   help o (no ¬p) = TLV.nonnesting
 
 @0 unambiguous : ∀ {@0 bs} → (o : OID bs) → Unambiguous (PublicKeyVal o)
-unambiguous{bs} o = help o (_ ∈? _)
+unambiguous{bs} o (mkPKVal v₁) (mkPKVal v₂) = cong mkPKVal (help o (_ ∈? _) v₁ v₂)
   where
   help : ∀ {@0 bs} → (o : OID bs) → (d : Dec ((-, TLV.val o) ∈ supportedPublicKeyAlgs))
          →  Unambiguous (PublicKeyVal' o d)
