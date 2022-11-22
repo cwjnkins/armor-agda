@@ -58,20 +58,20 @@ checkTwoTimes yr₁ mn₁ da₁ hr₁ mi₁ se₁ yr₂ mn₂ da₂ hr₂ mi₂ 
 
 
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
-isCA : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Bool
+isCA : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields)) → Bool
 isCA (─ .[] , none) = false
-isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBCFieldsSeqFields none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCA (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBCFieldsSeqFields (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
 
 
 -- returns BCPathLen if exists
-getBCPathLen :  Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields)) → Exists─ (List UInt8) (Option Int)
+getBCPathLen :  Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields)) → Exists─ (List UInt8) (Option Int)
 getBCPathLen (─ .[] , none) = _ , none
-getBCPathLen (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (X509.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
+getBCPathLen (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
 
 
 -- isCRLSign present in KU extension ? bit 6 == true ?
-isCRLIssuer : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isCRLIssuer : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields)) → Bool
 isCRLIssuer (─ .[] , none) = false
 isCRLIssuer (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
 isCRLIssuer (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
@@ -84,7 +84,7 @@ isCRLIssuer (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len
 
 
 -- isKeyCertSign present in KU extension ? bit 5 == true ?
-isKeyCertSignPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isKeyCertSignPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields)) → Bool
 isKeyCertSignPresent (─ .[] , none) = false
 isKeyCertSignPresent (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton [] x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
 isKeyCertSignPresent (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton (x ∷ []) x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
@@ -96,7 +96,7 @@ isKeyCertSignPresent (fst , some (X509.mkExtensionFields extnId extnId≡ crit (
 
 
 -- get KU Bits in bool list
-getKUBits : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → List Bool
+getKUBits : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields)) → List Bool
 getKUBits (─ .[] , none) = []
 getKUBits (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
 
@@ -120,7 +120,7 @@ isSANPresent (─ .[] , none) = false
 isSANPresent (fst , some x) = true
 
 -- is KU present in Cert ?
-isKUPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields)) → Bool
+isKUPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields)) → Bool
 isKUPresent (─ .[] , none) = false
 isKUPresent (fst , some x) = true
 

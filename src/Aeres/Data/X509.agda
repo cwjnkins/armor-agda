@@ -20,6 +20,10 @@ open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.Extension.AKI   public
+open import Aeres.Data.X509.Extension.BC    public
+open import Aeres.Data.X509.Extension.EKU   public
+open import Aeres.Data.X509.Extension.KU    public
+open import Aeres.Data.X509.Extension.SKI   public
 open import Aeres.Data.X509.GeneralName     public
 open import Aeres.Data.X509.IA5String       public
 open import Aeres.Data.X509.NoticeReference public
@@ -61,38 +65,6 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
 -----------------------------------------Extensions------------------------------------------
-
-------------------------------------------------------------------------------------------
-
-  SKIFields : (@0 _ : List UInt8) → Set
-  SKIFields xs = TLV Tag.OctetString  OctetString xs
-
-  KUFields : (@0 _ : List UInt8) → Set
-  KUFields xs = TLV Tag.OctetString  BitString xs
-
------------------------------------ eku extension -----------------------------------
-
-  EKUFieldsSeq : (@0 _ : List UInt8) → Set
-  EKUFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf OID) xs
-
-  EKUFields : (@0 _ : List UInt8) → Set
-  EKUFields xs = TLV Tag.OctetString  EKUFieldsSeq xs
-
--------------------------------------------------------------------------------
-
-  record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
-    constructor mkBCFieldsSeqFields
-    field
-      @0 {ca pl} : List UInt8
-      bcca : Option Boool ca
-      bcpathlen : Option Int pl
-      @0 bs≡  : bs ≡ ca ++ pl
-
-  BCFieldsSeq : (@0 _ : List UInt8) → Set
-  BCFieldsSeq xs = TLV Tag.Sequence  BCFieldsSeqFields xs
-
-  BCFields : (@0 _ : List UInt8) → Set
-  BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
 
 -------------------------- ian/san alternative names extensions ------------------
   IANFieldsSeq : (@0 _ : List UInt8) → Set

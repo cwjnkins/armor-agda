@@ -58,10 +58,10 @@ module ExtensionFields where
 
 module SelectExtn where
   Rep = (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.AKI      )            AKIFields)
-        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            X509.SKIFields)
-        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            X509.KUFields)
-        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            X509.EKUFields)
-        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            X509.BCFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI      )            SKIFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.KU       )            KUFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU      )            EKUFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            BCFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN      )            X509.IANFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN      )            X509.SANFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            X509.CertPolFields)
@@ -249,103 +249,103 @@ module SelectExtn where
                               (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.AKI) AKIFields}
                                 (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))))
 
-    noconfusion₂ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields) (Sum _ _)
+    noconfusion₂ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields) (Sum _ _)
     noconfusion₂ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                             (noconfusionOIDS λ ())
-                            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) X509.SKIFields}
+                            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SKI) SKIFields}
                               (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))))
 
 
-    noconfusion₃ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.KU)  X509.KUFields)  (Sum _ _)
+    noconfusion₃ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.KU)  KUFields)  (Sum _ _)
     noconfusion₃ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) X509.KUFields}
+                          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.KU) KUFields}
                             (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))
 
 
-    noconfusion₄ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields) (Sum _ _)
+    noconfusion₄ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields) (Sum _ _)
     noconfusion₄ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) X509.EKUFields}
+                        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.EKU) EKUFields}
                           (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))
 
 
-    noconfusion₅ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.BC)  X509.BCFields)  (Sum _ _)
+    noconfusion₅ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.BC)  BCFields)  (Sum _ _)
     noconfusion₅ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+                  (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+                    (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) X509.BCFields}
+                      (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.BC) BCFields}
                         (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))
 
 
