@@ -102,20 +102,20 @@ getKUBits (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (
 
 
 -- is SAN extension critical ? 
-isSANCritical : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
+isSANCritical : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) SANFields)) → Bool
 isSANCritical (─ .[] , none) = false
 isSANCritical (fst , some (X509.mkExtensionFields extnId extnId≡ none extension bs≡)) = false
 isSANCritical (fst , some (X509.mkExtensionFields extnId extnId≡ (some (mkTLV len (mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
 
 
 -- get SAN length
-getSANLength : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → ℕ
+getSANLength : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) SANFields)) → ℕ
 getSANLength (─ .[] , none) = 0
 getSANLength (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = lengthSequence fstₚ₁
 
 
 -- is SAN present in Cert ?
-isSANPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) X509.SANFields)) → Bool
+isSANPresent : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) SANFields)) → Bool
 isSANPresent (─ .[] , none) = false
 isSANPresent (fst , some x) = true
 

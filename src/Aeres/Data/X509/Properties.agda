@@ -13,9 +13,7 @@ import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
 import Aeres.Data.X509.Properties.PCFieldsSeqFields
 import Aeres.Data.X509.Properties.PolicyMapFields
-import Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 import Aeres.Data.X509.Properties.TBSCertFields
-import Aeres.Data.X509.Properties.UserNoticeFields
 
 module Aeres.Data.X509.Properties where
 
@@ -46,6 +44,4 @@ module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFiel
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
 module PCFieldsSeqFields         = Aeres.Data.X509.Properties.PCFieldsSeqFields
 module PolicyMapFields           = Aeres.Data.X509.Properties.PolicyMapFields
-module PolicyQualifierInfoFields = Aeres.Data.X509.Properties.PolicyQualifierInfoFields
 module TBSCertFields             = Aeres.Data.X509.Properties.TBSCertFields
-module UserNoticeFields          = Aeres.Data.X509.Properties.UserNoticeFields

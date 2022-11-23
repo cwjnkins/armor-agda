@@ -144,3 +144,6 @@ instance
         ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
             ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
                 ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)
+
+  eq≋ : Eq≋ DisplayText
+  eq≋ = Eq⇒Eq≋ it

@@ -7,12 +7,10 @@ open import Aeres.Data.X509
 open import Aeres.Data.X509.Decidable.AIAFields
 open import Aeres.Data.X509.Decidable.CRLDistFields
 open import Aeres.Data.X509.Decidable.CertPolFields
-open import Aeres.Data.X509.Decidable.IANFields
 open import Aeres.Data.X509.Decidable.INAPFields
 open import Aeres.Data.X509.Decidable.NCFields
 open import Aeres.Data.X509.Decidable.PCFields
 open import Aeres.Data.X509.Decidable.PMFields
-open import Aeres.Data.X509.Decidable.SANFields
 open import Aeres.Data.X509.Properties as Props
 open import Aeres.Grammar.Definitions
 open import Aeres.Grammar.Parser

@@ -3,7 +3,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-import      Aeres.Data.X509.Properties.PolicyQualifierInfoFields as PQIProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -17,7 +16,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 
-iso : Iso (&ₚ OID (Option X509.PolicyQualifiersSeq))
+iso : Iso (&ₚ OID (Option PolicyQualifiersSeq))
           X509.PolicyInformationFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = X509.mkPolicyInformationFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (X509.mkPolicyInformationFields cpid cpqls bs≡) = mk&ₚ cpid cpqls bs≡
@@ -31,5 +30,5 @@ unambiguous =
       OID.unambiguous TLV.nonnesting
       (TLV.unambiguous
         (SequenceOf.Bounded.unambiguous
-          (TLV.unambiguous PQIProps.unambiguous) TLV.nonempty TLV.nonnesting))
+          (TLV.unambiguous Qualifier.unambiguous) TLV.nonempty TLV.nonnesting))
       TLV.nonempty)

@@ -21,12 +21,15 @@ open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.Extension.AKI   public
 open import Aeres.Data.X509.Extension.BC    public
+open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier
+  public
 open import Aeres.Data.X509.Extension.EKU   public
+open import Aeres.Data.X509.Extension.IAN   public
 open import Aeres.Data.X509.Extension.KU    public
+open import Aeres.Data.X509.Extension.SAN   public
 open import Aeres.Data.X509.Extension.SKI   public
 open import Aeres.Data.X509.GeneralName     public
 open import Aeres.Data.X509.IA5String       public
-open import Aeres.Data.X509.NoticeReference public
 open import Aeres.Data.X509.PublicKey       public
 open import Aeres.Data.X509.RDN             public
 open import Aeres.Data.X509.SignAlg         public
@@ -66,63 +69,7 @@ module X509 where
 
 -----------------------------------------Extensions------------------------------------------
 
--------------------------- ian/san alternative names extensions ------------------
-  IANFieldsSeq : (@0 _ : List UInt8) → Set
-  IANFieldsSeq = GeneralNames
-
-  IANFields : (@0 _ : List UInt8) → Set
-  IANFields xs = TLV Tag.OctetString IANFieldsSeq xs
-
-  SANFieldsSeq : (@0 _ : List UInt8) → Set
-  SANFieldsSeq = GeneralNames
-
-  SANFields : (@0 _ : List UInt8) → Set
-  SANFields xs = TLV Tag.OctetString SANFieldsSeq xs
-
 ------------------------- certificate policies -------------------------
-  module PQOID where
-    CPSURI : List UInt8
-    CPSURI = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
-
-    USERNOTICE : List UInt8
-    USERNOTICE = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
-
-  record UserNoticeFields (@0 bs : List UInt8) : Set where
-    constructor mkUserNoticeFields
-    field
-      @0 {nr et} : List UInt8
-      noticeRef : Option NoticeReference nr
-      expText : Option DisplayText et
-      @0 bs≡  : bs ≡ nr ++ et
-
-  UserNotice : (@0 _ : List UInt8) → Set
-  UserNotice xs = TLV Tag.Sequence UserNoticeFields xs
-
-  record CPSURIQualifier (@0 bs : List UInt8) : Set where
-    constructor mkCPSURIQualifier
-    field
-      @0 {bs₁ bs₂} : List UInt8
-      ≡cpsuri : bs₁ ≡ PQOID.CPSURI
-      cpsPointer : IA5String bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  record UserNoticeQualifier (@0 bs : List UInt8) : Set where
-    constructor mkUserNoticeQualifier
-    field
-      @0 {bs₁ bs₂} : List UInt8
-      ≡usernotice : bs₁ ≡ PQOID.USERNOTICE
-      unotice : UserNotice bs₂
-      @0 bs≡ : bs ≡ bs₁ ++ bs₂
-
-  data PolicyQualifierInfoFields : @0 List UInt8 → Set where
-    cpsURI : ∀ {@0 bs} → CPSURIQualifier bs → PolicyQualifierInfoFields bs
-    userNotice : ∀ {@0 bs} → UserNoticeQualifier bs → PolicyQualifierInfoFields bs
-
-  PolicyQualifierInfo : (@0 _ : List UInt8) → Set
-  PolicyQualifierInfo xs = TLV Tag.Sequence PolicyQualifierInfoFields xs
-
-  PolicyQualifiersSeq : (@0 _ : List UInt8) → Set
-  PolicyQualifiersSeq xs = TLV Tag.Sequence (NonEmptySequenceOf PolicyQualifierInfo) xs
 
   record PolicyInformationFields (@0 bs : List UInt8) : Set where
     constructor mkPolicyInformationFields
