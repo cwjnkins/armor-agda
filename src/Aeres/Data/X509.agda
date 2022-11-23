@@ -21,7 +21,7 @@ open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.Extension.AKI   public
 open import Aeres.Data.X509.Extension.BC    public
-open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation
+open import Aeres.Data.X509.Extension.CertPolicy
   public
 open import Aeres.Data.X509.Extension.EKU   public
 open import Aeres.Data.X509.Extension.IAN   public
@@ -68,14 +68,6 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
 -----------------------------------------Extensions------------------------------------------
-
-------------------------- certificate policies -------------------------
-
-  CertPolFieldsSeq : (@0 _ : List UInt8) → Set
-  CertPolFieldsSeq = TLV Tag.Sequence (NonEmptySequenceOf PolicyInformation)
-
-  CertPolFields : (@0 _ : List UInt8) → Set
-  CertPolFields xs = TLV Tag.OctetString  CertPolFieldsSeq xs
 
 ----------------------------- crl dist point extension --------------------------------
 

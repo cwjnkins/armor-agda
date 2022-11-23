@@ -63,7 +63,7 @@ module SelectExtn where
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.BC       )            BCFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.IAN      )            IANFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.SAN      )            SANFields)
-        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            X509.CertPolFields)
+        (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL     )            CertPolFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST  )            X509.CRLDistFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.NC       )            X509.NCFields)
         (Sum (X509.ExtensionFields (_≡ X509.ExtensionOID.PC       )            X509.PCFields)
@@ -154,7 +154,7 @@ module SelectExtn where
                   (unambiguousSum
                     (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                     (unambiguousSum
-                       (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PolicyInformation.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
+                       (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CertPolicy.PolicyInformation.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                       (unambiguousSum
                         (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous DistPointFieldsProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                         (unambiguousSum
@@ -385,19 +385,19 @@ module SelectExtn where
                   (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.SAN) SANFields}
                     (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))
 
-    noconfusion₈ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields) (Sum _ _)
+    noconfusion₈ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields) (Sum _ _)
     noconfusion₈ =
-      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+      NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+        (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+          (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+            (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+              (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) X509.CertPolFields}
+                (NoConfusion.sumₚ{X509.ExtensionFields (_≡ X509.ExtensionOID.CPOL) CertPolFields}
                   (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))
 
     noconfusion₉ : NoConfusion (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields) (Sum _ _)
