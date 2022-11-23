@@ -144,9 +144,9 @@ getPolicyOIDList : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X5
 getPolicyOIDList (─ .[] , none) = []
 getPolicyOIDList (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
   where
-  helper : ∀ {@0 bs} → SequenceOf X509.PolicyInformation bs → List (Exists─ (List UInt8) OID)
+  helper : ∀ {@0 bs} → SequenceOf PolicyInformation bs → List (Exists─ (List UInt8) OID)
   helper nil = []
-  helper (cons (mkIListCons (mkTLV len (X509.mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
+  helper (cons (mkIListCons (mkTLV len (mkPolicyInformationFields cpid cpqls bs≡₂) len≡ bs≡₁) t bs≡)) = (_ , cpid) ∷ (helper t)
 
 
 -- returns true only if the extension is unknown and has critical bit = true

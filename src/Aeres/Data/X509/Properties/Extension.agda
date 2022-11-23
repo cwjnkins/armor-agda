@@ -7,7 +7,6 @@ import      Aeres.Data.X509.Properties.BCFieldsSeqFields  as BCProps
 import      Aeres.Data.X509.Properties.DistPointFields    as DistPointFieldsProps
 import      Aeres.Data.X509.Properties.NCFieldsSeqFields  as NCProps
 import      Aeres.Data.X509.Properties.PCFieldsSeqFields  as PCProps
-import      Aeres.Data.X509.Properties.PolicyInformationFields as PIProps
 import      Aeres.Data.X509.Properties.PolicyMapFields    as PMProps
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -155,7 +154,7 @@ module SelectExtn where
                   (unambiguousSum
                     (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
                     (unambiguousSum
-                       (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PIProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
+                       (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PolicyInformation.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                       (unambiguousSum
                         (ExtensionFields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous DistPointFieldsProps.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
                         (unambiguousSum

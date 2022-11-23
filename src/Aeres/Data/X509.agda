@@ -21,7 +21,7 @@ open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.Extension.AKI   public
 open import Aeres.Data.X509.Extension.BC    public
-open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier
+open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation
   public
 open import Aeres.Data.X509.Extension.EKU   public
 open import Aeres.Data.X509.Extension.IAN   public
@@ -70,17 +70,6 @@ module X509 where
 -----------------------------------------Extensions------------------------------------------
 
 ------------------------- certificate policies -------------------------
-
-  record PolicyInformationFields (@0 bs : List UInt8) : Set where
-    constructor mkPolicyInformationFields
-    field
-      @0 {pid pqls} : List UInt8
-      cpid : OID pid
-      cpqls : Option PolicyQualifiersSeq pqls
-      @0 bs≡  : bs ≡ pid ++ pqls
-
-  PolicyInformation : (@0 _ : List UInt8) → Set
-  PolicyInformation xs = TLV Tag.Sequence PolicyInformationFields xs
 
   CertPolFieldsSeq : (@0 _ : List UInt8) → Set
   CertPolFieldsSeq = TLV Tag.Sequence (NonEmptySequenceOf PolicyInformation)
