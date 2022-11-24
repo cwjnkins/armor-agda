@@ -2,7 +2,6 @@
 
 open import Aeres.Prelude
 
-import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.CertFields
@@ -31,7 +30,6 @@ module NonNesting where
   open import Aeres.Data.X509
 
 -- Finished lemmas
-module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
 module CertFields                = Aeres.Data.X509.Properties.CertFields

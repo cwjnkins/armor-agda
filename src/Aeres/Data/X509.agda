@@ -19,6 +19,8 @@ open Aeres.Grammar.Sum         UInt8
 open import Aeres.Data.X690-DER             public
 open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
+open import Aeres.Data.X509.Extension.AIA.AccessDesc.AccessMethod
+  public
 open import Aeres.Data.X509.Extension.AKI   public
 open import Aeres.Data.X509.Extension.BC    public
 open import Aeres.Data.X509.Extension.CRLDistPoint
@@ -72,16 +74,6 @@ module X509 where
 -----------------------------------------Extensions------------------------------------------
 
 ----------------------------------------- Authority Info access -----------------
-  module ACMOID where
-    CAISSUERS : List UInt8
-    CAISSUERS = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 2 ]
-
-    OCSP : List UInt8
-    OCSP = # 6 ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 1 ]
-
-  data AccessMethod : @0 List UInt8 → Set where
-    caissid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.CAISSUERS) → AccessMethod bs
-    ocspid : ∀ {@0 bs} → (@0 _ : bs ≡ ACMOID.OCSP) → AccessMethod bs
 
   record AccessDescFields (@0 bs : List UInt8) : Set where
     constructor mkAccessDescFields
