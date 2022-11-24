@@ -126,17 +126,17 @@ isKUPresent (fst , some x) = true
 
 -- helper for SCP17 :  While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
-checkCRLDistStruct : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) X509.CRLDistFields)) → Bool
+checkCRLDistStruct : Exists─ (List UInt8) (Option (X509.ExtensionFields (_≡ X509.ExtensionOID.CRLDIST) CRLDistFields)) → Bool
 checkCRLDistStruct (─ .[] , none) = true
 checkCRLDistStruct (fst , some (X509.mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
   where
-  helper : ∀ {@0 bs} → SequenceOf X509.DistPoint bs → Bool
+  helper : ∀ {@0 bs} → SequenceOf CRLDistPoint.DistPoint bs → Bool
   helper nil = true
-  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields crldp none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields none (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = false
-  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields none (some x) (some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields (some x₁) (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (X509.mkDistPointFields (some x₁) (some x) (some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (CRLDistPoint.mkDistPointFields crldp none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (CRLDistPoint.mkDistPointFields none (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = false
+  helper (cons (mkIListCons (mkTLV len (CRLDistPoint.mkDistPointFields none (some x) (some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (CRLDistPoint.mkDistPointFields (some x₁) (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
+  helper (cons (mkIListCons (mkTLV len (CRLDistPoint.mkDistPointFields (some x₁) (some x) (some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
 
 
 -- returns all certificate policy OIDs

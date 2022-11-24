@@ -21,6 +21,8 @@ open import Aeres.Data.X509.DirectoryString public
 open import Aeres.Data.X509.DisplayText     public
 open import Aeres.Data.X509.Extension.AKI   public
 open import Aeres.Data.X509.Extension.BC    public
+open import Aeres.Data.X509.Extension.CRLDistPoint
+  public
 open import Aeres.Data.X509.Extension.CertPolicy
   public
 open import Aeres.Data.X509.Extension.EKU   public
@@ -68,45 +70,6 @@ module X509 where
   ExpNull = # 5 ∷ [ # 0 ]
 
 -----------------------------------------Extensions------------------------------------------
-
------------------------------ crl dist point extension --------------------------------
-
-  CrlIssuer : (@0 _ : List UInt8) → Set
-  CrlIssuer xs = TLV Tag.AA2 GeneralNamesElems xs
-
-  ReasonFlags : (@0 _ : List UInt8) → Set
-  ReasonFlags xs = TLV Tag.A81 BitStringValue xs
-
-  FullName : (@0 _ : List UInt8) → Set
-  FullName xs = TLV Tag.AA0 GeneralNamesElems xs
-
-  NameRTCrlIssuer : (@0 _ : List UInt8) → Set
-  NameRTCrlIssuer xs = TLV Tag.AA1 RDNElems xs
-
-  data DistPointNameChoice : (@0 _ : List UInt8) → Set where
-    fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
-    nameRTCrlissr : ∀ {@0 bs} → NameRTCrlIssuer bs → DistPointNameChoice bs
-
-  DistPointName : (@0 _ : List UInt8) → Set
-  DistPointName xs = TLV Tag.AA0  DistPointNameChoice xs
-
-  record DistPointFields (@0 bs : List UInt8) : Set where
-    constructor mkDistPointFields
-    field
-      @0 {dp rsn issr} : List UInt8
-      crldp : Option DistPointName dp
-      crldprsn : Option ReasonFlags rsn
-      crlissr : Option CrlIssuer issr
-      @0 bs≡  : bs ≡ dp ++ rsn ++ issr
-
-  DistPoint : (@0 _ : List UInt8) → Set
-  DistPoint xs = TLV Tag.Sequence DistPointFields xs
-
-  CRLDistFieldsSeq : (@0 _ : List UInt8) → Set
-  CRLDistFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf DistPoint) xs
-
-  CRLDistFields : (@0 _ : List UInt8) → Set
-  CRLDistFields xs = TLV Tag.OctetString  CRLDistFieldsSeq xs
 
 ----------------------------------------- Authority Info access -----------------
   module ACMOID where

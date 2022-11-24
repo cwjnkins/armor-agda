@@ -6,8 +6,6 @@ import Aeres.Data.X509.Properties.AccessMethod
 import Aeres.Data.X509.Properties.AccessDescFields
 import Aeres.Data.X509.Properties.BCFieldsSeqFields
 import Aeres.Data.X509.Properties.CertFields
-import Aeres.Data.X509.Properties.DistPointFields
-import Aeres.Data.X509.Properties.DistPointNameChoice
 import Aeres.Data.X509.Properties.Extension
 import Aeres.Data.X509.Properties.GeneralSubtreeFields
 import Aeres.Data.X509.Properties.NCFieldsSeqFields
@@ -37,8 +35,6 @@ module AccessMethod              = Aeres.Data.X509.Properties.AccessMethod
 module AccessDescFields          = Aeres.Data.X509.Properties.AccessDescFields
 module BCFieldsSeqFields         = Aeres.Data.X509.Properties.BCFieldsSeqFields
 module CertFields                = Aeres.Data.X509.Properties.CertFields
-module DistPointFields           = Aeres.Data.X509.Properties.DistPointFields
-module DistPointNameChoice       = Aeres.Data.X509.Properties.DistPointNameChoice
 module Extension                 = Aeres.Data.X509.Properties.Extension
 module GeneralSubtreeFields      = Aeres.Data.X509.Properties.GeneralSubtreeFields
 module NCFieldsSeqFields         = Aeres.Data.X509.Properties.NCFieldsSeqFields
