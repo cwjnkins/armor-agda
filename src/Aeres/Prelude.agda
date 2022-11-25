@@ -162,7 +162,7 @@ open import Relation.Binary.PropositionalEquality public
   renaming ([_] to [_]R)
 module Reveal = Reveal_·_is_
 
-≡-unique : ∀ {ℓ} {A : Set ℓ} → Unique₂ (_≡_{A = A})
+≡-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique₂ (_≡_{A = A})
 ≡-unique refl refl = refl
 
 ≡-irrel : ∀ {ℓ} {A : Set ℓ} {x y : A} → (@0 _ : x ≡ y) → x ≡ y

@@ -2,7 +2,6 @@
 
 import      Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Properties
 open import Aeres.Data.X509.Semantic.StringPrep.Exec
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList as IList
@@ -17,18 +16,18 @@ open Aeres.Grammar.Definitions Dig
 
 ------- helper functions ------
 
-ChainToList : ∀ {@0 bs} → X509.Chain bs  → List (Exists─ (List Dig) X509.Cert)
+ChainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List Dig) Cert)
 ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
   where
-  helper :  ∀ {@0 bs}  → SequenceOf X509.Cert bs → List (Exists─ (List Dig) X509.Cert)
+  helper :  ∀ {@0 bs}  → SequenceOf Cert bs → List (Exists─ (List Dig) Cert)
   helper nil = []
   helper (cons (mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
 
 
-CCP2Seq : ∀ {@0 bs} → SequenceOf X509.Cert bs → Set  
+CCP2Seq : ∀ {@0 bs} → SequenceOf Cert bs → Set  
 CCP2Seq nil = ⊤
 CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
-CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = X509.Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
+CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
 
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → RDNATV bs₁ → RDNATV bs₂ → Set
 MatchRDNATV (mkTLV len (mkRDNATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (mkRDNATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = OID} oid oid₁ × Compare val val₁
@@ -59,10 +58,10 @@ MatchRDNSeq (mkTLV len nil len≡ bs≡) (mkTLV len₁ (cons x) len≡₁ bs≡�
 MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = ⊥
 MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = MatchRDNSeqHelper x x₁
 
-CCP6Seq : List (Exists─ (List Dig) X509.Cert) → Set
+CCP6Seq : List (Exists─ (List Dig) Cert) → Set
 CCP6Seq [] = ⊥
-CCP6Seq ((fst , snd) ∷ []) = MatchRDNSeq (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd))
-CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
+CCP6Seq ((fst , snd) ∷ []) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
 ----------------- helper decidables -------------------------
 
@@ -112,35 +111,35 @@ MatchRDNSeq-dec (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len�
 
 
 -- Conforming implementations may choose to reject all Version 1 and Version 2 intermediate CA certificates
-CCP2 : ∀ {@0 bs} → X509.Chain bs → Set
+CCP2 : ∀ {@0 bs} → Chain bs → Set
 CCP2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = CCP2Seq t
 
-ccp2 : ∀ {@0 bs} (c : X509.Chain bs) → Dec (CCP2 c)
+ccp2 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP2 c)
 ccp2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = helper t
   where
-  helper : ∀ {@0 bs} → (c : SequenceOf X509.Cert bs) → Dec (CCP2Seq c)  
+  helper : ∀ {@0 bs} → (c : SequenceOf Cert bs) → Dec (CCP2Seq c)  
   helper nil = yes tt
   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
-  helper (cons (mkSequenceOf h (cons x) bs≡)) = (X509.Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
+  helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
 
 
 -- A certificate MUST NOT appear more than once in a prospective certification path.
-CCP5 : ∀ {@0 bs} → X509.Chain bs → Set
+CCP5 : ∀ {@0 bs} → Chain bs → Set
 CCP5 c = List.Unique _≟_ (ChainToList c)
 
-ccp5 : ∀ {@0 bs} (c : X509.Chain bs) → Dec (CCP5 c)
+ccp5 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP5 c)
 ccp5 c = List.unique? _≟_ (ChainToList c)
 
 
 -- Certificate users MUST be prepared to process the Issuer distinguished name
 -- and Subject distinguished name fields to perform name chaining for certification path validation.
-CCP6 : ∀ {@0 bs} → X509.Chain bs → Set
+CCP6 : ∀ {@0 bs} → Chain bs → Set
 CCP6 c = CCP6Seq (ChainToList c)
 
-ccp6 : ∀ {@0 bs} (c : X509.Chain bs) → Dec (CCP6 c)
+ccp6 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP6 c)
 ccp6 c = helper (ChainToList c)
   where
-  helper : (c : List (Exists─ (List Dig) X509.Cert)) → Dec (CCP6Seq c)
+  helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP6Seq c)
   helper [] = no (λ ())
-  helper ((fst , snd) ∷ []) = MatchRDNSeq-dec (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd))
-  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (X509.Cert.getIssuer snd)) (proj₂ (X509.Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
+  helper ((fst , snd) ∷ []) = MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
