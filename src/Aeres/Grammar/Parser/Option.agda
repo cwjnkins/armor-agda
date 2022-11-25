@@ -81,13 +81,13 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   parseOption₁ExactLength
     : {@0 A : List Σ → Set}
-      → @0 NonEmpty A → @0 NonNesting A
+      → @0 NonNesting A
       → (underflow : M (Level.Lift _ ⊤))
       → Parser (M ∘ Dec) A
       → ∀ n → Parser (M ∘ Dec) (ExactLength (Option A) n)
-  runParser (parseOption₁ExactLength ne nn u p zero) xs =
+  runParser (parseOption₁ExactLength nn u p zero) xs =
     return (yes (success [] 0 refl (mk×ₚ none (─ refl) refl) xs refl))
-  runParser (parseOption₁ExactLength ne nn u p n'@(suc n)) xs = do
+  runParser (parseOption₁ExactLength  nn u p n'@(suc n)) xs = do
     yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ v₁Len bs≡) suf₁ ps≡₁) ← runParser (parseExactLength nn u p n') xs
       where no ¬parse → do
         return ∘ no $ λ where
@@ -163,8 +163,6 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
     open ≤-Reasoning
     module ≡R = ≡-Reasoning
 
-
-
   open ≡-Reasoning
 
   parseOption₁&₁ : {@0 A B : List Σ → Set}
@@ -226,6 +224,119 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
                prefixDecSuccess x₁ ++ pre₀ ++ suf₀ ≡⟨ cong (prefixDecSuccess x₁ ++_) ps≡ ⟩
                prefixDecSuccess x₁ ++ suffixDecSuccess x₁ ≡⟨ ps≡DecSuccess x₁ ⟩
                xs ∎)))
+
+  parse&Option
+    : ∀ {@0 A B : List Σ → Set}
+      → Parser (Logging ∘ Dec) A → (∀ n → Parser (Logging ∘ Dec) (ExactLength B n))
+      → @0 NonNesting A
+      → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option A) B) n)
+  runParser (parse&Option p₁ p₂ nn n) xs = do
+    tell "parseOption: trying to skip first field"
+    no ¬p₂ ← runParser (p₂ n) xs
+      where
+      yes (success pre₁ r₁ r₁≡ (mk×ₚ v₂ v₂Len refl) suf₁ ps≡₁) →
+        return (yes
+          (success pre₁ _ r₁≡ (mk×ₚ (mk&ₚ none v₂ refl) v₂Len refl) suf₁ ps≡₁))
+    tell "parseOption: trying to read first field"
+    yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser p₁ xs
+      where no ¬p₁ → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} none v₂ refl) (─ valueLen) refl) suffix ps≡) →
+            contradiction
+              (success prefix read read≡ (mk×ₚ v₂ (─ valueLen) refl) suffix ps≡)
+              ¬p₂
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} (some v₁) v₂ refl) (─ valueLen) refl) suffix ps≡) →
+            contradiction
+              (success bs₁ _ refl v₁ (bs₂ ++ suffix)
+                (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ _) ⟩
+                       (bs₁ ++ bs₂) ++ suffix ≡⟨⟩
+                       prefix ++ suffix ≡⟨ ps≡ ⟩
+                       xs ∎)))
+              ¬p₁
+    yes r₁≤n ← return (r₁ ≤? n)
+      where no ¬r₁≤n → do
+        tell $ "parseOption: overflow of first component"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} none v₂ refl) valueLen refl) suffix ps≡) →
+            contradiction
+              (success prefix read read≡ (mk×ₚ v₂ valueLen refl) suffix ps≡)
+              ¬p₂
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} (some v₁') v₂' refl) valueLen refl) suffix ps≡) →
+            let
+              xs≡ : Erased (bs₁ ++ bs₂ ++ suffix ≡ pre₁ ++ suf₁)
+              xs≡ = ─ (begin
+                (bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ _) ⟩
+                (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                xs ≡⟨ sym ps≡₁ ⟩
+                pre₁ ++ suf₁ ∎))
+
+              bs₁≡ : Erased (bs₁ ≡ pre₁)
+              bs₁≡ = ─ nn (¡ xs≡) v₁' v₁
+            in
+            contradiction
+              (≤.begin
+                (r₁ ≤.≡⟨ r₁≡ ⟩
+                length pre₁ ≤.≡⟨ cong length (sym (¡ bs₁≡)) ⟩
+                length bs₁ ≤.≤⟨ m≤m+n (length bs₁) _ ⟩
+                length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+                length (bs₁ ++ bs₂) ≤.≡⟨ ¡ valueLen ⟩
+                n ≤.∎))
+              ¬r₁≤n
+    yes (success pre₂ r₂ r₂≡ (mk×ₚ v₂ v₂Len refl) suf₂ ps≡₂) ← runParser (p₂ (n - r₁)) suf₁
+      where no ¬p₂' → do
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} none v₂ refl) (─ valueLen) refl) suffix ps≡) →
+            contradiction
+              (success prefix _ read≡ (mk×ₚ v₂ (─ valueLen) refl) suffix ps≡)
+              ¬p₂
+          (success prefix read read≡ (mk×ₚ (mk&ₚ{bs₁}{bs₂} (some v₁') v₂' refl) (─ valueLen) refl) suffix ps≡) →
+            let
+              xs≡ : Erased (bs₁ ++ bs₂ ++ suffix ≡ pre₁ ++ suf₁)
+              xs≡ = ─ (begin
+                (bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ _) ⟩
+                (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                xs ≡⟨ sym ps≡₁ ⟩
+                pre₁ ++ suf₁ ∎))
+
+              bs₁≡ : Erased (bs₁ ≡ pre₁)
+              bs₁≡ = ─ nn (¡ xs≡) v₁' v₁
+
+              suf₁≡ : Erased (bs₂ ++ suffix ≡ suf₁)
+              suf₁≡ = ─ Lemmas.++-cancel≡ˡ _ _ (¡ bs₁≡) (¡ xs≡)
+
+              v₂Len : Erased (length bs₂ ≡ n - r₁)
+              v₂Len = ─ (begin
+                (length bs₂ ≡⟨ sym (m+n∸m≡n (length bs₁) (length bs₂)) ⟩
+                length bs₁ + length bs₂ - length bs₁ ≡⟨ cong (_∸ length bs₁) (sym (length-++ bs₁)) ⟩
+                length (bs₁ ++ bs₂) - length bs₁ ≡⟨ cong₂ _∸_ valueLen (cong length (¡ bs₁≡)) ⟩
+                n - length pre₁ ≡⟨ cong (n -_) (sym r₁≡) ⟩
+                n - r₁ ∎))
+            in
+            contradiction
+              (success bs₂ _ refl (mk×ₚ v₂' v₂Len refl) suffix (¡ suf₁≡))
+              ¬p₂'
+    let 
+        valLen : Erased (length (pre₁ ++ pre₂) ≡ n)
+        valLen = ─ (begin
+          (length (pre₁ ++ pre₂) ≡⟨ length-++ pre₁ ⟩
+          length pre₁ + length pre₂ ≡⟨ cong₂ _+_ (sym r₁≡) (¡ v₂Len) ⟩
+          r₁ + (n - r₁) ≡⟨ sym (+-∸-assoc r₁ r₁≤n) ⟩
+          r₁ + n - r₁ ≡⟨ m+n∸m≡n r₁ n ⟩
+          n ∎))
+    return (yes
+      (success (pre₁ ++ pre₂) (r₁ + r₂)
+        (begin
+          r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+          length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+          length (pre₁ ++ pre₂) ∎)
+        (mk×ₚ (mk&ₚ (some v₁) v₂ refl) valLen refl) suf₂
+        (begin
+          (pre₁ ++ pre₂) ++ suf₂ ≡⟨ ++-assoc pre₁ pre₂ _ ⟩
+          pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+          pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+          xs ∎)))
+    where
+    module ≤ = ≤-Reasoning
 
   parseOption₂ : {A B : List Σ → Set}
                  → (@0 _ : NonNesting A) → (@0 _ : NonNesting B) → (@0 _ : NoConfusion A B)

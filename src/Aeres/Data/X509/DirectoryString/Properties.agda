@@ -15,7 +15,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.DirectoryString.Properties where
 
-open Base256
 open import Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum                UInt8
 
@@ -68,14 +67,13 @@ noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₂ x₂)) =  noconfusionΣₚ (TLV.no
 noconfusion₃ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₃ x x₁ (Sum.inj₂ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
+Rep = (Sum (Σₚ TeletexString   TLVNonEmptyVal)
+      (Sum (Σₚ PrintableString TLVNonEmptyVal)
+      (Sum (Σₚ UniversalString TLVNonEmptyVal)
+      (Sum (Σₚ UTF8String      TLVNonEmptyVal)
+           (Σₚ BMPString       TLVNonEmptyVal)))))
 
-@0 iso :
-         Iso (Sum (Σₚ TeletexString   TLVNonEmptyVal)
-             (Sum (Σₚ PrintableString TLVNonEmptyVal)
-             (Sum (Σₚ UniversalString TLVNonEmptyVal)
-             (Sum (Σₚ UTF8String      TLVNonEmptyVal)
-                  (Σₚ BMPString       TLVNonEmptyVal)))))
-             DirectoryString
+iso : Iso Rep DirectoryString
 proj₁ (proj₁ iso) (Sum.inj₁ x) = teletexString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₁ x)) = printableString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = universalString x

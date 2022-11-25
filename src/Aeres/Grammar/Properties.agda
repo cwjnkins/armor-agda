@@ -56,6 +56,41 @@ module Distribute where
     proj₂ exactLength-Sum (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₁ fstₚ₁) sndₚ₁ refl
     proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁ refl
 
+  exactLength-&ᵈ
+    : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → @0 List Σ → Set} {n}
+      → Equivalent (ExactLength (&ₚᵈ A B) n)
+                   (&ₚᵈ (WithinLength A n)
+                        λ bs₁ a → ExactLength (B _ (fstₚ a)) (n - length bs₁))
+  proj₁ (exactLength-&ᵈ{A}{B}{n}) (mk×ₚ (mk&ₚ{bs₁}{bs₂} a b refl) (─ len≡) refl) =
+    mk&ₚ (mk×ₚ a len≤ refl) (mk×ₚ b len-≡ refl) refl
+    where
+    module ≤ = ≤-Reasoning
+
+    len≤ : Erased (length bs₁ ≤ n)
+    len≤ = ─ (≤.begin
+      length bs₁ ≤.≤⟨ m≤m+n (length bs₁) (length bs₂) ⟩
+      length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂) ≤.≡⟨ len≡ ⟩
+      n ≤.∎)
+
+    len-≡ : Erased (length bs₂ ≡ n - length bs₁)
+    len-≡ = ─ (begin
+      (length bs₂ ≡⟨ sym (m+n∸m≡n (length bs₁) (length bs₂)) ⟩
+      length bs₁ + length bs₂ - length bs₁ ≡⟨ cong (_- length bs₁) (sym (length-++ bs₁)) ⟩
+      length (bs₁ ++ bs₂) - length bs₁ ≡⟨ cong (_∸ length bs₁) len≡ ⟩
+      n - length bs₁ ∎))
+  proj₂ (exactLength-&ᵈ{A}{B}{n}) (mk&ₚ{bs₁}{bs₂} (mk×ₚ a (─ len≤) refl) (mk×ₚ b (─ len≡) refl) refl) =
+    mk×ₚ (mk&ₚ a b refl) len≡' refl
+
+    where
+    len≡' : Erased (length (bs₁ ++ bs₂) ≡ n)
+    len≡' = ─ (begin
+      (length (bs₁ ++ bs₂) ≡⟨ length-++ bs₁ ⟩
+      length bs₁ + length bs₂ ≡⟨ cong (length bs₁ +_) len≡ ⟩
+      length bs₁ + (n - length bs₁) ≡⟨ m+[n∸m]≡n len≤ ⟩
+      n ∎))
+
+
 module NonNesting where
 
   open ≡-Reasoning
@@ -124,7 +159,8 @@ module Unambiguous where
   option₁ ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
 
   unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
-  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) = subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
+  unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
+    subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
   unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
     ⊥-elim (nc bs≡'  x sndₚ₁)
     where
@@ -146,6 +182,53 @@ module Unambiguous where
     where
     @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
     pf = unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
+
+  unambiguous-option₁& : ∀ {@0 A B} → Unambiguous A → NonNesting A → NonEmpty A → Unambiguous B → NoConfusion A (NotEmpty B) → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
+    subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
+  unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
+    ⊥-elim (nc bs≡'  x (mk×ₚ sndₚ₁ (─ 1≤len) refl) {- sndₚ₁ -})
+    where
+    @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
+    bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
+                 bs₁ ++ bs₂ ≡⟨ sym bs≡₁ ⟩
+                 xs ≡⟨ solve (++-monoid Σ) ⟩
+                 xs ++ [] ∎)
+
+    @0 xs≢[] : xs ≢ []
+    xs≢[] refl = contradiction (++-conicalˡ _ _ (sym bs≡₁)) (ne₁ x)
+
+    @0 lenxs≢0 : length xs ≢ 0
+    lenxs≢0 eq = case _,_{B = λ y → ↑ y ≢ []} (singleton xs refl) xs≢[] ret (const _) of λ where
+      (singleton [] refl , ≢[]) → contradiction refl ≢[]
+      (singleton (x ∷ x₁) refl , ≢[]) → contradiction eq λ ()
+
+    @0 1≤len : 1 ≤ length xs
+    1≤len = n≢0⇒n>0 lenxs≢0
+  unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc {xs} (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
+    ⊥-elim (nc bs≡' x (mk×ₚ sndₚ₂ (─ 1≤len) refl))
+    where
+    @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
+    bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
+                 bs₁ ++ bs₂ ≡⟨ sym bs≡ ⟩
+                 xs ≡⟨ solve (++-monoid Σ) ⟩
+                 xs ++ [] ∎)
+    @0 xs≢[] : xs ≢ []
+    xs≢[] refl = contradiction (++-conicalˡ _ _ (sym bs≡)) (ne₁ x)
+
+    @0 lenxs≢0 : length xs ≢ 0
+    lenxs≢0 eq = case _,_{B = λ y → ↑ y ≢ []} (singleton xs refl) xs≢[] ret (const _) of λ where
+      (singleton [] refl , ≢[]) → contradiction refl ≢[]
+      (singleton (x ∷ x₁) refl , ≢[]) → contradiction eq λ ()
+
+    @0 1≤len : 1 ≤ length xs
+    1≤len = n≢0⇒n>0 lenxs≢0
+  unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
+    cong (λ where (mk&ₚ v₀ v₁ eq) → mk&ₚ (some v₀) v₁ eq ) (‼ pf)
+    where
+    @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
+    pf = unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
+
 
   unambiguous-&₁option₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonEmpty B → Unambiguous (&ₚ A (Option B))
   unambiguous-&₁option₁{A}{B} ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂} fstₚ₂  none bs≡₁) = ‼

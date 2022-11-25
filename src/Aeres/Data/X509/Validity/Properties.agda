@@ -37,3 +37,6 @@ unambiguous =
 instance
   EqValidity : Eq (Exists─ (List UInt8) ValidityFields)
   EqValidity = isoEq iso (eq&ₚ it it)
+
+  eq≋ : Eq≋ ValidityFields
+  eq≋ = Eq⇒Eq≋ it

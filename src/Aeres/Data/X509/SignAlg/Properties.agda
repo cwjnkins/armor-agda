@@ -1,57 +1,109 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Int.TCB
+open import Aeres.Data.X690-DER.Length
+open import Aeres.Data.X690-DER.Null.TCB
+open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.TLV
+import      Aeres.Data.X690-DER.Tag as Tag
+open import Aeres.Data.X509.AlgorithmIdentifier
+import      Aeres.Data.X509.HashAlg.Properties as HashAlg
+open import Aeres.Data.X509.HashAlg.TCB
+open import Aeres.Data.X509.SignAlg.Exclusions
 open import Aeres.Data.X509.SignAlg.TCB
-open import Aeres.Data.X690-DER
+import      Aeres.Data.X509.SignAlg.TCB.OIDs          as OIDs
+import      Aeres.Data.X509.SignAlg.ECDSA.TCB         as ECDSA
+import      Aeres.Data.X509.SignAlg.ECDSA.Properties  as ECDSA
+import      Aeres.Data.X509.SignAlg.DSA.Properties    as DSA
+import      Aeres.Data.X509.SignAlg.DSA.TCB           as DSA
+import      Aeres.Data.X509.SignAlg.RSA.Properties    as RSA
+import      Aeres.Data.X509.SignAlg.RSA.TCB           as RSA
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
-open import Data.Nat.Properties
-  hiding (_≟_)
+import      Data.List.Relation.Unary.Any.Properties as Any
+open import Relation.Nullary.Negation
+  using (¬?)
+
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Sum         UInt8
 
 module Aeres.Data.X509.SignAlg.Properties where
 
-open Base256
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Option      UInt8
-open Aeres.Grammar.Properties  UInt8
+@0 unambiguousUnsupported : Unambiguous UnsupportedSignAlg
+unambiguousUnsupported =
+  TLV.unambiguous
+    (AlgorithmIdentifier.unambiguous
+      UnsupportedParam
+      (λ o → unambiguous×ₚ OctetString.unambiguous T-unique))
 
-iso : Iso (&ₚ OID (Option (NotEmpty OctetStringValue))) SignAlgFields
-proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkSignAlgFields fstₚ₁ sndₚ₁ bs≡
-proj₂ (proj₁ iso) (mkSignAlgFields signOID param bs≡) = mk&ₚ signOID param bs≡
-proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
-proj₂ (proj₂ iso) (mkSignAlgFields signOID param bs≡) = refl
+private
+  @0 ua₂ : Unambiguous (Sum RSA.Supported UnsupportedSignAlg)
+  ua₂ =
+    unambiguousSum{A = RSA.Supported}{B = UnsupportedSignAlg}
+      RSA.Supported.unambiguous
+      unambiguousUnsupported
+      noConfusion-RSA-Unsupported
 
-@0 unambiguous : Unambiguous SignAlgFields
+  @0 nc₂ : NoConfusion ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)
+  nc₂ =
+    NoConfusion.sumₚ{A = ECDSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+      noConfusion-ECDSA-RSA
+      noConfusion-ECDSA-Unsupported
+
+  @0 ua₁ : Unambiguous (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
+  ua₁ =
+    unambiguousSum{A = ECDSA.Supported}{B = Sum RSA.Supported UnsupportedSignAlg}
+      ECDSA.unambiguous ua₂ nc₂
+
+  @0 nc₁ : NoConfusion DSA.Supported (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
+  nc₁ =
+    NoConfusion.sumₚ{A = DSA.Supported}{B = ECDSA.Supported}{C = Sum RSA.Supported UnsupportedSignAlg}
+      noConfusion-DSA-ECDSA
+      (NoConfusion.sumₚ{A = DSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+        noConfusion-DSA-RSA
+        noConfusion-DSA-Unsupported)
+
+Rep : @0 List UInt8 → Set
+Rep =
+   Sum DSA.Supported
+  (Sum ECDSA.Supported
+  (Sum RSA.Supported
+       UnsupportedSignAlg))
+
+equiv : Equivalent Rep SignAlg
+proj₁ equiv (inj₁ x) = dsa x
+proj₁ equiv (inj₂ (inj₁ x)) = ecdsa x
+proj₁ equiv (inj₂ (inj₂ (inj₁ x))) = rsa x
+proj₁ equiv (inj₂ (inj₂ (inj₂ x))) = unsupported x
+proj₂ equiv (dsa x) = inj₁ x
+proj₂ equiv (ecdsa x) = inj₂ (inj₁ x)
+proj₂ equiv (rsa x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equiv (unsupported x) = inj₂ (inj₂ (inj₂ x))
+
+iso : Iso Rep SignAlg
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (inj₁ x) = refl
+proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
+proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl
+proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₂ x))) = refl
+proj₂ (proj₂ iso) (dsa x) = refl
+proj₂ (proj₂ iso) (ecdsa x) = refl
+proj₂ (proj₂ iso) (rsa x) = refl
+proj₂ (proj₂ iso) (unsupported x) = refl
+
+@0 unambiguous : Unambiguous SignAlg
 unambiguous =
   isoUnambiguous iso
-    (Unambiguous.unambiguous-&₁option₁
-      OID.unambiguous TLV.nonnesting
-      (unambiguous×ₚ OctetString.unambiguous λ a₁ a₂ → erased-unique ≤-irrelevant a₁ a₂)
-      λ where (mk×ₚ _ () refl) refl)
+    (unambiguousSum{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
+      DSA.unambiguous ua₁ nc₁)
 
+@0 nonnesting : NonNesting SignAlg
+nonnesting xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
+  TLV.nonnesting xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
 
-instance
-  SignAlgFieldsEq≋ : Eq≋ SignAlgFields
-  Eq≋._≋?_ SignAlgFieldsEq≋{bs₁} {bs₂} sf₁ sf₂ =
-    case SignAlgFields.signOID sf₁ ≋? SignAlgFields.signOID sf₂ of λ where
-      (no ¬oid₁≋oid₂) →
-        no λ where
-          ≋-refl → contradiction ≋-refl ¬oid₁≋oid₂
-      (yes ≋-refl) →
-        case SignAlgFields.param sf₁ ≋? SignAlgFields.param sf₂ of λ where
-          (no ¬param₁≋param₂) →
-            no λ where
-              ≋-refl → contradiction ≋-refl ¬param₁≋param₂
-          (yes ≋-refl) → yes (‼
-            let @0 bs₁≡bs₂ : bs₁ ≡ bs₂
-                bs₁≡bs₂ = trans (SignAlgFields.bs≡ sf₁) (sym (SignAlgFields.bs≡ sf₂))
-            in
-            case (‼ bs₁≡bs₂) of λ where
-              refl →
-                case (‼ ≡-unique (SignAlgFields.bs≡ sf₁) (SignAlgFields.bs≡ sf₂)) ret (const _) of λ where
-                  refl → ≋-refl)
-
-  SignAlgFieldsEq : Eq (Exists─ (List UInt8) SignAlgFields)
-  SignAlgFieldsEq = Eq≋⇒Eq it

@@ -3,7 +3,6 @@
 open import Data.Nat.DivMod
 import      Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Properties
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList
 import      Aeres.Grammar.Sum

@@ -1,26 +1,67 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X690-DER
+open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Int.TCB
+open import Aeres.Data.X690-DER.Null.TCB
+open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Data.X690-DER.Tag as Tag
+open import Aeres.Data.X509.AlgorithmIdentifier.TCB
+open import Aeres.Data.X509.HashAlg.TCB
+import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
+import      Aeres.Data.X509.SignAlg.ECDSA.TCB as ECDSA
+import      Aeres.Data.X509.SignAlg.DSA.TCB   as DSA
+import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
+import      Data.List.Relation.Unary.Any.Properties as Any
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Sum         UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
 
-record SignAlgFields (@0 bs : List UInt8) : Set where
-  constructor mkSignAlgFields
-  field
-    @0 {o p} : List UInt8
-    signOID : OID o
-    param : Option (NotEmpty OctetStringValue) p
-    @0 bs≡  : bs ≡ o ++ p
+supportedSignAlgOIDs : List (Exists─ _ OIDValue)
+supportedSignAlgOIDs =
+  DSA.supportedSignAlgOIDs ++ ECDSA.supportedSignAlgOIDs ++ RSA.supportedSignAlgOIDs
 
-SignAlg : (@0 _ : List UInt8) → Set
-SignAlg xs = TLV Tag.Sequence SignAlgFields xs
+UnsupportedParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
+UnsupportedParam o =
+     OctetStringValue
+  ×ₚ const (False ((-, TLV.val o) ∈? supportedSignAlgOIDs))
 
-getSignAlgOIDbs : ∀ {@0 bs} → SignAlg bs → List UInt8
-getSignAlgOIDbs = Singleton.x ∘ OID.serialize ∘ SignAlgFields.signOID ∘ TLV.val
+UnsupportedSignAlg =
+  AlgorithmIdentifier UnsupportedParam
+
+data SignAlg (@0 bs : List UInt8) : Set where
+  dsa : DSA.Supported bs → SignAlg bs
+  ecdsa : ECDSA.Supported bs → SignAlg bs
+  rsa   : RSA.Supported bs → SignAlg bs
+  unsupported : UnsupportedSignAlg bs → SignAlg bs
+
+erase
+  : ∀ {@0 bs} → SignAlg bs
+    → AlgorithmIdentifier (const (Erased ∘ OctetStringValue)) bs
+erase (dsa x) =
+  case DSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (ecdsa x) =
+  case ECDSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (rsa x) =
+  case RSA.erase x ret (const _) of λ where
+    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+erase (unsupported (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ _ refl) bs≡₁) len≡ bs≡)) =
+  mkTLV len (mkAlgIDFields algOID (─ p₁) bs≡₁) len≡ bs≡
+
+getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID
+getOID s = -, AlgorithmIdentifierFields.algOID (TLV.val (erase s))
+
+getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
+getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID

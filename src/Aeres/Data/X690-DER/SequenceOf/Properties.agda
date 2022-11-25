@@ -129,14 +129,18 @@ instance
     Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | no ¬v₁≋v₂ = no λ where
       ≋-refl → contradiction ≋-refl ¬v₁≋v₂
 
-    BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
-    Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
-      with fstₚ v₁ ≋? fstₚ v₂
-    ... | yes ≋-refl
-      with ‼ ≤-irrelevant (sndₚ v₁) (sndₚ v₂)
-    ... | refl
-      with ‼ Σₚ.bs≡ v₁
-      |    ‼ Σₚ.bs≡ v₂
-    ... | refl | refl = yes (mk≋ refl (subst (λ x → mk×ₚ _ _ x ≡ v₂) (≡-unique (Σₚ.bs≡ v₂) (Σₚ.bs≡ v₁)) refl))
-    Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
-      ≋-refl → contradiction ≋-refl ¬v₁≋v₂
+    SequenceOfEq : {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq (Exists─ _ A) ⦄
+                   → Eq (Exists─ _ (SequenceOf A))
+    SequenceOfEq = Eq≋⇒Eq (SequenceOfEq≋ ⦃ Eq⇒Eq≋ it ⦄)
+
+BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
+Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂
+  with fstₚ v₁ ≋? fstₚ v₂
+... | yes ≋-refl
+  with ‼ ≤-irrelevant (sndₚ v₁) (sndₚ v₂)
+... | refl
+  with ‼ Σₚ.bs≡ v₁
+  |    ‼ Σₚ.bs≡ v₂
+... | refl | refl = yes (mk≋ refl (subst (λ x → mk×ₚ _ _ x ≡ v₂) (≡-unique (Σₚ.bs≡ v₂) (Σₚ.bs≡ v₁)) refl))
+Eq≋._≋?_ BoundedSequenceOfEq≋{bs₁}{bs₂} v₁ v₂ | no ¬v₁≋v₂  = no λ where
+  ≋-refl → contradiction ≋-refl ¬v₁≋v₂

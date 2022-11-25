@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+  renaming (Σ to Sigma)
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -15,6 +16,19 @@ record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : 
     @0 a≡  : subst A bs≡ a₁ ≡ a₂
 
 pattern ≋-refl = mk≋ refl refl
+
+trans≋ : ∀ {@0 A : List Σ → Set} {@0 bs₁ bs₂ bs₃} → {a₁ : A bs₁} {a₂ : A bs₂} {a₃ : A bs₃}
+         → _≋_{A} a₁ a₂ → _≋_{A} a₂ a₃ → _≋_{A} a₁ a₃
+trans≋ ≋-refl ≋-refl = ≋-refl
+
+sym≋ : ∀ {@0 A : List Σ → Set} {@0 bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂}
+       → _≋_{A} a₁ a₂ → _≋_{A} a₂ a₁
+sym≋ ≋-refl = ≋-refl
+
+cong≋ : ∀ {@0 A B : List Σ → Set} {@0 bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂}
+        → (f : ∀ {@0 bs} → A bs → Sigma (List Σ) B)
+        → _≋_{A} a₁ a₂ → _≋_{B} (proj₂ (f a₁)) (proj₂ (f a₂))
+cong≋ f ≋-refl = ≋-refl
 
 instance
   Irrel≋ : ∀ {@0 A bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂} → Irrel (_≋_{A} a₁ a₂)
@@ -140,6 +154,9 @@ Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
   y“ : Exists─ (List Σ) A
   y“ = (─ bs₂) , y'
 
+isoEq≋ : ∀ {@0 A B} → Iso A B → Eq≋ A → Eq≋ B
+isoEq≋ iso eq = Eq⇒Eq≋ (isoEq iso (Eq≋⇒Eq eq))
+
 record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
@@ -153,7 +170,7 @@ _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 -- TODO: rename
-NotEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
+NotEmpty : (A : List Σ → Set) → @0 List Σ → Set
 NotEmpty A = A ×ₚ (Erased ∘ (_≥ 1) ∘ length)
 
 Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
@@ -169,6 +186,11 @@ Eq._≟_ (eqΣₚ eq₁ eq₂) (─ bs₁ , mk×ₚ a₁ b₁ refl) (─ bs₂ ,
       case Eq._≟_ (eq₂ a₁) b₁ b₂ ret (const _) of λ where
         (no ¬p) → no λ where refl → contradiction refl ¬p
         (yes refl) → yes refl
+
+eq≋Σₚ : ∀ {@0 A B} → Eq≋ A
+        → (∀ {@0 bs} → (a : A bs) → Eq (B bs a))
+        → Eq≋ (Σₚ A B)
+eq≋Σₚ eq₁ eq₂ = Eq⇒Eq≋ (eqΣₚ (Eq≋⇒Eq eq₁) eq₂)
 
 instance
   NotEmptyEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (NotEmpty A)
@@ -232,7 +254,7 @@ equivalent×ₚ : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → Equivalent (
 proj₁ (equivalent×ₚ (f , g)) = map×ₚ f
 proj₂ (equivalent×ₚ (f , g)) = map×ₚ g
 
-ExactLength : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
+ExactLength : (@0 A : List Σ → Set) → @0 ℕ → @0 List Σ → Set
 ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
 
 ExactLengthString : ℕ → @0 List Σ → Set
@@ -417,3 +439,12 @@ Eq._≟_ (eq&ₚ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁
     (yes refl) → case Eq._≟_ eq₂ (─ bs₁₂ , b₁) (─ bs₂₂ , b₂) ret (const _) of λ where
       (no ¬p) → no λ where refl → contradiction refl ¬p
       (yes refl) → yes refl
+
+eq≋&ₚ : ∀ {@0 A B} → Eq≋ A → Eq≋ B → Eq≋ (&ₚ A B)
+eq≋&ₚ eq₁ eq₂ = Eq⇒Eq≋ (eq&ₚ (Eq≋⇒Eq eq₁) (Eq≋⇒Eq eq₂))
+
+eq≋&ₚᵈ : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs₁ : List Σ) → A bs₁ → @0 List Σ → Set}
+         → Eq≋ A 
+         → (∀ {@0 bs₁} → (a : A bs₁) → Eq≋ (B bs₁ a))
+         → Eq≋ (&ₚᵈ A B)
+eq≋&ₚᵈ eq₁ eq₂ = Eq⇒Eq≋ (eq&ₚᵈ (Eq≋⇒Eq eq₁) (λ a → Eq≋⇒Eq (eq₂ a)))

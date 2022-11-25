@@ -2,8 +2,6 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Decidable.Cert
-open import Aeres.Data.X509.Decidable.Chain
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Chain
 import      Aeres.Grammar.Definitions
@@ -63,11 +61,11 @@ main = IO.run $
       pkBytes    : List UInt8
       sigBytes   : List UInt8
 
-  certOutput : ∀ {@0 bs} → X509.Cert bs → Output
-  Output.sigAlgOID (certOutput x) = SignAlg.getSignAlgOIDbs ∘ proj₂ ∘ X509.Cert.getTBSCertSignAlg $ x
-  Output.tbsBytes  (certOutput x) = X509.Cert.getTBSBytes x
-  Output.pkBytes   (certOutput x) = X509.Cert.getPublicKeyBytes x
-  Output.sigBytes  (certOutput x) = X509.Cert.getSignatureValueBytes x
+  certOutput : ∀ {@0 bs} → Cert bs → Output
+  Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ proj₂ ∘ Cert.getTBSCertSignAlg $ x
+  Output.tbsBytes  (certOutput x) = Cert.getTBSBytes x
+  Output.pkBytes   (certOutput x) = Cert.getPublicKeyBytes x
+  Output.sigBytes  (certOutput x) = Cert.getSignatureValueBytes x
 
   showOutput : Output → String
   showOutput o =
@@ -82,9 +80,9 @@ main = IO.run $
     showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
 
 
-  runCheck : ∀ {@0 bs} → X509.Cert bs → String
-             → {P : ∀ {@0 bs} → X509.Cert bs → Set}
-             → (∀ {@0 bs} → (c : X509.Cert bs) → Dec (P c))
+  runCheck : ∀ {@0 bs} → Cert bs → String
+             → {P : ∀ {@0 bs} → Cert bs → Set}
+             → (∀ {@0 bs} → (c : Cert bs) → Dec (P c))
              → IO.IO ⊤
   runCheck c m d
     with d c
@@ -96,9 +94,9 @@ main = IO.run $
     IO.return tt
 
 
-  runChainCheck : ∀ {@0 bs} → X509.Chain bs → String
-                  → {P : ∀ {@0 bs} → X509.Chain bs → Set}
-                  → (∀ {@0 bs} → (c : X509.Chain bs) → Dec (P c))
+  runChainCheck : ∀ {@0 bs} → Chain bs → String
+                  → {P : ∀ {@0 bs} → Chain bs → Set}
+                  → (∀ {@0 bs} → (c : Chain bs) → Dec (P c))
                   → IO.IO ⊤
   runChainCheck c m d
     with d c
@@ -109,7 +107,7 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runChecks' : ∀ {@0 bs} → ℕ → IList X509.Cert bs → _
+  runChecks' : ∀ {@0 bs} → ℕ → IList Cert bs → _
   runChecks' n nil = IO.return tt
   runChecks' n (consIList c tail bs≡) =
     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
@@ -143,11 +141,11 @@ main = IO.run $
         IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
 
-  runCertChecks : ∀ {@0 bs} → X509.Chain bs → _
+  runCertChecks : ∀ {@0 bs} → Chain bs → _
   runCertChecks c =
     runChecks' 1 (fstₚ c) IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
-    -- runChainCheck c "CCP5" ccp5 IO.>>
+    runChainCheck c "CCP5" ccp5 IO.>>
     runChainCheck c "CCP6" ccp6 IO.>>
     Aeres.IO.exitSuccess
     -- runCheck c "SCP1" scp1 IO.>>
