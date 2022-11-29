@@ -182,6 +182,52 @@ module Base64Str where
     where
     l = proj₂ equivₛ (mk×ₚ str (‼ strLen) refl)
 
+  char∈ : ∀ {b bs} → b ∈ bs → Base64.Base64Str bs → b ∈ B64.charset ⊎ b ≡ '='
+  char∈ b∈bs str = help (proj₂ equiv str) b∈bs
+    where
+    helpₚ : ∀ {b bs} → b ∈ bs → Sum Base64.Base64Pad1 Base64.Base64Pad2 bs → b ∈ B64.charset ⊎ b ≡ '='
+    helpₚ{b} (here refl) (inj₁ (Base64.mk64P1 (Base64.mk64 c c∈ i refl) c₂ c₃ pad bs≡)) =
+      inj₁ (uneraseDec (subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈) (_ ∈? _))
+    helpₚ (here refl) (inj₂ (Base64.mk64P2 (Base64.mk64 c c∈ i refl) c₂ pad bs≡)) =
+      inj₁ (uneraseDec (subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈) (_ ∈? _))
+    helpₚ (there (here refl)) (inj₁ (Base64.mk64P1 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 c c∈ i refl) c₃ pad bs≡)) =
+      inj₁ (uneraseDec (subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ bs≡))) c∈) (_ ∈? _))
+    helpₚ (there (here refl)) (inj₂ (Base64.mk64P2 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 c c∈ i refl) pad bs≡)) =
+      inj₁ (uneraseDec (subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ bs≡))) c∈) (_ ∈? _))
+    helpₚ (there (there (here refl))) (inj₁ (Base64.mk64P1 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) c₃@(Base64.mk64 c c∈ i refl) pad bs≡)) =
+      inj₁ (uneraseDec (subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡)))) c∈) (_ ∈? _))
+    helpₚ (there (there (here refl))) (inj₂ (Base64.mk64P2 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) pad bs≡)) =
+      inj₂ (‼ ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡)))
+    helpₚ (there (there (there (here refl)))) (inj₁ (Base64.mk64P1 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) c₃@(Base64.mk64 _ _ _ refl) pad bs≡)) =
+      inj₂ (‼ ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡))))
+    helpₚ (there (there (there (here refl)))) (inj₂ (Base64.mk64P2 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) pad bs≡)) =
+      inj₂ (‼ ∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡))))
+    helpₚ{b}{bs} (there (there (there (there{xs = xs} b∈)))) (inj₁ (Base64.mk64P1 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) c₃@(Base64.mk64 _ _ _ refl) pad bs≡)) =
+      contradiction b∈
+        (subst₀ (¬_ ∘ (b ∈_))
+          ([] ≡ xs ∋
+            proj₂ (Lemmas.length-++-≡ _ _ _ _ (trans (++-identityʳ _) (sym bs≡)) refl))
+          λ ())
+    helpₚ{b} (there (there (there (there{xs = xs} b∈)))) (inj₂ (Base64.mk64P2 c₁@(Base64.mk64 _ _ _ refl) c₂@(Base64.mk64 _ _ _ refl) pad bs≡)) =
+      contradiction b∈
+        ((subst₀ (¬_ ∘ (b ∈_))
+          ([] ≡ xs ∋
+            proj₂ (Lemmas.length-++-≡ _ _ _ _ (trans (++-identityʳ _) (sym bs≡)) refl))
+          λ ()))
+
+    help : ∀ {b bs} → Rep bs → b ∈ bs → b ∈ B64.charset ⊎ b ≡ '='
+    help (mk&ₚ nil (some sndₚ₁) refl) b∈ = helpₚ b∈ sndₚ₁
+    help (mk&ₚ (consIList (mk&ₚ (Base64.mk64 c c∈ i refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (Base64.mk64 _ _ _ refl) refl) refl) refl) tail refl) sndₚ₁ bs≡) (here refl) =
+      inj₁ (uneraseDec (subst (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈) (_ ∈? _))
+    help (mk&ₚ (consIList (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ c∈ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (Base64.mk64 _ _ _ refl) refl) refl) refl) tail refl) sndₚ₁ bs≡) (there (here refl)) =
+      inj₁ (uneraseDec (subst (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ bs≡))) c∈) (_ ∈? _))
+    help (mk&ₚ (consIList (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ c∈ _ refl) (Base64.mk64 _ _ _ refl) refl) refl) refl) tail refl) sndₚ₁ bs≡) (there (there (here refl))) =
+      inj₁ (uneraseDec (subst (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡)))) c∈) (_ ∈? _))
+    help (mk&ₚ (consIList (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (Base64.mk64 _ c∈ _ refl) refl) refl) refl) tail refl) sndₚ₁ bs≡) (there (there (there (here refl)))) =
+      inj₁ (uneraseDec (subst (_∈ B64.charset) (sym (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡))))) c∈) (_ ∈? _))
+    help (mk&ₚ (consIList (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (mk&ₚ (Base64.mk64 _ _ _ refl) (Base64.mk64 _ _ _ refl) refl) refl) refl) tail refl) sndₚ₁ bs≡) (there (there (there (there b∈)))) =
+      help (mk&ₚ tail sndₚ₁ ((∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡))))) ) b∈
+
   -- TODO: equality for List Char is decidable, so guard against ≡ [] first and then handle the negation case separately
   {-# TERMINATING #-}
   noOverlap : NoOverlap Repₛ (Sum Base64.Base64Pad1 Base64.Base64Pad2)
