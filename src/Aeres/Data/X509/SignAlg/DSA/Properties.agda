@@ -37,20 +37,20 @@ module DSA-Like where
     TLV.noconfusionVal λ where
      {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkAlgIDFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
        let
-         @0 ++≡ : bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂
-         ++≡ = begin
+         @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
+         ++≡ = ─ (begin
            bs₁ ++ p ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
            (bs₁ ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
            xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
            xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs'≡ ⟩
            (bs₁' ++ p') ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
-           bs₁' ++ p' ++ ys₂ ∎
+           bs₁' ++ p' ++ ys₂ ∎)
 
-         @0 bs₁≡ : bs₁ ≡ bs₁'
-         bs₁≡ = TLV.nonnesting ++≡ o o'
+         @0 bs₁≡ : Erased (bs₁ ≡ bs₁')
+         bs₁≡ = ─ TLV.nonnesting (¡ ++≡) o o'
 
          @0 o≋o' : _≋_{OID} o o'
-         o≋o' = mk≋ bs₁≡ (OID.unambiguous _ o')
+         o≋o' = mk≋ (¡ bs₁≡) (OID.unambiguous _ o')
        in
        contradiction
          (trans≋ (sym≋ o≡) (trans≋ (cong≋ (λ x → -, TLV.val x) o≋o') o'≡))

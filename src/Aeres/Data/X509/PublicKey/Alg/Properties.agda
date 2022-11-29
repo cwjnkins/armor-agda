@@ -51,19 +51,19 @@ noConfusion-RSA-Unsupported =
   TLV.noconfusionVal λ where
     {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
-        @0 ++≡ : a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂
-        ++≡ = begin
+        @0 ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
+        ++≡ = ─ (begin
           a ++ p ++ ys₁ ≡⟨ sym (++-assoc a p ys₁) ⟩
           (a ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
           xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
           xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
           (a' ++ p') ++ ys₂ ≡⟨ ++-assoc a' p' _ ⟩
-          a' ++ p' ++ ys₂ ∎
+          a' ++ p' ++ ys₂ ∎)
 
         o≋ : _≋_{A = OID} algOID o
         o≋ =
           mk≋
-            (TLV.nonnesting ++≡ algOID o)
+            (TLV.nonnesting (¡ ++≡) algOID o)
             (OID.unambiguous _ _)
       in
       contradiction
@@ -79,19 +79,19 @@ noConfusion-EC-Unsupported =
   TLV.noconfusionVal λ where
     {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
-        @0 ++≡ : a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂
-        ++≡ = begin
+        ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
+        ++≡ = ─ (begin
           a ++ p ++ ys₁ ≡⟨ sym (++-assoc a p ys₁) ⟩
           (a ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
           xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
           xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
           (a' ++ p') ++ ys₂ ≡⟨ ++-assoc a' p' _ ⟩
-          a' ++ p' ++ ys₂ ∎
+          a' ++ p' ++ ys₂ ∎)
 
         o≋ : _≋_{A = OID} algOID o
         o≋ =
           mk≋
-            (TLV.nonnesting ++≡ algOID o)
+            (TLV.nonnesting (¡ ++≡) algOID o)
             (OID.unambiguous _ _)
       in
       contradiction
@@ -115,9 +115,9 @@ nonnesting =
 
 @0 unambiguous : Unambiguous PublicKeyAlg
 unambiguous =
-  unambiguousSum
+  unambiguousSum{A = RSA}
     RSA.unambiguous
-    (unambiguousSum EC.unambiguous
+    (unambiguousSum{A = EC} EC.unambiguous
       (TLV.unambiguous
         (AlgorithmIdentifier.unambiguous
           UnsupportedParam λ o →
