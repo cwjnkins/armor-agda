@@ -23,6 +23,12 @@ module EOL where
         (Sum (_≡ [ '\r' ])
              (_≡ [ '\n' ]))
 
+  @0 char∈ : ∀ {@0 b bs} → b ∈ bs → EOL bs → b ≡ '\r' ⊎ b ≡ '\n'
+  char∈ (here refl) crlf = inj₁ refl
+  char∈ (there (here refl)) crlf = inj₂ refl
+  char∈ (here refl) cr = inj₁ refl
+  char∈ (here refl) lf = inj₂ refl
+
   char₁ : ∀ {@0 b bs} → EOL (b ∷ bs) → b ≡ '\r' ⊎ b ≡ '\n'
   char₁ crlf = inj₁ refl
   char₁ cr = inj₁ refl
