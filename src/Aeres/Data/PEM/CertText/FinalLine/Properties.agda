@@ -5,6 +5,7 @@ open import Aeres.Data.Base64
 open import Aeres.Data.PEM.CertText.FinalLine.TCB
 open import Aeres.Data.PEM.CertText.FullLine.TCB
 open import Aeres.Data.PEM.RFC5234.TCB
+import      Aeres.Data.PEM.RFC5234.Properties as RFC5234
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
@@ -31,5 +32,17 @@ fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen) refl) eol refl) =
     , Lemmas.≡⇒≤ lineLen)
     eol refl
 
-postulate
-  lengthRange : ∀ {@0 bs} → CertFinalLine bs → InRange 2 66 (length bs)
+@0 lengthRange : ∀ {@0 bs} → CertFinalLine bs → InRange 2 66 (length bs)
+lengthRange{bs} (mkCertFinalLine{l}{e} line lineLen eol bs≡) =
+    (≤.begin
+      2 ≤.≤⟨ Nat.+-mono-≤ (proj₁ lineLen) (proj₁ $ RFC5234.EOL.eolLen eol) ⟩
+      length l + length e ≤.≡⟨ sym (length-++ l) ⟩
+      length (l ++ e) ≤.≡⟨ cong length (sym bs≡) ⟩
+      length bs ≤.∎ )
+  , (≤.begin
+      (length bs ≤.≡⟨ cong length bs≡ ⟩
+      length (l ++ e) ≤.≡⟨ length-++ l ⟩
+      length l + length e ≤.≤⟨ Nat.+-mono-≤ (proj₂ lineLen) (proj₂ $ RFC5234.EOL.eolLen eol) ⟩
+      66 ≤.∎))
+  where
+  module ≤ = Nat.≤-Reasoning
