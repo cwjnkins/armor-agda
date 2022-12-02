@@ -102,3 +102,7 @@ fullLineLen{bs} (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs�
   where
   module ≤ = Nat.≤-Reasoning
   eolLen = RFC5234.EOL.eolLen eol
+
+@0 char₁ : ∀ {@0 b bs} → CertFullLine (b ∷ bs) → b ∈ B64.charset
+char₁ (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ _ refl) t refl) (─ len≡) refl) eol bs≡) =
+  subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈

@@ -1,8 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Binary
-  renaming (module Base64 to B64)
 open import Aeres.Data.Base64
+open import Aeres.Data.PEM.CertText.Exclusions
 open import Aeres.Data.PEM.CertText.FinalLine
 open import Aeres.Data.PEM.CertText.FullLine
 open import Aeres.Data.PEM.CertText.TCB
@@ -11,8 +10,8 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
-import      Data.List.Relation.Unary.Any.Properties as Any
 import      Data.Nat.Properties as Nat
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.PEM.CertText.Properties where
 
@@ -21,160 +20,6 @@ open Aeres.Grammar.IList                Char
 open Aeres.Grammar.Relation.Definitions Char
 
 open ≡-Reasoning
-
-noOverlapLines : NoOverlap CertFullLine CertFinalLine
-noOverlapLines ws [] ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂ f₁ f₂ = inj₁ refl
-noOverlapLines ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂
-  (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs≡)
-  (mkCertFullLine{l₁}{e₁} (mk×ₚ line₁ (─ lineLen₁) refl) eol₁ bs≡₁) =
-  inj₂ noway
-  where
-  open ≡-Reasoning
-
-  @0 bs≡' : l₁ ++ e₁ ++ xs₁ ≡ l ++ e
-  bs≡' = l₁ ++ e₁ ++ xs₁ ≡⟨ sym (++-assoc l₁ e₁ xs₁) ⟩
-         (l₁ ++ e₁) ++ xs₁ ≡⟨ cong (_++ xs₁) (sym bs≡₁) ⟩
-         ws ++ xs₁ ≡⟨ bs≡ ⟩
-         l ++ e ∎
-
-  @0 l×e≡ : l₁ ≡ l × (e₁ ++ xs₁) ≡ e
-  l×e≡ = Lemmas.length-++-≡ _ _ _ _ bs≡'
-           (length l₁ ≡⟨ lineLen₁ ⟩
-            64 ≡⟨ sym lineLen ⟩
-            length l ∎)
-
-  @0 x₁≡ : x₁ ≡ '\r' ⊎ x₁ ≡ '\n'
-  x₁≡ = RFC5234.EOL.char∈ (subst₀ (x₁ ∈_) (proj₂ l×e≡) (Any.++⁺ʳ e₁ (here refl))) eol
-
-  @0 x₁∉ : x₁ ∉ B64.charset
-  x₁∉ = case x₁≡ ret (const _) of λ where
-    (inj₁ refl) → toWitnessFalse{Q = _ ∈? _} tt
-    (inj₂ refl) → toWitnessFalse{Q = _ ∈? _} tt
-
-  @0 x₁≢ : x₁ ≢ '='
-  x₁≢ = case x₁≡ ret (const _) of λ where
-    (inj₁ refl) → λ ()
-    (inj₂ refl) → λ ()
-
-  noway : ¬ CertFinalLine xs₂
-  noway (mkCertFinalLine{l'}{e'} line' lineLen' eol' bs≡“) =
-    ‼ contradiction₂ l₁'∈
-        (subst₀ (_∉ B64.charset) l₁'≡ x₁∉)
-        (subst₀ (_≢ '=') l₁'≡ x₁≢)
-    where
-    abstract
-      @0 l'≡ : Σ[ p ∈ Char × List Char ] uncurry _∷_ p ≡ l'
-      l'≡ = case singleton l' refl ret (const _) of λ where
-        (singleton [] refl) → contradiction lineLen' λ ()
-        (singleton (x ∷ x₁) refl) → (x , x₁) , refl
-
-    @0 l₁' : Char
-    l₁' = proj₁ (proj₁ l'≡)
-
-    @0 l“ : List Char
-    l“  = proj₂ (proj₁ l'≡)
-
-    @0 l₁'≡ : x₁ ≡ l₁'
-    l₁'≡ = ∷-injectiveˡ
-             (x₁ ∷ xs₁' ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
-              xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡“ ⟩
-              (l' ++ e') ++ ys₂ ≡⟨ ++-assoc l' e' ys₂ ⟩
-              l' ++ e' ++ ys₂ ≡⟨ cong (λ x → x ++ e' ++ ys₂) (sym (proj₂ l'≡)) ⟩
-              (l₁' ∷ l“) ++ e' ++ ys₂ ∎)
-
-    line“ : Base64Str (l₁' ∷ l“)
-    line“ = subst₀ Base64Str (sym (proj₂ l'≡)) line'
-
-    @0 l₁'∈ : l₁' ∈ B64.charset ⊎ l₁' ≡ '='
-    l₁'∈ = Base64.Str.char∈ (here refl) line“
-
-noOverlapLemma₁ : NoOverlap CertFinalLine (&ₚ (IList CertFullLine) CertFinalLine)
-noOverlapLemma₁ ws [] ys₁ xs₂ ys₂ x x₁ x₂ = inj₁ refl
-noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂
-  (mkCertFinalLine{l}{e} line lineLen eol bs≡) (mkCertFinalLine{l₁}{e₁} line₁ lineLen₁ eol₁ bs≡₁) =
-  {!!}
-  where
-  open ≡-Reasoning
-
-  @0 bs≡' : l₁ ++ e₁ ++ xs₁ ≡ l ++ e
-  bs≡' = l₁ ++ e₁ ++ xs₁ ≡⟨ sym (++-assoc l₁ e₁ xs₁) ⟩
-         (l₁ ++ e₁) ++ xs₁ ≡⟨ cong (_++ xs₁) (sym bs≡₁) ⟩
-         ws ++ xs₁ ≡⟨ bs≡ ⟩
-         l ++ e ∎
-
-  module Len< (len< : length l₁ < length l) where
-    @0 l≡ : l ≡ l₁ ++ drop (length l₁) l
-    l≡ = Lemmas.drop-length-≤ l₁ _ _ _ bs≡' (Nat.<⇒≤ len<)
-
-    @0 lenDrop : length (drop (length l₁) l) ≡ length l - length l₁
-    lenDrop = length-drop (length l₁) l
-
-    @0 lenDrop>0 : 0 < length (drop (length l₁) l)
-    lenDrop>0 = Nat.≤-trans (Nat.m<n⇒0<n∸m len<) (Lemmas.≡⇒≤ (sym lenDrop))
-
-    abstract
-      @0 l≡∷ :  Σ[ p ∈ Char × List Char ] uncurry _∷_ p ≡ drop (length l₁) l
-      l≡∷ = caseErased (singleton (drop (length l₁) l) refl) ret (const _) of λ where
-        (singleton [] x≡) →
-          contradiction{P = 0 < 0}
-            (Nat.≤-trans lenDrop>0 (Lemmas.≡⇒≤ (cong length (sym x≡))))
-            λ ()
-        (singleton (x ∷ x₁) x≡) →
-          ─ ((x , x₁) , x≡)
-
-    @0 cₗ : _
-    cₗ = proj₁ (proj₁ l≡∷)
-
-    @0 cᵣ : _
-    cᵣ = proj₂ (proj₁ l≡∷)
-
-    line“ : Base64Str (l₁ ++ cₗ ∷ cᵣ)
-    line“ = subst₀ Base64Str
-              (l ≡⟨ l≡ ⟩
-              l₁ ++ drop (length l₁) l ≡⟨ cong (l₁ ++_) (sym $ proj₂ l≡∷) ⟩
-              l₁ ++ cₗ ∷ cᵣ ∎)
-              line
-
-    @0 cₗ∈ : cₗ ∈ B64.charset ⊎ cₗ ≡ '='
-    cₗ∈ = Base64.Str.char∈ (Any.++⁺ʳ l₁ (here refl)) line“
-
-    @0 bs≡“ : l₁ ++ e₁ ++ xs₁ ≡ l₁ ++ cₗ ∷ cᵣ ++ e
-    bs≡“ = l₁ ++ e₁ ++ xs₁ ≡⟨ bs≡' ⟩
-           l ++ e ≡⟨ cong (_++ e) l≡ ⟩
-           (l₁ ++ drop (length l₁) l) ++ e ≡⟨ ++-assoc l₁ _ _ ⟩
-           l₁ ++ drop (length l₁) l ++ e ≡⟨ cong (λ x → l₁ ++ x ++ e) (sym (proj₂ l≡∷)) ⟩
-           l₁ ++ cₗ ∷ cᵣ ++ e ∎
-
-    @0 bs≡ₗ : e₁ ++ xs₁ ≡ cₗ ∷ cᵣ ++ e
-    bs≡ₗ = ++-cancelˡ l₁ bs≡“
-
-    @0 cₗ≡ : cₗ ≡ '\r' ⊎ cₗ ≡ '\n'
-    cₗ≡ = caseErased eol₁ ret (const _) of λ where
-      crlf → ─ (inj₁ (sym (∷-injectiveˡ bs≡ₗ)))
-      cr → ─ (inj₁ (sym (∷-injectiveˡ bs≡ₗ)))
-      lf → ─ (inj₂ (sym (∷-injectiveˡ bs≡ₗ)))
-
-    @0 cₗ∉ : cₗ ∉ B64.charset × cₗ ≢ '='
-    cₗ∉ = caseErased cₗ≡ ret (const _) of λ where
-      (inj₁ x) →
-        ─   (subst₀ (_∉ B64.charset) (sym x) (toWitnessFalse{Q = _ ∈? _} tt)
-          , subst₀ (_≢ '=') (sym x) (λ ()))
-      (inj₂ y) →
-        ─   (subst₀ (_∉ B64.charset) (sym y) (toWitnessFalse{Q = _ ∈? _} tt)
-          , subst₀ (_≢ '=') (sym y) (λ ()))
-
-
-  @0 l₁×≡ : l₁ ≡ l × e₁ ++ xs₁ ≡ e
-  l₁×≡ = caseErased Nat.<-cmp (length l₁) (length l) ret (const _) of λ where
-    (tri≈ _ len≡ _) → ─ (Lemmas.length-++-≡ _ _ _ _ bs≡' len≡)
-    (tri< len< _ _) → ─ uncurry (contradiction₂ (Len<.cₗ∈ len<)) (Len<.cₗ∉ len<)
-    (tri> _ _ len>) → {!!}
-
-    -- Lemmas.length-++-≡ _ _ _ _ bs≡'
-    --        (length l₁ ≡⟨ lineLen₁ ⟩
-    --         64 ≡⟨ sym lineLen ⟩
-    --         length l ∎)
-
 
 finalLineFromLines : ∀ {@0 bs} → IList CertFullLine bs → Erased (bs ≡ []) ⊎ &ₚ (IList CertFullLine) CertFinalLine bs
 finalLineFromLines nil = inj₁ (─ refl)
@@ -192,5 +37,270 @@ finalLineFromLines{bs} (consIList{bs₁}{bs₂} head₁ tail₁@(consIList{bs₁
                     (begin _ ≡⟨ bs≡₁ ⟩
                            bs₁ ++ bs₅ ++ bs₆ ≡⟨ sym (++-assoc bs₁ bs₅ _) ⟩
                            (bs₁ ++ bs₅) ++ bs₆ ∎))
+
+{-# TERMINATING #-}
+@0 body< : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
+        → IList CertFullLine b₁ → CertFinalLine f₁
+        → IList CertFullLine b₂ → CertFinalLine f₂
+        → b₁ ++ f₁ ++ suf₁ ≡ b₂ ++ f₂ ++ suf₂
+        → length b₁ < length b₂
+        → length b₁ + length f₁ ≤ length b₂ + length f₂
+body<{f₂ = f₂} nil (mkCertFinalLine{l₁}{e₁} lineₗ lineLenₗ eolₗ refl) (consIList{bs₂ = bs₂} fullL@(mkCertFullLine{l}{e} (mk×ₚ line line≡ refl) eol refl) tail₁ refl) fin₂ ++≡ b₁< =
+  ≤.begin
+    length (l₁ ++ e₁) ≤.≡⟨ length-++ l₁ ⟩
+    length l₁ + length e₁ ≤.≤⟨ Nat.+-mono-≤ (proj₂ lineLenₗ) (proj₂ $ RFC5234.EOL.eolLen eolₗ) ⟩
+    64 + 2 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+    65 + 2 ≤.≤⟨ Nat.+-mono-≤ (proj₁ (FullLine.fullLineLen fullL)) (proj₁ $ FinalLine.lengthRange fin₂ ) ⟩
+    length (l ++ e) + length f₂ ≤.≤⟨ Nat.+-monoˡ-≤ (length f₂) (Nat.m≤m+n (length (l ++ e)) (length bs₂)) ⟩
+    (length (l ++ e) + length bs₂) + length f₂ ≤.≡⟨ cong (_+ length f₂) (sym (length-++ (l ++ e))) ⟩
+    (length ((l ++ e) ++ bs₂)) + length f₂ ≤.∎ 
+  where module ≤ = Nat.≤-Reasoning
+body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{bs₁} head₁ nil refl) fin₁ (consIList{bs₂} head₂ nil refl) fin₂ ++≡ b₁< =
+  let b₁<' : length bs₁ < length bs₂
+      b₁<' = subst₂ (λ x y → length x < length y) (++-identityʳ bs₁) (++-identityʳ bs₂) b₁<
+
+      bs₂≡ : Erased (bs₂ ≡ bs₁ ++ drop (length bs₁) bs₂)
+      bs₂≡ = ─ Lemmas.drop-length-≤ bs₁ (f₁ ++ suf₁) _ _ xs≡ (Nat.<⇒≤ b₁<')
+  in
+  caseErased noOverlapLines bs₁ (drop (length bs₁) bs₂) (f₂ ++ suf₂) f₁ suf₁
+               (++-cancelˡ bs₁ (begin
+                 (bs₁ ++ (drop (length bs₁) bs₂) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+                 (bs₁ ++ drop (length bs₁) bs₂) ++ f₂ ++ suf₂ ≡⟨ cong (_++ f₂ ++ suf₂) (sym (¡ bs₂≡)) ⟩
+                 bs₂ ++ f₂ ++ suf₂ ≡⟨ sym xs≡ ⟩
+                 bs₁ ++ f₁ ++ suf₁ ∎)))
+               (subst CertFullLine (¡ bs₂≡) head₂) head₁
+  ret (const _) of λ where
+    (inj₁ x) →
+      ─ contradiction
+          (begin (length bs₁ ≡⟨ cong length (sym (++-identityʳ bs₁)) ⟩
+                 length (bs₁ ++ []) ≡⟨ cong (length ∘ (bs₁ ++_)) (sym x) ⟩
+                 length (bs₁ ++ drop (length bs₁) bs₂) ≡⟨ cong length (sym (¡ bs₂≡)) ⟩
+                 length bs₂ ∎))
+          (Nat.<⇒≢ b₁<')
+    (inj₂ y) → ─ contradiction fin₁ y
+  where
+  xs≡ : bs₁ ++ f₁ ++ suf₁ ≡ bs₂ ++ f₂ ++ suf₂
+  xs≡ = begin (bs₁ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+              (bs₁ ++ []) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
+              (bs₂ ++ []) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+              bs₂ ++ f₂ ++ suf₂ ∎)
+body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂}
+  (consIList{bs₁} head₁ nil refl) fin₁
+  (consIList{bs₂} head₂ (consIList{bs₃}{bs₄} head₃ tail₃ refl) refl) fin₂ ++≡ b₁< =
+  caseErased Nat.<-cmp (length bs₁) (length bs₂) ret (const _) of λ where
+    (tri< bs₁< bs₁≢ _) →
+      let
+        bs₂≡ : Erased (bs₂ ≡ bs₁ ++ drop (length bs₁) bs₂)
+        bs₂≡ = ─ Lemmas.drop-length-≤ bs₁ (f₁ ++ suf₁) bs₂ (bs₃ ++ bs₄ ++ f₂ ++ suf₂) xs≡ (Nat.<⇒≤ bs₁<)
+
+        bs≡“ : Erased (f₁ ++ suf₁ ≡ drop (length bs₁) bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂)
+        bs≡“ = ─ ++-cancelˡ bs₁ (begin
+          (bs₁ ++ f₁ ++ suf₁ ≡⟨ xs≡ ⟩
+          bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ cong (_++ bs₃ ++ bs₄ ++ f₂ ++ suf₂) (¡ bs₂≡) ⟩
+          (bs₁ ++ drop (length bs₁) bs₂) ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+          bs₁ ++ drop (length bs₁) bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂ ∎))
+      in
+      ─ contradiction₂
+        (noOverlapLines bs₁ (drop (length bs₁) bs₂) (bs₃ ++ bs₄ ++ f₂ ++ suf₂) f₁ suf₁
+          (sym $ ¡ bs≡“)
+          (subst₀ CertFullLine (¡ bs₂≡) head₂)
+          head₁)
+        (drop (length bs₁) bs₂ ≢ [] ∋ λ ≡[] →
+          contradiction (cong length ≡[]) (Nat.>⇒≢ (≤.begin
+            (1 ≤.≤⟨ Nat.m<n⇒0<n∸m bs₁< ⟩
+            length bs₂ - length bs₁ ≤.≡⟨ sym (length-drop (length bs₁) bs₂) ⟩
+            length (drop (length bs₁) bs₂) ≤.∎))))
+        (contradiction fin₁)
+    (tri> _ bs₁≢ bs₁>) → 
+      let
+        bs₂≡ : Erased (bs₁ ≡ bs₂ ++ drop (length bs₂) bs₁)
+        bs₂≡ = ─ Lemmas.drop-length-≤ bs₂ _ bs₁ _ (sym xs≡) (Nat.<⇒≤ bs₁>)
+
+        bs≡“ : Erased (drop (length bs₂) bs₁ ++ f₁ ++ suf₁ ≡ bs₃ ++ bs₄ ++ f₂ ++ suf₂)
+        bs≡“ = ─ ++-cancelˡ bs₂
+          (bs₂ ++ drop (length bs₂) bs₁ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+          (bs₂ ++ drop (length bs₂) bs₁) ++ f₁ ++ suf₁ ≡⟨ cong (_++ f₁ ++ suf₁) (sym $ ¡ bs₂≡) ⟩
+          bs₁ ++ f₁ ++ suf₁ ≡⟨ xs≡ ⟩
+          _ ∎)
+      in
+      ─ contradiction₂
+          (FullLine.nooverlap bs₂ (drop (length bs₂) bs₁) (f₁ ++ suf₁) bs₃ _
+            (¡ bs≡“)
+            (subst₀ CertFullLine (¡ bs₂≡) head₁)
+            head₂)
+          (λ ≡[] →
+            contradiction (cong length ≡[]) (Nat.>⇒≢ (≤.begin
+              (1 ≤.≤⟨ Nat.m<n⇒0<n∸m bs₁> ⟩
+              length bs₁ - length bs₂ ≤.≡⟨ sym (length-drop (length bs₂) bs₁) ⟩
+              length (drop (length bs₂) bs₁) ≤.∎))))
+          (contradiction head₃)
+
+    (tri≈ _ bs₁≡ _) → ─
+      (let bs₂≡ : bs₁ ≡ bs₂
+           bs₂≡ = proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡ bs₁≡)
+
+           xs≡' : f₁ ++ suf₁ ≡ bs₃ ++ bs₄ ++ f₂ ++ suf₂
+           xs≡' = Lemmas.++-cancel≡ˡ _ _ bs₂≡ xs≡
+
+           f₁≤ : length f₁ ≤ length bs₃
+           f₁≤ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
+             (tri< f₁< _ _) → ─ (Nat.<⇒≤ f₁<)
+             (tri≈ _ f₁≡ _) → ─ (Lemmas.≡⇒≤ f₁≡)
+             (tri> _ _ f₁>) → ─
+               let f₁≡ : f₁ ≡ bs₃ ++ drop (length bs₃) f₁
+                   f₁≡ = Lemmas.drop-length-≤ bs₃ (bs₄ ++ f₂ ++ suf₂) _ _ (sym xs≡') (Nat.<⇒≤ f₁>)
+               in
+               contradiction₂
+                 (noOverlapLemma₁ bs₃ (drop (length bs₃) f₁) suf₁ (bs₄ ++ f₂) suf₂
+                    (++-cancelˡ bs₃
+                      (bs₃ ++ drop (length bs₃) f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+                      (bs₃ ++ drop (length bs₃) f₁) ++ suf₁ ≡⟨ cong (_++ suf₁) (sym f₁≡) ⟩
+                      f₁ ++ suf₁ ≡⟨ xs≡' ⟩
+                      bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+                      bs₃ ++ (bs₄ ++ f₂) ++ suf₂ ∎))
+                    (subst₀ CertFinalLine f₁≡ fin₁)
+                    (FinalLine.fromCertFullLine head₃))
+                 (λ ≡[] →
+                   contradiction (cong length ≡[]) (Nat.>⇒≢ (≤.begin
+                     1 ≤.≤⟨ Nat.m<n⇒0<n∸m f₁> ⟩
+                     length f₁ - length bs₃ ≤.≡⟨ sym (length-drop (length bs₃) f₁) ⟩
+                     length (drop (length bs₃) f₁) ≤.∎)))
+                 (contradiction (mk&ₚ tail₃ fin₂ refl))
+
+           -- f₁≡ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
+           --         (tri< f₁< f₁≢ _) → ─
+           --           (let bs₃≡ : bs₃ ≡ f₁ ++ drop (length f₁) bs₃
+           --                bs₃≡ = Lemmas.drop-length-≤ f₁ suf₁ _ _ xs≡' (Nat.<⇒≤ f₁<)
+
+           --                xs≡“ : drop (length f₁) bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡ suf₁
+           --                xs≡“ = ++-cancelˡ f₁
+           --                         (f₁ ++ drop (length f₁) bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+           --                         (f₁ ++ drop (length f₁) bs₃) ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ cong (_++ bs₄ ++ f₂ ++ suf₂) (sym bs₃≡) ⟩
+           --                         bs₃ ++ bs₄ ++ f₂ ++ suf₂ ≡⟨ sym xs≡' ⟩
+           --                         f₁ ++ suf₁ ∎)
+           --            in
+           --            contradiction₂
+           --              {!!}
+           --              {!!}
+           --              {!!}
+           --           )
+           --         (tri> _ f₁≢ f₁>) → {!!}
+           --         (tri≈ _ f₁≡ _) → ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡' f₁≡)
+       in
+       ≤.begin (length (bs₁ ++ []) + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) (++-identityʳ bs₁) ⟩
+               length bs₁ + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) bs₂≡ ⟩
+               length bs₂ + length f₁ ≤.≤⟨ Nat.+-monoʳ-≤ (length bs₂) f₁≤ ⟩
+               length bs₂ + length bs₃ ≤.≡⟨ sym (length-++ bs₂) ⟩
+               length (bs₂ ++ bs₃) ≤.≤⟨ Nat.m≤m+n (length (bs₂ ++ bs₃)) _ ⟩
+               length (bs₂ ++ bs₃) + length bs₄ ≤.≡⟨ sym (length-++ (bs₂ ++ bs₃)) ⟩
+               length ((bs₂ ++ bs₃) ++ bs₄) ≤.≡⟨ cong length (++-assoc bs₂ bs₃ _) ⟩
+               length (bs₂ ++ bs₃ ++ bs₄) ≤.≤⟨ Nat.m≤m+n _ (length f₂) ⟩
+               length (bs₂ ++ bs₃ ++ bs₄) + length f₂ ≤.∎)
+       )
+
+  where
+  module ≤ = Nat.≤-Reasoning
+
+  xs≡ : bs₁ ++ f₁ ++ suf₁ ≡ bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂
+  xs≡ = begin (bs₁ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+              (bs₁ ++ []) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
+              (bs₂ ++ bs₃ ++ bs₄) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+              bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂ ∎)
+
+body<{f₁ = f₁}{f₂ = f₂} (consIList{bs₁} head₁ (consIList{bs₁ = bs₂ₕ}{bs₂ = bs₂ₜ} head₂ tail₂ refl) refl) fin₁ (consIList{bs₁ = bs₃} head₃ nil refl) fin₂ ++≡ b₁< =
+  contradiction b₁< (Nat.<⇒≱ (s≤s
+    (≤.begin
+      (length (bs₃ ++ []) ≤.≡⟨ cong length (++-identityʳ bs₃) ⟩
+      length bs₃ ≤.≤⟨ proj₂ (FullLine.fullLineLen head₃) ⟩
+      66 ≤.≤⟨ Nat.+-monoˡ-≤ 1 (proj₁ (FullLine.fullLineLen head₁)) ⟩
+      length bs₁ + 1 ≤.≤⟨ Nat.+-monoʳ-≤ (length bs₁) (s≤s z≤n) ⟩
+      length bs₁ + 65 ≤.≤⟨ Nat.+-monoʳ-≤ (length bs₁) (proj₁ (FullLine.fullLineLen head₂)) ⟩
+      length bs₁ + length bs₂ₕ ≤.≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂ₕ) ≤.≤⟨ Nat.m≤m+n _ (length bs₂ₜ) ⟩
+      length (bs₁ ++ bs₂ₕ) + length bs₂ₜ ≤.≡⟨ sym (length-++ (bs₁ ++ bs₂ₕ)) ⟩
+      length ((bs₁ ++ bs₂ₕ) ++ bs₂ₜ) ≤.≡⟨ cong length (++-assoc bs₁ _ _) ⟩
+      length (bs₁ ++ bs₂ₕ ++ bs₂ₜ) ≤.∎))))
+  
+  where
+  module ≤ = Nat.≤-Reasoning
+
+body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{bs₁} head₁ tail₁@(consIList{bs₂}{bs₃} head₂ tail₂ refl) refl) fin₁ (consIList{bs₄} head₃ tail₃@(consIList{bs₅}{bs₆} head₄ tail₄ refl) refl) fin₂ ++≡ b₁< =
+  caseErased Nat.<-cmp (length bs₁) (length bs₄) ret (const _) of λ where
+    (tri< bs₁< bs₁≢ _) → ─
+      (let bs₄≡ : bs₄ ≡ bs₁ ++ drop (length bs₁) bs₄
+           bs₄≡ = Lemmas.drop-length-≤ bs₁ _ _ _ xs≡ (Nat.<⇒≤ bs₁<)
+       in
+       case FullLine.nooverlap bs₁ (drop (length bs₁) bs₄) (bs₅ ++ bs₆ ++ f₂ ++ suf₂) bs₂ (bs₃ ++ f₁ ++ suf₁)
+              (++-cancelˡ bs₁
+                (begin (bs₁ ++ drop (length bs₁) bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+                       (bs₁ ++ drop (length bs₁) bs₄) ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ (cong (_++ _) ∘ sym $ bs₄≡) ⟩
+                       bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ sym xs≡ ⟩
+                       _ ∎)))
+              (subst CertFullLine bs₄≡ head₃) head₁
+       ret (const _) of λ where
+        (inj₁ x) → contradiction{P = length bs₄ ≡ length bs₁}
+                     (begin
+                       length bs₄ ≡⟨ cong length bs₄≡ ⟩
+                       length (bs₁ ++ drop (length bs₁) bs₄) ≡⟨ cong (length ∘ (bs₁ ++_)) x ⟩
+                       length (bs₁ ++ []) ≡⟨ cong length (++-identityʳ bs₁) ⟩
+                       length bs₁ ∎) 
+                     (Nat.>⇒≢ bs₁<)
+        (inj₂ y) → contradiction head₂ y)
+    (tri> _ bs₁≢ bs₁>) → ─
+      (let bs₁≡' : bs₁ ≡ bs₄ ++ drop (length bs₄) bs₁
+           bs₁≡' = Lemmas.drop-length-≤ bs₄ _ _ _ (sym xs≡) (Nat.<⇒≤ bs₁>)
+       in
+       case FullLine.nooverlap bs₄ (drop (length bs₄) bs₁) (bs₂ ++ bs₃ ++ f₁ ++ suf₁) bs₅ (bs₆ ++ f₂ ++ suf₂)
+              (++-cancelˡ bs₄
+                (begin (bs₄ ++ drop (length bs₄) bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+                       (bs₄ ++ drop (length bs₄) bs₁) ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ cong (_++ _) (sym bs₁≡') ⟩
+                       bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁  ≡⟨ xs≡ ⟩
+                       _ ∎)))
+              (subst CertFullLine bs₁≡' head₁) head₃
+       ret (const _) of λ where
+         (inj₁ x) →
+           contradiction{P = length bs₁ ≡ length bs₄}
+             (begin (length bs₁ ≡⟨ cong length bs₁≡' ⟩
+                    length (bs₄ ++ drop (length bs₄) bs₁) ≡⟨ cong (length ∘ (bs₄ ++_)) x ⟩
+                    length (bs₄ ++ []) ≡⟨ cong length (++-identityʳ bs₄) ⟩
+                    length bs₄ ∎))
+             bs₁≢
+         (inj₂ y) → contradiction head₄ y
+      )
+    (tri≈ _ len≡ _) →
+      ─ (≤.begin (length (bs₁ ++ bs₂ ++ bs₃) + length f₁ ≤.≡⟨ cong (_+ length f₁) (length-++ bs₁) ⟩
+                 length bs₁ + length (bs₂ ++ bs₃) + length f₁ ≤.≡⟨ Nat.+-assoc (length bs₁) (length (bs₂ ++ bs₃)) (length f₁) ⟩
+                 length bs₁ + (length (bs₂ ++ bs₃) + length f₁) ≤.≤⟨ Nat.+-monoʳ-≤ (length bs₁) (rec len≡) ⟩
+                 length bs₁ + (length (bs₅ ++ bs₆) + length f₂) ≤.≡⟨ cong (_+ _) len≡ ⟩
+                 length bs₄ + (length (bs₅ ++ bs₆) + length f₂) ≤.≡⟨ sym (Nat.+-assoc (length bs₄) _ _) ⟩
+                 length bs₄ + length (bs₅ ++ bs₆) + length f₂ ≤.≡⟨ cong (_+ length f₂) (sym (length-++ bs₄)) ⟩
+                 length (bs₄ ++ bs₅ ++ bs₆) + length f₂ ≤.∎))
+  where
+  module ≤ = Nat.≤-Reasoning
+
+  xs≡ : bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡ bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂
+  xs≡ = begin bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+              (bs₁ ++ bs₂ ++ bs₃) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
+              (bs₄ ++ bs₅ ++ bs₆) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+              bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ∎
+
+  module _ (@0 len≡ : length bs₁ ≡ length bs₄) where
+    bs₁≡ : Erased (bs₁ ≡ bs₄)
+    bs₁≡ = ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡ len≡)
+
+    rec : (length (bs₂ ++ bs₃) + length f₁ ≤ length (bs₅ ++ bs₆) + length f₂)
+    rec = body<{suf₁ = suf₁}{suf₂} tail₁ fin₁ tail₃ fin₂
+               (Lemmas.++-cancel≡ˡ _ _ (¡ bs₁≡)
+                 (begin (bs₁ ++ (bs₂ ++ bs₃) ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
+                        bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ xs≡ ⟩
+                        bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
+                        bs₄ ++ (bs₅ ++ bs₆) ++ f₂ ++ suf₂ ∎)))
+               (Nat.+-cancelˡ-< (length bs₁)
+                 (≤.begin
+                   (1 + length bs₁ + length (bs₂ ++ bs₃) ≤.≡⟨ cong (1 +_) (sym (length-++ bs₁)) ⟩
+                   1 + length (bs₁ ++ bs₂ ++ bs₃) ≤.≤⟨ b₁< ⟩
+                   length (bs₄ ++ bs₅ ++ bs₆) ≤.≡⟨ length-++ bs₄ ⟩
+                   length bs₄ + length (bs₅ ++ bs₆) ≤.≡⟨ cong (_+ length (bs₅ ++ bs₆)) (cong length (sym (¡ bs₁≡))) ⟩
+                   length bs₁ + length (bs₅ ++ bs₆) ≤.∎)))      
 
 
