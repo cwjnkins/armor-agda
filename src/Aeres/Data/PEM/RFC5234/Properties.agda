@@ -88,3 +88,19 @@ module EOL where
             (inj₁ refl) →
               contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) λ ()
             (inj₂ refl) → contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) (λ ())
+
+  noOverlap' : NoOverlap EOL (NotEmpty Base64Str)
+  noOverlap' .('\r' ∷ [ '\n' ]) .[] ys₁ xs₂ ys₂ x crlf crlf = inj₁ refl
+  noOverlap' .([ '\r' ]) .([ '\n' ]) ys₁ xs₂ ys₂ ++≡ crlf cr =
+    inj₂ λ where
+      x₁@(mk×ₚ x₁' x₁'Len refl) → contradiction₂ (Base64.Str.char∈ ('\n' ∈ xs₂ ∋ n∈ x₁ x₁'Len) x₁')
+        (toWitnessFalse{Q = _ ∈? _} tt)
+        (λ ())
+    where
+    module _ (x₁ : NotEmpty Base64Str xs₂) (x₁Len : Erased (length xs₂ > 0)) where
+      n∈ : '\n' ∈ xs₂
+      n∈ = case singleton xs₂ refl ret (const _) of λ where
+        (singleton [] refl) → contradiction (¡ x₁Len) (λ ())
+        (singleton (x ∷ x₁) refl) → here (∷-injectiveˡ ++≡)
+  noOverlap' .([ '\r' ]) .[] ys₁ xs₂ ys₂ x cr cr = inj₁ refl
+  noOverlap' .([ '\n' ]) .[] ys₁ xs₂ ys₂ x lf lf = inj₁ refl

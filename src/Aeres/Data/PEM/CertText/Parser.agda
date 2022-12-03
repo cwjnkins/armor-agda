@@ -130,9 +130,9 @@ parseMaxCertText = LogDec.mkMaximalParser help
                             suf₁ ∎)))
                         ¬p)))
                 , tt
-              (inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) →
+              (inj₂ (mk&ₚ{pre₁₁}{pre₁₂} fstₚ₁ sndₚ₁ bs≡₁₂)) →
                   mkLogged [] (yes
-                    (success pre₁ _ r₁≡ (mkCertText fstₚ₁ sndₚ₁ bs≡) suf₁ ps≡₁))
+                    (success pre₁ _ r₁≡ (mkCertText fstₚ₁ sndₚ₁ bs≡₁₂) suf₁ ps≡₁))
                 , λ where
                   pre' suf' ps≡' (mkCertText{b}{f} body final bs≡) →
                     let
@@ -142,9 +142,29 @@ parseMaxCertText = LogDec.mkMaximalParser help
                          pre' ++ suf' ≡⟨ ps≡' ⟩
                          xs ∎)
 
+                      bs≡“ : Erased (b ++ f ++ suf' ≡ pre₁₁ ++ pre₁₂ ++ suf₁)
+                      bs≡“ = ─ trans (¡ bs≡') (trans (sym ps≡₁) (trans (cong (_++ suf₁) bs≡₁₂) (++-assoc pre₁₁ _ _)))
+
                       b≤ : Erased (length b ≤ length pre₁)
                       b≤ = ─ Nat.≤-trans
                              (max₁ _ _ (¡ bs≡') body)
                              (Lemmas.≡⇒≤ r₁≡)
                     in
-                    {!!}
+                    Nat.≮⇒≥ λ r₁<pre' →
+                      let
+                        pre₁< : Erased (length pre₁ < length pre')
+                        pre₁< = ─ Nat.≤-trans (s≤s (Lemmas.≡⇒≤ (sym r₁≡))) r₁<pre'
+                      in
+                      ‼ (caseErased Nat.<-cmp (length pre₁₁) (length b) ret (const _) of λ where
+                        (tri< pre₁₁< _ _) → ─ (
+                          let b≡ : b ≡ pre₁₁ ++ pre₁₂
+                              b≡ = foldFinalIntoBody fstₚ₁ sndₚ₁ body final (sym $ ¡ bs≡“) pre₁₁<
+
+                              suf₁≡ : f ++ suf' ≡ suf₁
+                              suf₁≡ = Lemmas.++-cancel≡ˡ _ _ b≡ (trans (¡ bs≡“) (sym (++-assoc pre₁₁ _ _)))
+                          in
+                          contradiction
+                            (success _ _ refl final suf' {!suf₁≡!})
+                            ¬p)
+                        (tri≈ _ pre₁₁≡ _) → {!!}
+                        (tri> _ _ pre₁₁>) → {!!})
