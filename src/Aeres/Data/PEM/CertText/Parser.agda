@@ -12,6 +12,7 @@ import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
+import      Data.List.Properties as List
 import      Data.Nat.Properties as Nat
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -130,7 +131,7 @@ parseMaxCertText = LogDec.mkMaximalParser help
                             suf₁ ∎)))
                         ¬p)))
                 , tt
-              (inj₂ (mk&ₚ{pre₁₁}{pre₁₂} fstₚ₁ sndₚ₁ bs≡₁₂)) →
+              (inj₂ (mk&ₚ{pre₁₁}{pre₁₂} fstₚ₁ (mk×ₚ sndₚ₁ sndₚ₁' refl) bs≡₁₂)) →
                   mkLogged [] (yes
                     (success pre₁ _ r₁≡ (mkCertText fstₚ₁ sndₚ₁ bs≡₁₂) suf₁ ps≡₁))
                 , λ where
@@ -149,22 +150,91 @@ parseMaxCertText = LogDec.mkMaximalParser help
                       b≤ = ─ Nat.≤-trans
                              (max₁ _ _ (¡ bs≡') body)
                              (Lemmas.≡⇒≤ r₁≡)
-                    in
-                    Nat.≮⇒≥ λ r₁<pre' →
-                      let
-                        pre₁< : Erased (length pre₁ < length pre')
-                        pre₁< = ─ Nat.≤-trans (s≤s (Lemmas.≡⇒≤ (sym r₁≡))) r₁<pre'
-                      in
-                      ‼ (caseErased Nat.<-cmp (length pre₁₁) (length b) ret (const _) of λ where
-                        (tri< pre₁₁< _ _) → ─ (
-                          let b≡ : b ≡ pre₁₁ ++ pre₁₂
-                              b≡ = foldFinalIntoBody fstₚ₁ sndₚ₁ body final (sym $ ¡ bs≡“) pre₁₁<
 
-                              suf₁≡ : f ++ suf' ≡ suf₁
-                              suf₁≡ = Lemmas.++-cancel≡ˡ _ _ b≡ (trans (¡ bs≡“) (sym (++-assoc pre₁₁ _ _)))
-                          in
-                          contradiction
-                            (success _ _ refl final suf' {!suf₁≡!})
-                            ¬p)
-                        (tri≈ _ pre₁₁≡ _) → {!!}
-                        (tri> _ _ pre₁₁>) → {!!})
+                      b< : Erased (length b < length pre₁)
+                      b< = ─ Nat.≤∧≢⇒< (¡ b≤) (λ b≡ →
+                        let suf₁≡ : f ++ suf' ≡ suf₁
+                            suf₁≡ = proj₂
+                              (Lemmas.length-++-≡ b (f ++ suf') pre₁ suf₁
+                                (b ++ f ++ suf' ≡⟨ ¡ bs≡“ ⟩
+                                pre₁₁ ++ pre₁₂ ++ suf₁ ≡⟨ sym (++-assoc pre₁₁ _ _) ⟩
+                                (pre₁₁ ++ pre₁₂) ++ suf₁ ≡⟨ cong (_++ suf₁) (sym bs≡₁₂) ⟩
+                                pre₁ ++ suf₁ ∎)
+                                b≡)
+                        in
+                        contradiction (success _ _ refl final suf' suf₁≡) ¬p)
+
+                      pf : Erased (length b + length f ≤ length pre₁₁ + length pre₁₂)
+                      pf = ─ Nat.≮⇒≥ λ pre₁< →
+                        caseErased Nat.<-cmp (length pre₁₁) (length b) ret (const _) of λ where
+                          (tri< pre₁₁< _ _) → ─
+                            let b≡ : ∃ λ n → b ≡ pre₁₁ ++ pre₁₂ ++ take n suf₁
+                                b≡ = foldFinalIntoBody fstₚ₁ sndₚ₁ body final (sym (¡ bs≡“))
+                                       pre₁₁<
+  
+                                n = proj₁ b≡
+                            in
+                            contradiction
+                              (≤.begin
+                                length pre₁ ≤.≡⟨ cong length bs≡₁₂ ⟩
+                                length (pre₁₁ ++ pre₁₂) ≤.≤⟨ Nat.m≤m+n (length (pre₁₁ ++ pre₁₂)) _ ⟩
+                                length (pre₁₁ ++ pre₁₂) + length (take n suf₁) ≤.≡⟨ sym (length-++ (pre₁₁ ++ pre₁₂)) ⟩
+                                length ((pre₁₁ ++ pre₁₂) ++ take n suf₁) ≤.≡⟨ cong length (++-assoc pre₁₁ _ _) ⟩
+                                length (pre₁₁ ++ pre₁₂ ++ take n suf₁) ≤.≡⟨ cong length (sym (proj₂ b≡)) ⟩
+                                length b ≤.∎)
+                              (Nat.<⇒≱ (¡ b<))
+                          (tri≈ _ pre₁₁≡ _) → ─
+                            let b≡× : b ≡ pre₁₁ × f ++ suf' ≡ pre₁₂ ++ suf₁
+                                b≡× = Lemmas.length-++-≡ _ _ _ _ (¡ bs≡“) (sym pre₁₁≡)
+
+                                final' : CertFullLine f
+                                final' = fullLineFromLine final sndₚ₁' (proj₂ b≡×)
+
+                                b++f≤ : length (b ++ f) ≤ length pre₁
+                                b++f≤ = ≤.begin
+                                  (length (b ++ f)
+                                    ≤.≤⟨ max₁ (b ++ f) suf'
+                                           ((b ++ f) ++ suf' ≡⟨ cong (_++ suf') (sym bs≡) ⟩
+                                           pre' ++ suf' ≡⟨ ps≡' ⟩
+                                           xs ∎)
+                                           (appendIList body (consIList final' nil (sym (++-identityʳ f))))
+                                    ⟩
+                                  r₁ ≤.≡⟨ r₁≡ ⟩
+                                  length pre₁ ≤.∎)
+                            in
+                            contradiction
+                              (≤.begin
+                                (length b + length f ≤.≡⟨ sym (length-++ b) ⟩
+                                length (b ++ f) ≤.≤⟨ b++f≤ ⟩
+                                length pre₁ ≤.≡⟨ cong length bs≡₁₂ ⟩
+                                length (pre₁₁ ++ pre₁₂) ≤.≡⟨ length-++ pre₁₁ ⟩
+                                length pre₁₁ + length pre₁₂ ≤.∎))
+                              (Nat.<⇒≱ pre₁<)
+                          (tri> _ _ pre₁₁>) → ─
+                            let pre₁₁≡ : ∃ λ n → pre₁₁ ≡ b ++ f ++ take n suf'
+                                pre₁₁≡ = foldFinalIntoBody body final fstₚ₁ sndₚ₁ (¡ bs≡“) pre₁₁>
+
+                                n = proj₁ pre₁₁≡
+                            in
+                            contradiction{P = length pre₁₁ + length pre₁₂ < length b + length f}
+                              pre₁<
+                              (Nat.≤⇒≯ (≤.begin
+                                length b + length f ≤.≤⟨ Nat.m≤m+n (length b + length f) _ ⟩
+                                length b + length f + length (take n suf') ≤.≡⟨ cong (_+ length (take n suf')) (sym (length-++ b)) ⟩
+                                length (b ++ f) + length (take n suf') ≤.≡⟨ sym (length-++ (b ++ f)) ⟩
+                                length ((b ++ f) ++ take n suf') ≤.≡⟨ cong length (++-assoc b f _) ⟩
+                                length (b ++ f ++ take n suf') ≤.≡⟨ cong length (sym (proj₂ pre₁₁≡)) ⟩
+                                length pre₁₁ ≤.≤⟨ Nat.m≤m+n (length pre₁₁) _ ⟩
+                                length pre₁₁ + length pre₁₂ ≤.∎))
+                    in
+                    uneraseDec
+                      (subst₂ _≤_
+                        (length b + length f ≡⟨ sym (length-++ b) ⟩
+                        length (b ++ f) ≡⟨ cong length (sym bs≡) ⟩
+                        length pre' ∎)
+                        (length pre₁₁ + length pre₁₂ ≡⟨ sym (length-++ pre₁₁) ⟩
+                        length (pre₁₁ ++ pre₁₂) ≡⟨ cong length (sym bs≡₁₂) ⟩
+                        length pre₁ ≡⟨ sym r₁≡ ⟩
+                        r₁ ∎)
+                        (¡ pf))
+                      (_ ≤? _)

@@ -5,17 +5,53 @@ import      Data.Nat.Properties as Nat
 
 module Aeres.Grammar.Relation.Definitions (Σ : Set) where
 
+open ≡-Reasoning
+
 NoOverlap : (A B : List Σ → Set) → Set
 NoOverlap A B =
   ∀ ws xs₁ ys₁ xs₂ ys₂ → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
   → A (ws ++ xs₁) → A ws → (xs₁ ≡ []) ⊎ (¬ B xs₂)
 
-noOverlapBoundary
+noOverlapBoundary₁
+  : ∀ {@0 A B} → NoOverlap A B
+    → ∀ {ws xs₁ ys₁ xs₂ ys₂} → ws ++ xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+    → A ws → B xs₁ → A xs₂
+    → ws ≡ xs₂ ++ drop (length xs₂) ws
+noOverlapBoundary₁{A} noo₁ {ws}{xs₁}{ys₁}{xs₂}{ys₂} ++≡ a₁ b₁ a₂ =
+  ‼ Lemmas.drop-length-≤ xs₂ _ ws (xs₁ ++ ys₁) (sym ++≡) xs₂≤ws
+  where
+  @0 xs₂≤ws : length xs₂ ≤ length ws
+  xs₂≤ws = Nat.≮⇒≥ noway
+    where
+    module _ (ws<xs₂ : length ws < length xs₂) where
+      @0 xs₂≡ : xs₂ ≡ ws ++ drop (length ws) xs₂
+      xs₂≡ = Lemmas.drop-length-≤ ws (xs₁ ++ ys₁) xs₂ ys₂ ++≡ (Nat.<⇒≤ ws<xs₂)
+
+      noway : ⊥
+      noway = ‼
+        contradiction₂
+          (noo₁ ws _ ys₂ xs₁ ys₁
+            (++-cancelˡ ws
+              (ws ++ drop (length ws) xs₂ ++ ys₂ ≡⟨ sym (++-assoc ws _ ys₂) ⟩
+              (ws ++ drop (length ws) xs₂) ++ ys₂ ≡⟨ cong (_++ ys₂) (sym xs₂≡) ⟩
+              xs₂ ++ ys₂ ≡⟨ sym ++≡ ⟩
+              ws ++ xs₁ ++ ys₁ ∎))
+            (subst₀ A xs₂≡ a₂) a₁)
+          (λ ≡[] →
+            contradiction
+              (length ws ≡⟨ cong length (sym (++-identityʳ ws)) ⟩
+              length (ws ++ []) ≡⟨ cong (λ x → length (ws ++ x)) (sym ≡[]) ⟩
+              length (ws ++ drop (length ws) xs₂) ≡⟨ cong length (sym xs₂≡) ⟩
+              length xs₂ ∎)
+              (Nat.<⇒≢ ws<xs₂))
+          (contradiction b₁)
+
+noOverlapBoundary₂
   : ∀ {@0 A B C} → NoOverlap A B → NoOverlap A C
     → ∀ {xs₁ ys₁ zs₁ xs₂ ys₂ zs₂} → xs₁ ++ ys₁ ++ zs₁ ≡ xs₂ ++ ys₂ ++ zs₂
     → A xs₁ → B ys₁ → A xs₂ → C ys₂
     → xs₁ ≡ xs₂
-noOverlapBoundary{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{zs₂} ++≡ a₁ b₁ a₂ c₂ =
+noOverlapBoundary₂{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{zs₂} ++≡ a₁ b₁ a₂ c₂ =
   case Nat.<-cmp (length xs₁) (length xs₂) ret (const _) of λ where
     (tri< xs₁<xs₂ _ _) →
       ‼ contradiction₂

@@ -592,6 +592,31 @@ module Lemmas where
   ... | n , inj₁ ys⊆ = n , inj₁ (cong (x ∷_) ys⊆)
   ... | n , inj₂ ws⊆ = n , inj₂ (cong (x ∷_) ws⊆)
 
+  ⊆⇒++take
+    : ∀ {ℓ} {A : Set ℓ} {xs₁ ys₁ xs₂ ys₂ : List A} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+      → length xs₁ ≤ length xs₂
+      → Σ[ n ∈ ℕ ] xs₂ ≡ xs₁ ++ take n ys₁
+  ⊆⇒++take {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ xs₁≤xs₂ =
+      (length (drop (length xs₁) xs₂))
+    , (xs₂ ≡⟨ xs₂≡ ⟩
+      xs₁ ++ drop (length xs₁) xs₂
+        ≡⟨ cong (xs₁ ++_) (sym (take-length-++ (drop (length xs₁) xs₂) ys₂)) ⟩
+      xs₁ ++ take (length (drop (length xs₁) xs₂)) (drop (length xs₁) xs₂ ++ ys₂)
+        ≡⟨ cong (λ x → xs₁ ++ take (length (drop (length xs₁) xs₂)) x) (sym ys₁≡) ⟩
+      xs₁ ++ take (length (drop (length xs₁) xs₂)) ys₁ ∎ )
+    where
+    open ≡-Reasoning
+
+    xs₂≡ : xs₂ ≡ xs₁ ++ drop (length xs₁) xs₂
+    xs₂≡ = drop-length-≤ xs₁ ys₁ xs₂ ys₂ ++≡ xs₁≤xs₂
+
+    ys₁≡ : ys₁ ≡ drop (length xs₁) xs₂ ++ ys₂
+    ys₁≡ = ++-cancelˡ xs₁
+      (xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+      xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) xs₂≡ ⟩
+      (xs₁ ++ drop (length xs₁) xs₂) ++ ys₂ ≡⟨ ++-assoc xs₁ _ _ ⟩
+      xs₁ ++ drop (length xs₁) xs₂ ++ ys₂ ∎)
+
   length-++-≤₁ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → length xs ≤ length (xs ++ ys)
   length-++-≤₁ [] ys = z≤n
   length-++-≤₁ (x ∷ xs) ys = s≤s (length-++-≤₁ xs ys)
