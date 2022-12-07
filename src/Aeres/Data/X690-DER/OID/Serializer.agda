@@ -11,5 +11,8 @@ serializeSub : ∀ {@0 bs} → OIDSub bs → Singleton bs
 serializeSub (mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) =
   singleton _ (sym bs≡)
 
+serializeVal : ∀ {@0 bs} → OIDValue bs → Singleton bs
+serializeVal = serializeNonEmptySequenceOf serializeSub
+
 serialize : ∀ {@0 bs} → OID bs → Singleton bs
-serialize = TLV.serialize (serializeNonEmptySequenceOf serializeSub)
+serialize = TLV.serialize serializeVal

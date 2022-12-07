@@ -7,7 +7,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
-module Aeres.Data.X509.Extension.AIA.AccessDesc.AccessMethod.TCB.OIDs where
+module Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8

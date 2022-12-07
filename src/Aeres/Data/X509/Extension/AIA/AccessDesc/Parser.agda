@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.Extension.AIA.AccessDesc.AccessMethod
-open import Aeres.Data.X509.Extension.AIA.AccessDesc.Properties
+open import Aeres.Data.X509.AlgorithmIdentifier
+import      Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.AIA.AccessDesc.TCB
 open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV
-import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
@@ -17,13 +17,16 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
-  here' = "X509: Extension: AIA: AccessDesc"
+  here' = "X509: Extension: AIA: AccessDesc:"
 
-parseAccessDescFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength AccessDescFields n)
-parseAccessDescFields n =
-  parseExactLength nonnesting (tell $ here' String.++ ": underflow")
-    (parseEquivalent equivalent (parse& TLV.nonnesting parseAccessMethod parseGeneralName)) n
-
-parseAccessDesc :  Parser (Logging ∘ Dec) AccessDesc
-parseAccessDesc = parseTLV _ here' _ parseAccessDescFields
-
+parseAccessDesc : Parser (Logging ∘ Dec) AccessDesc
+parseAccessDesc =
+  parseAlgorithmIdentifier here'
+    λ n o →
+      parseExactLength (nonnesting×ₚ₁ GeneralName.nonnesting)
+        (tell $ here' String.++ ": length mismatch")
+        (parse×Dec GeneralName.nonnesting
+          (tell $ here' String.++ ": unknonwn OID")
+          parseGeneralName
+          λ x → T-dec)
+        n

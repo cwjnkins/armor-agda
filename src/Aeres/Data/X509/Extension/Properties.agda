@@ -44,7 +44,7 @@ open Aeres.Grammar.Sum         UInt8
 
 module Fields where
   Rep : (@0 P : _) (@0 A : _) → @0 List UInt8 → Set
-  Rep P A = &ₚ (OID ×ₚ (Erased ∘ P)) (&ₚ (Option Boool) A)
+  Rep P A = &ₚ (Σₚ OID (λ _ → Erased ∘ P ∘ TLV.v)) (&ₚ (Option Boool) A)
 
   equivalent : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
                → Equivalent (Rep P A) (ExtensionFields P A)
@@ -54,11 +54,7 @@ module Fields where
     mk&ₚ (mk×ₚ extnId (─ extnId≡) refl) (mk&ₚ crit extension refl) refl
 
   iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
-        → Iso
-            (&ₚ (OID ×ₚ (Erased ∘ P))
-                (&ₚ (Option Boool)
-                    A))
-            (ExtensionFields P A)
+        → Iso (Rep P A) (ExtensionFields P A)
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (mkExtensionFields extnId extnId≡ crit extension refl) = refl
@@ -67,8 +63,8 @@ module Fields where
   unambiguous ua₁ ua₂ nc =
     isoUnambiguous iso
       (unambiguous&ₚ
-        (unambiguous×ₚ OID.unambiguous (erased-unique ua₁))
-        (nonnesting×ₚ₁ TLV.nonnesting)
+        (unambiguousΣₚ OID.unambiguous λ a → erased-unique ua₁)
+        (nonnestingΣₚ₁ TLV.nonnesting)
         (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nonnesting ua₂ nc))
 
 module Select where
@@ -207,7 +203,7 @@ module Select where
     where
     noconfusionOIDS : ∀ {@0 A B oid₁ oid₂} → oid₁ ≢ oid₂ → NoConfusion (ExtensionFields (_≡ oid₁) A) (ExtensionFields (_≡ oid₂) B)
     noconfusionOIDS oid≢ {xs₁}{ys₁}{xs₂}{ys₂}++≡ (mkExtensionFields{oex = oex}{cex}{ocex} extnId extnId≡ crit extension bs≡) (mkExtensionFields{oex = oex₁}{cex₁}{ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
-      contradiction oid≡ λ where refl → oid≢ (trans₀ (sym extnId≡) extnId≡₁)
+      contradiction oid≡ λ where refl → oid≢ (trans₀ (sym extnId≡) (trans v≡ extnId≡₁) {- extnId≡₁ -})
       where
       @0 bs≡' : oex ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
       bs≡' = begin oex ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
@@ -220,20 +216,34 @@ module Select where
       @0 oid≡ : oex ≡ oex₁
       oid≡ = TLV.nonnesting bs≡' extnId extnId₁
 
+      @0 oidT≡ : _≋_{A = OID} extnId extnId₁
+      oidT≡ = mk≋ oid≡ (OID.unambiguous _ _)
+
+      @0 v≡ : TLV.v extnId ≡ TLV.v extnId₁
+      v≡ = caseErased oidT≡ ret (const _) of λ where
+        ≋-refl → ─ refl
+
     noconfusionOIDN : ∀ {@0 A B oid} → (oid ∈ supportedExtensions) → NoConfusion (ExtensionFields (_≡ oid) A) (ExtensionFields (False ∘ (_∈? supportedExtensions)) B)
-    noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (mkExtensionFields {oex = _} {cex} {ocex} extnId refl crit extension bs≡) (mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
-      contradiction (subst (_∈ supportedExtensions) oid≡ supported) (toWitnessFalse extnId≡₁)
+    noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (mkExtensionFields {oex = oex} {cex} {ocex} extnId refl crit extension bs≡) (mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
+      contradiction (subst (_∈ supportedExtensions) v≡ supported) (toWitnessFalse extnId≡₁) {- (toWitnessFalse extnId≡₁ )-}
       where
-      @0 bs≡' : oid ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
-      bs≡' = begin oid ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
-                   (oid ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
+      @0 bs≡' : oex ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
+      bs≡' = begin oex ++ cex ++ ocex ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
+                   (oex ++ cex ++ ocex) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) {- (sym bs≡) -} ⟩
                    xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
                    xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡₁ ⟩
                    (oex₁ ++ cex₁ ++ ocex₁) ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
-      @0 oid≡ : oid ≡ oex₁
+      @0 oid≡ : oex ≡ oex₁
       oid≡ = TLV.nonnesting bs≡' extnId extnId₁
+
+      @0 oidT≡ : _≋_{A = OID} extnId extnId₁
+      oidT≡ = mk≋ oid≡ (OID.unambiguous _ _)
+
+      @0 v≡ : TLV.v extnId ≡ TLV.v extnId₁
+      v≡ = caseErased oidT≡ ret (const _) of λ where
+        ≋-refl → ─ refl
 
     noconfusion₁ : NoConfusion (ExtensionFields (_≡ OIDs.AKILit) AKIFields) (Sum _ _)
     noconfusion₁ =

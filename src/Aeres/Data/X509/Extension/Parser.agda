@@ -54,22 +54,22 @@ private
       → @0  NonNesting A → @0 NoConfusion Boool A → Unambiguous P
       → Parser (Logging ∘ Dec) A
       → ExactLengthParser (Logging ∘ Dec) (ExtensionFields P A)
-  parseExtensionFields P? nn nc ua p n =
+  parseExtensionFields{P} P? nn nc ua p n =
     parseEquivalent
       (transEquivalent
         (symEquivalent Distribute.exactLength-&)
         (equivalent×ₚ Fields.equivalent))
       (parse&ᵈ
-      (withinLength-nonnesting (nonnesting×ₚ₁ TLV.nonnesting))
-      (λ where
-        (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ fstₚ₂ (─ sndₚ₂) refl) → ‼
-          subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ x (─ sndₚ₂) refl)
-            (unambiguous×ₚ OID.unambiguous (λ where (─ pf₁) (─ pf₂) → ‼ cong ─_ (ua pf₁ pf₂) ) fstₚ₁ fstₚ₂)
-              (subst₀ (λ x → mk×ₚ fstₚ₁ (─ sndₚ₁) refl ≡ mk×ₚ fstₚ₁ (─ x) refl) (≤-irrelevant sndₚ₁ sndₚ₂)
-                refl))
-      (parse≤ n
-        (parse×Dec TLV.nonnesting (return (Level.lift tt)) parseOID λ x → erased? (P? x))
-          (nonnesting×ₚ₁ TLV.nonnesting) (tell $ here' String.++ ": fields: overflow"))
+        (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
+        (withinLength-unambiguous (unambiguousΣₚ OID.unambiguous λ _ → erased-unique ua))
+        (parse≤ n
+          (parseSigma TLV.nonnesting OID.unambiguous
+            parseOID λ x →
+              let (singleton v v≡) = OID.serializeVal (TLV.val x)
+              in
+              subst₀ (Dec ∘ Erased ∘ P) v≡ (erased? (P? v)))
+              -- erased? (P? {!!}))
+          (nonnestingΣₚ₁ TLV.nonnesting) (tell $ here' String.++ " underflow (OID)"))
       λ where
         (singleton r r≡) (mk×ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (─ bsLen) refl) →
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r≡

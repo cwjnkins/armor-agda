@@ -43,33 +43,44 @@ record ExtensionFields (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) (
   field
     @0 {oex cex ocex} : List UInt8
     extnId : OID oex
-    @0 extnId≡ : P oex -- oex ≡ lit
+    @0 extnId≡ : P (TLV.v extnId) -- oex ≡ lit
     crit : Option Boool cex
     extension : A ocex
     @0 bs≡ : bs ≡ oex ++ cex ++ ocex
 
+ExtensionFieldAIA     = ExtensionFields (_≡ OIDs.AIALit )    AIAFields
+ExtensionFieldAKI     = ExtensionFields (_≡ OIDs.AKILit )    AKIFields
 ExtensionFieldBC      = ExtensionFields (_≡ OIDs.BCLit  )    BCFields
-ExtensionFieldKU      = ExtensionFields (_≡ OIDs.KULit  )    KUFields
-ExtensionFieldSAN     = ExtensionFields (_≡ OIDs.SANLit )    SANFields
-ExtensionFieldCRLDist = ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields
 ExtensionFieldCPOL    = ExtensionFields (_≡ OIDs.CPOLLit)    CertPolFields
+ExtensionFieldCRLDist = ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields
+ExtensionFieldEKU     = ExtensionFields (_≡ OIDs.EKULit )    EKUFields
+ExtensionFieldIAN     = ExtensionFields (_≡ OIDs.IANLit )    IANFields     
+ExtensionFIeldINAP    = ExtensionFields (_≡ OIDs.INAPLit)    INAPFields
+ExtensionFieldKU      = ExtensionFields (_≡ OIDs.KULit  )    KUFields
+ExtensionFieldNC      = ExtensionFields (_≡ OIDs.NCLit  )    NCFields
+ExtensionFieldPC      = ExtensionFields (_≡ OIDs.PCLit  )    PCFields
+ExtensionFieldPM      = ExtensionFields (_≡ OIDs.PMLit  )    PMFields
+ExtensionFieldSAN     = ExtensionFields (_≡ OIDs.SANLit )    SANFields
+ExtensionFieldSKI     = ExtensionFields (_≡ OIDs.SKILit )    SKIFields
+
+ExtensionFieldUnsupported = ExtensionFields (False ∘ (_∈? supportedExtensions)) OctetString
 
 data SelectExtn : @0 List UInt8 → Set where
-  akiextn  : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.AKILit )    AKIFields     bs → SelectExtn bs 
-  skiextn  : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.SKILit )    SKIFields     bs → SelectExtn bs 
-  kuextn   : ∀ {@0 bs} → ExtensionFieldKU bs                                   → SelectExtn bs 
-  ekuextn  : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.EKULit )    EKUFields     bs → SelectExtn bs 
-  bcextn   : ∀ {@0 bs} → ExtensionFieldBC bs                                   → SelectExtn bs 
-  ianextn  : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.IANLit )    IANFields     bs → SelectExtn bs 
-  sanextn  : ∀ {@0 bs} → ExtensionFieldSAN bs                                  → SelectExtn bs 
-  cpextn   : ∀ {@0 bs} → ExtensionFieldCPOL bs                                 → SelectExtn bs 
-  crlextn  : ∀ {@0 bs} → ExtensionFieldCRLDist bs                              → SelectExtn bs 
-  ncextn   : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.NCLit  )    NCFields      bs → SelectExtn bs 
-  pcextn   : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.PCLit  )    PCFields      bs → SelectExtn bs 
-  pmextn   : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.PMLit  )    PMFields      bs → SelectExtn bs 
-  inapextn : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.INAPLit)    INAPFields    bs → SelectExtn bs 
-  aiaextn  : ∀ {@0 bs} → ExtensionFields (_≡ OIDs.AIALit )    AIAFields     bs → SelectExtn bs
-  other    : ∀ {@0 bs} → ExtensionFields (False ∘ (_∈? supportedExtensions)) OctetString bs → SelectExtn bs
+  akiextn  : ∀ {@0 bs} → ExtensionFieldAKI bs → SelectExtn bs 
+  skiextn  : ∀ {@0 bs} → ExtensionFieldSKI bs → SelectExtn bs 
+  kuextn   : ∀ {@0 bs} → ExtensionFieldKU bs  → SelectExtn bs 
+  ekuextn  : ∀ {@0 bs} → ExtensionFieldEKU bs → SelectExtn bs 
+  bcextn   : ∀ {@0 bs} → ExtensionFieldBC bs  → SelectExtn bs 
+  ianextn  : ∀ {@0 bs} → ExtensionFieldIAN bs → SelectExtn bs 
+  sanextn  : ∀ {@0 bs} → ExtensionFieldSAN bs → SelectExtn bs 
+  cpextn   : ∀ {@0 bs} → ExtensionFieldCPOL bs → SelectExtn bs 
+  crlextn  : ∀ {@0 bs} → ExtensionFieldCRLDist bs → SelectExtn bs 
+  ncextn   : ∀ {@0 bs} → ExtensionFieldNC bs  → SelectExtn bs 
+  pcextn   : ∀ {@0 bs} → ExtensionFieldPC bs → SelectExtn bs 
+  pmextn   : ∀ {@0 bs} → ExtensionFieldPM bs → SelectExtn bs 
+  inapextn : ∀ {@0 bs} → ExtensionFIeldINAP bs → SelectExtn bs 
+  aiaextn  : ∀ {@0 bs} → ExtensionFieldAIA bs → SelectExtn bs
+  other    : ∀ {@0 bs} → ExtensionFieldUnsupported bs → SelectExtn bs
 
 Extension : @0 List UInt8 → Set
 Extension xs = TLV Tag.Sequence SelectExtn xs

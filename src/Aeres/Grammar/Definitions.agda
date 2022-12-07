@@ -30,6 +30,10 @@ cong≋ : ∀ {@0 A B : List Σ → Set} {@0 bs₁ bs₂} {a₁ : A bs₁} {a₂
         → _≋_{A} a₁ a₂ → _≋_{B} (proj₂ (f a₁)) (proj₂ (f a₂))
 cong≋ f ≋-refl = ≋-refl
 
+unique≋ : ∀ {@0 A : List Σ → Set} {@0 bs₁ bs₂ : List Σ}
+          → (a₁ : A bs₁) (a₂ : A bs₂) → Unique (_≋_{A = A} a₁ a₂)
+unique≋ a₁ a₂ ≋-refl ≋-refl = refl
+
 instance
   Irrel≋ : ∀ {@0 A bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂} → Irrel (_≋_{A} a₁ a₂)
   Irrel.irrel Irrel≋ ≋-refl = ≋-refl
