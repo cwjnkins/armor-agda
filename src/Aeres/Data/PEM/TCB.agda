@@ -2,66 +2,18 @@
 
 open import Aeres.Binary
 open import Aeres.Data.Base64
+open import Aeres.Data.PEM.CertBoundary.TCB
+open import Aeres.Data.PEM.CertText.TCB
+open import Aeres.Data.PEM.CertText.FinalLine.TCB
+open import Aeres.Data.PEM.CertText.FullLine.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Option
-import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 module Aeres.Data.PEM.TCB where
 
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
-open Aeres.Grammar.Option      Char
-open Aeres.Grammar.Sum         Char
-
--- For now, we only support the strict PEM encoding;
--- see `stricttextualmsg` in Fig. 3 of RFC 7468
-
-module RFC5234 where
-  WSP = Sum (_≡ [ ' ' ]) (_≡ [ '\t' ])
-
-  data EOL : @0 List Char → Set where
-    crlf : EOL ('\r' ∷ [ '\n' ])
-    cr   : EOL [ '\r' ]
-    lf   : EOL [ '\n' ]
-
-record CertBoundary (ctrl : String) (@0 bs : List Char) : Set where
-  constructor mkCertBoundary
-  field
-    @0 {e} : List Char
-    @0 begin : Singleton ∘ String.toList $
-                 "-----" String.++ ctrl String.++ " CERTIFICATE-----"
-    @0 eol   : RFC5234.EOL e
-    @0 bs≡   : bs ≡ ↑ begin ++ e
-
-CertHeader = CertBoundary "BEGIN"
-CertFooter = CertBoundary "END"
-
-record CertFullLine (@0 bs : List Char) : Set where
-  constructor mkCertFullLine
-  field
-    @0 {l e} : List Char
-    line : ExactLength (IList Base64Char) 64 l
-    eol  : RFC5234.EOL e
-    @0 bs≡  : bs ≡ l ++ e
-
-record CertFinalLine (@0 bs : List Char) : Set where
-  constructor mkCertFinalLine
-  field
-    @0 {l e} : List Char
-    line : Base64Str l
-    @0 lineLen : InRange 1 64 ∘ length $ l
-    eol : RFC5234.EOL e
-    @0 bs≡ : bs ≡ l ++ e
-
-record CertText (@0 bs : List Char) : Set where
-  constructor mkCertText
-  field
-    @0 {b f} : List Char
-    body  : IList CertFullLine b
-    final : CertFinalLine      f
-    @0 bs≡ : bs ≡ b ++ f
 
 record Cert (@0 bs : List Char) : Set where
   constructor mkCert

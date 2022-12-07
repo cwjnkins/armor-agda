@@ -33,7 +33,7 @@ parseMaxCertText = LogDec.mkMaximalParser help
   help xs =
     case LogDec.runMaximalParser
            (parseIListMaxNoOverlap.parseIListMax
-             (mkLogged [ "parseMaxCertText: underflow" ] tt)
+             (mkLogged [ "parseMaxCertText: underflow" ] _)
              _ FullLine.nonempty FullLine.nooverlap parseCertFullLine)
            xs
       ret (const _) of λ where

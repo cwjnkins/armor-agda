@@ -264,7 +264,7 @@ module parseIListMax
                 pre' suf' ps'≡ (mk×ₚ fstₚ₁ _ refl) → max₁ _ _ ps'≡ fstₚ₁
 
 module parseIListMaxNoOverlap
-  (underflow : Logging ⊤)
+  (underflow : Logging (Level.Lift Level.zero ⊤))
   (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 noo : NoOverlap A A)
   (p : LogDec.MaximalParser A) where
 

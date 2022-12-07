@@ -10,11 +10,10 @@ module Aeres.Data.PEM.CertBoundary.TCB where
 record CertBoundary (ctrl : String) (@0 bs : List Char) : Set where
   constructor mkCertBoundary
   field
-    @0 {e} : List Char
-    @0 begin : Singleton ∘ String.toList $
-                 "-----" String.++ ctrl String.++ " CERTIFICATE-----"
+    @0 {b e} : List Char
+    @0 begin : b ≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----")
     @0 eol   : EOL e
-    @0 bs≡   : bs ≡ ↑ begin ++ e
+    @0 bs≡   : bs ≡ b ++ e
 
 CertHeader = CertBoundary "BEGIN"
 CertFooter = CertBoundary "END"

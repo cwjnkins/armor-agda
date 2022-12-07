@@ -53,6 +53,16 @@ char₁{b}{bs} (mkCertFinalLine{e = e} (mk64Str{p = p} (consIList{bs₁}{bs₂} 
   where
   open ≡-Reasoning
 
+@0 char∈ : ∀ {@0 b bs} → b ∈ bs → CertFinalLine bs → b ∈ B64.charset ++ String.toList "=\r\n"
+char∈ b∈ (mkCertFinalLine{l}{e} line lineLen eol refl) =
+  caseErased Any.++⁻ l b∈ ret (const _) of λ where
+    (inj₁ x) → ─
+      (caseErased Base64.Str.char∈ x line ret (const _) of λ where
+        (inj₁ x) → ─ Any.++⁺ˡ x
+        (inj₂ refl) → ─ toWitness{Q = _ ∈? _} tt)
+    (inj₂ y) → ─ (caseErased RFC5234.EOL.char∈ y eol ret (const _) of λ where
+      (inj₁ refl) → ─ toWitness{Q = _ ∈? _} tt
+      (inj₂ refl) → ─ (toWitness{Q = _ ∈? _} tt))
 
 @0 lengthRange : ∀ {@0 bs} → CertFinalLine bs → InRange 2 66 (length bs)
 lengthRange{bs} (mkCertFinalLine{l}{e} line lineLen eol bs≡) =

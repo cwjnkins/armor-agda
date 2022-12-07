@@ -1,277 +1,215 @@
 {-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Binary
+  renaming (module Base64 to B64)
+open import Aeres.Data.Base64
+open import Aeres.Data.PEM.CertBoundary.TCB
+open import Aeres.Data.PEM.CertText
+open import Aeres.Data.PEM.CertText.FinalLine
+open import Aeres.Data.PEM.CertText.FullLine
+open import Aeres.Data.PEM.RFC5234
+open import Aeres.Data.PEM.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Relation.Definitions
-import      Aeres.Grammar.Sum
 open import Aeres.Prelude
-open import Aeres.Data.Base64
-import      Aeres.Data.PEM.TCB as PEM
-import      Data.Nat.Properties as Nat
+import      Data.List.Relation.Unary.Any.Properties as Any
 open import Tactic.MonoidSolver using (solve ; solve-macro)
+
+module Aeres.Data.PEM.Properties where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
 open Aeres.Grammar.Relation.Definitions Char
-open Aeres.Grammar.Sum                  Char
 
-module Aeres.Data.PEM.Properties where
+Rep : @0 List Char → Set
+Rep = &ₚ CertHeader (&ₚ CertText CertFooter)
 
-module EOL where
-  Rep =  Sum (_≡ '\r' ∷ [ '\n' ])
-        (Sum (_≡ [ '\r' ])
-             (_≡ [ '\n' ]))
+equiv : Equivalent Rep Cert
+proj₁ equiv (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) =
+  mkCert fstₚ₁ fstₚ₂ sndₚ₁ refl
+proj₂ equiv (mkCert header body footer refl) =
+  mk&ₚ header (mk&ₚ body footer refl) refl
 
-  equiv : Equivalent Rep PEM.RFC5234.EOL
-  proj₁ equiv (Sum.inj₁ refl) = PEM.RFC5234.crlf
-  proj₁ equiv (Sum.inj₂ (Sum.inj₁ refl)) = PEM.RFC5234.cr
-  proj₁ equiv (Sum.inj₂ (Sum.inj₂ refl)) = PEM.RFC5234.lf
-  proj₂ equiv PEM.RFC5234.crlf = Sum.inj₁ refl
-  proj₂ equiv PEM.RFC5234.cr = Sum.inj₂ (Sum.inj₁ refl)
-  proj₂ equiv PEM.RFC5234.lf = Sum.inj₂ (Sum.inj₂ refl)
+nonempty : NonEmpty Cert
+nonempty (mkCert (mkCertBoundary refl eol refl) body footer ()) refl
 
-  postulate
-    -- Joy
-    @0 eolLen : ∀ {@0 bs} → PEM.RFC5234.EOL bs → InRange 1 2 (length bs)
-
-    -- Christa
-    noOverlap : NoOverlap Base64Str PEM.RFC5234.EOL
-
-module CertBoundary where
-  Rep : (ctrl : String) → @0 List Char → Set
-  Rep ctrl = &ₚ (_≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----"))
-                (Erased ∘ PEM.RFC5234.EOL)
-
-  equiv : ∀ ctrl → Equivalent (Rep ctrl) (PEM.CertBoundary ctrl)
-  proj₁ (equiv ctrl) (mk&ₚ refl (─ sndₚ₁) bs≡) = PEM.mkCertBoundary self sndₚ₁ bs≡
-  proj₂ (equiv ctrl) (PEM.mkCertBoundary self eol bs≡) = mk&ₚ refl (─ eol) bs≡
-
-module CertFullLine where
-  Rep = &ₚ (ExactLength (IList Base64Char) 64) PEM.RFC5234.EOL
-
-  equiv : Equivalent Rep PEM.CertFullLine
-  proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = PEM.mkCertFullLine fstₚ₁ sndₚ₁ bs≡
-  proj₂ equiv (PEM.mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
-
-  postulate
-    nonempty   : NonEmpty PEM.CertFullLine
-    nooverlap  : NoOverlap PEM.CertFullLine PEM.CertFullLine
-    @0 fullLineLen : ∀ {@0 bs} → PEM.CertFullLine bs → InRange 65 65 (length bs)
-
-module CertFinalLine where
-
-  Rep : @0 List Char → Set
-  Rep = Σₚ (&ₚ Base64Str PEM.RFC5234.EOL)
-           (λ _ → Erased ∘ InRange 1 64 ∘ length ∘ &ₚᵈ.bs₁ )
-
-  postulate
-    equiv : Equivalent Rep PEM.CertFinalLine
-    fromCertFullLine : ∀ {@0 bs} → PEM.CertFullLine bs → PEM.CertFinalLine bs
-    lengthRange : ∀ {@0 bs} → PEM.CertFinalLine bs → InRange 2 66 (length bs)
-
-module CertText where
+@0 noOverlapHeaderText : NoOverlap CertHeader (&ₚ CertText CertFooter)
+noOverlapHeaderText ws [] ys₁ xs₂ ys₂ ++≡ x₁ x₂ = inj₁ refl
+noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
+  (mkCertBoundary{b}{e} begin eol bs≡) (mkCertBoundary{b₁}{e₁} begin₁ eol₁ bs≡₁) =
+  inj₂ noway
+  where
   open ≡-Reasoning
 
-  postulate
-    noOverlapLines  : NoOverlap PEM.CertFullLine PEM.CertFinalLine
-    noOverlapLemma₁ : NoOverlap PEM.CertFinalLine (&ₚ (IList PEM.CertFullLine) PEM.CertFinalLine)
+  @0 b≡ : b ≡ b₁
+  b≡ = trans begin (sym begin₁)
 
+  @0 ++≡w : e₁ ++ xs₁ ≡ e
+  ++≡w = ++-cancelˡ b
+    (b ++ e₁ ++ xs₁ ≡⟨ cong (_++ e₁ ++ xs₁) b≡ ⟩
+    b₁ ++ e₁ ++ xs₁ ≡⟨ sym (++-assoc b₁ e₁ xs₁) ⟩
+    (b₁ ++ e₁) ++ xs₁ ≡⟨ cong (_++ xs₁) (sym bs≡₁) ⟩
+    ws ++ xs₁ ≡⟨ bs≡ ⟩
+    b ++ e ∎)
 
-  finalLineFromLines : ∀ {@0 bs} → IList PEM.CertFullLine bs → bs ≡ [] ⊎ &ₚ (IList PEM.CertFullLine) PEM.CertFinalLine bs
-  finalLineFromLines nil = inj₁ refl
-  finalLineFromLines (consIList{bs₁}{.[]} head₁ nil bs≡) =
-    inj₂ (mk&ₚ nil (CertFinalLine.fromCertFullLine head₁)
-            (begin (_ ≡⟨ bs≡ ⟩
-                   bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
-                   bs₁ ∎)))
-  finalLineFromLines (consIList{bs₁}{bs₂} head₁ tail₁@(consIList{bs₁ = bs₃} head₂ tail₂ bs≡₂) bs≡₁) =
-    case finalLineFromLines tail₁ ret (const _) of λ where
-      (inj₁ refl) →
-        contradiction{P = bs₃ ≡ []} (++-conicalˡ bs₃ _ (sym bs≡₂)) (CertFullLine.nonempty head₂)
-      (inj₂ (mk&ₚ{bs₅}{bs₆} fstₚ₁ sndₚ₁ refl)) →
-        inj₂ (mk&ₚ (consIList head₁ fstₚ₁ refl) sndₚ₁
-                      (begin _ ≡⟨ bs≡₁ ⟩
-                             bs₁ ++ bs₅ ++ bs₆ ≡⟨ sym (++-assoc bs₁ bs₅ _) ⟩
-                             (bs₁ ++ bs₅) ++ bs₆ ∎))
+  @0 x₁≡ : x₁ ≡ '\n'
+  x₁≡ = caseErased eol ,′ eol₁ ret (const _) of λ where
+    (crlf , crlf) → contradiction ++≡w (λ ())
+    (crlf , cr) → ─ (∷-injectiveˡ (∷-injectiveʳ ++≡w))
+    (crlf , lf) → contradiction ++≡w λ ()
+    (cr , crlf) → contradiction ++≡w λ ()
+    (cr , cr) → contradiction ++≡w λ ()
+    (cr , lf) → contradiction ++≡w λ ()
+    (lf , crlf) → contradiction ++≡w λ ()
+    (lf , cr) → contradiction ++≡w λ ()
+    (lf , lf) → contradiction ++≡w λ ()
 
-  {-# TERMINATING #-}
-  @0 body< : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
-          → IList PEM.CertFullLine b₁ → PEM.CertFinalLine f₁
-          → IList PEM.CertFullLine b₂ → PEM.CertFinalLine f₂
-          → b₁ ++ f₁ ++ suf₁ ≡ b₂ ++ f₂ ++ suf₂
-          → length b₁ < length b₂
-          → length b₁ + length f₁ ≤ length b₂ + length f₂
-  body<{f₂ = f₂} nil (PEM.mkCertFinalLine{l₁}{e₁} lineₗ lineLenₗ eolₗ refl) (consIList{bs₂ = bs₂} fullL@(PEM.mkCertFullLine{l}{e} (mk×ₚ line line≡ refl) eol refl) tail₁ refl) fin₂ ++≡ b₁< =
-    ≤.begin
-      length (l₁ ++ e₁) ≤.≡⟨ length-++ l₁ ⟩
-      length l₁ + length e₁ ≤.≤⟨ Nat.+-mono-≤ (proj₂ lineLenₗ) (proj₂ $ EOL.eolLen eolₗ) ⟩
-      64 + 2 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
-      65 + 2 ≤.≤⟨ Nat.+-mono-≤ (proj₁ (CertFullLine.fullLineLen fullL)) (proj₁ $ CertFinalLine.lengthRange fin₂ ) ⟩
-      length (l ++ e) + length f₂ ≤.≤⟨ Nat.+-monoˡ-≤ (length f₂) (Nat.m≤m+n (length (l ++ e)) (length bs₂)) ⟩
-      (length (l ++ e) + length bs₂) + length f₂ ≤.≡⟨ cong (_+ length f₂) (sym (length-++ (l ++ e))) ⟩
-      (length ((l ++ e) ++ bs₂)) + length f₂ ≤.∎ 
-    where module ≤ = Nat.≤-Reasoning
-  body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{bs₁} head₁ nil refl) fin₁ (consIList{bs₂} head₂ nil refl) fin₂ ++≡ b₁< =
-    let b₁<' : length bs₁ < length bs₂
-        b₁<' = subst₂ (λ x y → length x < length y) (++-identityʳ bs₁) (++-identityʳ bs₂) b₁<
-
-        bs₂≡ : Erased (bs₂ ≡ bs₁ ++ drop (length bs₁) bs₂)
-        bs₂≡ = ─ Lemmas.drop-length-≤ bs₁ (f₁ ++ suf₁) _ _ xs≡ (Nat.<⇒≤ b₁<')
-    in
-    caseErased noOverlapLines bs₁ (drop (length bs₁) bs₂) (f₂ ++ suf₂) f₁ suf₁
-                 (++-cancelˡ bs₁ (begin
-                   (bs₁ ++ (drop (length bs₁) bs₂) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                   (bs₁ ++ drop (length bs₁) bs₂) ++ f₂ ++ suf₂ ≡⟨ cong (_++ f₂ ++ suf₂) (sym (¡ bs₂≡)) ⟩
-                   bs₂ ++ f₂ ++ suf₂ ≡⟨ sym xs≡ ⟩
-                   bs₁ ++ f₁ ++ suf₁ ∎)))
-                 (subst PEM.CertFullLine (¡ bs₂≡) head₂) head₁
-    ret (const _) of λ where
-      (inj₁ x) →
-        ─ contradiction
-            (begin (length bs₁ ≡⟨ cong length (sym (++-identityʳ bs₁)) ⟩
-                   length (bs₁ ++ []) ≡⟨ cong (length ∘ (bs₁ ++_)) (sym x) ⟩
-                   length (bs₁ ++ drop (length bs₁) bs₂) ≡⟨ cong length (sym (¡ bs₂≡)) ⟩
-                   length bs₂ ∎))
-            (Nat.<⇒≢ b₁<')
-      (inj₂ y) → ─ contradiction fin₁ y
+  noway : ¬ &ₚ CertText CertFooter xs₂
+  noway (mk&ₚ (mkCertText{f = f} nil final refl) sndₚ₁ bs≡) =
+    contradiction x₁∈ (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt))
     where
-    xs≡ : bs₁ ++ f₁ ++ suf₁ ≡ bs₂ ++ f₂ ++ suf₂
-    xs≡ = begin (bs₁ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
-                (bs₁ ++ []) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
-                (bs₂ ++ []) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                bs₂ ++ f₂ ++ suf₂ ∎)
-  body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{bs₁} head₁ nil refl) fin₁ (consIList{bs₂} head₂ (consIList{bs₃}{bs₄} head₃ tail₃ refl) refl) fin₂ ++≡ b₁< =
-    caseErased Nat.<-cmp (length bs₁) (length bs₂) ret (const _) of λ where
-      (tri< bs₁< bs₁≢ _) → {!!}
-      (tri> _ bs₁≢ bs₁>) → {!!}
-      (tri≈ _ bs₁≡ _) → ─
-        (let bs₂≡ : bs₁ ≡ bs₂
-             bs₂≡ = proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡ bs₁≡)
+    @0 bs₂≡ : ∃ λ xs₂' → x₁ ∷ xs₂' ≡ f
+    bs₂≡ = caseErased (singleton f refl) ret (const _) of λ where
+      (singleton [] refl) →
+        contradiction{P = 2 ≤ 0}
+          (proj₁ $ FinalLine.lengthRange final)
+          λ ()
+      (singleton (x ∷ xs₂') refl) →
+        ─ (xs₂'
+          , cong (_∷ xs₂')
+              (∷-injectiveˡ
+                (xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+                 xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+                 _ ∎)))
 
-             xs≡' : f₁ ++ suf₁ ≡ bs₃ ++ bs₄ ++ f₂ ++ suf₂
-             xs≡' = Lemmas.++-cancel≡ˡ _ _ bs₂≡ xs≡
-
-             f₁≤ : length f₁ ≤ length bs₃
-             f₁≤ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
-               (tri< f₁< _ _) → ─ (Nat.<⇒≤ f₁<)
-               (tri≈ _ f₁≡ _) → ─ (Lemmas.≡⇒≤ f₁≡)
-               (tri> _ _ f₁>) → ─
-                 (let f₁≡ : f₁ ≡ bs₃ ++ drop (length bs₃) f₁
-                      f₁≡ = Lemmas.drop-length-≤ bs₃ (bs₄ ++ f₂ ++ suf₂) _ _ (sym xs≡') (Nat.<⇒≤ f₁>)
-                  in
-                  caseErased noOverlapLemma₁ bs₃ (drop (length bs₃) f₁) suf₁ (bs₄ ++ f₂) suf₂
-                               {!!}
-                               (subst PEM.CertFinalLine f₁≡ fin₁) (CertFinalLine.fromCertFullLine head₃)
-                  ret (const _) of λ where
-                    (inj₁ x) → ─ contradiction{P = f₁ ≡ bs₃} {!!} λ where refl → ‼ Nat.<⇒≢ f₁> refl
-                    (inj₂ y) → ─ contradiction (mk&ₚ tail₃ fin₂ refl) y)
-             -- f₁≡ : f₁ ≡ bs₃
-             -- f₁≡ = caseErased Nat.<-cmp (length f₁) (length bs₃) ret (const _) of λ where
-             --         (tri< f₁< f₁≢ _) → ─
-             --           (let bs₃≡ : bs₃ ≡ f₁ ++ drop (length f₁) bs₃
-             --                bs₃≡ = Lemmas.drop-length-≤ f₁ suf₁ _ _ xs≡' (Nat.<⇒≤ f₁<)
-             --            in
-             --            caseErased noOverlapLemma₁ f₁ (drop (length f₁) bs₃) (bs₄ ++ f₂ ++ suf₂) {!!} {!!}
-             --                         {!!}
-             --                         (subst PEM.CertFinalLine bs₃≡ (CertFinalLine.fromCertFullLine head₃)) fin₁
-             --            ret (const _) of λ where
-             --              x → {!!}
-             --           )
-             --         (tri> _ f₁≢ f₁>) → {!!}
-             --         (tri≈ _ f₁≡ _) → ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡' f₁≡)
-         in
-         ≤.begin (length (bs₁ ++ []) + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) (++-identityʳ bs₁) ⟩
-                 length bs₁ + length f₁ ≤.≡⟨ cong (λ x → length x + length f₁) bs₂≡ ⟩
-                 length bs₂ + length f₁ ≤.≡⟨ {!!} ⟩
-                 {!!})
-         )
-
+    @0 x₁∈ : x₁ ∈ B64.charset
+    x₁∈ = FinalLine.char₁ (subst₀ CertFinalLine (sym $ proj₂ bs₂≡) final)
+  noway (mk&ₚ (mkCertText (consIList{f₁}{b₁} full₁ body refl) final refl) sndₚ₁ bs≡) =
+    contradiction x₁∈
+      (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt))
     where
-    module ≤ = Nat.≤-Reasoning
+    @0 f₁≡ : ∃ λ f₁' → x₁ ∷ f₁' ≡ f₁
+    f₁≡ = caseErased (singleton f₁ refl) ret (const _) of λ where
+      (singleton [] refl) →
+        contradiction{P = 65 ≤ 0}
+          (proj₁ (FullLine.fullLineLen full₁))
+          (λ ())
+      (singleton (x ∷ f₁') refl) → ─
+        (f₁' , (cong (_∷ f₁') (∷-injectiveˡ
+          (xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+          xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+          _ ∎))))
 
-    xs≡ : bs₁ ++ f₁ ++ suf₁ ≡ bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂
-    xs≡ = begin (bs₁ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
-                (bs₁ ++ []) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
-                (bs₂ ++ bs₃ ++ bs₄) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                bs₂ ++ bs₃ ++ bs₄ ++ f₂ ++ suf₂ ∎)
-  body< (Aeres.Grammar.IList.cons (Aeres.Grammar.IList.mkIListCons {_} {_} head₁ (Aeres.Grammar.IList.cons x) refl)) fin₁ (Aeres.Grammar.IList.cons (Aeres.Grammar.IList.mkIListCons {_} {_} head₂ Aeres.Grammar.IList.nil refl)) fin₂ ++≡ b₁< = {!!}
-  body<{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{bs₁} head₁ tail₁@(consIList{bs₂}{bs₃} head₂ tail₂ refl) refl) fin₁ (consIList{bs₄} head₃ tail₃@(consIList{bs₅}{bs₆} head₄ tail₄ refl) refl) fin₂ ++≡ b₁< =
-    caseErased Nat.<-cmp (length bs₁) (length bs₄) ret (const _) of λ where
-      (tri< bs₁< bs₁≢ _) → ─
-        (let bs₄≡ : bs₄ ≡ bs₁ ++ drop (length bs₁) bs₄
-             bs₄≡ = Lemmas.drop-length-≤ bs₁ _ _ _ xs≡ (Nat.<⇒≤ bs₁<)
-         in
-         case CertFullLine.nooverlap bs₁ (drop (length bs₁) bs₄) (bs₅ ++ bs₆ ++ f₂ ++ suf₂) bs₂ (bs₃ ++ f₁ ++ suf₁)
-                (++-cancelˡ bs₁
-                  (begin (bs₁ ++ drop (length bs₁) bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                         (bs₁ ++ drop (length bs₁) bs₄) ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ (cong (_++ _) ∘ sym $ bs₄≡) ⟩
-                         bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ sym xs≡ ⟩
-                         _ ∎)))
-                (subst PEM.CertFullLine bs₄≡ head₃) head₁
-         ret (const _) of λ where
-          (inj₁ x) → contradiction{P = length bs₄ ≡ length bs₁}
-                       (begin
-                         length bs₄ ≡⟨ cong length bs₄≡ ⟩
-                         length (bs₁ ++ drop (length bs₁) bs₄) ≡⟨ cong (length ∘ (bs₁ ++_)) x ⟩
-                         length (bs₁ ++ []) ≡⟨ cong length (++-identityʳ bs₁) ⟩
-                         length bs₁ ∎) 
-                       (Nat.>⇒≢ bs₁<)
-          (inj₂ y) → contradiction head₂ y)
-      (tri> _ bs₁≢ bs₁>) → ─
-        (let bs₁≡' : bs₁ ≡ bs₄ ++ drop (length bs₄) bs₁
-             bs₁≡' = Lemmas.drop-length-≤ bs₄ _ _ _ (sym xs≡) (Nat.<⇒≤ bs₁>)
-         in
-         case CertFullLine.nooverlap bs₄ (drop (length bs₄) bs₁) (bs₂ ++ bs₃ ++ f₁ ++ suf₁) bs₅ (bs₆ ++ f₂ ++ suf₂)
-                (++-cancelˡ bs₄
-                  (begin (bs₄ ++ drop (length bs₄) bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
-                         (bs₄ ++ drop (length bs₄) bs₁) ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ cong (_++ _) (sym bs₁≡') ⟩
-                         bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁  ≡⟨ xs≡ ⟩
-                         _ ∎)))
-                (subst PEM.CertFullLine bs₁≡' head₁) head₃
-         ret (const _) of λ where
-           (inj₁ x) →
-             contradiction{P = length bs₁ ≡ length bs₄}
-               (begin (length bs₁ ≡⟨ cong length bs₁≡' ⟩
-                      length (bs₄ ++ drop (length bs₄) bs₁) ≡⟨ cong (length ∘ (bs₄ ++_)) x ⟩
-                      length (bs₄ ++ []) ≡⟨ cong length (++-identityʳ bs₄) ⟩
-                      length bs₄ ∎))
-               bs₁≢
-           (inj₂ y) → contradiction head₄ y
-        )
-      (tri≈ _ len≡ _) →
-        ─ (≤.begin (length (bs₁ ++ bs₂ ++ bs₃) + length f₁ ≤.≡⟨ cong (_+ length f₁) (length-++ bs₁) ⟩
-                   length bs₁ + length (bs₂ ++ bs₃) + length f₁ ≤.≡⟨ Nat.+-assoc (length bs₁) (length (bs₂ ++ bs₃)) (length f₁) ⟩
-                   length bs₁ + (length (bs₂ ++ bs₃) + length f₁) ≤.≤⟨ Nat.+-monoʳ-≤ (length bs₁) (rec len≡) ⟩
-                   length bs₁ + (length (bs₅ ++ bs₆) + length f₂) ≤.≡⟨ cong (_+ _) len≡ ⟩
-                   length bs₄ + (length (bs₅ ++ bs₆) + length f₂) ≤.≡⟨ sym (Nat.+-assoc (length bs₄) _ _) ⟩
-                   length bs₄ + length (bs₅ ++ bs₆) + length f₂ ≤.≡⟨ cong (_+ length f₂) (sym (length-++ bs₄)) ⟩
-                   length (bs₄ ++ bs₅ ++ bs₆) + length f₂ ≤.∎))
+    @0 x₁∈ : x₁ ∈ B64.charset
+    x₁∈ = FullLine.char₁ (subst₀ CertFullLine (sym (proj₂ f₁≡)) full₁)
+
+noOverlapTextFooter : NoOverlap CertText CertFooter
+noOverlapTextFooter ws [] ys₁ xs₂ ys₂ x x₁ x₂ = inj₁ refl
+noOverlapTextFooter ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
+  text₁@(mkCertText{b₁}{f₁} body₁ final₁ bs≡₁)
+  text₂@(mkCertText{b₂}{f₂} body₂ final₂ bs≡₂) =
+  inj₂ noway
+  where
+  open ≡-Reasoning
+
+  @0 x₁∈ : x₁ ∈ B64.charset ++ String.toList "=\r\n"
+  x₁∈ =
+    caseErased
+      Any.++⁻ b₁{f₁}
+        (subst₀ (x₁ ∈_) bs≡₁ (Any.++⁺ʳ{P = x₁ ≡_} ws {ys = x₁ ∷ xs₁'} (here refl)))
+    ret (const _)
+    of λ where
+      (inj₁ x) → ─ FullLine.char∈List x body₁
+      (inj₂ y) → ─ FinalLine.char∈ y final₁
+
+  noway : ¬ CertFooter xs₂
+  noway (mkCertBoundary{e = e'} refl eol bs≡) =
+    contradiction{P = '-' ∈ B64.charset ++ String.toList "=\r\n"}
+      (subst₀ (_∈ B64.charset ++ String.toList "=\r\n") x₁≡' x₁∈)
+      (toWitnessFalse{Q = _ ∈? _} tt)
     where
-    module ≤ = Nat.≤-Reasoning
+    @0 x₁≡' : x₁ ≡ '-'
+    x₁≡' = ∷-injectiveˡ
+      (x₁ ∷ xs₁' ++ ys₁ ≡⟨ ++≡ ⟩
+       xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs≡ ⟩
+       (_ ++ e') ++ ys₂ ∎)
 
-    xs≡ : bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡ bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂
-    xs≡ = begin bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
-                (bs₁ ++ bs₂ ++ bs₃) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
-                (bs₄ ++ bs₅ ++ bs₆) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ∎
+noOverlap : NoOverlap Cert Cert
+noOverlap ws [] ys₁ xs₂ ys₂ ++≡ (mkCert{h₁}{b₁}{f₁} header₁ body₁ footer₁ bs≡₁) (mkCert{h₂}{b₂}{f₂} header₂ body₂ footer₂ bs≡₂) = inj₁ refl
+noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡ (mkCert{h₁}{b₁}{f₁} header₁ body₁ footer₁ bs≡₁) (mkCert{h₂}{b₂}{f₂} header₂ body₂ footer₂ bs≡₂) =
+  inj₂ noway
+  where
+  open ≡-Reasoning
 
-    module _ (@0 len≡ : length bs₁ ≡ length bs₄) where
-      bs₁≡ : Erased (bs₁ ≡ bs₄)
-      bs₁≡ = ─ proj₁ (Lemmas.length-++-≡ _ _ _ _ xs≡ len≡)
+  @0 ++≡' : h₁ ++ (b₁ ++ f₁) ++ ys₁ ≡ h₂ ++ (b₂ ++ f₂) ++ xs₂ ++ ys₂
+  ++≡' = begin
+    (h₁ ++ (b₁ ++ f₁) ++ ys₁ ≡⟨ solve (++-monoid Char) ⟩
+    (h₁ ++ b₁ ++ f₁) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡₁) ⟩
+    (ws ++ xs₁) ++ ys₁ ≡⟨ ++-assoc ws xs₁ _ ⟩
+    ws ++ xs₁ ++ ys₁ ≡⟨ cong (ws ++_) ++≡ ⟩
+    ws ++ xs₂ ++ ys₂ ≡⟨ cong (_++ xs₂ ++ ys₂) bs≡₂ ⟩
+    (h₂ ++ b₂ ++ f₂) ++ xs₂ ++ ys₂ ≡⟨ solve (++-monoid Char) ⟩
+    _ ∎)
 
-      rec : (length (bs₂ ++ bs₃) + length f₁ ≤ length (bs₅ ++ bs₆) + length f₂)
-      rec = body<{suf₁ = suf₁}{suf₂} tail₁ fin₁ tail₃ fin₂
-                 (Lemmas.++-cancel≡ˡ _ _ (¡ bs₁≡)
-                   (begin (bs₁ ++ (bs₂ ++ bs₃) ++ f₁ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
-                          bs₁ ++ bs₂ ++ bs₃ ++ f₁ ++ suf₁ ≡⟨ xs≡ ⟩
-                          bs₄ ++ bs₅ ++ bs₆ ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
-                          bs₄ ++ (bs₅ ++ bs₆) ++ f₂ ++ suf₂ ∎)))
-                 (Nat.+-cancelˡ-< (length bs₁)
-                   (≤.begin
-                     (1 + length bs₁ + length (bs₂ ++ bs₃) ≤.≡⟨ cong (1 +_) (sym (length-++ bs₁)) ⟩
-                     1 + length (bs₁ ++ bs₂ ++ bs₃) ≤.≤⟨ b₁< ⟩
-                     length (bs₄ ++ bs₅ ++ bs₆) ≤.≡⟨ length-++ bs₄ ⟩
-                     length bs₄ + length (bs₅ ++ bs₆) ≤.≡⟨ cong (_+ length (bs₅ ++ bs₆)) (cong length (sym (¡ bs₁≡))) ⟩
-                     length bs₁ + length (bs₅ ++ bs₆) ≤.∎)))      
+  @0 h₁≡ : h₁ ≡ h₂
+  h₁≡ =
+    noOverlapBoundary₂
+      noOverlapHeaderText noOverlapHeaderText
+      ++≡'
+      header₁ (mk&ₚ body₁ footer₁ refl)
+      header₂ (mk&ₚ body₂ footer₂ refl)
 
+  @0 ++≡ₕ : b₁ ++ f₁ ++ ys₁ ≡ b₂ ++ f₂ ++ xs₂ ++ ys₂
+  ++≡ₕ = Lemmas.++-cancel≡ˡ _ _ h₁≡
+    (h₁ ++ b₁ ++ f₁ ++ ys₁ ≡⟨ solve (++-monoid Char) ⟩
+    _ ≡⟨ ++≡' ⟩
+    h₂ ++ (b₂ ++ f₂) ++ xs₂ ++ ys₂ ≡⟨ solve (++-monoid Char) ⟩
+    _ ∎)
+
+  @0 b₁≡ : b₁ ≡ b₂
+  b₁≡ = noOverlapBoundary₂
+          noOverlapTextFooter noOverlapTextFooter
+          ++≡ₕ
+          body₁ footer₁ body₂ footer₂
+
+  @0 ++≡b : f₁ ++ ys₁ ≡ f₂ ++ xs₂ ++ ys₂
+  ++≡b = Lemmas.++-cancel≡ˡ _ _ b₁≡ ++≡ₕ
+
+  @0 ++xs₁≡ : f₂ ++ xs₁ ≡ f₁
+  ++xs₁≡ =
+    Lemmas.++-cancel≡ˡ (h₂ ++ b₂) (h₁ ++ b₁)
+      (cong₂ _++_ (sym h₁≡) (sym b₁≡))
+      ((h₂ ++ b₂) ++ f₂ ++ xs₁ ≡⟨ sym (++-assoc (h₂ ++ b₂) f₂ _) ⟩
+      ((h₂ ++ b₂) ++ f₂) ++ xs₁ ≡⟨ cong (_++ xs₁) (++-assoc h₂ _ _) ⟩
+      (h₂ ++ b₂ ++ f₂) ++ xs₁ ≡⟨ cong (_++ xs₁) (sym bs≡₂) ⟩
+      ws ++ xs₁ ≡⟨ bs≡₁ ⟩
+      h₁ ++ b₁ ++ f₁ ≡⟨ sym (++-assoc h₁ _ _) ⟩
+      (h₁ ++ b₁) ++ f₁ ∎)
+
+  @0 x₁≡n : x₁ ≡ '\n'
+  x₁≡n = caseErased footer₁ ,′ footer₂ ret (const _) of λ where
+    (mkCertBoundary{e = e₁} refl eol₁ refl , mkCertBoundary{e = e₂} refl eol₂ refl) → ─
+      let e₂≡ : e₂ ++ xs₁ ≡ e₁
+          e₂≡ = ++-cancelˡ _ ++xs₁≡
+      in
+      caseErased eol₁ ,′ eol₂ ret (const _) of λ where
+        (crlf , crlf) → contradiction e₂≡ λ ()
+        (crlf , cr) → ─ ∷-injectiveˡ (∷-injectiveʳ e₂≡)
+        (crlf , lf) → contradiction e₂≡ λ ()
+        (cr , crlf) → contradiction e₂≡ λ ()
+        (cr , cr) → contradiction e₂≡ λ ()
+        (cr , lf) → contradiction e₂≡ λ ()
+        (lf , crlf) → contradiction e₂≡ λ ()
+        (lf , cr) → contradiction e₂≡ λ ()
+        (lf , lf) → contradiction e₂≡ λ ()
+      -- ∷-injectiveˡ{xs = xs₁'}{ys = []}
+      --   (++-cancelˡ (String.toList "-----END CERTIFICATE-----")
+      --     {!!})
+
+  noway : ¬ Cert xs₂
+  noway (mkCert{b'}{f'} (mkCertBoundary refl eol refl) body footer bs≡) =
+    contradiction{P = '-' ≡ '\n'} (trans (sym x₁≡) x₁≡n) λ ()
+    where
+    @0 x₁≡ : x₁ ≡ '-'
+    x₁≡ = ∷-injectiveˡ (trans ++≡ (cong (_++ ys₂) bs≡))

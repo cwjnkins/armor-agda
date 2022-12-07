@@ -1,5 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
+open import Aeres.Binary
+  renaming (module Base64 to B64)
 open import Aeres.Data.Base64
 open import Aeres.Data.PEM.CertText.Exclusions
 open import Aeres.Data.PEM.CertText.FinalLine
@@ -10,6 +12,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
+import      Data.List.Relation.Unary.Any.Properties as Any
 import      Data.Nat.Properties as Nat
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -55,6 +58,12 @@ fullLineFromLine{xs₁}{ys₁}{xs₂}{ys₂} (mkCertFinalLine{l}{e} line lineLen
          (l₁ ++ e₁) ++ ys₂ ≡⟨ ++-assoc l₁ _ _ ⟩
          l₁ ++ e₁ ++ ys₂ ∎)
          line eol (Base64.Str.fromExactLength line₁) eol₁
+
+@0 char∈ : ∀ {@0 b bs} → b ∈ bs → CertText bs → b ∈ B64.charset ++ String.toList "=\r\n"
+char∈ b∈ (mkCertText{b₁}{f₁} body₁ final₁ refl) =
+  caseErased Any.++⁻ b₁ b∈ ret (const _) of λ where
+    (inj₁ x) → ─ FullLine.char∈List x body₁
+    (inj₂ y) → ─ FinalLine.char∈ y final₁
 
 {-# TERMINATING #-}
 @0 foldFinalIntoBody

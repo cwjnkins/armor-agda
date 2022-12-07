@@ -106,3 +106,22 @@ fullLineLen{bs} (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs�
 @0 char₁ : ∀ {@0 b bs} → CertFullLine (b ∷ bs) → b ∈ B64.charset
 char₁ (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ _ refl) t refl) (─ len≡) refl) eol bs≡) =
   subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈
+
+@0 char∈ : ∀ {@0 b bs} → b ∈ bs → CertFullLine bs → b ∈ B64.charset ++ (String.toList $ "=\r\n")
+char∈ b∈ (mkCertFullLine{l}{e} line eol refl) =
+  caseErased Any.++⁻ l b∈ ret (const _) of λ where
+    (inj₁ x) → ─ Any.++⁺ˡ{xs = B64.charset ++ [ '=' ]}
+      (caseErased Base64.Str.char∈ x (Base64.Str.fromExactLength line) ret (const _) of λ where
+        (inj₁ x) → ─ Any.++⁺ˡ x
+        (inj₂ refl) → ─ (Any.++⁺ʳ B64.charset (here refl)))
+    (inj₂ y) → ─
+      (caseErased RFC5234.EOL.char∈ y eol ret (const _) of λ where
+        (inj₁ refl) → ─ toWitness{Q = _ ∈? _} tt
+        (inj₂ refl) → ─ toWitness{Q = _ ∈? _} tt)
+
+@0 char∈List : ∀ {@0 b bs} → b ∈ bs → IList CertFullLine bs → b ∈ B64.charset ++ (String.toList $ "=\r\n")
+char∈List () nil
+char∈List b∈ (consIList{l}{r} line lines refl) =
+  caseErased Any.++⁻ l b∈ ret (const _) of λ where
+    (inj₁ x) → ─ char∈ x line
+    (inj₂ y) → ─ char∈List y lines
