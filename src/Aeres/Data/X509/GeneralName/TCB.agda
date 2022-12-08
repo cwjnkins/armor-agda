@@ -27,7 +27,7 @@ X400Address : @0 List UInt8 → Set
 X400Address xs = TLV Tag.AA3 OctetStringValue xs --abstracted
 
 DirName : @0 List UInt8 → Set
-DirName xs = TLV Tag.AA4 (SequenceOf RDN) xs
+DirName xs = TLV Tag.AA4 RDNSeq xs
 
 --- we do not support EdipartyName since very rarely used
 EdipartyName : @0 List UInt8 → Set
