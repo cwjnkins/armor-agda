@@ -1,6 +1,6 @@
 {-# OPTIONS --inversion-max-depth=100 #-}
 
-open import Aeres.Arith using (divmod2 ; 2^n≢0 ; 1≤10^n)
+open import Aeres.Arith using (divmod2 ; 2^n≢0 ; 1≤10^n; divmod2-*2)
 open import Aeres.Prelude
 open import Data.Fin.Properties as Fin
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
@@ -20,16 +20,22 @@ Binary = Vec Bool
 pattern #0 = false
 pattern #1 = true
 
-toBinary : ∀ {n} → Fin (2 ^ n) → Binary n
-toBinary{n} i = Vec.reverse $ help n (toℕ i)
-  where
+module ToBinary where
   help : (n : ℕ) (i : ℕ) → Binary n
   help 0 i = []
-  help (suc n) 0 = Vec.replicate #0
-  help (suc n) 1 = #1 ∷ Vec.replicate #0
-  help (suc n) i@(suc (suc i'))
-    with divmod2 i'
-  ... | q , r = r ∷ help n (1 + q)
+  help (suc n) i
+    with divmod2 i
+  ... | q , r = r ∷ help n q
+  -- help (suc n) 0 = Vec.replicate #0
+  -- help (suc n) 1 = #1 ∷ Vec.replicate #0
+  -- help (suc n) i@(suc (suc i'))
+  --   with divmod2 i
+  -- ... | q , r = r ∷ help n q
+
+  toBinary : ∀ {n} → Fin (2 ^ n) → Binary n
+  toBinary{n} i = Vec.reverse $ help n (toℕ i)
+
+open ToBinary public using (toBinary)
 
 fromBinary : ∀ {n} → Binary n → Fin (2 ^ n)
 fromBinary bits = go (Vec.reverse bits)
@@ -43,8 +49,42 @@ fromBinary bits = go (Vec.reverse bits)
 
 -- TODO: postulate
 toBinary-injective : ∀ {n} → (i₁ i₂ : Fin (2 ^ n)) → toBinary{n} i₁ ≡ toBinary{n} i₂ → i₁ ≡ i₂
-toBinary-injective i₁ i₂ i≡ = primTrustMe
+toBinary-injective i₁ i₂ i≡ = {!!}
   where
+  open ≡-Reasoning
+  module ≤ = ≤-Reasoning
+
+  lem₁ : ∀ n i → 1 ≤ n → 1 ≤ i → i < 2 ^ n → ToBinary.help n i ≢ Vec.replicate #0
+  lem₁ (suc n) i 1≤n 1≤i i<2^n
+    with divmod2 i
+    |    divmod2-*2 i
+  ... | q , #1 | i≡ = λ ()
+  ... | zero , #0 | refl = contradiction 1≤i (λ ())
+  lem₁ 1 ._ 1≤n 1≤i (s≤s (s≤s ())) | suc zero , #0 | refl
+  lem₁ 1 i 1≤n 1≤i i<2^n | suc (suc q) , #0 | i≡ =
+    {!!}
+    where
+    i≥ : 4 ≤ i
+    i≥ = ≤.begin
+      (4 ≤.≤⟨ m≤m+n 4 (q + q) ⟩
+      4 + (q + q) ≤.≡⟨ {!!} ⟩
+      {!!})
+  lem₁ (suc (suc n)) i 1≤n 1≤i i<2^n | suc q , #0 | i≡ = {!!}
+
+  help : ∀ {n} (i₁ i₂ : Fin (2 ^ n))
+         → (n₁ : Singleton (toℕ i₁)) (n₂ : Singleton (toℕ i₂))
+         → ToBinary.help n (↑ n₁) ≡ ToBinary.help n (↑ n₂)
+         → i₁ ≡ i₂
+  help {zero} Fin.zero Fin.zero (singleton n₁ n₁≡) (singleton n₂ n₂≡) x = refl
+  help {suc n} i₁ i₂ (singleton zero n₁≡) (singleton zero n₂≡) x =
+    toℕ-injective (begin
+      toℕ i₁ ≡⟨ ‼ sym n₁≡ ⟩
+      0 ≡⟨ ‼ n₂≡ ⟩
+      toℕ i₂ ∎)
+  help {suc n} i₁ i₂ (singleton zero n₁≡) (singleton (suc n₂) n₂≡) x = {!!}
+  help {suc n} i₁ i₂ (singleton (suc n₁) n₁≡) (singleton zero n₂≡) x = {!!}
+  help {suc n} i₁ i₂ (singleton (suc n₁) n₁≡) (singleton (suc n₂) n₂≡) x = {!!}
+
   open import Agda.Builtin.TrustMe
 
 -- TODO postulate
@@ -64,8 +104,8 @@ private
   test₁ : toℕ (fromBinary (#1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ])) ≡ 9
   test₁ = refl
 
-  test₂ : toBinary (Fin.inject+ _ (Fin.fromℕ 9)) ≡ #1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ]
-  test₂ = refl
+  test₂ : toBinary (# 9) ≡ #0 ∷ #1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ]
+  test₂ = {!!}
 
 
 UInt8 = Fin (2 ^ 8)
