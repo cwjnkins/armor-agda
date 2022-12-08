@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.SignAlg.DSA.TCB
-  using (DSA-Like)
+open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.SignAlg.DSA.Properties as DSA
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.SignAlg.ECDSA.TCB
-open import Aeres.Data.X690-DER.OID.TCB
+open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -18,21 +18,40 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
+module ECDSA-Like where
+  @0 unambiguous : ∀ {@0 bs} → (o : OIDValue bs) → Unambiguous (ECDSA-Like o)
+  unambiguous o =
+    TLV.unambiguous
+      (AlgorithmIdentifier.unambiguous
+        _
+        λ where
+          o' (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) → refl)
+
+  @0 noConfusion
+    : ∀ {@0 bs₁ bs₂} → (o₁ : OIDValue bs₁) (o₂ : OIDValue bs₂)
+      → {t : False (o₁ ≋? o₂)}
+      → NoConfusion (ECDSA-Like o₁) (ECDSA-Like o₂)
+  noConfusion o₁ o₂ {t} =
+    AlgorithmIdentifier.noConfusionParam (ECDSA-Like-Params o₁)
+      λ where
+        o (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) →
+          contradiction ≋-refl (toWitnessFalse t)
+
 @0 unambiguous : Unambiguous Supported
 unambiguous =
-  unambiguousSum (DSA.DSA-Like.unambiguous _)
-    (unambiguousSum (DSA.DSA-Like.unambiguous _)
-      (unambiguousSum (DSA.DSA-Like.unambiguous _)
-        (unambiguousSum (DSA.DSA-Like.unambiguous _)
-          (DSA.DSA-Like.unambiguous _)
-          (DSA.DSA-Like.noConfusion _ _))
+  unambiguousSum (ECDSA-Like.unambiguous _)
+    (unambiguousSum (ECDSA-Like.unambiguous _)
+      (unambiguousSum (ECDSA-Like.unambiguous _)
+        (unambiguousSum (ECDSA-Like.unambiguous _)
+          (ECDSA-Like.unambiguous _)
+          (ECDSA-Like.noConfusion _ _))
         (NoConfusion.sumₚ {A = SHA256}
-          (DSA.DSA-Like.noConfusion _ _)
-          (DSA.DSA-Like.noConfusion _ _)))
+          (ECDSA-Like.noConfusion _ _)
+          (ECDSA-Like.noConfusion _ _)))
       (NoConfusion.sumₚ{A = SHA224}
-        (DSA.DSA-Like.noConfusion _ _)
-          (NoConfusion.sumₚ {A = SHA224} (DSA.DSA-Like.noConfusion _ _)
-            (DSA.DSA-Like.noConfusion _ _))))
-    (NoConfusion.sumₚ {A = SHA1} (DSA.DSA-Like.noConfusion _ _)
-      (NoConfusion.sumₚ {A = SHA1} (DSA.DSA-Like.noConfusion _ _)
-        (NoConfusion.sumₚ {A = SHA1} (DSA.DSA-Like.noConfusion _ _) (DSA.DSA-Like.noConfusion _ _))))
+        (ECDSA-Like.noConfusion _ _)
+          (NoConfusion.sumₚ {A = SHA224} (ECDSA-Like.noConfusion _ _)
+            (ECDSA-Like.noConfusion _ _))))
+    (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _)
+      (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _)
+        (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _) (ECDSA-Like.noConfusion _ _))))
