@@ -57,6 +57,55 @@ divmod2-*2 (suc (suc n))
   2 + n ∎
   where open ≡-Reasoning
 
+divmod2-cancel₀ : ∀ n → divmod2 (2 * n) ≡ (n , false)
+divmod2-cancel₀ zero = refl
+divmod2-cancel₀ (suc n)
+  with 1 + (n + (1 + n + 0))
+  |    eq
+  where
+  open ≡-Reasoning
+
+  eq : 1 + (n + (1 + n + 0)) ≡ 2 + (2 * n)
+  eq =
+    1 + (n + (1 + n + 0)) ≡⟨⟩
+    1 + (n + (1 + (n + 0))) ≡⟨ cong suc (+-suc _ _) ⟩
+    1 + ((1 + n) + (n + 0)) ≡⟨⟩ 
+    2 + (n + (n + zero)) ∎
+... | n' | refl
+  with divmod2 (2 * n)
+  |    divmod2-cancel₀ n
+... | .n , .false | refl = refl
+
+divmod2-cancel₁ : ∀ n → divmod2 (1 + 2 * n) ≡ (n , true)
+divmod2-cancel₁ zero = refl
+divmod2-cancel₁ (suc n)
+  with n + suc (n + zero)
+  |    x≡
+  where
+  x≡ : n + suc (n + zero) ≡ 1 + 2 * n
+  x≡ = +-suc n (n + zero)
+... | .(suc (n + (n + 0))) | refl
+  with divmod2 (1 + 2 * n)
+  |    divmod2-cancel₁ n
+... | .(n , true) | refl = refl
+
+
+  -- with (1 + 2 * suc n) | x≡
+  -- where
+  -- open ≡-Reasoning
+
+  -- x≡ : 1 + 2 * suc n ≡ 2 + 2 * n
+  -- x≡ = begin
+  --   (1 + (n + (1 + (n + 0))) ≡⟨ cong suc (sym (+-assoc n 1 _)) ⟩
+  --   1 + (n + 1 + (n + 0)) ≡⟨ cong suc (cong (_+ (n + 0)) (+-comm n 1)) ⟩
+  --   1 + (1 + n + (n + 0)) ∎)
+-- ... | .(suc (suc (n + (n + 0)))) | refl = {!!}
+--   with divmod2 (1 + 2 * n)
+--   |    divmod2-cancel n
+-- ... | .n , .true | refl = {!!}
+-- divmod2-cancel : ∀ n → divmod2 (2 * n) ≡ (n , 0)
+-- divmod2-cancel n ? = ?
+
 divmod2-2^ : ∀ n → proj₁ (divmod2 (2 ^ (1 + n))) ≡ 2 ^ n
 divmod2-2^ n
   with divmod2-*2 (2 ^ (1 + n))
@@ -75,9 +124,38 @@ divmod2-2^ n
     |       +-suc b (b + 0)
     = cong suc (*-injective a b (suc-injective (suc-injective eq)))
 
--- Not needed for now
--- divmod2-mono-≤ : ∀ m n → m ≤ n → proj₁ (divmod2 m) ≤ proj₁ (divmod2 n)
--- divmod2-mono-≤ = {!!}
+divmod2-mono-≤ : ∀ m n → m ≤ n → proj₁ (divmod2 m) ≤ proj₁ (divmod2 n)
+divmod2-mono-≤ zero n m≤n = z≤n
+divmod2-mono-≤ (suc zero) (suc zero) m≤n = z≤n
+divmod2-mono-≤ (suc zero) (suc (suc n)) m≤n = z≤n
+divmod2-mono-≤ (suc (suc m)) (suc zero) (s≤s ())
+divmod2-mono-≤ (suc (suc m)) (suc (suc n)) (s≤s (s≤s m≤n))
+  with divmod2 m
+  |    divmod2 n
+  |    divmod2-mono-≤ m n m≤n
+... | q₁ , r₁ | q₂ , r₂ | q₁≤q₂ = s≤s q₁≤q₂
+
+
+divmod2-mono-< : ∀ m n → 2 + m ≤ n → div2 m < div2 n
+divmod2-mono-< zero .(suc (suc _)) (s≤s (s≤s 2+m≤n)) = s≤s z≤n
+divmod2-mono-< (suc zero) .(suc (suc (suc _))) (s≤s (s≤s (s≤s 2+m≤n))) = s≤s z≤n
+divmod2-mono-< (suc (suc m)) (suc .(suc n)) (s≤s (s≤s{n = n} 2+m≤n))
+  with div2 m
+  |    div2 n
+  |    divmod2-mono-< m n 2+m≤n
+... | xxx | yyy | zzz = s≤s zzz
+
+divmod2-mono-<' : ∀ m n → m < 2 * n → div2 m < n
+divmod2-mono-<' zero (suc n) m<2*n = s≤s z≤n
+divmod2-mono-<' (suc zero) (suc n) m<2*n = s≤s z≤n
+divmod2-mono-<' (suc (suc m)) (suc n) (s≤s m<2*n)
+  with n + suc (n + zero)
+  |    +-suc n (n + zero)
+divmod2-mono-<' (suc (suc m)) (suc n) (s≤s (s≤s m<2*n)) | .(suc (n + (n + 0))) | refl =
+  s≤s (divmod2-mono-<' m n m<2*n)
+
+
+-- divmod2-mono-< : ∀ m n → m < n → proj₁ (divmod2 m) < proj₁ (divmod2 n)
 
 -- divmod2-m∸n : ∀ m n → div2 (m - n) ≤ div2 m - div2 n
 -- divmod2-m∸n m n

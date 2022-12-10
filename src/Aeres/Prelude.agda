@@ -716,3 +716,81 @@ module Lemmas where
     where
     open ≡-Reasoning
     open import Data.Nat.Properties
+
+  import Relation.Binary.HeterogeneousEquality as ≅
+  open ≅ using (_≅_ ; refl)
+
+  -- https://stackoverflow.com/questions/26841142/how-to-prove-unfold-reverse-for-vec
+  Vec-unfold-reverse
+    : ∀ {ℓ} {A : Set ℓ} {n} → (x : A) (xs : Vec A n)
+      → Vec.reverse (x ∷ xs) ≅ Vec.reverse xs Vec.++ Vec.[ x ]
+  Vec-unfold-reverse{A = A} x xs =
+    begin
+      Vec.reverse (x ∷ xs) ≅⟨ refl ⟩
+      Vec.foldl (Vec _ ∘ (1 +_)) (flip _∷_) Vec.[ x ] xs
+        ≅⟨ Vec.foldl-cong{B = Vec _ ∘ (1 +_)}{f = flip _∷_}{C = Vec _ ∘ (_+ 1)}{g = flip _∷_}
+             (λ where
+               {n'}{h₁}{y}{z} x₁ →
+                 ≅.icong (Vec _) (+-comm 1 n') (h₁ Vec.∷_) x₁)
+             refl xs
+        ⟩
+      (Vec.foldl (Vec _ ∘ (_+ 1)) (flip _∷_) Vec.[ x ] xs ≅⟨ helper Vec.[ x ] xs ⟩
+      (Vec.reverse xs Vec.++ Vec.[ x ] ∎))
+    where
+    open ≅.≅-Reasoning
+
+    import Data.Vec.Properties.WithK as Vec
+
+    helper : ∀ {n m} (xs : Vec A n) (ys : Vec A m)
+             → Vec.foldl (Vec A ∘ (_+ n)) (flip _∷_) xs ys ≅ Vec.reverse ys Vec.++ xs
+    helper xs [] = refl
+    helper{n}{m} xs (_∷_{n'} y ys) = begin
+      Vec.foldl (Vec A ∘ (_+ n)) (flip _∷_) xs (y ∷ ys) ≅⟨ refl ⟩
+      Vec.foldl (Vec A ∘ suc ∘ (_+ n)) (flip _∷_) (y ∷ xs) ys
+        ≅⟨ Vec.foldl-cong
+             (λ {n'}{h₁}{ws₁}{ws₂} ws≅ →
+               ≅.icong{I = ℕ} (Vec _){B = λ {k} _ → Vec _ (suc k)} (sym (+-suc n' _)) (h₁ ∷_) ws≅)
+             refl ys
+        ⟩
+      Vec.foldl (Vec A ∘ (_+ suc n)) (flip _∷_) (y ∷ xs) ys ≅⟨ helper (y ∷ xs) ys ⟩
+      Vec.reverse ys Vec.++ (y ∷ xs) ≅⟨ refl ⟩
+      Vec.reverse ys Vec.++ (Vec.[ y ] Vec.++ xs)
+        ≅⟨ ≅.sym (Vec.++-assoc (Vec.reverse ys) Vec.[ y ] xs) ⟩
+      (Vec.reverse ys Vec.++ Vec.[ y ]) Vec.++ xs
+        ≅⟨ ≅.icong (Vec _) {B = _} (+-comm n' 1) (Vec._++ xs)
+             (≅.sym (Vec-unfold-reverse y ys)) ⟩
+      Vec.reverse (y ∷ ys) Vec.++ xs ∎
+
+  Vec-reverse-injective : ∀ {ℓ} {A : Set ℓ} {n} (xs ys : Vec A n)
+                          → Vec.reverse xs ≡ Vec.reverse ys
+                        → xs ≡ ys
+  Vec-reverse-injective {ℓ} {A} {.zero} [] [] xs≡ys = refl
+  Vec-reverse-injective {ℓ} {A} {.(suc _)} (_∷_{n} x xs) (y ∷ ys) xs≡ys =
+    ≅-Core.≅-to-≡ (begin
+      (x ∷ xs
+        ≅⟨
+          ≅.icong₂{I = ℕ}
+            (λ _ → A){i = 0} refl
+            (Vec._∷_{n = n})
+            (≅-Core.≡-to-≅ (Vec.∷-injectiveˡ (Vec.++-injectiveʳ (Vec.reverse xs) (Vec.reverse ys) (≅-Core.≅-to-≡ xs≅ys))))
+            (≅-Core.≡-to-≅ ih) ⟩
+      y ∷ ys ∎))
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
+    xs≅ys : Vec.reverse xs Vec.++ Vec.[ x ] ≅ Vec.reverse ys Vec.++ Vec.[ y ]
+    xs≅ys = begin
+      (Vec.reverse xs Vec.++ Vec.[ x ] ≅⟨ ≅.sym (Vec-unfold-reverse x xs) ⟩
+      Vec.reverse (x ∷ xs) ≅⟨ ≅-Core.≡-to-≅ xs≡ys ⟩
+      Vec.reverse (y ∷ ys) ≅⟨ Vec-unfold-reverse y ys ⟩
+      Vec.reverse ys Vec.++ Vec.[ y ] ∎)
+
+    ih =
+      Vec-reverse-injective xs ys
+        (Vec.++-injectiveˡ (Vec.reverse xs) (Vec.reverse ys)
+          (≅-Core.≅-to-≡ xs≅ys))

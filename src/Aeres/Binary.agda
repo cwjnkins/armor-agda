@@ -1,6 +1,6 @@
 {-# OPTIONS --inversion-max-depth=100 #-}
 
-open import Aeres.Arith using (divmod2 ; 2^n≢0 ; 1≤10^n; divmod2-*2)
+open import Aeres.Arith
 open import Aeres.Prelude
 open import Data.Fin.Properties as Fin
   renaming (≤-refl to Fin-≤-refl ; ≤-trans to Fin-≤-trans ; suc-injective to Fin-suc-injective)
@@ -10,6 +10,7 @@ open import Data.Nat.Induction
 open import Data.Nat.Properties as Nat
   hiding (_≟_)
 import      Data.Sign
+import      Data.Vec.Properties as Vec
 
 module Aeres.Binary where
 
@@ -47,43 +48,52 @@ fromBinary bits = go (Vec.reverse bits)
   go {n@.(suc _)} (#1 ∷ bits) =
     subst Fin (suc[pred[n]]≡n{2 ^ n} (2^n≢0 n)) (Fin.fromℕ 1 Fin.+ (Fin.2* (go bits)))
 
--- TODO: postulate
+-- TODO: satisfy termination checker
+{-# TERMINATING #-}
 toBinary-injective : ∀ {n} → (i₁ i₂ : Fin (2 ^ n)) → toBinary{n} i₁ ≡ toBinary{n} i₂ → i₁ ≡ i₂
-toBinary-injective i₁ i₂ i≡ = {!!}
+toBinary-injective{n} i₁ i₂ i≡ =
+  help{n} i₁ i₂ self self (Lemmas.Vec-reverse-injective _ _ i≡)
   where
   open ≡-Reasoning
   module ≤ = ≤-Reasoning
-
-  lem₁ : ∀ n i → 1 ≤ n → 1 ≤ i → i < 2 ^ n → ToBinary.help n i ≢ Vec.replicate #0
-  lem₁ (suc n) i 1≤n 1≤i i<2^n
-    with divmod2 i
-    |    divmod2-*2 i
-  ... | q , #1 | i≡ = λ ()
-  ... | zero , #0 | refl = contradiction 1≤i (λ ())
-  lem₁ 1 ._ 1≤n 1≤i (s≤s (s≤s ())) | suc zero , #0 | refl
-  lem₁ 1 i 1≤n 1≤i i<2^n | suc (suc q) , #0 | i≡ =
-    {!!}
-    where
-    i≥ : 4 ≤ i
-    i≥ = ≤.begin
-      (4 ≤.≤⟨ m≤m+n 4 (q + q) ⟩
-      4 + (q + q) ≤.≡⟨ {!!} ⟩
-      {!!})
-  lem₁ (suc (suc n)) i 1≤n 1≤i i<2^n | suc q , #0 | i≡ = {!!}
 
   help : ∀ {n} (i₁ i₂ : Fin (2 ^ n))
          → (n₁ : Singleton (toℕ i₁)) (n₂ : Singleton (toℕ i₂))
          → ToBinary.help n (↑ n₁) ≡ ToBinary.help n (↑ n₂)
          → i₁ ≡ i₂
-  help {zero} Fin.zero Fin.zero (singleton n₁ n₁≡) (singleton n₂ n₂≡) x = refl
-  help {suc n} i₁ i₂ (singleton zero n₁≡) (singleton zero n₂≡) x =
-    toℕ-injective (begin
-      toℕ i₁ ≡⟨ ‼ sym n₁≡ ⟩
-      0 ≡⟨ ‼ n₂≡ ⟩
-      toℕ i₂ ∎)
-  help {suc n} i₁ i₂ (singleton zero n₁≡) (singleton (suc n₂) n₂≡) x = {!!}
-  help {suc n} i₁ i₂ (singleton (suc n₁) n₁≡) (singleton zero n₂≡) x = {!!}
-  help {suc n} i₁ i₂ (singleton (suc n₁) n₁≡) (singleton (suc n₂) n₂≡) x = {!!}
+  help {zero} Fin.zero Fin.zero n₁ n₂ toB≡ = refl
+  help {suc n} i₁ i₂ (singleton n₁ n₁≡) (singleton n₂ n₂≡) toB≡ =
+    toℕ-injective
+      (begin
+        (toℕ i₁ ≡⟨ ‼ sym n₁≡ ⟩
+        n₁ ≡⟨ sym (divmod2-*2 n₁) ⟩
+        toℕ (mod2 n₁) + 2 * (div2 n₁) ≡⟨ cong (_+ (2 * (div2 n₁))) (cong toℕ (Vec.∷-injectiveˡ toB≡)) ⟩
+        toℕ (mod2 n₂) + 2 * (div2 n₁) ≡⟨ cong (toℕ (mod2 n₂) +_) (cong (2 *_) i₁'≡) ⟩
+        toℕ (mod2 n₂) + 2 * (toℕ i₁') ≡⟨ cong (toℕ (mod2 n₂) +_) (cong ((2 *_) ∘ toℕ) ih) ⟩
+        toℕ (mod2 n₂) + 2 * (toℕ i₂') ≡⟨ cong (toℕ (mod2 n₂) +_) (cong (2 *_) (sym i₂'≡)) ⟩
+        toℕ (mod2 n₂) + 2 * (div2 n₂) ≡⟨ divmod2-*2 n₂ ⟩
+        n₂ ≡⟨ ‼ n₂≡ ⟩
+        toℕ i₂ ∎))
+    where
+    i₁'< : div2 n₁ < 2 ^ n
+    i₁'< = divmod2-mono-<' n₁ (2 ^ n) (subst₀ (_< (2 ^ (1 + n))) (sym n₁≡) (Fin.toℕ<n i₁))
+
+    i₁' : Fin (2 ^ n)
+    i₁' = Fin.fromℕ< i₁'<
+
+    i₁'≡ : div2 n₁ ≡ toℕ i₁'
+    i₁'≡ = sym (toℕ-fromℕ< i₁'<)
+
+    i₂'< : div2 n₂ < 2 ^ n
+    i₂'< = divmod2-mono-<' n₂ (2 ^ n) (subst₀ ((_< (2 ^ (1 + n)))) (sym n₂≡) (Fin.toℕ<n i₂))
+
+    i₂' : Fin (2 ^ n)
+    i₂' = Fin.fromℕ< i₂'<
+
+    i₂'≡ : div2 n₂ ≡ toℕ i₂'
+    i₂'≡ = sym (toℕ-fromℕ< i₂'<)
+
+    ih = help{n} i₁' i₂' (singleton (div2 n₁) i₁'≡) (singleton (div2 n₂) i₂'≡) (Vec.∷-injectiveʳ toB≡)
 
   open import Agda.Builtin.TrustMe
 
@@ -105,7 +115,7 @@ private
   test₁ = refl
 
   test₂ : toBinary (# 9) ≡ #0 ∷ #1 ∷ #0 ∷ #0 ∷ Vec.[ #1 ]
-  test₂ = {!!}
+  test₂ = refl
 
 
 UInt8 = Fin (2 ^ 8)
