@@ -19,37 +19,25 @@ open Aeres.Grammar.Parser      Char
 module Props = Aeres.Grammar.Properties Char
 
 module parseBase64 where
-  hereChar = "parseBase64Char"
+  hereChar = "Base64: Char"
 
   open ≡-Reasoning
 
   parseBase64Char : Parser (Logging ∘ Dec) Base64Char
-  parseBase64Char =
-    parseEquivalent Base64Char.equiv
-      (parseSigma' (Props.NonNesting.erased exactLength-nonnesting)
-        (λ where
-          {c ∷ []} (─ e@(mk×ₚ self (─ refl) refl)) →
-            case c ∈? Base64.charset of λ where
-              (no ¬c∈) →
-                no λ where
-                  (─ c∈ , snd) → contradiction c∈ ¬c∈
-              (yes c∈) → yes ((─ c∈) , self))
-          (λ where
-            {bs} (─ mk×ₚ self (─ len≡) refl) (─ mk×ₚ self (─ len≡') refl) (─ c∈ , singleton i i≡) →
-              let @0 c : Char
-                  c = lookupELS{bs} (mk×ₚ self (─ len≡) refl) (# 0)
-                  bs≡ : Erased (bs ≡ [ c ])
-                  bs≡ = ─ (case ((Σ[ xs ∈ List Char ] length xs ≡ 1) ∋ bs , len≡) ret (λ where (bs' , bsLen) → bs' ≡ [ lookupELS (mkELS 1 bs' bsLen) (# 0) ]) of λ where
-                            (c ∷ [] , refl) → refl)
-              in
-              subst₀
-                (λ xs → (@0 len≡“ : length xs ≡ 1) →
-                  Exists─ (lookupELS (mkELS 1 xs len≡“) (# 0) ∈ Base64.charset)
-                    λ (@0 c∈₁) → Singleton (Any.index c∈₁))
-                (sym $ Erased.x bs≡)
-                  (λ where refl → (─ c∈) , (singleton i i≡))
-                  len≡')
-        (parseErased (parseExactLengthString (tell $ hereChar String.++ ": underflow") 1)))
+  runParser parseBase64Char [] = do
+    tell $ hereChar String.++ ": underflow"
+    return ∘ no $ λ where
+      (success prefix read read≡ (mk64 c c∈ i refl) suffix ())
+  runParser parseBase64Char (x ∷ xs) = do
+    case x ∈? Base64.charset of λ where
+      (no ¬p) → do
+        tell $ hereChar String.++ ": invalid char " String.++ String.fromList [ x ]
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk64 c c∈ i refl) suffix refl) →
+            contradiction c∈ ¬p
+      (yes c∈) →
+        return (yes
+          (success [ x ] _ refl (mk64 x c∈ self refl) xs refl))
 
   parseBase64Pad1 : Parser (Logging ∘ Dec) Base64Pad1
   parseBase64Pad1 =
