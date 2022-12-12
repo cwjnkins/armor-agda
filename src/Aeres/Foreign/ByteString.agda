@@ -28,6 +28,9 @@ postulate
 toUInt8 : ByteString → List UInt8
 toUInt8 = reverse ∘ foldl (λ xs w → Word8.toUInt8 w ∷ xs) []
 
+toChar : ByteString → List Char
+toChar = reverse ∘ foldl (λ xs w → Char.fromℕ (Word8.toNat w) ∷ xs) []
+
 {-# COMPILE GHC ByteString  = type ByteString.ByteString #-}
 {-# COMPILE GHC Word8       = type Word8 #-}
 {-# COMPILE GHC Word8.toNat = toInteger #-}

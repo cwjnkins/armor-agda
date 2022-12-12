@@ -76,7 +76,7 @@ private
     xsLen> = ≤.begin
       8 ≤.≡⟨ sym xs₁Len ⟩
       length xs₁ ≤.≤⟨ Nat.m≤m+n (length xs₁) (length xs₂) ⟩
-      length xs₁ + length xs₂ ≤.≡⟨ sym (length-++ xs₁) ⟩
+      length xs₁ + length xs₂ ≤.≡⟨ sym (length-++ xs₁ {xs₂}) ⟩
       length (xs₁ ++ xs₂) ≤.∎
 
   serializeValueRaw≡ (x ∷ []) {bₕ} {x₁ ∷ []} bₕ<8 bits≡ u =
@@ -124,7 +124,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) _ ⟩
-        length xs + length (toBitRep bₕ (x₂ ∷ bₜ)) ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length (toBitRep bₕ (x₂ ∷ bₜ)) ≤.≡⟨ sym (length-++ xs {toBitRep bₕ (x₂ ∷ bₜ)}) ⟩
         length (xs ++ toBitRep bₕ (x₂ ∷ bₜ)) ≤.≡⟨ cong length (sym bits≡) ⟩
         (length [ x ]) ≤.≡⟨⟩
         1 ≤.∎)
@@ -185,7 +185,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) _ ⟩
-        length xs + length (toBitRep bₕ (x₃ ∷ bₜ)) ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length (toBitRep bₕ (x₃ ∷ bₜ)) ≤.≡⟨ sym (length-++ xs {toBitRep bₕ (x₃ ∷ bₜ)}) ⟩
         length (xs ++ toBitRep bₕ (x₃ ∷ bₜ)) ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ [ x₁ ]) ≤.≡⟨⟩
         2 ≤.∎)
@@ -244,7 +244,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) (length xs') ⟩
-        length xs + length xs' ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ x₁ ∷ [ x₂ ]) ≤.∎)
       (λ { (s≤s (s≤s (s≤s ())))})
@@ -306,7 +306,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) (length xs') ⟩
-        length xs + length xs' ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ x₁ ∷ x₂ ∷ [ x₃ ]) ≤.∎)
       (toWitnessFalse{Q = _ ≤? _} tt)
@@ -366,7 +366,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) (length xs') ⟩
-        length xs + length xs' ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ [ x₄ ]) ≤.∎)
       (toWitnessFalse{Q = _ ≤? _} tt)
@@ -428,7 +428,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) (length xs') ⟩
-        length xs + length xs' ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length xs“ ≤.∎)
       (toWitnessFalse{Q = _ ≤? _} tt)
@@ -491,7 +491,7 @@ private
       (≤.begin
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ Nat.m≤m+n (length xs) (length xs') ⟩
-        length xs + length xs' ≤.≡⟨ sym (length-++ xs) ⟩
+        length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length xs“ ≤.∎)
       (toWitnessFalse{Q = _ ≤? _} tt)

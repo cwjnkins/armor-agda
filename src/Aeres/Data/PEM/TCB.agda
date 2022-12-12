@@ -37,3 +37,8 @@ extractCert (mkCert _ (mkCertText body final _) _ _) =
 
   ef : ∀ {@0 bs} → CertFinalLine bs → List UInt8
   ef (mkCertFinalLine line lineLen _ _) = decodeStr line
+
+extractCerts : ∀ {@0 bs} → CertList bs → List UInt8
+extractCerts nil = []
+extractCerts (consIList c rest refl) =
+  extractCert c ++ extractCerts rest
