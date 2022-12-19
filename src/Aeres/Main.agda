@@ -45,7 +45,7 @@ main = IO.run $
     (mkLogged log (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
       Aeres.IO.putStrLnErr
         ("Only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
-         String.++ " certificate(s), but more bytes remain") IO.>>
+         String.++ " certificate(s) - but more bytes remain") IO.>>
       (case proj₁ (LogDec.runMaximalParser Char PEM.parseCert suf) of λ where
         (mkLogged log (no _)) →
           Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
