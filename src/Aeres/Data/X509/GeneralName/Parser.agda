@@ -44,7 +44,7 @@ parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ parseOctetStr
 parseDirName : Parser (Logging ∘ Dec) DirName
 parseDirName =
   parseTLV _ (here' String.++ ": directory name") _
-    (parseSequenceOf "X509: RDN" _ TLV.nonempty TLV.nonnesting parseRDN)
+    λ n → parseExactLength TLV.nonnesting (tell $ here' String.++  "X509: RDN") parseRDNSeq n
 
 parseEdipartyName : Parser (Logging ∘ Dec) EdipartyName
 parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ parseOctetStringValue

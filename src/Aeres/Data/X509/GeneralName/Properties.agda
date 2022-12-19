@@ -176,28 +176,29 @@ module GeneralName where
       (unambiguousSum
         (TLV.unambiguous OctetString.unambiguous)
         (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-          (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+          (unambiguousSum (TLV.unambiguous  IA5String.unambiguous)
             (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
               (unambiguousSum
                 (TLV.unambiguous
-                  (SequenceOf.unambiguous
-                    RDN.unambiguous TLV.nonempty TLV.nonnesting))
-                (unambiguousSum
-                  (TLV.unambiguous OctetString.unambiguous)
-                  (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-                    (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
-                      (TLV.unambiguous
-                        (SequenceOf.Bounded.unambiguous
-                          OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
-                        (TLV.noconfusion λ ()))
-                      (NoConfusion.sumₚ{A = URI} (TLV.noconfusion λ ())
-                        (TLV.noconfusion λ ())))
-                    (NoConfusion.sumₚ{A = EdipartyName} (TLV.noconfusion λ ())
-                      (NoConfusion.sumₚ{A = EdipartyName} (TLV.noconfusion λ ())
-                        (TLV.noconfusion λ ()))))
-                (NoConfusion.sumₚ{A = DirName} (TLV.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = DirName} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = DirName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))
+                  (TLV.unambiguous
+                    (SequenceOf.unambiguous
+                      RDN.unambiguous TLV.nonempty  TLV.nonnesting)))
+                  (unambiguousSum
+                    (TLV.unambiguous OctetString.unambiguous)
+                    (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+                      (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+                        (TLV.unambiguous
+                          (SequenceOf.Bounded.unambiguous
+                            OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
+                          (TLV.noconfusion λ ()))
+                        (NoConfusion.sumₚ {A = URI} (TLV.noconfusion λ ())
+                            (TLV.noconfusion λ ())))
+                      (NoConfusion.sumₚ {A = EdipartyName} (TLV.noconfusion λ ())
+                        (NoConfusion.sumₚ {A = EdipartyName} (TLV.noconfusion λ ())
+                          (TLV.noconfusion λ ()))))
+                  (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ()))
+                    (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ()))
+                      (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ()))))))
               (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
                 (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
                   (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
@@ -221,7 +222,7 @@ module GeneralName where
                   (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
                     (NoConfusion.sumₚ{A = OtherName}
                        (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))))))
-
+ 
 module GeneralNamesElems where
   @0 unambiguous : Unambiguous GeneralNamesElems
   unambiguous =
