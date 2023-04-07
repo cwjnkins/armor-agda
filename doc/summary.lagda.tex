@@ -1,4 +1,4 @@
-% Created 2021-12-02 Thu 18:56
+% Created 2023-04-07 Fri 09:02
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8x]{inputenc}
@@ -17,18 +17,19 @@
 \usepackage{bbm}
 \usepackage[greek, english]{babel}
 \usepackage{latex/agda}
-\DeclareUnicodeCharacter{8346}{\ensuremath { _p}}
 \DeclareUnicodeCharacter{7522}{\ensuremath { _i}}
 \DeclareUnicodeCharacter{8337}{\ensuremath { _e}}
+\DeclareUnicodeCharacter{8346}{\ensuremath { _p}}
+\DeclareUnicodeCharacter{7523}{\ensuremath { _r}}
 \DeclareUnicodeCharacter{8321}{\ensuremath { _1}}
 \DeclareUnicodeCharacter{8322}{\ensuremath { _2}}
 \DeclareUnicodeCharacter{955}{\ensuremath{\lambda}}
 \DeclareUnicodeCharacter{8759}{\ensuremath{::}}
-\author{Chris Jenkins}
+\author{Christa Jenkins}
 \date{\today}
 \title{AERES: Summary of verification architecture}
 \hypersetup{
- pdfauthor={Chris Jenkins},
+ pdfauthor={Christa Jenkins},
  pdftitle={AERES: Summary of verification architecture},
  pdfkeywords={},
  pdfsubject={},
@@ -44,381 +45,123 @@ open import Aeres.Binary
 module summary where
 
 open Base256
-Type = Set
 \end{code}
 
-\section{Specification}
-\label{sec:org5299f5e}
 
-This section describes the discipline used in Aeres to model the supported
-subset of X.509.
-Parsers in Aeres construct values from inputs of type
-\AgdaDatatype{List}\AgdaSpace{}\AgdaFunction{UInt8} --- that is, lists of
-nonnegative integers which are no greater than 255.
-Unlike the other X.509 parsers we have discussed, the types of the values
-constructed from bytestring inputs \emph{depends} upon those inputs.
-This allows us to have an X.509 parser that is sound \emph{by construction},
-because the parser returns a proof that \emph{the input conforms to the
-specification}.
+\section{Operative Notions}
+\label{sec:orgf55f06f}
 
-To illustrate this point, we now look at some Agda definitions that capture a
-handful of the ANS.1 DER type specifications.
+\begin{itemize}
+\item \textbf{soundness} If the parser accepts the string, so does the grammar
+
+\item \textbf{completeness} If the grammar accepts the string, so does the parser
+
+\item \textbf{secure completeness} If the grammar accepts the string, so does the parser,
+and there are no two distinct ways for the grammar to accept the string.
+
+NOTE TO OMAR: I'm not sure if this is good terminology, or even if it is a
+good idea to group completeness (a relation between the grammar and parser)
+and uniqueness (a property of the grammar).
+\end{itemize}
+
+\section{Overview}
+\label{sec:orgbea5f27}
+
+\begin{enumerate}
+\item The Aeres external driver is invoked with the filepath of the certificate
+chain we wish to check.
+The driver invokes Aeres with the contents of this file.
+
+\item Aeres uses its verified PEM parser library to parse the PEM certificate
+chain, then decodes the Base64-encoded certificates into a single
+bytestring.\footnote{We maybe could have decoded it to a list of bytestrings and
+parsed each, come to think of it\ldots{}}
+
+(Sound and complete parsing)
+
+\item Aeres uses its verified X.509 parser library to parse the bytestring into a
+list of certificates.
+
+(Sound, complete, secure)
+
+\item Aeres then checks several semantic properties not suitable for expressing
+in the grammar (e.g., validity period of cert contains current time)
+
+\item For each cert, Aeres outputs the bytestring serializations for the TBS
+certificate, signature, and public key, and also outputs the signature
+algorithm OIDLeastBytes
+
+\item The external driver verifies the public key signatures.
+\end{enumerate}
 
 
-\subsection{\href{../src/Aeres/Data/X509.agda}{Agda X.509 Definitions}}
-\label{sec:orgd15167b}
-\subsubsection{Short lengths}
-\label{sec:orgc686d71}
-Consider the definition short lengths, given as \AgdaDatatype{Short} below.
+
+\section{Design (Challenges and Solutions)}
+\label{sec:orgbb59e4e}
+
+\textbf{Challenge} Our first and most fundamental question is: how shall we represent
+the grammar?
+Recall that our operative notion of soundness is "if the parser accepts the
+string, then so does the grammar."
+We also wish for our formulation of the grammar to serve as a readable
+formalization of the X.509 and X.690 specification.
+
+\textbf{Solution} In general purpose functional languages, inductive types are a
+natural choice for expressing the grammar of a language.
+Our choice of formalizing X.509 and X.680 is \emph{inductive families}, the
+generalization of inductive types to a dependently typed setting.
+
+Let us consider a simple example: X.690 DER Boolean values.
+The BER require that Boolean values consists of a single octet
+with \texttt{FALSE} represented by the setting all bits to 0, and the DER further
+stipulates that \texttt{TRUE} be represented by setting all bits to 1.
+We represent these constraints as follows.
 
 \begin{code}
-module Length where
-  record Short (@erased bs : List UInt8) : Type where
-    constructor mkShort
+module BoolExample where
+  data BoolRep : Bool → UInt8 → Set where
+    falseᵣ : BoolRep false (UInt8.fromℕ 0)
+    trueᵣ  : BoolRep true (UInt8.fromℕ 255)
+  record BoolValue (@0 bs : List UInt8) : Set where
+    constructor mkBoolValue
     field
-      l : UInt8
-      @erased l<128 : toℕ l < 128
-      @erased serial : bs ≡ [ l ]
+      v     : Bool
+      @0 b  : UInt8
+      @0 vᵣ : BoolRep v b
+      @0 bs≡ : bs ≡ [ b ]
 \end{code}
 
-\begin{itemize}
-\item \AgdaDatatype{Short} is not a type, but a \emph{predicate} (a family of types
-indexed by bytestrings).
-\item \AgdaBound{bs} is a bound variable, the formal argument to the predicate we
-are defining.
-It can also be thought of as a \emph{serialization} of the type we are
-defining (our modeling discipline allows for the possibility that there may
-be multiple serializations of a given value; in the case of
-\AgdaDatatype{Short}, it is clear that this is not so).
-It is marked as being erased at runtime with the \AgdaSymbol{@erased}
-annotation (the parsed structure does not carry its serialization around).
-\item \AgdaInductiveConstructor{mkShort} is the constructor for
-\AgdaDatatype{Short}\AgdaSpace{}\AgdaBound{bs} (for all \AgdaBound{bs}),
-requiring three arguments whose types are given by the fields below
-\begin{itemize}
-\item \AgdaField{l} is a single byte, whose value is to be interpreted as the
-length of some other content.
+\begin{enumerate}
+\item First, we define a binary relation \AgdaDatatype{BoolRep} that relates Agda
+\AgdaDatatype{Bool} values to the octet values specified by X.690 DER
+(\AgdaFunction{UInt8.fromℕ} converts a nonnegative unbounded integer to its
+\AgdaFunction{UInt8} representation, provided Agda can verify automatically
+the given number is less than 256).
 
-\item \AgdaField{l<128} is a constraint on \AgdaField{l}. Per the ANS.1 grammar,
-lengths exceeding 127 must be represented by a \emph{long length}.
-
-\item \AgdaField{serial} relates the data field \AgdaField{l} to the serialization
-\AgdaBound{bs}.
-In this case, \AgdaField{bs} must be equal to the singleton list
-containing \AgdaField{l}.
-\end{itemize}
-\end{itemize}
-
-
-A parser which returns \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} is
-therefore a sound parser for short lengths \emph{by construction}, because in order
-to create a value of type \AgdaDatatype{Short}\AgdaSpace\AgdaBound{bs} one
-must produce witnesses that \AgdaBound{bs} is a singleton list whose sole
-element is strictly less than 128.
-
-\subsubsection{Object Subidentifiers}
-\label{sec:org4857360}
-Here is another example: object sub-identifiers
-
-\begin{code}
-OIDLeastBytes : List Dig → Set
-OIDLeastBytes [] = ⊤
-OIDLeastBytes (b  ∷ bs) = toℕ b > 128
-record OIDSub (@erased bs : List Dig) : Set where
-  constructor mkOIDSub
-  field
-    lₚ : List Dig
-    lₑ : Dig
-    @erased lₚ≥128 : All (λ d → toℕ d ≥ 128) lₚ
-    @erased lₑ<128 : toℕ lₑ < 128
-    @erased leastBytes : OIDLeastBytes lₚ
-    @erased serial : bs ≡ lₚ ++ [ lₑ ]
-\end{code}
+\item Next, we define a record \AgdaDatatype{BoolValue} for the representation of
+the X.690 Boolean value itself.
 
 \begin{itemize}
-\item The data fields are \AgdaField{lₚ} (the prefix bytes) and \AgdaField{lₑ}
-(the ending byte).
+\item Each production rule of the grammar, such as \AgdaDatatype{BoolValue}, is
+represented by a type family of type
+\AgdaSymbol{@}\AgdaSymbol{0}\AgdaSpace{}\AgdaDatatype{List}\AgdaSpace{}\AgdaDatatype{UInt8}\AgdaSpace{}\AgdaSymbol{→}\AgdaSpace{}\AgdaPrimitive{Set},
+which we interpret as the type of predicates over bytestrings (we will
+explain the \AgdaSymbol{@}\AgdaSymbol{0} business shortly).
 
-\item Per section 8.19.2 of the X.690 specification,
-
-\begin{quote}
-\emph{Each sub-identifier is represented as a series of (one or more) octets. Bit 8
-of each octet indicates whether it is the last in the series: bit 8 of the}
-\emph{last octet is zero; bit 8 of each preceding octet is one.}
-\end{quote}
-
-Therefore, all of the bytes in the prefix must be at least as large as 128,
-and the ending byte must be strictly less than 128.
-This is enforced by \AgdaField{lₚ≥128} and \AgdaField{lₑ>128}.
-
-\item Finally, as X.509 uses DER, we require that the least number of bytes are
-used for representing the object sub-identifier.
-The definition of this property is \AgdaFunction{OIDLeastBytes}, and the
-requirement that this holds of the prefix \AgdaField{lₚ} is enforced by
-\AgdaField{leastBytes}.
+\item The fields of the record are the Boolean value \AgdaField{v}, its
+bytestring representation \AgdaField{b}, a proof of type
+\AgdaDatatype{BoolRep}\AgdaSpace{}\AgdaField{v}\AgdaSpace{}\AgdaField{b}
+that \AgdaField{b} is the correct representation of \AgdaField{b}, and a
+proof that the bytestring representation of this terminal of the grammar
+is the singleton list consisting of \AgdaField{b} (written \AgdaFunction{[}\AgdaSpace{}\AgdaField{b}\AgdaSpace{}\AgdaFunction{]})
 \end{itemize}
-
-\subsubsection{Generic ``sequence-of'' type}
-\label{sec:orgfd83c9e}
-
-The next Agda definitions model sequences of a single type with a variable
-number of entries.
-
-\begin{code}
-mutual
-  data SeqElems (@erased A : List Dig → Set) : @erased List Dig → Set where
-    []   : (@erased bs : List Dig) → SeqElems A bs
-    cons : (@erased bs : List Dig) → SeqElemFields A bs → SeqElems A bs
-  record SeqElemFields (@erased A : List Dig → Set) (@erased bs : List Dig) : Set where
-    inductive
-    constructor mkSeqElems
-    field
-      @erased bs₁ bs₂ : List Dig
-      h : A bs₁
-      t : SeqElems A bs₂
-      @erased serial : bs ≡ bs₁ ++ bs₂
-\end{code}
-
-\begin{itemize}
-\item The algebraic datatype \AgdaDatatype{SeqElems} is defined mutually with
-the record \AgdaDatatype{SeqElemFields}.
-
-\item \AgdaDatatype{SeqElems} follows the usual format for defining a list as an
-algebraic datatype, except that the parameter \AgdaBound{A} gives the type
-\emph{family} of elements, and the list is indexed by its serialization.
-
-\item One constructs a nonempty list with \AgdaInductiveConstructor{cons}, which
-takes as an argument an element of the record type
-\AgdaDatatype{SeqElemFields}.
-
-\item Since \AgdaDatatype{SeqElemFields} is recursive (indirectly, by the type
-of \AgdaField{t}), Agda requires we declare it either
-\AgdaKeyword{inductive} or \AgdaKeyword{coinductive}.
-
-\item The record has two fields, the head of the list \AgdaField{h} and the tail
-\AgdaField{t}.
-
-\item The serialization is the concatenation of the serializations of the head
-and tail elements (as given by the type of \AgdaField{serial}).
-\end{itemize}
-
-\subsection{Contribution}
-\label{sec:orge125a2c}
-
-One of the contributes of this work is a formalization in Agda of a subset
-of X.509 and X.690 (DER).
-We believe that this specification is human-readable (though it may require
-learning some of Agda's notational convention), while at the same time
-completely unambiguous (compared to the natural language description of both
-specs).
-
-\section{\href{../src/Aeres/Grammar/Parser/Core.agda}{Parsing}}
-\label{sec:org36b183f}
-
-The results of a successful parse of a structure \texttt{A} from \texttt{xs} are given by
-the \texttt{Success} record.
-
-\begin{verbatim}
-record Success (@erased A : List Dig → Set) (@erased xs : List Dig) : Set where
-  constructor success
-  field
-    @erased prefix : List Dig
-    read   : ℕ
-    @erased read≡ : read ≡ length prefix
-    value  : A prefix
-    suffix : List Dig
-    @erased ps≡ : prefix ++ suffix ≡ xs
-\end{verbatim}
-
-The unerased fields are the returned values, and the erased fields are
-part of the specification.
-\begin{itemize}
-\item \texttt{prefix}, the bytes consumed during parsing
-
-This is not returned at run time, but it is needed to state the type of the
-parsed result.
-\item \texttt{read}, the number of bytes read (enforced by the field \texttt{read≡})
-\item \texttt{value}, the construction of the structure \texttt{A} from \texttt{prefix}
-\item \texttt{suffix}, the remaining bytes to consume for future parsing.
-\item The field \texttt{ps≡} guarantees that \texttt{prefix} and \texttt{suffix} are correctly named.
-\end{itemize}
-
-With the definition of the type of results of parsing, we define a parser
-itself as a record wrapping a function from byte strings to "possible
-\texttt{Success} es" --- the structure \texttt{Parser} is parameterized by a type
-constructor \texttt{M} to allow for flexible handling of failure.
-
-\begin{verbatim}
-record Parserᵢ (M : List Dig → Set → Set) (A : List Dig → Set) : Set where
-  constructor mkParser
-  field
-    runParser : (xs : List Dig) → M xs (Success A xs)
-open Parserᵢ public
-
-Parser : (M : Set → Set) (A : List Dig → Set) → Set
-Parser M = Parserᵢ (const M)
-\end{verbatim}
-
-For parsing X.509, the environment \texttt{M} for failure will always involve \texttt{Dec},
-discussed next. (TODO: \texttt{Dec} should probably be part of the definition of \texttt{Parserᵢ})
-
-\subsection{\texttt{Dec} and complete parsing}
-\label{sec:org39e8479}
-
-In the Agda standard library, the type \texttt{Dec : Set -> Set} is the type of
-"decisions" about a proposition \texttt{P : Set}.
-That is, a proof of \texttt{Dec P} is either a proof of \texttt{P} or a proof of \texttt{¬ P}.
-
-\begin{verbatim}
-data Dec (P : Set) : Set where
-  yes :   P → Dec P
-  no  : ¬ P → Dec P
-\end{verbatim}
-
-Now consider the use of \texttt{Dec} in the context of parsing
-
-\begin{verbatim}
-parseInt : Parser Dec Int
-\end{verbatim}
-
-where \texttt{Int} is the X.690 DER encoding of an integer.
-When this parser is run on a byte string \texttt{xs}, it returns \texttt{Dec (Success Int
-    xs)}. There are two options.
-\begin{itemize}
-\item if the decision is \texttt{yes}, then we have a proof that there exists some
-prefix of \texttt{xs} which conforms to the specification \texttt{Int}
-
-\item if the decision is \texttt{no}, then we have a proof that \textbf{no prefix exists}
-from which an \texttt{Int} may be parse
-\end{itemize}
+\end{enumerate}
 
 
-Because the parser returns a \emph{decision} on whether a successful parse is
-possible, we have completeness as well as soundness.
-Consider the following proof.
-
-\begin{verbatim}
-record ⊤ : Set where
-  constructor tt
-
-data ⊥ : Set where
-
-True : ∀ {P} → Dec P → Set
-True (yes _) = ⊤
-True (no  _) = ⊥
-
-completeness : ∀ {bs} → Success Int bs → True (runParser parseInt bs)
-completeness{bs} cert
-  with runParser parseInt bs
-... | (yes _) = tt
-... | no ¬cert = contradiction cert ¬cert
-\end{verbatim}
-
-
-\begin{itemize}
-\item \(\top\) is a trivially inhabited type (a true proposition)
-\item \(\bot\) is a trivially uninhabited type (a false proposition)
-\item \texttt{True} computes a type by case analysis on a decision over some
-proposition. It is defined in such a way that a term of type
-\texttt{True (runParser parseInt bs)} implies that \texttt{runParser parseInt bs} was
-successful
-
-\item In the proof, we assume that an oracle has given us a successful parse of
-an \texttt{Int} from byte string \texttt{bs}. We show that this means the parser \emph{must}
-succeed as well.
-
-\begin{itemize}
-\item Of course, if the parser does succeed (the \texttt{yes} case), then we are done
---- the goal is \texttt{True (yes \_)}, or more succinctly \(\top\).
-\item If we fail, the parser returns a proof that there is \emph{no} way to parse
-an \texttt{Int} from \texttt{bs}, contradicting our assumption.
-\end{itemize}
-\end{itemize}
-
-\section{Lemmas}
-\label{sec:org9e19669}
-
-The proof effort makes use of several lemmas concerning the
-specification\footnote{These may not need to be mentioned in the paper, but I will
-describe them for the sake of completeness}, which on their own may be seen
-as a minor contribution about the properties of the X.690 and X.509 languages.
-
-
-\begin{itemize}
-\item \texttt{NonNesting} (should be: \texttt{Unambiguous})
-
-The property that there is only one way to parse a structure \texttt{A} from a
-given byte string
-
-\begin{verbatim}
-NonNesting : (A : List Dig → Set) → Set
-NonNesting A = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
-               → A xs₁ → A xs₂ → xs₁ ≡ xs₂
-\end{verbatim}
-
-In particular, it is relatively easy to show that TLV structures are
-unambiguous, because the length of the content is encoded in the byte string
-itself.
-
-\item \texttt{Unambiguous} (should be: \texttt{Unique})
-
-Byte strings uniquely determine the fields of the structure.
-
-\begin{verbatim}
-Unambiguous : (A : List Dig → Set) → Set
-Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
-\end{verbatim}
-
-\item \texttt{NoConfusion}
-
-It is not possible to confuse the structure \texttt{A} for the structure \texttt{B} when
-parsing a byte string; put another way, it is not possible to both be able
-to parse an \texttt{A} and a \texttt{B} from the same byte string. This is needed when e.g.
-some fields are optional.
-
-\begin{verbatim}
-NoConfusion : (A B : List Dig → Set) → Set
-NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
-                  → (A xs₁ → ¬ B xs₂)
-\end{verbatim}
-\end{itemize}
-
-\subsection{Parser Combinators}
-\label{sec:org36fd9eb}
-
-At present, Aeres is intended to be used as a stand-alone application for
-differential testing of X.509 parser implementations.
-However, the development contains several generic parser combinators that
-could be packaged into their own library for sound and complete parsing of
-arbitrary languages.
-
-For example, here is the type of a parser combinator which takes a parser for
-\texttt{A} and returns a parser for \texttt{A} in which the length of the byte string read
-is exactly \texttt{n}
-
-\begin{verbatim}
-ExactLength : (@erased A : List Dig → Set) → ℕ → @erased List Dig → Set
-ExactLength A n xs = A xs × Erased (length xs ≤ n)
-
-parseExactLength : {@erased A : List Dig → Set} → @erased NonNesting A →
-                   Parser Dec A →
-                   ∀ n → Parser Dec (ExactLength A n)
-\end{verbatim}
-
-where \texttt{Erased} is a record containing a single field of the given type,
-erased at run time.
-\begin{verbatim}
-record Erased (@erased A : Set) : Set where
-  constructor mkErased
-  field
-    @erased x : A
-\end{verbatim}
-
-Here, we require as an assumption that \texttt{A} is \texttt{NonNesting} (that is, has no
-left recursion).
-If we did not have this, then there may be multiple ways to parse \texttt{A} from a
-given byte string.
-If the given parser succeeds but returns a \texttt{A} built from a prefix that is
-not the specified length, we would not be able to conclude that there is \textbf{no}
-way to parse \texttt{A} from that byte string such that we consume exactly \texttt{n} bytes.
+The \AgdaSymbol{@}\AgdaSymbol{0} annotations on types and fields indicate that
+the values are \emph{erased at runtime.}
+We do this for two reasons: to reduce the space and time overhead for
+executions of Aeres, and to serve as machine-enforced documentation
+delineating the parts of the formalization that are purely for the purposes of
+verification.
 \end{document}

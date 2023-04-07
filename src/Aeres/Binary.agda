@@ -124,6 +124,9 @@ module Base256 where
   Byte  = Binary 8
   Dig   = Fin (2 ^ 8)
 
+  fromℕ : (m : ℕ) {_ : True (suc (toℕ m) Nat.≤? 256)} → UInt8
+  fromℕ m {m<} = #_ m {m<n = m<}
+
   twosComplement : List Dig → ℤ
   twosComplement xs = go (reverse xs) 0 0
     where
@@ -143,21 +146,91 @@ module Base256 where
     tc₂ = refl
 
   -- Converts ASCII codes for '0'-'9' to the corresponding nat.
-  asciiNum₁ : Dig → ℕ
+  asciiNum₁ : UInt8 → ℕ
   asciiNum₁ = (_- toℕ '0') ∘ toℕ
 
-  asciiNum : List UInt8 → ℕ
-  asciiNum xs = go (reverse xs)
+  asciiNum₁-injective
+    : ∀ b₁ b₂ → All (((toℕ '0') ≤_) ∘ toℕ) (b₁ ∷ [ b₂ ])
+      → asciiNum₁ b₁ ≡ asciiNum₁ b₂
+      → b₁ ≡ b₂
+  asciiNum₁-injective b₁ b₂ (p₁ ∷ p₂ ∷ []) ascii≡ =
+    toℕ-injective (∸-cancelʳ-≡ p₁ p₂ ascii≡)
     where
-    go : List Dig → ℕ
-    go [] = 0
-    go (x ∷ xs) = asciiNum₁ x + 10 * go xs
+    open ≡-Reasoning
 
-  postulate
-    asciiNum-injective : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
-                         → xs₁ ≢ [] → xs₂ ≢ []
-                         → asciiNum xs₁ ≡ asciiNum xs₂
-                         → xs₁ ≡ xs₂
+  asciiNum-help : List UInt8 → ℕ
+  asciiNum-help [] = 0
+  asciiNum-help (x ∷ xs) = asciiNum₁ x + 10 * asciiNum-help xs
+
+  asciiNum : List UInt8 → ℕ
+  asciiNum xs = asciiNum-help (reverse xs)
+
+  asciiNum-injective
+    : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
+      → length xs₁ ≡ length xs₂
+      → asciiNum xs₁ ≡ asciiNum xs₂
+      → xs₁ ≡ xs₂
+  asciiNum-injective xs₁ xs₂ inr₁ inr₂ len≡ ascii≡ =
+    reverse-injective
+      (help _ _
+        (Lemmas.All-reverse xs₁ inr₁)
+        (Lemmas.All-reverse xs₂ inr₂)
+        (length (reverse xs₁) ≡⟨ length-reverse xs₁ ⟩
+        length xs₁ ≡⟨ len≡ ⟩
+        length xs₂ ≡⟨ sym (length-reverse xs₂) ⟩
+        length (reverse xs₂) ∎)
+        ascii≡)
+    where
+    open ≡-Reasoning
+
+    help : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
+      → length xs₁ ≡ length xs₂
+      → asciiNum-help xs₁ ≡ asciiNum-help xs₂
+      → xs₁ ≡ xs₂
+    help [] [] inr₁ inr₂ len≡ ascii≡ = refl
+    help (x₁ ∷ xs₁) (x₂ ∷ xs₂) (p₁ ∷ inr₁) (p₂ ∷ inr₂) len≡ ascii≡ =
+      cong₂ _∷_ x₁≡x₂ (help xs₁ xs₂ inr₁ inr₂ (suc-injective len≡) xs₁≡xs₂an)
+      where
+      open import Data.Nat.DivMod
+      module ≤ = ≤-Reasoning
+
+      x₁an : asciiNum₁ x₁ ≤ 9
+      x₁an = ≤.begin
+        (asciiNum₁ x₁ ≤.≡⟨ refl ⟩
+        toℕ x₁ - toℕ '0' ≤.≤⟨ ∸-monoˡ-≤ 48 (proj₂ p₁) ⟩
+        9 ≤.∎)
+
+      x₂an : asciiNum₁ x₂ ≤ 9
+      x₂an = ≤.begin
+        (asciiNum₁ x₂ ≤.≡⟨ refl ⟩
+        toℕ x₂ - toℕ '0' ≤.≤⟨ ∸-monoˡ-≤ 48 (proj₂ p₂) ⟩
+        9 ≤.∎)
+
+      xan≡ : asciiNum₁ x₁ ≡ asciiNum₁ x₂
+      xan≡ = begin
+        asciiNum₁ x₁      ≡⟨ sym (m≤n⇒m%n≡m x₁an) ⟩
+        asciiNum₁ x₁ % 10 ≡⟨ sym ([m+kn]%n≡m%n (asciiNum₁ x₁) (asciiNum-help xs₁) 9) ⟩
+        (asciiNum₁ x₁ + asciiNum-help xs₁ * 10) % 10
+          ≡⟨ cong (_% 10)
+               (begin (asciiNum₁ x₁ + asciiNum-help xs₁ * 10 ≡⟨ cong (asciiNum₁ x₁ +_) (*-comm (asciiNum-help xs₁) 10) ⟩
+                      asciiNum₁ x₁ + 10 * asciiNum-help xs₁ ≡⟨ ascii≡ ⟩
+                      asciiNum₁ x₂ + 10 * asciiNum-help xs₂ ≡⟨ cong (asciiNum₁ x₂ +_) (*-comm 10 (asciiNum-help xs₂)) ⟩
+                      asciiNum₁ x₂ + asciiNum-help xs₂ * 10 ∎)) ⟩
+        (asciiNum₁ x₂ + asciiNum-help xs₂ * 10) % 10 ≡⟨ [m+kn]%n≡m%n (asciiNum₁ x₂) (asciiNum-help xs₂) 9 ⟩
+        asciiNum₁ x₂ % 10 ≡⟨ m≤n⇒m%n≡m x₂an ⟩
+        asciiNum₁ x₂ ∎
+
+      x₁≡x₂ : x₁ ≡ x₂
+      x₁≡x₂ = asciiNum₁-injective x₁ x₂ (proj₁ p₁ ∷ proj₁ p₂ ∷ []) xan≡
+
+      xs₁≡xs₂an : asciiNum-help xs₁ ≡ asciiNum-help xs₂
+      xs₁≡xs₂an =
+        *-cancelˡ-≡ 9
+          (+-cancelˡ-≡ (asciiNum₁ x₁)
+            (begin
+              asciiNum₁ x₁ + 10 * asciiNum-help xs₁ ≡⟨ ascii≡ ⟩
+              asciiNum₁ x₂ + 10 * asciiNum-help xs₂ ≡⟨ cong (_+ 10 * asciiNum-help xs₂) (sym xan≡) ⟩
+              asciiNum₁ x₁ + 10 * asciiNum-help xs₂ ∎))
 
   showFixed : (w n : ℕ) → Vec UInt8 w
   showFixed zero n = Vec.[]
@@ -177,6 +250,7 @@ module Base256 where
       where
       module ≤ = ≤-Reasoning
 
+module UInt8 = Base256
 
 module Base128 where
   Byte = Binary 7
