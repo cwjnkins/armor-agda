@@ -217,8 +217,7 @@ module MonthDayHourMinSecFields where
         (yes refl) →
           case (─ asciiNum-injective (mo₁ ∷ [ mo₂ ]) (mo₁' ∷ [ mo₂' ])
                     (MonthRange.monthRange⇒asciinum monRange) (MonthRange.monthRange⇒asciinum monRange₁)
-                    (λ ()) (λ ())
-                    (trans (sym mon≡) mon≡₁))
+                    refl (trans (sym mon≡) mon≡₁))
           ret (const _) of λ where
             (─ refl) →
               case (─ ≡-unique mon≡ mon≡₁ ,′ ─ MonthRange.unambiguous monRange monRange₁)
@@ -229,8 +228,7 @@ module MonthDayHourMinSecFields where
                     (yes refl) →
                       case ─ asciiNum-injective (d₁ ∷ [ d₂ ]) (d₁' ∷ [ d₂' ])
                                  (DayRange.asciinum dayRange) (DayRange.asciinum dayRange₁)
-                                 (λ ()) (λ ())
-                                 (trans (sym day≡) day≡₁)
+                                 refl (trans (sym day≡) day≡₁)
                       ret (const _) of λ where
                         (─ refl) →
                           case (─ ≡-unique day≡ day≡₁ ,′ ─ DayRange.unambiguous dayRange dayRange₁) ret (const _) of λ where
@@ -240,8 +238,7 @@ module MonthDayHourMinSecFields where
                                 (yes refl) →
                                   case ─ asciiNum-injective (h₁ ∷ [ h₂ ]) (h₁' ∷ [ h₂' ])
                                     (HourRange.asciinum hourRange) (HourRange.asciinum hourRange₁)
-                                    (λ ()) (λ ())
-                                    (trans (sym hour≡) hour≡₁)
+                                    refl (trans (sym hour≡) hour≡₁)
                                   ret (const _) of λ where
                                     (─ refl) →
                                       case (─ ≡-unique hour≡ hour≡₁ ,′ ─ HourRange.unambiguous hourRange hourRange₁)
@@ -252,8 +249,7 @@ module MonthDayHourMinSecFields where
                                             (yes refl) →
                                               case ─ asciiNum-injective (mi₁ ∷ [ mi₂ ]) (mi₁' ∷ [ mi₂' ])
                                                 (MinuteRange.asciinum minRange) (MinuteRange.asciinum minRange₁)
-                                                (λ ()) (λ ())
-                                                (trans (sym min≡) min≡₁)
+                                                refl (trans (sym min≡) min≡₁)
                                               ret (const _) of λ where
                                                 (─ refl) →
                                                   case (─ ≡-unique min≡ min≡₁ ,′ ─ MinuteRange.unambiguous minRange minRange₁)
@@ -264,8 +260,7 @@ module MonthDayHourMinSecFields where
                                                         (yes refl) →
                                                           case ─ asciiNum-injective (s₁ ∷ [ s₂ ]) (s₁' ∷ [ s₂' ])
                                                             (SecRange.asciinum secRange) (SecRange.asciinum secRange₁)
-                                                            (λ ()) (λ ())
-                                                            (trans (sym sec≡) sec≡₁)
+                                                            refl (trans (sym sec≡) sec≡₁)
                                                           ret (const _)
                                                           of λ where
                                                             (─ refl) →
@@ -292,8 +287,7 @@ module UTC where
           case (─ asciiNum-injective
                     (y₁ ∷ [ y₂ ]) (y₁' ∷ [ y₂' ])
                     yearRange yearRange₁
-                    (λ ()) (λ ())
-                    (trans (sym year≡) year₁≡))
+                    refl (trans (sym year≡) year₁≡))
           ret (const _) of λ where
             (─ refl) →
               case (─ ≡-unique year≡ year₁≡ ,′ ─ All.irrelevant (inRange-unique{A = Char}{B = UInt8}{l = '0'}{u = '9'}) yearRange yearRange₁) ret (const _) of λ where
@@ -409,8 +403,7 @@ module GenTime where
           case (─ asciiNum-injective
                     (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ])
                     yearRange yearRange₁
-                    (λ ()) (λ ())
-                    (trans (sym year≡) year₁≡))
+                    refl (trans (sym year≡) year₁≡))
           ret (const _) of λ where
             (─ refl) →
               case (─ ≡-unique year≡ year₁≡ ,′ ─ All.irrelevant (inRange-unique{A = Char}{B = UInt8}{l = '0'}{u = '9'}) yearRange yearRange₁) ret (const _) of λ where
