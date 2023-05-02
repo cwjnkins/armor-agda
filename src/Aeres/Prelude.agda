@@ -717,6 +717,12 @@ module Lemmas where
     open ≡-Reasoning
     open import Data.Nat.Properties
 
+  All-reverse : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {P : A → Set ℓ₂}
+                → ∀ xs → All P xs → All P (reverse xs)
+  All-reverse [] a = a
+  All-reverse{P = P} (x ∷ xs) (p ∷ a) rewrite unfold-reverse x xs =
+    All.++⁺ (All P (reverse xs) ∋ All-reverse xs a) (p ∷ [])
+
   import Relation.Binary.HeterogeneousEquality as ≅
   open ≅ using (_≅_ ; refl)
 
