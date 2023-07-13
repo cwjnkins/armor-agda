@@ -26,20 +26,20 @@ parseKUFields =
 -- private
 --   module Test where
 
---     val₁ : List Dig
---     val₁ = # 4 ∷ # 4 ∷ # 3 ∷ # 2 ∷ # 5 ∷ [ # 160 ]
+--     val₁ : List UInt8
+--     val₁ = # 4 ∷ # 6 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 160 ∷ # 0 ∷ [ # 0 ]
 
---     val₂ : List Dig
+--     val₂ : List UInt8
 --     val₂ = # 4 ∷ # 4 ∷ # 3 ∷ # 2 ∷ # 4 ∷ [ # 160 ]
 
---     val₃ : List Dig
+--     val₃ : List UInt8
 --     val₃ = # 4 ∷ # 4 ∷ # 3 ∷ # 2 ∷ # 6 ∷ [ # 160 ]
 
---     test₁ : X509.KUFields val₁
+--     test₁ : KUFields val₁
 --     test₁ = Success.value (toWitness {Q = Logging.val (runParser parseKUFields val₁)} tt)
 
---     test₂ : X509.KUFields val₂
+--     test₂ : KUFields val₂
 --     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseKUFields val₂)} tt)
 
---     test₃ : ¬ Success _ X509.KUFields val₃
---     test₃ = toWitnessFalse {Q = Logging.val (runParser parseKUFields val₃)} tt
+    -- test₃ : ¬ Success _ KUFields val₃
+    -- test₃ = toWitnessFalse {Q = Logging.val (runParser parseKUFields val₃)}
