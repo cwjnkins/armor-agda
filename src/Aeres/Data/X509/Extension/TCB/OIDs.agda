@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.Parser
 open import Aeres.Data.X690-DER.OID.TCB
+open import Aeres.Data.X690-DER.Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
@@ -95,3 +96,23 @@ AIALit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 
 AIA : OIDValue AIALit
 AIA = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length AIALit)) AIALit)} tt))
+
+
+ServerAuthOID : List UInt8
+ServerAuthOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 1 ]
+
+ClientAuthOID : List UInt8
+ClientAuthOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 2 ]
+
+CodeSignOID : List UInt8
+CodeSignOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 3 ]
+
+EmailProtOID : List UInt8
+EmailProtOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 4 ]
+
+TimeStampOID : List UInt8
+TimeStampOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 8 ]
+
+OCSPSignOID : List UInt8
+OCSPSignOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 9 ]
+

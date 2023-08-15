@@ -101,6 +101,9 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU = elimOption (_ , none) (λ v → Extensions.getKU v) extensions
 
+  getEKU : Exists─ (List UInt8) (Option ExtensionFieldEKU)
+  getEKU = elimOption (_ , none) (λ v → Extensions.getEKU v) extensions
+
   getSAN : Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN = elimOption (_ , none) (λ v → Extensions.getSAN v) extensions
 

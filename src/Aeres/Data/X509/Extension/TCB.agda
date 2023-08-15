@@ -100,6 +100,10 @@ module Extension where
   getKU (mkTLV len (kuextn x) len≡ bs≡) = _ , (some x)
   getKU (mkTLV len _ len≡ bs≡) = _ , none
 
+  getEKU : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldEKU)
+  getEKU (mkTLV len (ekuextn x) len≡ bs≡) = _ , (some x)
+  getEKU (mkTLV len _ len≡ bs≡) = _ , none
+
   getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN (mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
   getSAN (mkTLV len _ len≡ bs≡) = _ , none
@@ -128,6 +132,15 @@ module ExtensionsSeq where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
     helper (consIList h t bs≡) = case (Extension.getKU h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+  getEKU : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldEKU)
+  getEKU (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getEKU h) of λ where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
@@ -171,6 +184,9 @@ module Extensions where
 
   getKU : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU (mkTLV len val len≡ bs≡) = ExtensionsSeq.getKU val
+
+  getEKU : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldEKU)
+  getEKU (mkTLV len val len≡ bs≡) = ExtensionsSeq.getEKU val
 
   getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN (mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val

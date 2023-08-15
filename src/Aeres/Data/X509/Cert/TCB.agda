@@ -99,6 +99,9 @@ record CertFields (@0 bs : List UInt8) : Set where
   getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU = TBSCertFields.getKU (TLV.val tbs)
 
+  getEKU : Exists─ (List UInt8) (Option ExtensionFieldEKU)
+  getEKU = TBSCertFields.getEKU (TLV.val tbs)
+
   getSAN : Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN = TBSCertFields.getSAN (TLV.val tbs)
 
@@ -194,6 +197,9 @@ module Cert where
 
     getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
     getKU = CertFields.getKU (TLV.val c)
+
+    getEKU : Exists─ (List UInt8) (Option ExtensionFieldEKU)
+    getEKU = CertFields.getEKU (TLV.val c)
 
     getSAN : Exists─ (List UInt8) (Option ExtensionFieldSAN)
     getSAN = CertFields.getSAN (TLV.val c)
