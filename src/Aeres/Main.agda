@@ -80,6 +80,7 @@ main = IO.run $
       tbsBytes   : List UInt8
       pkBytes    : List UInt8
       sigBytes   : List UInt8
+      kuBits     : List Bool
       ekuOIDBytes : List (List UInt8)
 
   certOutput : ∀ {@0 bs} → Cert bs → Output
@@ -87,6 +88,7 @@ main = IO.run $
   Output.tbsBytes  (certOutput x) = Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = Cert.getPublicKeyBytes x
   Output.sigBytes  (certOutput x) = Cert.getSignatureValueBytes x
+  Output.kuBits    (certOutput x) = Cert.getKUBits x (Cert.getKU x)
   Output.ekuOIDBytes (certOutput x) = Cert.getEKUOIDList x (Cert.getEKU x)
 
   showOutput : Output → String
@@ -95,6 +97,7 @@ main = IO.run $
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes pkBytes)   String.++ "\n"
     String.++ (showBytes sigAlgOID) String.++ "\n"
+    String.++ (showBoolList kuBits) String.++ "\n"
     String.++ (showListBytes ekuOIDBytes) String.++ "\n"
     String.++ "***************"
     where
@@ -105,6 +108,9 @@ main = IO.run $
     showListBytes : List (List UInt8) → String
     showListBytes [] = ""
     showListBytes (x ∷ x₁) = (showBytes x) String.++ "@@ " String.++ (showListBytes x₁)
+
+    showBoolList : List Bool → String
+    showBoolList xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
 
   runCheck : ∀ {@0 bs} → Cert bs → String
              → {P : ∀ {@0 bs} → Cert bs → Set}

@@ -238,6 +238,11 @@ module Cert where
       helper nil = []
       helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
 
+    -- get KU Bits in bool list
+    getKUBits : Exists─ (List UInt8) (Option ExtensionFieldKU) → List Bool
+    getKUBits (─ .[] , none) = []
+    getKUBits (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
+
 open Cert public using (Cert)
 
 module Chain where
