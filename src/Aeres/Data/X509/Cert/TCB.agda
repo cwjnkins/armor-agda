@@ -12,6 +12,9 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Time.TCB
+open import Aeres.Data.X690-DER.SequenceOf
+open import Aeres.Data.X690-DER.OID
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
 open import Aeres.Prelude
@@ -20,6 +23,7 @@ module Aeres.Data.X509.Cert.TCB where
 
 open Aeres.Grammar.IList  UInt8
 open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Definitions UInt8
 
 record CertFields (@0 bs : List UInt8) : Set where
   constructor mkCertFields
@@ -224,6 +228,15 @@ module Cert where
 
     getSignatureValueBytes : List UInt8
     getSignatureValueBytes = ↑ (BitString.serializeValue (TLV.val (CertFields.signature (TLV.val c))))
+
+    -- List of EKU OIds to List of List UInt8
+    getEKUOIDList : Exists─ (List UInt8) (Option ExtensionFieldEKU) → List (List UInt8)
+    getEKUOIDList (─ .[] , none) = []
+    getEKUOIDList (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ val len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper (fstₚ val)
+      where
+      helper : ∀ {@0 bs} → SequenceOf OID bs → List (List UInt8)
+      helper nil = []
+      helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
 
 open Cert public using (Cert)
 

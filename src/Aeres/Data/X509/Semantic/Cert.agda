@@ -535,6 +535,7 @@ checkPurposeConsistency x ((fst , snd) ∷ y)
 ... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
 ... | no ¬p = true ∧ (checkPurposeConsistency x y)
 
+
 --- consistency of certificate purposes based on key usage bits and extended key usage OIDs
 SCP19 : ∀ {@0 bs} → Cert bs → Set
 SCP19 c = T (checkPurposeConsistency (Cert.getKU c) (getEKUOIDList (Cert.getEKU c)))

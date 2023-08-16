@@ -80,12 +80,14 @@ main = IO.run $
       tbsBytes   : List UInt8
       pkBytes    : List UInt8
       sigBytes   : List UInt8
+      ekuOIDBytes : List (List UInt8)
 
   certOutput : ∀ {@0 bs} → Cert bs → Output
   Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ proj₂ ∘ Cert.getTBSCertSignAlg $ x
   Output.tbsBytes  (certOutput x) = Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = Cert.getPublicKeyBytes x
   Output.sigBytes  (certOutput x) = Cert.getSignatureValueBytes x
+  Output.ekuOIDBytes (certOutput x) = Cert.getEKUOIDList x (Cert.getEKU x)
 
   showOutput : Output → String
   showOutput o =
@@ -93,12 +95,16 @@ main = IO.run $
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes pkBytes)   String.++ "\n"
     String.++ (showBytes sigAlgOID) String.++ "\n"
+    String.++ (showListBytes ekuOIDBytes) String.++ "\n"
     String.++ "***************"
     where
     open Output o
     showBytes : List UInt8 → String
     showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
 
+    showListBytes : List (List UInt8) → String
+    showListBytes [] = ""
+    showListBytes (x ∷ x₁) = (showBytes x) String.++ "@@ " String.++ (showListBytes x₁)
 
   runCheck : ∀ {@0 bs} → Cert bs → String
              → {P : ∀ {@0 bs} → Cert bs → Set}
@@ -149,6 +155,7 @@ main = IO.run $
     runCheck c "SCP15" scp15 IO.>>
     runCheck c "SCP16" scp16 IO.>>
     runCheck c "SCP17" scp17 IO.>>
+    runCheck c "SCP19" scp19 IO.>>
     Aeres.IO.getCurrentTime IO.>>= λ now →
     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
     case Time.fromFFI now of λ where
