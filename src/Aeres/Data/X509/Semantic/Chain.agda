@@ -3,6 +3,7 @@
 import      Aeres.Binary
 open import Aeres.Data.X509
 open import Aeres.Data.X509.Semantic.StringPrep.Exec
+open import Aeres.Data.X509.Semantic.Cert
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList as IList
 open import Aeres.Prelude
@@ -16,7 +17,7 @@ open Aeres.Grammar.Definitions Dig
 
 ------- helper functions ------
 
-ChainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List Dig) Cert)
+ChainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List UInt8) Cert)
 ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
   where
   helper :  ∀ {@0 bs}  → SequenceOf Cert bs → List (Exists─ (List Dig) Cert)
@@ -143,3 +144,30 @@ ccp6 c = helper (ChainToList c)
   helper [] = no (λ ())
   helper ((fst , snd) ∷ []) = MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
+
+
+
+---- helpers
+
+CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
+CCP10Seq [] = ⊤
+CCP10Seq ((fst , snd) ∷ []) = T (isCA (Cert.getBC snd))
+CCP10Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₁) = T (isCA (Cert.getBC snd₁)) × CCP10Seq x₁
+
+--- every issuer certificate in a chain must be CA certificate
+CCP10 : ∀ {@0 bs} → Chain bs → Set
+CCP10 c = CCP10Seq (ChainToList c)
+
+ccp10 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP10 c)
+ccp10 c = helper (ChainToList c)
+  where
+  helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP10Seq c)
+  helper [] = yes tt
+  helper ((fst , snd) ∷ [])
+    with isCA (Cert.getBC snd)
+  ... | false = no (λ ())
+  ... | true = yes tt
+  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
+    with isCA (Cert.getBC snd₁)
+  ... | false = no (λ ())
+  ... | true = yes tt ×-dec helper t
