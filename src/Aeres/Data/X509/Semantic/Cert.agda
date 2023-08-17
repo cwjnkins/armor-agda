@@ -274,6 +274,30 @@ getExtensionsOIDList = map helper
   helper (fst , mkTLV len (other x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
 
 
+checkPurposeConsistency : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.KULit) Extension.KUFields)) → List (Exists─ (List UInt8) OID) → Bool
+checkPurposeConsistency x [] = true
+checkPurposeConsistency x ((fst , snd) ∷ y)
+  with ↑ OID.serialize snd ≟ OIDs.ServerAuthOID
+... | yes p = ((isDigSignPresent x) ∨ (isKeyEncPresent x) ∨ (isKeyAgreePresent x)) ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.ClientAuthOID
+... | yes p = ((isDigSignPresent x) ∨ (isKeyAgreePresent x)) ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.CodeSignOID
+... | yes p = (isDigSignPresent x) ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.EmailProtOID
+... | yes p = ((isDigSignPresent x) ∨ (isKeyEncPresent x) ∨ (isKeyAgreePresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.TimeStampOID
+... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.OCSPSignOID
+... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
+... | no ¬p = true ∧ (checkPurposeConsistency x y)
+
+---------------------- SCP rules -----------------
+
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
 SCP1 : ∀ {@0 bs} → Cert bs → Set
@@ -508,34 +532,6 @@ scp18 c t
 ... | true  = yes tt
 
 
-
------- new semantic checks
-
-
---- helper for SCP19
-checkPurposeConsistency : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.KULit) Extension.KUFields)) → List (Exists─ (List UInt8) OID) → Bool
-checkPurposeConsistency x [] = true
-checkPurposeConsistency x ((fst , snd) ∷ y)
-  with ↑ OID.serialize snd ≟ OIDs.ServerAuthOID
-... | yes p = ((isDigSignPresent x) ∨ (isKeyEncPresent x) ∨ (isKeyAgreePresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p
-  with ↑ OID.serialize snd ≟ OIDs.ClientAuthOID
-... | yes p = ((isDigSignPresent x) ∨ (isKeyAgreePresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p
-  with ↑ OID.serialize snd ≟ OIDs.CodeSignOID
-... | yes p = (isDigSignPresent x) ∧ (checkPurposeConsistency x y)
-... | no ¬p
-  with ↑ OID.serialize snd ≟ OIDs.EmailProtOID
-... | yes p = ((isDigSignPresent x) ∨ (isKeyEncPresent x) ∨ (isKeyAgreePresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p
-  with ↑ OID.serialize snd ≟ OIDs.TimeStampOID
-... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p
-  with ↑ OID.serialize snd ≟ OIDs.OCSPSignOID
-... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p = true ∧ (checkPurposeConsistency x y)
-
-
 --- consistency of certificate purposes based on key usage bits and extended key usage OIDs
 SCP19 : ∀ {@0 bs} → Cert bs → Set
 SCP19 c = T (checkPurposeConsistency (Cert.getKU c) (getEKUOIDList (Cert.getEKU c)))
@@ -545,4 +541,3 @@ scp19 c
   with checkPurposeConsistency (Cert.getKU c) (getEKUOIDList (Cert.getEKU c))
 ... | true = yes tt
 ... | false = no (λ x → x)
-
