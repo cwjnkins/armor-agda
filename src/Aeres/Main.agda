@@ -179,6 +179,7 @@ main = IO.run $
     runChecks' 1 (fstₚ c) IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
     runChainCheck c "CCP3" ccp3 IO.>>
+    runChainCheck c "CCP4" ccp3 IO.>>
     runChainCheck c "CCP5" ccp5 IO.>>
     runChainCheck c "CCP6" ccp6 IO.>>
     runChainCheck c "CCP10" ccp10 IO.>>

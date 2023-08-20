@@ -26,7 +26,6 @@ ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁))
   helper nil = []
   helper (cons (mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
 
-
 CCP2Seq : ∀ {@0 bs} → SequenceOf Cert bs → Set  
 CCP2Seq nil = ⊤
 CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
@@ -71,6 +70,37 @@ CCP10Seq [] = ⊤
 CCP10Seq ((fst , snd) ∷ []) = T (isCA (Cert.getBC snd))
 CCP10Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₁) = T (isCA (Cert.getBC snd₁)) × CCP10Seq x₁
 
+helperCCP4₁-h : ∀ {@0 h t} → Extension.CRLDistPoint.DistPoint h → IList UInt8 Extension.CRLDistPoint.DistPoint t  → Set
+helperCCP4₁-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn none bs≡₁) len≡ bs≡) x₁ = ⊥
+helperCCP4₁-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn (some x) bs≡₁) len≡ bs≡) nil = ⊤ 
+helperCCP4₁-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn (some x) bs≡₁) len≡ bs≡) (cons (mkIListCons head₁ tail₁ bs≡₂)) = helperCCP4₁-h head₁ tail₁
+  
+helperCCP4₁ : Exists─ (List UInt8) (Option ExtensionFieldCRLDist) → Set
+helperCCP4₁ (─ .[] , none) = ⊤
+helperCCP4₁ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h head₁ tail₁
+
+helperCCP4₂-h : ∀ {@0 h t} → Extension.CRLDistPoint.DistPoint h → IList UInt8 Extension.CRLDistPoint.DistPoint t  → Set
+helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn none bs≡₁) len≡ bs≡) x₁ = ⊥
+helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn (some x) bs≡₁) len≡ bs≡) x₁ = ⊥
+helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn none bs≡₁) len≡ bs≡) nil = ⊤
+helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn none bs≡₁) len≡ bs≡) (cons (mkIListCons head₁ tail₁ bs≡₂)) = helperCCP4₂-h head₁ tail₁
+helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn (some y) bs≡₁) len≡ bs≡) x₁ = ⊥
+
+helperCCP4₂ : Exists─ (List UInt8) (Option ExtensionFieldCRLDist) → Set
+helperCCP4₂ (─ .[] , none) = ⊤
+helperCCP4₂ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h head₁ tail₁
+
+helperCCP4 : (c : List (Exists─ (List Dig) Cert)) → Set
+helperCCP4 [] = ⊤
+helperCCP4 ((fst , snd) ∷ [])
+  with isCRLSignPresent (Cert.getKU snd)
+... | false = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) × helperCCP4₁ (Cert.getCRLDIST snd)
+... | true = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) × helperCCP4₂ (Cert.getCRLDIST snd)
+helperCCP4 ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
+  with isCRLSignPresent (Cert.getKU snd₁)
+... | false = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₁ (Cert.getCRLDIST snd)
+... | true = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₂ (Cert.getCRLDIST snd)
+
 ----------------- helper decidables -------------------------
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : RDNATV bs₁) → (m : RDNATV bs₂) → Dec (MatchRDNATV n m)
@@ -113,6 +143,37 @@ MatchRDNSeq-dec (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len�
   helper (mkSequenceOf h nil bs≡) (mkSequenceOf h₁ (cons x) bs≡₁) = MatchRDN-dec h h₁
   helper (mkSequenceOf h (cons x) bs≡) (mkSequenceOf h₁ nil bs≡₁) = MatchRDN-dec h h₁
   helper (mkSequenceOf h (cons x) bs≡) (mkSequenceOf h₁ (cons x₁) bs≡₁) = MatchRDN-dec h h₁ ×-dec helper x x₁
+
+helperCCP4₂-h-dec : ∀ {@0 h t} → (a : Extension.CRLDistPoint.DistPoint h) → (b : IList UInt8 Extension.CRLDistPoint.DistPoint t)  → Dec (helperCCP4₂-h a b)
+helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn none bs≡₁) len≡ bs≡) x₁ = no (λ())
+helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn (some x) bs≡₁) len≡ bs≡) x₁ = no (λ())
+helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn none bs≡₁) len≡ bs≡) nil = yes tt
+helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn none bs≡₁) len≡ bs≡) (cons (mkIListCons head₁ tail₁ bs≡₂)) = helperCCP4₂-h-dec head₁ tail₁
+helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) crldprsn (some y) bs≡₁) len≡ bs≡) x₁ = no (λ())
+
+helperCCP4₂-dec : (c : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)) → Dec (helperCCP4₂ c)
+helperCCP4₂-dec (─ .[] , none) = yes tt
+helperCCP4₂-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h-dec head₁ tail₁
+
+helperCCP4₁-h-dec : ∀ {@0 h t} → (a : Extension.CRLDistPoint.DistPoint h) → (b : IList UInt8 Extension.CRLDistPoint.DistPoint t)  → Dec (helperCCP4₁-h a b)
+helperCCP4₁-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn none bs≡₁) len≡ bs≡) x₁ = no (λ())
+helperCCP4₁-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn (some x) bs≡₁) len≡ bs≡) nil = yes tt 
+helperCCP4₁-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn (some x) bs≡₁) len≡ bs≡) (cons (mkIListCons head₁ tail₁ bs≡₂)) = helperCCP4₁-h-dec head₁ tail₁
+
+helperCCP4₁-dec : (c : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)) → Dec (helperCCP4₁ c)
+helperCCP4₁-dec (─ .[] , none) = yes tt
+helperCCP4₁-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h-dec head₁ tail₁
+
+helperCCP4-dec : (c : List (Exists─ (List Dig) Cert)) → Dec (helperCCP4 c)
+helperCCP4-dec [] = yes tt
+helperCCP4-dec ((fst , snd) ∷ [])
+  with isCRLSignPresent (Cert.getKU snd)
+... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
+... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
+helperCCP4-dec ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
+  with isCRLSignPresent (Cert.getKU snd₁)
+... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
+... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
 
 ------------------------------------------------------------------------
 
@@ -212,3 +273,13 @@ ccp10 c = helper (ChainToList c)
     with isCA (Cert.getBC snd₁)
   ... | false = no (λ ())
   ... | true = yes tt ×-dec helper t
+
+-- For DistributionPoint field, if the certificate issuer is not the CRL issuer,
+-- then the CRLIssuer field MUST be present and contain the Name of the CRL issuer. If the
+-- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
+-- field and MUST include the distributionPoint field.
+CCP4 : ∀ {@0 bs} → Chain bs → Set
+CCP4 c = helperCCP4 (ChainToList c)
+
+ccp4 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP4 c)
+ccp4 c = helperCCP4-dec (ChainToList c)
