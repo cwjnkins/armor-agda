@@ -20,11 +20,18 @@ open Aeres.Grammar.Definitions Dig
 ------- helper functions ------
 
 ChainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List UInt8) Cert)
-ChainToList (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
+ChainToList nil = []
+ChainToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
   where
-  helper :  ∀ {@0 bs}  → SequenceOf Cert bs → List (Exists─ (List Dig) Cert)
+  helper : ∀ {@0 bs} → IList UInt8 Cert bs → List (Exists─ (List UInt8) Cert)
   helper nil = []
-  helper (cons (mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
+  helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+-- (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
+--   where
+--   helper :  ∀ {@0 bs}  → SequenceOf Cert bs → List (Exists─ (List Dig) Cert)
+--   helper nil = []
+--   helper (cons (mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
+
 
 CCP2Seq : ∀ {@0 bs} → SequenceOf Cert bs → Set  
 CCP2Seq nil = ⊤
@@ -213,15 +220,26 @@ helperCCP3-dec (fst , snd) x₁
 
 -- Conforming implementations may choose to reject all Version 1 and Version 2 intermediate CA certificates
 CCP2 : ∀ {@0 bs} → Chain bs → Set
-CCP2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = CCP2Seq t
+CCP2 nil = ⊤
+CCP2 (cons (mkIListCons h t bs≡)) = CCP2Seq t
+-- (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = CCP2Seq t
+
 
 ccp2 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP2 c)
-ccp2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = helper t
+ccp2 nil = yes tt
+ccp2 (cons (mkIListCons h t bs≡)) = helper t
   where
-  helper : ∀ {@0 bs} → (c : SequenceOf Cert bs) → Dec (CCP2Seq c)  
+  helper : ∀ {@0 bs} → (c : IList UInt8 Cert bs) → Dec (CCP2Seq c)  
   helper nil = yes tt
   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
   helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
+-- ccp2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = helper t
+--   where
+--   helper : ∀ {@0 bs} → (c : SequenceOf Cert bs) → Dec (CCP2Seq c)  
+--   helper nil = yes tt
+--   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
+--   helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
+
 
 --- The PathLenConstraint field is meaningful only if the CA boolean
 --- is asserted and the Key Usage extension, if present, asserts the KeyCertSign bit. In this case, it gives

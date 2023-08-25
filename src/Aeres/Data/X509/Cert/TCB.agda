@@ -247,5 +247,6 @@ open Cert public using (Cert)
 
 module Chain where
   Chain : (@0 _ : List UInt8) → Set
-  Chain = IListNonEmpty Cert
+  Chain = IList Cert
+  -- Chain = IListNonEmpty Cert
 open Chain public using (Chain)

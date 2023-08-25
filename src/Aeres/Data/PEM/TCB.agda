@@ -42,3 +42,21 @@ extractCerts : ∀ {@0 bs} → CertList bs → List UInt8
 extractCerts nil = []
 extractCerts (consIList c rest refl) =
   extractCert c ++ extractCerts rest
+
+
+----------------------------------------
+-- charToNat : Char → ℕ
+-- charToNat c = Char.toNat c - Char.toNat '0'
+
+-- stringToNat : List Char → ℕ
+-- stringToNat [] = 0
+-- stringToNat (c ∷ cs) = charToNat c + 10 * stringToNat cs
+
+-- record CertListWithRootStore (@0 bs : List Char) : Set where
+--   constructor mkCertListWithRootStore
+--   field
+--     @0 {cl n rl} : List Char
+--     certs : CertList cl
+--     rootcerts : CertList rl
+--     @0 bs≡ : bs ≡ cl ++ n ++ rl
+--     @0 length≡ : stringToNat n ≡ lengthIList certs

@@ -41,3 +41,8 @@ parseCertList =
     (tell "PEM: underflow reading cert list")
     Cert nonempty noOverlap
     parseCert
+
+-- parseCertListWithRootStore : LogDec.MaximalParser CertListWithRootStore
+-- parseCertListWithRootStore = LogDec.equivalent {!!}
+--                                (LogDec.parse& parseCertList (
+--                                  LogDec.parse& {!!} parseCertList {!!}) {!!})

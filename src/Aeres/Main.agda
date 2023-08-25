@@ -33,6 +33,39 @@ usage = "usage: 'aeres [CERT]'"
 --   bs ← decToMaybe ∘ All.all? (_<? 256) ∘ map toℕ ∘ String.toList $ xs
 --   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
 
+
+ ------------ chain building ---------------
+-- getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
+-- getCertsbySubject x [] = []
+-- getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
+--   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
+-- ... | no ¬p = getCertsbySubject ((fst , snd)) x₂
+-- ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
+
+-- {-# TERMINATING #-}
+-- --- TODO: satisfy termination checker
+-- findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+-- findIssuerCert (fst , snd) aux root
+--   with getCertsbySubject (Cert.getIssuer snd) root
+-- ... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
+--                [] → []
+--                (y ∷ t) → [ y ] ++ findIssuerCert y aux root
+-- ... | y ∷ t = [ y ]
+  
+-- buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+-- buildChain [] x₁ = []
+-- buildChain (x ∷ x₂) x₁ = [ x ] ++ findIssuerCert x x₂ x₁
+
+-- ListToChain : ∀ {@0 bs} → List (Exists─ (List UInt8) Cert) → Chain bs
+-- ListToChain [] = cons (mkIListCons _ nil {!!})
+-- ListToChain (x ∷ x₁) = helper (x ∷ x₁)
+--   where
+--   helper : ∀ {@0 bs} → List (Exists─ (List UInt8) Cert) →  IList Cert bs
+--   helper [] = cons (mkIListCons _ nil {!!})
+--   helper (x ∷ x₁) = cons (mkIListCons (proj₂ x) (helper x₁) {!!})
+--------------------------------------------------------------------------
+
+
 -- TODO: bindings for returning error codes?
 main : IO.Main
 main = IO.run $
@@ -59,7 +92,7 @@ main = IO.run $
          case suf ≟ [] of λ where
            (no  _) →
              Aeres.IO.putStrLnErr
-               ("Only read " String.++ (showℕ (lengthIList (fstₚ chain)))
+                ("Only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
                 String.++ " certificate(s), but more bytes remain") IO.>>
              (case runParser parseCert suf of λ where
                (mkLogged log (no _)) →
@@ -139,9 +172,9 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runChecks' : ∀ {@0 bs} → ℕ → IList Cert bs → _
+  runChecks' : ∀ {@0 bs} → ℕ → Chain bs → _
   runChecks' n nil = IO.return tt
-  runChecks' n (consIList c tail bs≡) =
+  runChecks' n (cons (mkIListCons c tail bs≡)) =
     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
     runCheck c "SCP1" scp1 IO.>>
     runCheck c "SCP2" scp2 IO.>>
@@ -176,7 +209,7 @@ main = IO.run $
 
   runCertChecks : ∀ {@0 bs} → Chain bs → _
   runCertChecks c =
-    runChecks' 1 (fstₚ c) IO.>>
+    runChecks' 1 c IO.>>
     runChainCheck c "CCP2" ccp2 IO.>>
     runChainCheck c "CCP3" ccp3 IO.>>
     runChainCheck c "CCP4" ccp3 IO.>>
