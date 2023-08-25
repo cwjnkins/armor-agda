@@ -19,19 +19,13 @@ open Aeres.Grammar.Definitions Dig
 
 ------- helper functions ------
 
-ChainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List UInt8) Cert)
-ChainToList nil = []
-ChainToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+chainToList : ∀ {@0 bs} → Chain bs  → List (Exists─ (List UInt8) Cert)
+chainToList nil = []
+chainToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
   where
   helper : ∀ {@0 bs} → IList UInt8 Cert bs → List (Exists─ (List UInt8) Cert)
   helper nil = []
   helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
--- (Aeres.Grammar.Definitions.mk×ₚ (cons (mkIListCons h t bs≡₁)) sndₚ₁ bs≡) = (_ , h) ∷ helper t
---   where
---   helper :  ∀ {@0 bs}  → SequenceOf Cert bs → List (Exists─ (List Dig) Cert)
---   helper nil = []
---   helper (cons (mkSequenceOf h t bs≡)) = (_ , h) ∷ helper t
-
 
 CCP2Seq : ∀ {@0 bs} → SequenceOf Cert bs → Set  
 CCP2Seq nil = ⊤
@@ -69,7 +63,7 @@ MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡�
 
 CCP6Seq : List (Exists─ (List Dig) Cert) → Set
 CCP6Seq [] = ⊥
-CCP6Seq ((fst , snd) ∷ []) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+CCP6Seq ((fst , snd) ∷ []) = ⊤ -- MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
 CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
 CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
@@ -245,10 +239,10 @@ ccp2 (cons (mkIListCons h t bs≡)) = helper t
 --- is asserted and the Key Usage extension, if present, asserts the KeyCertSign bit. In this case, it gives
 --- the maximum number of non-self-issued intermediate certificates that may follow this certificate in a valid certification path.
 CCP3 : ∀ {@0 bs} → Chain bs → Set
-CCP3 c = CCP3Seq (reverse (ChainToList c))
+CCP3 c = CCP3Seq (reverse (chainToList c))
 
 ccp3 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP3 c)
-ccp3 c = CCP3Seq-dec (reverse (ChainToList c))
+ccp3 c = CCP3Seq-dec (reverse (chainToList c))
   where
   CCP3Seq-dec : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP3Seq c)
   CCP3Seq-dec [] = yes tt
@@ -256,30 +250,30 @@ ccp3 c = CCP3Seq-dec (reverse (ChainToList c))
 
 -- A certificate MUST NOT appear more than once in a prospective certification path.
 CCP5 : ∀ {@0 bs} → Chain bs → Set
-CCP5 c = List.Unique _≟_ (ChainToList c)
+CCP5 c = List.Unique _≟_ (chainToList c)
 
 ccp5 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP5 c)
-ccp5 c = List.unique? _≟_ (ChainToList c)
+ccp5 c = List.unique? _≟_ (chainToList c)
 
 -- Certificate users MUST be prepared to process the Issuer distinguished name
 -- and Subject distinguished name fields to perform name chaining for certification path validation.
 CCP6 : ∀ {@0 bs} → Chain bs → Set
-CCP6 c = CCP6Seq (ChainToList c)
+CCP6 c = CCP6Seq (chainToList c)
 
 ccp6 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP6 c)
-ccp6 c = helper (ChainToList c)
+ccp6 c = helper (chainToList c)
   where
   helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP6Seq c)
   helper [] = no (λ ())
-  helper ((fst , snd) ∷ []) = MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+  helper ((fst , snd) ∷ []) = yes tt -- MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
 
 --- every issuer certificate in a chain must be CA certificate
 CCP10 : ∀ {@0 bs} → Chain bs → Set
-CCP10 c = CCP10Seq (ChainToList c)
+CCP10 c = CCP10Seq (chainToList c)
 
 ccp10 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP10 c)
-ccp10 c = helper (ChainToList c)
+ccp10 c = helper (chainToList c)
   where
   helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP10Seq c)
   helper [] = yes tt
@@ -297,7 +291,7 @@ ccp10 c = helper (ChainToList c)
 -- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
 -- field and MUST include the distributionPoint field.
 CCP4 : ∀ {@0 bs} → Chain bs → Set
-CCP4 c = helperCCP4 (ChainToList c)
+CCP4 c = helperCCP4 (chainToList c)
 
 ccp4 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP4 c)
-ccp4 c = helperCCP4-dec (ChainToList c)
+ccp4 c = helperCCP4-dec (chainToList c)

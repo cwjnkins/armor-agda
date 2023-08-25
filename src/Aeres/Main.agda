@@ -26,85 +26,104 @@ open Aeres.Grammar.IList       UInt8
 open Base256
 
 usage : String
-usage = "usage: 'aeres [CERT]'"
+usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"
 
 -- str2dig : String → Maybe (List Dig)
 -- str2dig xs = do
 --   bs ← decToMaybe ∘ All.all? (_<? 256) ∘ map toℕ ∘ String.toList $ xs
 --   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
 
-
  ------------ chain building ---------------
--- getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
--- getCertsbySubject x [] = []
--- getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
---   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
--- ... | no ¬p = getCertsbySubject ((fst , snd)) x₂
--- ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
+getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
+getCertsbySubject x [] = []
+getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
+  with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
+... | no ¬p = getCertsbySubject ((fst , snd)) x₂
+... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
 
--- {-# TERMINATING #-}
--- --- TODO: satisfy termination checker
--- findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
--- findIssuerCert (fst , snd) aux root
---   with getCertsbySubject (Cert.getIssuer snd) root
--- ... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
---                [] → []
---                (y ∷ t) → [ y ] ++ findIssuerCert y aux root
--- ... | y ∷ t = [ y ]
+{-# TERMINATING #-}
+--- TODO: satisfy termination checker
+findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+findIssuerCert (fst , snd) aux root
+  with getCertsbySubject (Cert.getIssuer snd) root
+... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
+               [] → []
+               (y ∷ t) → case findIssuerCert y aux root of λ where
+                   [] → []
+                   (x ∷ z) → [ y ] ++ x ∷ z
+... | y ∷ t = [ y ]
   
--- buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
--- buildChain [] x₁ = []
--- buildChain (x ∷ x₂) x₁ = [ x ] ++ findIssuerCert x x₂ x₁
+buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+buildChain [] x₁ = []
+buildChain (x ∷ x₂) x₁
+  with findIssuerCert x x₂ x₁
+... | [] = []
+... | x₃ ∷ v = [ x ] ++ x₃ ∷ v
 
--- ListToChain : ∀ {@0 bs} → List (Exists─ (List UInt8) Cert) → Chain bs
--- ListToChain [] = cons (mkIListCons _ nil {!!})
--- ListToChain (x ∷ x₁) = helper (x ∷ x₁)
---   where
---   helper : ∀ {@0 bs} → List (Exists─ (List UInt8) Cert) →  IList Cert bs
---   helper [] = cons (mkIListCons _ nil {!!})
---   helper (x ∷ x₁) = cons (mkIListCons (proj₂ x) (helper x₁) {!!})
---------------------------------------------------------------------------
+listToChain : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
+listToChain [] = _ , nil
+listToChain ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = listToChain x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
+-- --------------------------------------------------------------------------
 
 
 -- TODO: bindings for returning error codes?
+parseCerts : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 Chain))
+parseCerts fn input =
+  case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList input) of λ where
+    (mkLogged log₁ (no ¬p)) →
+      Aeres.IO.putStrLnErr (foldl String._++_ "" log₁)
+      IO.>> Aeres.IO.exitFailure
+    (mkLogged log₁ (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
+      Aeres.IO.putStrLnErr 
+        (fn String.++ ": incomplete read\n"
+         String.++ "-- only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
+         String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
+      IO.>> Aeres.IO.putStrLnErr "-- attempting to parse remainder"
+      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList suf) of λ where
+        (mkLogged log₂ (yes _)) →
+          Aeres.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
+          IO.>> Aeres.IO.exitFailure
+        (mkLogged log₂ (no  _)) →
+          Aeres.IO.putStrLnErr (foldl String._++_ "-- " log₂)
+          IO.>> Aeres.IO.exitFailure)
+    (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
+      case runParser parseChain (PEM.extractCerts chain) of λ where
+        (mkLogged log₂ (no  _)) →
+          Aeres.IO.putStrLnErr
+            (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
+             String.++ (foldl String._++_ "-- " log₂))
+          IO.>> Aeres.IO.exitFailure
+        (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+          Aeres.IO.putStrLnErr
+            (fn String.++ " (decoded): incomplete read\n"
+             String.++ "-- read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509)) String.++ "certificate(s), but more bytes remain\n"
+             String.++ "-- attempting to parse remainder")
+          IO.>> ((case runParser parseCert suf of λ where
+            (mkLogged log₃ (yes _)) →
+              Aeres.IO.putStrLnErr (fn String.++ "(decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              IO.>> Aeres.IO.exitFailure
+            (mkLogged log₃ (no _)) →
+              Aeres.IO.putStrLnErr (fn String.++ "(decoded):\n--" String.++
+                foldl String._++_ "" log₃)
+              IO.>> Aeres.IO.exitFailure))
+        (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
+
 main : IO.Main
 main = IO.run $
-  Aeres.IO.getByteStringContents IO.>>= λ bs →
-  let input = toChar bs in
-  case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList input) of λ where
-    (mkLogged log (no ¬p)) →
-      Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
-      Aeres.IO.exitFailure
-    (mkLogged log (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
-      Aeres.IO.putStrLnErr
-        ("Only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
-         String.++ " certificate(s) - but more bytes remain") IO.>>
-      (case proj₁ (LogDec.runMaximalParser Char PEM.parseCert suf) of λ where
-        (mkLogged log (no _)) →
-          Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
-          Aeres.IO.exitFailure
-        (mkLogged _ (yes _)) →
-          Aeres.IO.putStrLnErr "aeres: THIS SHOULD NOT HAPPEN" IO.>>
-          Aeres.IO.exitFailure)
-    (mkLogged log (yes (success prefix read read≡ chain [] ps≡))) →
-      case runParser parseChain (PEM.extractCerts chain) of λ where
-       (mkLogged _ (yes (success _ r r≡ chain suf ps≡))) →
-         case suf ≟ [] of λ where
-           (no  _) →
-             Aeres.IO.putStrLnErr
-                ("Only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
-                String.++ " certificate(s), but more bytes remain") IO.>>
-             (case runParser parseCert suf of λ where
-               (mkLogged log (no _)) →
-                 Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
-                 Aeres.IO.exitFailure
-               (mkLogged _ (yes _)) →
-                 Aeres.IO.putStrLnErr "aeres: THIS SHOULD NOT HAPPEN" IO.>>
-                 Aeres.IO.exitFailure)
-           (yes _) → runCertChecks chain
-       (mkLogged log (no _)) →
-         Aeres.IO.putStrLnErr (foldl String._++_ "" log) IO.>>
-         Aeres.IO.exitFailure
+  Aeres.IO.getArgs IO.>>= λ args →
+  case args of λ where
+    (certName ∷ rootName ∷ []) →
+      IO.readFiniteFile certName
+      IO.>>= (parseCerts certName ∘ String.toList)
+      IO.>>= λ certS → let (_ , success pre₁ r₁ r₁≡ cert suf₁ ps≡₁) = certS in
+      IO.readFiniteFile rootName
+      IO.>>= (parseCerts rootName ∘ String.toList)
+      IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ root suf₂ ps≡₂) = rootS in
+      runCertChecks (proj₂ (listToChain (buildChain (chainToList cert) (chainToList root))))
+    _ →
+      Aeres.IO.putStrLnErr usage
+      IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
+      IO.>> Aeres.IO.exitFailure
 
   where
   record Output : Set where
@@ -158,7 +177,6 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-
   runChainCheck : ∀ {@0 bs} → Chain bs → String
                   → {P : ∀ {@0 bs} → Chain bs → Set}
                   → (∀ {@0 bs} → (c : Chain bs) → Dec (P c))
@@ -207,13 +225,14 @@ main = IO.run $
         IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
 
-  runCertChecks : ∀ {@0 bs} → Chain bs → _
-  runCertChecks c =
-    runChecks' 1 c IO.>>
-    runChainCheck c "CCP2" ccp2 IO.>>
-    runChainCheck c "CCP3" ccp3 IO.>>
-    runChainCheck c "CCP4" ccp3 IO.>>
-    runChainCheck c "CCP5" ccp5 IO.>>
-    runChainCheck c "CCP6" ccp6 IO.>>
-    runChainCheck c "CCP10" ccp10 IO.>>
+  runCertChecks : ∀ {@0 bs} → (cert : Chain bs) → _
+  runCertChecks nil = Aeres.IO.putStrLnErr "Error: empty chain" 
+  runCertChecks (cons x) =
+    runChecks' 1 (cons x) IO.>>
+    runChainCheck (cons x) "CCP2" ccp2 IO.>>
+    runChainCheck (cons x) "CCP3" ccp3 IO.>>
+    runChainCheck (cons x) "CCP4" ccp3 IO.>>
+    runChainCheck (cons x) "CCP5" ccp5 IO.>>
+    runChainCheck (cons x) "CCP6" ccp6 IO.>>
+    runChainCheck (cons x) "CCP10" ccp10 IO.>>
     Aeres.IO.exitSuccess
