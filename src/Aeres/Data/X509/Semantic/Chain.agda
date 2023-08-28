@@ -216,8 +216,6 @@ helperCCP3-dec (fst , snd) x₁
 CCP2 : ∀ {@0 bs} → Chain bs → Set
 CCP2 nil = ⊤
 CCP2 (cons (mkIListCons h t bs≡)) = CCP2Seq t
--- (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = CCP2Seq t
-
 
 ccp2 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP2 c)
 ccp2 nil = yes tt
@@ -227,12 +225,6 @@ ccp2 (cons (mkIListCons h t bs≡)) = helper t
   helper nil = yes tt
   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
   helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
--- ccp2 (Aeres.Grammar.Definitions.mk×ₚ (cons (mkSequenceOf h t bs≡₁)) sndₚ₁ bs≡) = helper t
---   where
---   helper : ∀ {@0 bs} → (c : SequenceOf Cert bs) → Dec (CCP2Seq c)  
---   helper nil = yes tt
---   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
---   helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
 
 
 --- The PathLenConstraint field is meaningful only if the CA boolean
@@ -265,7 +257,7 @@ ccp6 c = helper (chainToList c)
   where
   helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP6Seq c)
   helper [] = no (λ ())
-  helper ((fst , snd) ∷ []) = yes tt -- MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+  helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
 
 --- every issuer certificate in a chain must be CA certificate
