@@ -56,9 +56,9 @@ parsePolicyQualifierInfoFields n =
 
 parsePolicyQualifierInfo : Parser (Logging ∘ Dec) PolicyQualifierInfo
 parsePolicyQualifierInfo =
-  parseTLV _ "policy qualifier info" _ parsePolicyQualifierInfoFields
+  parseTLV _ (here' String.++ " (fields)") _ parsePolicyQualifierInfoFields
 
 parsePolicyQualifiersSeq : Parser (Logging ∘ Dec) PolicyQualifiersSeq
 parsePolicyQualifiersSeq =
-  parseNonEmptySeq "policy qualifier info" _ TLV.nonempty TLV.nonnesting
+  parseNonEmptySeq here' _ TLV.nonempty TLV.nonnesting
     parsePolicyQualifierInfo

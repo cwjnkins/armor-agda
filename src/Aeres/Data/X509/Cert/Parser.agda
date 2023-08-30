@@ -61,7 +61,7 @@ parseCertFields n =
 
 parseCert : Parser (Logging ∘ Dec) Cert
 parseCert =
-  parseTLV _ "cert" _ parseCertFields
+  parseTLV _ "Cert" _ parseCertFields
 
 parseChain : Parser (Logging ∘ Dec) Chain
 parseChain =
