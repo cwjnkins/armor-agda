@@ -116,25 +116,24 @@ noconfusionSeq = noconfusionTLV pf
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous)
-        (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-      (unambiguousSum
-        (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-          λ _ → inRange-unique{A =  ℕ}{B = ℕ})
+      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous) λ _ → inRange-unique{A = ℕ}{B = ℕ})
+      (unambiguousSum (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
         (unambiguousSum
-          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-            (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-            (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ()))))
-        (NoConfusion.sumₚ{A = Σₚ _ _}
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))))
-      (NoConfusion.sumₚ {A = Σₚ _ _}
-        (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
+          (unambiguousΣₚ
+            (TLV.unambiguous (IList.unambiguous Strings.BMP.unambiguous Strings.BMP.nonempty Strings.BMP.nonnesting))
+            λ _ → inRange-unique{A = ℕ}{B = ℕ})
+          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
         (NoConfusion.sumₚ{A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
+      (NoConfusion.sumₚ {A = Σₚ _ _}
+        (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+        (NoConfusion.sumₚ {A = Σₚ _ _}
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
+  where
+  open import Aeres.Grammar.IList UInt8
 
 instance
   DisplayTextEq : Eq (Exists─ _ DisplayText)

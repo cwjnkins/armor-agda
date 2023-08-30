@@ -41,7 +41,7 @@ Transcode (printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x re
   helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
 Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
-Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , {!!})
 
 InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 InitialMapping nil = _ , nil

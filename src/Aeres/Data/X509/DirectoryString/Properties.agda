@@ -8,6 +8,7 @@ open import Aeres.Data.X509.IA5String
 open import Aeres.Data.X509.DirectoryString.TCB
 open import Aeres.Data.X509.Strings
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.IList
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -16,6 +17,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DirectoryString.Properties where
 
 open import Aeres.Grammar.Definitions UInt8
+open        Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Sum                UInt8
 
 nonnesting : NonNesting DirectoryString
@@ -103,8 +105,9 @@ unambiguous =
       (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
         (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
           (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-            (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-              (noconfusionΣₚ (TLV.noconfusion λ ())))
+            (TLV.NonEmptyVal.unambiguous
+              (IList.unambiguous Strings.BMP.unambiguous Strings.BMP.nonempty Strings.BMP.nonnesting))
+            (noconfusionΣₚ (TLV.noconfusion λ ())))
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)

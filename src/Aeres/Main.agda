@@ -100,10 +100,10 @@ parseCerts fn input =
              String.++ "-- attempting to parse remainder")
           IO.>> ((case runParser parseCert suf of λ where
             (mkLogged log₃ (yes _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
               IO.>> Aeres.IO.exitFailure
             (mkLogged log₃ (no _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded):\n--" String.++
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded):\n--" String.++
                 foldl String._++_ "" log₃)
               IO.>> Aeres.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
