@@ -1,13 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.IA5String.TCB
-open import Aeres.Data.X690-DER
+open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Strings.IA5String.TCB
+open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
-module Aeres.Data.X509.IA5String.Parser where
+module Aeres.Data.X690-DER.Strings.IA5String.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
@@ -43,7 +44,3 @@ runParser (parseIA5StringValue n) xs = do
 
 parseIA5String : Parser (Logging ∘ Dec) IA5String
 parseIA5String = parseTLV _ "IA5String" _ parseIA5StringValue
-
-parsePrintableString : Parser (Logging ∘ Dec) PrintableString
-parsePrintableString =
-  parseTLV Tag.PrintableString "printable string" IA5StringValue parseIA5StringValue

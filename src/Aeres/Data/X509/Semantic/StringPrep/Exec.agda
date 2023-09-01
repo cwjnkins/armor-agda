@@ -8,10 +8,8 @@ open import Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
-open import Aeres.Data.UTF8
-open import Aeres.Data.UTF8.Properties
-open import Aeres.Data.UTF8.Serializer
-open import Aeres.Data.UTF8.Trie
+open import Aeres.Data.Unicode
+open import Aeres.Data.Unicode.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers
 open import Aeres.Data.X509.Semantic.StringPrep.InitMap.Helpers
 open import Aeres.Data.X509.Semantic.StringPrep.InsigCharHandler.Helpers

@@ -1,15 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Prelude
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Sum
+open import Aeres.Prelude
 
-module Aeres.Data.UTF8.TCB where
+module Aeres.Data.Unicode.UTF8.TCB where
 
-open Base256
 open Aeres.Grammar.IList UInt8
-open Aeres.Grammar.Sum   UInt8
 
 record UTF8Char1 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char1

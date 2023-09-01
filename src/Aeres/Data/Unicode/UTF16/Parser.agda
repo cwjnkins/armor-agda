@@ -2,46 +2,29 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
-open import Aeres.Data.UTF8
-open import Aeres.Data.X509.Strings.Properties
-open import Aeres.Data.X509.Strings.TCB
-open import Aeres.Data.X690-DER.TLV
-import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.Unicode.UTF16.Properties
+open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 
-module Aeres.Data.X509.Strings.Parser where
+module Aeres.Data.Unicode.UTF16.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Parser      UInt8
 
-parseTeletexString : Parser (Logging ∘ Dec) TeletexString
-parseTeletexString =
-  parseTLV Tag.TeletexString "teletex string" OctetStringValue parseOctetStringValue
+private
+  here' = "Unicode: UTF16:"
 
-parseUniversalString : Parser (Logging ∘ Dec) UniversalString
-parseUniversalString =
-  parseTLV Tag.UniversalString "universal string" _ parseUTF8
-
-parseUTF8String : Parser (Logging ∘ Dec) UTF8String
-parseUTF8String =
-  parseTLV Tag.UTF8String "UTF8 string" _ parseUTF8
-
-parseBMPString : Parser (Logging ∘ Dec) BMPString
-parseBMPString =
-  parseTLV Tag.BMPString "BMP string" _
-    (parseIList
-      (tell "parseBMPString: underflow") _
-      BMP.nonempty BMP.nonnesting
-      p)
+parseBMP : ∀ n → Parser (Logging ∘ Dec) (ExactLength BMP n)
+parseBMP =
+  parseIList (tell $ here' String.++ "parseBMP: underflow" ) _ BMP.nonempty BMP.nonnesting p
   where
   p : Parser (Logging ∘ Dec) BMPChar
   runParser p xs = do
     yes (success ._ _ refl (mk×ₚ (singleton (c₁ ∷ c₂ ∷ []) refl) (─ refl) refl) suf₁ refl)
-      ← runParser (parseN 2 (tell "parseBMP: underflow")) xs
+      ← runParser (parseN 2 (tell $ here' String.++ "parseBMPChar: underflow")) xs
       where no ¬p → do
         return ∘ no $ λ where
           (success ._ ._ refl (mkBMPChar c₁ c₂ range refl) ._ refl) →
@@ -53,16 +36,12 @@ parseBMPString =
         case inRange? 224 255 c₁ of λ where
           (yes r) → return (yes (success _ _ refl (mkBMPChar c₁ c₂ (inj₂ r) refl) suf₁ refl))
           (no ¬r) → do
-            tell $ "parseBMP: char 1 out of range: " String.++ (show (toℕ c₁))
+            tell $ here' String.++ "parseBMPChar: char 1 out of range: " String.++ (show (toℕ c₁))
             return ∘ no $ λ where
               (success ._ _ refl (mkBMPChar .c₁ .c₂ range refl) _ refl) →
                 ‼ (case range of λ where
                   (inj₁ p) → contradiction p ¬c₁≤215
                   (inj₂ p) → contradiction p ¬r)
-
-parseVisibleString : Parser (Logging ∘ Dec) VisibleString
-parseVisibleString =
-  parseTLV Tag.VisibleString "universal string" _ parseUTF8
 
 -- private
 --   module Test where

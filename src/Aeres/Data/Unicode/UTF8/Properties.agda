@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8.TCB
+open import Aeres.Data.Unicode.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
@@ -12,9 +12,8 @@ open import Data.Nat.Properties
 open import Relation.Binary
   hiding (NonEmpty)
 
-module Aeres.Data.UTF8.Properties where
+module Aeres.Data.Unicode.UTF8.Properties where
 
-open Base256
 open Aeres.Grammar.Definitions      UInt8
 open Aeres.Grammar.IList            UInt8
 open Aeres.Grammar.Properties       UInt8

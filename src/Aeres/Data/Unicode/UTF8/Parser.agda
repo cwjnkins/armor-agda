@@ -1,15 +1,15 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8.TCB
-import      Aeres.Data.UTF8.Properties as UTF8Props
+open import Aeres.Data.Unicode.UTF8.TCB
+import      Aeres.Data.Unicode.UTF8.Properties as UTF8Props
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
-module Aeres.Data.UTF8.Parser where
+module Aeres.Data.Unicode.UTF8.Parser where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
@@ -18,7 +18,7 @@ open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module parseUTF8 where
-  hereChar = "parseUTF8Char"
+  hereChar = "Unicode: UTF8: Char: parse"
 
   parseUTF8Char1 : Parser (Logging ∘ Dec) UTF8Char1
   runParser parseUTF8Char1 [] = do

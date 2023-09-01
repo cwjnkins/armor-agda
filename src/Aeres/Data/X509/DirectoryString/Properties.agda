@@ -2,11 +2,10 @@
 
 open import Aeres.Binary
 import      Aeres.Grammar.Sum
-open import Aeres.Data.UTF8
-import      Aeres.Data.UTF8.Properties                  as UTF8Props
-open import Aeres.Data.X509.IA5String
+open import Aeres.Data.Unicode
+open import Aeres.Data.X690-DER.Strings.IA5String
+open import Aeres.Data.X690-DER.Strings.PrintableString
 open import Aeres.Data.X509.DirectoryString.TCB
-open import Aeres.Data.X509.Strings
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
@@ -102,11 +101,17 @@ proj₂ (proj₂ iso) (bmpString x) = refl
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
-      (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
-        (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-          (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
+      (unambiguousSum
+        (TLV.NonEmptyVal.unambiguous
+          (IList.unambiguous
+            PrintableString.Char.unambiguous
+            PrintableString.Char.nonempty
+            PrintableString.Char.nonnesting))
+        (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF32.unambiguous)
+          (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8.unambiguous)
             (TLV.NonEmptyVal.unambiguous
-              (IList.unambiguous Strings.BMP.unambiguous Strings.BMP.nonempty Strings.BMP.nonnesting))
+              (IList.unambiguous
+                UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
             (noconfusionΣₚ (TLV.noconfusion λ ())))
           noconfusion₃)
         noconfusion₂)

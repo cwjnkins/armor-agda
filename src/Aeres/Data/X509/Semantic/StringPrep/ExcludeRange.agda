@@ -1,8 +1,8 @@
 {-# OPTIONS --subtyping --sized-types #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8
-open import Aeres.Data.UTF8.Serializer
+open import Aeres.Data.Unicode.UTF8
+open import Aeres.Data.Unicode.UTF8.Serializer
 open import Aeres.Prelude
 
 import      Data.Vec.Relation.Unary.All as VecAll
