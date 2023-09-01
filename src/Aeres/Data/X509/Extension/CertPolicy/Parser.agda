@@ -18,9 +18,9 @@ private
   here' = "X509: Extension: CertPolicy"
 
 parseCertPolFieldsSeq : Parser (Logging ∘ Dec) CertPolFieldsSeq
-parseCertPolFieldsSeq = parseNonEmptySeq (here' String.++ " (fields)") _ TLV.nonempty TLV.nonnesting parsePolicyInformation
+parseCertPolFieldsSeq = parseNonEmptySeq "policy info" _ TLV.nonempty TLV.nonnesting parsePolicyInformation
 
 parseCertPolFields : Parser (Logging ∘ Dec) CertPolFields
 parseCertPolFields =
-  parseTLV _ here' _
+  parseTLV _ "cert. policy" _
     (parseExactLength TLV.nonnesting (tell $ here' String.++ ": overflow") parseCertPolFieldsSeq)

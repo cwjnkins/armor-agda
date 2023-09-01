@@ -3,20 +3,17 @@
 open import Aeres.Binary
 open import Aeres.Prelude
 open import Aeres.Data.UTF8
-open import Aeres.Data.X509.Strings.Properties
 open import Aeres.Data.X509.Strings.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.OctetString
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 
 module Aeres.Data.X509.Strings.Parser where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList       UInt8
-open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Parser UInt8
 
 parseTeletexString : Parser (Logging ∘ Dec) TeletexString
 parseTeletexString =
@@ -32,33 +29,7 @@ parseUTF8String =
 
 parseBMPString : Parser (Logging ∘ Dec) BMPString
 parseBMPString =
-  parseTLV Tag.BMPString "BMP string" _
-    (parseIList
-      (tell "parseBMPString: underflow") _
-      BMP.nonempty BMP.nonnesting
-      p)
-  where
-  p : Parser (Logging ∘ Dec) BMPChar
-  runParser p xs = do
-    yes (success ._ _ refl (mk×ₚ (singleton (c₁ ∷ c₂ ∷ []) refl) (─ refl) refl) suf₁ refl)
-      ← runParser (parseN 2 (tell "parseBMP: underflow")) xs
-      where no ¬p → do
-        return ∘ no $ λ where
-          (success ._ ._ refl (mkBMPChar c₁ c₂ range refl) ._ refl) →
-            contradiction (success _ _ refl (mk×ₚ (singleton (c₁ ∷ [ c₂ ]) refl) (─ refl) refl) _ refl) ¬p
-    case inRange? 0 215 c₁ of λ where
-      (yes c₁≤215) →
-        return (yes (success _ _ refl (mkBMPChar c₁ c₂ (inj₁ c₁≤215) refl) suf₁ refl))
-      (no ¬c₁≤215) →
-        case inRange? 224 255 c₁ of λ where
-          (yes r) → return (yes (success _ _ refl (mkBMPChar c₁ c₂ (inj₂ r) refl) suf₁ refl))
-          (no ¬r) → do
-            tell $ "parseBMP: char 1 out of range: " String.++ (show (toℕ c₁))
-            return ∘ no $ λ where
-              (success ._ _ refl (mkBMPChar .c₁ .c₂ range refl) _ refl) →
-                ‼ (case range of λ where
-                  (inj₁ p) → contradiction p ¬c₁≤215
-                  (inj₂ p) → contradiction p ¬r)
+  parseTLV Tag.BMPString "BMP string" _ parseUTF8
 
 parseVisibleString : Parser (Logging ∘ Dec) VisibleString
 parseVisibleString =
