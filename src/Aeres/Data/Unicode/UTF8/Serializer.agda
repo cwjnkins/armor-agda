@@ -1,14 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8.TCB
-import      Aeres.Data.UTF8.Properties as UTF8Props
+open import Aeres.Data.Unicode.UTF8.TCB
+import      Aeres.Data.Unicode.UTF8.Properties as UTF8Props
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 
-module Aeres.Data.UTF8.Serializer where
+module Aeres.Data.Unicode.UTF8.Serializer where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8

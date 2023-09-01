@@ -1,9 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.IA5String.TCB
-open import Aeres.Data.X509.Strings.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
+open import Aeres.Data.X690-DER.Strings.BMPString.TCB
+open import Aeres.Data.X690-DER.Strings.IA5String.TCB
+open import Aeres.Data.X690-DER.Strings.UTF8String.TCB
+open import Aeres.Data.X690-DER.Strings.VisibleString.TCB
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 

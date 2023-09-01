@@ -3,9 +3,9 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
-open import Aeres.Data.UTF8.Serializer
-open import Aeres.Data.UTF8.TCB
-open import Aeres.Data.UTF8.Trie
+open import Aeres.Data.Unicode.UTF8.Serializer
+open import Aeres.Data.Unicode.UTF8.TCB
+open import Aeres.Data.Unicode.UTF8.Trie
 open import Aeres.Data.X509.Semantic.StringPrep.InitMap.M1
 open import Aeres.Data.X509.Semantic.StringPrep.InitMap.M2
 open import Data.These.Base

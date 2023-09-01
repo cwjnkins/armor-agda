@@ -1,12 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8
-open import Aeres.Data.X509.IA5String
+open import Aeres.Data.Unicode
 open import Aeres.Data.X509.DirectoryString.Properties
 open import Aeres.Data.X509.DirectoryString.TCB
-open import Aeres.Data.X509.Strings
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions

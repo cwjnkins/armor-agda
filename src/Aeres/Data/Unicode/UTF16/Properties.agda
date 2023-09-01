@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.Strings.TCB
+open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
-module Aeres.Data.X509.Strings.Properties where
+module Aeres.Data.Unicode.UTF16.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 
@@ -39,11 +39,11 @@ module BMP where
           215 ∎)
         (toWitnessFalse{Q = 224 ≤? 215} tt)
     range≡ (inj₂ y) (inj₂ y₁) = cong inj₂ (inRange-unique{A = ℕ}{B = UInt8} y y₁)
-
+  
   @0 unambiguous : Unambiguous BMPChar
   unambiguous (mkBMPChar c₁ c₂ range refl) (mkBMPChar .c₁ .c₂ range₁ refl) =
     subst (λ x → mkBMPChar c₁ c₂ range refl ≡ mkBMPChar c₁ c₂ x refl) (‼ range≡ range range₁) refl
-
+  
   instance
     eq≋BMP : Eq≋ BMPChar
     Eq≋._≋?_ eq≋BMP (mkBMPChar c₁ c₂ range refl) (mkBMPChar c₃ c₄ range₁ refl)
@@ -52,6 +52,6 @@ module BMP where
     ... | yes refl | no ¬p = no λ where (mk≋ refl _) → contradiction refl ¬p
     ... | yes refl | yes refl =
       yes (mk≋ refl (subst (λ x → mkBMPChar c₁ c₂ range refl ≡ mkBMPChar c₁ c₂ x refl) (‼ range≡ range range₁) refl))
-
+  
     eqBMP : Eq (Exists─ (List UInt8) BMPChar)
     eqBMP = Eq≋⇒Eq it

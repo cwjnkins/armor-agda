@@ -12,6 +12,7 @@ open import Aeres.Data.X690-DER.Null        public
 open import Aeres.Data.X690-DER.OID         public
 open import Aeres.Data.X690-DER.OctetString public
 open import Aeres.Data.X690-DER.SequenceOf  public
+open import Aeres.Data.X690-DER.Strings     public
 open import Aeres.Data.X690-DER.TLV         public
 module Tag where
   open import Aeres.Data.X690-DER.Tag public

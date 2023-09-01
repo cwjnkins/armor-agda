@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.IA5String.TCB
 open import Aeres.Data.X509.RDN.TCB
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
