@@ -65,16 +65,15 @@ char∈ b∈ (mkCertText{b₁}{f₁} body₁ final₁ refl) =
     (inj₁ x) → ─ FullLine.char∈List x body₁
     (inj₂ y) → ─ FinalLine.char∈ y final₁
 
-{-# TERMINATING #-}
-@0 foldFinalIntoBody
+@0 foldFinalIntoBodyWF
   : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
     → IList CertFullLine b₁ → CertFinalLine f₁
-    → IList CertFullLine b₂ → CertFinalLine f₂
+    → (body₂ : IList CertFullLine b₂) → CertFinalLine f₂
+    → Acc _<_ (lengthIList body₂)
     → b₁ ++ f₁ ++ suf₁ ≡ b₂ ++ f₂ ++ suf₂
     → length b₁ < length b₂
     → Σ[ n ∈ ℕ ] b₂ ≡ b₁ ++ f₁ ++ take n suf₁
-foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} nil fin₁
-  (consIList{l₂}{b₂} fu₁ body₂ refl) fin₂ ++≡ b₁< =
+foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} nil fin₁ (consIList{l₂}{b₂} fu₁ body₂ refl) fin₂ ac ++≡ b₁< =
     Lemmas.⊆⇒++take
       ++≡
       (caseErased singleton body₂ refl ret (const _) of λ where
@@ -105,7 +104,7 @@ foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} nil fin₁
   where
   module ≤ = Nat.≤-Reasoning
   
-foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ nil refl) fin₁ (consIList{u₂}{b₂} fu₂ nil refl) fin₂ ++≡ b₁< =
+foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ nil refl) fin₁ (consIList{u₂}{b₂} fu₂ nil refl) fin₂ ac ++≡ b₁< =
   contradiction
     (cong length (u₁ ≡ u₂ ∋
       noOverlapBoundary₂ noOverlapLines noOverlapLines ++≡' fu₁ fin₁ fu₂ fin₂))
@@ -124,7 +123,7 @@ foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b�
     (u₁ ++ []) ++ f₁ ++ suf₁ ≡⟨ ++≡ ⟩
     (u₂ ++ []) ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
     u₂ ++ f₂ ++ suf₂ ∎
-foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ nil refl) fin₁ (consIList{u₂}{b₂} fu₂ (consIList{u₂'}{b₂'} fu₂' body₂ refl) refl) fin₂ ++≡ b₁< =
+foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ nil refl) fin₁ (consIList{u₂}{b₂} fu₂ (consIList{u₂'}{b₂'} fu₂' body₂ refl) refl) fin₂ (WellFounded.acc rs) ++≡ b₁< =
   (proj₁ ih) ,
     (u₂ ++ u₂' ++ b₂' ≡⟨ cong (u₂ ++_) (proj₂ ih) ⟩
     u₂ ++ f₁ ++ take (proj₁ ih) suf₁ ≡⟨ cong (_++ f₁ ++ take (proj₁ ih) suf₁) (sym u₁≡) ⟩
@@ -153,13 +152,13 @@ foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b�
     length u₂ + length (u₂' ++ b₂') ≤.≡⟨ cong (_+ length (u₂' ++ b₂')) (cong length (sym u₁≡)) ⟩
     length u₁ + length (u₂' ++ b₂') ≤.∎)
 
-  ih = foldFinalIntoBody nil fin₁ (consIList fu₂' body₂ refl) fin₂
+  ih = foldFinalIntoBodyWF nil fin₁ (consIList fu₂' body₂ refl) fin₂ (rs _ Nat.≤-refl)
          (f₁ ++ suf₁ ≡⟨ ++≡ᵤ ⟩
          u₂' ++ b₂' ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
          (u₂' ++ b₂') ++ f₂ ++ suf₂ ∎)
          (Nat.+-cancelˡ-< (length u₁) b₁<')
 
-foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ (consIList{u₁'}{b₁'} fu₁' body₁ refl) refl) fin₁ (consIList{u₂}{b₂} fu₂ nil refl) fin₂ ++≡ b₁< =
+foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ (consIList{u₁'}{b₁'} fu₁' body₁ refl) refl) fin₁ (consIList{u₂}{b₂} fu₂ nil refl) fin₂ ac ++≡ b₁< =
   contradiction{P = length (u₁' ++ b₁') < 0}
     (Nat.+-cancelˡ-< (length u₁) (≤.begin
       (1 + length u₁ + length (u₁' ++ b₁') ≤.≡⟨ cong suc (sym (length-++ u₁)) ⟩
@@ -190,7 +189,7 @@ foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b�
   ++≡ᵤ : u₁' ++ b₁' ++ f₁ ++ suf₁ ≡ f₂ ++ suf₂
   ++≡ᵤ = Lemmas.++-cancel≡ˡ _ _ u₁≡ ++≡'
 
-foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ (consIList{u₁'}{b₁'} fu₁' body₁ refl) refl) fin₁ (consIList{u₂}{b₂} fu₂ (consIList{u₂'}{b₂'} fu₂' body₂ refl) refl) fin₂ ++≡ b₁< =
+foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ (consIList{u₁'}{b₁'} fu₁' body₁ refl) refl) fin₁ (consIList{u₂}{b₂} fu₂ (consIList{u₂'}{b₂'} fu₂' body₂ refl) refl) fin₂ (WellFounded.acc rs) ++≡ b₁< =
   proj₁ ih ,
     (u₂ ++ u₂' ++ b₂' ≡⟨ cong (u₂ ++_) (proj₂ ih) ⟩
     u₂ ++ (u₁' ++ b₁') ++ f₁ ++ take (proj₁ ih) suf₁ ≡⟨ cong (_++ ((u₁' ++ b₁') ++ f₁ ++ take (proj₁ ih) suf₁)) (sym u₁≡) ⟩
@@ -222,7 +221,18 @@ foldFinalIntoBody{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b�
     length u₂ + length (u₂' ++ b₂') ≤.≡⟨ cong (λ x → length x + length (u₂' ++ b₂')) (sym u₁≡) ⟩
     length u₁ + length (u₂' ++ b₂') ≤.∎))
 
-  ih = foldFinalIntoBody (consIList fu₁' body₁ refl) fin₁ (consIList fu₂' body₂ refl) fin₂ ++≡ᵤ b₁<'
+  ih = foldFinalIntoBodyWF (consIList fu₁' body₁ refl) fin₁ (consIList fu₂' body₂ refl) fin₂ (rs _ Nat.≤-refl) ++≡ᵤ b₁<'
+
+@0 foldFinalIntoBody
+  : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
+    → IList CertFullLine b₁ → CertFinalLine f₁
+    → IList CertFullLine b₂ → CertFinalLine f₂
+    → b₁ ++ f₁ ++ suf₁ ≡ b₂ ++ f₂ ++ suf₂
+    → length b₁ < length b₂
+    → Σ[ n ∈ ℕ ] b₂ ≡ b₁ ++ f₁ ++ take n suf₁
+foldFinalIntoBody fu₁ fi₁ fu₂ fi₂ ++≡ b₁< = foldFinalIntoBodyWF fu₁ fi₁ fu₂ fi₂ (<-wellFounded (lengthIList fu₂)) ++≡ b₁<
+  where open import Data.Nat.Induction
+
 @0 body< : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
         → IList CertFullLine b₁ → CertFinalLine f₁
         → IList CertFullLine b₂ → CertFinalLine f₂
