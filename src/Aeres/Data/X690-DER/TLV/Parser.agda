@@ -22,7 +22,7 @@ module parseTLV
   (p : ∀ n → Parser (Logging ∘ Dec) (ExactLength A n))
   where
 
-  here' = "parseTLV: " String.++ tName
+  here' = "TLV: " String.++ tName
 
   open ≡-Reasoning
 
@@ -52,7 +52,7 @@ module parseTLV
                   ¬parse
         yes (success pre₁ r₁ r₁≡ (mk×ₚ val (─ lenVal) refl) suf₁ ps≡₁) ← runParser (p (getLength len₀)) suf₀
           where no ¬parse → do
-            tell $ here' String.++ ": error parsing value: " String.++ show (map toℕ (take 10 (suf₀)))
+            tell $ here'
             return ∘ no $ λ where
               (success .(x ∷ l ++ v) read read≡ (mkTLV{l}{v} len val len≡ refl) suffix ps≡) → ‼
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ l ++ v ++ suffix

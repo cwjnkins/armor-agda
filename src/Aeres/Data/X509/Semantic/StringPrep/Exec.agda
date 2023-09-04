@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
 
 open import Data.Nat.DivMod
 import      Aeres.Binary
@@ -31,15 +31,16 @@ appendUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exi
 appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , (appendIList _ snd snd₁)
 
 Transcode : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) UTF8
-Transcode (teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
-Transcode (printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x (toWitness all<128))
-  where
-  helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
-  helper [] All.[] = _ , nil
-  helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
-Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
-Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
-Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , {!!})
+Transcode = {!!}
+-- Transcode (teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
+-- Transcode (printableString (mk×ₚ (mkTLV len (mkIA5StringValue (singleton x refl) all<128) len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (helper x (toWitness all<128))
+--   where
+--   helper : (ss : List UInt8) → @0 All (Fin._< # 128) ss → Exists─ (List UInt8) UTF8
+--   helper [] All.[] = _ , nil
+--   helper (x ∷ xs) (px All.∷ x₁) = _ , (cons (mkIListCons (utf81 (mkUTF8Char1 x px refl)) (proj₂ (helper xs x₁)) refl))
+-- Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+-- Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
+-- Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ refl) sndₚ₁ refl)) = inj₂ (_ , val)
 
 InitialMapping : ∀ {@0 bs} → UTF8 bs → Exists─ (List UInt8) UTF8
 InitialMapping nil = _ , nil
