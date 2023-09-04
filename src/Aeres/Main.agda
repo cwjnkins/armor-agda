@@ -5,6 +5,7 @@ open import Aeres.Binary
 import      Aeres.Data.Base64 as Base64
 import      Aeres.Data.PEM as PEM
 open import Aeres.Data.X509
+open import Aeres.Data.X509.ChainBuilder.Exec
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Chain
 import      Aeres.Grammar.Definitions
@@ -32,39 +33,6 @@ usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"
 -- str2dig xs = do
 --   bs ← decToMaybe ∘ All.all? (_<? 256) ∘ map toℕ ∘ String.toList $ xs
 --   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
-
- ------------ chain building ---------------
-getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
-getCertsbySubject x [] = []
-getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
-  with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
-... | no ¬p = getCertsbySubject ((fst , snd)) x₂
-... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
-
-{-# TERMINATING #-}
---- TODO: satisfy termination checker
-findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
-findIssuerCert (fst , snd) aux root
-  with getCertsbySubject (Cert.getIssuer snd) root
-... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
-               [] → []
-               (y ∷ t) → case findIssuerCert y aux root of λ where
-                   [] → []
-                   (x ∷ z) → [ y ] ++ x ∷ z
-... | y ∷ t = [ y ]
-  
-buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
-buildChain [] x₁ = []
-buildChain (x ∷ x₂) x₁
-  with findIssuerCert x x₂ x₁
-... | [] = []
-... | x₃ ∷ v = [ x ] ++ x₃ ∷ v
-
-listToChain : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
-listToChain [] = _ , nil
-listToChain ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = listToChain x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
--- --------------------------------------------------------------------------
-
 
 -- TODO: bindings for returning error codes?
 parseCerts : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 Chain))
@@ -119,7 +87,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ root suf₂ ps≡₂) = rootS in
-      runCertChecks (proj₂ (listToChain (buildChain (chainToList cert) (chainToList root))))
+      runCertChecks (proj₂ (listToChain (buildChain (chainToList cert) (chainToList root)))) -- calling chain builder here
     _ →
       Aeres.IO.putStrLnErr usage
       IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
