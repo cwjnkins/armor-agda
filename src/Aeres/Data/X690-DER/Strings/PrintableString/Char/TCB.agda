@@ -29,5 +29,5 @@ record PrintableStringChar (@0 bs : List UInt8) : Set where
   constructor mkPrintableStringChar
   field
     c : UInt8
-    @0 range : PrintableStringCharRange c
+    range : PrintableStringCharRange c
     @0 bs≡ : bs ≡ [ c ]
