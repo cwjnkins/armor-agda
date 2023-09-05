@@ -156,22 +156,32 @@ module Base64Str where
   Repₛ : @0 List Char → Set
   Repₛ = IList (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char Base64.Base64Char)))
 
-  {-# TERMINATING #-}
   equivₛ : Equivalent Repₛ ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length))
-  proj₁ equivₛ nil = mk×ₚ nil refl refl
-  proj₁ equivₛ (consIList{bs₂ = bsₜ} (mk&ₚ fstₚ₁@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₂@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₃@(Base64.mk64 _ _ _ refl) sndₚ₂@(Base64.mk64 _ _ _ refl) refl) refl) refl) tail₁ refl) =
-    case tail' of λ where
-      (mk×ₚ{bs} fstₚ₁' sndₚ₁' bs≡') →
-        mk×ₚ (consIList fstₚ₁ (consIList fstₚ₂ (consIList fstₚ₃ (consIList sndₚ₂ fstₚ₁' refl) refl) refl) refl) sndₚ₁' (‼ cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) bs≡')
+  proj₁ equivₛ x = equivₛ₁WF x (<-wellFounded _)
     where
-    tail' : ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bsₜ
-    tail' = proj₁ equivₛ tail₁
-  proj₂ equivₛ (mk×ₚ nil sndₚ₁ refl) = nil
-  proj₂ equivₛ (mk×ₚ (consIList fstₚ₁@(Base64.mk64 _ _ _ refl) (consIList fstₚ₂@(Base64.mk64 _ _ _ refl) (consIList fstₚ₃@(Base64.mk64 _ _ _ refl) (consIList{bs₂ = bs₂} fstₚ₄@(Base64.mk64 _ _ _ refl) tail₁ refl) refl) refl) refl) sndₚ₁ bs≡) =
-    consIList (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ fstₚ₄ refl) refl) refl) tail' (sym bs≡)
+    open import Data.Nat.Induction
+      hiding (Acc)
+
+    equivₛ₁WF : ∀ {@0 bs} → (cs : Repₛ bs) → @0 Acc _<_ (lengthIList cs) → ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bs
+    equivₛ₁WF nil (acc rs) = mk×ₚ nil refl refl
+    equivₛ₁WF (consIList{bs₂ = bsₜ} (mk&ₚ fstₚ₁@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₂@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₃@(Base64.mk64 _ _ _ refl) sndₚ₂@(Base64.mk64 _ _ _ refl) refl) refl) refl) tail₁ refl) (acc rs) =
+      case tail' of λ where
+        (mk×ₚ{bs} fstₚ₁' sndₚ₁' bs≡') →
+          mk×ₚ (consIList fstₚ₁ (consIList fstₚ₂ (consIList fstₚ₃ (consIList sndₚ₂ fstₚ₁' refl) refl) refl) refl) sndₚ₁' (‼ (cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) bs≡'))
+      where
+      tail' : ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bsₜ
+      tail' = equivₛ₁WF tail₁ (rs _ Nat.≤-refl)
+  proj₂ equivₛ x = equivₛ₂WF x (<-wellFounded _)
     where
-    tail' : Repₛ bs₂
-    tail' = proj₂ equivₛ (mk×ₚ tail₁ sndₚ₁ refl)
+    open import Data.Nat.Induction
+      hiding (Acc)
+
+    equivₛ₂WF : ∀ {@0 bs} → (cs : ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bs) → @0 Acc _<_ (lengthIList (fstₚ cs)) → Repₛ bs
+    equivₛ₂WF (mk×ₚ nil _ refl) (WellFounded.acc rs) = nil
+    equivₛ₂WF (mk×ₚ (consIList fstₚ₁@(Base64.mk64 _ _ _ refl) (consIList fstₚ₂@(Base64.mk64 _ _ _ refl) (consIList fstₚ₃@(Base64.mk64 _ _ _ refl) (consIList{bs₂ = bs₂} fstₚ₄@(Base64.mk64 _ _ _ refl) tail₁ refl) refl) refl) refl) sndₚ₁ bs≡) (WellFounded.acc rs) = {!!}
+      where
+      tail' : Repₛ bs₂
+      tail' = equivₛ₂WF (mk×ₚ tail₁ sndₚ₁ refl) (rs _ (Nat.m≤n+m (suc (lengthIList tail₁)) 3))
 
   equiv : Equivalent Rep Base64.Base64Str
   proj₁ equiv{xs} (mk&ₚ{bs₁}{bs₂} fstₚ₁ sndₚ₁ bs≡) =
