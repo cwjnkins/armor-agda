@@ -110,7 +110,7 @@ dfs visited cert intermediates trustedRoots currentChain chains =
 
     helper₁ : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert)) → List (List (Exists─ (List UInt8) Cert))
     helper₁ [] curChain chains = chains
-    helper₁ (x ∷ cers) curChain chains = helper₁ cers curChain (chains ++ curChain ∷ [ [ x ] ])
+    helper₁ (x ∷ cers) curChain chains = helper₁ cers curChain (chains ++ [ curChain ++ [ x ] ])
 
 
 buildCertificateChains : List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert))

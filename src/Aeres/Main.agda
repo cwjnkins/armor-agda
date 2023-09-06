@@ -208,4 +208,4 @@ main = IO.run $
   runCertChecks : List (Exists─ (List UInt8) Chain) → _
   runCertChecks [] = Aeres.IO.putStrLnErr "Error: no candidate chain"
   runCertChecks (x ∷ []) = helper x
-  runCertChecks (x ∷ x₁ ∷ x₂) = helper x --- TODO: how to call other chains in IO
+  runCertChecks (x ∷ x₁ ∷ x₂) =  runCertChecks (x₁ ∷ x₂)--- TODO: how to call other chains in IO
