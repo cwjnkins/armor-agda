@@ -87,7 +87,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ root suf₂ ps≡₂) = rootS in
-      runCertChecks (proj₂ (listToChain (buildChain (chainToList cert) (chainToList root)))) -- calling chain builder here
+      runCertChecks (candidateChains (buildCertificateChains (chainToList cert) (chainToList root))) -- calling chain builder here
     _ →
       Aeres.IO.putStrLnErr usage
       IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
@@ -193,9 +193,9 @@ main = IO.run $
         IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
 
-  runCertChecks : ∀ {@0 bs} → (cert : Chain bs) → _
-  runCertChecks nil = Aeres.IO.putStrLnErr "Error: empty chain" 
-  runCertChecks (cons x) =
+  helper : Exists─ (List UInt8) Chain → _
+  helper (─ .[] , nil) = Aeres.IO.putStrLnErr "Error: empty chain"
+  helper (fst , cons x) =
     runChecks' 1 (cons x) IO.>>
     runChainCheck (cons x) "CCP2" ccp2 IO.>>
     runChainCheck (cons x) "CCP3" ccp3 IO.>>
@@ -204,3 +204,8 @@ main = IO.run $
     runChainCheck (cons x) "CCP6" ccp6 IO.>>
     runChainCheck (cons x) "CCP10" ccp10 IO.>>
     Aeres.IO.exitSuccess
+ 
+  runCertChecks : List (Exists─ (List UInt8) Chain) → _
+  runCertChecks [] = Aeres.IO.putStrLnErr "Error: no candidate chain"
+  runCertChecks (x ∷ []) = helper x
+  runCertChecks (x ∷ x₁ ∷ x₂) = helper x --- TODO: how to call other chains in IO

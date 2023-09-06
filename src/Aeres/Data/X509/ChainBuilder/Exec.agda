@@ -19,6 +19,42 @@ open Aeres.Grammar.IList       UInt8
 open Base256
 
 ------------ chain building ---------------
+-- getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
+-- getCertsbySubject x [] = []
+-- getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
+--   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
+-- ... | no ¬p = getCertsbySubject ((fst , snd)) x₂
+-- ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
+
+-- {-# TERMINATING #-}
+-- --- TODO: satisfy termination checker
+-- findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+-- findIssuerCert (fst , snd) aux root
+--   with getCertsbySubject (Cert.getIssuer snd) root
+-- ... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
+--                [] → []
+--                (y ∷ t) → case findIssuerCert y aux root of λ where
+--                    [] → []
+--                    (x ∷ z) → [ y ] ++ x ∷ z
+-- ... | y ∷ t = [ y ]
+  
+-- buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
+-- buildChain [] x₁ = []
+-- buildChain (x ∷ x₂) x₁
+--   with findIssuerCert x x₂ x₁
+-- ... | [] = []
+-- ... | x₃ ∷ v = [ x ] ++ x₃ ∷ v
+-------------------------
+
+candidateChains : List (List (Exists─ (List UInt8) Cert)) → List (Exists─ (List UInt8) Chain)
+candidateChains [] = []
+candidateChains (x ∷ x₁) = (helper x) ∷ (candidateChains x₁)
+  where
+  helper : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
+  helper [] = _ , nil
+  helper ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = helper x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
+
+
 getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
 getCertsbySubject x [] = []
 getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
@@ -26,30 +62,6 @@ getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
 ... | no ¬p = getCertsbySubject ((fst , snd)) x₂
 ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
 
-{-# TERMINATING #-}
---- TODO: satisfy termination checker
-findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
-findIssuerCert (fst , snd) aux root
-  with getCertsbySubject (Cert.getIssuer snd) root
-... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
-               [] → []
-               (y ∷ t) → case findIssuerCert y aux root of λ where
-                   [] → []
-                   (x ∷ z) → [ y ] ++ x ∷ z
-... | y ∷ t = [ y ]
-  
-buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
-buildChain [] x₁ = []
-buildChain (x ∷ x₂) x₁
-  with findIssuerCert x x₂ x₁
-... | [] = []
-... | x₃ ∷ v = [ x ] ++ x₃ ∷ v
-
-listToChain : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
-listToChain [] = _ , nil
-listToChain ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = listToChain x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
-
-------------------------- not working correctly
 
 certInList : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → Bool
 certInList c [] = false
@@ -61,43 +73,49 @@ certInList (fst , snd) ((fst₁ , snd₁) ∷ l)
 ... | no ¬q = certInList (fst , snd) l
 ... | yes q = true  
 
-helper₁ : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert)) → List (List (Exists─ (List UInt8) Cert))
-helper₁ [] curChain chains = []
-helper₁ (x ∷ cers) curChain chains = (curChain ++ [ x ]) ∷ helper₁ cers curChain chains
 
 {-# TERMINATING #-}
 dfs : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Cert →
   List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) →
   List (List (Exists─ (List UInt8) Cert)) → List (List (Exists─ (List UInt8) Cert))
-dfs visited cert intermediates trustedRoots currentChain chains = if not (certInList cert visited)
-  then
-    (let
+dfs visited cert intermediates trustedRoots currentChain chains =
+  if not (certInList cert visited)
+    then
+     (let
        visited' : List (Exists─ (List UInt8) Cert)
-       visited' = cert ∷ visited
+       visited' = List.reverse (cert ∷ List.reverse visited)
 
        currentChain' : List (Exists─ (List UInt8) Cert)
-       currentChain' = cert ∷ currentChain
+       currentChain' = List.reverse (cert ∷ List.reverse currentChain)
      in
      case getCertsbySubject (Cert.getIssuer (proj₂ cert)) trustedRoots of λ where
-       [] → chains
-       (x ∷ v) →
-         let
+       [] → case getCertsbySubject (Cert.getIssuer (proj₂ cert)) intermediates of λ where
+         [] → chains
+         (x ∷ z) → helper₂ visited' (x ∷ z) intermediates trustedRoots currentChain' chains
+       (y ∷ q) →
+         (let
            chains' : List (List (Exists─ (List UInt8) Cert))
-           chains' = helper₁ (x ∷ v) currentChain' chains
-         in
-         case getCertsbySubject (Cert.getIssuer (proj₂ cert)) intermediates of λ where
-           [] → chains
-           (y ∷ z) → helper₂ visited' (y ∷ z)  intermediates trustedRoots currentChain' chains')
-  else chains
-  where
+           chains' = helper₁ (y ∷ q) currentChain' chains
+           in
+           case getCertsbySubject (Cert.getIssuer (proj₂ cert)) intermediates of λ where
+             [] → chains'
+             (p ∷ b) → helper₂ visited' (p ∷ b) intermediates trustedRoots currentChain' chains'))
+    else chains
+    where
     helper₂ :  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) →
                         List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) →
                         List (List (Exists─ (List UInt8) Cert)) → List (List (Exists─ (List UInt8) Cert))
-    helper₂ v [] i t cc cs = []
-    helper₂ v (x ∷ certs) i t cc cs = cs ++ (dfs v x i t cc cs) ++ helper₂ v certs i t cc cs
+    helper₂ v [] i t cc cs = cs
+    helper₂ v (x ∷ certs) i t cc cs = helper₂ v certs i t cc (dfs v x i t cc cs)
 
-buildCertificateChains : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert))
-buildCertificateChains c i t = let
+    helper₁ : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert)) → List (List (Exists─ (List UInt8) Cert))
+    helper₁ [] curChain chains = chains
+    helper₁ (x ∷ cers) curChain chains = helper₁ cers curChain (chains ++ curChain ∷ [ [ x ] ])
+
+
+buildCertificateChains : List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → List (List (Exists─ (List UInt8) Cert))
+buildCertificateChains [] t = []
+buildCertificateChains (c ∷ i) t = let
   visited : List (Exists─ (List UInt8) Cert)
   visited = []
 
