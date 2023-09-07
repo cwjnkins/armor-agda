@@ -404,5 +404,8 @@ instance
   UTF8CharEq : Eq (Exists─ (List UInt8) UTF8Char)
   UTF8CharEq = Eq≋⇒Eq it
 
-  -- UTF8Eq : Eq (Exists─ _ UTF8)
-  -- UTF8Eq = IList.IListEq
+  UTF8Eq : Eq (Exists─ _ UTF8)
+  UTF8Eq = IList.IListEq
+
+  UTF8Eq≋ : Eq≋ UTF8
+  UTF8Eq≋ = IList.IListEq≋

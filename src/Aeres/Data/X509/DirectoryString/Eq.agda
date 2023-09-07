@@ -7,8 +7,8 @@ open import Aeres.Data.X509.DirectoryString.TCB
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -18,6 +18,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DirectoryString.Eq where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Sum         UInt8
 
 instance

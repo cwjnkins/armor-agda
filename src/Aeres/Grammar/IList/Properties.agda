@@ -126,17 +126,19 @@ lengthIList≤ ne nn .(bs₁ ++ bs₂) xs₂{ys₁ = ys₁}{ys₂} ++≡ xs₁�
                     length bs₁' + length bs₂' ≤.≡⟨ cong ((_+ _) ∘ length) (sym bs₁≡) ⟩
                     length bs₁ + length bs₂' ≤.∎))
 
-instance
-  {-# TERMINATING #-}
-  IListEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
-            → Eq (Exists─ (List Σ) (IList A))
-  Eq._≟_ IListEq (─ _ , nil) (─ _ , nil) = yes refl
-  Eq._≟_ IListEq (─ _ , nil) (─ bs , consIList h t bs≡) = no λ ()
-  Eq._≟_ IListEq (─ bs , consIList h t bs≡) (─ _ , nil)  = no λ ()
-  Eq._≟_ IListEq (─ bs₁ , consIList{bs₁₁}{bs₁₂} h₁ t₁ refl) (─ bs₂ , consIList{bs₂₁}{bs₂₂} h₂ t₂ refl) =
-    case (─ bs₁₁ ,e h₁) ≟ (─ bs₂₁ ,e h₂) ret (const _) of λ where
-      (no ¬p) → no λ where refl → contradiction refl ¬p
-      (yes refl) →
-        case (─ bs₁₂ ,e t₁) ≟ (─ bs₂₂ , t₂) ret (const _) of λ where
-          (no ¬p) → no λ where refl → contradiction refl ¬p
-          (yes refl) → yes refl
+{-# TERMINATING #-}
+IListEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
+          → Eq (Exists─ (List Σ) (IList A))
+Eq._≟_ IListEq (─ _ , nil) (─ _ , nil) = yes refl
+Eq._≟_ IListEq (─ _ , nil) (─ bs , consIList h t bs≡) = no λ ()
+Eq._≟_ IListEq (─ bs , consIList h t bs≡) (─ _ , nil)  = no λ ()
+Eq._≟_ IListEq (─ bs₁ , consIList{bs₁₁}{bs₁₂} h₁ t₁ refl) (─ bs₂ , consIList{bs₂₁}{bs₂₂} h₂ t₂ refl) =
+  case (─ bs₁₁ ,e h₁) ≟ (─ bs₂₁ ,e h₂) ret (const _) of λ where
+    (no ¬p) → no λ where refl → contradiction refl ¬p
+    (yes refl) →
+      case Eq._≟_ IListEq (─ bs₁₂ ,e t₁) (─ bs₂₂ , t₂) ret (const _) of λ where
+        (no ¬p) → no λ where refl → contradiction refl ¬p
+        (yes refl) → yes refl
+
+IListEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
+IListEq≋ = Eq⇒Eq≋ (IListEq ⦃ Eq≋⇒Eq it ⦄)

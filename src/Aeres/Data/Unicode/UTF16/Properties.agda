@@ -3,11 +3,13 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF16.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList       UInt8
 
 module BMP where
   @0 nonempty : NonEmpty BMPChar
@@ -45,8 +47,8 @@ module BMP where
     subst (λ x → mkBMPChar c₁ c₂ range refl ≡ mkBMPChar c₁ c₂ x refl) (‼ range≡ range range₁) refl
   
   instance
-    eq≋BMP : Eq≋ BMPChar
-    Eq≋._≋?_ eq≋BMP (mkBMPChar c₁ c₂ range refl) (mkBMPChar c₃ c₄ range₁ refl)
+    BMPEq≋ : Eq≋ BMPChar
+    Eq≋._≋?_ BMPEq≋ (mkBMPChar c₁ c₂ range refl) (mkBMPChar c₃ c₄ range₁ refl)
       with c₁ ≟ c₃ | c₂ ≟ c₄
     ... | no ¬p | _ = no λ where (mk≋ refl a≡) → contradiction refl ¬p
     ... | yes refl | no ¬p = no λ where (mk≋ refl _) → contradiction refl ¬p
@@ -55,3 +57,6 @@ module BMP where
   
     eqBMP : Eq (Exists─ (List UInt8) BMPChar)
     eqBMP = Eq≋⇒Eq it
+
+    UTF16Eq≋ : Eq≋ BMP
+    UTF16Eq≋ = IList.IListEq≋

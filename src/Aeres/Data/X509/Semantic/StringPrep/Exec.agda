@@ -142,4 +142,4 @@ Compare-dec x₁ x₂
   with ProcessString x₂
 ... | inj₁ err = no (λ ())
 --... | inj₂ b = 
-... | inj₂ b = {!!} --_≋?_ {A = Unicode} (proj₂ a) (proj₂ b)
+... | inj₂ b = _≋?_{A = Unicode} (proj₂ a) (proj₂ b)

@@ -70,3 +70,7 @@ module Char where
 
 @0 unambiguous : Unambiguous UTF32
 unambiguous = IList.unambiguous Char.unambiguous Char.nonempty Char.nonnesting
+
+instance
+  UTF32Eq≋ : Eq≋ UTF32
+  UTF32Eq≋ = IList.IListEq≋
