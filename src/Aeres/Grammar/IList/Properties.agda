@@ -126,19 +126,29 @@ lengthIList≤ ne nn .(bs₁ ++ bs₂) xs₂{ys₁ = ys₁}{ys₂} ++≡ xs₁�
                     length bs₁' + length bs₂' ≤.≡⟨ cong ((_+ _) ∘ length) (sym bs₁≡) ⟩
                     length bs₁ + length bs₂' ≤.∎))
 
-{-# TERMINATING #-}
+private
+  eqIListWF
+    : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
+      → {@0 xs ys : List Σ} (a₁ : IList A xs) (a₂ : IList A ys)
+      → @0 Acc _<_ (lengthIList a₁)
+      → Dec (_≡_{A = Exists─ (List Σ) (IList A)} (─ xs , a₁) (─ ys , a₂))
+  eqIListWF nil nil (WellFounded.acc rs) = yes refl
+  eqIListWF nil (consIList h t bs≡) (WellFounded.acc rs) = no λ ()
+  eqIListWF (consIList h t bs≡) nil (WellFounded.acc rs) = no λ ()
+  eqIListWF (consIList h t refl) (consIList h₁ t₁ refl) (WellFounded.acc rs)
+    = case (─ _ ,e h) ≟ (─ _ ,e h₁) ret (const _) of λ where
+        (no ¬p) → no λ where refl → contradiction refl ¬p
+        (yes refl) →
+          case eqIListWF t t₁ (rs _ ≤-refl) ret (const _) of λ where
+            (no ¬p) → no λ where refl → contradiction refl ¬p
+            (yes refl) → yes refl
+    where
+    open import Data.Nat.Properties hiding (_≟_)
+
 IListEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
           → Eq (Exists─ (List Σ) (IList A))
-Eq._≟_ IListEq (─ _ , nil) (─ _ , nil) = yes refl
-Eq._≟_ IListEq (─ _ , nil) (─ bs , consIList h t bs≡) = no λ ()
-Eq._≟_ IListEq (─ bs , consIList h t bs≡) (─ _ , nil)  = no λ ()
-Eq._≟_ IListEq (─ bs₁ , consIList{bs₁₁}{bs₁₂} h₁ t₁ refl) (─ bs₂ , consIList{bs₂₁}{bs₂₂} h₂ t₂ refl) =
-  case (─ bs₁₁ ,e h₁) ≟ (─ bs₂₁ ,e h₂) ret (const _) of λ where
-    (no ¬p) → no λ where refl → contradiction refl ¬p
-    (yes refl) →
-      case Eq._≟_ IListEq (─ bs₁₂ ,e t₁) (─ bs₂₂ , t₂) ret (const _) of λ where
-        (no ¬p) → no λ where refl → contradiction refl ¬p
-        (yes refl) → yes refl
+Eq._≟_ IListEq (─ xs₁ , a₁) (─ xs₂ , a₂) = eqIListWF a₁ a₂ (<-wellFounded _)
+  where open import Data.Nat.Induction
 
 IListEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
 IListEq≋ = Eq⇒Eq≋ (IListEq ⦃ Eq≋⇒Eq it ⦄)
