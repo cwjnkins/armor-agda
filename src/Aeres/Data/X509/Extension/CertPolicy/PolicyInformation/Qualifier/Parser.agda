@@ -6,9 +6,9 @@ open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Pro
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice
-open import Aeres.Data.X509.IA5String
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.SequenceOf
+open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -56,9 +56,9 @@ parsePolicyQualifierInfoFields n =
 
 parsePolicyQualifierInfo : Parser (Logging ∘ Dec) PolicyQualifierInfo
 parsePolicyQualifierInfo =
-  parseTLV _ "policy qualifier info" _ parsePolicyQualifierInfoFields
+  parseTLV _ (here' String.++ " (fields)") _ parsePolicyQualifierInfoFields
 
 parsePolicyQualifiersSeq : Parser (Logging ∘ Dec) PolicyQualifiersSeq
 parsePolicyQualifiersSeq =
-  parseNonEmptySeq "policy qualifier info" _ TLV.nonempty TLV.nonnesting
+  parseNonEmptySeq here' _ TLV.nonempty TLV.nonnesting
     parsePolicyQualifierInfo

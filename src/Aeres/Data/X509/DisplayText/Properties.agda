@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.UTF8
+open import Aeres.Data.Unicode.UTF8
+open import Aeres.Data.Unicode.UTF16
 open import Aeres.Data.X509.DisplayText.TCB
-open import Aeres.Data.X509.IA5String
-open import Aeres.Data.X509.Strings
+open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf
@@ -116,25 +116,24 @@ noconfusionSeq = noconfusionTLV pf
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum
-      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous)
-        (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-      (unambiguousSum
-        (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-          λ _ → inRange-unique{A =  ℕ}{B = ℕ})
+      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous) λ _ → inRange-unique{A = ℕ}{B = ℕ})
+      (unambiguousSum (unambiguousΣₚ (TLV.unambiguous VisibleString.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
         (unambiguousSum
-          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-            (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous)
-            (λ _ → inRange-unique {A = ℕ} {B = ℕ}))
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ()))))
-        (NoConfusion.sumₚ{A = Σₚ _ _}
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
-          (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))))
-      (NoConfusion.sumₚ {A = Σₚ _ _}
-        (NoConfusion.sigmaₚ₁ (TLV.noconfusion (λ ())))
+          (unambiguousΣₚ
+            (TLV.unambiguous (IList.unambiguous UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
+            λ _ → inRange-unique{A = ℕ}{B = ℕ})
+          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
         (NoConfusion.sumₚ{A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
+      (NoConfusion.sumₚ {A = Σₚ _ _}
+        (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
+        (NoConfusion.sumₚ {A = Σₚ _ _}
+          (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
+  where
+  open import Aeres.Grammar.IList UInt8
 
 instance
   DisplayTextEq : Eq (Exists─ _ DisplayText)
@@ -143,7 +142,7 @@ instance
       (sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
         ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
             ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
-                ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)
+                ⦃ eqΣₚ (TLV.eqTLV ⦃ UTF8.UTF8Eq ⦄) λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)
 
   eq≋ : Eq≋ DisplayText
   eq≋ = Eq⇒Eq≋ it

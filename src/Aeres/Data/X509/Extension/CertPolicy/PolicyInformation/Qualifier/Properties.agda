@@ -5,9 +5,9 @@ open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice
-open import Aeres.Data.X509.IA5String
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.SequenceOf.TCB
+open import Aeres.Data.X690-DER.Strings.IA5String
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions

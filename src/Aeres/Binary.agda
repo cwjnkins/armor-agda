@@ -48,8 +48,6 @@ fromBinary bits = go (Vec.reverse bits)
   go {n@.(suc _)} (#1 ∷ bits) =
     subst Fin (suc[pred[n]]≡n{2 ^ n} (2^n≢0 n)) (Fin.fromℕ 1 Fin.+ (Fin.2* (go bits)))
 
--- TODO: satisfy termination checker
-{-# TERMINATING #-}
 toBinary-injective : ∀ {n} → (i₁ i₂ : Fin (2 ^ n)) → toBinary{n} i₁ ≡ toBinary{n} i₂ → i₁ ≡ i₂
 toBinary-injective{n} i₁ i₂ i≡ =
   help{n} i₁ i₂ self self (Lemmas.Vec-reverse-injective _ _ i≡)

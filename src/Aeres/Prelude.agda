@@ -217,6 +217,12 @@ no₀ p = false because (ofⁿ p)
   |    ub b d
 ... | refl | refl = refl
 
+⊎-unique : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → Unique A → Unique B → ¬ (A × B) → Unique (A ⊎ B)
+⊎-unique uA uB ¬A×B (inj₁ x) (inj₁ x₁) = cong inj₁ (uA x x₁)
+⊎-unique uA uB ¬A×B (inj₁ x) (inj₂ y) = ⊥-elim (¬A×B (x , y))
+⊎-unique uA uB ¬A×B (inj₂ y) (inj₁ x) = ⊥-elim (¬A×B (x , y))
+⊎-unique uA uB ¬A×B (inj₂ y) (inj₂ y₁) = cong inj₂ (uB y y₁)
+
 open import Relation.Nullary.Negation public
   hiding (contradiction ; contraposition)
 

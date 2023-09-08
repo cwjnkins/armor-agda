@@ -2,8 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.DisplayText.TCB
-open import Aeres.Data.X509.IA5String
-open import Aeres.Data.X509.Strings
+open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude

@@ -1,14 +1,14 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.IA5String.TCB
+open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.OctetString
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.IA5String.Properties where
+module Aeres.Data.X690-DER.Strings.IA5String.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 

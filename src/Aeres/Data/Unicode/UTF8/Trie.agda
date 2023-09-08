@@ -3,14 +3,14 @@
 open import Aeres.Binary
 open import Aeres.Prelude
   hiding (tabulate)
-open import Aeres.Data.UTF8.TCB
+open import Aeres.Data.Unicode.UTF8.TCB
 import      Aeres.Grammar.IList
 import      Data.Fin.Properties as Fin
 open import      Aeres.Grammar.IList
 import      Data.List.Relation.Binary.Equality.Propositional as List
 import      Data.Nat.Properties as Nat
 
-module Aeres.Data.UTF8.Trie where
+module Aeres.Data.Unicode.UTF8.Trie where
 
 open Base256
 

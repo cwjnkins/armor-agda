@@ -2,38 +2,27 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
-open import Aeres.Data.UTF8
-open import Aeres.Data.X509.Strings.TCB
+open import Aeres.Data.Unicode.UTF16
+open import Aeres.Data.X690-DER.Strings.BMPString.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.OctetString
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
 
-module Aeres.Data.X509.Strings.Parser where
+module Aeres.Data.X690-DER.Strings.BMPString.Parser where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Parser UInt8
+open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Parser      UInt8
 
-parseTeletexString : Parser (Logging ∘ Dec) TeletexString
-parseTeletexString =
-  parseTLV Tag.TeletexString "teletex string" OctetStringValue parseOctetStringValue
-
-parseUniversalString : Parser (Logging ∘ Dec) UniversalString
-parseUniversalString =
-  parseTLV Tag.UniversalString "universal string" _ parseUTF8
-
-parseUTF8String : Parser (Logging ∘ Dec) UTF8String
-parseUTF8String =
-  parseTLV Tag.UTF8String "UTF8 string" _ parseUTF8
+private
+  here' = "X690-DER: Strings: BMPString: parse:"
 
 parseBMPString : Parser (Logging ∘ Dec) BMPString
 parseBMPString =
-  parseTLV Tag.BMPString "BMP string" _ parseUTF8
-
-parseVisibleString : Parser (Logging ∘ Dec) VisibleString
-parseVisibleString =
-  parseTLV Tag.VisibleString "universal string" _ parseUTF8
+  parseTLV Tag.BMPString here' _ parseBMP
 
 -- private
 --   module Test where

@@ -2,12 +2,12 @@
 
 open import Aeres.Binary
 import      Aeres.Grammar.Sum
-open import Aeres.Data.UTF8
-import      Aeres.Data.UTF8.Properties                  as UTF8Props
-open import Aeres.Data.X509.IA5String
+open import Aeres.Data.Unicode
+open import Aeres.Data.X690-DER.Strings.IA5String
+open import Aeres.Data.X690-DER.Strings.PrintableString
 open import Aeres.Data.X509.DirectoryString.TCB
-open import Aeres.Data.X509.Strings
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.IList
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -16,6 +16,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DirectoryString.Properties where
 
 open import Aeres.Grammar.Definitions UInt8
+open        Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Sum                UInt8
 
 nonnesting : NonNesting DirectoryString
@@ -100,11 +101,18 @@ proj₂ (proj₂ iso) (bmpString x) = refl
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
-      (unambiguousSum (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
-        (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-          (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-            (TLV.NonEmptyVal.unambiguous UTF8Props.unambiguous)
-              (noconfusionΣₚ (TLV.noconfusion λ ())))
+      (unambiguousSum
+        (TLV.NonEmptyVal.unambiguous
+          (IList.unambiguous
+            PrintableString.Char.unambiguous
+            PrintableString.Char.nonempty
+            PrintableString.Char.nonnesting))
+        (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF32.unambiguous)
+          (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8.unambiguous)
+            (TLV.NonEmptyVal.unambiguous
+              (IList.unambiguous
+                UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
+            (noconfusionΣₚ (TLV.noconfusion λ ())))
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)
