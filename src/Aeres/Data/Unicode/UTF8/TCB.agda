@@ -79,6 +79,10 @@ InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) _ _ = ⊥
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
 
+module UTF8 where
+  size : ∀ {@0 bs} → UTF8 bs → ℕ
+  size utf8 = lengthIList utf8
+
 instance
   -- TODO: come back to this if there are performance issues
   NumericUTF8Char : ∀ {@0 bs} → Numeric (UTF8Char bs)
