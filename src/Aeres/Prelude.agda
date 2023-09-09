@@ -545,6 +545,10 @@ module Lemmas where
   -- ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   -- ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
 
+  take-≤-length-++ : ∀ {ℓ} {A : Set ℓ} n (xs ys : List A) → n ≤ length xs → take n (xs ++ ys) ≡ take n xs
+  take-≤-length-++ zero xs ys n≤ = refl
+  take-≤-length-++ (suc n) (x ∷ xs) ys (s≤s n≤) = cong (x ∷_) (take-≤-length-++ n xs ys n≤)
+
   take-length-++ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → take (length xs) (xs ++ ys) ≡ xs
   take-length-++ [] ys = refl
   take-length-++ (x ∷ xs) ys = cong (x ∷_) (take-length-++ xs ys)
