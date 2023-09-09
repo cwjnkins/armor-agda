@@ -27,7 +27,7 @@ module parseSequenceOf
   (eName : String) (A : List Dig → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
   (p : Parser (Logging ∘ Dec) A) where
 
-  here' = "parseSeq"
+  here' = "parseSeq: "
 
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -38,7 +38,7 @@ module parseSequenceOf
       (success [] _ refl (mk×ₚ nil (─ refl) refl) xs refl))
   runParser (parseSequenceOfWF n@(suc _)) xs (WellFounded.acc rs) = do
     yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len) refl) suf₀ ps≡₀)
-      ← runParser (parse≤ n p nn (tell $ here' String.++ ": overflow")) xs
+      ← runParser (parse≤ n p nn (tell $ here' String.++ "overflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ nil (─ ()) refl) suffix ps≡)
@@ -133,7 +133,7 @@ module parseSequenceOf
         return (yes
           (success pre₀ r₀ r₀≡ (mk×ₚ (mk×ₚ v₀ b≤len refl) (─ v₀Len) refl) suf₀ ps≡₀))
       (no  b≰len) → do
-        tell $ here' String.++ ": does not meet min length"
+        tell $ here' String.++ eName String.++ ": does not meet min length"
         return ∘ no $ λ where
           (success prefix read read≡ (mk×ₚ (mk×ₚ fstₚ₁ sndₚ₂ refl) (─ sndₚ₁) refl) suffix ps≡) → ‼
             let @0 pre₀≡ : prefix ≡ pre₀
@@ -151,10 +151,10 @@ module parseSequenceOf
               b≰len
 
   parseSeq : Parser (Logging ∘ Dec) (Seq A)
-  parseSeq = parseTLV Tag.Sequence "seq" (SequenceOf A) parseSequenceOf
+  parseSeq = parseTLV Tag.Sequence ("parseSeq: " String.++ eName) (SequenceOf A) parseSequenceOf
 
   parseNonEmptySeq : Parser (Logging ∘ Dec) (NonEmptySeq A)
-  parseNonEmptySeq = parseTLV Tag.Sequence "seq" (NonEmptySequenceOf A) λ n → parseBoundedSequenceOf n 1
+  parseNonEmptySeq = parseTLV Tag.Sequence ("parseNonEmptySeq: " String.++ eName) (NonEmptySequenceOf A) λ n → parseBoundedSequenceOf n 1
 
 open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseNonEmptySeq ; parseSeq)
 

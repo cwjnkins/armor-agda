@@ -48,7 +48,7 @@ module parseRDN where
 
   parseRDNSeq : Parser (Logging ∘ Dec) RDNSeq
   parseRDNSeq =
-    parseSeq (here₁ String.++ " Sequence") _ TLV.nonempty TLV.nonnesting parseRDN
+    parseSeq (here₁ String.++ " (fields)") _ TLV.nonempty TLV.nonnesting parseRDN
 
 open parseRDN public
   using (parseRDNATV ; parseRDN ; parseRDNSeq)

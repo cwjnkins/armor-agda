@@ -25,10 +25,10 @@ open Aeres.Grammar.Sum         UInt8
 
 equivalent
   : Equivalent
-      (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-      (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
-      (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
-           (Σₚ UTF8String    (TLVLenBounded 1 200)))))
+      (Sum (Σₚ IA5String     (TLVSizeBounded IA5StringValue.size 1 200))
+      (Sum (Σₚ VisibleString (TLVSizeBounded VisibleStringValue.size 1 200))
+      (Sum (Σₚ BMPString     (TLVSizeBounded UTF16.size 1 200))
+           (Σₚ UTF8String    (TLVSizeBounded UTF8.size 1 200)))))
       DisplayText
 proj₁ equivalent (Sum.inj₁ x) = ia5String x
 proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = visibleString x
@@ -41,10 +41,10 @@ proj₂ equivalent (utf8String x) = inj₂ (inj₂ (inj₂ x))
 
 iso
   : Iso
-      (Sum (Σₚ IA5String     (TLVLenBounded 1 200))
-      (Sum (Σₚ VisibleString (TLVLenBounded 1 200))
-      (Sum (Σₚ BMPString     (TLVLenBounded 1 200))
-           (Σₚ UTF8String    (TLVLenBounded 1 200)))))
+      (Sum (Σₚ IA5String     (TLVSizeBounded IA5StringValue.size 1 200))
+      (Sum (Σₚ VisibleString (TLVSizeBounded VisibleStringValue.size 1 200))
+      (Sum (Σₚ BMPString     (TLVSizeBounded UTF16.size 1 200))
+           (Σₚ UTF8String    (TLVSizeBounded UTF8.size 1 200)))))
       DisplayText
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl

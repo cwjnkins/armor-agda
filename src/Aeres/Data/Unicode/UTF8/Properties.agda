@@ -304,6 +304,9 @@ unambiguous =
   IList.unambiguous
     UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
 
+sizeUnique : ∀ {@0 bs} → (a₁ a₂ : UTF8 bs) → UTF8.size a₁ ≡ UTF8.size a₂
+sizeUnique a₁ a₂ = ‼ cong UTF8.size (unambiguous a₁ a₂)
+
 instance
   UTF8Char1Eq≋ : Eq≋ UTF8Char1
   Eq≋._≋?_ UTF8Char1Eq≋ (mkUTF8Char1 b₁₁ b₁range₁ refl) (mkUTF8Char1 b₁₂ b₁range₂ refl) =

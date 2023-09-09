@@ -17,4 +17,7 @@ record VisibleStringValue (@0 bs : List UInt8) : Set where
     @0 range : All (InRange 32 127) chars
     @0 bs≡ : bs ≡ chars
 
+  size : ℕ
+  size = length chars
+
 VisibleString = TLV Tag.VisibleString VisibleStringValue
