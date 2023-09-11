@@ -11,11 +11,16 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.Strings.IA5String.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Data.X690-DER.Strings.IA5String.TCB.IA5StringValue
+  using (size)
 
 @0 unambiguous : Unambiguous IA5StringValue
 unambiguous (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) =
   subst₀ (λ x → _ ≡ mkIA5StringValue self x)
     (T-unique all<128 all<129) refl
+
+sizeUnique : ∀ {@0 bs} → (a₁ a₂ : IA5StringValue bs) → size a₁ ≡ size a₂
+sizeUnique (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) = refl
 
 Rep : @0 List UInt8 → Set
 Rep = Σₚ OctetStringValue λ _ str → Erased (True (All.all? (Fin._<? (# 128)) (↑ str)))

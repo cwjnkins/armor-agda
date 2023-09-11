@@ -96,9 +96,9 @@ module parseTLV
 open parseTLV public using (parseTLV)
 
 parseTLVLenBound
-  : ∀ {t A} l u → Parser (Logging ∘ Dec) (TLV t A)
+  : ∀ {t A} l u → (tName : String) → Parser (Logging ∘ Dec) (TLV t A)
     → Parser (Logging ∘ Dec) (Σₚ (TLV t A) (TLVLenBounded l u))
-runParser (parseTLVLenBound l u p) xs = do
+runParser (parseTLVLenBound l u tName p) xs = do
   yes (success pre r r≡ v suf bs≡) ← runParser p xs
     where no ¬parse → do
       return ∘ no $ λ where
@@ -109,13 +109,53 @@ runParser (parseTLVLenBound l u p) xs = do
       return (yes
         (success pre r r≡ (mk×ₚ v l≤len≤u refl) suf bs≡))
     (no  ¬l≤len≤u) → do
-      tell $ "parseTLVLenBound" String.++ ": given length bounds violated"
+      tell $ "parseTLVLenBound: " String.++ tName String.++ ": given length bounds violated"
       return ∘ no $ λ where
         (success pre' r' r'≡ (mk×ₚ v' l≤len≤u refl) suf' bs≡') → ‼
           let @0 len≡ : getLength (TLV.len v) ≡ getLength (TLV.len v')
               len≡ = TLV.getLengthLen≡ (trans₀ bs≡ (sym bs≡')) v v'
           in
           contradiction (subst (InRange l u) (sym len≡) l≤len≤u) ¬l≤len≤u
+
+parseTLVSizeBound
+  : ∀ {t A} (size : ∀ {@0 bs} → A bs → ℕ) (uniqueSize : ∀ {@0 bs} → (a₁ a₂ : A bs) → size a₁ ≡ size a₂)
+    → ∀ l u
+    → (tName : String) → Parser (Logging ∘ Dec) (TLV t A)
+    → Parser (Logging ∘ Dec) (Σₚ (TLV t A) (TLVSizeBounded size l u))
+runParser (parseTLVSizeBound size uniqueSize l u tName p) xs = do
+  yes (success pre r r≡ tlv@(mkTLV{v = v} len val len≡ bs≡) suf ps≡) ← runParser p xs
+    where no ¬parse → do
+      return ∘ no $ λ where
+        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+          contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
+  case inRange? l u (size val) of λ where
+    (no ¬p) → do
+      tell $
+        "parseTLVSizeBound: " String.++ tName
+        String.++ ": size " String.++ show (size val)
+        String.++ " out of bounds: " String.++ show l String.++ "," String.++ show u
+      return ∘ no $ λ where
+        (success prefix read read≡ (mk×ₚ tlv'@(mkTLV{v = v'} len' val' len≡' bs≡') ir refl) suffix ps≡') →
+          let
+            xs≡ : Erased (prefix ++ suffix ≡ pre ++ suf)
+            xs≡ = ─ trans ps≡' (sym ps≡)
+
+            prefix≡ : Erased (prefix ≡ pre)
+            prefix≡ = ─ nonnesting (¡ xs≡) tlv' tlv
+
+            v≡ : Erased (v ≡ v')
+            v≡ = ─ TLVProps.valBS≡ (sym (¡ prefix≡)) tlv tlv' 
+
+            len≡ : Erased (size val' ≡ size val)
+            len≡ = ─
+              (case (¡ v≡) ret (const _) of λ where
+                refl → uniqueSize val' val)
+          in
+          contradiction (subst (InRange{B = ℕ} l u) (¡ len≡) ir) ¬p
+    (yes p) →
+      return (yes (success pre r r≡ (mk×ₚ tlv p refl) suf ps≡))
+  where
+  open ≡-Reasoning
 
 parseTLVNonEmpty
   : ∀ {t A} → Parser (Logging ∘ Dec) (TLV t A)

@@ -60,3 +60,10 @@ module BMP where
 
     UTF16Eq≋ : Eq≋ BMP
     UTF16Eq≋ = IList.IListEq≋
+
+sizeUnique : ∀ {@0 bs} → (a₁ a₂ : BMP bs) → size a₁ ≡ size a₂
+sizeUnique nil nil = refl
+sizeUnique nil (consIList {_} {_} (mkBMPChar _ _ _ refl) t₂ ())
+sizeUnique (consIList (mkBMPChar c₁₁ c₁₂ _ refl) t₁ ()) nil
+sizeUnique (consIList (mkBMPChar c₁₁ c₁₂ _ refl) t₁ refl) (consIList (mkBMPChar ._ ._ _ refl) t₂ refl) =
+  cong suc (sizeUnique t₁ t₂)

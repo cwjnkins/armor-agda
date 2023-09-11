@@ -47,7 +47,7 @@ parseCerts fn input =
          String.++ "-- only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
          String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
       IO.>> Aeres.IO.putStrLnErr "-- attempting to parse remainder"
-      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList suf) of λ where
+      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCert suf) of λ where
         (mkLogged log₂ (yes _)) →
           Aeres.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
           IO.>> Aeres.IO.exitFailure
@@ -64,15 +64,18 @@ parseCerts fn input =
         (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
           Aeres.IO.putStrLnErr
             (fn String.++ " (decoded): incomplete read\n"
-             String.++ "-- read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509)) String.++ "certificate(s), but more bytes remain\n"
+             String.++ "-- only read "
+               String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509))
+               String.++ " certificate(s), but more bytes remain\n"
              String.++ "-- attempting to parse remainder")
           IO.>> ((case runParser parseCert suf of λ where
             (mkLogged log₃ (yes _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
               IO.>> Aeres.IO.exitFailure
             (mkLogged log₃ (no _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded):\n--" String.++
-                foldl String._++_ "" log₃)
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded): "
+                String.++ show (map toℕ (take 10 suf))
+                String.++ foldl String._++_ "" log₃)
               IO.>> Aeres.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
