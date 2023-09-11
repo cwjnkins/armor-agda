@@ -33,6 +33,8 @@ module parseDirectoryString where
       where yes u → return (yes (mapSuccess (λ {bs} → utf8String{bs}) u))
     no ¬bmp ← runParser (parseTLVNonEmpty parseBMPString) xs
       where yes b → return (yes (mapSuccess (λ {bs} → bmpString{bs}) b))
+    no ¬ia5 ← runParser (parseTLVNonEmpty parseIA5String) xs
+      where yes b → return (yes (mapSuccess (λ {bs} → ia5String{bs}) b))
     return ∘ no $ λ where
       (success prefix read read≡ (teletexString x) suffix ps≡) →
         contradiction (success _ _ read≡ x _ ps≡) ¬teletex
@@ -44,6 +46,9 @@ module parseDirectoryString where
         contradiction (success _ _ read≡ x _ ps≡) ¬utf8
       (success prefix read read≡ (bmpString x) suffix ps≡) →
         contradiction (success _ _ read≡ x _ ps≡) ¬bmp
+      (success prefix read read≡ (ia5String x) suffix ps≡) →
+        contradiction (success _ _ read≡ x _ ps≡) ¬ia5
+
 
 open parseDirectoryString public using (parseDirectoryString)
 
