@@ -27,7 +27,7 @@ open Base256
 open Aeres.Grammar.Definitions Dig
 
 
--- Note: Currently, we only transform unicode strings encoded in UTF8. For UTF16 and UTF32, we do not perform any transformation yet.
+-- Note: Currently, we only transform unicode strings encoded in UTF8. For UTF16 and UTF32, we do not perform any transformation before comparison.
 
 appendUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8
 appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , (appendIList _ snd snd₁)
@@ -57,7 +57,11 @@ Transcode (printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len
 Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf32 val)
 Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf8 val)
 Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf16 val)
-Transcode (ia5String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = {!!}
+Transcode (ia5String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf8 (helper (toWitness all<128)))
+  where
+  helper :  ∀ {bs} → @0 All (Fin._< # 128) bs → UTF8 bs
+  helper {[]} x = nil
+  helper {x₁ ∷ bs} (px ∷ x) = cons (mkIListCons (utf81 (mkUTF8Char1 x₁ px refl)) (helper x) refl)
 
 
 InitialMapping : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
