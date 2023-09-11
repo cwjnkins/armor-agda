@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
 
 open import Data.Nat.DivMod
 import      Aeres.Binary
@@ -57,12 +57,7 @@ Transcode (printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len
 Transcode (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf32 val)
 Transcode (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf8 val)
 Transcode (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf16 val)
-Transcode (ia5String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (mkIA5StringValue (Aeres.Prelude.singleton [] x≡) all<128) len≡ bs≡₁) sndₚ₁ refl)) = {!!}
-Transcode (ia5String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len (mkIA5StringValue (Aeres.Prelude.singleton (x ∷ x₁) x≡) all<128) len≡ bs≡₁) sndₚ₁ refl)) = {!!}
-  where
-  helper : List UInt8  → Exists─ (List UInt8) UTF8
-  helper [] = {!!}
-  helper (x ∷ x₁) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 x (toWitness {Q = Fin.toℕ x <? 128} {!!}) refl)) {!!} refl)
+Transcode (ia5String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = {!!}
 
 
 InitialMapping : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
