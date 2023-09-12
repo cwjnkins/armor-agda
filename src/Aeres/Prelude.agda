@@ -579,6 +579,9 @@ module Lemmas where
     with length-++-≡ ws xs ys zs (∷-injectiveʳ ++-≡) (cong pred len≡)
   ...| refl , xs≡zs = cong (_∷ ws) (∷-injectiveˡ ++-≡) , xs≡zs
 
+  length-0-≡-[] : ∀ {ℓ} {A : Set ℓ} (xs : List A) → length xs ≡ 0 → xs ≡ []
+  length-0-≡-[] [] len = refl
+
   ++-≡-⊆ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ≡ ys ++ zs → ∃[ n ] ( ws ++ take n xs ≡ ys ⊎  ws ≡ ys ++ take n zs)
   ++-≡-⊆ [] xs [] zs eq = 0 , inj₁ refl
   ++-≡-⊆ [] (x₁ ∷ xs) (x ∷ ys) zs eq =

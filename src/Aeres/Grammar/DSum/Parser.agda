@@ -15,10 +15,11 @@ parse
   : ∀ {M n} → ⦃ _ : Monad M ⦄
     → {A : Vec Σ n → Set} {B : {xs : Vec Σ n} → A xs → List Σ → Set}
     → (underflow notFound ¬pb : M (Level.Lift _ ⊤))
-    → Decidable A → (∀ xs → Unique (A xs))
-    → (∀ {@0 xs₁} → (d : A xs₁) → Parser (M ∘ Dec) (B d ∘ (Vec.toList xs₁ ++_)))
+    → Decidable A → @0 (∀ xs → Unique (A xs))
+    → @0 (∀ {xs₁ xs₂} → (d : A xs₁) → B d xs₂ → n ≤ length xs₂)
+    → (∀ {@0 xs₁} → (d : A xs₁) → Parser (M ∘ Dec) (B d))
     → Parser (M ∘ Dec) (DSum{n} A B)
-runParser (parse{n = n}{A = A}{B = B} underflow notFound ¬pb d? uA p) xs = do
+runParser (parse{n = n}{A = A}{B = B} underflow notFound ¬pb d? uA bLen p) xs = do
   (yes (success .look ._ refl (mk×ₚ (singleton look refl) (─ v₁Len) refl) suf₁ ps≡₁)) ← runParser (parseN n underflow) xs
     where no ¬p → do
       notFound
@@ -67,7 +68,8 @@ runParser (parse{n = n}{A = A}{B = B} underflow notFound ¬pb d? uA p) xs = do
           in
           contradiction (subst A (sym (¡ look≡')) discr) ¬p
     (yes discr) → do
-      (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) ← runParser (p discr) suf₁
+      -- try 1
+      (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) ← runParser (p discr) xs
         where no ¬p → do
           ¬pb
           return ∘ no $ λ where
@@ -98,77 +100,26 @@ runParser (parse{n = n}{A = A}{B = B} underflow notFound ¬pb d? uA p) xs = do
                 discr“ : A look'
                 discr“ = subst₀ A (sym (¡ look≡')) discr'
 
-                value' : B{look'} discr (Vec.toList look' ++ drop n prefix)
+                value' : B discr prefix
                 value' =
                   case look≡' ret (const _) of λ where
-                    (─ refl) → case uA look' discr discr' ret (const _) of λ where
-                      refl →
-                        subst₀ (B discr)
-                          (begin
-                            prefix ≡⟨ sym (take++drop n prefix) ⟩
-                            take n prefix ++ drop n prefix ≡⟨ cong (_++ drop n prefix) (sym look≡) ⟩
-                            Vec.toList look' ++ drop n prefix ∎)
-                          value
+                    (─ refl) →
+                      case (‼ uA look' discr discr') ret (const _) of λ where
+                        refl → value
               in
-              contradiction
-                (success (drop n prefix) _ refl value' suffix
-                  (++-cancelˡ look
-                    (begin
-                      look ++ drop n prefix ++ suffix ≡⟨ cong (_++ drop n prefix ++ suffix)
-                        (begin
-                          look ≡⟨ sym (Vec.toList∘fromList look) ⟩
-                          Vec.toList (Vec.fromList look)
-                            ≡⟨ ≡-elim (λ eq → Vec.toList (Vec.fromList look) ≡ Vec.toList (subst₀ (Vec Σ) eq (Vec.fromList look))) refl v₁Len ⟩
-                          Vec.toList look' ≡⟨ cong Vec.toList (¡ look≡') ⟩
-                          Vec.toList look“ ≡⟨ look≡ ⟩
-                          take n prefix ∎) ⟩
-                      take n prefix ++ drop n prefix ++ suffix ≡⟨ sym (++-assoc (take n prefix) (drop n prefix) suffix) ⟩
-                      (take n prefix ++ drop n prefix) ++ suffix ≡⟨ cong (_++ suffix) (take++drop n prefix) ⟩
-                      prefix ++ suffix ≡⟨ ps≡ ⟩
-                      xs ≡⟨ sym ps≡₁ ⟩
-                      look ++ suf₁ ∎)))
-                ¬p
+              contradiction (success prefix _ refl value' suffix ps≡) ¬p
       let
-        look≡ : Erased (Vec.toList look' ≡ look)
-        look≡ = ─
-          (caseErased v₁Len ret (λ eq → Vec.toList (subst₀ (Vec Σ) eq (Vec.fromList look)) ≡ look) of λ where
-            refl → ─ Vec.toList∘fromList look)
-
-        v₂' : B discr (look ++ pre₂)
-        v₂' = subst₀ (λ x → B discr (x ++ pre₂)) (¡ look≡) v₂
-
-        look≡' : Erased (Vec.toList look' ≡ take n (look ++ pre₂))
-        look≡' = ─
-          (begin
-            (Vec.toList look' ≡⟨ ¡ look≡ ⟩
-            look ≡⟨ sym (Lemmas.take-length-++ look pre₂) ⟩
-            take (length look) (look ++ pre₂) ≡⟨ cong (λ x → take x (look ++ pre₂)) v₁Len ⟩
-            take n (look ++ pre₂) ∎))
+        lookPrefix : Erased (Vec.toList look' ≡ take n pre₂)
+        lookPrefix = ─ (caseErased v₁Len ret (λ eq → Vec.toList (subst₀ (Vec Σ) eq (Vec.fromList look)) ≡ take n pre₂) of λ where
+          refl → ─
+            (begin
+              Vec.toList (Vec.fromList look) ≡⟨ Vec.toList∘fromList look ⟩
+              look ≡⟨ (sym $ Lemmas.take-length-++ look suf₁) ⟩
+              take n (look ++ suf₁) ≡⟨ cong (take n) (trans ps≡₁ (sym ps≡₂)) ⟩
+              take n (pre₂ ++ suf₂) ≡⟨ Lemmas.take-≤-length-++ n pre₂ suf₂ (bLen discr v₂) ⟩
+              take n pre₂ ∎))
       return (yes
-        (success (look ++ pre₂)
-          (n + r₂)
-          (begin
-            n + r₂ ≡⟨ cong₂ _+_ (sym v₁Len) r₂≡ ⟩
-            length look + length pre₂ ≡⟨ sym (length-++ look ) ⟩
-            length (look ++ pre₂) ∎)
-          (mkDSum discr v₂' (¡ look≡'))
-          suf₂
-          (begin
-            (look ++ pre₂) ++ suf₂ ≡⟨ ++-assoc look pre₂ suf₂ ⟩
-            look ++ pre₂ ++ suf₂ ≡⟨ cong (look ++_) ps≡₂ ⟩
-            look ++ suf₁ ≡⟨ ps≡₁ ⟩
-            xs ∎)))
-      -- let
-      --   look≡ : Erased (Vec.toList look' ≡ take n pre₂)
-      --   look≡ = ─ (
-      --     caseErased v₁Len ret (λ eq → Vec.toList (subst₀ (Vec Σ) eq (Vec.fromList look)) ≡ take n pre₂) of λ where
-      --       refl → ─ (begin
-      --         Vec.toList (Vec.fromList look) ≡⟨ Vec.toList∘fromList look ⟩
-      --         look ≡⟨ {!!} ⟩
-      --         take n (look ++ suf₁) ≡⟨ {!!} ⟩
-      --         take n xs ≡⟨ {!!} ⟩
-      --         take n (pre₂ ++ suf₂) ≡⟨ {!!} ⟩
-      --         {!!}))
+        (success pre₂ _ r₂≡ (mkDSum{look = look'} discr v₂ (¡ lookPrefix)) _ ps≡₂))
   where
   open ≡-Reasoning
   import Data.Nat.Properties as Nat

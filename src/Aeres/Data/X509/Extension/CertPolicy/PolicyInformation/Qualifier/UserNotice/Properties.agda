@@ -33,18 +33,7 @@ proj₂ (proj₂ iso) (mkUserNoticeFields noticeRef expText bs≡) = refl
 
 private
   @0 nc : NoConfusion NoticeReference DisplayText
-  nc = symNoConfusion{A = DisplayText}{B = NoticeReference}
-         (NoConfusion.equivalent{A₁ = Sum _ _}{A₂ = DisplayText}{NoticeReference}
-           DisplayText.equivalent
-           (symNoConfusion{NoticeReference}{Sum _ _}
-             (NoConfusion.sumₚ{NoticeReference}
-               (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference}
-                 (TLV.noconfusion λ ()))
-               (NoConfusion.sumₚ{NoticeReference}
-                 (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
-                 (NoConfusion.sumₚ{NoticeReference}
-                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
-                   (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ())))))))
+  nc = DisplayText.noconfusionTLV (toWitnessFalse{Q = _ ∈? _} tt)
 
 @0 unambiguous : Unambiguous UserNoticeFields
 unambiguous =
