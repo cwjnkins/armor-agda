@@ -17,4 +17,3 @@ data DirectoryString : @0 List UInt8 → Set where
   universalString : ∀ {@0 bs} → Σₚ UniversalString TLVNonEmptyVal bs → DirectoryString bs
   utf8String : ∀ {@0 bs} → Σₚ UTF8String TLVNonEmptyVal bs → DirectoryString bs
   bmpString  : ∀ {@0 bs} → Σₚ BMPString  TLVNonEmptyVal bs → DirectoryString bs
-  ia5String  : ∀ {@0 bs} → Σₚ IA5String  TLVNonEmptyVal bs → DirectoryString bs

@@ -31,8 +31,5 @@ instance
           ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
           ⦃ sumEq≋
             ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-            ⦃ sumEq≋
-              ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-              ⦃ sumEq≋
-                  ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-                  ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄ ⦄ ⦄ ⦄ ⦄)
+            ⦃ sumEq≋ ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
+                     ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄ ⦄ ⦄ ⦄)

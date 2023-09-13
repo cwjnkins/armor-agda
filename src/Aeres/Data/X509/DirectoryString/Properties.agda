@@ -25,124 +25,94 @@ nonnesting x (teletexString x₁) (printableString x₂)    = ⊥-elim (noconfus
 nonnesting x (teletexString x₁) (universalString x₂)    = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (teletexString x₁) (utf8String x₂)         = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (teletexString x₁) (bmpString x₂)          = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (teletexString x₁) (ia5String x₂)          = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (printableString x₁) (teletexString x₂)    = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (printableString x₁) (printableString x₂)  = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 nonnesting x (printableString x₁) (universalString x₂)  = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (printableString x₁) (utf8String x₂)       = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (printableString x₁) (bmpString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (printableString x₁) (ia5String x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (universalString x₁) (teletexString x₂)    = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (universalString x₁) (printableString x₂)  = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (universalString x₁) (universalString x₂)  = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 nonnesting x (universalString x₁) (utf8String x₂)       = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (universalString x₁) (bmpString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (universalString x₁) (ia5String x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (utf8String x₁) (teletexString x₂)         = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (utf8String x₁) (printableString x₂)       = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (utf8String x₁) (universalString x₂)       = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (utf8String x₁) (utf8String x₂)            = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 nonnesting x (utf8String x₁) (bmpString x₂)             = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (utf8String x₁) (ia5String x₂)             = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (bmpString x₁) (teletexString x₂)          = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (bmpString x₁) (printableString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (bmpString x₁) (universalString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (bmpString x₁) (utf8String x₂)             = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
 nonnesting x (bmpString x₁) (bmpString x₂)              = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
-nonnesting x (bmpString x₁) (ia5String x₂)              = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (teletexString x₂)          = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (printableString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (universalString x₂)        = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (utf8String x₂)             = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (bmpString x₂)              = ⊥-elim (noconfusionΣₚ (TLV.noconfusion λ ()) x x₁ x₂)
-nonnesting x (ia5String x₁) (ia5String x₂)              = ‼ (nonnestingΣₚ₁ TLV.nonnesting x x₁ x₂)
 
 @0 noconfusion₁ : NoConfusion (Σₚ TeletexString TLVNonEmptyVal)
                     (Sum (Σₚ PrintableString TLVNonEmptyVal)
                     (Sum (Σₚ UniversalString TLVNonEmptyVal)
                     (Sum (Σₚ UTF8String TLVNonEmptyVal)
-                    (Sum (Σₚ BMPString TLVNonEmptyVal)
-                         (Σₚ IA5String TLVNonEmptyVal)))))
+                         (Σₚ BMPString TLVNonEmptyVal))))
 noconfusion₁ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x₂)))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x₂)))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
+noconfusion₁ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x₂))) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
 @0 noconfusion₂ : NoConfusion (Σₚ PrintableString TLVNonEmptyVal)
                               (Sum (Σₚ UniversalString TLVNonEmptyVal)
                               (Sum (Σₚ UTF8String      TLVNonEmptyVal)
-                              (Sum (Σₚ BMPString      TLVNonEmptyVal)
-                                   (Σₚ IA5String      TLVNonEmptyVal))))
+                                   (Σₚ BMPString       TLVNonEmptyVal)))
 noconfusion₂ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x₂))) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x₂))) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
+noconfusion₂ x x₁ (Sum.inj₂ (Sum.inj₂ x₂)) =  noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
-@0 noconfusion₃ : NoConfusion (Σₚ UniversalString TLVNonEmptyVal)
-                              (Sum (Σₚ UTF8String TLVNonEmptyVal)
-                              (Sum (Σₚ BMPString TLVNonEmptyVal)
-                                   (Σₚ IA5String TLVNonEmptyVal)))
+@0 noconfusion₃ : NoConfusion (Σₚ UniversalString TLVNonEmptyVal) (Sum (Σₚ UTF8String TLVNonEmptyVal) (Σₚ BMPString TLVNonEmptyVal))
 noconfusion₃ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₃ x x₁ (Sum.inj₂ (Sum.inj₁ x₂)) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₃ x x₁ (Sum.inj₂ (Sum.inj₂ x₂)) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-
-@0 noconfusion₄ : NoConfusion (Σₚ UTF8String TLVNonEmptyVal)
-                              (Sum (Σₚ BMPString TLVNonEmptyVal)
-                                   (Σₚ IA5String TLVNonEmptyVal))
-noconfusion₄ x x₁ (Sum.inj₁ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
-noconfusion₄ x x₁ (Sum.inj₂ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
+noconfusion₃ x x₁ (Sum.inj₂ x₂) = noconfusionΣₚ (TLV.noconfusion (λ ())) x x₁ x₂
 
 Rep = (Sum (Σₚ TeletexString   TLVNonEmptyVal)
       (Sum (Σₚ PrintableString TLVNonEmptyVal)
       (Sum (Σₚ UniversalString TLVNonEmptyVal)
       (Sum (Σₚ UTF8String      TLVNonEmptyVal)
-      (Sum (Σₚ BMPString       TLVNonEmptyVal)
-           (Σₚ IA5String       TLVNonEmptyVal))))))
+           (Σₚ BMPString       TLVNonEmptyVal)))))
 
 iso : Iso Rep DirectoryString
 proj₁ (proj₁ iso) (Sum.inj₁ x) = teletexString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₁ x)) = printableString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = universalString x
 proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = utf8String x
-proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = bmpString x
-proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))))) = ia5String x
+proj₁ (proj₁ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))) = bmpString x
 proj₂ (proj₁ iso) (teletexString x) = Sum.inj₁ x
 proj₂ (proj₁ iso) (printableString x) = Sum.inj₂ (Sum.inj₁ x)
 proj₂ (proj₁ iso) (universalString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
 proj₂ (proj₁ iso) (utf8String x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))
-proj₂ (proj₁ iso) (bmpString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))
-proj₂ (proj₁ iso) (ia5String x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))))
+proj₂ (proj₁ iso) (bmpString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = refl
-proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = refl
-proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))))) = refl
+proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))) = refl
 proj₂ (proj₂ iso) (teletexString x) = refl
 proj₂ (proj₂ iso) (printableString x) = refl
 proj₂ (proj₂ iso) (universalString x) = refl
 proj₂ (proj₂ iso) (utf8String x) = refl
 proj₂ (proj₂ iso) (bmpString x) = refl
-proj₂ (proj₂ iso) (ia5String x) = refl
 
 
 @0 unambiguous : Unambiguous DirectoryString
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
-      (unambiguousSum (TLV.NonEmptyVal.unambiguous
-                        (IList.unambiguous
-                          PrintableString.Char.unambiguous
-                          PrintableString.Char.nonempty
-                          PrintableString.Char.nonnesting))
+      (unambiguousSum
+        (TLV.NonEmptyVal.unambiguous
+          (IList.unambiguous
+            PrintableString.Char.unambiguous
+            PrintableString.Char.nonempty
+            PrintableString.Char.nonnesting))
         (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF32.unambiguous)
           (unambiguousSum (TLV.NonEmptyVal.unambiguous UTF8.unambiguous)
-            (unambiguousSum (TLV.NonEmptyVal.unambiguous
-                              (IList.unambiguous UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
-                            (TLV.NonEmptyVal.unambiguous IA5String.unambiguous)
-              (noconfusionΣₚ(TLV.noconfusion λ ())))
-            noconfusion₄)
+            (TLV.NonEmptyVal.unambiguous
+              (IList.unambiguous
+                UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
+            (noconfusionΣₚ (TLV.noconfusion λ ())))
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)
