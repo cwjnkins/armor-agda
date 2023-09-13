@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.SignAlg.ECDSA.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum
@@ -17,9 +17,9 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum         UInt8
 
 instance
-  eq≋ : ∀ {@0 bs} → {o : OIDValue bs} → Eq≋ (AlgorithmIdentifierFields (ECDSA-Like-Params o))
+  eq≋ : ∀ {@0 bs} → {o : OIDValue bs} → Eq≋ (DefinedByOIDFields (ECDSA-Like-Params o))
   eq≋{o = o} =
-    AlgorithmIdentifier.eq≋ _
+    DefinedByOID.eq≋ _
       λ o₁ →
         record
           { _≋?_ = λ where

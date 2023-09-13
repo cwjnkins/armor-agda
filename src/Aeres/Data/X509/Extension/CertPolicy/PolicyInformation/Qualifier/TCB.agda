@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -21,14 +21,14 @@ CPSURIQualifierParam o =
      IA5String
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.CPSURI)
 
-CPSURIQualifier = AlgorithmIdentifierFields CPSURIQualifierParam
+CPSURIQualifier = DefinedByOIDFields CPSURIQualifierParam
 
 UserNoticeQualifierParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
 UserNoticeQualifierParam o =
      UserNotice
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.UserNotice)
 
-UserNoticeQualifier = AlgorithmIdentifierFields UserNoticeQualifierParam
+UserNoticeQualifier = DefinedByOIDFields UserNoticeQualifierParam
 
 data PolicyQualifierInfoFields : @0 List UInt8 → Set where
   cpsURI : ∀ {@0 bs} → CPSURIQualifier bs → PolicyQualifierInfoFields bs

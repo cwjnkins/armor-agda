@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Properties
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
@@ -29,7 +29,7 @@ private
 
 parseCPSURIQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength CPSURIQualifier n)
 parseCPSURIQualifier =
-  parseAlgorithmIdentifierFields λ n o →
+  DefinedByOID.parseDefinedByOIDFields here' λ n o →
     parseExactLength (nonnesting×ₚ₁ TLV.nonnesting)
       (tell $ here' String.++ ": CPSURI: length mismatch")
       (parse×Dec TLV.nonnesting (tell $ here' String.++ ": CPSURI: wrong OID")
@@ -39,7 +39,7 @@ parseCPSURIQualifier =
 
 parseUserNoticeQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeQualifier n)
 parseUserNoticeQualifier =
-  parseAlgorithmIdentifierFields λ n o →
+  DefinedByOID.parseDefinedByOIDFields here' λ n o →
     parseExactLength (nonnesting×ₚ₁ TLV.nonnesting)
       (tell $ here' String.++ ": UserNoticeQualifier: length mismatch")
       (parse×Dec TLV.nonnesting

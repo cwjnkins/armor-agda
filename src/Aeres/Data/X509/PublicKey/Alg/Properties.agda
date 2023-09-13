@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.HashAlg.Properties     as HashAlg
 open import Aeres.Data.X509.PublicKey.Alg.TCB
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
@@ -9,6 +8,7 @@ open import Aeres.Data.X509.PublicKey.Alg.EC
 open import Aeres.Data.X509.PublicKey.Alg.RSA
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -25,7 +25,7 @@ open Aeres.Grammar.Sum         UInt8
 @0 noConfusion-RSA-EC : NoConfusion RSA EC
 noConfusion-RSA-EC =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} algOID₁ (mk×ₚ _ ≋-refl refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} algOID₁ (mk×ₚ _ ≋-refl refl) bs≡₁) →
       let
         @0 algOID≋ : _≋_{A = OID} algOID algOID₁
         algOID≋ =
@@ -49,7 +49,7 @@ noConfusion-RSA-EC =
 @0 noConfusion-RSA-Unsupported : NoConfusion RSA UnsupportedPublicKeyAlg
 noConfusion-RSA-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
         @0 ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
         ++≡ = ─ (begin
@@ -77,7 +77,7 @@ noConfusion-RSA-Unsupported =
 @0 noConfusion-EC-Unsupported : NoConfusion EC UnsupportedPublicKeyAlg
 noConfusion-EC-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkAlgIDFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
       let
         ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
         ++≡ = ─ (begin
@@ -119,7 +119,7 @@ unambiguous =
     RSA.unambiguous
     (unambiguousSum{A = EC} EC.unambiguous
       (TLV.unambiguous
-        (AlgorithmIdentifier.unambiguous
+        (DefinedByOID.unambiguous
           UnsupportedParam λ o →
             unambiguous×ₚ OctetString.unambiguous T-unique))
       noConfusion-EC-Unsupported)

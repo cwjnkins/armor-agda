@@ -1,31 +1,35 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
-open import Aeres.Data.X509.AlgorithmIdentifier.Properties
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.Properties
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
-module Aeres.Data.X509.AlgorithmIdentifier.Parser where
+module Aeres.Data.X690-DER.Sequence.DefinedByOID.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 
-parseAlgorithmIdentifierFields
+private
+  here' = "Sequence: DefinedByOID"
+
+parseDefinedByOIDFields
   : ∀ {@0 P : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set}
+    → (s : String)
     → (∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (P o) n))
-    → ∀ n → Parser (Logging ∘ Dec) (ExactLength (AlgorithmIdentifierFields P) n)
-parseAlgorithmIdentifierFields{P} p₁ n =
+    → ∀ n → Parser (Logging ∘ Dec) (ExactLength (DefinedByOIDFields P) n)
+parseDefinedByOIDFields{P} s p₁ n =
   parseEquivalent
     (transEquivalent{B = ExactLength (Rep P) n} (symEquivalent Distribute.exactLength-&ᵈ) (equivalent×ₚ (equiv P)))
     (parse&ᵈ
       (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous OID.unambiguous)
-      (parse≤ _ parseOID TLV.nonnesting (tell $ "X509: AlgorithmIdentifier: Fields: overflow (OID)"))
+      (parse≤ _ parseOID TLV.nonnesting (tell $ s String.++ here' String.++ " (fields): overflow (OID)"))
       λ where
         (singleton r r≡) (mk×ₚ a (─ r≤) refl) →
           let p = p₁ (n - r) a
@@ -33,11 +37,9 @@ parseAlgorithmIdentifierFields{P} p₁ n =
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (P a) (n - x)))
             r≡ p)
 
-parseAlgorithmIdentifier
+parse
   : ∀ {@0 P : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set}
     → String
     → (∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (P o) n))
-    → Parser (Logging ∘ Dec) (AlgorithmIdentifier P)
-parseAlgorithmIdentifier{P} s p =
-  parseTLV _ ("parseAlgorithmIdentifier: " String.++ s)
-    (AlgorithmIdentifierFields P) λ n → parseAlgorithmIdentifierFields p n
+    → Parser (Logging ∘ Dec) (DefinedByOID P)
+parse{P} s p = parseTLV _ (s String.++ here') (DefinedByOIDFields P) λ n → parseDefinedByOIDFields s p n

@@ -168,56 +168,110 @@ module GeneralName where
   @0 unambiguous : Unambiguous GeneralName
   unambiguous =
     isoUnambiguous iso
-      (unambiguousSum
-        (TLV.unambiguous OctetString.unambiguous)
-        (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-          (unambiguousSum (TLV.unambiguous  IA5String.unambiguous)
-            (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
-              (unambiguousSum
-                (TLV.unambiguous
-                  (TLV.unambiguous
-                    (SequenceOf.unambiguous
-                      RDN.unambiguous TLV.nonempty  TLV.nonnesting)))
-                  (unambiguousSum
-                    (TLV.unambiguous OctetString.unambiguous)
-                    (unambiguousSum (TLV.unambiguous IA5String.unambiguous)
-                      (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
-                        (TLV.unambiguous
-                          (SequenceOf.Bounded.unambiguous
-                            OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
-                          (TLV.noconfusion λ ()))
-                        (NoConfusion.sumₚ {A = URI} (TLV.noconfusion λ ())
-                            (TLV.noconfusion λ ())))
-                      (NoConfusion.sumₚ {A = EdipartyName} (TLV.noconfusion λ ())
-                        (NoConfusion.sumₚ {A = EdipartyName} (TLV.noconfusion λ ())
-                          (TLV.noconfusion λ ()))))
-                  (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ()))
-                      (NoConfusion.sumₚ {A = DirName} (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ()))))))
-              (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = X400Address} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()))))))
-            (NoConfusion.sumₚ{A = DnsName} (TLV.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = DnsName} (TLV.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = DnsName} (TLV.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = DnsName} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = DnsName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))))
-          (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ()))
-            (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = RfcName} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()))))))))
-        (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-          (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-            (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-              (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-                (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-                  (NoConfusion.sumₚ{A = OtherName} (TLV.noconfusion (λ ()))
-                    (NoConfusion.sumₚ{A = OtherName}
-                       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())))))))))
- 
+      (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+        ua₁ nc₀)
+    where
+    Rep₇ = Sum IpAddress RegID
+    Rep₆ = Sum URI Rep₇
+    Rep₅ = Sum EdipartyName Rep₆
+    Rep₄ = Sum DirName Rep₅
+    Rep₃ = Sum X400Address Rep₄
+    Rep₂ = Sum DnsName Rep₃
+    Rep₁ = Sum RfcName Rep₂
+
+    nc₇ : NoConfusion IpAddress RegID
+    nc₇ = TLV.noconfusion λ ()
+
+    ua₇ : Unambiguous Rep₇
+    ua₇ = unambiguousSum
+            (TLV.unambiguous OctetString.unambiguous)
+            (TLV.unambiguous
+              (SequenceOf.Bounded.unambiguous OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
+            nc₇
+
+    nc₆ : NoConfusion URI Rep₇
+    nc₆ = NoConfusion.sumₚ{A = URI} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())
+
+    ua₆ : Unambiguous Rep₆
+    ua₆ = unambiguousSum (TLV.unambiguous IA5String.unambiguous) ua₇ nc₆
+
+    nc₅ : NoConfusion EdipartyName Rep₆
+    nc₅ = NoConfusion.sumₚ{A = EdipartyName}
+            (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ{A = EdipartyName} (TLV.noconfusion (λ ()))
+              (TLV.noconfusion λ ()))
+
+    ua₅ : Unambiguous Rep₅
+    ua₅ = unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+            ua₆ nc₅
+
+    nc₄ : NoConfusion DirName Rep₅
+    nc₄ = NoConfusion.sumₚ {A = DirName}
+            (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ {A = DirName}
+              (TLV.noconfusion λ ())
+              (NoConfusion.sumₚ {A = DirName}
+                (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
+
+    ua₄ : Unambiguous Rep₄
+    ua₄ = unambiguousSum (TLV.unambiguous RDN.unambiguous) ua₅ nc₄
+
+    nc₃ : NoConfusion X400Address Rep₄
+    nc₃ = NoConfusion.sumₚ {A = X400Address}
+            (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ{A = X400Address}
+              (TLV.noconfusion λ ())
+              (NoConfusion.sumₚ{A = X400Address}
+                (TLV.noconfusion λ ())
+                (NoConfusion.sumₚ {A = X400Address}
+                  (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
+
+    ua₃ : Unambiguous Rep₃
+    ua₃ = unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+            ua₄ nc₃
+
+    nc₂ : NoConfusion DnsName Rep₃
+    nc₂ = NoConfusion.sumₚ{A = DnsName}
+            (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ {A = DnsName}
+              (TLV.noconfusion λ ())
+              (NoConfusion.sumₚ {A = DnsName}
+                (TLV.noconfusion λ ())
+                (NoConfusion.sumₚ {A = DnsName} (TLV.noconfusion λ ())
+                  (NoConfusion.sumₚ {A = DnsName} (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))))
+
+    ua₂ : Unambiguous Rep₂
+    ua₂ = unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+            ua₃ nc₂
+
+    nc₁ : NoConfusion RfcName Rep₂
+    nc₁ = NoConfusion.sumₚ {A = RfcName}
+            (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ {A = RfcName}
+              (TLV.noconfusion λ ())
+              (NoConfusion.sumₚ {A = RfcName}
+                (TLV.noconfusion λ ())
+                (NoConfusion.sumₚ {A = RfcName}
+                  (TLV.noconfusion λ ())
+                  (NoConfusion.sumₚ {A = RfcName}
+                    (TLV.noconfusion λ ())
+                    (NoConfusion.sumₚ {A = RfcName}
+                      (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))))
+
+    ua₁ : Unambiguous Rep₁
+    ua₁ = unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+            ua₂ nc₁
+
+    nc₀ : NoConfusion OtherName Rep₁
+    nc₀ = NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+            (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+              (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+                (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+                  (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+                    (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+                      (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
+                        (TLV.noconfusion λ ())))))))
+
 module GeneralNamesElems where
   @0 unambiguous : Unambiguous GeneralNamesElems
   unambiguous =

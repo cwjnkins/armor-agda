@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB as HashAlg
 import      Aeres.Data.X509.HashAlg.TCB             as HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
 import      Aeres.Data.X509.MaskGenAlg.TCB          as MaskGenAlg
@@ -9,6 +8,7 @@ import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
@@ -31,17 +31,17 @@ SupportedHashAlg =
        HashAlg.SHA512)))
 
 module SupportedHashAlg where
-  erase : ∀ {@0 bs} → SupportedHashAlg bs → AlgorithmIdentifier (const $ Erased ∘ OctetStringValue) bs
-  erase (inj₁ (mkTLV len (mkAlgIDFields o p refl) len≡ bs≡)) =
-    mkTLV len (mkAlgIDFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₁ (mkTLV len (mkAlgIDFields o p refl) len≡ bs≡))) =
-    mkTLV len (mkAlgIDFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₁ (mkTLV len (mkAlgIDFields o p refl) len≡ bs≡)))) =
-    mkTLV len (mkAlgIDFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₂ (inj₁ (mkTLV len (mkAlgIDFields o p refl) len≡ bs≡))))) =
-    mkTLV len (mkAlgIDFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₂ (inj₂ (mkTLV len (mkAlgIDFields o p refl) len≡ bs≡))))) =
-    mkTLV len (mkAlgIDFields o (─ self) refl) len≡ bs≡
+  erase : ∀ {@0 bs} → SupportedHashAlg bs → DefinedByOID (const $ Erased ∘ OctetStringValue) bs
+  erase (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)) =
+    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+  erase (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))) =
+    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+  erase (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)))) =
+    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+  erase (inj₂ (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
+    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+  erase (inj₂ (inj₂ (inj₂ (inj₂ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
+    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
 
 --   {- https://datatracker.ietf.org/doc/html/rfc4055#section-3.1 -}
 {-
@@ -135,4 +135,4 @@ PSSParam o =
      PSSParamFields
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.RSA.PSS) 
 
-PSS = AlgorithmIdentifier PSSParam
+PSS = DefinedByOID PSSParam

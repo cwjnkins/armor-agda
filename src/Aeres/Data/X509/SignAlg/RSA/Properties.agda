@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.SignAlg.TCB.OIDs            as OIDs
 import      Aeres.Data.X509.SignAlg.RSA.TCB             as RSA
 open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB         as PSS
@@ -11,6 +10,7 @@ import      Aeres.Data.X509.HashAlg.Properties          as HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs            as OIDs
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -29,7 +29,7 @@ module Supported where
                 → NoConfusion (HashAlg.SHA-Like o) PSS
   noConfusion o {t} =
     TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkAlgIDFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
        let
          @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
          ++≡ = ─ (begin

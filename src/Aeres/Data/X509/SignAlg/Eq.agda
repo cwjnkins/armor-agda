@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg.TCB
 open import Aeres.Data.X509.SignAlg.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
@@ -14,6 +13,7 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -27,9 +27,9 @@ open Aeres.Grammar.Sum         UInt8
 module Aeres.Data.X509.SignAlg.Eq where
 
 instance
-  eq≋Unsupported : Eq≋ (AlgorithmIdentifierFields UnsupportedParam)
+  eq≋Unsupported : Eq≋ (DefinedByOIDFields UnsupportedParam)
   eq≋Unsupported =
-    AlgorithmIdentifier.eq≋ UnsupportedParam
+    DefinedByOID.eq≋ UnsupportedParam
       (λ o →
         record
           { _≋?_ = λ where
