@@ -40,9 +40,5 @@ proj₂ (proj₂ iso) (nameRTCrlissr x) = refl
 @0 unambiguous : Unambiguous DistPointNameChoice
 unambiguous =
   isoUnambiguous iso
-    (unambiguousSum
-      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
-      (TLV.unambiguous
-        (SequenceOf.Bounded.unambiguous (TLV.unambiguous RDN.ATV.unambiguous)
-          TLV.nonempty TLV.nonnesting))
-      (TLV.noconfusion λ ()))
+    (unambiguousSum (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
+      (TLV.unambiguous RDN.unambiguousElems) (TLV.noconfusion λ ()))

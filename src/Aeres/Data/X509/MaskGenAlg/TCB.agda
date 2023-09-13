@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 import Aeres.Data.X509.HashAlg.TCB              as HashAlg
 open import Aeres.Data.X509.HashAlg.TCB.OIDs    as OIDs
 import      Aeres.Data.X509.MaskGenAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum
@@ -54,4 +54,4 @@ module MGF1 where
   Param o =    SupportedHashAlg
             ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.MGF1)
 
-  MaskGenAlg = AlgorithmIdentifier Param
+  MaskGenAlg = DefinedByOID Param

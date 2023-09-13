@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 open import Aeres.Data.X509.PublicKey.Alg.RSA.TCB
 open import Aeres.Data.X509.SignAlg.DSA
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.OID.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude

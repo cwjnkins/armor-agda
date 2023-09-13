@@ -6,9 +6,9 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 open import Aeres.Data.X509.HashAlg.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.SignAlg.ECDSA.TCB as ECDSA
@@ -34,7 +34,7 @@ UnsupportedParam o =
   ×ₚ const (False ((-, TLV.val o) ∈? supportedSignAlgOIDs))
 
 UnsupportedSignAlg =
-  AlgorithmIdentifier UnsupportedParam
+  DefinedByOID UnsupportedParam
 
 data SignAlg (@0 bs : List UInt8) : Set where
   dsa : DSA.Supported bs → SignAlg bs
@@ -44,24 +44,24 @@ data SignAlg (@0 bs : List UInt8) : Set where
 
 erase
   : ∀ {@0 bs} → SignAlg bs
-    → AlgorithmIdentifier (const (Erased ∘ OctetStringValue)) bs
+    → DefinedByOID (const (Erased ∘ OctetStringValue)) bs
 erase (dsa x) =
   case DSA.erase x ret (const _) of λ where
-    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
 erase (ecdsa x) =
   case ECDSA.erase x ret (const _) of λ where
-    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
 erase (rsa x) =
   case RSA.erase x ret (const _) of λ where
-    (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkAlgIDFields algOID p₁ bs≡₁) len≡ bs≡
-erase (unsupported (mkTLV len (mkAlgIDFields algOID (mk×ₚ p₁ _ refl) bs≡₁) len≡ bs≡)) =
-  mkTLV len (mkAlgIDFields algOID (─ p₁) bs≡₁) len≡ bs≡
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
+erase (unsupported (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ _ refl) bs≡₁) len≡ bs≡)) =
+  mkTLV len (mkOIDDefinedFields algOID (─ p₁) bs≡₁) len≡ bs≡
 
 getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID
-getOID s = -, AlgorithmIdentifierFields.algOID (TLV.val (erase s))
+getOID s = -, DefinedByOIDFields.oid (TLV.val (erase s))
 
 getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
 getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
