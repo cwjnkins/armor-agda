@@ -2,13 +2,17 @@
 
 import      Aeres.Binary
 open import Aeres.Data.X509
-open import Aeres.Data.X509.Semantic.StringPrep.Exec
--- open import Aeres.Data.X509.Semantic.Cert
+open import Aeres.Data.X509.Semantic.StringPrep.ExecDS
+open import Aeres.Data.X509.Semantic.StringPrep.ExecPS
+open import Aeres.Data.X509.Semantic.StringPrep.ExecIS
+open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Cert.Utils
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 open import Aeres.Grammar.IList as IList
 open import Aeres.Prelude
+
+open import  Aeres.Data.X509.RDN.ATV.OIDs
 
 module Aeres.Data.X509.Semantic.Chain where
 
@@ -34,7 +38,23 @@ CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
 CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
 
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → RDN.ATV bs₁ → RDN.ATV bs₂ → Set
-MatchRDNATV (mkTLV len (RDN.mkATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (RDN.mkATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋_ {A = OID} oid oid₁ × Compare val val₁
+MatchRDNATV (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len≡ bs≡) (mkTLV len₁ (Sequence.mkOIDDefinedFields oid₁ param₁ bs≡₃) len≡₁ bs≡₁) = helper oid ((-, TLV.val oid) ∈? Supported) oid₁ ((-, TLV.val oid₁) ∈? Supported)
+  where
+  helper : ∀ {@0 bs₁ bs₂} → (o₁ : OID bs₁) → (d : Dec ((-, TLV.val o₁) ∈ Supported)) → (o₂ : OID bs₂) → (d : Dec ((-, TLV.val o₂) ∈ Supported)) → Set
+  helper o₁ (no ¬p) o₂ (no ¬p₁) = (_≋_ {A = OID} o₁ o₂) × CompareDS {!!} {!!}
+  helper o₁ (no ¬p) o₂ (yes p) = ⊥
+  helper o₁ (yes p) o₂ (no ¬p) = ⊥
+  helper o₁ (yes (here px)) o₂ (yes (here px₁)) = (_≋_ {A = OID} o₁ o₂) × ComparePS {!!} {!!}
+  helper o₁ (yes (here px)) o₂ (yes (there p₁)) = ⊥
+  helper o₁ (yes (there p)) o₂ (yes (here px)) = ⊥
+  helper o₁ (yes (there (here px))) o₂ (yes (there (here px₁))) = (_≋_ {A = OID} o₁ o₂) × ComparePS {!!} {!!}
+  helper o₁ (yes (there (here px))) o₂ (yes (there (there p₁))) = ⊥
+  helper o₁ (yes (there (there p))) o₂ (yes (there (here px))) = ⊥
+  helper o₁ (yes (there (there (here px)))) o₂ (yes (there (there (here px₁)))) = (_≋_ {A = OID} o₁ o₂) × ComparePS {!!} {!!}
+  helper o₁ (yes (there (there (here px)))) o₂ (yes (there (there (there p₁)))) = ⊥
+  helper o₁ (yes (there (there (there p)))) o₂ (yes (there (there (here px)))) = ⊥
+  helper o₁ (yes (there (there (there (here px))))) o₂ (yes (there (there (there (here px₁))))) = (_≋_ {A = OID} o₁ o₂) × CompareIS {!!} {!!}
+
 
 data InSeq {@0 bs} (a : RDN.ATV bs) : (@0 b : List Dig) → SequenceOf RDN.ATV b → Set where
   here  : ∀ {@0 bs₁ bs₂ bs₃} {x : RDN.ATV bs₁} {xs : SequenceOf RDN.ATV bs₂} (px : MatchRDNATV a x) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
@@ -64,7 +84,7 @@ MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡�
 
 CCP6Seq : List (Exists─ (List Dig) Cert) → Set
 CCP6Seq [] = ⊥
-CCP6Seq ((fst , snd) ∷ []) = ⊤ -- MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+CCP6Seq ((fst , snd) ∷ []) = ⊤
 CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
 CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
@@ -106,7 +126,7 @@ helperCCP4 ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
 ----------------- helper decidables -------------------------
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : RDN.ATV bs₁) → (m : RDN.ATV bs₂) → Dec (MatchRDNATV n m)
-MatchRDNATV-dec (mkTLV len (RDN.mkATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (RDN.mkATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = _≋?_ {A = OID} oid oid₁ ×-dec Compare-dec val val₁
+MatchRDNATV-dec (mkTLV len (RDN.mkATVFields oid val bs≡₂) len≡ bs≡) (mkTLV len₁ (RDN.mkATVFields oid₁ val₁ bs≡₃) len≡₁ bs≡₁) = {!!} --_≋?_ {A = OID} oid oid₁ -- ×-dec Compare-dec {!!} {!!}
 
 InSeq-dec : ∀ {@0 bs} (a : RDN.ATV bs) → (@0 b : List Dig) → (c : SequenceOf RDN.ATV b) → Dec (InSeq a b c)
 InSeq-dec a .[] nil = no (λ ())
@@ -241,12 +261,25 @@ ccp3 c = CCP3Seq-dec (reverse (chainToList c))
   CCP3Seq-dec [] = yes tt
   CCP3Seq-dec (x ∷ x₁) = helperCCP3-dec x x₁ ×-dec CCP3Seq-dec x₁
 
+
+-- For DistributionPoint field, if the certificate issuer is not the CRL issuer,
+-- then the CRLIssuer field MUST be present and contain the Name of the CRL issuer. If the
+-- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
+-- field and MUST include the distributionPoint field.
+CCP4 : ∀ {@0 bs} → Chain bs → Set
+CCP4 c = helperCCP4 (chainToList c)
+
+ccp4 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP4 c)
+ccp4 c = helperCCP4-dec (chainToList c)
+
+
 -- A certificate MUST NOT appear more than once in a prospective certification path.
 CCP5 : ∀ {@0 bs} → Chain bs → Set
 CCP5 c = List.Unique _≟_ (chainToList c)
 
 ccp5 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP5 c)
 ccp5 c = List.unique? _≟_ (chainToList c)
+
 
 -- Certificate users MUST be prepared to process the Issuer distinguished name
 -- and Subject distinguished name fields to perform name chaining for certification path validation.
@@ -260,6 +293,7 @@ ccp6 c = helper (chainToList c)
   helper [] = no (λ ())
   helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
+
 
 --- every issuer certificate in a chain must be CA certificate
 CCP10 : ∀ {@0 bs} → Chain bs → Set
@@ -278,13 +312,3 @@ ccp10 c = helper (chainToList c)
     with isCA (Cert.getBC snd₁)
   ... | false = no (λ ())
   ... | true = yes tt ×-dec helper t
-
--- For DistributionPoint field, if the certificate issuer is not the CRL issuer,
--- then the CRLIssuer field MUST be present and contain the Name of the CRL issuer. If the
--- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
--- field and MUST include the distributionPoint field.
-CCP4 : ∀ {@0 bs} → Chain bs → Set
-CCP4 c = helperCCP4 (chainToList c)
-
-ccp4 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP4 c)
-ccp4 c = helperCCP4-dec (chainToList c)
