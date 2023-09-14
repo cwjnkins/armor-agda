@@ -117,10 +117,22 @@ helperCCP4 ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
 
 ----------------- helper decidables -------------------------
 
+helperMatchRDNATV-dec : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : Dec ((-, TLV.val o) ∈ Supported)) → (p₁ : RDN.ATVParam o d bs₂) → (p₂ : RDN.ATVParam o d bs₃) →
+  Dec (helperMatchRDNATV o d p₁ p₂)
+helperMatchRDNATV-dec o (no ¬p) x x₁ = CompareDS-dec x x₁
+helperMatchRDNATV-dec o (yes (here px)) x x₁ = ComparePS-dec x x₁
+helperMatchRDNATV-dec o (yes (there (here px))) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = ComparePS-dec fstₚ₁ fstₚ₂
+helperMatchRDNATV-dec o (yes (there (there (here px)))) x x₁ = ComparePS-dec x x₁
+helperMatchRDNATV-dec o (yes (there (there (there (here px))))) x x₁ = CompareIS-dec x x₁
+
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : RDN.ATV bs₁) → (m : RDN.ATV bs₂) → Dec (MatchRDNATV n m)
 MatchRDNATV-dec (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len≡ bs≡) (mkTLV len₁ (Sequence.mkOIDDefinedFields oid₁ param₁ bs≡₃) len≡₁ bs≡₁)
-  with _≋?_ {A = OID} oid oid₁
-... | v = ?
+  = case (_≋?_ {A = OID} oid oid₁) of λ where
+      (no ¬p) → no λ { (fst , snd) → contradiction fst ¬p}
+      (yes ≋-refl) →
+        case helperMatchRDNATV-dec oid ((-, TLV.val oid) ∈? Supported) param param₁ of λ where
+          (no ¬p) → no λ where (≋-refl , snd) → contradiction snd ¬p
+          (yes p) → yes (≋-refl , p)
 
 InSeq-dec : ∀ {@0 bs} (a : RDN.ATV bs) → (@0 b : List Dig) → (c : SequenceOf RDN.ATV b) → Dec (InSeq a b c)
 InSeq-dec a .[] nil = no (λ ())
@@ -190,14 +202,6 @@ helperCCP4-dec ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
   with isCRLSignPresent (Cert.getKU snd₁)
 ... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
 ... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
-
-helperMatchRDNATV-dec : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : Dec ((-, TLV.val o) ∈ Supported)) → (p₁ : RDN.ATVParam o d bs₂) → (p₂ : RDN.ATVParam o d bs₃) →
-  Dec (helperMatchRDNATV o d p₁ p₂)
-helperMatchRDNATV-dec o (no ¬p) x x₁ = CompareDS-dec x x₁
-helperMatchRDNATV-dec o (yes (here px)) x x₁ = ComparePS-dec x x₁
-helperMatchRDNATV-dec o (yes (there (here px))) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = ComparePS-dec fstₚ₁ fstₚ₂
-helperMatchRDNATV-dec o (yes (there (there (here px)))) x x₁ = ComparePS-dec x x₁
-helperMatchRDNATV-dec o (yes (there (there (there (here px))))) x x₁ = CompareIS-dec x x₁
 
 ------------------------------------------------------------------------
 

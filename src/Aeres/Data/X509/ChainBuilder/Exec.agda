@@ -18,34 +18,6 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Base256
 
------------- chain building ---------------
--- getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
--- getCertsbySubject x [] = []
--- getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
---   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
--- ... | no ¬p = getCertsbySubject ((fst , snd)) x₂
--- ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
-
--- {-# TERMINATING #-}
--- --- TODO: satisfy termination checker
--- findIssuerCert :  Exists─ (List UInt8) Cert → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
--- findIssuerCert (fst , snd) aux root
---   with getCertsbySubject (Cert.getIssuer snd) root
--- ... | [] = case (getCertsbySubject (Cert.getIssuer snd) aux) of λ where
---                [] → []
---                (y ∷ t) → case findIssuerCert y aux root of λ where
---                    [] → []
---                    (x ∷ z) → [ y ] ++ x ∷ z
--- ... | y ∷ t = [ y ]
-  
--- buildChain : List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert)
--- buildChain [] x₁ = []
--- buildChain (x ∷ x₂) x₁
---   with findIssuerCert x x₂ x₁
--- ... | [] = []
--- ... | x₃ ∷ v = [ x ] ++ x₃ ∷ v
--------------------------
-
 candidateChains : List (List (Exists─ (List UInt8) Cert)) → List (Exists─ (List UInt8) Chain)
 candidateChains [] = []
 candidateChains (x ∷ x₁) = (helper x) ∷ (candidateChains x₁)
@@ -55,7 +27,7 @@ candidateChains (x ∷ x₁) = (helper x) ∷ (candidateChains x₁)
   helper ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = helper x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
 
 
-getCertsbySubject : Exists─ (List UInt8) RDNSeq → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
+getCertsbySubject : Exists─ (List UInt8) Name → List (Exists─ (List UInt8) Cert) →  List (Exists─ (List UInt8) Cert)
 getCertsbySubject x [] = []
 getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd

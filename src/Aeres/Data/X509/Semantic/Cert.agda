@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Semantic.Cert.Utils
--- import      Aeres.Data.X509.Semantic.Cert.SCP1 as SCP1
+import      Aeres.Data.X509.Semantic.Cert.SCP1 as SCP1
 import      Aeres.Data.X509.Semantic.Cert.SCP2 as SCP2
 import      Aeres.Data.X509.Semantic.Cert.SCP3 as SCP3
 import      Aeres.Data.X509.Semantic.Cert.SCP4 as SCP4
@@ -37,7 +37,7 @@ open Aeres.Grammar.Option      UInt8
 
 -- SignatureAlgorithm field MUST contain the same algorithm identifier as
 -- the Signature field in the sequence TbsCertificate.
--- open SCP1 public
+open SCP1 public
 
 -- Extension field MUST only appear if the Version is 3(2).
 open SCP2 public
