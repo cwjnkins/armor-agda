@@ -47,7 +47,7 @@ parseCerts fn input =
          String.++ "-- only read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chain))
          String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
       IO.>> Aeres.IO.putStrLnErr "-- attempting to parse remainder"
-      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList suf) of λ where
+      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCert suf) of λ where
         (mkLogged log₂ (yes _)) →
           Aeres.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
           IO.>> Aeres.IO.exitFailure
@@ -64,15 +64,18 @@ parseCerts fn input =
         (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
           Aeres.IO.putStrLnErr
             (fn String.++ " (decoded): incomplete read\n"
-             String.++ "-- read " String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509)) String.++ "certificate(s), but more bytes remain\n"
+             String.++ "-- only read "
+               String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509))
+               String.++ " certificate(s), but more bytes remain\n"
              String.++ "-- attempting to parse remainder")
           IO.>> ((case runParser parseCert suf of λ where
             (mkLogged log₃ (yes _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
               IO.>> Aeres.IO.exitFailure
             (mkLogged log₃ (no _)) →
-              Aeres.IO.putStrLnErr (fn String.++ "(decoded):\n--" String.++
-                foldl String._++_ "" log₃)
+              Aeres.IO.putStrLnErr (fn String.++ " (decoded): "
+                String.++ show (map toℕ (take 10 suf))
+                String.++ foldl String._++_ "" log₃)
               IO.>> Aeres.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
@@ -87,7 +90,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ root suf₂ ps≡₂) = rootS in
-      runCertChecks (proj₂ (listToChain (buildChain (chainToList cert) (chainToList root)))) -- calling chain builder here
+      runCertChecks (candidateChains (buildCertificateChains (chainToList cert) (chainToList root))) -- calling chain builder here
     _ →
       Aeres.IO.putStrLnErr usage
       IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
@@ -193,9 +196,9 @@ main = IO.run $
         IO.putStrLn (showOutput (certOutput c)) IO.>>
         runChecks' (n + 1) tail
 
-  runCertChecks : ∀ {@0 bs} → (cert : Chain bs) → _
-  runCertChecks nil = Aeres.IO.putStrLnErr "Error: empty chain" 
-  runCertChecks (cons x) =
+  helper : Exists─ (List UInt8) Chain → _
+  helper (─ .[] , nil) = Aeres.IO.putStrLnErr "Error: empty chain"
+  helper (fst , cons x) =
     runChecks' 1 (cons x) IO.>>
     runChainCheck (cons x) "CCP2" ccp2 IO.>>
     runChainCheck (cons x) "CCP3" ccp3 IO.>>
@@ -204,3 +207,8 @@ main = IO.run $
     runChainCheck (cons x) "CCP6" ccp6 IO.>>
     runChainCheck (cons x) "CCP10" ccp10 IO.>>
     Aeres.IO.exitSuccess
+ 
+  runCertChecks : List (Exists─ (List UInt8) Chain) → _
+  runCertChecks [] = Aeres.IO.putStrLnErr "Error: no candidate chain"
+  runCertChecks (x ∷ []) = helper x
+  runCertChecks (x ∷ x₁ ∷ x₂) =  runCertChecks (x₁ ∷ x₂)--- TODO: how to call other chains in IO

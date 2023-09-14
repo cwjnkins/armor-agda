@@ -19,3 +19,6 @@ record BMPChar (@0 bs : List UInt8) : Set where
 
 BMP : @0 List UInt8 → Set
 BMP = IList BMPChar
+
+size : ∀ {@0 bs} → BMP bs → ℕ
+size bmp = lengthIList bmp

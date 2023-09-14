@@ -79,10 +79,10 @@ parseTBSCertFields n =
   p₄ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₄ n)
   p₄ n =
     parseEquivalent (symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ {A = WithinLength RDNSeq n}
+      (parse&ᵈ {A = WithinLength Name n}
         (withinLength-nonnesting TLV.nonnesting)
-        (withinLength-unambiguous RDN.Seq.unambiguous)
-        (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
+        (withinLength-unambiguous RDN.unambiguous)
+        (parse≤ _ RDN.parse TLV.nonnesting overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₃ (n ∸ x)))
@@ -104,10 +104,10 @@ parseTBSCertFields n =
   p₂ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₆ n)
   p₂ n  =
     parseEquivalent (symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ{A = WithinLength RDNSeq n}
+      (parse&ᵈ{A = WithinLength Name n}
         (withinLength-nonnesting TLV.nonnesting)
-        (withinLength-unambiguous RDN.Seq.unambiguous)
-        (parse≤ _ parseRDNSeq TLV.nonnesting overflow)
+        (withinLength-unambiguous RDN.unambiguous)
+        (parse≤ _ RDN.parse TLV.nonnesting overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₅ (n ∸ x)))

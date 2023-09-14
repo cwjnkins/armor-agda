@@ -13,3 +13,6 @@ open Aeres.Grammar.IList UInt8
 
 PrintableString : @0 List UInt8 → Set
 PrintableString = TLV Tag.PrintableString (IList PrintableStringChar)
+
+size : ∀ {@0 bs} → IList PrintableStringChar bs → ℕ
+size = lengthIList

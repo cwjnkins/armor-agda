@@ -12,11 +12,15 @@ module Aeres.Data.X690-DER.Strings.VisibleString.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open VisibleStringValue using (size)
 
 @0 unambiguous : Unambiguous VisibleStringValue
 unambiguous (mkVisibleStringValue chars range refl) (mkVisibleStringValue .chars range₁ refl) =
   case All.irrelevant (inRange-unique{A = ℕ}{B = UInt8}) range range₁ of λ where
     refl → refl
+
+sizeUnique : ∀ {@0 bs} → (a₁ a₂ : VisibleStringValue bs) → size a₁ ≡ size a₂
+sizeUnique (mkVisibleStringValue chars range refl) (mkVisibleStringValue .chars range₁ refl) = refl
 
 instance
   VisibleStringEq : Eq (Exists─ (List UInt8) VisibleStringValue)

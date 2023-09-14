@@ -1,13 +1,13 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg
 import      Aeres.Data.X509.MaskGenAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.MaskGenAlg.Properties
 import      Aeres.Data.X509.MaskGenAlg.TCB as MaskGenAlg
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
@@ -22,7 +22,7 @@ open Aeres.Grammar.Sum         UInt8
 
 parseMGF1 : Parser (Logging ∘ Dec) MaskGenAlg.MGF1.MaskGenAlg
 parseMGF1 =
-  parseAlgorithmIdentifier "X509: MaskGenAlg: MGF1"
+  DefinedByOID.parse "X509: MaskGenAlg: MGF1"
     help
   where
   open MaskGenAlg.MGF1

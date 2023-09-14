@@ -7,9 +7,9 @@ open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.HashAlg.Properties as HashAlg
 open import Aeres.Data.X509.HashAlg.TCB
 open import Aeres.Data.X509.SignAlg.Exclusions
@@ -38,7 +38,7 @@ module Aeres.Data.X509.SignAlg.Properties where
 @0 unambiguousUnsupported : Unambiguous UnsupportedSignAlg
 unambiguousUnsupported =
   TLV.unambiguous
-    (AlgorithmIdentifier.unambiguous
+    (DefinedByOID.unambiguous
       UnsupportedParam
       (λ o → unambiguous×ₚ OctetString.unambiguous T-unique))
 

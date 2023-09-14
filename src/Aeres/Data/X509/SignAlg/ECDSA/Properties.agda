@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.SignAlg.DSA.Properties as DSA
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.SignAlg.ECDSA.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -22,7 +22,7 @@ module ECDSA-Like where
   @0 unambiguous : ∀ {@0 bs} → (o : OIDValue bs) → Unambiguous (ECDSA-Like o)
   unambiguous o =
     TLV.unambiguous
-      (AlgorithmIdentifier.unambiguous
+      (DefinedByOID.unambiguous
         _
         λ where
           o' (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) → refl)
@@ -32,7 +32,7 @@ module ECDSA-Like where
       → {t : False (o₁ ≋? o₂)}
       → NoConfusion (ECDSA-Like o₁) (ECDSA-Like o₂)
   noConfusion o₁ o₂ {t} =
-    AlgorithmIdentifier.noConfusionParam (ECDSA-Like-Params o₁)
+    DefinedByOID.noConfusionParam (ECDSA-Like-Params o₁)
       λ where
         o (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) →
           contradiction ≋-refl (toWitnessFalse t)

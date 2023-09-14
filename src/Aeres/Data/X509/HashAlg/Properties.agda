@@ -1,13 +1,13 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.HashAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.HashAlg.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -28,7 +28,7 @@ module SHA-Like where
                 → NoConfusion (SHA-Like o₁) (SHA-Like o₂)
   noConfusion o₁ o₂ {t} =
     TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkAlgIDFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkAlgIDFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
        let
          @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
          ++≡ = ─ (begin
@@ -54,7 +54,7 @@ module SHA-Like where
   @0 unambiguous : ∀ {@0 bs} → (o : OIDValue bs) → Unambiguous (SHA-Like o)
   unambiguous o =
     TLV.unambiguous
-      (AlgorithmIdentifier.unambiguous
+      (DefinedByOID.unambiguous
         _
         (λ o₁ →
          unambiguous×ₚ
@@ -64,12 +64,12 @@ module SHA-Like where
             (λ where ≋-refl ≋-refl → refl)))
 
   instance
-    eq≋ : ∀ {@0 bs} → {o : OIDValue bs} → Eq≋ (AlgorithmIdentifierFields (SHA-Like-Param o))
+    eq≋ : ∀ {@0 bs} → {o : OIDValue bs} → Eq≋ (DefinedByOIDFields (SHA-Like-Param o))
     eq≋ =
-      AlgorithmIdentifier.eq≋ _
+      DefinedByOID.eq≋ _
         λ o' →
           eq≋Σₚ it
             λ _ → record { _≟_ = λ where ≋-refl ≋-refl → yes refl }
 
-    eq : ∀ {@0 bs} → {o : OIDValue bs} → Eq (Exists─ _ (AlgorithmIdentifierFields (SHA-Like-Param o)))
+    eq : ∀ {@0 bs} → {o : OIDValue bs} → Eq (Exists─ _ (DefinedByOIDFields (SHA-Like-Param o)))
     eq = Eq≋⇒Eq eq≋
