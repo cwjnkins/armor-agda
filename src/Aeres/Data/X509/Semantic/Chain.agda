@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
+{-# OPTIONS --subtyping --sized-types #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509
