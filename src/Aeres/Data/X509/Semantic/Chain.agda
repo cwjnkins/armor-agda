@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --subtyping --sized-types --allow-unsolved-metas #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509
@@ -115,6 +115,19 @@ helperCCP4 ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
 ... | false = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₁ (Cert.getCRLDIST snd)
 ... | true = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₂ (Cert.getCRLDIST snd)
 
+certInList : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → Bool
+certInList c [] = false
+certInList (fst , snd) ((fst₁ , snd₁) ∷ l) = case (snd ≋? snd₁) of λ where
+  (no ¬p) → certInList (fst , snd) l
+  (yes p) → true
+    
+helperCCP7 : List (Exists─ (List UInt8) Cert) → List (Exists─ (List UInt8) Cert) → Set
+helperCCP7 r [] = ⊥
+helperCCP7 r (x ∷ t)
+  with certInList x r
+... | false = helperCCP7 r t
+... | true = ⊤
+
 ----------------- helper decidables -------------------------
 
 helperMatchRDNATV-dec : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : Dec ((-, TLV.val o) ∈ Supported)) → (p₁ : RDN.ATVParam o d bs₂) → (p₂ : RDN.ATVParam o d bs₃) →
@@ -202,6 +215,13 @@ helperCCP4-dec ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
   with isCRLSignPresent (Cert.getKU snd₁)
 ... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
 ... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
+
+helperCCP7-dec : (r : List (Exists─ (List UInt8) Cert)) → (c : List (Exists─ (List UInt8) Cert)) → Dec (helperCCP7 r c)
+helperCCP7-dec r [] = no λ()
+helperCCP7-dec r (x ∷ t)
+  with certInList x r
+... | false = helperCCP7-dec r t
+... | true = yes tt
 
 ------------------------------------------------------------------------
 
@@ -318,3 +338,11 @@ ccp10 c = helper (chainToList c)
     with isCA (Cert.getBC snd₁)
   ... | false = no (λ ())
   ... | true = yes tt ×-dec helper t
+
+
+--- check whether any of the certificate in given chain is trusted by the system's trust anchor
+CCP7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Set
+CCP7 r c = helperCCP7 (chainToList r) (chainToList c)
+
+ccp7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Dec (CCP7 r c)
+ccp7 r c = helperCCP7-dec (chainToList r) (chainToList c)
