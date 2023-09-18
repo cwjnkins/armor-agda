@@ -125,23 +125,253 @@ module Base256 where
   fromℕ : (m : ℕ) {_ : True (suc (toℕ m) Nat.≤? 256)} → UInt8
   fromℕ m {m<} = #_ m {m<n = m<}
 
-  twosComplement : List Dig → ℤ
-  twosComplement xs = go (reverse xs) 0 0
+  unsigned : List UInt8 → ℕ
+  unsigned [] = 0
+  unsigned (x ∷ bs) = toℕ x * (256 ^ length bs) + unsigned bs
+
+  unsigned< : ∀ bs → unsigned bs < 256 ^ length bs
+  unsigned< [] = s≤s z≤n
+  unsigned< (x ∷ bs) = ≤.begin
+    suc (toℕ x * (256 ^ length bs)) + unsigned bs ≤.≡⟨ sym (+-suc _ (unsigned bs)) ⟩
+    (toℕ x * (256 ^ length bs)) + suc (unsigned bs)
+      ≤.≤⟨ +-monoʳ-≤ ((toℕ x * (256 ^ length bs))) ih ⟩
+    (toℕ x * (256 ^ length bs)) + 256 ^ length bs
+      ≤.≡⟨ cong (_+ (256 ^ length bs))
+             (Lemmas.m*n≡[suc-m]*n∸n (toℕ x) (256 ^ length bs)
+               (n≢0⇒n>0 (λ eq → contradiction (m^n≡0⇒m≡0 256 (length bs) eq) λ ()))) ⟩
+    suc (toℕ x) * (256 ^ length bs) - (256 ^ length bs) + 256 ^ length bs
+      ≤.≤⟨ +-monoˡ-≤ (256 ^ length bs){x = suc (toℕ x) * (256 ^ length bs) - (256 ^ length bs)}
+             (∸-monoˡ-≤ {m = suc (toℕ x) * (256 ^ length bs)} (256 ^ length bs)
+                (*-monoˡ-≤ (256 ^ length bs) {x = suc (toℕ x)} (Fin.toℕ<n x))) ⟩ 
+    (256 ^ (1 + length bs)) - (256 ^ length bs) + 256 ^ length bs
+      ≤.≡⟨ m∸n+n≡m
+             ((256 ^ length bs) ≤ 256 * (256 ^ length bs)
+             ∋ ≤.begin
+               256 ^ length bs ≤.≡⟨ sym (*-identityˡ _) ⟩
+               1 * (256 ^ length bs) ≤.≤⟨ *-monoˡ-≤ (256 ^ length bs) (s≤s{n = 255} z≤n) ⟩
+               256 * 256 ^ length bs ≤.∎) ⟩
+    256 ^ (1 + length bs) ≤.∎
     where
-    go : List Dig → (i sum : ℕ) → ℤ
-    go [] _ _ = ℤ.+ 0
-    go (x ∷ []) i sum =
-      if ⌊ x Fin.<? # 128 ⌋
-      then ℤ.+ (sum + (toℕ x * (2 ^ i)))
-      else (ℤ.+ (sum + ((toℕ x - 128) * (2 ^ i)))) ℤ.- ℤ.+ (2 ^ (i + 7))
-    go (x ∷ x₁ ∷ xs) i sum = go (x₁ ∷ xs) (i + 8) (sum + toℕ x * (2 ^ i))
+    module ≤ = ≤-Reasoning
 
-  private
-    tc₁ : twosComplement ([ # 255 ]) ≡ ℤ.- (ℤ.+ 1)
-    tc₁ = refl
+    ih : unsigned bs < 256 ^ length bs
+    ih = unsigned< bs
 
-    tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
-    tc₂ = refl
+  unsigned-head< : ∀ b bs {n} → toℕ b < n → unsigned (b ∷ bs) < n * 256 ^ length bs
+  unsigned-head< b bs {n} b≤n = ≤.begin
+    suc (unsigned (b ∷ bs)) ≤.≡⟨⟩
+    suc (toℕ b * 256 ^ length bs + unsigned bs) ≤.≡⟨ sym (+-suc _ _) ⟩
+    toℕ b * 256 ^ length bs + suc (unsigned bs) ≤.≤⟨ +-monoʳ-≤ (toℕ b * 256 ^ length bs) (unsigned< bs) ⟩
+    toℕ b * 256 ^ length bs + 256 ^ length bs ≤.≡⟨ +-comm _ (256 ^ length bs) ⟩
+    256 ^ length bs + toℕ b * 256 ^ length bs ≤.≡⟨⟩
+    (1 + toℕ b) * 256 ^ length bs ≤.≤⟨ *-monoˡ-≤ _ b≤n ⟩
+    n * 256 ^ length bs ≤.∎
+    where
+    module ≤ = ≤-Reasoning
+
+  unsigned-leading-0
+    : ∀ {bs₁ bs₂} → (ne : 0 < length bs₂) (l : length bs₁ < length bs₂) → unsigned bs₁ ≡ unsigned bs₂
+      → toℕ (headSafe bs₂ ne) ≡ 0
+  unsigned-leading-0 {bs₁} {Fin.zero ∷ bs₂} ne l eq = refl
+  unsigned-leading-0 {bs₁} {Fin.suc x ∷ bs₂} (s≤s z≤n) (s≤s l) eq =
+    contradiction eq (Nat.<⇒≢ (≤.begin
+      suc (unsigned bs₁) ≤.≤⟨ unsigned< bs₁ ⟩
+      256 ^ length bs₁ ≤.≤⟨ Lemmas.^-monoʳ-≤ 256 (s≤s{n = 255} z≤n) l ⟩
+      256 ^ length bs₂ ≤.≤⟨ m≤m+n (256 ^ length bs₂) _ ⟩
+      256 ^ length bs₂ + toℕ x * (256 ^ length bs₂)
+        ≤.≤⟨ m≤m+n _ (unsigned bs₂) ⟩
+      256 ^ length bs₂ + toℕ x * (256 ^ length bs₂) + unsigned bs₂ ≤.∎))
+    where
+    module ≤ = ≤-Reasoning
+
+  unsigned-injective : ∀ bs₁ bs₂ → length bs₁ ≡ length bs₂ → unsigned bs₁ ≡ unsigned bs₂ → bs₁ ≡ bs₂
+  unsigned-injective [] [] len≡ eq = refl
+  unsigned-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ eq =
+    cong₂ _∷_ x₁≡x₂ bs₁≡bs₂
+    where
+    module ≤ = ≤-Reasoning
+    open ≡-Reasoning
+
+    len≡' = suc-injective len≡
+
+    lem₀ : ∀ (x₁ x₂ : UInt8) bs₁ bs₂ → length bs₁ ≡ length bs₂
+           → toℕ x₁ < toℕ x₂
+           → toℕ x₁ * (256 ^ length bs₁) + unsigned bs₁ ≡ toℕ x₂ * (256 ^ length bs₁) + unsigned bs₂
+           → ⊥
+    lem₀ x₁ x₂ bs₁ bs₂ len≡ x₁<x₂ eq
+      with Lemmas.m≤n⇒∃[o]o+m≡n x₁<x₂
+    ... | (o , x₁+o≡x₂) rewrite sym x₁+o≡x₂ =
+      contradiction eq (Nat.<⇒≢ (≤.begin
+        1 + (toℕ x₁ * (256 ^ length bs₁)) + unsigned bs₁ ≤.≡⟨ sym (+-suc _ (unsigned bs₁)) ⟩
+        toℕ x₁ * (256 ^ length bs₁) + suc (unsigned bs₁) ≤.≤⟨ +-monoʳ-≤ (toℕ x₁ * 256 ^ length bs₁) (unsigned< bs₁) ⟩
+        toℕ x₁ * (256 ^ length bs₁) + 256 ^ (length bs₁) ≤.≡⟨ +-comm (toℕ x₁ * 256 ^ length bs₁) (256 ^ length bs₁) ⟩
+        (1 + toℕ x₁) * 256 ^ length bs₁ ≤.≤⟨ *-monoˡ-≤ (256 ^ length bs₁) (m≤n+m (1 + toℕ x₁) o) ⟩
+        (o + suc (toℕ x₁)) * 256 ^ length bs₁ ≤.≤⟨ m≤m+n _ (unsigned bs₂) ⟩
+        (o + suc (toℕ x₁)) * 256 ^ length bs₁ + unsigned bs₂ ≤.∎))
+
+    x₁≡x₂ : x₁ ≡ x₂
+    x₁≡x₂
+      with Nat.<-cmp (toℕ x₁) (toℕ x₂)
+    ... | tri< x₁<x₂ _ _ =
+      ⊥-elim (lem₀ x₁ x₂ bs₁ bs₂ len≡' x₁<x₂
+        (subst (λ n → toℕ x₁ * (256 ^ length bs₁) + unsigned bs₁ ≡ toℕ x₂ * (256 ^ n) + unsigned bs₂)
+           (sym len≡') eq))
+    ... | tri> _ _ x₂<x₁ =
+     ⊥-elim (lem₀ x₂ x₁ bs₂ bs₁ (sym len≡') x₂<x₁
+        (subst (λ n → toℕ x₂ * (256 ^ length bs₂) + unsigned bs₂ ≡ toℕ x₁ * (256 ^ n) + unsigned bs₁)
+           len≡' (sym eq)))
+    ... | tri≈ _ x₁≡x₂ _ = Fin.toℕ-injective x₁≡x₂
+
+    bs₁≡bs₂ : bs₁ ≡ bs₂
+    bs₁≡bs₂ = unsigned-injective bs₁ bs₂ (suc-injective len≡)
+           (+-cancelˡ-≡ (toℕ x₁ * 256 ^ length bs₁) (begin
+             toℕ x₁ * 256 ^ length bs₁ + unsigned bs₁ ≡⟨ eq ⟩
+             toℕ x₂ * 256 ^ length bs₂ + unsigned bs₂
+               ≡⟨ cong (_+ unsigned bs₂)
+                    (cong₂ _*_
+                      (cong Fin.toℕ (sym x₁≡x₂))
+                      (cong (256 ^_) (sym $ suc-injective len≡))) ⟩
+             toℕ x₁ * 256 ^ length bs₁ + unsigned bs₂ ∎))
+
+  twosComplement- : UInt8 → List UInt8 → ℤ
+  twosComplement- b bs =
+    Sign.- ℤ.◃ (128 * 256 ^ length bs - unsigned (Fin.fromℕ<{m = toℕ b - 128}{n = 256} (≤-trans (s≤s (m∸n≤m (toℕ b) 128)) (Fin.toℕ<n b)) ∷ bs))
+
+  twosComplement : List UInt8 → ℤ
+  twosComplement [] = ℤ.+ 0
+  twosComplement xs@(b₁ ∷ bs) with toℕ b₁ Nat.≤? 127
+  ... | no ¬p = twosComplement- b₁ bs
+  ... | yes p = ℤ.+ unsigned xs
+
+  twosComplement<0 : ∀ b bs → ∃ λ n → twosComplement- b bs ≡ ℤ.-[1+ n ]
+  twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
+      128 * 256 ^ length bs - (toℕ b' * 256 ^ length bs + unsigned bs)
+        ≡⟨ sym (∸-+-assoc (128 * 256 ^ length bs) (toℕ b' * 256 ^ length bs) (unsigned bs)) ⟩
+      128 * 256 ^ length bs - (toℕ b' * 256 ^ length bs) - unsigned bs
+        ≡⟨ cong (_- (unsigned bs)) (sym (Nat.*-distribʳ-∸ (256 ^ length bs) 128 (toℕ b'))) ⟩
+      (128 - toℕ b') * 256 ^ length bs - unsigned bs
+        ≡⟨ cong (λ x → x * (256 ^ length bs) ∸ unsigned bs) (proj₂ diff) ⟩
+      suc (proj₁ diff) * 256 ^ length bs - unsigned bs
+        ≡⟨⟩
+      256 ^ length bs + (proj₁ diff * 256 ^ length bs) - unsigned bs
+        ≡⟨ cong (_∸ unsigned bs) (+-comm (256 ^ length bs) (proj₁ diff * 256 ^ length bs)) ⟩
+      (proj₁ diff * 256 ^ length bs) + 256 ^ length bs - unsigned bs
+        ≡⟨ +-∸-assoc (proj₁ diff * (256 ^ length bs)){n = 256 ^ length bs}{o = unsigned bs} (<⇒≤ (unsigned< bs)) ⟩
+      (proj₁ diff * 256 ^ length bs) + (256 ^ length bs - unsigned bs)
+        ≡⟨ cong (proj₁ diff * (256 ^ length bs) +_) (proj₂ diff') ⟩
+      (proj₁ diff * 256 ^ length bs) + suc (proj₁ diff')
+        ≡⟨ +-suc _ (proj₁ diff') ⟩
+      suc (proj₁ diff * 256 ^ length bs) + proj₁ diff' ∎)
+    where
+    open ≡-Reasoning
+    module ≤ = ≤-Reasoning
+
+    b-128<256 : toℕ b - 128 < 256
+    b-128<256 = ≤-trans (s≤s (m∸n≤m (toℕ b) 128)) (Fin.toℕ<n b)
+
+    b' : UInt8
+    b' = Fin.fromℕ< b-128<256
+
+    b'≤127 : toℕ b' ≤ 127
+    b'≤127 = ≤.begin
+      toℕ b' ≤.≡⟨⟩
+      toℕ (Fin.fromℕ< b-128<256) ≤.≡⟨ toℕ-fromℕ< b-128<256 ⟩
+      toℕ b - 128 ≤.≤⟨ ∸-monoˡ-≤ {m = toℕ b} {n = 255} 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n b)) ⟩
+      127 ≤.∎
+
+    diff : ∃ λ n → 128 - toℕ b' ≡ suc n
+    diff with Lemmas.m≤n⇒∃[o]o+m≡n b'≤127
+    ... | (o , o+b≡127) = o , (begin
+      128 - toℕ b' ≡⟨ cong (λ x → suc x - toℕ b') (sym o+b≡127) ⟩
+      suc o + toℕ b' - toℕ b' ≡⟨ m+n∸n≡m (suc o) (toℕ b') ⟩
+      suc o ∎)
+
+    diff' : ∃ λ n → 256 ^ length bs - unsigned bs ≡ suc n
+    diff' with Lemmas.m≤n⇒∃[o]o+m≡n (unsigned< bs)
+    ... | (o , o+[1+u]≡) = o , (begin
+      256 ^ length bs - unsigned bs ≡⟨ cong (_- (unsigned bs)) (sym o+[1+u]≡) ⟩
+      o + suc (unsigned bs) - unsigned bs ≡⟨ cong (_∸ unsigned bs) (+-suc o (unsigned bs)) ⟩
+      suc o + unsigned bs - unsigned bs ≡⟨ m+n∸n≡m (suc o) (unsigned bs) ⟩
+      suc o ∎)
+
+
+  twosComplement-injective : (bs₁ bs₂ : List UInt8) → length bs₁ ≡ length bs₂ → twosComplement bs₁ ≡ twosComplement bs₂ → bs₁ ≡ bs₂
+  twosComplement-injective [] [] len≡ twos≡ = refl
+  twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡
+    with toℕ x₁ Nat.≤? 127 | toℕ x₂ Nat.≤? 127
+  twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | no ¬x₁≤127 | no ¬x₂≤127 =
+    cong₂ _∷_ lem₄ (∷-injectiveʳ lem₃)
+    where
+    open ≡-Reasoning
+    module ≤ = ≤-Reasoning
+
+    x₁∸128<256 = ≤-trans (s≤s (m∸n≤m (toℕ x₁) 128)) (Fin.toℕ<n x₁)
+    x₂∸128<256 = ≤-trans (s≤s (m∸n≤m (toℕ x₂) 128)) (Fin.toℕ<n x₂)
+
+    x₁' = Fin.fromℕ<{m = toℕ x₁ - 128}{n = 256} x₁∸128<256
+    x₂' = Fin.fromℕ<{m = toℕ x₂ - 128}{n = 256} x₂∸128<256
+
+    x₁'≤127 : toℕ x₁' ≤ 127
+    x₁'≤127 = ≤.begin
+      toℕ x₁' ≤.≡⟨⟩
+      toℕ (Fin.fromℕ<{m = toℕ x₁ - 128}{n = 256} x₁∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< x₁∸128<256 ⟩
+      toℕ x₁ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n x₁)) ⟩
+      127 ≤.∎
+
+    x₂'≤127 : toℕ x₂' ≤ 127
+    x₂'≤127 = ≤.begin
+      toℕ x₂' ≤.≡⟨⟩
+      toℕ (Fin.fromℕ<{m = toℕ x₂ - 128}{n = 256} x₂∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< x₂∸128<256 ⟩
+      toℕ x₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n x₂)) ⟩
+      127 ≤.∎
+
+    lem₀ = Lemmas.neg◃-injective twos≡
+
+    lem₁ :   128 * 256 ^ length bs₁ - unsigned (x₁' ∷ bs₁)
+           ≡ 128 * 256 ^ length bs₁ - unsigned (x₂' ∷ bs₂)
+    lem₁ = subst₀ (λ x → 128 * 256 ^ length bs₁ - unsigned (x₁' ∷ bs₁) ≡ 128 * 256 ^ x - unsigned (x₂' ∷ bs₂)){x = length bs₂}{y = length bs₁} (sym (suc-injective len≡)) lem₀
+
+    lem₂ = ∸-cancelˡ-≡{m = 128 * 256 ^ length bs₁}{n = unsigned (x₁' ∷ bs₁)}{o = unsigned (x₂' ∷ bs₂)}
+             (<⇒≤ (unsigned-head< x₁' bs₁{128} (s≤s x₁'≤127)))
+             (subst₀ (λ x → unsigned (x₂' ∷ bs₂) ≤ 128 * (256 ^ x)) (sym $ suc-injective len≡)
+               (<⇒≤ (unsigned-head< x₂' bs₂{128} (s≤s x₂'≤127))))
+             lem₁
+
+    lem₃ = unsigned-injective (x₁' ∷ bs₁) (x₂' ∷ bs₂) len≡ lem₂
+
+    lem₄ : x₁ ≡ x₂
+    lem₄ =
+      toℕ-injective
+        (∸-cancelʳ-≡ {o = 128} (≰⇒> ¬x₁≤127) (≰⇒> ¬x₂≤127) (begin
+          toℕ x₁ - 128 ≡⟨ sym (Fin.toℕ-fromℕ< x₁∸128<256) ⟩
+          toℕ x₁' ≡⟨ cong Fin.toℕ (∷-injectiveˡ lem₃) ⟩
+          toℕ x₂' ≡⟨ Fin.toℕ-fromℕ< x₂∸128<256 ⟩
+          toℕ x₂ - 128 ∎))
+  twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | no ¬x₁≤127 | yes x₂≤127 =
+    contradiction {P = ℤ.-[1+ _ ] ≡ ℤ.+ _}
+      (trans (sym (proj₂ (twosComplement<0 x₁ bs₁))) twos≡)
+      λ ()
+  twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | yes x₁≤127 | no ¬x₂≤127 =
+    contradiction {P = ℤ.-[1+ _ ] ≡ ℤ.+ _}
+      (trans (sym (proj₂ (twosComplement<0 x₂ bs₂))) (sym twos≡))
+      λ ()
+  twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | yes x₁≤127 | yes x₂≤127 =
+    unsigned-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ (ℤ.+-injective twos≡)
+    where
+    import Data.Integer.Properties as ℤ
+  
+  -- private
+  --   tc₁ : twosComplement ([ # 255 ]) ≡ ℤ.- (ℤ.+ 1)
+  --   tc₁ = refl
+
+  --   tc₂ : twosComplement (# 252 ∷ [ # 24 ]) ≡ ℤ.- (ℤ.+ 1000)
+  --   tc₂ = refl
+
+  --   tc₃ : twosComplement (# 125 ∷ [ # 1 ]) ≡ ℤ.+ 32001
+  --   tc₃ = refl
+
+  --   tc₄ : twosComplement (# 128 ∷ [ # 0 ]) ≡ Sign.- ℤ.◃ 32768
+  --   tc₄ = refl
 
   -- Converts ASCII codes for '0'-'9' to the corresponding nat.
   asciiNum₁ : UInt8 → ℕ

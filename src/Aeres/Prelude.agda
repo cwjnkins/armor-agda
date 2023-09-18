@@ -317,6 +317,17 @@ erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) re
 Exists─ : (@0 A : Set) (B : @0 A → Set) → Set
 Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
 
+curry─ : {A : Set} {B : @0 A → Set} {C : Exists─ A B → Set}
+         → ((p : Exists─ A B) → C p)
+         → {@0 x : A} (y : B x) → C (─ x , y)
+curry─ p y = p (─ _ , y)
+
+
+uncurry─ : {A : Set} {B : @0 A → Set} {C : Exists─ A B → Set}
+           → ({@0 x : A} (y : B x) → C (─ x , y))
+           → (e : Exists─ A B) → C e
+uncurry─ f (─ fst , snd) = f {fst} snd
+
 -- Typeclasses
 
 record Numeric {ℓ} (A : Set ℓ) : Set ℓ where
@@ -524,7 +535,9 @@ module Lemmas where
 
   open import Tactic.MonoidSolver using (solve ; solve-macro)
   open import Data.Nat.Properties
+  import      Data.Integer.Properties as ℤ
   open import Data.List.Properties
+  import      Data.Sign as Sign
 
   m+n-m≡n : ∀ {m n} → m ≤ n → m + (n - m) ≡ n
   m+n-m≡n{m}{n} m≤n = begin
@@ -539,11 +552,47 @@ module Lemmas where
   ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
   ++-assoc₄{A = A} ws xs ys zs = solve (++-monoid A)
 
-  -- open import Data.List.Solver using (module ++-Solver)
-  -- open ++-Solver using (_⊕_)
+  m*n≡[suc-m]*n∸n : ∀ m n → (n > 0) → m * n ≡ suc m * n - n
+  m*n≡[suc-m]*n∸n zero n n>0 =
+    (begin
+      0 ≡⟨ sym (n∸n≡0 n) ⟩
+      n - n ≡⟨ cong (_∸ n) (sym (+-identityʳ n)) ⟩
+      (n + 0) - n ∎)
+    where
+    open ≡-Reasoning
+  m*n≡[suc-m]*n∸n (suc m) n n>0 =
+    n + (m * n) ≡⟨ cong (n +_) ih ⟩
+    n + (n + m * n - n) ≡⟨ sym (+-∸-assoc n (n ≤ n + m * n ∋ m≤m+n _ _)) ⟩
+    n + (n + m * n) - n ∎
+    where
+    open ≡-Reasoning
 
-  -- ++-assoc₄ : ∀ {ℓ} {A : Set ℓ} (ws xs ys zs : List A) → ws ++ xs ++ ys ++ zs ≡ (ws ++ xs ++ ys) ++ zs
-  -- ++-assoc₄ = ++-Solver.solve 4 (λ ws xs ys zs → ws ⊕ xs ⊕ ys ⊕ zs , (ws ⊕ xs ⊕ ys) ⊕ zs) refl
+    ih : m * n ≡ n + m * n - n
+    ih = m*n≡[suc-m]*n∸n m n n>0
+
+  m^n≥1 : ∀ m n → m > 0 → m ^ n ≥ 1
+  m^n≥1 m zero x = ≤-refl
+  m^n≥1 m (suc n) x =
+    ≤.begin
+      1 ≤.≤⟨ x ⟩
+      m ≤.≤⟨ m≤m*n m (m^n≥1 m n x) ⟩
+      m * (m ^ n) ≤.∎
+    where
+    module ≤ = ≤-Reasoning
+
+  ^-monoʳ-≤ : ∀ m {n o} → m > 0 → n ≤ o → m ^ n ≤ m ^ o
+  ^-monoʳ-≤ m{o = o} m>0 z≤n = m^n≥1 m o m>0
+  ^-monoʳ-≤ m{n}{o} m>0 (s≤s x) = *-monoʳ-≤ m (^-monoʳ-≤ m m>0 x)
+
+  m≤n⇒∃[o]o+m≡n : ∀ {m n} → m ≤ n → ∃ λ o → o + m ≡ n
+  m≤n⇒∃[o]o+m≡n {.zero} {n} z≤n = _ , (+-identityʳ n)
+  m≤n⇒∃[o]o+m≡n {.(suc _)} {.(suc _)} (s≤s m≤n)
+    with m≤n⇒∃[o]o+m≡n m≤n
+  ... | (o , o+m≡n) = o , trans (+-suc o _) (cong suc o+m≡n)
+
+  neg◃-injective : ∀ {m n} → Sign.- ℤ.◃ m ≡ Sign.- ℤ.◃ n → m ≡ n
+  neg◃-injective {zero} {zero} eq = refl
+  neg◃-injective {suc m} {suc n} eq = cong suc (ℤ.-[1+-injective eq)
 
   take-length-++ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → take (length xs) (xs ++ ys) ≡ xs
   take-length-++ [] ys = refl
