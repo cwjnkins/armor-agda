@@ -1,17 +1,18 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --inversion-max-depth=300 #-}
 
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.Length.Properties where
 
-open Base256
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 elimMinRepLong
   : ∀ {ℓ} lₕ lₜ (P : UInt8 → List UInt8 → Set ℓ) →
@@ -134,3 +135,59 @@ nonnesting xs₁++ys₁≡xs₂++ys₂ (long (mkLong l l>128 lₕ lₕ≢0 lₜ 
 
 getLength∘toLength-short : (n : Fin 128) → getLength (toLength n) ≡ toℕ n
 getLength∘toLength-short n = Fin.toℕ-inject≤ n (toWitness{Q = _ ≤? _} tt)
+
+@0 nonmalleable : NonMalleable Length RawLength
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable = inj
+  where
+  module ≤ = ≤-Reasoning
+
+  getLengthRaw>128 : ∀ {lₕ lₜ} → toℕ lₕ > 0 → MinRepLong lₕ lₜ → getLengthRaw (lₕ ∷ lₜ) ≥ 128
+  getLengthRaw>128 {lₕ} {[]} lₕ>0 mr =
+    ≤.begin
+      128 ≤.≤⟨ mr ⟩
+      toℕ lₕ ≤.≡⟨ sym (*-identityʳ _) ⟩
+      toℕ lₕ * 1 ≤.≡⟨ sym (+-identityʳ _) ⟩
+      toℕ lₕ * 1 + 0 ≤.∎
+  getLengthRaw>128 {lₕ} {x ∷ lₜ} lₕ>0 tt =
+    ≤.begin
+      128 ≤.≤⟨ toWitness{Q = 128 ≤? 256} tt ⟩
+      256 ≤.≤⟨ m≤m*n 256 (0 < (256 ^ (length lₜ)) ∋ n≢0⇒n>0 (λ ≡0 → contradiction (m^n≡0⇒m≡0 256 (length lₜ) ≡0) λ ())) ⟩
+      256 ^ (1 + length lₜ) ≤.≡⟨ sym (*-identityˡ _) ⟩
+      1 * 256 ^ (1 + length lₜ) ≤.≤⟨ *-monoˡ-≤ (256 ^ (1 + length lₜ)) lₕ>0 ⟩
+      toℕ lₕ * 256 ^ (1 + length lₜ) ≤.≤⟨ m≤m+n _ _ ⟩
+      toℕ lₕ * (256 ^ (1 + length lₜ)) + getLengthRaw (x ∷ lₜ) ≤.∎
+
+  @0 inj : (a₁ a₂ : Exists─ (List UInt8) Length) → uncurry─ getLength a₁ ≡ uncurry─ getLength a₂ → a₁ ≡ a₂
+  inj (─ bs₁ , s₁@(short (mkShort l l<128 refl))) (─ bs₂ , s₂@(short (mkShort l₁ l<129 refl))) eq =
+    case Fin.toℕ-injective eq ret (const _) of λ where
+      refl →
+        case (‼ unambiguous s₁ s₂) ret (const _) of λ where
+          refl → refl
+  inj (─ bs₁ , short x) (─ bs₂ , long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRepLong refl)) eq =
+    contradiction eq (<⇒≢ (≤.begin
+      1 + toℕ (Short.l x) ≤.≤⟨ Short.l<128 x ⟩
+      128 ≤.≤⟨ getLengthRaw>128 lₕ≢0 lₕₜMinRepLong ⟩
+      getLengthRaw (lₕ ∷ lₜ) ≤.∎))
+  inj (─ bs₁ , long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRepLong bs≡)) (─ bs₂ , short x₁) eq =
+      contradiction eq (>⇒≢ (≤.begin
+      1 + toℕ (Short.l x₁) ≤.≤⟨ Short.l<128 x₁ ⟩
+      128 ≤.≤⟨ getLengthRaw>128 lₕ≢0 lₕₜMinRepLong ⟩
+      getLengthRaw (lₕ ∷ lₜ) ≤.∎))
+  inj (─ bs₁ , len₁@(long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRepLong refl))) (─ bs₂ , len₂@(long (mkLong l₁ l>129 lₕ₁ lₕ≢1 lₜ₁ lₜLen₁ lₕₜMinRepLong₁ refl))) eq =
+    case ‼ bs₁≡bs₂ ret (const _) of λ where
+      refl → case (‼ unambiguous len₁ len₂) ret (const _) of λ where
+        refl → refl
+    where
+    @0 bs₁≡bs₂ : bs₁ ≡ bs₂
+    bs₁≡bs₂ = case <-cmp (length bs₁) (length bs₂) ret (const _) of λ where
+      (tri< (s≤s bs₁<bs₂) _ _) →
+        contradiction (Base256.unsigned-leading-0{bs₁ = lₕ ∷ lₜ}{bs₂ = lₕ₁ ∷ lₜ₁} (s≤s z≤n) bs₁<bs₂ eq) (>⇒≢ lₕ≢1)
+      (tri≈ _ len≡ _) →
+        cong₂ _∷_
+          (Fin.toℕ-injective
+            (‼ ∸-cancelʳ-≡ l>128 l>129
+              (trans (sym lₜLen) (trans (+-cancelˡ-≡ 2 len≡) lₜLen₁))))
+          (‼ Base256.unsigned-injective _ _ (suc-injective len≡) eq)
+      (tri> _ _ (s≤s bs₂<bs₁)) →
+        contradiction (Base256.unsigned-leading-0 {bs₁ = lₕ₁ ∷ lₜ₁} {bs₂ = lₕ ∷ lₜ} (s≤s z≤n) bs₂<bs₁ (sym eq)) (>⇒≢ lₕ≢0)

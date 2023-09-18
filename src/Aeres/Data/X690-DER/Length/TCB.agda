@@ -2,11 +2,13 @@
 
 open import Aeres.Binary
 open import Aeres.Prelude
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Data.Nat.Properties as Nat
 
 module Aeres.Data.X690-DER.Length.TCB where
 
-open Base256
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+  using (Raw)
 
 record Short (@0 bs : List UInt8) : Set where
   constructor mkShort
@@ -36,14 +38,12 @@ data Length : (@0 _ : List UInt8) → Set where
   short : ∀ {@0 bs} → Short bs → Length bs
   long  : ∀ {@0 bs} → Long  bs → Length bs
 
--- read the value of a length field
 getLengthRaw : List UInt8 → ℕ
-getLengthRaw [] = 0
-getLengthRaw (b ∷ bs) = toℕ b + 256 * getLengthRaw bs
+getLengthRaw = Base256.unsigned
 
 getLength : ∀ {@0 bs} → Length bs → ℕ
 getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
-getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = getLengthRaw (reverse (lₕ ∷ lₜ))
+getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = getLengthRaw (lₕ ∷ lₜ)
 
 toLength : (n : Fin 128) → Length ([ Fin.inject≤ n (toWitness{Q = _ ≤? _} tt) ])
 toLength n = short (mkShort c c< refl)
@@ -57,3 +57,8 @@ toLength n = short (mkShort c c< refl)
          (Nat.≤-trans
            (Fin.toℕ<n n)
            Nat.≤-refl)
+
+-- for nonmalleability
+RawLength : Raw Length
+Raw.D RawLength = ℕ
+Raw.to RawLength = uncurry─ getLength
