@@ -2,10 +2,14 @@
 
 open import Aeres.Binary
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Boool.TCB where
+
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+  using (Raw)
 
 data BoolRep : Bool → UInt8 → Set where
   falseᵣ : BoolRep false (# 0)
@@ -20,3 +24,7 @@ record BoolValue (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ [ b ]
 
 Boool = TLV Tag.Boolean BoolValue
+
+RawBoolValue : Raw BoolValue
+Raw.D RawBoolValue = Bool
+Raw.to RawBoolValue = uncurry─ BoolValue.v

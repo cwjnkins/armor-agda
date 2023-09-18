@@ -2,12 +2,16 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Boool.TCB
+import      Aeres.Data.X690-DER.TLV.Properties as TLV
+open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Boool.Properties where
 
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 nonempty : NonEmpty BoolValue
 nonempty () refl
@@ -21,3 +25,11 @@ unambiguous (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#0 .(# 0) false
 unambiguous (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ ())
 unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ ())
 unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ refl) = refl
+
+@0 nonmalleableValue : NonMalleable BoolValue RawBoolValue
+NonMalleable.unambiguous nonmalleableValue = unambiguous
+NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #0 ._ falseᵣ refl) (─ ._ , mkBoolValue #0 ._ falseᵣ refl) _ = refl
+NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #1 ._ trueᵣ refl) (─ ._ , mkBoolValue #1 ._ trueᵣ refl) _ = refl
+
+@0 nonmalleable : NonMalleable Boool _
+nonmalleable = TLV.nonmalleable nonmalleableValue
