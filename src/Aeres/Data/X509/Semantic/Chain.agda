@@ -80,9 +80,9 @@ CCP6Seq ((fst , snd) ∷ []) = ⊤
 CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
 CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
-CCP10Seq [] = ⊤
-CCP10Seq ((fst , snd) ∷ []) = T (isCA (Cert.getBC snd))
-CCP10Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₁) = T (isCA (Cert.getBC snd₁)) × CCP10Seq x₁
+CCP10Seq [] = ⊥
+CCP10Seq ((fst , snd) ∷ []) = ⊤
+CCP10Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₁) = T(isCA (Cert.getBC snd₁)) × CCP10Seq ((fst₁ , snd₁) ∷ x₁)
 
 helperCCP4₁-h : ∀ {@0 h t} → Extension.CRLDistPoint.DistPoint h → IList UInt8 Extension.CRLDistPoint.DistPoint t  → Set
 helperCCP4₁-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn none bs≡₁) len≡ bs≡) x₁ = ⊥
@@ -105,15 +105,11 @@ helperCCP4₂ (─ .[] , none) = ⊤
 helperCCP4₂ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h head₁ tail₁
 
 helperCCP4 : (c : List (Exists─ (List Dig) Cert)) → Set
-helperCCP4 [] = ⊤
-helperCCP4 ((fst , snd) ∷ [])
-  with isCRLSignPresent (Cert.getKU snd)
-... | false = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) × helperCCP4₁ (Cert.getCRLDIST snd)
-... | true = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) × helperCCP4₂ (Cert.getCRLDIST snd)
-helperCCP4 ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
-  with isCRLSignPresent (Cert.getKU snd₁)
-... | false = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₁ (Cert.getCRLDIST snd)
-... | true = (MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) × helperCCP4₂ (Cert.getCRLDIST snd)
+helperCCP4 [] = ⊥
+helperCCP4 (x₁ ∷ []) = ⊤
+helperCCP4 (x₁ ∷ x₂ ∷ t) with helperCCP4 (x₂ ∷ t) | isCRLSignPresent (Cert.getKU (proj₂ x₂))
+... | rec | true =  helperCCP4₂ (Cert.getCRLDIST (proj₂ x₁)) × rec
+... | rec | false = helperCCP4₁ (Cert.getCRLDIST (proj₂ x₁)) × rec
 
 certInList : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → Bool
 certInList c [] = false
@@ -206,15 +202,11 @@ helperCCP4₁-dec (─ .[] , none) = yes tt
 helperCCP4₁-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h-dec head₁ tail₁
 
 helperCCP4-dec : (c : List (Exists─ (List Dig) Cert)) → Dec (helperCCP4 c)
-helperCCP4-dec [] = yes tt
-helperCCP4-dec ((fst , snd) ∷ [])
-  with isCRLSignPresent (Cert.getKU snd)
-... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
-... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
-helperCCP4-dec ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
-  with isCRLSignPresent (Cert.getKU snd₁)
-... | false = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₁-dec (Cert.getCRLDIST snd)
-... | true = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helperCCP4₂-dec (Cert.getCRLDIST snd)
+helperCCP4-dec [] = no λ()
+helperCCP4-dec (x₁ ∷ []) = yes tt
+helperCCP4-dec (x₁ ∷ x₂ ∷ t) with helperCCP4-dec (x₂ ∷ t) | isCRLSignPresent (Cert.getKU (proj₂ x₂))
+... | rec | true = helperCCP4₂-dec (Cert.getCRLDIST (proj₂ x₁)) ×-dec rec
+... | rec | false = helperCCP4₁-dec (Cert.getCRLDIST (proj₂ x₁)) ×-dec rec
 
 helperCCP7-dec : (r : List (Exists─ (List UInt8) Cert)) → (c : List (Exists─ (List UInt8) Cert)) → Dec (helperCCP7 r c)
 helperCCP7-dec r [] = no λ()
@@ -222,7 +214,6 @@ helperCCP7-dec r (x ∷ t)
   with certInList x r
 ... | false = helperCCP7-dec r t
 ... | true = yes tt
-
 ------------------------------------------------------------------------
 
 countNextIntCACerts : List (Exists─ (List UInt8) Cert) → ℤ → ℤ
@@ -256,7 +247,6 @@ helperCCP3-dec (fst , snd) x₁
   with (getBCPathLen (Cert.getBC snd))
 ... | (─ .[] , none) = yes tt
 ... | (fst , some x) = countNextIntCACerts x₁ (ℤ.+ 0) ℤ.≤? Int.getVal x
-
 -------------------------- CCP rules ---------------------------------------
 
 -- Conforming implementations may choose to reject all Version 1 and Version 2 intermediate CA certificates
@@ -329,15 +319,9 @@ ccp10 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP10 c)
 ccp10 c = helper (chainToList c)
   where
   helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP10Seq c)
-  helper [] = yes tt
-  helper ((fst , snd) ∷ [])
-    with isCA (Cert.getBC snd)
-  ... | false = no (λ ())
-  ... | true = yes tt
-  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ t)
-    with isCA (Cert.getBC snd₁)
-  ... | false = no (λ ())
-  ... | true = yes tt ×-dec helper t
+  helper [] = no λ()
+  helper ((fst , snd) ∷ []) = yes tt
+  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ t) = T-dec ×-dec helper ((fst₁ , snd₁) ∷ t)
 
 
 --- check whether any of the certificate in given chain is trusted by the system's trust anchor
