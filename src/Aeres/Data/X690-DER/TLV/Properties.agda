@@ -5,14 +5,15 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.TLV.Properties where
 
-open Base256
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 nonempty : ∀ {t} {@0 A} → NonEmpty (TLV t A)
 nonempty (mkTLV len val len≡ ()) refl
@@ -154,3 +155,19 @@ getLengthLen≡{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ v₁ v₂
     t ∷ TLV.l v₂ ++ TLV.v v₂ ++ ys₂   ∎
 ... | refl = cong getLength (Length.unambiguous (TLV.len v₁) (TLV.len v₂))
 
+@0 nonmalleable : ∀ {t} {A : @0 List UInt8 → Set} {R : Raw A} → NonMalleable A R → NonMalleable (TLV t A) (RawTLV R)
+NonMalleable.unambiguous (nonmalleable N) = unambiguous (NonMalleable.unambiguous N)
+NonMalleable.injective (nonmalleable{t}{A}{R} N) = inj'
+  where
+  to = Raw.to (RawTLV R)
+
+  inj' : (a₁ a₂ : Exists─ (List UInt8) (TLV t A)) → to a₁ ≡ to a₂ → a₁ ≡ a₂
+  inj' (─ bs₁ , mkTLV len val len≡ refl) (─ bs₂ , mkTLV len₁ val₁ len≡₁ refl) eq =
+    case val≡val₁ ret (const _) of λ where
+      refl → case (‼ NonMalleable.injective Length.nonmalleable (─ _ , len) (─ _ , len₁) (trans len≡ (sym len≡₁)))
+             ret (const _) of λ where
+        refl → case (‼ ≡-unique len≡ len≡₁) ret (const _) of λ where
+          refl → refl
+    where
+    val≡val₁ : _≡_{A = Exists─ (List UInt8) A} (─ _ , val) (─ _ , val₁)
+    val≡val₁ = ‼ (NonMalleable.injective N (─ _ , val) (─ _ , val₁) eq)
