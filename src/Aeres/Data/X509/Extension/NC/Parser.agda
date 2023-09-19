@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.Parser where
@@ -17,6 +18,7 @@ module Aeres.Data.X509.Extension.NC.Parser where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.IList      UInt8
 
 private
   here' = "X509: Extension: NC"
@@ -29,8 +31,7 @@ parseNCFields =
       (parseTLV _ "NC Fields" _ helper))
   where
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (NCFieldsSeqFields) n)
-  helper n =
-    parseEquivalent
+  helper n =  parseEquivalent
       (equivalent×ₚ equivalent)
       (parseOption₂ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())
         (parseTLV _ here' _ parseExactLengthGeneralSubtrees)
