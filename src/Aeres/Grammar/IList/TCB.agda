@@ -26,6 +26,10 @@ data IList A where
 
 pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
 
+toList : ∀ {@0 A : @0 List Σ → Set} {@0 bs} → IList A bs → List (Exists─ (List Σ) A)
+toList nil = []
+toList (consIList h₁ t₁ bs≡₁) = (─ _ , h₁) ∷ toList t₁
+
 appendIList : ∀ {@0 A xs₁ xs₂} → IList A xs₁ → IList A xs₂ → IList A (xs₁ ++ xs₂)
 appendIList nil x₁ = x₁
 appendIList (cons (mkIListCons head tail refl)) x₁

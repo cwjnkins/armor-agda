@@ -2,7 +2,10 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf.TCB
+open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
@@ -14,12 +17,12 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.SequenceOf.Properties where
 
-open Base256
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList       UInt8
-open Aeres.Grammar.Option      UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.IList                    UInt8
+open Aeres.Grammar.Option                   UInt8
+open Aeres.Grammar.Properties               UInt8
+open Aeres.Grammar.Sum                      UInt8
 
 module SequenceOf where
   equivalent : ∀ {@0 A} → Equivalent (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
@@ -97,6 +100,22 @@ module SequenceOf where
         (λ {ys} eq → ∀ (t' : SequenceOf _ ys) → lengthSequence (subst₀ _ (sym eq) t') ≡ lengthSequence t')
         (λ t → refl) bs₂≡ t₁
 
+  @0 nonmalleable : ∀ {A : @0 List UInt8 → Set} {R : Raw A} → NonEmpty A → NonNesting A → NonMalleable A R → NonMalleable (SequenceOf A) (RawSequenceOf R)
+  NonMalleable.unambiguous (nonmalleable {R = R} ne nn N) = unambiguous (NonMalleable.unambiguous N) ne nn
+  NonMalleable.injective (nonmalleable{A}{R} ne nn N) a₁ a₂ = inj a₁ a₂ (Nat.<-wellFounded _)
+    where
+    import Data.Nat.Induction
+    module Nat = Data.Nat.Induction
+
+    to = Raw.to (RawSequenceOf R)
+
+    inj : (a₁ a₂ : Exists─ (List UInt8) (IList A)) → @0 Acc _<_ (lengthIList (proj₂ a₂)) → to a₁ ≡ to a₂ → a₁ ≡ a₂
+    inj (─ .[] , nil) (─ .[] , nil) _ eq = refl
+    inj (─ ._ , consIList h₁ t₁ refl) (─ ._ , consIList h₂ t₂ refl) (WellFounded.acc rs) eq =
+      case NonMalleable.injective N (─ _ , h₁) (─ _ , h₂) (∷-injectiveˡ eq) ret (const _) of λ where
+        refl → case (‼ inj (─ _ , t₁) (─ _ , t₂) (rs _ ≤-refl) (∷-injectiveʳ eq)) ret (const _) of λ where
+          refl → refl
+
 module Bounded where
 
   @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (BoundedSequenceOf A n)
@@ -104,7 +123,31 @@ module Bounded where
     unambiguousΣₚ (SequenceOf.unambiguous uaₐ naₐ nnₐ)
       λ {xs} a → ≤-irrelevant
 
+  @0 nonmalleable : ∀ {A : @0 List UInt8 → Set} {n} {R : Raw A} → NonEmpty A → NonNesting A → NonMalleable A R → NonMalleable (BoundedSequenceOf A n) (RawBoundedSequenceOf R)
+  NonMalleable.unambiguous (nonmalleable ne nn N) = unambiguous (NonMalleable.unambiguous N) ne nn
+  NonMalleable.injective (nonmalleable{A}{n}{R} ne nn N) = inj
+    where
+    to = Raw.to (RawBoundedSequenceOf R)
+
+    @0 inj : (a₁ a₂ : Exists─ (List UInt8) (BoundedSequenceOf A n)) → to a₁ ≡ to a₂ → a₁ ≡ a₂
+    inj (─ bs₁ , mk×ₚ l₁ len₁ refl) (─ bs₂ , mk×ₚ l₂ len₂ refl) eq =
+      case NonMalleable.injective (SequenceOf.nonmalleable ne nn N) (─ _ , l₁) (─ _ , l₂) eq ret (const _) of λ where
+        refl → case ≤-irrelevant len₁ len₂ ret (const _) of λ where
+          refl → refl
+
 open SequenceOf public
+
+@0 nonmalleableSeq
+  : ∀ {A : @0 List UInt8 → Set} {R : Raw A}
+    → NonEmpty A → NonNesting A
+    → NonMalleable A R → NonMalleable (Seq A) (RawTLV (RawSequenceOf R))
+nonmalleableSeq ne nn N = TLV.nonmalleable (nonmalleable ne nn N)
+
+@0 nonmalleableNonEmptySeq
+  : ∀ {A : @0 List UInt8 → Set} {R : Raw A}
+    → NonEmpty A → NonNesting A
+    → NonMalleable A R → NonMalleable (NonEmptySeq A) (RawTLV (RawBoundedSequenceOf R))
+nonmalleableNonEmptySeq ne nn N = TLV.nonmalleable (Bounded.nonmalleable ne nn N)
 
 instance
     SequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
