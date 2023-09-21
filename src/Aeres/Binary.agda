@@ -243,6 +243,19 @@ module Base256 where
   ... | no ¬p = twosComplement- b₁ bs
   ... | yes p = ℤ.+ unsigned xs
 
+  TwosComplementMinRep : UInt8 → List UInt8 → Set
+  TwosComplementMinRep bₕ [] = ⊤
+  TwosComplementMinRep bₕ (b ∷ bₜ) =
+    (toℕ bₕ ≡ 0 → toℕ b ≥ 128) × (toℕ bₕ ≡ 255 → toℕ b ≤ 127)
+
+  twosComplementMinRep? : ∀ bₕ bₜ → Dec (TwosComplementMinRep bₕ bₜ)
+  twosComplementMinRep? bₕ [] = yes tt
+  twosComplementMinRep? bₕ (b ∷ bₜ) =
+          (toℕ bₕ ≟ 0 →-dec toℕ b ≥? 128)
+    ×-dec (toℕ bₕ ≟ 255 →-dec toℕ b Nat.≤? 127)
+    where
+    open import Relation.Nullary.Implication
+
   twosComplement<0 : ∀ b bs → ∃ λ n → twosComplement- b bs ≡ ℤ.-[1+ n ]
   twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
       128 * 256 ^ length bs - (toℕ b' * 256 ^ length bs + unsigned bs)
@@ -294,6 +307,146 @@ module Base256 where
       suc o + unsigned bs - unsigned bs ≡⟨ m+n∸n≡m (suc o) (unsigned bs) ⟩
       suc o ∎)
 
+  ¬twosComplementMinRep : ∀ bₕ₁ bₜ₁ bₕ₂ bₜ₂ → length bₜ₁ < length bₜ₂ → twosComplement (bₕ₁ ∷ bₜ₁) ≡ twosComplement (bₕ₂ ∷ bₜ₂)
+                          → ¬ TwosComplementMinRep bₕ₂ bₜ₂
+  ¬twosComplementMinRep bₕ₁ bₜ₁ bₕ₂ (b ∷ bₜ₂) (s≤s bs₁<bs₂) eq (mr₂₁ , mr₂₂)
+    with toℕ bₕ₁ Nat.≤? 127
+  ... | yes bₕ₁≤127
+    with toℕ bₕ₂ Nat.≤? 127
+  ... | no ¬bₕ₂≤127 =
+    contradiction {P = ℤ.+ _ ≡ ℤ.-[1+ _ ]} (trans eq (proj₂ (twosComplement<0 bₕ₂ (b ∷ bₜ₂)))) (λ ())
+  ... | yes bₕ₂≤127 =
+    contradiction lem₀ (Nat.<⇒≢ (≤.begin
+      suc (toℕ bₕ₁ * 256 ^ length bₜ₁) + unsigned bₜ₁
+        ≤.≡⟨ sym (+-suc _ (unsigned bₜ₁)) ⟩
+      toℕ bₕ₁ * 256 ^ length bₜ₁ + suc (unsigned bₜ₁)
+        ≤.≤⟨ +-monoʳ-≤ _ (unsigned< bₜ₁) ⟩
+      toℕ bₕ₁ * 256 ^ length bₜ₁ + 256 ^ length bₜ₁
+        ≤.≡⟨ +-comm _ (256 ^ length bₜ₁) ⟩
+      suc (toℕ bₕ₁) * 256 ^ length bₜ₁
+        ≤.≤⟨ Nat.*-monoʳ-≤ (suc (toℕ bₕ₁)) (Lemmas.^-monoʳ-≤ 256 (s≤s z≤n) bs₁<bs₂) ⟩
+      suc (toℕ bₕ₁) * 256 ^ length bₜ₂
+        ≤.≤⟨ (case singleton (toℕ bₕ₂) refl ret (const _) of λ where
+          (singleton (suc n) n≡) → ≤.begin
+            suc (toℕ bₕ₁) * 256 ^ length bₜ₂
+              ≤.≤⟨ *-monoˡ-≤ (256 ^ length bₜ₂) (Fin.toℕ<n bₕ₁) ⟩
+            256 ^ (1 + length bₜ₂)
+              ≤.≤⟨ Nat.m≤n*m (256 ^ (1 + length bₜ₂)) {toℕ bₕ₂} (n≢0⇒n>0 (λ eq → case trans (‼ n≡) eq of λ ())) ⟩
+            toℕ bₕ₂ * 256 ^ (1 + length bₜ₂)
+              ≤.≤⟨ m≤m+n _ _ ⟩
+            toℕ bₕ₂ * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)
+              ≤.∎
+          (singleton zero    n≡) → ≤.begin
+            suc (toℕ bₕ₁) * 256 ^ length bₜ₂
+              ≤.≤⟨ *-monoˡ-≤ (256 ^ length bₜ₂) (≤-trans (s≤s bₕ₁≤127) (mr₂₁ (‼ sym n≡))) ⟩
+            toℕ b * 256 ^ length bₜ₂
+              ≤.≤⟨ m≤m+n _ (unsigned bₜ₂) ⟩
+            toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂
+              ≤.≡⟨ cong (λ x → x * 256 ^ (1 + length bₜ₂) + (toℕ b * (256 ^ length bₜ₂) + unsigned bₜ₂))
+                     (‼ n≡) ⟩
+            toℕ bₕ₂ * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)
+              ≤.∎)⟩
+      toℕ bₕ₂ * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂) ≤.∎))
+    where
+    module ≤ = ≤-Reasoning
+    import Data.Integer.Properties as ℤ
+
+    lem₀ : toℕ bₕ₁ * (256 ^ length bₜ₁) + unsigned bₜ₁ ≡ toℕ bₕ₂ * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)
+    lem₀ = ℤ.+-injective eq
+  ¬twosComplementMinRep bₕ₁ bₜ₁ bₕ₂ (b ∷ bₜ₂) (s≤s bs₁<bs₂) eq (mr₂₁ , mr₂₂) | no ¬bₕ₁≤127
+    with toℕ bₕ₂ Nat.≤? 127
+  ... | yes bₕ₂≤127 =
+    contradiction {P = ℤ.+ _ ≡ ℤ.-[1+ _ ]} (trans (sym eq) (proj₂ (twosComplement<0 bₕ₁ bₜ₁))) (λ ())
+  ... | no ¬bₕ₂≤127 =
+    contradiction lem₀ (Nat.<⇒≢ (≤.begin
+      suc (128 * 256 ^ length bₜ₁ - unsigned (bₕ₁' ∷ bₜ₁))
+        ≤.≤⟨ +-monoʳ-≤ 1 (≤.begin
+               128 * 256 ^ length bₜ₁ - unsigned (bₕ₁' ∷ bₜ₁) ≤.≤⟨ m∸n≤m _ (unsigned (bₕ₁' ∷ bₜ₁)) ⟩
+               128 * 256 ^ length bₜ₁ ≤.≤⟨ *-monoʳ-≤ 128 (Lemmas.^-monoʳ-≤ 256 (s≤s z≤n) bs₁<bs₂) ⟩
+               128 * 256 ^ length bₜ₂ ≤.≡⟨ *-distribʳ-∸ (256 ^ length bₜ₂) 256 128 ⟩
+               256 ^ (1 + length bₜ₂) - 128 * 256 ^ length bₜ₂
+                 ≤.≡⟨ cong (_∸ 128 * (256 ^ length bₜ₂)) (begin
+                   256 ^ (1 + length bₜ₂) ≡⟨ sym (*-identityˡ (256 ^ (1 + length bₜ₂))) ⟩
+                   1 * 256 ^ (1 + length bₜ₂) ≡⟨⟩
+                   (128 - 127) * 256 ^ (1 + length bₜ₂) ≡⟨ *-distribʳ-∸ (256 ^ (1 + length bₜ₂) ) 128 127 ⟩
+                   128 * 256 ^ (1 + length bₜ₂) - 127 * 256 ^ (1 + length bₜ₂) ∎) ⟩
+               (128 * 256 ^ (1 + length bₜ₂) - 127 * 256 ^ (1 + length bₜ₂)) - 128 * 256 ^ length bₜ₂
+                 ≤.≡⟨ ∸-+-assoc (128 * 256 ^ (1 + length bₜ₂)) (127 * 256 ^ (1 + length bₜ₂)) (128 * 256 ^ length bₜ₂) ⟩
+               128 * 256 ^ (1 + length bₜ₂) - (127 * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂) ≤.∎) ⟩
+      suc (128 * 256 ^ (1 + length bₜ₂) - (127 * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂))
+        ≤.≤⟨ ∸-monoʳ-<
+               {128 * 256 ^ (1 + length bₜ₂)}
+               {(127 * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂)}
+               {toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)}
+               (case toℕ bₕ₂ ≟ 255 ret (const _) of λ where
+                 (yes bₕ₂≡255) → lem₂ bₕ₂≡255
+                 (no  bₕ₂≢255) → lem₁ (+-cancelˡ-≤ 1 (Nat.≤∧≢⇒< (+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ₂)) bₕ₂≢255)))
+               (≤.begin
+                 127 * 256 ^ (1 + length bₜ₂) + 128 * (256 ^ length bₜ₂)
+                   ≤.≤⟨ +-monoʳ-≤ (127 * 256 ^ (1 + length bₜ₂)) (*-monoˡ-≤ (256 ^ length bₜ₂) (toWitness{Q = 128 Nat.≤? 256} tt)) ⟩
+                 127 * 256 ^ (1 + length bₜ₂) + 256 ^ (1 + length bₜ₂)
+                   ≤.≡⟨ +-comm (127 * 256 ^ (1 + length bₜ₂)) (256 ^ (1 + length bₜ₂)) ⟩
+                 128 * 256 ^ (1 + length bₜ₂) ≤.∎) ⟩
+      128 * 256 ^ (1 + length bₜ₂) - (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)) ≤.∎))
+    where
+    open ≡-Reasoning
+    module ≤ = ≤-Reasoning
+    bₕ₁∸128<256 = ≤-trans (s≤s (m∸n≤m (toℕ bₕ₁) 128)) (Fin.toℕ<n bₕ₁)
+    bₕ₂∸128<256 = ≤-trans (s≤s (m∸n≤m (toℕ bₕ₂) 128)) (Fin.toℕ<n bₕ₂)
+
+    bₕ₁' = Fin.fromℕ<{m = toℕ bₕ₁ - 128}{n = 256} bₕ₁∸128<256
+    bₕ₂' = Fin.fromℕ<{m = toℕ bₕ₂ - 128}{n = 256} bₕ₂∸128<256
+
+    bₕ₂'≤127 : toℕ bₕ₂' ≤ 127
+    bₕ₂'≤127 = ≤.begin
+      toℕ bₕ₂' ≤.≡⟨⟩
+      toℕ (Fin.fromℕ<{m = toℕ bₕ₂ - 128}{n = 256} bₕ₂∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< bₕ₂∸128<256 ⟩
+      toℕ bₕ₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ₂)) ⟩
+      127 ≤.∎
+
+    lem₀ :   128 * 256 ^ length bₜ₁ - unsigned (bₕ₁' ∷ bₜ₁)
+           ≡ 128 * 256 ^ (1 + length bₜ₂) - (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂))
+    lem₀ = Lemmas.neg◃-injective eq
+
+    lem₁ : toℕ bₕ₂ ≤ 254 →   toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + unsigned (b ∷ bₜ₂)
+                           < 127      * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂
+    lem₁ bₕ₂≤254 = ≤.begin
+      suc (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + unsigned (b ∷ bₜ₂))
+        ≤.≡⟨ sym (+-suc (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂)) _) ⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + suc (unsigned (b ∷ bₜ₂))
+        ≤.≤⟨ +-monoʳ-≤ (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂)) (unsigned< (b ∷ bₜ₂)) ⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + 256 ^ (1 + length bₜ₂)
+        ≤.≤⟨ +-monoˡ-≤ (256 ^ (1 + length bₜ₂)) (*-monoˡ-≤ (256 ^ (1 + length bₜ₂))
+               (≤.begin
+                 toℕ (Fin.fromℕ<{m = toℕ bₕ₂ - 128}{n = 256} bₕ₂∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< bₕ₂∸128<256 ⟩
+                 toℕ bₕ₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 bₕ₂≤254 ⟩
+                 126 ≤.∎)) ⟩
+      126 * 256 ^ (1 + length bₜ₂) + 256 ^ (1 + length bₜ₂) ≤.≡⟨ +-comm (126 * 256 ^ (1 + length bₜ₂)) _ ⟩
+      127 * 256 ^ (1 + length bₜ₂) ≤.≤⟨ m≤m+n (127 * 256 ^ (1 + length bₜ₂)) _ ⟩
+      127 * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂ ≤.∎
+
+    lem₂ : toℕ bₕ₂ ≡ 255 →    toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + unsigned (b ∷ bₜ₂)
+                           < 127      * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂
+    lem₂ bₕ₂≡255 = ≤.begin
+      suc (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + unsigned (b ∷ bₜ₂)) ≤.≡⟨ sym (+-suc (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂)) _) ⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + suc (unsigned (b ∷ bₜ₂)) ≤.≡⟨⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + suc (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)
+        ≤.≡⟨ cong ((toℕ bₕ₂' * 256 ^ (1 + length bₜ₂)) +_) (sym (+-suc _ (unsigned bₜ₂))) ⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + suc (unsigned bₜ₂))
+        ≤.≤⟨ +-monoʳ-≤ (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂))
+               (+-mono-≤ (*-monoˡ-≤ (256 ^ length bₜ₂) (mr₂₂ bₕ₂≡255)) (unsigned< bₜ₂)) ⟩
+      toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (127 * 256 ^ length bₜ₂ + 256 ^ length bₜ₂)
+        ≤.≤⟨ +-monoˡ-≤ ((127 * 256 ^ length bₜ₂ + 256 ^ length bₜ₂))
+               (*-monoˡ-≤ (256 ^ (1 + length bₜ₂)) bₕ₂'≤127) ⟩
+      127 * 256 ^ (1 + length bₜ₂) + (127 * 256 ^ length bₜ₂ + 256 ^ length bₜ₂)
+        ≤.≡⟨ cong (127 * (256 ^ (1 + length bₜ₂)) +_) (+-comm (127 * 256 ^ length bₜ₂) _) ⟩
+      127 * 256 ^ (1 + length bₜ₂) + 128 * 256 ^ length bₜ₂ ≤.∎
+
+    {- 128 * 256 ^ length bₜ₁ - unsigned (bₕ₁' ∷ bₜ₁) ≤
+    -- 128 * 256 ^ length bₜ₁ ≤
+    -- 128 * 256 ^ length bₜ₂ ≡
+    -- 256 ^ (1 + length bₜ₂) - 128 * length bₜ₂
+    -}
 
   twosComplement-injective : (bs₁ bs₂ : List UInt8) → length bs₁ ≡ length bs₂ → twosComplement bs₁ ≡ twosComplement bs₂ → bs₁ ≡ bs₂
   twosComplement-injective [] [] len≡ twos≡ = refl
