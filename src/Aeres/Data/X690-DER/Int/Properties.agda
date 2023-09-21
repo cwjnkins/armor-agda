@@ -17,6 +17,9 @@ module MinRep where
   @0 unique : ∀ {b bs} → Unique (True (Base256.twosComplementMinRep? b bs))
   unique p₁ p₂ = T-unique p₁ p₂
 
+nonempty : NonEmpty IntegerValue
+nonempty (mkIntVal bₕ bₜ minRep val ()) refl
+
 @0 unambiguous : Unambiguous IntegerValue
 unambiguous (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
   case (trans (sym bs≡) bs≡₁) ret (const _) of λ where
@@ -74,12 +77,5 @@ instance
         case (‼ NonMalleable.injective nonmalleableVal (─ _ , i₁) (─ _ , i₂) refl) ret (const _) of λ where
           refl → yes refl
 
--- instance
---   IntValEq : Eq (Exists─ (List UInt8) Singleton)
---   Eq._≟_ IntValEq (─ bs₁ , singleton s₁ refl) (─ bs₂ , singleton s₂ refl)
---     with s₁ ≟ s₂
---   ... | yes refl = yes refl
---   ... | no ¬eq = no λ where refl → contradiction refl ¬eq
-
---   eq≋ : Eq≋ IntegerValue
---   eq≋ = Eq⇒Eq≋ it
+  eq≋ : Eq≋ IntegerValue
+  eq≋ = Eq⇒Eq≋ it

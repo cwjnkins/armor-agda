@@ -36,7 +36,7 @@ module parseAKIFields where
   parseAKIAuthCertIssuer = parseTLV _ Here.AKIAuthCertIssuer _ parseGeneralNamesElems
 
   parseAKIAuthCertSN : Parser (Logging ∘ Dec) AKIAuthCertSN
-  parseAKIAuthCertSN = parseTLV _ Here.AKIAuthCertSN _ parseIntValue
+  parseAKIAuthCertSN = parseTLV _ Here.AKIAuthCertSN _ Int.parseValue
 
   -- NOTE: The proof effort caught a bug in my original implementation :)
   -- (Try to parse all, then check lengths)

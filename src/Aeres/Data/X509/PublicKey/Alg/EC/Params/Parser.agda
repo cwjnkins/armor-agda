@@ -56,12 +56,12 @@ parseEcParamsFields n =
           (parse& (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
             (parse& (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
               (parse& (λ where _ refl refl → refl) (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") (# 2 ∷ # 1 ∷ [ # 1 ]))
-              parseFieldID) parseCurve) parseOctetString) parseInt)
+              parseFieldID) parseCurve) parseOctetString) Int.parse)
           (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) (tell $ here' String.++ ": overflow"))
         λ where
           {bs} (singleton read read≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
-              (parseOption₁ExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") parseInt (n - read)))
+              (parseOption₁ExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") Int.parse (n - read)))
 
 parseEcParams :  Parser (Logging ∘ Dec) EcParams
 parseEcParams = parseTLV _ "EC params" _ parseEcParamsFields

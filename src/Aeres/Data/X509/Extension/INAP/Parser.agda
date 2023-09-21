@@ -19,5 +19,5 @@ private
 parseINAPFields : Parser (Logging ∘ Dec) INAPFields
 parseINAPFields =
   parseTLV _ here' _
-    λ n → parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") parseInt n
+    λ n → parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") Int.parse n
 

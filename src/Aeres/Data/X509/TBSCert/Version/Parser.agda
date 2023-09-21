@@ -21,4 +21,4 @@ parseVersion : Parser (Logging ∘ Dec) Version
 parseVersion = parseTLV Tag.AA0 "version" Int p
   where
   p : ∀ n → Parser (Logging ∘ Dec) (ExactLength Int n)
-  p = parseExactLength TLV.nonnesting (tell $ here' String.++ ": length mismatch") parseInt
+  p = parseExactLength TLV.nonnesting (tell $ here' String.++ ": length mismatch") Int.parse

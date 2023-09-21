@@ -1,13 +1,15 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open        Base256
-open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.SequenceOf
+open import Aeres.Data.X690-DER.SequenceOf.TCB
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.OID.TCB where
+
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 LeastBytes : List UInt8 → Set
 LeastBytes = maybe (Fin._> # 128) ⊤ ∘ head
@@ -31,9 +33,19 @@ record OIDSub (@0 bs : List UInt8) : Set where
     @0 leastDigs : LeastBytes lₚ
     @0 bs≡ : bs ≡ lₚ ∷ʳ lₑ
 
+-- TODO: sharpen this
+RawOIDSub : Raw OIDSub
+Raw.D RawOIDSub = List UInt8
+Raw.to RawOIDSub (_ , mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) = lₚ ∷ʳ lₑ
+
 OIDValue : @0 List UInt8 → Set
 OIDValue = NonEmptySequenceOf OIDSub
+
+RawOIDValue : Raw OIDValue
+RawOIDValue = RawBoundedSequenceOf RawOIDSub
 
 OID : @0 List UInt8 → Set
 OID = TLV Tag.ObjectIdentifier OIDValue
 
+RawOID : Raw OID
+RawOID = RawTLV RawOIDValue

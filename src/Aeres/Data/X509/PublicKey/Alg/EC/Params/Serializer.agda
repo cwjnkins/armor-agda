@@ -21,18 +21,18 @@ open Aeres.Grammar.Option     UInt8
 open Aeres.Grammar.Serializer UInt8
 
 
-serializeFields : Serializer EcParamsFields
-serializeFields =
-  serializeEquivalent Fields.equivalent
-    (serialize&ₚ
-      (serialize&ₚ
-        (serialize&ₚ
-          (serialize&ₚ
-            (serialize&ₚ
-              (λ where refl → self)
-              (TLV.serialize id))
-            (TLV.serialize Curve.serialize))
-          (TLV.serialize id))
-        Int.serialize)
-      (Option.serialize Int.serialize))
+-- serializeFields : Serializer EcParamsFields
+-- serializeFields =
+--   serializeEquivalent Fields.equivalent
+--     (serialize&ₚ
+--       (serialize&ₚ
+--         (serialize&ₚ
+--           (serialize&ₚ
+--             (serialize&ₚ
+--               (λ where refl → self)
+--               (TLV.serialize id))
+--             (TLV.serialize Curve.serialize))
+--           (TLV.serialize id))
+--         Int.serialize)
+--       (Option.serialize Int.serialize))
 

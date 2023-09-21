@@ -18,13 +18,12 @@ open import Data.Nat.Properties
 
 module Aeres.Data.X690-DER.SequenceOf.Parser where
 
-open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
-open Aeres.Grammar.Parser      Dig
+open Aeres.Grammar.Parser      UInt8
 
 module parseSequenceOf
-  (eName : String) (A : List Dig → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (eName : String) (A : List UInt8 → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
   (p : Parser (Logging ∘ Dec) A) where
 
   here' = "parseSeq: "
@@ -49,7 +48,7 @@ module parseSequenceOf
                   (─ m+n≤o⇒m≤o _ {length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen)))
                   refl)
                 (bs₂ ++ suffix)
-                (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
+                (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid UInt8) ⟩
                         (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
                         xs ∎)))
               ¬parse
@@ -59,7 +58,7 @@ module parseSequenceOf
       (tri≈ _ r₀≡n _) →
         return (yes
           (success pre₀ _ r₀≡
-            (mk×ₚ (cons (mkSequenceOf v₀ nil (solve (++-monoid Dig)))) (─ trans (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
+            (mk×ₚ (cons (mkSequenceOf v₀ nil (solve (++-monoid UInt8)))) (─ trans (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
       (tri< r₀<n _ _) → do
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
@@ -72,7 +71,7 @@ module parseSequenceOf
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
                     xs≡ = begin pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                                  xs                     ≡⟨ sym ps≡ ⟩
-                                 (bs₁ ++ bs₂) ++ suffix ≡⟨ solve (++-monoid Dig) ⟩
+                                 (bs₁ ++ bs₂) ++ suffix ≡⟨ solve (++-monoid UInt8) ⟩
                                  bs₁ ++ bs₂ ++ suffix   ∎
 
                     @0 pre₀≡bs₁ : pre₀ ≡ bs₁
@@ -113,7 +112,7 @@ module parseSequenceOf
                          n                         ∎)))
               refl)
             suf₁
-            (begin ((pre₀ ++ pre₁) ++ suf₁  ≡⟨ solve (++-monoid Dig) ⟩
+            (begin ((pre₀ ++ pre₁) ++ suf₁  ≡⟨ solve (++-monoid UInt8) ⟩
                     pre₀ ++ pre₁ ++ suf₁    ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
                     pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                     xs                      ∎))))
@@ -159,30 +158,30 @@ module parseSequenceOf
 open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseNonEmptySeq ; parseSeq)
 
 parseIntegerSeq : Parser (Logging ∘ Dec) IntegerSeq
-parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nonnesting parseInt -- parseInt
+parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nonnesting Int.parse -- parseInt
 
 -- private
 --   module Test where
 
---     elm₁ : List Dig
+--     elm₁ : List UInt8
 --     elm₁ = Tag.Integer ∷ # 1 ∷ [ # 4 ]
 
---     elm₂ : List Dig
+--     elm₂ : List UInt8
 --     elm₂ = Tag.Integer ∷ # 1 ∷ [ # 5 ]
 
---     elm₃ : List Dig
+--     elm₃ : List UInt8
 --     elm₃ = Tag.Integer ∷ # 1 ∷ [ # 6 ]
 
---     elm₄ : List Dig
+--     elm₄ : List UInt8
 --     elm₄ = Tag.Boolean ∷ # 1 ∷ [ # 255 ]
 
---     Seq₁₂₃ : List Dig
+--     Seq₁₂₃ : List UInt8
 --     Seq₁₂₃ = Tag.Sequence ∷ [ # 9 ] ++ elm₁ ++ elm₂ ++ elm₃
 
---     Seq₁₂₄ : List Dig
+--     Seq₁₂₄ : List UInt8
 --     Seq₁₂₄ = Tag.Sequence ∷ [ # 9 ] ++ elm₁ ++ elm₂ ++ elm₄
 
---     SeqBad₁₂₃ : List Dig
+--     SeqBad₁₂₃ : List UInt8
 --     SeqBad₁₂₃ = Tag.Sequence ∷ [ # 19 ] ++ elm₁ ++ elm₂ ++ elm₄
 
 --     test₁ : Seq Int Seq₁₂₃

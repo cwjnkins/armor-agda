@@ -44,7 +44,7 @@ parseTBSCertFields n =
             (TLV.unambiguous λ{xs} → Int.unambiguous{xs}))
           TLV.nonnesting
           (TLV.unambiguous λ{xs} → Int.unambiguous{xs}) (TLV.noconfusion λ ())))
-      (parseOption₁&₁≤ parseVersion parseInt TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
+      (parseOption₁&₁≤ parseVersion Int.parse TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
       λ where
         (singleton r₁ r₁≡) _ →
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₇ (n - x)))

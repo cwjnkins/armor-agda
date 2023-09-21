@@ -5,6 +5,7 @@ open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -13,8 +14,9 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.OID.Properties where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.IList                    UInt8
 
 module Sub where
   nonempty : NonEmpty OIDSub
@@ -91,12 +93,23 @@ module Sub where
         (Lemmas.∷ʳ⇒≢[]{xs = ws}{w})
     lem {x ∷ ws} {xs = xs} {x₁ ∷ ys} ++≡ (_ All.∷ ys≤128) = lem (∷-injectiveʳ ++≡) ys≤128
 
+  @0 nonmalleable : NonMalleable OIDSub RawOIDSub
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (─ ._ , o₁@(mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl)) (─ ._ , o₂@(mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl)) eq =
+     case ∷ʳ-injective lₚ lₚ₁ eq ret (const _) of λ where
+      (refl , refl) →
+        case (‼ unambiguous o₁ o₂) ret (const _) of λ where
+          refl → refl
+
 module OID where
   @0 unambiguous : Unambiguous OID
   unambiguous =
     TLV.unambiguous
       (SequenceOf.Bounded.unambiguous
         Sub.unambiguous Sub.nonempty Sub.nonnesting)
+
+  @0 nonmalleable : NonMalleable OID RawOID
+  nonmalleable = TLV.nonmalleable (SequenceOf.Bounded.nonmalleable Sub.nonempty Sub.nonnesting Sub.nonmalleable)
 
 module OIDSeq where
   @0 unambiguous : Unambiguous (SequenceOf OID)

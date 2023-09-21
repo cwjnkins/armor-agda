@@ -26,7 +26,7 @@ parseBCFieldsSeqFields n =
     (parseOption₂ TLV.nonnesting TLV.nonnesting
       (TLV.noconfusion λ where ())
       parseBool
-      parseInt
+      Int.parse
       (tell $ here' String.++ ": underflow") _)
 
 parseBCFieldsSeq : Parser (Logging ∘ Dec) BCFieldsSeq

@@ -10,8 +10,8 @@ module Aeres.Data.X690-DER.Int.Serializer where
 
 open Aeres.Grammar.Serializer UInt8
 
-serializeVal : Serializer IntegerValue
-serializeVal = id
+-- serializeVal : Serializer IntegerValue
+-- serializeVal (mkIntVal bₕ bₜ minRep (singleton val val≡) refl) = {!!}
 
-serialize : Serializer Int
-serialize = TLV.serialize serializeVal
+-- serialize : Serializer Int
+-- serialize = TLV.serialize serializeVal

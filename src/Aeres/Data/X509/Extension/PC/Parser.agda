@@ -30,6 +30,6 @@ parsePCFields =
   helper n =
     parseEquivalent (equivalent×ₚ equivalent)
       (parseOption₂ TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ()))
-        (parseTLV _ (here' String.++ ": require explicit policy") _ parseIntValue)
-        (parseTLV _ (here' String.++ ": inhibit policy mapping") _ parseIntValue)
+        (parseTLV _ (here' String.++ ": require explicit policy") _ Int.parseValue)
+        (parseTLV _ (here' String.++ ": inhibit policy mapping") _ Int.parseValue)
         (tell $ here' String.++ ": underflow") n)

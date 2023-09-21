@@ -20,7 +20,7 @@ private
 parseRSAPkIntsFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSAPkIntsFields n)
 parseRSAPkIntsFields n =
   parseExactLength nonnesting (tell $ here' String.++ ": underflow")
-    (parseEquivalent equivalent (parse& TLV.nonnesting parseInt parseInt)) n
+    (parseEquivalent equivalent (parse& TLV.nonnesting Int.parse Int.parse)) n
 
 parseRSAPkInts :  Parser (Logging ∘ Dec) RSAPkInts
 parseRSAPkInts = parseTLV _ here' _ parseRSAPkIntsFields

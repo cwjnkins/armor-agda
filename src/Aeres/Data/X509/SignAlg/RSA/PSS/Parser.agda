@@ -57,7 +57,7 @@ parseFields“ n =
           (parseOption₁ExactLength
             TLV.nonnesting
             (tell $ here' String.++ ": Params: SaltLength: underflow")
-            parseInt))
+            Int.parse))
         TLV.nonnesting
         (tell $ here' String.++ ": Params: SaltLength: overflow"))
       (λ where
@@ -69,7 +69,7 @@ parseFields“ n =
               (parseTLV _ (here' String.++ "Params: trailerField") _
                 (parseOption₁ExactLength (nonnestingΣₚ₁ TLV.nonnesting)
                   (tell $ here' String.++ ": Params: trailerField: underflow")
-                  (parseSigma TLV.nonnesting (TLV.unambiguous Int.unambiguous) parseInt (λ i → _ ≟ _))))
+                  (parseSigma TLV.nonnesting (TLV.unambiguous Int.unambiguous) Int.parse (λ i → _ ≟ _))))
               (n - x))))
 
 parseFields' : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep' n)

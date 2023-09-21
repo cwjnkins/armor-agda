@@ -7,12 +7,11 @@ import Aeres.Data.X690-DER.Int.TCB
 
 module Aeres.Data.X690-DER.Int where
 
+open Aeres.Data.X690-DER.Int.TCB public
+  hiding (getVal)
+
 module Int where
+  open Aeres.Data.X690-DER.Int.Parser public
   open Aeres.Data.X690-DER.Int.Properties public
-  open Aeres.Data.X690-DER.Int.Serializer public
-  open Aeres.Data.X690-DER.Int.TCB        public
-
-open Int public
-  hiding (getVal ; serialize ; serializeVal; unambiguous)
-
-open Aeres.Data.X690-DER.Int.Parser public
+  open Aeres.Data.X690-DER.Int.TCB public
+    using (getVal)
