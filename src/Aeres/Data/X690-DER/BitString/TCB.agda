@@ -3,9 +3,12 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.BitString.TCB where
+
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 UnusedBits : UInt8 → List UInt8 → Set
 UnusedBits bₕ [] = toℕ bₕ ≡ 0
@@ -29,3 +32,7 @@ record BitStringValue (@0 bs : List UInt8) : Set where
 
 BitString : @0 List UInt8 → Set
 BitString = TLV Tag.BitString BitStringValue
+
+RawBitStringValue : Raw BitStringValue
+Raw.D RawBitStringValue = List Bool
+Raw.to RawBitStringValue = uncurry─ (↑_ ∘ BitStringValue.bits)
