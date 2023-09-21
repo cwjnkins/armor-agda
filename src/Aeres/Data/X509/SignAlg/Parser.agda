@@ -3,7 +3,6 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.SignAlg.DSA
 open import Aeres.Data.X509.SignAlg.ECDSA
 open import Aeres.Data.X509.SignAlg.Properties
@@ -11,6 +10,7 @@ open import Aeres.Data.X509.SignAlg.RSA
 open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
@@ -29,7 +29,7 @@ private
 
 parseUnsupported : Parser (Logging ∘ Dec) UnsupportedSignAlg
 parseUnsupported =
-  parseAlgorithmIdentifier (here' String.++ ": unsupported") p
+  DefinedByOID.parse (here' String.++ ": unsupported") p
   where
   p : ∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (UnsupportedParam o) n)
   runParser (p n o) xs =

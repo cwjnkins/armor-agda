@@ -79,10 +79,10 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSubjectLen :  ℕ
   getSubjectLen = TBSCertFields.getSubjectLen (TLV.val tbs)
 
-  getIssuer :  Exists─ (List UInt8) RDNSeq
+  getIssuer :  Exists─ (List UInt8) Name
   getIssuer = TBSCertFields.getIssuer (TLV.val tbs)
 
-  getSubject :  Exists─ (List UInt8) RDNSeq
+  getSubject :  Exists─ (List UInt8) Name
   getSubject = TBSCertFields.getSubject (TLV.val tbs)
 
   getIssUID : Exists─ (List UInt8) (Option TBSCert.IssUID)
@@ -175,10 +175,10 @@ module Cert where
     getSubjectLen :  ℕ
     getSubjectLen = CertFields.getSubjectLen (TLV.val c)
 
-    getIssuer :  Exists─ (List UInt8) RDNSeq
+    getIssuer :  Exists─ (List UInt8) Name
     getIssuer = CertFields.getIssuer (TLV.val c)
 
-    getSubject :  Exists─ (List UInt8) RDNSeq
+    getSubject :  Exists─ (List UInt8) Name
     getSubject = CertFields.getSubject (TLV.val c)
 
     getIssUID : Exists─ (List UInt8) (Option TBSCert.IssUID)
@@ -238,15 +238,9 @@ module Cert where
       helper nil = []
       helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
 
-    -- get KU Bits in bool list
-    getKUBits : Exists─ (List UInt8) (Option ExtensionFieldKU) → List Bool
-    getKUBits (─ .[] , none) = []
-    getKUBits (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
-
 open Cert public using (Cert)
 
 module Chain where
   Chain : (@0 _ : List UInt8) → Set
   Chain = IList Cert
-  -- Chain = IListNonEmpty Cert
 open Chain public using (Chain)

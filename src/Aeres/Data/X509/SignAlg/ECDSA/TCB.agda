@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum
@@ -24,7 +24,7 @@ ECDSA-Like-Params : ∀ {@0 bs} → (o : OIDValue bs) → ∀ {@0 bs'} → (o' :
 ECDSA-Like-Params o o' = (_≡ []) ×ₚ const (_≋_{A = OIDValue} (TLV.val o') o)
 
 ECDSA-Like : {@0 bs : List UInt8} (o : OIDValue bs) → @0 List UInt8 → Set
-ECDSA-Like o = AlgorithmIdentifier (ECDSA-Like-Params o)
+ECDSA-Like o = DefinedByOID (ECDSA-Like-Params o)
 
 SHA1   = ECDSA-Like OIDs.ECDSA.SHA1
 SHA224 = ECDSA-Like OIDs.ECDSA.SHA224
@@ -42,16 +42,16 @@ Supported =
 
 erase
   : ∀ {@0 bs} → Supported bs
-    → AlgorithmIdentifier
+    → DefinedByOID
         (λ o → (Erased ∘ OctetStringValue) ×ₚ const (True ((-, TLV.val o) ∈? supportedSignAlgOIDs)))
         bs
-erase (Sum.inj₁ (mkTLV len (mkAlgIDFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡)) =
-  mkTLV len (mkAlgIDFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkAlgIDFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))) =
-  mkTLV len (mkAlgIDFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkAlgIDFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡)))) =
-  mkTLV len (mkAlgIDFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkAlgIDFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))))) =
-  mkTLV len (mkAlgIDFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkAlgIDFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))))) =
-  mkTLV len (mkAlgIDFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡)) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡)))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡

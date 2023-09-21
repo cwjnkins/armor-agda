@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X509.MaskGenAlg
@@ -11,6 +10,7 @@ import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
@@ -38,9 +38,9 @@ instance
         (eq&ₚ (Eq≋⇒Eq it)
         (eq&ₚ (Eq≋⇒Eq it)
         (eq&ₚ it (Eq≋⇒Eq (TLV.EqTLV ⦃ Option.OptionEq≋ ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≡-unique x y) } ⦄ ⦄))))))
-  eq≋ : Eq≋ (AlgorithmIdentifierFields PSSParam)
+  eq≋ : Eq≋ (DefinedByOIDFields PSSParam)
   eq≋ =
-    AlgorithmIdentifier.eq≋
+    DefinedByOID.eq≋
       PSSParam
       (λ o → record
         { _≋?_ = λ where

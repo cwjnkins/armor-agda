@@ -1,13 +1,13 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg
 open import Aeres.Data.X509.HashAlg.TCB.OIDs    as OIDs
 import      Aeres.Data.X509.MaskGenAlg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.MaskGenAlg.TCB      as MaskGenAlg
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -92,14 +92,14 @@ module MGF1 where
   @0 unambiguous : Unambiguous MaskGenAlg
   unambiguous =
     TLV.unambiguous
-      (AlgorithmIdentifier.unambiguous Param
+      (DefinedByOID.unambiguous Param
         λ o →
          unambiguous×ₚ SupportedHashAlg.unambiguous (λ where ≋-refl ≋-refl → refl))
 
   instance
-    MG1Eq≋ : Eq≋ (AlgorithmIdentifierFields Param)
+    MG1Eq≋ : Eq≋ (DefinedByOIDFields Param)
     MG1Eq≋ =
-      AlgorithmIdentifier.eq≋ Param λ o →
+      DefinedByOID.eq≋ Param λ o →
         Eq⇒Eq≋
           (eqΣₚ
             (sumEq ⦃ Eq≋⇒Eq it ⦄

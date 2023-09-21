@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey.Alg.EC.Params
 open import Aeres.Data.X509.PublicKey.Alg.EC.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
@@ -27,4 +27,4 @@ parseECParams n o =
     _
 
 parseEC : Parser (Logging ∘ Dec) EC
-parseEC = parseAlgorithmIdentifier "X509: PublicKey: Alg: EC" parseECParams
+parseEC = DefinedByOID.parse "X509: PublicKey: Alg: EC" parseECParams

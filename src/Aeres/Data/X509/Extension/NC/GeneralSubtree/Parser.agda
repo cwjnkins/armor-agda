@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties
@@ -11,6 +11,7 @@ open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 
@@ -19,16 +20,17 @@ module Aeres.Data.X509.Extension.NC.GeneralSubtree.Parser where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.IList      UInt8
 open Aeres.Grammar.Properties  UInt8
 
 private
   here' = "X509: Extension: NC: GeneralSubtree"
 
 parseExactLengthGeneralSubtrees : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (GeneralSubtrees) n)
-parseExactLengthGeneralSubtrees =
-  parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow")
-    (parseNonEmptySeq "GeneralSubtrees" _ TLV.nonempty TLV.nonnesting
-      (parseTLV _ "GeneralSubtrees" _ helper))
+parseExactLengthGeneralSubtrees n =
+  parseIListNonEmpty (tell $ here' String.++ ": underflow")
+    _ TLV.nonempty TLV.nonnesting
+      (parseTLV _ "GeneralSubtree" _ helper) n
   where
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (GeneralSubtreeFields) n)
   helper n =
@@ -47,3 +49,4 @@ parseExactLengthGeneralSubtrees =
               (parseTLV _ "MaxBaseDistance" _ Int.parseValue)
               (tell $ here' String.++ ": underflow")
               (n - read)))
+

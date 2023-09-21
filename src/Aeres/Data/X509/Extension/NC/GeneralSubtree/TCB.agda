@@ -32,5 +32,5 @@ GeneralSubtree : @0 List UInt8 → Set
 GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
 
 GeneralSubtrees : @0 List UInt8 → Set
-GeneralSubtrees xs = TLV Tag.Sequence (NonEmptySequenceOf GeneralSubtree) xs
+GeneralSubtrees xs = (NonEmptySequenceOf GeneralSubtree) xs
 

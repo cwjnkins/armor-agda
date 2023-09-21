@@ -9,7 +9,10 @@ module Aeres.Data.X690-DER.Strings.PrintableString where
 
 open Aeres.Data.X690-DER.Strings.PrintableString.Parser public
 open Aeres.Data.X690-DER.Strings.PrintableString.TCB    public
+  hiding (size)
 
 module PrintableString where
   open Aeres.Data.X690-DER.Strings.PrintableString.Char       public
   open Aeres.Data.X690-DER.Strings.PrintableString.Properties public
+  open Aeres.Data.X690-DER.Strings.PrintableString.TCB        public
+    using (size)

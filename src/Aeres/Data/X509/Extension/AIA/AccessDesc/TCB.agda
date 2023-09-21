@@ -1,10 +1,10 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 import      Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs as OIDs
 open import Aeres.Data.X509.GeneralName.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -23,4 +23,4 @@ AccessDescParam o =
   ×ₚ const (True ((-, TLV.val o) ∈? supportedAccessMethod))
 
 AccessDesc : @0 List UInt8 → Set
-AccessDesc = AlgorithmIdentifier AccessDescParam
+AccessDesc = DefinedByOID AccessDescParam

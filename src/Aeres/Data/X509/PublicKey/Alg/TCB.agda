@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.PublicKey.Alg.EC.TCB   as EC
 import      Aeres.Data.X509.PublicKey.Alg.RSA.TCB  as RSA
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -30,7 +30,7 @@ UnsupportedParam o =
   ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))
 
 UnsupportedPublicKeyAlg =
-  AlgorithmIdentifier UnsupportedParam
+  DefinedByOID UnsupportedParam
 
 PublicKeyAlg : @0 List UInt8 → Set
 PublicKeyAlg =
@@ -44,4 +44,4 @@ getOID (Sum.inj₁ x) =
 getOID (Sum.inj₂ (Sum.inj₁ x)) =
   EC.getOID x
 getOID (Sum.inj₂ (Sum.inj₂ x)) =
-  -, AlgorithmIdentifierFields.algOID (TLV.val x)
+  -, DefinedByOIDFields.oid (TLV.val x)

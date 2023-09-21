@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X509.MaskGenAlg
@@ -11,6 +10,7 @@ import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
@@ -123,7 +123,7 @@ module Fields where
 @0 unambiguous : Unambiguous PSS
 unambiguous =
   TLV.unambiguous
-    (AlgorithmIdentifier.unambiguous PSSParam
+    (DefinedByOID.unambiguous PSSParam
       λ o →
        unambiguous×ₚ Fields.unambiguous
          (λ where
