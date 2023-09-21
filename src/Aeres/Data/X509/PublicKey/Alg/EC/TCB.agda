@@ -1,9 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier.TCB
 open import Aeres.Data.X509.PublicKey.Alg.EC.Params.TCB
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -20,7 +20,7 @@ Params o =
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.EC)
 
 EC : @0 List UInt8 → Set
-EC = AlgorithmIdentifier Params
+EC = DefinedByOID Params
 
 getOID : ∀ {@0 bs} → EC bs → Exists─ _ OID
-getOID ec = -, (AlgorithmIdentifierFields.algOID (TLV.val ec))
+getOID ec = -, (DefinedByOIDFields.oid (TLV.val ec))

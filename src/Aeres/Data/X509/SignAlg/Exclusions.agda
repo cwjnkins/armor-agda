@@ -3,8 +3,8 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.SignAlg.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs          as OIDs
 import      Aeres.Data.X509.SignAlg.ECDSA.TCB         as ECDSA
@@ -25,7 +25,7 @@ open Aeres.Grammar.Definitions UInt8
 
 @0 noConfusion-DSA-ECDSA : NoConfusion DSA.Supported ECDSA.Supported
 noConfusion-DSA-ECDSA xs₁++ys₁≡xs₂++ys₂ dsa' ecda =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈DSA refl) (mk×ₚ _ o∈ECDSA refl) →
         let
@@ -41,7 +41,7 @@ noConfusion-DSA-ECDSA xs₁++ys₁≡xs₂++ys₂ dsa' ecda =
 
 @0 noConfusion-DSA-RSA : NoConfusion DSA.Supported RSA.Supported
 noConfusion-DSA-RSA xs₁++ys₁≡xs₂++ys₂ dsa' rsa' =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈DSA refl) (mk×ₚ _ o∈RSA refl) →
         let
@@ -57,7 +57,7 @@ noConfusion-DSA-RSA xs₁++ys₁≡xs₂++ys₂ dsa' rsa' =
 
 @0 noConfusion-ECDSA-RSA : NoConfusion ECDSA.Supported RSA.Supported
 noConfusion-ECDSA-RSA xs₁++ys₁≡xs₂++ys₂  ecda' rsa' =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈ECDSA refl) (mk×ₚ _ o∈RSA refl) →
         let
@@ -73,7 +73,7 @@ noConfusion-ECDSA-RSA xs₁++ys₁≡xs₂++ys₂  ecda' rsa' =
 
 @0 noConfusion-DSA-Unsupported : NoConfusion DSA.Supported UnsupportedSignAlg
 noConfusion-DSA-Unsupported xs₁++ys₁≡xs₂++ys₂ dsa' un =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
         contradiction
@@ -84,7 +84,7 @@ noConfusion-DSA-Unsupported xs₁++ys₁≡xs₂++ys₂ dsa' un =
 
 @0 noConfusion-ECDSA-Unsupported : NoConfusion ECDSA.Supported UnsupportedSignAlg
 noConfusion-ECDSA-Unsupported xs₁++ys₁≡xs₂++ys₂  ecda' un =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
         contradiction
@@ -94,7 +94,7 @@ noConfusion-ECDSA-Unsupported xs₁++ys₁≡xs₂++ys₂  ecda' un =
 
 @0 noConfusion-RSA-Unsupported : NoConfusion RSA.Supported UnsupportedSignAlg
 noConfusion-RSA-Unsupported xs₁++ys₁≡xs₂++ys₂ rsa' un =
-  AlgorithmIdentifier.noConfusionParam _
+  DefinedByOID.noConfusionParam _
     (λ where
       o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
         contradiction

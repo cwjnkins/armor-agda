@@ -1,7 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X509.MaskGenAlg
@@ -10,6 +9,7 @@ open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
@@ -124,4 +124,4 @@ parsePSSParam n o =
       (λ _ → _ ≋? _))
 
 parsePSS : Parser (Logging ∘ Dec) PSS
-parsePSS = parseAlgorithmIdentifier here' parsePSSParam
+parsePSS = DefinedByOID.parse here' parsePSSParam

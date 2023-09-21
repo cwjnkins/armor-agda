@@ -19,7 +19,7 @@ module Aeres.Data.X509.TBSCert.TCB where
 
 open Aeres.Grammar.Option UInt8
 open Int     hiding (getVal)
-open RDN     using  (RDN; RDNSeq)
+open RDN     using  (RDN; Name)
 open Validity using (Validity)
 open Version hiding (getVal)
 
@@ -30,9 +30,9 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
     version : Option Version ver
     serial  : Int ser
     signAlg : SignAlg sa
-    issuer  : RDNSeq i
+    issuer  : Name i
     validity : Validity va
-    subject  : RDNSeq u
+    subject  : Name u
     pk       : PublicKey p
     pkBytes  : Singleton p -- TODO: eventually this should come from serialization
     issuerUID : Option IssUID u₁ -- if this takes a lot of time, this and the lower can be dropped
@@ -86,10 +86,10 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getSubjectLen :  ℕ
   getSubjectLen = RDN.getSeqLen subject
 
-  getIssuer : Exists─ (List UInt8) RDNSeq
+  getIssuer : Exists─ (List UInt8) Name
   getIssuer = _ , issuer
 
-  getSubject : Exists─ (List UInt8) RDNSeq
+  getSubject : Exists─ (List UInt8) Name
   getSubject = _ , subject
 
   getSignAlg : Exists─ (List UInt8) SignAlg

@@ -29,19 +29,14 @@ proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkNCFieldsSeqFields permt excld refl) = refl
 
 @0 unambiguous : Unambiguous NCFieldsSeqFields
-unambiguous =
-  isoUnambiguous iso
-    (Unambiguous.option₂&₁
-      (TLV.unambiguous
-        (TLV.unambiguous
-          (SequenceOf.Bounded.unambiguous
-            (TLV.unambiguous GeneralSubtree.unambiguous)
-            TLV.nonempty TLV.nonnesting)))
-      TLV.nonnesting TLV.nonempty
-      (TLV.unambiguous
-        (TLV.unambiguous
-          (SequenceOf.Bounded.unambiguous
-            (TLV.unambiguous GeneralSubtree.unambiguous)
-            TLV.nonempty TLV.nonnesting)))
-      TLV.nonempty (TLV.noconfusion λ ()))
-
+unambiguous = isoUnambiguous iso
+                (Unambiguous.option₂&₁
+                  (TLV.unambiguous
+                    (SequenceOf.Bounded.unambiguous
+                      (TLV.unambiguous GeneralSubtree.unambiguous) TLV.nonempty TLV.nonnesting))
+                  TLV.nonnesting
+                  TLV.nonempty
+                  (TLV.unambiguous
+                    (SequenceOf.Bounded.unambiguous
+                      (TLV.unambiguous GeneralSubtree.unambiguous)  TLV.nonempty TLV.nonnesting))
+                  TLV.nonempty (TLV.noconfusion λ ()))

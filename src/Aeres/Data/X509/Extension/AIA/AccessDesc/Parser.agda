@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.AIA.AccessDesc.TCB
 open import Aeres.Data.X509.GeneralName
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
@@ -21,7 +21,7 @@ private
 
 parseAccessDesc : Parser (Logging ∘ Dec) AccessDesc
 parseAccessDesc =
-  parseAlgorithmIdentifier here'
+  DefinedByOID.parse here'
     λ n o →
       parseExactLength (nonnesting×ₚ₁ GeneralName.nonnesting)
         (tell $ here' String.++ ": length mismatch")

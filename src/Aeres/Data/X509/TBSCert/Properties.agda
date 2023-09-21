@@ -30,9 +30,9 @@ open Aeres.Grammar.Properties  UInt8
 Rep₁ = &ₚ (Option SubUID) (Option Extensions)
 Rep₂ = &ₚ (Option IssUID) Rep₁
 Rep₃ = &ₚ (PublicKey ×ₚ Singleton) Rep₂
-Rep₄ = &ₚ RDNSeq Rep₃
+Rep₄ = &ₚ Name Rep₃
 Rep₅ = &ₚ Validity Rep₄
-Rep₆ = &ₚ RDNSeq Rep₅
+Rep₆ = &ₚ Name Rep₅
 Rep₇ = &ₚ SignAlg Rep₆
 
 Rep : @0 List UInt8 → Set
@@ -71,9 +71,9 @@ unambiguous =
       (NonNesting.noconfusion-option&₁
         TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ()))
       (unambiguous&ₚ SignAlg.unambiguous SignAlg.nonnesting
-        (unambiguous&ₚ RDN.Seq.unambiguous TLV.nonnesting
+        (unambiguous&ₚ RDN.unambiguous TLV.nonnesting
           (unambiguous&ₚ (TLV.unambiguous Validity.unambiguous) TLV.nonnesting
-            (unambiguous&ₚ RDN.Seq.unambiguous TLV.nonnesting
+            (unambiguous&ₚ RDN.unambiguous TLV.nonnesting
               (unambiguous&ₚ
                 (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
                   (nonnesting×ₚ₁ TLV.nonnesting)

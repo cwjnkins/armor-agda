@@ -1,11 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.Strings.IA5String
 open import Aeres.Data.X690-DER.TLV
@@ -23,13 +23,13 @@ module CPSURIQualifier where
 
   @0 unambiguous : Unambiguous CPSURIQualifier
   unambiguous =
-    AlgorithmIdentifier.unambiguous CPSURIQualifierParam
+    DefinedByOID.unambiguous CPSURIQualifierParam
       λ o → unambiguous×ₚ (TLV.unambiguous IA5String.unambiguous) λ where ≋-refl ≋-refl → refl
 
 module UserNoticeQualifier where
   @0 unambiguous : Unambiguous UserNoticeQualifier
   unambiguous =
-    AlgorithmIdentifier.unambiguous UserNoticeQualifierParam
+    DefinedByOID.unambiguous UserNoticeQualifierParam
       λ o → unambiguous×ₚ (TLV.unambiguous UserNotice.unambiguous) λ where ≋-refl ≋-refl → refl
 
 equivalent : Equivalent (Sum CPSURIQualifier UserNoticeQualifier) PolicyQualifierInfoFields
@@ -49,13 +49,13 @@ proj₂ (proj₂ iso) (userNotice x) = refl
 nonnesting =
   equivalent-nonnesting equivalent
     (nonnestingSum{A = CPSURIQualifier}{B = UserNoticeQualifier}
-      (equivalent-nonnesting (AlgorithmIdentifier.equiv _)
+      (equivalent-nonnesting (DefinedByOID.equiv _)
         (nonnesting&ₚᵈ TLV.nonnesting OID.unambiguous
           (λ _ → nonnesting×ₚ₁ TLV.nonnesting)))
-      (equivalent-nonnesting (AlgorithmIdentifier.equiv _)
+      (equivalent-nonnesting (DefinedByOID.equiv _)
         (nonnesting&ₚᵈ TLV.nonnesting OID.unambiguous
           (λ a → nonnesting×ₚ₁ TLV.nonnesting)))
-      (AlgorithmIdentifier.noConfusionFieldsParam CPSURIQualifierParam
+      (DefinedByOID.noConfusionFieldsParam CPSURIQualifierParam
         λ where
           o (mk×ₚ _ ≋-refl refl) (mk×ₚ fstₚ₂ (mk≋ () _) refl)))
 
@@ -63,6 +63,6 @@ nonnesting =
 unambiguous =
   isoUnambiguous iso
     (unambiguousSum CPSURIQualifier.unambiguous UserNoticeQualifier.unambiguous
-      (AlgorithmIdentifier.noConfusionFieldsParam CPSURIQualifierParam
+      (DefinedByOID.noConfusionFieldsParam CPSURIQualifierParam
         λ where
           o (mk×ₚ _ ≋-refl refl) (mk×ₚ fstₚ₂ (mk≋ () _) refl)))

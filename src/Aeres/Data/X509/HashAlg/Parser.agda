@@ -1,12 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.AlgorithmIdentifier
 import      Aeres.Data.X509.HashAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.HashAlg.TCB
 open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parser
@@ -23,7 +23,7 @@ open Aeres.Grammar.Properties  UInt8
 parseSHA-Like
   : ∀ {@0 bs} (o : OIDValue bs) → String → Parser (Logging ∘ Dec) (SHA-Like o)
 parseSHA-Like o s =
-  parseAlgorithmIdentifier s help
+  DefinedByOID.parse s help
   where
   help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
   help n o =
