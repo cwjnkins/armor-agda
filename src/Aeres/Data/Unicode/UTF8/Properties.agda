@@ -150,6 +150,13 @@ module UTF8Char2Props where
       @0 b₁≡ : UTF8Char2.b₁ a ≡ UTF8Char4.b₁ x
       b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char2.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
+  @0 nonmalleable : NonMalleable UTF8Char2 RawUTF8Char2
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (fst₁ , mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) refl =
+      case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
+        refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
+          refl → refl)
+
 module UTF8Char3Props where
   nonnesting : NonNesting UTF8Char3
   nonnesting xs₁++ys₁≡xs₂++ys₂
@@ -207,6 +214,13 @@ module UTF8Char3Props where
     @0 b₁≡ : UTF8Char3.b₁ a ≡ UTF8Char4.b₁ x
     b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char3.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
+  @0 nonmalleable : NonMalleable UTF8Char3 RawUTF8Char3
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (fst₁ , mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ refl) refl =
+    case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
+      refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
+        refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₃range b₃range₁) ret (const _) of λ where
+          refl → refl))
 
 module UTF8Char4Props where
   nonnesting : NonNesting UTF8Char4
@@ -229,7 +243,6 @@ module UTF8Char4Props where
   proj₂ equiv (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡) =
     mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range , b₄range)) (sym bs≡)
 
-
   iso : Iso Rep UTF8Char4
   proj₁ iso = equiv
   proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl) refl) (─ (r₁ , r₂ , r₃ , r₄)) refl) = refl
@@ -245,6 +258,15 @@ module UTF8Char4Props where
               (×-unique (inRange-unique{A = ℕ}{B = UInt8})
                 (×-unique (inRange-unique{A = ℕ}{B = UInt8})
                   (inRange-unique{A = ℕ}{B = UInt8}))))))
+
+  @0 nonmalleable : NonMalleable UTF8Char4 RawUTF8Char4
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) (fst₁ , mkUTF8Char4 b₅ b₆ b₇ b₈ b₁range₁ b₂range₁ b₃range₁ b₄range₁ refl) refl =
+    case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
+      refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
+        refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₃range b₃range₁) ret (const _) of λ where
+          refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₄range b₄range₁) ret (const _) of λ where
+            refl → refl)))
 
 module UTF8CharProps where
   Rep : @0 List UInt8 → Set
