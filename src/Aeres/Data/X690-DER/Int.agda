@@ -2,7 +2,7 @@
 
 import Aeres.Data.X690-DER.Int.Parser
 import Aeres.Data.X690-DER.Int.Properties
-import Aeres.Data.X690-DER.Int.Serializer
+-- import Aeres.Data.X690-DER.Int.Serializer
 import Aeres.Data.X690-DER.Int.TCB
 
 module Aeres.Data.X690-DER.Int where
