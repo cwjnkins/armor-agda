@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF8.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -14,10 +15,11 @@ open import Relation.Binary
 
 module Aeres.Data.Unicode.UTF8.Properties where
 
-open Aeres.Grammar.Definitions      UInt8
-open Aeres.Grammar.IList            UInt8
-open Aeres.Grammar.Properties       UInt8
-open Aeres.Grammar.Sum              UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.IList                    UInt8
+open Aeres.Grammar.Properties               UInt8
+open Aeres.Grammar.Sum                      UInt8
 
 module UTF8Char1Props where
   @0 unambiguous : Unambiguous UTF8Char1
@@ -89,6 +91,12 @@ module UTF8Char1Props where
 
       @0 b₁≡ : UTF8Char1.b₁ a ≡ UTF8Char4.b₁ x
       b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char1.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
+
+  @0 nonmalleable : NonMalleable UTF8Char1 RawUTF8Char1
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (─ _ , mkUTF8Char1 b₁ b₁range refl) (─ _ , mkUTF8Char1 ._ b₁range₁ refl) refl =
+    case (‼ ≤-irrelevant b₁range b₁range₁) ret (const _) of λ where
+      refl → refl
 
 module UTF8Char2Props where
   @0 unambiguous : Unambiguous UTF8Char2

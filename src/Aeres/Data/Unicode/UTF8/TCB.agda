@@ -2,11 +2,13 @@
 
 open import Aeres.Binary
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF8.TCB where
 
-open Aeres.Grammar.IList UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.IList                    UInt8
 
 record UTF8Char1 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char1
@@ -14,6 +16,10 @@ record UTF8Char1 (@0 bs : List UInt8) : Set where
     b₁ : UInt8
     @0 b₁range : toℕ b₁ < 128
     @0 bs≡ : bs ≡ [ b₁ ]
+
+RawUTF8Char1 : Raw UTF8Char1
+Raw.D RawUTF8Char1 = UInt8
+Raw.to RawUTF8Char1 = uncurry─ UTF8Char1.b₁
 
 record UTF8Char2 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char2
