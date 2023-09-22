@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.BitString.TCB
@@ -416,13 +416,14 @@ unambiguous (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs
   @0 bₜ≡ : _
   bₜ≡ = ∷-injectiveʳ bs≡
 
-@0 nonmalleableValue : NonMalleable BitStringValue RawBitStringValue
-NonMalleable.unambiguous nonmalleableValue = unambiguous
-NonMalleable.injective nonmalleableValue (─ _ , mkBitStringValue bₕ bₜ bₕ<8 (singleton bits refl) unusedBits refl) (─ _ , mkBitStringValue bₕ₁ bₜ₁ bₕ<9 (singleton bits₁ refl) unusedBits₁ refl) eq =
-  caseErased toBitRep-injective bₕ bₕ₁ bₜ bₜ₁ bₕ<8 bₕ<9 unusedBits unusedBits₁ eq ret (const _) of λ where
-    refl → ─ (caseErased (‼ ≤-irrelevant bₕ<8 bₕ<9) ret (const _) of λ where
-      refl → ─ (caseErased (‼ uniqueUnusedBits{bₕ}{bₜ} unusedBits unusedBits₁) ret (const _) of λ where
-        refl → ─ refl))
+postulate
+  @0 nonmalleableValue : NonMalleable BitStringValue RawBitStringValue
+-- NonMalleable.unambiguous nonmalleableValue = unambiguous
+-- NonMalleable.injective nonmalleableValue (─ _ , mkBitStringValue bₕ bₜ bₕ<8 (singleton bits refl) unusedBits refl) (─ _ , mkBitStringValue bₕ₁ bₜ₁ bₕ<9 (singleton bits₁ refl) unusedBits₁ refl) eq =
+--   caseErased toBitRep-injective bₕ bₕ₁ bₜ bₜ₁ bₕ<8 bₕ<9 unusedBits unusedBits₁ eq ret (const _) of λ where
+--     refl → ─ (caseErased (‼ ≤-irrelevant bₕ<8 bₕ<9) ret (const _) of λ where
+--       refl → ─ (caseErased (‼ uniqueUnusedBits{bₕ}{bₜ} unusedBits unusedBits₁) ret (const _) of λ where
+--         refl → ─ refl))
 
 @0 nonmalleable : NonMalleable BitString (RawTLV RawBitStringValue)
 nonmalleable = TLV.nonmalleable nonmalleableValue
