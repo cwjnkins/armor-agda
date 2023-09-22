@@ -1,15 +1,24 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
+open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Properties
 open import Aeres.Prelude
-  hiding (head ; tail)
+open import Data.Nat.Properties
+  hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList.Properties (Σ : Set) where
 
 open import Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions.NonMalleable Σ
 open        Aeres.Grammar.IList.TCB   Σ
-open import Aeres.Grammar.Sum         Σ
+open import Aeres.Grammar.Sum Σ
+open Aeres.Grammar.Option      Σ
+open Aeres.Grammar.Properties  Σ
 
 Rep : (List Σ → Set) → @0 List Σ → Set
 Rep A = Sum (_≡ []) (&ₚ A (IList A))
@@ -152,3 +161,19 @@ Eq._≟_ IListEq (─ xs₁ , a₁) (─ xs₂ , a₂) = eqIListWF a₁ a₂ (<-
 
 IListEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
 IListEq≋ = Eq⇒Eq≋ (IListEq ⦃ Eq≋⇒Eq it ⦄)
+
+@0 nonmalleable : ∀ {A : @0 List Σ → Set} {R : Raw A} → NonEmpty A → NonNesting A → NonMalleable A R → NonMalleable (IList A) (RawIList R)
+NonMalleable.unambiguous (nonmalleable {R = R} ne nn N) = unambiguous (NonMalleable.unambiguous N) ne nn
+NonMalleable.injective (nonmalleable{A}{R} ne nn N) a₁ a₂ = inj a₁ a₂ (Nat.<-wellFounded _)
+    where
+    import Data.Nat.Induction
+    module Nat = Data.Nat.Induction
+
+    to = Raw.to (RawIList R)
+
+    inj : (a₁ a₂ : Exists─ (List Σ) (IList A)) → @0 Acc _<_ (lengthIList (proj₂ a₂)) → to a₁ ≡ to a₂ → a₁ ≡ a₂
+    inj (─ .[] , nil) (─ .[] , nil) _ eq = refl
+    inj (─ ._ , consIList h₁ t₁ refl) (─ ._ , consIList h₂ t₂ refl) (WellFounded.acc rs) eq =
+      case NonMalleable.injective N (─ _ , h₁) (─ _ , h₂) (∷-injectiveˡ eq) ret (const _) of λ where
+        refl → case (‼ inj (─ _ , t₁) (─ _ , t₂) (rs _ ≤-refl) (∷-injectiveʳ eq)) ret (const _) of λ where
+          refl → refl
