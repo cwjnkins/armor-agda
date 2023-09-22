@@ -44,7 +44,7 @@ data SignAlg (@0 bs : List UInt8) : Set where
 
 erase
   : ∀ {@0 bs} → SignAlg bs
-    → DefinedByOID (const (Erased ∘ OctetStringValue)) bs
+    → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
 erase (dsa x) =
   case DSA.erase x ret (const _) of λ where
     (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →

@@ -31,7 +31,7 @@ SupportedHashAlg =
        HashAlg.SHA512)))
 
 module SupportedHashAlg where
-  erase : ∀ {@0 bs} → SupportedHashAlg bs → DefinedByOID (const $ Erased ∘ OctetStringValue) bs
+  erase : ∀ {@0 bs} → SupportedHashAlg bs → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
   erase (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)) =
     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
   erase (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))) =

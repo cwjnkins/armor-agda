@@ -17,7 +17,7 @@ open Aeres.Grammar.Definitions UInt8
 supportedAccessMethod : List (Exists─ _ OIDValue)
 supportedAccessMethod = (-, OIDs.OSCP) ∷ [ -, OIDs.CAIssuers ]
 
-AccessDescParam : {@0 bs : List UInt8} → OID bs → List UInt8 → Set
+AccessDescParam : {@0 bs : List UInt8} → OID bs → @0 List UInt8 → Set
 AccessDescParam o =
      GeneralName
   ×ₚ const (True ((-, TLV.val o) ∈? supportedAccessMethod))

@@ -18,7 +18,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseTLV
-  (t : UInt8) (tName : String) (A : List UInt8 → Set)
+  (t : UInt8) (tName : String) (@0 A : List UInt8 → Set)
   (p : ∀ n → Parser (Logging ∘ Dec) (ExactLength A n))
   where
 
