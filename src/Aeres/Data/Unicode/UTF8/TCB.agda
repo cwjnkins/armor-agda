@@ -33,6 +33,10 @@ InRangeUTF8Char2 : (l₁ u₁ l₂ u₂ : UInt8) → ∀ {@0 bs} → UTF8Char2 b
 InRangeUTF8Char2 l₁ u₁ l₂ u₂ x = InRange l₁ u₁ b₁ × InRange l₂ u₂ b₂
   where open UTF8Char2 x
 
+RawUTF8Char2 : Raw UTF8Char2
+Raw.D RawUTF8Char2 = Vec UInt8 2
+Raw.to RawUTF8Char2 = uncurry─ (λ y → (UTF8Char2.b₁ y) ∷ (UTF8Char2.b₂ y) ∷ [])
+
 record UTF8Char3 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char3
   field
@@ -46,6 +50,10 @@ record UTF8Char3 (@0 bs : List UInt8) : Set where
 InRangeUTF8Char3 : (l₁ u₁ l₂ u₂ l₃ u₃ : UInt8) → ∀ {@0 bs} → UTF8Char3 bs → Set
 InRangeUTF8Char3 l₁ u₁ l₂ u₂ l₃ u₃ x = InRange l₁ u₁ b₁ × InRange l₂ u₂ b₂ × InRange l₃ u₃ b₃
   where open UTF8Char3 x
+
+RawUTF8Char3 : Raw UTF8Char3
+Raw.D RawUTF8Char3 = Vec UInt8 3
+Raw.to RawUTF8Char3 = uncurry─ (λ y → (UTF8Char3.b₁ y) ∷ (UTF8Char3.b₂ y) ∷ (UTF8Char3.b₃ y) ∷ [])
 
 record UTF8Char4 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char4
@@ -61,6 +69,10 @@ InRangeUTF8Char4 : (l₁ u₁ l₂ u₂ l₃ u₃ l₄ u₄ : UInt8) → ∀ {@0
 InRangeUTF8Char4 l₁ u₁ l₂ u₂ l₃ u₃ l₄ u₄ x =
   InRange l₁ u₁ b₁ × InRange l₂ u₂ b₂ × InRange l₃ u₃ b₃ × InRange l₄ u₄ b₄
   where open UTF8Char4 x
+
+RawUTF8Char4 : Raw UTF8Char4
+Raw.D RawUTF8Char4 = Vec UInt8 4
+Raw.to RawUTF8Char4 = uncurry─ (λ y → (UTF8Char4.b₁ y) ∷ (UTF8Char4.b₂ y) ∷ (UTF8Char4.b₃ y) ∷ (UTF8Char4.b₄ y) ∷ [])
 
 data UTF8Char (@0 bs : List UInt8) : Set where
   utf81 : UTF8Char1 bs → UTF8Char bs
