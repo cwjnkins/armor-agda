@@ -20,15 +20,14 @@ record BMPChar (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ c₁ ∷ [ c₂ ]
 
 RawBMPChar : Raw BMPChar
-Raw.D RawBMPChar = List UInt8
+Raw.D RawBMPChar = Vec UInt8 2
 Raw.to RawBMPChar = uncurry─ λ y → (BMPChar.c₁ y) ∷ (BMPChar.c₂ y) ∷ []
 
 BMP : @0 List UInt8 → Set
 BMP = IList BMPChar
 
 RawBMP : Raw BMP
-Raw.D RawBMP = List (List UInt8)
-Raw.to RawBMP = Raw.to (RawIList RawBMPChar)
+RawBMP = RawIList RawBMPChar
 
 size : ∀ {@0 bs} → BMP bs → ℕ
 size bmp = lengthIList bmp

@@ -14,7 +14,8 @@ open Aeres.Grammar.Sum.Properties Σ
   renaming ( nonempty     to nonemptySum
            ; nonnesting   to nonnestingSum
            ; unambiguous' to unambiguousSum'
-           ; unambiguous  to unambiguousSum)
+           ; unambiguous  to unambiguousSum
+           ; nonmalleable  to nonmalleableSum)
 open Aeres.Grammar.Sum.TCB    Σ public
   hiding (module Sum)
 open Aeres.Grammar.Sum.Parser Σ public

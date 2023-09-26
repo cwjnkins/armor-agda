@@ -9,6 +9,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -20,6 +21,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DisplayText.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -135,6 +137,8 @@ unambiguous =
   where
   open import Aeres.Grammar.IList UInt8
 
+
+
 instance
   DisplayTextEq : Eq (Exists─ _ DisplayText)
   DisplayTextEq =
@@ -146,3 +150,6 @@ instance
 
   eq≋ : Eq≋ DisplayText
   eq≋ = Eq⇒Eq≋ it
+
+postulate
+  @0 nonmalleable : NonMalleable DisplayText RawDisplayText

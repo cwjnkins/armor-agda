@@ -7,6 +7,7 @@ open import Aeres.Data.X690-DER.Strings.IA5String
 open import Aeres.Data.X690-DER.Strings.PrintableString
 open import Aeres.Data.X509.DirectoryString.TCB
 open import Aeres.Data.X690-DER
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -16,6 +17,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DirectoryString.Properties where
 
 open import Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open        Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Sum                UInt8
 
@@ -116,3 +118,7 @@ unambiguous =
           noconfusion₃)
         noconfusion₂)
       noconfusion₁)
+
+postulate
+  @0 nonmalleable : NonMalleable DirectoryString RawDirectoryString
+ 

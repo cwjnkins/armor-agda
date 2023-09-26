@@ -95,18 +95,17 @@ InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) ((l₁ , u₁) ∷ (l₂ 
 InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) _ _ = ⊥
 
 RawUTF8Char : Raw UTF8Char
-Raw.D RawUTF8Char = List UInt8
-Raw.to RawUTF8Char (fst , utf81 x) = Vec.toList (Raw.to RawUTF8Char1 (fst , x))
-Raw.to RawUTF8Char (fst , utf82 x) = Vec.toList (Raw.to RawUTF8Char2 (fst , x))
-Raw.to RawUTF8Char (fst , utf83 x) = Vec.toList (Raw.to RawUTF8Char3 (fst , x))
-Raw.to RawUTF8Char (fst , utf84 x) = Vec.toList (Raw.to RawUTF8Char4 (fst , x))
+Raw.D RawUTF8Char = Vec UInt8 1 ⊎ Vec UInt8 2 ⊎ Vec UInt8 3 ⊎ Vec UInt8 4
+Raw.to RawUTF8Char (fst , utf81 x) = inj₁ (Raw.to RawUTF8Char1 (fst , x))
+Raw.to RawUTF8Char (fst , utf82 x) = inj₂ (inj₁ (Raw.to RawUTF8Char2 (fst , x)))
+Raw.to RawUTF8Char (fst , utf83 x) = inj₂ (inj₂ (inj₁ (Raw.to RawUTF8Char3 (fst , x))))
+Raw.to RawUTF8Char (fst , utf84 x) = inj₂ (inj₂ (inj₂ (Raw.to RawUTF8Char4 (fst , x))))
 
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
 
 RawUTF8 : Raw UTF8
-Raw.D RawUTF8 = List (List UInt8)
-Raw.to RawUTF8 = Raw.to (RawIList RawUTF8Char)
+RawUTF8 = RawIList RawUTF8Char
 
 module UTF8 where
   size : ∀ {@0 bs} → UTF8 bs → ℕ

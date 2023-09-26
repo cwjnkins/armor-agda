@@ -1,13 +1,16 @@
-{-# OPTIONS --subtyping #-}
+{-# OPTIONS --subtyping --allow-unsolved-metas #-}
 
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Sum.TCB
+open import Data.Sum.Properties
 
 module Aeres.Grammar.Sum.Properties (Σ : Set) where
 
 open Aeres.Grammar.Sum.TCB     Σ
 open Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions.NonMalleable Σ
 
 nonempty : ∀ {@0 A B} → @0 NonEmpty A → @0 NonEmpty B → NonEmpty (Sum A B)
 nonempty ne₁ ne₂ (inj₁ x) ≡[] = contradiction ≡[] (ne₁ x)
@@ -46,3 +49,12 @@ Eq._≟_ sumEq (─ bs₁ , inj₂ x) (─ bs₂ , inj₂ y) =
 sumEq≋ : ∀ {@0 A B : @0 List Σ → Set} → ⦃ eq₁ : Eq≋ A ⦄ → ⦃ eq₂ : Eq≋ B ⦄
          → Eq≋ (Sum A B)
 sumEq≋ ⦃ eq₁ ⦄ ⦃ eq₂ ⦄ = Eq⇒Eq≋ (sumEq ⦃ Eq≋⇒Eq eq₁ ⦄ ⦃ Eq≋⇒Eq eq₂ ⦄)
+
+@0 nonmalleable : ∀ {@0 A ra B rb} → @0 NonMalleable A ra → @0 NonMalleable B rb → @0 NoConfusion A B → NonMalleable (Sum A B) (RawSum ra rb)
+NonMalleable.unambiguous (nonmalleable x x₁ x₂) = unambiguous (NonMalleable.unambiguous x) (NonMalleable.unambiguous x₁) x₂
+NonMalleable.injective (nonmalleable x x₁ x₂) (─ x₄ , inj₁ x₆) (─ x₅ , inj₁ x₇) x₃ =
+  case NonMalleable.injective x _ _ (inj₁-injective x₃)  of λ where
+    refl → refl
+NonMalleable.injective (nonmalleable x x₁ x₂) (─ x₄ , inj₂ x₆) (─ x₅ , inj₂ x₇) x₃ =
+  case NonMalleable.injective x₁ _ _ (inj₂-injective x₃)  of λ where
+    refl → refl
