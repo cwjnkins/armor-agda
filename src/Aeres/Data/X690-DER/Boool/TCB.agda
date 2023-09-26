@@ -28,3 +28,6 @@ Boool = TLV Tag.Boolean BoolValue
 RawBoolValue : Raw BoolValue
 Raw.D RawBoolValue = Bool
 Raw.to RawBoolValue = uncurry─ BoolValue.v
+
+RawBoool : Raw Boool
+RawBoool = RawTLV RawBoolValue

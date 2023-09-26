@@ -18,3 +18,6 @@ OctetString = TLV Tag.OctetString OctetStringValue
 RawOctetStringValue : Raw OctetStringValue
 Raw.D RawOctetStringValue = List UInt8
 Raw.to RawOctetStringValue = uncurry─ ↑_
+
+RawOctetString : Raw OctetString
+RawOctetString = RawTLV RawOctetStringValue

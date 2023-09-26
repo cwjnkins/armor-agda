@@ -425,5 +425,5 @@ postulate
 --       refl → ─ (caseErased (‼ uniqueUnusedBits{bₕ}{bₜ} unusedBits unusedBits₁) ret (const _) of λ where
 --         refl → ─ refl))
 
-@0 nonmalleable : NonMalleable BitString (RawTLV RawBitStringValue)
+@0 nonmalleable : NonMalleable BitString RawBitString
 nonmalleable = TLV.nonmalleable nonmalleableValue

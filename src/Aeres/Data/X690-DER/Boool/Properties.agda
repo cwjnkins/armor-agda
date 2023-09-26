@@ -31,5 +31,5 @@ NonMalleable.unambiguous nonmalleableValue = unambiguous
 NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #0 ._ falseᵣ refl) (─ ._ , mkBoolValue #0 ._ falseᵣ refl) _ = refl
 NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #1 ._ trueᵣ refl) (─ ._ , mkBoolValue #1 ._ trueᵣ refl) _ = refl
 
-@0 nonmalleable : NonMalleable Boool _
+@0 nonmalleable : NonMalleable Boool RawBoool
 nonmalleable = TLV.nonmalleable nonmalleableValue
