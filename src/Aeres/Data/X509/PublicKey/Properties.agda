@@ -30,7 +30,7 @@ proj₂ (proj₂ iso) (mkPublicKeyFields alg key bs≡) = refl
 @0 unambiguous : Unambiguous PublicKey
 unambiguous =
   TLV.unambiguous
-    (isoUnambiguous iso
+    (Iso.unambiguous iso
       (unambiguous&ₚᵈ
         Alg.unambiguous
         Alg.nonnesting

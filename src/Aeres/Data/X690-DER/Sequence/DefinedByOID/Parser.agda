@@ -26,7 +26,7 @@ parseDefinedByOIDFields
     → ∀ n → Parser (Logging ∘ Dec) (ExactLength (DefinedByOIDFields P) n)
 parseDefinedByOIDFields{P} s p₁ n =
   parseEquivalent
-    (transEquivalent{B = ExactLength (Rep P) n} (symEquivalent Distribute.exactLength-&ᵈ) (equivalent×ₚ (equiv P)))
+    (Iso.transEquivalent{B = ExactLength (Rep P) n} (Iso.symEquivalent Distribute.exactLength-&ᵈ) (equivalent×ₚ (equiv P)))
     (parse&ᵈ
       (withinLength-nonnesting TLV.nonnesting) (withinLength-unambiguous OID.unambiguous)
       (parse≤ _ parseOID TLV.nonnesting (tell $ s String.++ here' String.++ " (fields): overflow (OID)"))

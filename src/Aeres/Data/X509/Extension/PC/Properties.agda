@@ -29,7 +29,7 @@ proj₂ (proj₂ iso) (mkPCFieldsSeqFields require inhibit refl) = refl
 
 @0 unambiguous : Unambiguous PCFieldsSeqFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (Unambiguous.option₂&₁
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs})  TLV.nonnesting TLV.nonempty
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty (TLV.noconfusion λ ()))

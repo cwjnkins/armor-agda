@@ -34,8 +34,8 @@ private
 parseCertFields : ExactLengthParser (Logging ∘ Dec) CertFields
 parseCertFields n =
   parseEquivalent
-    (transEquivalent
-      (symEquivalent Distribute.exactLength-&)
+    (Iso.transEquivalent
+      (Iso.symEquivalent Distribute.exactLength-&)
       (equivalent×ₚ equiv))
     (parse&ᵈ{A = WithinLength (TBSCert ×ₚ Singleton) n}
       (withinLength-nonnesting (nonnesting×ₚ₁ TLV.nonnesting))

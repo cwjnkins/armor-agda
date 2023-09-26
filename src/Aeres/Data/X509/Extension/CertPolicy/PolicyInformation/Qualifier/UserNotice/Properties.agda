@@ -48,7 +48,7 @@ private
 
 @0 unambiguous : Unambiguous UserNoticeFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (Unambiguous.option₂&₁
       (TLV.unambiguous NoticeReference.unambiguous) TLV.nonnesting TLV.nonempty
       DisplayText.unambiguous DisplayText.nonempty

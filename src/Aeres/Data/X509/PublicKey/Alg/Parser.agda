@@ -26,7 +26,7 @@ parseUnsupported : Parser (Logging ∘ Dec) UnsupportedPublicKeyAlg
 parseUnsupported =
   DefinedByOID.parse "X509: PublicKey: Alg: unsupported" λ n o →
     parseEquivalent{A = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
-      (symEquivalent{B = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
+      (Iso.symEquivalent{B = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
         (proj₁ (Distribute.×ₚ-Σₚ-iso{A = OctetStringValue}{C = λ _ _ → False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs)})))
       (parse×Dec{A = ExactLength OctetStringValue n}
         exactLength-nonnesting (tell $ "X509: PublicKey: Alg: supported failed to parse")

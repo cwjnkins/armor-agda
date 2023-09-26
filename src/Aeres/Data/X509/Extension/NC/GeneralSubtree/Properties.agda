@@ -31,7 +31,7 @@ proj₂ (proj₂ iso) (mkGeneralSubtreeFields base minimum maximum refl) = refl
 
 @0 unambiguous : Unambiguous GeneralSubtreeFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ GeneralName.unambiguous GeneralName.nonnesting
       (Unambiguous.option₂&₁
         (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonnesting TLV.nonempty

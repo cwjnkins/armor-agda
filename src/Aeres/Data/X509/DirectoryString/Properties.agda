@@ -99,7 +99,7 @@ proj₂ (proj₂ iso) (bmpString x) = refl
 
 @0 unambiguous : Unambiguous DirectoryString
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguousSum (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
       (unambiguousSum
         (TLV.NonEmptyVal.unambiguous

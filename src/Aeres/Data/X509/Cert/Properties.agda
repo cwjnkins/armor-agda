@@ -48,7 +48,7 @@ proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) 
 
 @0 unambiguous : Unambiguous CertFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ
       (unambiguous×ₚ (TLV.unambiguous TBSCert.unambiguous) (λ where self self → refl))
       (nonnestingΣₚ₁ TLV.nonnesting)

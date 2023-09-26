@@ -28,7 +28,7 @@ proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ fstₚ₁ sndₚ₁ bs�
 proj₂ (proj₂ iso) (mkRSAPkIntsFields nval eval bs≡) = refl
 
 @0 unambiguous : Unambiguous RSAPkIntsFields
-unambiguous = isoUnambiguous iso
+unambiguous = Iso.unambiguous iso
                 (unambiguous&ₚ
                 (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
                 TLV.nonnesting

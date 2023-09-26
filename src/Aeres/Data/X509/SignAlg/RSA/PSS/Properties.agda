@@ -101,7 +101,7 @@ module Fields where
 
   @0 unambiguous : Unambiguous PSSParamFields
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguous&ₚ
         (TLV.unambiguous
           (Unambiguous.option₁ SupportedHashAlg.unambiguous SupportedHashAlg.nonempty))

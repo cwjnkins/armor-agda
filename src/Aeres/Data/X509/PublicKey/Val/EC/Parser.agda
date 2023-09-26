@@ -30,7 +30,7 @@ parseECBitString =
     parseBitstring
     (parseErased (parseTLV _ "X509: PublicKey: Val: EC:" _
       λ n →
-        parseEquivalent (symEquivalent Distribute.exactLength-&)
+        parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
          (parse&ᵈ
            (withinLength-nonnesting λ where _ refl refl → refl)
            (withinLength-unambiguous (λ where refl refl → refl))

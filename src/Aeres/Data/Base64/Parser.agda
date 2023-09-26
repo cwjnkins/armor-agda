@@ -198,7 +198,7 @@ module parseBase64 where
           (parse& Base64Char.nonnesting parseBase64Char
             (parse& Base64Char.nonnesting parseBase64Char
               (parse& Base64Char.nonnesting parseBase64Char parseBase64Char))))
-        (LogDec.equivalent (symEquivalent Base64Pad.equiv) parseMaxBase64Pad)
+        (LogDec.equivalent (Iso.symEquivalent Base64Pad.equiv) parseMaxBase64Pad)
         Base64Str.noOverlap)
     where
     @0 nn4 : _

@@ -35,7 +35,7 @@ private
 
 parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields n)
 parseTBSCertFields n =
-  parseEquivalent (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ equivalent))
+  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (equivalent×ₚ equivalent))
     (parse&ᵈ{A = WithinLength (&ₚ (Option Version) Int) n}
       (withinLength-nonnesting (NonNesting.noconfusion-option&₁ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())))
       (withinLength-unambiguous
@@ -65,7 +65,7 @@ parseTBSCertFields n =
 
   p₅ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₃ n)
   p₅ n =
-    parseEquivalent (symEquivalent Distribute.exactLength-&)
+    parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ {A = WithinLength (PublicKey ×ₚ Singleton) n}
         (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
         (withinLength-unambiguous (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl)))
@@ -78,7 +78,7 @@ parseTBSCertFields n =
 
   p₄ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₄ n)
   p₄ n =
-    parseEquivalent (symEquivalent Distribute.exactLength-&)
+    parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ {A = WithinLength Name n}
         (withinLength-nonnesting TLV.nonnesting)
         (withinLength-unambiguous RDN.unambiguous)
@@ -91,7 +91,7 @@ parseTBSCertFields n =
 
   p₃ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₅ n)
   p₃ n =
-    parseEquivalent (symEquivalent Distribute.exactLength-&)
+    parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ {A = WithinLength Validity n}
         (withinLength-nonnesting TLV.nonnesting)
         (withinLength-unambiguous (TLV.unambiguous Validity.unambiguous))
@@ -103,7 +103,7 @@ parseTBSCertFields n =
 
   p₂ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₆ n)
   p₂ n  =
-    parseEquivalent (symEquivalent Distribute.exactLength-&)
+    parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ{A = WithinLength Name n}
         (withinLength-nonnesting TLV.nonnesting)
         (withinLength-unambiguous RDN.unambiguous)
@@ -115,7 +115,7 @@ parseTBSCertFields n =
 
   p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₇ n)
   p₁ n =
-    parseEquivalent (symEquivalent Distribute.exactLength-&)
+    parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ{A = WithinLength SignAlg n}
         (withinLength-nonnesting{A = SignAlg} SignAlg.nonnesting)
         (withinLength-unambiguous SignAlg.unambiguous)

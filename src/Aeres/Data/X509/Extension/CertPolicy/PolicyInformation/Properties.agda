@@ -30,7 +30,7 @@ equiv = proj₁ iso
 
 @0 unambiguous : Unambiguous PolicyInformationFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (Unambiguous.unambiguous-&₁option₁
       OID.unambiguous TLV.nonnesting
       (TLV.unambiguous

@@ -23,7 +23,7 @@ proj₂ (proj₂ iso) (mkNoticeReferenceFields organization noticenums bs≡) = 
 
 @0 unambiguous : Unambiguous NoticeReferenceFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ
       DisplayText.unambiguous DisplayText.nonnesting
       (TLV.unambiguous

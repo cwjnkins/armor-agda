@@ -59,7 +59,7 @@ module Fields where
       refl
 
   @0 unambiguous : Unambiguous EcParamsFields
-  unambiguous = isoUnambiguous iso
+  unambiguous = Iso.unambiguous iso
     (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
       (TLV.unambiguous OctetString.unambiguous))
         (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
@@ -109,7 +109,7 @@ nonnesting =
 
 @0 unambiguous : Unambiguous EcPkAlgParams
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguousSum
       (TLV.unambiguous Fields.unambiguous)
       (unambiguousSum

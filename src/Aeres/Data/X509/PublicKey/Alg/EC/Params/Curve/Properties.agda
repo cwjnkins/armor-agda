@@ -40,7 +40,7 @@ proj₂ (proj₂ iso) (mkCurveFields a b seed refl) = ‼
     refl _
 
 @0 unambiguous : Unambiguous CurveFields
-unambiguous = isoUnambiguous iso
+unambiguous = Iso.unambiguous iso
   (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting (TLV.unambiguous OctetString.unambiguous))
     (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
       (Unambiguous.option₁ (TLV.unambiguous BitString.unambiguous) TLV.nonempty))

@@ -35,8 +35,8 @@ parseExactLengthGeneralSubtrees n =
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (GeneralSubtreeFields) n)
   helper n =
     parseEquivalent
-      (transEquivalent
-        (symEquivalent Distribute.exactLength-&)
+      (Iso.transEquivalent
+        (Iso.symEquivalent Distribute.exactLength-&)
         (equivalent×ₚ equivalent))
       (parse&ᵈ (withinLength-nonnesting GeneralName.nonnesting)
         (withinLength-unambiguous GeneralName.unambiguous)

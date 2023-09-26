@@ -186,7 +186,7 @@ module UTF8Char3Props where
 
   @0 unambiguous : Unambiguous UTF8Char3
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguousΣₚ
         exactLengthString-unambiguous
         (λ {xs} a →
@@ -250,7 +250,7 @@ module UTF8Char4Props where
 
   @0 unambiguous : Unambiguous UTF8Char4
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguousΣₚ exactLengthString-unambiguous
         (λ {xs} a →
           erased-unique
@@ -298,7 +298,7 @@ module UTF8CharProps where
 
   @0 unambiguous : Unambiguous UTF8Char
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguousSum
         UTF8Char1Props.unambiguous
         (unambiguousSum

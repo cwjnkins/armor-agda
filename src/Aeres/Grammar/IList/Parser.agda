@@ -133,7 +133,7 @@ module parseIList
   parseIListNonEmpty : ∀ n → Parser (M ∘ Dec) (ExactLength (IListNonEmpty A) n)
   parseIListNonEmpty n =
     parseEquivalent{A = Σₚ (ExactLength (IList A) n) (λ _ xs → lengthIList (fstₚ xs) ≥ 1)}
-      (symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
+      (Iso.symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
       (parseSigma' exactLength-nonnesting (λ _ → _ ≥? 1)
         (λ where
           (mk×ₚ l₁ sndₚ₁ refl) (mk×ₚ l₂ sndₚ₂ refl) ≥1 →

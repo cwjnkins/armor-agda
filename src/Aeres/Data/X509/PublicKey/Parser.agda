@@ -31,7 +31,7 @@ parsePublicKeyFields n =
           (PublicKeyVal (proj₂ (Alg.getOID (fstₚ a))))
           (n - length bs₁)
   eq : Equivalent (&ₚᵈ A B) (ExactLength PublicKeyFields n)
-  eq = transEquivalent (symEquivalent (Distribute.exactLength-&ᵈ)) (equivalent×ₚ equiv)
+  eq = Iso.transEquivalent (Iso.symEquivalent (Distribute.exactLength-&ᵈ)) (equivalent×ₚ equiv)
 
   @0 nn₁ : NonNesting A
   nn₁ = withinLength-nonnesting Alg.nonnesting

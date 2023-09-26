@@ -29,7 +29,7 @@ proj₁ (proj₂ iso) (Aeres.Grammar.Definitions.mk&ₚ refl sndₚ₁ refl) = r
 proj₂ (proj₂ iso) (mkRSABitStringFields self rsane refl) = refl
 
 @0 unambiguous : Unambiguous RSABitStringFields
-unambiguous = isoUnambiguous iso
+unambiguous = Iso.unambiguous iso
                 (unambiguous&ₚ
                   ≡-unique
                   (λ where _ refl refl → refl)

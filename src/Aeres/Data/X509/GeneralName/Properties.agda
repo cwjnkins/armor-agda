@@ -167,7 +167,7 @@ nonnesting x (rid x₁) (rid x₂) = ‼ TLV.nonnesting x x₁ x₂
 module GeneralName where
   @0 unambiguous : Unambiguous GeneralName
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
         ua₁ nc₀)
     where

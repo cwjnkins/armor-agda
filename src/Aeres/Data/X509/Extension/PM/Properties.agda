@@ -26,7 +26,7 @@ proj₂ (proj₂ iso) (mkPolicyMapFields issuerDomainPolicy subjectDomainPolicy 
 
 @0 unambiguous : Unambiguous PolicyMapFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ OID.unambiguous TLV.nonnesting OID.unambiguous)
 
 @0 nonnesting : NonNesting PolicyMapFields

@@ -1,5 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Grammar.Definitions.Iso
+import      Aeres.Grammar.Definitions.Unambiguous
 open import Aeres.Prelude
   renaming (Σ to Sigma)
 open import Data.Nat.Properties
@@ -7,6 +9,9 @@ open import Data.Nat.Properties
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Definitions (Σ : Set) where
+
+open Aeres.Grammar.Definitions.Iso         Σ public
+open Aeres.Grammar.Definitions.Unambiguous Σ public
 
 infix 4 _≋_
 record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
@@ -61,9 +66,6 @@ Eq≋._≋?_ (Eq⇒Eq≋ eq) a₁ a₂ =
     (yes refl) → yes₀ ≋-refl
 
 -- TODO: rename to "Unique"
-Unambiguous : (A : List Σ → Set) → Set
-Unambiguous A = ∀ {xs} → (a₁ a₂ : A xs) → a₁ ≡ a₂
-
 unambiguousHet : ∀ {A} → Unambiguous A → ∀ {xs ys} → (eq : xs ≡ ys)
                  → (a₁ : A xs) (a₂ : A ys) → subst A eq a₁ ≡ a₂
 unambiguousHet ua refl a₁ a₂ = ua a₁ a₂
@@ -85,35 +87,11 @@ NoConfusion A B = ∀ {xs₁ ys₁ xs₂ ys₂}
 symNoConfusion : ∀ {@0 A B} → NoConfusion A B → NoConfusion B A
 symNoConfusion nc ++≡ v₂ v₁ = nc (sym ++≡) v₁ v₂
 
-Equivalent : (A B : (@0 _ : List Σ) → Set) → Set
-Equivalent A B = (∀ {@0 xs} → A xs → B xs) × (∀ {@0 xs} → B xs → A xs)
-
 equivalent-nonempty : ∀ {@0 A B} → Equivalent A B → NonEmpty A → NonEmpty B
 equivalent-nonempty eqv ne b ≡[] = contradiction ≡[] (ne (proj₂ eqv b))
 
 equivalent-nonnesting : ∀ {@0 A B} → Equivalent A B → NonNesting A → NonNesting B
 equivalent-nonnesting{A}{B} eqv nn ++≡ b₁ b₂ = ‼ nn ++≡ (proj₂ eqv b₁) (proj₂ eqv b₂)
-
-symEquivalent : ∀ {A B} → Equivalent A B → Equivalent B A
-symEquivalent (fst , snd) = snd , fst
-
-transEquivalent : ∀ {A B C} → Equivalent A B → Equivalent B C → Equivalent A C
-proj₁ (transEquivalent e₁ e₂) = proj₁ e₂ ∘ proj₁ e₁
-proj₂ (transEquivalent e₁ e₂) = proj₂ e₁ ∘ proj₂ e₂
-
-Iso : (A B : @0 List Σ → Set) → Set
-Iso A B = Σ[ e ∈ Equivalent A B ]
-            ((∀ {@0 xs} → proj₂ e ∘ proj₁ e ≗ id{A = A xs}) × (∀ {@0 xs} → proj₁ e ∘ proj₂ e ≗ id{A = B xs}))
-
-isoUnambiguous : ∀ {A B} → Iso A B → Unambiguous A → Unambiguous B
-isoUnambiguous ((a→b , b→a) , _ , id₂) ua{xs} b₁ b₂ =
-  subst₂ _≡_ (id₂ b₁) (id₂ b₂) (‼ b≡)
-  where
-  @0 a≡ : b→a b₁ ≡ b→a b₂
-  a≡ = ua (b→a b₁) (b→a b₂)
-
-  @0 b≡ : a→b (b→a b₁) ≡ a→b (b→a b₂)
-  b≡ = cong a→b a≡
 
 isoEq : ∀ {@0 A B} → Iso A B → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B)
 Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =

@@ -61,7 +61,7 @@ module Fields where
 
   @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
   unambiguous ua₁ ua₂ nc =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguous&ₚ
         (unambiguousΣₚ OID.unambiguous λ a → erased-unique ua₁)
         (nonnestingΣₚ₁ TLV.nonnesting)
@@ -150,7 +150,7 @@ module Select where
 
   @0 unambiguous : Unambiguous SelectExtn
   unambiguous =
-    isoUnambiguous iso
+    Iso.unambiguous iso
       (unambiguousSum
         (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKI.unambiguous)) (TLV.noconfusion λ ()))
         (unambiguousSum

@@ -28,7 +28,7 @@ parseSHA-Like o s =
   help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
   help n o =
     parseEquivalent
-      (symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{A = Option Null}{B = _}{C = _})))
+      (Iso.symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{A = Option Null}{B = _}{C = _})))
       (parse×Dec exactLength-nonnesting
         (tell $ "X509: HashAlg: " String.++ s String.++ ": OID mismatch")
         (parseOption₁ExactLength TLV.nonnesting

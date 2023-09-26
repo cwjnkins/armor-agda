@@ -51,7 +51,7 @@ parseUserNoticeQualifier =
 parsePolicyQualifierInfoFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength PolicyQualifierInfoFields n)
 parsePolicyQualifierInfoFields n =
   parseEquivalent{A = Sum (ExactLength CPSURIQualifier n) (ExactLength UserNoticeQualifier n)}
-    (transEquivalent (symEquivalent Distribute.exactLength-Sum) (equivalent×ₚ equivalent))
+    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-Sum) (equivalent×ₚ equivalent))
     (parseSum (parseCPSURIQualifier n) (parseUserNoticeQualifier n))
 
 parsePolicyQualifierInfo : Parser (Logging ∘ Dec) PolicyQualifierInfo

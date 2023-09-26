@@ -45,7 +45,7 @@ parseSupportedHashAlg =
 
 parseFields“ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep“ n)
 parseFields“ n =
-  parseEquivalent (symEquivalent Distribute.exactLength-&)
+  parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
     (parse&ᵈ
       (withinLength-nonnesting TLV.nonnesting)
       (withinLength-unambiguous
@@ -74,7 +74,7 @@ parseFields“ n =
 
 parseFields' : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep' n)
 parseFields' n =
-  parseEquivalent (symEquivalent Distribute.exactLength-&)
+  parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
     (parse&ᵈ
       (withinLength-nonnesting TLV.nonnesting)
       (withinLength-unambiguous
@@ -96,12 +96,12 @@ parsePSSParam : ∀ n {@0 bs} → (o : OID bs)
                 → Parser (Logging ∘ Dec) (ExactLength (PSSParam o) n)
 parsePSSParam n o =
   parseEquivalent{A = ExactLength Fields.Rep n ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.RSA.PSS)}{B = ExactLength (PSSParam o) n}
-    (transEquivalent (equivalent×ₚ (equivalent×ₚ Fields.equiv)) (symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{C = λ _ _ → _}))))
+    (Iso.transEquivalent (equivalent×ₚ (equivalent×ₚ Fields.equiv)) (Iso.symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{C = λ _ _ → _}))))
     (parse×Dec
       exactLength-nonnesting
       (tell $ here' String.++ ": OID mismatch (PSS)")
       (parseEquivalent
-        (symEquivalent Distribute.exactLength-&)
+        (Iso.symEquivalent Distribute.exactLength-&)
         (parse&ᵈ
           (withinLength-nonnesting TLV.nonnesting)
           (unambiguous×ₚ

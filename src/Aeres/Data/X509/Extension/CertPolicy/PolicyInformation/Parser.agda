@@ -29,7 +29,7 @@ open ≡-Reasoning
 parsePolicyInformationFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength PolicyInformationFields n)
 parsePolicyInformationFields n =
   parseEquivalent{A = &ₚᵈ (WithinLength OID n) (λ (@0 bs) _ → ExactLength (Option PolicyQualifiersSeq) (n - length bs))}
-    (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ equiv))
+    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (equivalent×ₚ equiv))
     (parse&ᵈ
       (withinLength-nonnesting TLV.nonnesting)
       (withinLength-unambiguous OID.unambiguous)

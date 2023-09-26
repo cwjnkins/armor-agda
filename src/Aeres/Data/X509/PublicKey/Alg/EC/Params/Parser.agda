@@ -29,7 +29,7 @@ parseFieldID = parseTLV _ "X509: EcPkAlg: Params: FieldId" _ parseOctetStringVal
 parseEcParamsFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength EcParamsFields n)
 parseEcParamsFields n =
   parseEquivalent
-    (transEquivalent (symEquivalent Distribute.exactLength-&)
+    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (equivalent×ₚ Fields.equivalent))
     (parse&ᵈ 
       (withinLength-nonnesting

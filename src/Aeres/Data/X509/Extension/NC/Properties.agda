@@ -29,7 +29,7 @@ proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkNCFieldsSeqFields permt excld refl) = refl
 
 @0 unambiguous : Unambiguous NCFieldsSeqFields
-unambiguous = isoUnambiguous iso
+unambiguous = Iso.unambiguous iso
                 (Unambiguous.option₂&₁
                   (TLV.unambiguous
                     (SequenceOf.Bounded.unambiguous

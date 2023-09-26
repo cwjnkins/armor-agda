@@ -30,7 +30,7 @@ nonnesting x x₁ x₂ = foo
 
 @0 unambiguous : Unambiguous ValidityFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ Time.unambiguous Time.nonnesting
       Time.unambiguous)
 

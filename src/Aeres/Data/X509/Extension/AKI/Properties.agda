@@ -32,7 +32,7 @@ proj₂ (proj₂ iso) (mkAKIFieldsSeqFields akeyid authcertiss authcertsn refl) 
 
 @0 unambiguous : Unambiguous AKIFieldsSeqFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (Unambiguous.option₃&₂
       (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting TLV.nonempty
       (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonnesting TLV.nonempty

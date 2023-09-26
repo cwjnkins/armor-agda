@@ -99,7 +99,7 @@ proj₂ (proj₂ iso) (unsupported x) = refl
 
 @0 unambiguous : Unambiguous SignAlg
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguousSum{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
       DSA.unambiguous ua₁ nc₁)
 

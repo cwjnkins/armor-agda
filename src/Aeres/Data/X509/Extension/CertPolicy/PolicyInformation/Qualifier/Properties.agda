@@ -61,7 +61,7 @@ nonnesting =
 
 @0 unambiguous : Unambiguous PolicyQualifierInfoFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguousSum CPSURIQualifier.unambiguous UserNoticeQualifier.unambiguous
       (DefinedByOID.noConfusionFieldsParam CPSURIQualifierParam
         λ where

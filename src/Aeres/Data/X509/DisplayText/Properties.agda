@@ -114,7 +114,7 @@ noconfusionSeq = noconfusionTLV pf
 
 @0 unambiguous : Unambiguous DisplayText
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguousSum
       (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous) λ _ → inRange-unique{A = ℕ}{B = ℕ})
       (unambiguousSum (unambiguousΣₚ (TLV.unambiguous VisibleString.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))

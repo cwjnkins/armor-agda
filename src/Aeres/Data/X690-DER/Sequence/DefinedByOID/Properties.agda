@@ -35,7 +35,7 @@ proj₂ (proj₂ iso) (mkOIDDefinedFields algOID param bs≡) = refl
   : (∀ {@0 bs} → (o : OID bs) → Unambiguous (P o))
     → Unambiguous (DefinedByOIDFields P)
 unambiguous ua =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚᵈ OID.unambiguous TLV.nonnesting ua)
 
 @0 noConfusionFieldsParam
@@ -84,6 +84,11 @@ NonMalleable.injective (nonmalleableFields{R} N) (─ _ , mkOIDDefinedFields oid
             refl → ─ refl))))
   where
   import Data.Product.Properties as Product
+
+@0 nonmalleable
+  : {R : Raw₁ RawOID P} → NonMalleable₁ P R
+    → NonMalleable (DefinedByOID P) (RawTLV (RawDefinedByOIDFields R))
+nonmalleable N = TLV.nonmalleable (nonmalleableFields N)
 
 eq≋ : (∀ {@0 bs} → (o : OID bs) → Eq≋ (P o)) → Eq≋ (DefinedByOIDFields P)
 eq≋ eqP = Eq⇒Eq≋ (isoEq iso (eq&ₚᵈ it λ a → Eq≋⇒Eq (eqP a)))

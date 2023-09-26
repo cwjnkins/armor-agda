@@ -61,7 +61,7 @@ proj₂ (proj₂ iso) (mkTBSCertFields version serial signAlg issuer validity su
 
 @0 unambiguous : Unambiguous TBSCertFields
 unambiguous =
-  isoUnambiguous iso
+  Iso.unambiguous iso
     (unambiguous&ₚ
       (Unambiguous.unambiguous-option₁&₁
         (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))

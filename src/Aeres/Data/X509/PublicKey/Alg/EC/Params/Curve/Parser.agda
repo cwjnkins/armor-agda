@@ -23,7 +23,7 @@ private
 parseCurveFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CurveFields n)
 parseCurveFields n =
   parseEquivalent
-    (transEquivalent (symEquivalent Distribute.exactLength-&) (equivalent×ₚ equivalent))
+    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (equivalent×ₚ equivalent))
     (parse&ᵈ (withinLength-nonnesting (NonNesting&ₚ TLV.nonnesting  TLV.nonnesting))
       (withinLength-unambiguous
         (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous)
