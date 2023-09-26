@@ -3,10 +3,13 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Data.X690-DER.Tag
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Strings.PrintableString.Char.TCB where
+
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 data PrintableStringCharRange : @0 UInt8 → Set where
   space      : PrintableStringCharRange (# 32)
@@ -31,3 +34,7 @@ record PrintableStringChar (@0 bs : List UInt8) : Set where
     c : UInt8
     range : PrintableStringCharRange c
     @0 bs≡ : bs ≡ [ c ]
+
+RawPrintableStringChar : Raw PrintableStringChar
+Raw.D RawPrintableStringChar = UInt8
+Raw.to RawPrintableStringChar = uncurry─ λ y → (PrintableStringChar.c y)

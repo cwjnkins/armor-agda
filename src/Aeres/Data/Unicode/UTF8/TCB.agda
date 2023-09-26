@@ -18,8 +18,8 @@ record UTF8Char1 (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ [ b₁ ]
 
 RawUTF8Char1 : Raw UTF8Char1
-Raw.D RawUTF8Char1 = UInt8
-Raw.to RawUTF8Char1 = uncurry─ UTF8Char1.b₁
+Raw.D RawUTF8Char1 = Vec UInt8 1
+Raw.to RawUTF8Char1 = uncurry─ (λ y → (UTF8Char1.b₁ y) ∷ [])
 
 record UTF8Char2 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char2
@@ -94,8 +94,18 @@ InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) ((l₁ , u₁) ∷ (l₂ 
   InRangeUTF8Char4 l₁ u₁ l₂ u₂ l₃ u₃ l₄ u₄ x
 InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) _ _ = ⊥
 
+RawUTF8Char : Raw UTF8Char
+Raw.D RawUTF8Char = Vec UInt8 1 ⊎ Vec UInt8 2 ⊎ Vec UInt8 3 ⊎ Vec UInt8 4
+Raw.to RawUTF8Char (fst , utf81 x) = inj₁ (Raw.to RawUTF8Char1 (fst , x))
+Raw.to RawUTF8Char (fst , utf82 x) = inj₂ (inj₁ (Raw.to RawUTF8Char2 (fst , x)))
+Raw.to RawUTF8Char (fst , utf83 x) = inj₂ (inj₂ (inj₁ (Raw.to RawUTF8Char3 (fst , x))))
+Raw.to RawUTF8Char (fst , utf84 x) = inj₂ (inj₂ (inj₂ (Raw.to RawUTF8Char4 (fst , x))))
+
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char
+
+RawUTF8 : Raw UTF8
+RawUTF8 = RawIList RawUTF8Char
 
 module UTF8 where
   size : ∀ {@0 bs} → UTF8 bs → ℕ

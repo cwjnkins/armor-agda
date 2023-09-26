@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF32.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
   hiding (module Char)
@@ -10,6 +11,7 @@ open import Aeres.Prelude
 module Aeres.Data.Unicode.UTF32.Properties where
 
 open Aeres.Grammar.Definitions      UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList            UInt8
 
 utf32CharRange? : ∀ b₂ b₃ b₄ → Dec (UTF32CharRange b₂ b₃ b₄)
@@ -58,6 +60,12 @@ module Char where
     case (‼ rangeUnique range range₁) of λ where
       refl → refl
 
+  @0 nonmalleable : NonMalleable UTF32Char RawUTF32Char
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , mkUTF32Char b₂ b₃ b₄ range refl) (fst₁ , mkUTF32Char b₅ b₆ b₇ range₁ refl) refl =
+    case rangeUnique range range₁ of λ where
+      refl → refl
+
   instance
     UTF32CharEq≋ : Eq≋ UTF32Char
     Eq≋._≋?_ UTF32CharEq≋ (mkUTF32Char b₁₂ b₁₃ b₁₄ range₁ refl) (mkUTF32Char b₂₂ b₂₃ b₂₄ range₂ refl) =
@@ -71,6 +79,11 @@ module Char where
 @0 unambiguous : Unambiguous UTF32
 unambiguous = IList.unambiguous Char.unambiguous Char.nonempty Char.nonnesting
 
+@0 nonmalleable : NonMalleable UTF32 RawUTF32
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
+  NonMalleable.injective (IList.nonmalleable Char.nonempty Char.nonnesting Char.nonmalleable) (fst , snd) (fst₁ , snd₁) x
+  
 instance
   UTF32Eq≋ : Eq≋ UTF32
   UTF32Eq≋ = IList.IListEq≋

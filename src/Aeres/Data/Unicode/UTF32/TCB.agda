@@ -2,10 +2,12 @@
 
 open import Aeres.Binary
 import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF32.TCB where
 
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList.TCB UInt8
 
 -- • Because surrogate code points are not included in the set of Unicode scalar
@@ -24,5 +26,12 @@ record UTF32Char (@0 bs : List UInt8) : Set where
     @0 range : UTF32CharRange b₂ b₃ b₄
     @0 bs≡ : bs ≡ (# 0) ∷ b₂ ∷ b₃ ∷ [ b₄ ]
 
+RawUTF32Char : Raw UTF32Char
+Raw.D RawUTF32Char = Vec UInt8 4
+Raw.to RawUTF32Char = uncurry─ λ y → (# 0) ∷ (UTF32Char.b₂ y) ∷ (UTF32Char.b₃ y) ∷ (UTF32Char.b₄ y) ∷ []
+
 UTF32 : @0 List UInt8 → Set
 UTF32 = IList UTF32Char
+
+RawUTF32 : Raw UTF32
+RawUTF32 = RawIList RawUTF32Char

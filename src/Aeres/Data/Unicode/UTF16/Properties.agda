@@ -3,12 +3,14 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
+import Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF16.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList       UInt8
 
 module BMP where
@@ -45,7 +47,13 @@ module BMP where
   @0 unambiguous : Unambiguous BMPChar
   unambiguous (mkBMPChar c₁ c₂ range refl) (mkBMPChar .c₁ .c₂ range₁ refl) =
     subst (λ x → mkBMPChar c₁ c₂ range refl ≡ mkBMPChar c₁ c₂ x refl) (‼ range≡ range range₁) refl
-  
+
+  @0 nonmalleable : NonMalleable BMPChar RawBMPChar
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , mkBMPChar c₁ c₂ range refl) (fst₁ , mkBMPChar c₃ c₄ range₁ refl) refl =
+    case (‼ range≡ range range₁) of λ where
+      refl → refl
+
   instance
     BMPEq≋ : Eq≋ BMPChar
     Eq≋._≋?_ BMPEq≋ (mkBMPChar c₁ c₂ range refl) (mkBMPChar c₃ c₄ range₁ refl)
@@ -67,3 +75,13 @@ sizeUnique nil (consIList {_} {_} (mkBMPChar _ _ _ refl) t₂ ())
 sizeUnique (consIList (mkBMPChar c₁₁ c₁₂ _ refl) t₁ ()) nil
 sizeUnique (consIList (mkBMPChar c₁₁ c₁₂ _ refl) t₁ refl) (consIList (mkBMPChar ._ ._ _ refl) t₂ refl) =
   cong suc (sizeUnique t₁ t₂)
+
+@0 unambiguous : Unambiguous BMP
+unambiguous =
+  IList.unambiguous
+    BMP.unambiguous BMP.nonempty BMP.nonnesting
+
+@0 nonmalleable : NonMalleable BMP RawBMP
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
+  NonMalleable.injective (IList.nonmalleable BMP.nonempty BMP.nonnesting BMP.nonmalleable) (fst , snd) (fst₁ , snd₁) x

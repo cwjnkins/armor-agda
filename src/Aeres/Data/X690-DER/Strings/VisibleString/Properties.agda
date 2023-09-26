@@ -2,20 +2,25 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Strings.VisibleString.TCB
-open import Aeres.Data.X690-DER.TLV.TCB
-import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
+import      Aeres.Grammar.Definitions.NonMalleable.Base
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Strings.VisibleString.Properties where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Definitions                   UInt8
+open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 open VisibleStringValue using (size)
 
 @0 unambiguous : Unambiguous VisibleStringValue
 unambiguous (mkVisibleStringValue chars range refl) (mkVisibleStringValue .chars range₁ refl) =
+  case All.irrelevant (inRange-unique{A = ℕ}{B = UInt8}) range range₁ of λ where
+    refl → refl
+
+@0 nonmalleable : NonMalleable VisibleStringValue RawVisibleStringValue
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (fst , mkVisibleStringValue chars range refl) (fst₁ , mkVisibleStringValue chars₁ range₁ refl) refl =
   case All.irrelevant (inRange-unique{A = ℕ}{B = UInt8}) range range₁ of λ where
     refl → refl
 
@@ -32,3 +37,6 @@ instance
         ret (const _)
         of λ where
           refl → yes refl
+
+@0 nonmalleableVisibleString : NonMalleable VisibleString RawVisibleString
+nonmalleableVisibleString = TLV.nonmalleable nonmalleable

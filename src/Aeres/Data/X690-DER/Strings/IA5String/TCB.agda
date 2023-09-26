@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Data.X690-DER.OctetString.TCB
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
@@ -10,6 +11,7 @@ open import Aeres.Prelude
 module Aeres.Data.X690-DER.Strings.IA5String.TCB where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 record IA5StringValue (@0 bs : List UInt8) : Set where
   constructor mkIA5StringValue
@@ -22,3 +24,10 @@ record IA5StringValue (@0 bs : List UInt8) : Set where
 
 IA5String : (@0 _ : List UInt8) → Set
 IA5String xs = TLV Tag.IA5String IA5StringValue xs
+
+RawIA5StringValue : Raw IA5StringValue
+Raw.D RawIA5StringValue = List UInt8
+Raw.to RawIA5StringValue = uncurry─ (↑_ ∘ IA5StringValue.str)
+
+RawIA5String : Raw IA5String 
+RawIA5String = RawTLV RawIA5StringValue

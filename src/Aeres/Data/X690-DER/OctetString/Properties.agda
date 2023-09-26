@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
@@ -17,6 +18,9 @@ unambiguous (singleton x refl) (singleton .x refl) = refl
 @0 nonmalleableValue : NonMalleable OctetStringValue RawOctetStringValue
 NonMalleable.unambiguous nonmalleableValue = unambiguous
 NonMalleable.injective nonmalleableValue (─ _ , singleton bytes₁ refl) (─ _ , singleton bytes₂ refl) refl = refl
+
+@0 nonmalleable : NonMalleable OctetString RawOctetString
+nonmalleable = TLV.nonmalleable nonmalleableValue
 
 instance
   OctetstringValueEq≋ : Eq≋ OctetStringValue

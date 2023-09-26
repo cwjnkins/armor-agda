@@ -6,6 +6,7 @@ open import Aeres.Data.X690-DER.Strings.PrintableString.Char.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -13,6 +14,7 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.Strings.PrintableString.Char.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 @0 nonempty : NonEmpty PrintableStringChar
 nonempty () refl
@@ -200,6 +202,12 @@ unambiguousRange (lowers y@(fst , snd)) (lowers x) =
 @0 unambiguous : Unambiguous PrintableStringChar
 unambiguous (mkPrintableStringChar c range refl) (mkPrintableStringChar .c range₁ refl) =
   case unambiguousRange range range₁ of λ where
+    refl → refl
+
+@0 nonmalleable : NonMalleable PrintableStringChar RawPrintableStringChar
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (fst , mkPrintableStringChar c range refl) (fst₁ , mkPrintableStringChar c₁ range₁ refl) refl =
+  case (‼ unambiguousRange range range₁) of λ where
     refl → refl
 
 printableStringChar? : Decidable PrintableStringCharRange

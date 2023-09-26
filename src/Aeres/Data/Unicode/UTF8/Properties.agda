@@ -329,10 +329,30 @@ module UTF8CharProps where
           UTF8Char2Props.noconfusion)
         UTF8Char1Props.noconfusion)
 
+  @0 nonmalleable : NonMalleable UTF8Char RawUTF8Char
+  NonMalleable.unambiguous nonmalleable = unambiguous
+  NonMalleable.injective nonmalleable (fst , utf81 x₁) (fst₁ , utf81 x₂) refl =
+    case NonMalleable.injective (UTF8Char1Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
+      refl → refl
+  NonMalleable.injective nonmalleable (fst , utf82 x₁) (fst₁ , utf82 x₂) refl =
+    case NonMalleable.injective (UTF8Char2Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
+      refl → refl
+  NonMalleable.injective nonmalleable (fst , utf83 x₁) (fst₁ , utf83 x₂) refl =
+    case NonMalleable.injective (UTF8Char3Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
+      refl → refl
+  NonMalleable.injective nonmalleable (fst , utf84 x₁) (fst₁ , utf84 x₂) refl =
+    case NonMalleable.injective (UTF8Char4Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
+      refl → refl
+
 @0 unambiguous : Unambiguous UTF8
 unambiguous =
   IList.unambiguous
     UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
+
+@0 nonmalleable : NonMalleable UTF8 RawUTF8
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
+  NonMalleable.injective (IList.nonmalleable UTF8CharProps.nonempty UTF8CharProps.nonnesting UTF8CharProps.nonmalleable) (fst , snd) (fst₁ , snd₁) x
 
 sizeUnique : ∀ {@0 bs} → (a₁ a₂ : UTF8 bs) → UTF8.size a₁ ≡ UTF8.size a₂
 sizeUnique a₁ a₂ = ‼ cong UTF8.size (unambiguous a₁ a₂)

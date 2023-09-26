@@ -65,7 +65,7 @@ NonMalleable.injective nonmalleableVal (─ bs₁ , i₁@(mkIntVal bₕ₁ bₜ�
               Base256.twosComplement (bₕ₂ ∷ bₜ₂) ≡⟨ cong Base256.twosComplement (sym bs≡₂) ⟩
               Base256.twosComplement bs₂ ∎)
 
-@0 nonmalleable : NonMalleable Int (RawTLV RawIntegerValue)
+@0 nonmalleable : NonMalleable Int RawInt
 nonmalleable = TLV.nonmalleable nonmalleableVal
 
 instance

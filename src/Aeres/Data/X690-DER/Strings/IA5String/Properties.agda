@@ -3,7 +3,10 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.TLV as TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -11,6 +14,7 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.Strings.IA5String.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Data.X690-DER.Strings.IA5String.TCB.IA5StringValue
   using (size)
 
@@ -18,6 +22,12 @@ open Aeres.Data.X690-DER.Strings.IA5String.TCB.IA5StringValue
 unambiguous (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) =
   subst₀ (λ x → _ ≡ mkIA5StringValue self x)
     (T-unique all<128 all<129) refl
+
+@0 nonmalleable : NonMalleable IA5StringValue RawIA5StringValue
+NonMalleable.unambiguous nonmalleable = unambiguous
+NonMalleable.injective nonmalleable (─ _ , mkIA5StringValue self all<128) (─ _ , mkIA5StringValue self all<129) refl = 
+  case (‼ T-unique all<128 all<129) of λ where
+    refl → ‼ refl
 
 sizeUnique : ∀ {@0 bs} → (a₁ a₂ : IA5StringValue bs) → size a₁ ≡ size a₂
 sizeUnique (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) = refl
@@ -47,3 +57,6 @@ instance
 
   IA5StringEq≋ : Eq≋ IA5StringValue
   IA5StringEq≋ = Eq⇒Eq≋ it
+
+@0 nonmalleableIA5String : NonMalleable IA5String RawIA5String
+nonmalleableIA5String = TLV.nonmalleable nonmalleable

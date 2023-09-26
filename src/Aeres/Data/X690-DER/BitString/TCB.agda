@@ -36,3 +36,6 @@ BitString = TLV Tag.BitString BitStringValue
 RawBitStringValue : Raw BitStringValue
 Raw.D RawBitStringValue = List Bool
 Raw.to RawBitStringValue = uncurry─ (↑_ ∘ BitStringValue.bits)
+
+RawBitString : Raw BitString
+RawBitString = RawTLV RawBitStringValue
