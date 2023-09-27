@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF8.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -16,7 +15,6 @@ open import Relation.Binary
 module Aeres.Data.Unicode.UTF8.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList                    UInt8
 open Aeres.Grammar.Properties               UInt8
 open Aeres.Grammar.Sum                      UInt8

@@ -6,7 +6,6 @@ open import Aeres.Data.X690-DER.Strings.PrintableString.Char.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.Tag
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -14,7 +13,6 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.Strings.PrintableString.Char.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 @0 nonempty : NonEmpty PrintableStringChar
 nonempty () refl

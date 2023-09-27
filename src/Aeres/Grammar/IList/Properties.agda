@@ -2,10 +2,11 @@
 
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -13,12 +14,11 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList.Properties (Σ : Set) where
 
-open import Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.Definitions.NonMalleable Σ
-open        Aeres.Grammar.IList.TCB   Σ
-open import Aeres.Grammar.Sum Σ
+open Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.IList.TCB   Σ
 open Aeres.Grammar.Option      Σ
 open Aeres.Grammar.Properties  Σ
+open Aeres.Grammar.Sum         Σ
 
 Rep : (List Σ → Set) → @0 List Σ → Set
 Rep A = Sum (_≡ []) (&ₚ A (IList A))

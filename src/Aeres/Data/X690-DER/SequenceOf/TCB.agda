@@ -5,14 +5,12 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.SequenceOf.TCB where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList.TCB                UInt8
 
 SequenceOf       = IList

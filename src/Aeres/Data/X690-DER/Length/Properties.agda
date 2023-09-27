@@ -4,7 +4,6 @@ open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -12,7 +11,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X690-DER.Length.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 elimMinRepLong
   : ∀ {ℓ} lₕ lₜ (P : UInt8 → List UInt8 → Set ℓ) →

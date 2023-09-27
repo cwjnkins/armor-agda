@@ -5,7 +5,6 @@ open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
@@ -18,7 +17,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X690-DER.SequenceOf.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList                    UInt8
 open Aeres.Grammar.Option                   UInt8
 open Aeres.Grammar.Properties               UInt8

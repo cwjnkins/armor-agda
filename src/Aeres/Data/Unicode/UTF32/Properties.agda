@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF32.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
   hiding (module Char)
@@ -11,7 +10,6 @@ open import Aeres.Prelude
 module Aeres.Data.Unicode.UTF32.Properties where
 
 open Aeres.Grammar.Definitions      UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList            UInt8
 
 utf32CharRange? : ∀ b₂ b₃ b₄ → Dec (UTF32CharRange b₂ b₃ b₄)

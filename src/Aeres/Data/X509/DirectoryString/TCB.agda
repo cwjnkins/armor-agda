@@ -9,13 +9,13 @@ open import Aeres.Data.X690-DER.Strings.UTF8String.TCB
 open import Aeres.Data.X690-DER.Strings.UniversalString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.DirectoryString.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Sum.TCB                  UInt8
 
 data DirectoryString : @0 List UInt8 → Set where
   teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs
@@ -24,6 +24,32 @@ data DirectoryString : @0 List UInt8 → Set where
   utf8String : ∀ {@0 bs} → Σₚ UTF8String TLVNonEmptyVal bs → DirectoryString bs
   bmpString  : ∀ {@0 bs} → Σₚ BMPString  TLVNonEmptyVal bs → DirectoryString bs
 
-postulate
-  RawDirectoryString : Raw DirectoryString
-  
+DirectoryStringRep =
+  (Sum (Σₚ TeletexString   TLVNonEmptyVal)
+  (Sum (Σₚ PrintableString TLVNonEmptyVal)
+  (Sum (Σₚ UniversalString TLVNonEmptyVal)
+  (Sum (Σₚ UTF8String      TLVNonEmptyVal)
+       (Σₚ BMPString       TLVNonEmptyVal)))))
+
+equivalent : Equivalent DirectoryStringRep DirectoryString
+proj₁ equivalent (Sum.inj₁ x) = teletexString x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = printableString x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = universalString x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = utf8String x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))) = bmpString x
+proj₂ equivalent (teletexString x) = Sum.inj₁ x
+proj₂ equivalent (printableString x) = Sum.inj₂ (Sum.inj₁ x)
+proj₂ equivalent (universalString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
+proj₂ equivalent (utf8String x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))
+proj₂ equivalent (bmpString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))
+
+RawDirectoryStringRep : Raw DirectoryStringRep
+RawDirectoryStringRep =
+  (RawSum (RawΣₚ₁ RawTeletexString TLVNonEmptyVal)
+  (RawSum (RawΣₚ₁ RawPrintableString TLVNonEmptyVal)
+  (RawSum (RawΣₚ₁ RawUniversalString TLVNonEmptyVal)
+  (RawSum (RawΣₚ₁ RawUTF8String TLVNonEmptyVal)
+          (RawΣₚ₁ RawBMPString TLVNonEmptyVal)))))
+
+RawDirectoryString : Raw DirectoryString
+RawDirectoryString = Iso.raw equivalent RawDirectoryStringRep

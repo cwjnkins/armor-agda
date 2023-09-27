@@ -9,7 +9,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Grammar.IList.TCB (Σ : Set) where
 
 open Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.Definitions.NonMalleable Σ
 
 data IList (@0 A : List Σ → Set) : @0 List Σ → Set
 

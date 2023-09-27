@@ -4,13 +4,11 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.Strings.VisibleString.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable.Base
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Strings.VisibleString.Properties where
 
 open Aeres.Grammar.Definitions                   UInt8
-open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 open VisibleStringValue using (size)
 
 @0 unambiguous : Unambiguous VisibleStringValue

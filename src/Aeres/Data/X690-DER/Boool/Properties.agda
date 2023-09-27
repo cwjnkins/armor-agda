@@ -5,13 +5,11 @@ open import Aeres.Data.X690-DER.Boool.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Boool.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 nonempty : NonEmpty BoolValue
 nonempty () refl

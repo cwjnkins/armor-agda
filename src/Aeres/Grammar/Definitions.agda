@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 import      Aeres.Grammar.Definitions.Iso
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Definitions.Unambiguous
 open import Aeres.Prelude
   renaming (Σ to Sigma)
@@ -10,8 +11,9 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.Definitions (Σ : Set) where
 
-open Aeres.Grammar.Definitions.Iso         Σ public
-open Aeres.Grammar.Definitions.Unambiguous Σ public
+open Aeres.Grammar.Definitions.Iso          Σ public
+open Aeres.Grammar.Definitions.NonMalleable Σ public
+open Aeres.Grammar.Definitions.Unambiguous  Σ public
 
 infix 4 _≋_
 record _≋_ {@0 A : List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
@@ -150,6 +152,11 @@ open Σₚ public using (fstₚ ; sndₚ)
 
 _×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
+
+-- Raw values that drop the second component (for when it is only specificational)
+RawΣₚ₁ : {A : @0 List Σ → Set} → Raw A → (B : (xs : List Σ) (a : A xs) → Set) → Raw (Σₚ A B)
+Raw.D (RawΣₚ₁ r B) = Raw.D r
+Raw.to (RawΣₚ₁ r B) (─ _ , mk×ₚ a _ refl) = Raw.to r (─ _ , a)
 
 -- TODO: rename
 NotEmpty : (A : List Σ → Set) → @0 List Σ → Set

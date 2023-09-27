@@ -3,14 +3,12 @@
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
-import Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF16.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList       UInt8
 
 module BMP where

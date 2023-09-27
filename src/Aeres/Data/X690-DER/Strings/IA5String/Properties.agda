@@ -5,7 +5,6 @@ open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -14,7 +13,6 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.Strings.IA5String.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Data.X690-DER.Strings.IA5String.TCB.IA5StringValue
   using (size)
 

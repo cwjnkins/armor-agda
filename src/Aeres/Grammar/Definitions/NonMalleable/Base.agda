@@ -18,6 +18,10 @@ record Raw₁ {A : @0 List Σ → Set} (R : Raw A) (P : {@0 xs : List Σ} → A 
     D : Raw.D R → Set
     to : ∀ {@0 bs} → (a : A bs) → Exists─ (List Σ) (P a) → D (Raw.to R (─ _ , a))
 
+mapRaw : {A B : @0 List Σ → Set} → (∀ {@0 xs} → B xs → A xs) → Raw A → Raw B
+Raw.D (mapRaw f r) = Raw.D r
+Raw.to (mapRaw f r) (─ _ , b) = Raw.to r (─ _ , f b)
+
 record NonMalleable (A : @0 List Σ → Set) (R : Raw A) : Set where
   open Raw R public
   field

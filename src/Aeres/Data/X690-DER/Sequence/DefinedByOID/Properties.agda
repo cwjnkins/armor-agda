@@ -8,7 +8,6 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -17,7 +16,6 @@ module Aeres.Data.X690-DER.Sequence.DefinedByOID.Properties
   where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 Rep : @0 List UInt8 → Set
 Rep = &ₚᵈ OID λ bs → P {bs}

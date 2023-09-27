@@ -5,7 +5,6 @@ open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -13,7 +12,6 @@ open import Data.Nat.Properties
 module Aeres.Data.X690-DER.BitString.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open ≡-Reasoning
 
 uniqueUnusedBits : ∀ {bₕ bₜ} → Unique (UnusedBits bₕ bₜ)

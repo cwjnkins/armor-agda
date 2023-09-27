@@ -4,13 +4,11 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.OctetString.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 @0 unambiguous : Unambiguous OctetStringValue
 unambiguous (singleton x refl) (singleton .x refl) = refl

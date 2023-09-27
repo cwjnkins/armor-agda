@@ -5,7 +5,6 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Data.Nat.Properties
   hiding (_≟_)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -13,7 +12,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X690-DER.TLV.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 nonempty : ∀ {t} {@0 A} → NonEmpty (TLV t A)
 nonempty (mkTLV len val len≡ ()) refl

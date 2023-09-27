@@ -6,14 +6,12 @@ open import Aeres.Data.X690-DER.Strings.PrintableString.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Strings.PrintableString.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList       UInt8
 
 sizeUnique : ∀ {@0 bs} → (a₁ a₂ : IList PrintableStringChar bs) → size a₁ ≡ size a₂

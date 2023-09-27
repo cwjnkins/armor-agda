@@ -2,7 +2,6 @@
 
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Sum.TCB
 open import Data.Sum.Properties
 
@@ -10,7 +9,6 @@ module Aeres.Grammar.Sum.Properties (Σ : Set) where
 
 open Aeres.Grammar.Sum.TCB     Σ
 open Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.Definitions.NonMalleable Σ
 
 nonempty : ∀ {@0 A B} → @0 NonEmpty A → @0 NonEmpty B → NonEmpty (Sum A B)
 nonempty ne₁ ne₂ (inj₁ x) ≡[] = contradiction ≡[] (ne₁ x)

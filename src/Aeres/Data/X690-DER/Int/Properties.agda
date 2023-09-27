@@ -5,13 +5,11 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Int.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
 
 module MinRep where
   @0 unique : ∀ {b bs} → Unique (True (Base256.twosComplementMinRep? b bs))

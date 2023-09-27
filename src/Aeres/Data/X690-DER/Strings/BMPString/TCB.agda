@@ -1,8 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.Unicode.UTF16
-open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.Unicode.UTF16.TCB
+open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList.TCB
