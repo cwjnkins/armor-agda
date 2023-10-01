@@ -11,6 +11,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -20,6 +21,7 @@ module Aeres.Data.X509.PublicKey.Alg.EC.Params.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option  UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 open ≡-Reasoning
 
@@ -60,15 +62,15 @@ module Fields where
 
   @0 unambiguous : Unambiguous EcParamsFields
   unambiguous = Iso.unambiguous iso
-    (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (unambiguous&ₚ (λ where refl refl → refl) (λ where _ refl refl → refl)
+    (Seq.unambiguous (Seq.unambiguous (Seq.unambiguous (Seq.unambiguous (Seq.unambiguous (λ where refl refl → refl) (λ where _ refl refl → refl)
       (TLV.unambiguous OctetString.unambiguous))
-        (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting)
+        (Seq.nosubstrings (λ where _ refl refl → refl) TLV.nosubstrings)
       (TLV.unambiguous Curve.unambiguous))
-        (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting)
+        (Seq.nosubstrings (Seq.nosubstrings (λ where _ refl refl → refl) TLV.nosubstrings) TLV.nosubstrings)
       (TLV.unambiguous OctetString.unambiguous))
-        (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
+        (Seq.nosubstrings (Seq.nosubstrings (Seq.nosubstrings (λ where _ refl refl → refl) TLV.nosubstrings) TLV.nosubstrings) TLV.nosubstrings)
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
-        (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (NonNesting&ₚ (λ where _ refl refl → refl) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting) TLV.nonnesting)
+        (Seq.nosubstrings (Seq.nosubstrings (Seq.nosubstrings (Seq.nosubstrings (λ where _ refl refl → refl) TLV.nosubstrings) TLV.nosubstrings) TLV.nosubstrings) TLV.nosubstrings)
       (Unambiguous.option₁ (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty))
 
 Rep : @0 List UInt8 → Set
@@ -96,12 +98,12 @@ len≥1 (ecparams (mkTLV len val len≡ refl))   = s≤s z≤n
 len≥1 (namedcurve (mkTLV len val len≡ refl)) = s≤s z≤n
 len≥1 (implicitlyCA (mkTLV len refl len≡ refl)) = s≤s z≤n
 
-@0 nonnesting : NonNesting EcPkAlgParams
-nonnesting =
-  equivalent-nonnesting equivalent
-    (nonnestingSum
-      TLV.nonnesting 
-      (nonnestingSum TLV.nonnesting TLV.nonnesting
+@0 nosubstrings : NoSubstrings EcPkAlgParams
+nosubstrings =
+  Iso.nosubstrings equivalent
+    (Sum.nosubstrings
+      TLV.nosubstrings 
+      (Sum.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion (λ ())))
       (NoConfusion.sumₚ{A = EcParams}
         (TLV.noconfusion (λ ()))
@@ -110,9 +112,9 @@ nonnesting =
 @0 unambiguous : Unambiguous EcPkAlgParams
 unambiguous =
   Iso.unambiguous iso
-    (unambiguousSum
+    (Sum.unambiguous
       (TLV.unambiguous Fields.unambiguous)
-      (unambiguousSum
+      (Sum.unambiguous
         OID.unambiguous (TLV.unambiguous (λ where refl refl → refl))
         (TLV.noconfusion λ ()))
       (NoConfusion.sumₚ{A = EcParams}

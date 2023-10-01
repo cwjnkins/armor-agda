@@ -15,7 +15,9 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -23,7 +25,9 @@ module Aeres.Data.X509.SignAlg.RSA.PSS.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module Fields where
@@ -57,10 +61,10 @@ module Fields where
 
     @0 unambiguous : Unambiguous SupportedHashAlg
     unambiguous =
-      unambiguousSum (HashAlg.SHA-Like.unambiguous _)
-        (unambiguousSum (HashAlg.SHA-Like.unambiguous _)
-          (unambiguousSum (HashAlg.SHA-Like.unambiguous _)
-            (unambiguousSum
+      Sum.unambiguous (HashAlg.SHA-Like.unambiguous _)
+        (Sum.unambiguous (HashAlg.SHA-Like.unambiguous _)
+          (Sum.unambiguous (HashAlg.SHA-Like.unambiguous _)
+            (Sum.unambiguous
               (HashAlg.SHA-Like.unambiguous _)
               (HashAlg.SHA-Like.unambiguous _)
               (HashAlg.SHA-Like.noConfusion _ _))
@@ -68,12 +72,12 @@ module Fields where
           noConfusion-SHA224-)
         noConfusion-SHA1-
 
-    @0 nonnesting : NonNesting SupportedHashAlg
-    nonnesting =
-      nonnestingSum TLV.nonnesting
-        (nonnestingSum TLV.nonnesting
-          (nonnestingSum TLV.nonnesting
-            (nonnestingSum TLV.nonnesting TLV.nonnesting
+    @0 nosubstrings : NoSubstrings SupportedHashAlg
+    nosubstrings =
+      Sum.nosubstrings TLV.nosubstrings
+        (Sum.nosubstrings TLV.nosubstrings
+          (Sum.nosubstrings TLV.nosubstrings
+            (Sum.nosubstrings TLV.nosubstrings TLV.nosubstrings
               (HashAlg.SHA-Like.noConfusion _ _))
             noConfusion-SHA256-)
           noConfusion-SHA224-)
@@ -102,30 +106,30 @@ module Fields where
   @0 unambiguous : Unambiguous PSSParamFields
   unambiguous =
     Iso.unambiguous iso
-      (unambiguous&ₚ
+      (Seq.unambiguous
         (TLV.unambiguous
           (Unambiguous.option₁ SupportedHashAlg.unambiguous SupportedHashAlg.nonempty))
-        TLV.nonnesting
-        (unambiguous&ₚ
+        TLV.nosubstrings
+        (Seq.unambiguous
           (TLV.unambiguous
             (Unambiguous.option₁ MGF1.unambiguous TLV.nonempty))
-          TLV.nonnesting
-          (unambiguous&ₚ
+          TLV.nosubstrings
+          (Seq.unambiguous
             (TLV.unambiguous (Unambiguous.option₁ (TLV.unambiguous Int.unambiguous)
               TLV.nonempty))
-            TLV.nonnesting
+            TLV.nosubstrings
             (TLV.unambiguous
               (Unambiguous.option₁
-                (unambiguousΣₚ (TLV.unambiguous Int.unambiguous)
+                (Parallel.unambiguous (TLV.unambiguous Int.unambiguous)
                   (λ _ → ≡-unique))
-                (nonemptyΣₚ₁ TLV.nonempty))))))
+                (Parallel.nonempty₁ TLV.nonempty))))))
 
 @0 unambiguous : Unambiguous PSS
 unambiguous =
   TLV.unambiguous
     (DefinedByOID.unambiguous PSSParam
       λ o →
-       unambiguous×ₚ Fields.unambiguous
+       Parallel.unambiguous×ₚ Fields.unambiguous
          (λ where
            ≋-refl ≋-refl → refl))
 

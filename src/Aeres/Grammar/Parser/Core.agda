@@ -1,12 +1,13 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+import      Aeres.Grammar.Definitions
 open import Data.Nat.Properties
   hiding (_≟_)
 
 module Aeres.Grammar.Parser.Core (Σ : Set) where
 
-open import Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions Σ
 
 record Success (@0 A : List Σ → Set) (@0 xs : List Σ) : Set where
   constructor success
@@ -52,7 +53,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   parser2dec
     : (extract : ∀ {A} → M A → A)
-      → {A : @0 List Σ → Set} → @0 NonNesting A
+      → {A : @0 List Σ → Set} → @0 NoSubstrings A
       → Parser (M ∘ Dec) A → Decidable A
   parser2dec extract {A} nn p xs =
     case extract (runParser p xs) of λ where

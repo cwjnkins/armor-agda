@@ -6,12 +6,14 @@ open import Aeres.Data.Unicode.UTF16.Properties
 open import Aeres.Data.Unicode.UTF16.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 
 module Aeres.Data.Unicode.UTF16.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -19,16 +21,16 @@ private
 
 parseBMP : ∀ n → Parser (Logging ∘ Dec) (ExactLength BMP n)
 parseBMP =
-  parseIList (tell $ here' String.++ "parseBMP: underflow" ) _ BMP.nonempty BMP.nonnesting p
+  parseIList (tell $ here' String.++ "parseBMP: underflow" ) _ BMP.nonempty BMP.nosubstrings p
   where
   p : Parser (Logging ∘ Dec) BMPChar
   runParser p xs = do
-    yes (success ._ _ refl (mk×ₚ (singleton (c₁ ∷ c₂ ∷ []) refl) (─ refl) refl) suf₁ refl)
+    yes (success ._ _ refl (mk×ₚ (singleton (c₁ ∷ c₂ ∷ []) refl) (─ refl)) suf₁ refl)
       ← runParser (parseN 2 (tell $ here' String.++ "parseBMPChar: underflow")) xs
       where no ¬p → do
         return ∘ no $ λ where
           (success ._ ._ refl (mkBMPChar c₁ c₂ range refl) ._ refl) →
-            contradiction (success _ _ refl (mk×ₚ (singleton (c₁ ∷ [ c₂ ]) refl) (─ refl) refl) _ refl) ¬p
+            contradiction (success _ _ refl (mk×ₚ (singleton (c₁ ∷ [ c₂ ]) refl) (─ refl)) _ refl) ¬p
     case inRange? 0 215 c₁ of λ where
       (yes c₁≤215) →
         return (yes (success _ _ refl (mkBMPChar c₁ c₂ (inj₁ c₁≤215) refl) suf₁ refl))

@@ -6,12 +6,14 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.EKU.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -20,9 +22,9 @@ private
 parseEKUFields : Parser (Logging ∘ Dec) EKUFields
 parseEKUFields =
   parseTLV _ here' _
-    (parseExactLength TLV.nonnesting
+    (parseExactLength TLV.nosubstrings
       (tell $ here' String.++ ": underflow")
-      (parseNonEmptySeq (here' String.++ ": elems") _ TLV.nonempty TLV.nonnesting parseOID))
+      (parseNonEmptySeq (here' String.++ ": elems") _ TLV.nonempty TLV.nosubstrings parseOID))
 
 -- private
 --   module Test where

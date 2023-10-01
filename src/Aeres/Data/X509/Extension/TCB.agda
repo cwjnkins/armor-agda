@@ -24,14 +24,16 @@ open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
-import      Aeres.Grammar.Option
+import      Aeres.Grammar.Option.TCB
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.IList.TCB   UInt8
-open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.IList.TCB    UInt8
+open Aeres.Grammar.Option.TCB   UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
 
 supportedExtensions : List (List UInt8)
 supportedExtensions =
@@ -118,7 +120,7 @@ module Extension where
 
 module ExtensionsSeq where
   getBC : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldBC)
-  getBC (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getBC (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldBC)
     helper nil = _ , none
@@ -127,7 +129,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getKU : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldKU)
-  getKU (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getKU (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
@@ -136,7 +138,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getEKU : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldEKU)
-  getEKU (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getEKU (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
@@ -145,7 +147,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getSAN : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldSAN)
-  getSAN (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getSAN (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
@@ -154,7 +156,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getCRLDIST : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
-  getCRLDIST (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getCRLDIST (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
@@ -163,7 +165,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getCPOL : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldCPOL)
-  getCPOL (mkTLV len (mk×ₚ x sndₚ₁ bs≡₁) len≡ bs≡) = helper x
+  getCPOL (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
     helper nil = _ , none
@@ -172,7 +174,7 @@ module ExtensionsSeq where
       y@(fst , some x) → y
 
   getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List UInt8) Extension)
-  getExtensionsList (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁ bs≡₁) len≡ bs≡) = helper fstₚ₁
+  getExtensionsList (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁) len≡ bs≡) = helper fstₚ₁
     where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → List (Exists─ (List UInt8) Extension)
     helper nil = []

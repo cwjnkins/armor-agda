@@ -26,9 +26,8 @@ unambiguous (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minR
         refl → case (‼ ≡-unique bs≡ bs≡₁) ret (const _) of λ where
           refl → refl
 
-@0 nonmalleableVal : NonMalleable IntegerValue RawIntegerValue
-NonMalleable.unambiguous nonmalleableVal = unambiguous
-NonMalleable.injective nonmalleableVal (─ bs₁ , i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁)) (─ bs₂ , i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂)) eq =
+@0 nonmalleableVal : NonMalleable RawIntegerValue
+nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁) i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂) eq =
   case bs₁≡bs₂ ret (const _) of λ where
     refl → case (‼ unambiguous i₁ i₂) ret (const _) of λ where
       refl → refl
@@ -63,7 +62,7 @@ NonMalleable.injective nonmalleableVal (─ bs₁ , i₁@(mkIntVal bₕ₁ bₜ�
               Base256.twosComplement (bₕ₂ ∷ bₜ₂) ≡⟨ cong Base256.twosComplement (sym bs≡₂) ⟩
               Base256.twosComplement bs₂ ∎)
 
-@0 nonmalleable : NonMalleable Int RawInt
+@0 nonmalleable : NonMalleable RawInt
 nonmalleable = TLV.nonmalleable nonmalleableVal
 
 instance
@@ -72,7 +71,7 @@ instance
     case v₁ ≟ v₂ ret (const _) of λ where
       (no  v₁≢v₂) → no λ where refl → contradiction refl v₁≢v₂
       (yes refl)  →
-        case (‼ NonMalleable.injective nonmalleableVal (─ _ , i₁) (─ _ , i₂) refl) ret (const _) of λ where
+        case (‼ nonmalleableVal i₁ i₂ refl) ret (const _) of λ where
           refl → yes refl
 
   eq≋ : Eq≋ IntegerValue

@@ -13,6 +13,7 @@ open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -21,6 +22,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.SignAlg.RSA.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -29,7 +31,7 @@ module Supported where
                 → NoConfusion (HashAlg.SHA-Like o) PSS
   noConfusion o {t} =
     TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡) bs'≡) →
        let
          @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
          ++≡ = ─ (begin
@@ -41,7 +43,7 @@ module Supported where
            bs₁' ++ p' ++ ys₂ ∎)
   
          @0 bs₁≡ : Erased (bs₁ ≡ bs₁')
-         bs₁≡ = ─ TLV.nonnesting (¡ ++≡) o o'
+         bs₁≡ = ─ TLV.nosubstrings (¡ ++≡) o o'
   
          @0 o≋o' : _≋_{OID} o o'
          o≋o' = mk≋ (¡ bs₁≡) (OID.unambiguous _ o')
@@ -54,19 +56,19 @@ module Supported where
 
   @0 unambiguous : Unambiguous RSA.Supported
   unambiguous =
-    unambiguousSum{A = RSA.MD2}
+    Sum.unambiguous{A = RSA.MD2}
       (HashAlg.SHA-Like.unambiguous OIDs.RSA.MD2)
-      (unambiguousSum{A = RSA.MD5}
+      (Sum.unambiguous{A = RSA.MD5}
         (HashAlg.SHA-Like.unambiguous OIDs.RSA.MD5)
-        (unambiguousSum{A = RSA.SHA1}
+        (Sum.unambiguous{A = RSA.SHA1}
           (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA1)
-          (unambiguousSum{A = RSA.SHA224}
+          (Sum.unambiguous{A = RSA.SHA224}
             (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA224)
-            (unambiguousSum{A = RSA.SHA256}
+            (Sum.unambiguous{A = RSA.SHA256}
               (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA256)
-              (unambiguousSum{A = RSA.SHA384}
+              (Sum.unambiguous{A = RSA.SHA384}
                 (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA384)
-                (unambiguousSum{A = RSA.SHA512}
+                (Sum.unambiguous{A = RSA.SHA512}
                   (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA512)
                   PSS.unambiguous
                   (noConfusion OIDs.RSA.SHA512))

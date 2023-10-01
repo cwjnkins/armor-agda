@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Seq
 
 open import Aeres.Prelude
 
@@ -17,7 +18,8 @@ module Aeres.Data.X509.Extension.AKI.Eq where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Seq         UInt8
 
 instance
   eq≋ : Eq≋ AKIFieldsSeqFields
-  eq≋ = isoEq≋ iso (eq≋&ₚ it (eq≋&ₚ it it))
+  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))

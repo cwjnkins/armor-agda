@@ -3,8 +3,9 @@
 open import Aeres.Binary renaming (module Base64 to B64)
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Option
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 import      Aeres.Data.Base64.TCB as Base64
@@ -13,8 +14,9 @@ import      Data.Nat.Properties   as Nat
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
+open Aeres.Grammar.Parallel             Char
 open Aeres.Grammar.Option               Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Seq                  Char
 open Aeres.Grammar.Sum                  Char
 open ≡-Reasoning
 
@@ -27,18 +29,18 @@ module Base64Char where
        λ where
          ._ (─ xs) →
            let @0 c : Char
-               c = lookupELS xs (# 0)
+               c = lookupExactLengthString xs (# 0)
            in Exists─ (c ∈ B64.charset) (λ c∈ → Singleton (Any.index c∈))
 
   equiv : Equivalent Rep Base64.Base64Char
-  proj₁ equiv {xs“} (mk×ₚ (─ xs'@(mk×ₚ self (─ xsLen) refl)) (─ c∈ , i) refl) =
-    Base64.mk64 (lookupELS xs' (# 0)) c∈ i (‼ lem xsLen)
+  proj₁ equiv {xs“} (mk×ₚ (─ xs'@(mk×ₚ self (─ xsLen))) (─ c∈ , i)) =
+    Base64.mk64 (lookupExactLengthString xs' (# 0)) c∈ i (‼ lem xsLen)
     where
     @0 lem : ∀ {xs“} (xsLen : length xs“ ≡ 1)
-             → xs“ ≡ [ lookupELS (mk×ₚ (singleton xs“ refl) (─ xsLen) refl) (# 0) ]
+             → xs“ ≡ [ lookupExactLengthString (mk×ₚ (singleton xs“ refl) (─ xsLen)) (# 0) ]
     lem {x ∷ []} refl = refl
   proj₂ equiv (Base64.mk64 c c∈ i refl) =
-    mk×ₚ (─ (mk×ₚ (singleton (c ∷ []) refl) (─ refl) refl)) ((─ c∈) , i) refl
+    mk×ₚ (─ (mk×ₚ (singleton (c ∷ []) refl) (─ refl))) ((─ c∈) , i)
 
   all2IList : ∀ {bs} → All (_∈ B64.charset) bs → IList Base64.Base64Char bs
   all2IList All.[] = nil
@@ -50,8 +52,8 @@ module Base64Char where
   iList2All{bs = .(c ∷ bs₂)} (consIList{bs₂ = bs₂} (Base64.mk64 c c∈ i refl) tail₁ refl) =
     All._∷_ (Base64.mk64 c c∈ i refl) (iList2All{bs₂} tail₁)
 
-  @0 nonnesting : NonNesting Base64.Base64Char
-  nonnesting{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Base64.mk64 c c∈ i bs≡) (Base64.mk64 c₁ c∈₁ i₁ bs≡₁) =
+  @0 nosubstrings : NoSubstrings Base64.Base64Char
+  nosubstrings{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (Base64.mk64 c c∈ i bs≡) (Base64.mk64 c₁ c∈₁ i₁ bs≡₁) =
     begin xs₁ ≡⟨ bs≡ ⟩
           [ c ] ≡⟨ cong [_] c≡ ⟩
           [ c₁ ] ≡⟨ sym bs≡₁ ⟩
@@ -101,8 +103,8 @@ module Base64Pad where
              (_≡ [ '=' ]))
   
   equiv₁ : Equivalent Rep₁ Base64.Base64Pad1
-  proj₁ equiv₁ (mk&ₚ (mk&ₚ (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl) refl refl) refl) = Base64.mk64P1 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl
-  proj₂ equiv₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl) = mk&ₚ (mk&ₚ c₁ c₂ refl) (mk&ₚ (mk×ₚ c₃ (‼ pad) refl) refl refl) refl
+  proj₁ equiv₁ (mk&ₚ (mk&ₚ (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃) refl refl) refl) = Base64.mk64P1 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) (Base64.mk64 c₂ c∈₂ i₂ refl) sndₚ₃ refl
+  proj₂ equiv₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl) = mk&ₚ (mk&ₚ c₁ c₂ refl) (mk&ₚ (mk×ₚ c₃ (‼ pad)) refl refl) refl
 
   Rep₂ : @0 List Char → Set
   Rep₂ =  &ₚ Base64.Base64Char
@@ -110,8 +112,8 @@ module Base64Pad where
              (_≡ '=' ∷ [ '=' ]))
 
   equiv₂ : Equivalent Rep₂ Base64.Base64Pad2
-  proj₁ equiv₂ (mk&ₚ (Base64.mk64 c c∈ i refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl) refl refl) refl) = Base64.mk64P2 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl
-  proj₂ equiv₂ (Base64.mk64P2 c₁ c₂ pad refl) = mk&ₚ c₁ (mk&ₚ (mk×ₚ c₂ (‼ pad) refl) refl refl) refl
+  proj₁ equiv₂ (mk&ₚ (Base64.mk64 c c∈ i refl) (mk&ₚ (mk×ₚ (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂) refl refl) refl) = Base64.mk64P2 (Base64.mk64 c c∈ i refl) (Base64.mk64 c₁ c∈₁ i₁ refl) sndₚ₂ refl
+  proj₂ equiv₂ (Base64.mk64P2 c₁ c₂ pad refl) = mk&ₚ c₁ (mk&ₚ (mk×ₚ c₂ (‼ pad)) refl refl) refl
 
   Rep : @0 List Char → Set
   Rep = Option (Sum Base64.Base64Pad1 Base64.Base64Pad2)
@@ -163,11 +165,11 @@ module Base64Str where
       hiding (Acc)
 
     equivₛ₁WF : ∀ {@0 bs} → (cs : Repₛ bs) → @0 Acc _<_ (lengthIList cs) → ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bs
-    equivₛ₁WF nil (acc rs) = mk×ₚ nil refl refl
+    equivₛ₁WF nil (acc rs) = mk×ₚ nil refl
     equivₛ₁WF (consIList{bs₂ = bsₜ} (mk&ₚ fstₚ₁@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₂@(Base64.mk64 _ _ _ refl) (mk&ₚ fstₚ₃@(Base64.mk64 _ _ _ refl) sndₚ₂@(Base64.mk64 _ _ _ refl) refl) refl) refl) tail₁ refl) (acc rs) =
       case tail' of λ where
-        (mk×ₚ{bs} fstₚ₁' sndₚ₁' bs≡') →
-          mk×ₚ (consIList fstₚ₁ (consIList fstₚ₂ (consIList fstₚ₃ (consIList sndₚ₂ fstₚ₁' refl) refl) refl) refl) sndₚ₁' (‼ (cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) bs≡'))
+        (mk×ₚ fstₚ₁' sndₚ₁') →
+          mk×ₚ (consIList fstₚ₁ (consIList fstₚ₂ (consIList fstₚ₃ (consIList sndₚ₂ fstₚ₁' refl) refl) refl) refl) sndₚ₁' -- (‼ (cong (λ x → _ ∷ _ ∷ _ ∷ _ ∷ x) ?))
       where
       tail' : ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bsₜ
       tail' = equivₛ₁WF tail₁ (rs _ Nat.≤-refl)
@@ -177,25 +179,22 @@ module Base64Str where
       hiding (Acc)
 
     equivₛ₂WF : ∀ {@0 bs} → (cs : ((IList Base64.Base64Char) ×ₚ ((_≡ 0) ∘ (_% 4) ∘ length)) bs) → @0 Acc _<_ (lengthIList (fstₚ cs)) → Repₛ bs
-    equivₛ₂WF (mk×ₚ nil _ refl) (WellFounded.acc rs) = nil
-    equivₛ₂WF (mk×ₚ (consIList fstₚ₁@(Base64.mk64 _ _ _ refl) (consIList fstₚ₂@(Base64.mk64 _ _ _ refl) (consIList fstₚ₃@(Base64.mk64 _ _ _ refl) (consIList{bs₂ = bs₂} fstₚ₄@(Base64.mk64 _ _ _ refl) tail₁ refl) refl) refl) refl) sndₚ₁ bs≡) (WellFounded.acc rs) =
-      consIList (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ fstₚ₄ refl) refl) refl) tail' (sym bs≡)
+    equivₛ₂WF (mk×ₚ nil _) (WellFounded.acc rs) = nil
+    equivₛ₂WF (mk×ₚ (consIList fstₚ₁@(Base64.mk64 _ _ _ refl) (consIList fstₚ₂@(Base64.mk64 _ _ _ refl) (consIList fstₚ₃@(Base64.mk64 _ _ _ refl) (consIList{bs₂ = bs₂} fstₚ₄@(Base64.mk64 _ _ _ refl) tail₁ refl) refl) refl) refl) sndₚ₁) (WellFounded.acc rs) =
+      consIList (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ fstₚ₄ refl) refl) refl) tail' refl
       where
       tail' : Repₛ bs₂
-      tail' = equivₛ₂WF (mk×ₚ tail₁ sndₚ₁ refl) (rs _ (Nat.m≤n+m (suc (lengthIList tail₁)) 3))
+      tail' = equivₛ₂WF (mk×ₚ tail₁ sndₚ₁) (rs _ (Nat.m≤n+m (suc (lengthIList tail₁)) 3))
 
   equiv : Equivalent Rep Base64.Base64Str
   proj₁ equiv{xs} (mk&ₚ{bs₁}{bs₂} fstₚ₁ sndₚ₁ bs≡) =
-    Base64.mk64Str (fstₚ l) (sndₚ l) (proj₁ Base64Pad.equiv sndₚ₁)
-      (begin xs ≡⟨ bs≡ ⟩
-             bs₁ ++ bs₂ ≡⟨ cong (_++ bs₂) (sym $ Σₚ.bs≡ l) ⟩
-             Σₚ.bs l ++ bs₂ ∎)
+    Base64.mk64Str (fstₚ l) (sndₚ l) (proj₁ Base64Pad.equiv sndₚ₁) bs≡
     where
     l = proj₁ equivₛ fstₚ₁
   proj₂ equiv (Base64.mk64Str str strLen pad bs≡) =
     mk&ₚ l (proj₂ Base64Pad.equiv pad) bs≡
     where
-    l = proj₂ equivₛ (mk×ₚ str (‼ strLen) refl)
+    l = proj₂ equivₛ (mk×ₚ str (‼ strLen))
 
   char∈ : ∀ {b bs} → b ∈ bs → Base64.Base64Str bs → b ∈ B64.charset ⊎ b ≡ '='
   char∈ b∈bs str = help (proj₂ equiv str) b∈bs
@@ -286,15 +285,15 @@ module Base64Str where
             (rs _ <len)
 
   fromExactLength : ∀ {@0 bs} {n} → {t : True (n % 4 ≟ 0)} → ExactLength (IList Base64.Base64Char) n bs → Base64.Base64Str bs
-  fromExactLength (mk×ₚ  nil (─ len≡) refl) = Base64.mk64Str nil refl (Base64.Base64Pad.pad0 refl) refl
-  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 c _ _ refl) nil refl) (─ len≡) refl) =
+  fromExactLength (mk×ₚ  nil (─ len≡)) = Base64.mk64Str nil refl (Base64.Base64Pad.pad0 refl) refl
+  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 c _ _ refl) nil refl) (─ len≡)) =
     contradiction (toWitness t) (subst₀ (¬_ ∘ (_≡ 0) ∘ (_% 4)) len≡ (λ ()))
-  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) nil refl) refl) (─ len≡) refl) =
+  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) nil refl) refl) (─ len≡)) =
     contradiction (toWitness t) (subst₀ (¬_ ∘ (_≡ 0) ∘ (_% 4)) len≡ (λ ()))
-  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) nil refl) refl) refl) (─ len≡) refl) =
+  fromExactLength{t = t} (mk×ₚ (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) (consIList (Base64.mk64 _ _ _ refl) nil refl) refl) refl) (─ len≡)) =
     contradiction (toWitness t) (subst₀ (¬_ ∘ (_≡ 0) ∘ (_% 4)) len≡ (λ ()))
-  fromExactLength{n = suc (suc (suc (suc n)))} {t = t} (mk×ₚ (consIList c₁@(Base64.mk64 _ _ _ refl) (consIList c₂@(Base64.mk64 _ _ _ refl) (consIList c₃@(Base64.mk64 _ _ _ refl) (consIList c₄@(Base64.mk64 _ _ _ refl) t₄ refl) refl) refl) refl) (─ len≡) refl) =
-    case fromExactLength{n = n}{t = t} (mk×ₚ t₄ (─ Nat.+-cancelˡ-≡ 4 len≡) refl)  ret (const _) of λ where
+  fromExactLength{n = suc (suc (suc (suc n)))} {t = t} (mk×ₚ (consIList c₁@(Base64.mk64 _ _ _ refl) (consIList c₂@(Base64.mk64 _ _ _ refl) (consIList c₃@(Base64.mk64 _ _ _ refl) (consIList c₄@(Base64.mk64 _ _ _ refl) t₄ refl) refl) refl) refl) (─ len≡)) =
+    case fromExactLength{n = n}{t = t} (mk×ₚ t₄ (─ Nat.+-cancelˡ-≡ 4 len≡))  ret (const _) of λ where
       (Base64.mk64Str str strLen pad refl) →
         Base64.mk64Str (consIList c₁ (consIList c₂ (consIList c₃ (consIList c₄ str refl) refl) refl) refl )
           strLen

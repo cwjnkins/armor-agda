@@ -81,94 +81,94 @@ nonempty (uri ()) refl
 nonempty (ipadd ()) refl
 nonempty (rid ()) refl
 
-@0 nonnesting : NonNesting GeneralName
-nonnesting x (oname x₁) (oname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (oname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (oname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (rfcname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (rfcname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rfcname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (dnsname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (dnsname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dnsname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (x400add x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (x400add x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (x400add x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (dirname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (dirname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (dirname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (ediname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (ediname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ediname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (uri x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (uri x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (uri x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (ipadd x₁) (ipadd x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (ipadd x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (rid x₁) (rid x₂) = ‼ TLV.nonnesting x x₁ x₂
+@0 nosubstrings : NoSubstrings GeneralName
+nosubstrings x (oname x₁) (oname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (oname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (oname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (rfcname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (rfcname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rfcname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (dnsname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (dnsname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dnsname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (x400add x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (x400add x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (x400add x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (dirname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (dirname x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (dirname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (ediname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (ediname x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ediname x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (uri x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (uri x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (uri x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (ipadd x₁) (ipadd x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (ipadd x₁) (rid x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (oname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (rfcname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (dnsname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (x400add x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (dirname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (ediname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (rid x₁) (rid x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
 module GeneralName where
   @0 unambiguous : Unambiguous GeneralName
   unambiguous =
     Iso.unambiguous iso
-      (unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+      (Sum.unambiguous (TLV.unambiguous OctetString.unambiguous)
         ua₁ nc₀)
     where
     Rep₇ = Sum IpAddress RegID
@@ -183,17 +183,17 @@ module GeneralName where
     nc₇ = TLV.noconfusion λ ()
 
     ua₇ : Unambiguous Rep₇
-    ua₇ = unambiguousSum
+    ua₇ = Sum.unambiguous
             (TLV.unambiguous OctetString.unambiguous)
             (TLV.unambiguous
-              (SequenceOf.Bounded.unambiguous OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nonnesting))
+              (SequenceOf.Bounded.unambiguous OID.Sub.unambiguous OID.Sub.nonempty OID.Sub.nosubstrings))
             nc₇
 
     nc₆ : NoConfusion URI Rep₇
     nc₆ = NoConfusion.sumₚ{A = URI} (TLV.noconfusion (λ ())) (TLV.noconfusion λ ())
 
     ua₆ : Unambiguous Rep₆
-    ua₆ = unambiguousSum (TLV.unambiguous IA5String.unambiguous) ua₇ nc₆
+    ua₆ = Sum.unambiguous (TLV.unambiguous IA5String.unambiguous) ua₇ nc₆
 
     nc₅ : NoConfusion EdipartyName Rep₆
     nc₅ = NoConfusion.sumₚ{A = EdipartyName}
@@ -202,7 +202,7 @@ module GeneralName where
               (TLV.noconfusion λ ()))
 
     ua₅ : Unambiguous Rep₅
-    ua₅ = unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+    ua₅ = Sum.unambiguous (TLV.unambiguous OctetString.unambiguous)
             ua₆ nc₅
 
     nc₄ : NoConfusion DirName Rep₅
@@ -214,7 +214,7 @@ module GeneralName where
                 (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 
     ua₄ : Unambiguous Rep₄
-    ua₄ = unambiguousSum (TLV.unambiguous RDN.unambiguous) ua₅ nc₄
+    ua₄ = Sum.unambiguous (TLV.unambiguous RDN.unambiguous) ua₅ nc₄
 
     nc₃ : NoConfusion X400Address Rep₄
     nc₃ = NoConfusion.sumₚ {A = X400Address}
@@ -227,7 +227,7 @@ module GeneralName where
                   (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
 
     ua₃ : Unambiguous Rep₃
-    ua₃ = unambiguousSum (TLV.unambiguous OctetString.unambiguous)
+    ua₃ = Sum.unambiguous (TLV.unambiguous OctetString.unambiguous)
             ua₄ nc₃
 
     nc₂ : NoConfusion DnsName Rep₃
@@ -241,7 +241,7 @@ module GeneralName where
                   (NoConfusion.sumₚ {A = DnsName} (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))))
 
     ua₂ : Unambiguous Rep₂
-    ua₂ = unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+    ua₂ = Sum.unambiguous (TLV.unambiguous IA5String.unambiguous)
             ua₃ nc₂
 
     nc₁ : NoConfusion RfcName Rep₂
@@ -259,7 +259,7 @@ module GeneralName where
                       (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))))
 
     ua₁ : Unambiguous Rep₁
-    ua₁ = unambiguousSum (TLV.unambiguous IA5String.unambiguous)
+    ua₁ = Sum.unambiguous (TLV.unambiguous IA5String.unambiguous)
             ua₂ nc₁
 
     nc₀ : NoConfusion OtherName Rep₁
@@ -276,7 +276,7 @@ module GeneralNamesElems where
   @0 unambiguous : Unambiguous GeneralNamesElems
   unambiguous =
     SequenceOf.Bounded.unambiguous
-      GeneralName.unambiguous nonempty nonnesting
+      GeneralName.unambiguous nonempty nosubstrings
 
 module GeneralNames where
   @0 unambiguous : Unambiguous GeneralNames

@@ -13,7 +13,7 @@ open import Aeres.Data.PEM.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parser
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 
@@ -21,15 +21,15 @@ module Aeres.Data.PEM.Parser where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
-open Aeres.Grammar.Relation.Definitions Char
 open Aeres.Grammar.Parser               Char
+open Aeres.Grammar.Seq                  Char
 
 parseCert : LogDec.MaximalParser Cert
 parseCert =
   LogDec.equivalent equiv
-    (LogDec.parse&
+    (Seq.MaximalParser.parse&
       (parseCertBoundary "BEGIN")
-      (LogDec.parse&
+      (Seq.MaximalParser.parse&
         parseMaxCertText
         (parseCertBoundary "END")
         noOverlapTextFooter)

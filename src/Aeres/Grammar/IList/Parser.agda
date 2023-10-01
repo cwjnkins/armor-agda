@@ -4,12 +4,10 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.IList.Properties
 import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Parser.Bounded
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser.Core
 import      Aeres.Grammar.Parser.Maximal
-import      Aeres.Grammar.Parser.Sigma
 import      Aeres.Grammar.Parser.WellFounded
-import      Aeres.Grammar.Relation.Definitions
 open import Aeres.Prelude
   renaming (Σ to Sigma)
 open import Data.List.Properties
@@ -22,17 +20,15 @@ open Aeres.Grammar.Definitions          Σ
 open Aeres.Grammar.IList.TCB            Σ
 open Aeres.Grammar.IList.Properties     Σ
 open Aeres.Grammar.Properties           Σ
-open Aeres.Grammar.Parser.Bounded       Σ
+open Aeres.Grammar.Parallel             Σ
 open Aeres.Grammar.Parser.Core          Σ
 open Aeres.Grammar.Parser.Maximal       Σ
-open Aeres.Grammar.Parser.Sigma         Σ
 open Aeres.Grammar.Parser.WellFounded   Σ
-open Aeres.Grammar.Relation.Definitions Σ
 
 module parseIList
   {M : Set → Set} ⦃ _ : Monad M ⦄
   (underflow : M (Level.Lift _ ⊤))
-  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (M ∘ Dec) A) where
 
   open ≡-Reasoning
@@ -43,18 +39,17 @@ module parseIList
   parseIListWF : ∀ n → ParserWF (M ∘ Dec) (ExactLength (IList A) n)
   runParser (parseIListWF zero) xs _ = 
     return (yes
-      (success [] 0 refl (mk×ₚ nil (─ refl) refl) xs refl))
+      (success [] 0 refl (mk×ₚ nil (─ refl)) xs refl))
   runParser (parseIListWF n@(suc _)) xs (WellFounded.acc rs) = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len) refl) suf₀ ps≡₀)
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len)) suf₀ ps≡₀)
       ← runParser (parse≤ n p nn underflow) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ refl)) (─ bsLen) refl) suffix ps≡) →
+          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ refl)) (─ bsLen)) suffix ps≡) →
             contradiction
               (success bs₁ _ refl
                 (mk×ₚ head₁
-                  (─ (m+n≤o⇒m≤o _{length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen))))
-                  refl)
+                  (─ (m+n≤o⇒m≤o _{length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen)))))
                 (bs₂ ++ suffix)
                 (begin bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
                        (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
@@ -63,21 +58,27 @@ module parseIList
     case <-cmp r₀ n of λ where
       (tri> _ _  r₀>n) →
         contradiction (≤-trans (Lemmas.≡⇒≤ r₀≡) r₀≤len) (<⇒≱ r₀>n)
-      (tri≈ _ r₀≡n _)  →
+      (tri≈ _ r₀≡n _)  → do
+        let
+          l₁ : IList A pre₀
+          l₁ = cons (mkIListCons v₀ nil (sym $ ++-identityʳ _))
+
+          pre₀Len : Erased (length pre₀ ≡ n)
+          pre₀Len = ─ (begin
+            length pre₀ ≡⟨ sym r₀≡ ⟩
+            r₀ ≡⟨ r₀≡n ⟩
+            n ∎)
         return (yes
-          (success pre₀ _ r₀≡
-            (mk×ₚ (cons (mkIListCons{bs₁ = pre₀} v₀ nil refl))
-               (─ trans (trans (cong length (++-identityʳ pre₀)) (sym r₀≡)) r₀≡n) (++-identityʳ _))
-               suf₀ ps≡₀))
+          (success pre₀ _ r₀≡ (mk×ₚ l₁ pre₀Len) suf₀ ps≡₀))
       (tri< r₀<n _ _)  → do
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁) refl) suf₁ ps≡₁)
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁)) suf₁ ps≡₁)
           ← runParser (parseIListWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ nil (─ ()) refl) suffix ps≡)
-              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mk×ₚ nil (─ ())) suffix ps≡)
+              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkIListCons{bs₁}{bs₂} h t refl)) (─ bsLen)) suffix ps≡) → ‼
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
                     xs≡ = begin pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                                  xs                     ≡⟨ sym ps≡ ⟩
@@ -100,8 +101,8 @@ module parseIList
                                 n + (r₀ - r₀)            ≡⟨ sym (+-∸-assoc n {r₀} ≤-refl) ⟩
                                 (n + r₀) - r₀            ≡⟨ cong (_∸ r₀) (+-comm n _) ⟩
                                 (r₀ + n) - r₀            ≡⟨ +-∸-assoc r₀ {n} (<⇒≤ r₀<n) ⟩
-                                r₀ + (n - r₀)            ∎)))
-                      refl) suffix
+                                r₀ + (n - r₀)            ∎))))
+                    suffix
                     (++-cancelˡ bs₁ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
                   ¬parse
         return (yes
@@ -119,8 +120,7 @@ module parseIList
                          n + r₀ - r₀               ≡⟨ +-∸-assoc n {n = r₀} ≤-refl ⟩
                          n + (r₀ - r₀)             ≡⟨ cong (n +_) (n∸n≡0 r₀) ⟩
                          n + 0                     ≡⟨ +-identityʳ n ⟩
-                         n                         ∎)))
-              refl)
+                         n                         ∎))))
             suf₁
             (begin ((pre₀ ++ pre₁) ++ suf₁  ≡⟨ solve (++-monoid Σ) ⟩
                     pre₀ ++ pre₁ ++ suf₁    ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
@@ -134,9 +134,9 @@ module parseIList
   parseIListNonEmpty n =
     parseEquivalent{A = Σₚ (ExactLength (IList A) n) (λ _ xs → lengthIList (fstₚ xs) ≥ 1)}
       (Iso.symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
-      (parseSigma' exactLength-nonnesting (λ _ → _ ≥? 1)
+      (parseSigma' (Parallel.ExactLength.nosubstrings _) (λ _ → _ ≥? 1)
         (λ where
-          (mk×ₚ l₁ sndₚ₁ refl) (mk×ₚ l₂ sndₚ₂ refl) ≥1 →
+          (mk×ₚ l₁ sndₚ₁) (mk×ₚ l₂ sndₚ₂) ≥1 →
             subst₀ (_≥ 1) (lengthIList≡ ne nn l₁ l₂) ≥1)
         (parseIList n))
 
@@ -144,7 +144,7 @@ open parseIList public using (parseIList ; parseIListNonEmpty)
 
 module parseIListMax
   (underflow : Logging ⊤)
-  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (Logging ∘ Dec) A) where
 
   open LogDec
@@ -248,7 +248,7 @@ module parseIListMax
             (no  n≰v₁) →
               (mkLogged (log ++ ["parseIListLowerBounded: lower bound violated"])
                  (no λ where
-                   (success prefix read read≡ (mk×ₚ v vLen refl) suffix ps≡) →
+                   (success prefix read read≡ (mk×ₚ v vLen) suffix ps≡) →
                      contradiction
                        (≤.begin n ≤.≤⟨ vLen ⟩
                                 lengthIList v
@@ -259,9 +259,9 @@ module parseIListMax
                        n≰v₁))
               , tt
             (yes n≤v₁) →
-              (mkLogged log (yes (success pre₁ _ r₁≡ (mk×ₚ v₁ n≤v₁ refl) suf₁ ps≡₁)))
+              (mkLogged log (yes (success pre₁ _ r₁≡ (mk×ₚ v₁ n≤v₁) suf₁ ps≡₁)))
               , λ where
-                pre' suf' ps'≡ (mk×ₚ fstₚ₁ _ refl) → max₁ _ _ ps'≡ fstₚ₁
+                pre' suf' ps'≡ (mk×ₚ fstₚ₁ _) → max₁ _ _ ps'≡ fstₚ₁
 
 module parseIListMaxNoOverlap
   (underflow : Logging (Level.Lift Level.zero ⊤))

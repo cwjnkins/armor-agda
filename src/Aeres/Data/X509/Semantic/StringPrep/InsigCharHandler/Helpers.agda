@@ -1,10 +1,11 @@
 {-# OPTIONS --subtyping --sized-types #-}
 
 open import Data.Nat.DivMod
-import      Aeres.Binary
+open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -16,9 +17,8 @@ open import Data.These.Base
 
 module Aeres.Data.X509.Semantic.StringPrep.InsigCharHandler.Helpers where
 
-open Aeres.Binary
-open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel UInt8
 
 
 spaceUTF8 : Exists─ (List UInt8) UTF8
@@ -35,16 +35,16 @@ checkOnlySpaces (cons (mkIListCons (utf83 x) tail₁ bs≡)) = false
 checkOnlySpaces (cons (mkIListCons (utf84 x) tail₁ bs≡)) = false
 
 lstripUTF8 : ∀ {@0 bs} → (bsname : UTF8 bs) → Exists─ (List UInt8) (Σₚ UTF8 (λ xs a → lengthIList _ a ≤ lengthIList _ bsname))
-lstripUTF8 nil = _ , (Aeres.Grammar.Definitions.mk×ₚ nil z≤n refl)
+lstripUTF8 nil = _ , (mk×ₚ nil z≤n)
 lstripUTF8 a@(cons (mkIListCons (utf81 (mkUTF8Char1 b₁ b₁range bs≡₁)) tail₁ bs≡))
   with toℕ b₁ ≟ 32
-... | no ¬p = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+... | no ¬p = _ , (mk×ₚ a (s≤s Nat.≤-refl))
 ... | yes p
   with lstripUTF8 tail₁
-... | fst , Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ refl = fst , (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ (Nat.≤-step sndₚ₁) refl)
-lstripUTF8 a@(cons (mkIListCons (utf82 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
-lstripUTF8 a@(cons (mkIListCons (utf83 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
-lstripUTF8 a@(cons (mkIListCons (utf84 x) tail₁ bs≡)) = _ , (Aeres.Grammar.Definitions.mk×ₚ a (s≤s Nat.≤-refl) refl)
+... | fst , mk×ₚ fstₚ₁ sndₚ₁ = fst , (mk×ₚ fstₚ₁ (Nat.≤-step sndₚ₁))
+lstripUTF8 a@(cons (mkIListCons (utf82 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
+lstripUTF8 a@(cons (mkIListCons (utf83 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
+lstripUTF8 a@(cons (mkIListCons (utf84 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
 
 lstripUTF8' : ∀ {@0 bs} → (bsname : UTF8 bs) → Exists─ (List UInt8) UTF8
 lstripUTF8' bsname
@@ -67,7 +67,7 @@ innerSeqSpaceHelperWF (cons (mkIListCons (utf81 x@(mkUTF8Char1 b₁ b₁range bs
 ... | no ¬p = innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf81 x) nil refl)))
 ... | yes p
   with lstripUTF8 tail₁
-... | fst , Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡₂ = innerSeqSpaceHelperWF fstₚ₁ (rs (lengthIList _ fstₚ₁) (s≤s sndₚ₁)) (((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)))))
+... | fst , mk×ₚ fstₚ₁ sndₚ₁ = innerSeqSpaceHelperWF fstₚ₁ (rs (lengthIList _ fstₚ₁) (s≤s sndₚ₁)) (((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)))))
 innerSeqSpaceHelperWF (cons (mkIListCons (utf82 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
   innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf82 x) nil refl)))
 innerSeqSpaceHelperWF (cons (mkIListCons (utf83 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =

@@ -10,13 +10,16 @@ open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Alg.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Sum.TCB      UInt8
+
 open EC  using (EC)
 open RSA using (RSA)
 

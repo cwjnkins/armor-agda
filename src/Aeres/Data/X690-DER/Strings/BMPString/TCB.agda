@@ -18,4 +18,4 @@ BMPString : @0 List UInt8 → Set
 BMPString xs = TLV Tag.BMPString BMP xs
 
 RawBMPString : Raw BMPString 
-RawBMPString = RawTLV RawBMP
+RawBMPString = RawTLV _ RawBMP

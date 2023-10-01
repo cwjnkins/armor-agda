@@ -53,8 +53,8 @@ module Sub where
     ... | no ¬bs≡bs₁ = no λ where
       (mk≋ bs≡bs₁ a≡) → contradiction (trans (sym bs≡) (trans bs≡bs₁ bs≡₁)) ¬bs≡bs₁
 
-  @0 nonnesting : NonNesting OIDSub
-  nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
+  @0 nosubstrings : NoSubstrings OIDSub
+  nosubstrings {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastDigs₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastDigs₂ refl)
     with Lemmas.++-≡-⊆ (lₚ₁ ∷ʳ lₑ₁) _ (lₚ₂ ∷ʳ lₑ₂) _ ++≡
   ... | 0 , inj₁ xs₁⊆xs₂ = trans₀ (lₚ₁ ++ lₑ₁ ∷ [] ≡ (lₚ₁ ++ lₑ₁ ∷ []) ++ [] ∋ solve (++-monoid UInt8)) xs₁⊆xs₂
   ... | 0 , inj₂ xs₂⊆xs₁ = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid UInt8))
@@ -75,7 +75,7 @@ module Sub where
         (++-conicalˡ _ _ (∷-injectiveʳ ++≡))
         (Lemmas.∷ʳ⇒≢[]{xs = ws}{w})
     lem {x ∷ ws} {xs = xs} {x₁ ∷ ys} ++≡ (_ All.∷ ys≤128) = lem (∷-injectiveʳ ++≡) ys≤128
-  nonnesting {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastUInt8s₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastUInt8s₂ refl) | suc n , inj₂ xs₂⊆xs₁
+  nosubstrings {ys₁ = ys₁} {ys₂ = ys₂} ++≡ (mkOIDSub lₚ₁ lₚ₁≥128 lₑ₁ lₑ₁<128 leastUInt8s₁ refl) (mkOIDSub lₚ₂ lₚ₂≥128 lₑ₂ lₑ₂<128 leastUInt8s₂ refl) | suc n , inj₂ xs₂⊆xs₁
     with ys₂
   ... | [] = trans₀ xs₂⊆xs₁ ((lₚ₂ ++ lₑ₂ ∷ []) ++ [] ≡ lₚ₂ ++ lₑ₂ ∷ [] ∋ solve (++-monoid UInt8))
   ... | y₂ ∷ ys₂ =
@@ -91,9 +91,8 @@ module Sub where
         (Lemmas.∷ʳ⇒≢[]{xs = ws}{w})
     lem {x ∷ ws} {xs = xs} {x₁ ∷ ys} ++≡ (_ All.∷ ys≤128) = lem (∷-injectiveʳ ++≡) ys≤128
 
-  @0 nonmalleable : NonMalleable OIDSub RawOIDSub
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (─ ._ , o₁@(mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl)) (─ ._ , o₂@(mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl)) eq =
+  @0 nonmalleable : NonMalleable RawOIDSub
+  nonmalleable o₁@(mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs refl) o₂@(mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ refl) eq =
      case ∷ʳ-injective lₚ lₚ₁ eq ret (const _) of λ where
       (refl , refl) →
         case (‼ unambiguous o₁ o₂) ret (const _) of λ where
@@ -104,14 +103,14 @@ module OID where
   unambiguous =
     TLV.unambiguous
       (SequenceOf.Bounded.unambiguous
-        Sub.unambiguous Sub.nonempty Sub.nonnesting)
+        Sub.unambiguous Sub.nonempty Sub.nosubstrings)
 
-  @0 nonmalleable : NonMalleable OID RawOID
-  nonmalleable = TLV.nonmalleable (SequenceOf.Bounded.nonmalleable Sub.nonempty Sub.nonnesting Sub.nonmalleable)
+  @0 nonmalleable : NonMalleable RawOID
+  nonmalleable = TLV.nonmalleable (SequenceOf.Bounded.nonmalleable Sub.nonempty Sub.nosubstrings Sub.nonmalleable)
 
 module OIDSeq where
   @0 unambiguous : Unambiguous (SequenceOf OID)
-  unambiguous = SequenceOf.unambiguous OID.unambiguous TLV.nonempty TLV.nonnesting
+  unambiguous = SequenceOf.unambiguous OID.unambiguous TLV.nonempty TLV.nosubstrings
 
 open OID public
 

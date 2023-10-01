@@ -12,6 +12,7 @@ open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -19,18 +20,19 @@ open import Aeres.Prelude
 module Aeres.Data.X509.PublicKey.Alg.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
 @0 noConfusion-RSA-EC : NoConfusion RSA EC
 noConfusion-RSA-EC =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} algOID₁ (mk×ₚ _ ≋-refl refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl) bs≡) (mkOIDDefinedFields{a'}{p'} algOID₁ (mk×ₚ _ ≋-refl) bs≡₁) →
       let
         @0 algOID≋ : _≋_{A = OID} algOID algOID₁
         algOID≋ =
           mk≋
-            (TLV.nonnesting
+            (TLV.nosubstrings
               (a ++ p ++ ys₁ ≡⟨ sym (++-assoc a p ys₁) ⟩
               (a ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
               xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
@@ -49,7 +51,7 @@ noConfusion-RSA-EC =
 @0 noConfusion-RSA-Unsupported : NoConfusion RSA UnsupportedPublicKeyAlg
 noConfusion-RSA-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉) bs≡₁) →
       let
         @0 ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
         ++≡ = ─ (begin
@@ -63,7 +65,7 @@ noConfusion-RSA-Unsupported =
         o≋ : _≋_{A = OID} algOID o
         o≋ =
           mk≋
-            (TLV.nonnesting (¡ ++≡) algOID o)
+            (TLV.nosubstrings (¡ ++≡) algOID o)
             (OID.unambiguous _ _)
       in
       contradiction
@@ -77,7 +79,7 @@ noConfusion-RSA-Unsupported =
 @0 noConfusion-EC-Unsupported : NoConfusion EC UnsupportedPublicKeyAlg
 noConfusion-EC-Unsupported =
   TLV.noconfusionVal λ where
-    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉ refl) bs≡₁) →
+    {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{a}{p} algOID (mk×ₚ _ ≋-refl) bs≡) (mkOIDDefinedFields{a'}{p'} o (mk×ₚ sndₚ₁ o∉) bs≡₁) →
       let
         ++≡ : Erased (a ++ p ++ ys₁ ≡ a' ++ p' ++ ys₂)
         ++≡ = ─ (begin
@@ -91,7 +93,7 @@ noConfusion-EC-Unsupported =
         o≋ : _≋_{A = OID} algOID o
         o≋ =
           mk≋
-            (TLV.nonnesting (¡ ++≡) algOID o)
+            (TLV.nosubstrings (¡ ++≡) algOID o)
             (OID.unambiguous _ _)
       in
       contradiction
@@ -101,13 +103,13 @@ noConfusion-EC-Unsupported =
   where
   open ≡-Reasoning
 
-@0 nonnesting : NonNesting PublicKeyAlg
-nonnesting =
- nonnestingSum
-    TLV.nonnesting
-    (nonnestingSum
-      TLV.nonnesting
-      TLV.nonnesting
+@0 nosubstrings : NoSubstrings PublicKeyAlg
+nosubstrings =
+ Sum.nosubstrings
+    TLV.nosubstrings
+    (Sum.nosubstrings
+      TLV.nosubstrings
+      TLV.nosubstrings
       noConfusion-EC-Unsupported)
     (NoConfusion.sumₚ{A = RSA}
       noConfusion-RSA-EC
@@ -115,12 +117,12 @@ nonnesting =
 
 @0 unambiguous : Unambiguous PublicKeyAlg
 unambiguous =
-  unambiguousSum{A = RSA}
+  Sum.unambiguous{A = RSA}
     RSA.unambiguous
-    (unambiguousSum{A = EC} EC.unambiguous
+    (Sum.unambiguous{A = EC} EC.unambiguous
       (TLV.unambiguous
         (DefinedByOID.unambiguous
           UnsupportedParam λ o →
-            unambiguous×ₚ OctetString.unambiguous T-unique))
+            Parallel.unambiguous×ₚ OctetString.unambiguous T-unique))
       noConfusion-EC-Unsupported)
     (NoConfusion.sumₚ{A = RSA} noConfusion-RSA-EC noConfusion-RSA-Unsupported)

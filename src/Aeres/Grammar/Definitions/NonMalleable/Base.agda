@@ -1,37 +1,27 @@
 {-# OPTIONS --subtyping #-}
 
-import      Aeres.Grammar.Definitions.Unambiguous.Base
-open import Aeres.Prelude
-  renaming (Σ to Sigma)
+open import Aeres.Prelude renaming (Σ to Sigma)
 
 module Aeres.Grammar.Definitions.NonMalleable.Base (Σ : Set) where
 
-open Aeres.Grammar.Definitions.Unambiguous.Base Σ
-
-record Raw (A : @0 List Σ → Set) : Set₁ where
+record Raw (A : List Σ → Set) : Set₁ where
   field
     D : Set
-    to : Exists─ (List Σ) A → D
+    to : {@0 xs : List Σ} → A xs → D
 
-record Raw₁ {A : @0 List Σ → Set} (R : Raw A) (P : {@0 xs : List Σ} → A xs → @0 List Σ → Set) : Set₁ where
+record Raw₁ {A : List Σ → Set} (R : Raw A) (P : {xs : List Σ} → A xs → List Σ → Set) : Set₁ where
   field
     D : Raw.D R → Set
-    to : ∀ {@0 bs} → (a : A bs) → Exists─ (List Σ) (P a) → D (Raw.to R (─ _ , a))
+    to : ∀ {@0 bs₁} → (a : A bs₁) → ∀ {@0 bs₂} → P a bs₂ → D (Raw.to R a)
 
 mapRaw : {A B : @0 List Σ → Set} → (∀ {@0 xs} → B xs → A xs) → Raw A → Raw B
 Raw.D (mapRaw f r) = Raw.D r
-Raw.to (mapRaw f r) (─ _ , b) = Raw.to r (─ _ , f b)
+Raw.to (mapRaw f r) b = Raw.to r (f b)
 
-record NonMalleable (A : @0 List Σ → Set) (R : Raw A) : Set where
-  open Raw R public
-  field
-    unambiguous : Unambiguous A
-    injective : ∀ a₁ a₂ → to a₁ ≡ to a₂ → a₁ ≡ a₂
+NonMalleable : {A : @0 List Σ → Set} → Raw A → Set
+NonMalleable{A} R = ∀ {@0 bs₁ bs₂} → (a₁ : A bs₁) (a₂ : A bs₂) (eq : Raw.to R a₁ ≡ Raw.to R a₂) → _≡_{A = Exists─ (List Σ) A} (─ bs₁ , a₁) (─ bs₂ , a₂)
 
-record NonMalleable₁
-  {A : @0 List Σ → Set} {R : Raw A}
-  (P : {@0 xs : List Σ} → A xs → @0 List Σ → Set) (RP : Raw₁ R P) : Set where
-  open Raw₁ RP public
-  field
-    unambiguous : ∀ {@0 xs} → (a : A xs) → Unambiguous (P a)
-    injective   : ∀ {@0 bs} a p₁ p₂ → to{bs} a p₁ ≡ to{bs} a p₂ → p₁ ≡ p₂
+NonMalleable₁ : {A : @0 List Σ → Set} {R : Raw A} {P : ∀ {@0 xs} → A xs → @0 List Σ → Set} (RP : Raw₁ R P) → Set
+NonMalleable₁{A}{P = P} RP =
+  ∀ {@0 bs} {a : A bs} → ∀ {@0 bs₁ bs₂} → (p₁ : P a bs₁) (p₂ : P a bs₂) → (eq : Raw₁.to RP a p₁ ≡ Raw₁.to RP a p₂)
+  → _≡_{A = Exists─ (List Σ) (P a)} (─ bs₁ , p₁) (─ bs₂ , p₂)

@@ -6,8 +6,10 @@ open import Aeres.Data.Base64.Properties
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Data.Nat.Properties as Nat
 
 module Aeres.Data.Base64.Parser where
@@ -15,7 +17,9 @@ module Aeres.Data.Base64.Parser where
 open Base256
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Parallel    Char
 open Aeres.Grammar.Parser      Char
+open Aeres.Grammar.Seq         Char
 module Props = Aeres.Grammar.Properties Char
 
 module parseBase64 where
@@ -42,24 +46,27 @@ module parseBase64 where
   parseBase64Pad1 : Parser (Logging ∘ Dec) Base64Pad1
   parseBase64Pad1 =
     parseEquivalent Base64Pad.equiv₁
-      (parse& (NonNesting&ₚ Base64Char.nonnesting Base64Char.nonnesting) (parse& Base64Char.nonnesting parseBase64Char parseBase64Char)
-        (parse& (nonnestingΣₚ₁ Base64Char.nonnesting)
-          (parseSigma Base64Char.nonnesting Base64Char.unambiguous parseBase64Char
-            λ where
-              (mk64 c c∈ i bs≡) → _ ≟ 0)
-          (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") _)))
+      (parse& (Seq.nosubstrings Base64Char.nosubstrings Base64Char.nosubstrings)
+        (parse& Base64Char.nosubstrings parseBase64Char parseBase64Char)
+        (parse&
+          (Parallel.nosubstrings₁ Base64Char.nosubstrings)
+          (parseSigma Base64Char.nosubstrings Base64Char.unambiguous parseBase64Char
+            (λ where (mk64 c c∈ i bs≡) → _ ≟ 0))
+          (parseLit
+            (tell $ here' String.++ ": underflow")
+            (tell $ here' String.++ ": mismatch") _)))
     where here' = "parseBase64Pad1"
 
   parseBase64Pad2 : Parser (Logging ∘ Dec) Base64Pad2
   parseBase64Pad2 =
     parseEquivalent Base64Pad.equiv₂
-      (parse& Base64Char.nonnesting
-        parseBase64Char
-        (parse& (nonnestingΣₚ₁ Base64Char.nonnesting)
-          (parseSigma Base64Char.nonnesting Base64Char.unambiguous parseBase64Char
-            λ where
-              (mk64 c c∈ i bs≡) → _ ≟ 0)
-          (parseLit (tell $ here' String.++ ": underflow" ) (tell $ here' String.++ ": mismatch") _)))
+      (parse& Base64Char.nosubstrings parseBase64Char
+        (parse& (Parallel.nosubstrings₁ Base64Char.nosubstrings)
+          (parseSigma Base64Char.nosubstrings Base64Char.unambiguous
+            parseBase64Char
+              (λ where (mk64 c c∈ i bs≡) → _ ≟ 0))
+          (parseLit
+            (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") _)))
     where
     here' = "parseBase64Pad2"
 
@@ -191,20 +198,21 @@ module parseBase64 where
   parseMaxBase64Str : LogDec.MaximalParser Base64Str
   parseMaxBase64Str =
     LogDec.equivalent Base64Str.equiv
-      (LogDec.parse&o₂
+      (parse&o₂
         (parseIListMax (mkLogged ["parseMaxBase64Str: underflow"] tt) _
-          (nonempty&₁ Base64Char.nonempty)
-          nn4
-          (parse& Base64Char.nonnesting parseBase64Char
-            (parse& Base64Char.nonnesting parseBase64Char
-              (parse& Base64Char.nonnesting parseBase64Char parseBase64Char))))
+          (Seq.nonempty₁ Base64Char.nonempty) nn4
+          (parse& Base64Char.nosubstrings parseBase64Char
+            (parse& Base64Char.nosubstrings parseBase64Char
+              (parse& Base64Char.nosubstrings parseBase64Char parseBase64Char))))
         (LogDec.equivalent (Iso.symEquivalent Base64Pad.equiv) parseMaxBase64Pad)
         Base64Str.noOverlap)
     where
-    @0 nn4 : _
-    nn4 = (NonNesting&ₚ   Base64Char.nonnesting
-              (NonNesting&ₚ Base64Char.nonnesting
-              (NonNesting&ₚ Base64Char.nonnesting Base64Char.nonnesting)))
+    open import Aeres.Grammar.Option.MaximalParser Char
+
+    @0 nn4 : NoSubstrings (&ₚ Base64Char (&ₚ Base64Char (&ₚ Base64Char Base64Char)))
+    nn4 = Seq.nosubstrings Base64Char.nosubstrings
+            (Seq.nosubstrings Base64Char.nosubstrings
+              (Seq.nosubstrings Base64Char.nosubstrings Base64Char.nosubstrings))
 
 open parseBase64 public
   using (parseBase64Char; parseMaxBase64Pad; parseMaxBase64Str)

@@ -1,20 +1,22 @@
 {-# OPTIONS --subtyping #-}
 
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Option.TCB
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 
 module Aeres.Grammar.Option.Properties (Σ : Set) where
 
-open Aeres.Grammar.Definitions Σ
-open Aeres.Grammar.Option.TCB  Σ
+open Aeres.Grammar.Definitions  Σ
+open Aeres.Grammar.Option.TCB   Σ
+open Aeres.Grammar.Parallel.TCB Σ
 
 equivNonEmpty : ∀ {@0 A : @0 List Σ → Set} → @0 NonEmpty A
-                → Equivalent (NotEmpty (Option A)) A
-proj₁ (equivNonEmpty ne) (mk×ₚ (some x) sndₚ₁ refl) = x
+                → Equivalent (Length≥ (Option A) 1) A
+proj₁ (equivNonEmpty ne) (mk×ₚ (some x) sndₚ₁) = x
 proj₂ (equivNonEmpty ne) {xs}x =
-  mk×ₚ (some x) (─ (Nat.n≢0⇒n>0 (λ x₁ → contradiction (proj₁ (Lemmas.length-++-≡ _ [] _ xs (++-identityʳ xs) x₁)) (ne x)))) refl
+  mk×ₚ (some x) (─ (Nat.n≢0⇒n>0 (λ x₁ → contradiction (proj₁ (Lemmas.length-++-≡ _ [] _ xs (++-identityʳ xs) x₁)) (ne x))))
 
 instance
   OptionEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (Option A)

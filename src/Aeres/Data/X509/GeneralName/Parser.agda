@@ -8,6 +8,7 @@ open import Aeres.Data.X509.RDN
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -18,6 +19,7 @@ open import Data.Nat.Properties
 module Aeres.Data.X509.GeneralName.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -40,7 +42,7 @@ parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ parseOctetStr
 parseDirName : Parser (Logging ∘ Dec) DirName
 parseDirName =
   parseTLV _ (here' String.++ ": directory name") _
-    λ n → parseExactLength TLV.nonnesting (tell $ here' String.++  "X509: RDN") RDN.parse n
+    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") RDN.parse n
 
 parseEdipartyName : Parser (Logging ∘ Dec) EdipartyName
 parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ parseOctetStringValue
@@ -107,7 +109,7 @@ module parseGeneralName where
 
   parseGeneralNamesElems : ∀ n → Parser (Logging ∘ Dec) (ExactLength GeneralNamesElems n)
   parseGeneralNamesElems n =
-    parseBoundedSequenceOf here' _ nonempty nonnesting parseGeneralName n 1
+    parseBoundedSequenceOf here' _ nonempty nosubstrings parseGeneralName n 1
 
   parseGeneralNames : Parser (Logging ∘ Dec) GeneralNames
   parseGeneralNames = parseTLV _ here' _ parseGeneralNamesElems

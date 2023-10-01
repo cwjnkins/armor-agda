@@ -9,8 +9,9 @@ open import Aeres.Data.PEM.CertText.TCB
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Properties as List
 import      Data.Nat.Properties as Nat
@@ -20,8 +21,9 @@ module Aeres.Data.PEM.CertText.Parser where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
+open Aeres.Grammar.Parallel             Char
 open Aeres.Grammar.Parser               Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Seq                  Char
 
 open ≡-Reasoning
 module ≤ = Nat.≤-Reasoning
@@ -131,7 +133,7 @@ parseMaxCertText = LogDec.mkMaximalParser help
                             suf₁ ∎)))
                         ¬p)))
                 , tt
-              (inj₂ (mk&ₚ{pre₁₁}{pre₁₂} fstₚ₁ (mk×ₚ sndₚ₁ sndₚ₁' refl) bs≡₁₂)) →
+              (inj₂ (mk&ₚ{pre₁₁}{pre₁₂} fstₚ₁ (mk×ₚ sndₚ₁ sndₚ₁') bs≡₁₂)) →
                   mkLogged [] (yes
                     (success pre₁ _ r₁≡ (mkCertText fstₚ₁ sndₚ₁ bs≡₁₂) suf₁ ps≡₁))
                 , λ where

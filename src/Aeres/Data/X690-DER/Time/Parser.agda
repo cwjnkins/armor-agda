@@ -7,6 +7,7 @@ open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Time.Properties
 open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -16,6 +17,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X690-DER.Time.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseMonthDayHourMinSecFields where
@@ -23,13 +25,13 @@ module parseMonthDayHourMinSecFields where
 
   parseMonthDayHourMinSecFields : Parser (Logging ∘ Dec) MonthDayHourMinSecFields
   runParser parseMonthDayHourMinSecFields xs = do
-    yes (success pre₀@._ ._ refl (mk×ₚ (singleton (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ []) refl) (─ refl) refl) suf₀ refl)
+    yes (success pre₀@._ ._ refl (mk×ₚ (singleton (mn1 ∷ mn2 ∷ d1 ∷ d2 ∷ h1 ∷ h2 ∷ mi1 ∷ mi2 ∷ s1 ∷ s2 ∷ []) refl) (─ refl)) suf₀ refl)
       ← runParser (parseN (String.length "MMDDhhmmss") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix@._ _ _ (mkMDHMSFields _ _ _ _ _ _ _ _ _ _ refl) suffix ps≡) →
             contradiction
-              (success prefix _ refl (mk×ₚ singleSelf (─ refl) refl) suffix ps≡)
+              (success prefix _ refl (mk×ₚ singleSelf (─ refl)) suffix ps≡)
               ¬parse
     case check mn1 mn2 d1 d2 h1 h2 mi1 mi2 s1 s2 suf₀ of λ where
       (l , no  ¬check) → do
@@ -79,13 +81,13 @@ module parseUTCTimeFields where
 
   parseUTCTimeFields : Parser (Logging ∘ Dec) UTCTimeFields
   runParser parseUTCTimeFields xs = do
-    yes (success ._ ._ refl (mk×ₚ (singleton (y₁ ∷ y₂ ∷ []) refl) (─ refl) refl) suf₀ refl)
+    yes (success ._ ._ refl (mk×ₚ (singleton (y₁ ∷ y₂ ∷ []) refl) (─ refl)) suf₀ refl)
       ← runParser (parseN (String.length "YY") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success prefix@._ read read≡ (mkUTCTimeFields{y1 = y₁}{y₂} _ _ _ _ refl) suffix ps≡) →
             contradiction
-              (success (y₁ ∷ [ y₂ ]) 2 refl (mk×ₚ singleSelf (─ refl) refl) _ ps≡)
+              (success (y₁ ∷ [ y₂ ]) 2 refl (mk×ₚ singleSelf (─ refl)) _ ps≡)
               ¬parse
     yes (success pre₁@._ r₁ r₁≡ v₁@(mkMDHMSFields mon monᵣ day dayᵣ hour hourᵣ min minᵣ sec secᵣ refl) suf₁ ps≡₁)
       ← runParser parseMonthDayHourMinSecFields suf₀
@@ -145,7 +147,7 @@ open parseUTCTimeFields public using (parseUTCTimeFields)
 parseUTCTime : Parser (Logging ∘ Dec) UTCTime
 parseUTCTime =
   parseTLV _ "UTCTime" _
-    (parseExactLength UTC.nonnesting (tell $ "UTCTime: length mismatch") parseUTCTimeFields)
+    (parseExactLength UTC.nosubstrings (tell $ "UTCTime: length mismatch") parseUTCTimeFields)
 
 module parseGenTimeFields where
   open ≡-Reasoning
@@ -154,13 +156,13 @@ module parseGenTimeFields where
 
   parseGenTimeFields : Parser (Logging ∘ Dec) GenTimeFields
   runParser parseGenTimeFields xs = do
-    yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen refl) suf₀ ps≡₀)
+    yes (success .v₀ r₀ r₀≡ (mk×ₚ (singleton v₀@(y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ []) refl) vLen) suf₀ ps≡₀)
       ← runParser (parseN (String.length "YYYY") (tell $ here' String.++ ": underflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
           (success ._ read read≡ (mkGenTimeFields{y1 = y₁}{y₂}{y₃}{y₄} year _ _ _ refl) suffix ps≡) →
             contradiction
-              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf (─ refl) refl) _ ps≡)
+              (success (y₁ ∷ y₂ ∷ y₃ ∷ [ y₄ ]) _ refl (mk×ₚ singleSelf (─ refl)) _ ps≡)
               ¬parse
     yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁) ← runParser parseMonthDayHourMinSecFields suf₀
       where no ¬parse → do
@@ -190,7 +192,7 @@ module parseGenTimeFields where
                 ps≡″ = trans₀ (Lemmas.++-cancel≡ˡ _ _ (proj₁ $ Lemmas.length-++-≡ v₀ _ (y₁' ∷ y₂' ∷ y₃' ∷ [ y₄' ]) _ ps≡' refl) ps≡') (solve (++-monoid UInt8))
             in
             contradiction
-              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (MonthDayHourMinSecFields.nonnesting (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
+              (success _ _ refl refl suffix (Lemmas.++-cancel≡ˡ _ _ (MonthDayHourMinSecFields.nosubstrings (sym ps≡″) mmddhhmmss v₁) (sym ps≡″)))
               ¬parse
     case All.all? (inRange? '0' '9') v₀ of λ where
       (no ¬allv₀) → do
@@ -219,7 +221,7 @@ open parseGenTimeFields public using (parseGenTimeFields)
 parseGenTime : Parser (Logging ∘ Dec) GenTime
 parseGenTime =
   parseTLV _ "GenTime" _
-    (parseExactLength GenTime.nonnesting
+    (parseExactLength GenTime.nosubstrings
       (tell $ "GenTime: length mismatch") parseGenTimeFields)
 
 parseTime : Parser (Logging ∘ Dec) Time

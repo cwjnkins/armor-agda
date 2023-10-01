@@ -24,4 +24,4 @@ Raw.D RawPrintableStringValue = List UInt8
 Raw.to RawPrintableStringValue = Raw.to (RawIList RawPrintableStringChar)
 
 RawPrintableString : Raw PrintableString 
-RawPrintableString = RawTLV RawPrintableStringValue
+RawPrintableString = RawTLV _ RawPrintableStringValue

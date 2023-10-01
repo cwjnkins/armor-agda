@@ -21,7 +21,7 @@ record BMPChar (@0 bs : List UInt8) : Set where
 
 RawBMPChar : Raw BMPChar
 Raw.D RawBMPChar = Vec UInt8 2
-Raw.to RawBMPChar = uncurry─ λ y → (BMPChar.c₁ y) ∷ (BMPChar.c₂ y) ∷ []
+Raw.to RawBMPChar y = (BMPChar.c₁ y) ∷ (BMPChar.c₂ y) ∷ []
 
 BMP : @0 List UInt8 → Set
 BMP = IList BMPChar

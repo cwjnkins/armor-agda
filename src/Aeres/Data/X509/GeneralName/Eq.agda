@@ -20,14 +20,14 @@ open Aeres.Grammar.Sum         UInt8
 instance
   eq≋ : Eq≋ GeneralName
   eq≋ =
-    isoEq≋ iso
-      (sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ =
-       sumEq≋ ⦃ eq₂ = sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄)
+    Iso.isoEq≋ iso
+      (Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ =
+       Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄)
 
   eq≋Elems : Eq≋ GeneralNamesElems
   eq≋Elems = SequenceOf.BoundedSequenceOfEq≋

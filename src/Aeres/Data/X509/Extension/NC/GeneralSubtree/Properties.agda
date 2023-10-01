@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties where
@@ -17,6 +18,7 @@ module Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ GeneralName (&ₚ (Option MinBaseDistance) (Option MaxBaseDistance))
 
@@ -32,7 +34,7 @@ proj₂ (proj₂ iso) (mkGeneralSubtreeFields base minimum maximum refl) = refl
 @0 unambiguous : Unambiguous GeneralSubtreeFields
 unambiguous =
   Iso.unambiguous iso
-    (unambiguous&ₚ GeneralName.unambiguous GeneralName.nonnesting
+    (Seq.unambiguous GeneralName.unambiguous GeneralName.nosubstrings
       (Unambiguous.option₂&₁
-        (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonnesting TLV.nonempty
+        (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nosubstrings TLV.nonempty
         (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonempty (TLV.noconfusion λ ())))

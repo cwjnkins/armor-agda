@@ -16,9 +16,8 @@ unambiguous (mkVisibleStringValue chars range refl) (mkVisibleStringValue .chars
   case All.irrelevant (inRange-unique{A = ℕ}{B = UInt8}) range range₁ of λ where
     refl → refl
 
-@0 nonmalleable : NonMalleable VisibleStringValue RawVisibleStringValue
-NonMalleable.unambiguous nonmalleable = unambiguous
-NonMalleable.injective nonmalleable (fst , mkVisibleStringValue chars range refl) (fst₁ , mkVisibleStringValue chars₁ range₁ refl) refl =
+@0 nonmalleable : NonMalleable RawVisibleStringValue
+nonmalleable (mkVisibleStringValue chars range refl) (mkVisibleStringValue chars₁ range₁ refl) refl =
   case All.irrelevant (inRange-unique{A = ℕ}{B = UInt8}) range range₁ of λ where
     refl → refl
 
@@ -36,5 +35,5 @@ instance
         of λ where
           refl → yes refl
 
-@0 nonmalleableVisibleString : NonMalleable VisibleString RawVisibleString
+@0 nonmalleableVisibleString : NonMalleable RawVisibleString
 nonmalleableVisibleString = TLV.nonmalleable nonmalleable

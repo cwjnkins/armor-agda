@@ -28,7 +28,7 @@ record UTF32Char (@0 bs : List UInt8) : Set where
 
 RawUTF32Char : Raw UTF32Char
 Raw.D RawUTF32Char = Vec UInt8 4
-Raw.to RawUTF32Char = uncurry─ λ y → (# 0) ∷ (UTF32Char.b₂ y) ∷ (UTF32Char.b₃ y) ∷ (UTF32Char.b₄ y) ∷ []
+Raw.to RawUTF32Char y = (# 0) ∷ (UTF32Char.b₂ y) ∷ (UTF32Char.b₃ y) ∷ (UTF32Char.b₄ y) ∷ []
 
 UTF32 : @0 List UInt8 → Set
 UTF32 = IList UTF32Char

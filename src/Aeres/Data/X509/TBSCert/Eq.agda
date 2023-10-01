@@ -20,31 +20,35 @@ import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.TBSCert.Eq where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 instance
   eq≋ : Eq≋ TBSCertFields
   eq≋ =
-    isoEq≋ iso
-      (eq≋&ₚ (eq≋&ₚ it it)
-        (eq≋&ₚ it
-          (eq≋&ₚ it
-            (eq≋&ₚ it
-              (eq≋&ₚ it
-                (eq≋&ₚ
-                  (eq≋Σₚ it λ _ →
+    Iso.isoEq≋ iso
+      (Seq.eq≋&ₚ (Seq.eq≋&ₚ it it)
+        (Seq.eq≋&ₚ it
+          (Seq.eq≋&ₚ it
+            (Seq.eq≋&ₚ it
+              (Seq.eq≋&ₚ it
+                (Seq.eq≋&ₚ
+                  (Parallel.eq≋Σₚ it λ _ →
                     record
                       { _≟_ = λ where
                         self self → yes refl
                       })
-                  (eq≋&ₚ it (eq≋&ₚ it it))))))))
+                  (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))))))))
     where
     instance
       e₁ : Eq≋ (NonEmptySequenceOf Extension)

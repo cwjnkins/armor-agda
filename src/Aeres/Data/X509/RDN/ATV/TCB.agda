@@ -12,11 +12,13 @@ open import Aeres.Data.X690-DER.Strings.PrintableString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 module Aeres.Data.X509.RDN.ATV.TCB where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 {-
 -- https://datatracker.ietf.org/doc/html/rfc5280#appendix-A.1

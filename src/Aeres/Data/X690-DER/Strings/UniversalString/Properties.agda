@@ -11,5 +11,5 @@ module Aeres.Data.X690-DER.Strings.UniversalString.Properties where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
-@0 nonmalleableUniversalString : NonMalleable UniversalString RawUniversalString
+@0 nonmalleableUniversalString : NonMalleable RawUniversalString
 nonmalleableUniversalString = TLV.nonmalleable UTF32.nonmalleable

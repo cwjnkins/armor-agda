@@ -10,6 +10,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X509.DisplayText
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -18,6 +19,7 @@ module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNoti
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -26,8 +28,8 @@ private
 
 parseUserNoticeFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeFields n)
 parseUserNoticeFields n =
-  parseEquivalent (equivalent×ₚ equivalent)
-    (parseOption₂ TLV.nonnesting DisplayText.nonnesting
+  parseEquivalent (Parallel.equivalent₁ equivalent)
+    (Option.parseOption₂ TLV.nosubstrings DisplayText.nosubstrings
       (DisplayText.noconfusionTLV (toWitnessFalse{Q = _ ∈? _} tt))
       parseNoticeReference parseDisplayText
       (tell $ here' String.++ ": underflow") n)

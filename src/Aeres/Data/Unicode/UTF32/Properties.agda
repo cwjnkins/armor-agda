@@ -50,17 +50,16 @@ module Char where
   @0 nonempty : NonEmpty UTF32Char
   nonempty (mkUTF32Char b₂ b₃ b₄ range refl) ()
 
-  @0 nonnesting : NonNesting UTF32Char
-  nonnesting refl (mkUTF32Char b₂ b₃ b₄ range refl) (mkUTF32Char b₅ b₆ b₇ range₁ refl) = refl
+  @0 nosubstrings : NoSubstrings UTF32Char
+  nosubstrings refl (mkUTF32Char b₂ b₃ b₄ range refl) (mkUTF32Char b₅ b₆ b₇ range₁ refl) = refl
 
   @0 unambiguous : Unambiguous UTF32Char
   unambiguous (mkUTF32Char b₂ b₃ b₄ range refl) (mkUTF32Char .b₂ .b₃ .b₄ range₁ refl) =
     case (‼ rangeUnique range range₁) of λ where
       refl → refl
 
-  @0 nonmalleable : NonMalleable UTF32Char RawUTF32Char
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , mkUTF32Char b₂ b₃ b₄ range refl) (fst₁ , mkUTF32Char b₅ b₆ b₇ range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawUTF32Char
+  nonmalleable (mkUTF32Char b₂ b₃ b₄ range refl) (mkUTF32Char b₅ b₆ b₇ range₁ refl) refl =
     case rangeUnique range range₁ of λ where
       refl → refl
 
@@ -75,12 +74,10 @@ module Char where
             refl → yes ≋-refl
 
 @0 unambiguous : Unambiguous UTF32
-unambiguous = IList.unambiguous Char.unambiguous Char.nonempty Char.nonnesting
+unambiguous = IList.unambiguous Char.unambiguous Char.nonempty Char.nosubstrings
 
-@0 nonmalleable : NonMalleable UTF32 RawUTF32
-NonMalleable.unambiguous nonmalleable = unambiguous
-NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
-  NonMalleable.injective (IList.nonmalleable Char.nonempty Char.nonnesting Char.nonmalleable) (fst , snd) (fst₁ , snd₁) x
+@0 nonmalleable : NonMalleable RawUTF32
+nonmalleable = IList.nonmalleable Char.nonempty Char.nosubstrings Char.nonmalleable
   
 instance
   UTF32Eq≋ : Eq≋ UTF32

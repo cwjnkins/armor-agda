@@ -6,6 +6,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -18,6 +19,7 @@ open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.IList.TCB   Σ
 open Aeres.Grammar.Option      Σ
 open Aeres.Grammar.Properties  Σ
+open Aeres.Grammar.Seq         Σ
 open Aeres.Grammar.Sum         Σ
 
 Rep : (List Σ → Set) → @0 List Σ → Set
@@ -38,7 +40,7 @@ proj₁ (proj₂ iso) (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) = refl
 proj₂ (proj₂ iso) nil = refl
 proj₂ (proj₂ iso) (consIList h t bs≡) = refl
 
-@0 unambiguous : ∀ {@0 A} → Unambiguous A → NonEmpty A → NonNesting A → Unambiguous (IList A)
+@0 unambiguous : ∀ {@0 A} → Unambiguous A → NonEmpty A → NoSubstrings A → Unambiguous (IList A)
 unambiguous ua ne nn nil nil = refl
 unambiguous ua ne nn{xs} nil (cons (mkIListCons{bs₁}{bs₂} h t bs≡)) =
   contradiction (++-conicalˡ _ _ (sym bs≡)) (ne h)
@@ -64,7 +66,7 @@ unambiguous{A} ua ne nn (consIList{bs₁₁}{bs₁₂} h t bs≡) (consIList{bs�
   bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
 lengthIList≡
-  : ∀ {@0 A} → NonEmpty A → NonNesting A
+  : ∀ {@0 A} → NonEmpty A → NoSubstrings A
     → ∀ {@0 xs} → (il₁ il₂ : IList A xs)
     → lengthIList il₁ ≡ lengthIList il₂
 lengthIList≡ ne nn nil nil = refl
@@ -91,7 +93,7 @@ lengthIList≡{A} ne nn (cons (mkIListCons{bs₂ = bs₂} head tail refl)) (cons
   tail' = subst₀ (IList A) bs₂≡ tail₁
 
 lengthIList≤
-  : ∀ {@0 A} → NonEmpty A → NonNesting A
+  : ∀ {@0 A} → NonEmpty A → NoSubstrings A
     → (@0 xs₁ xs₂ : List Σ) {@0 ys₁ ys₂ : List Σ}
     → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
     → @0 length xs₁ ≤ length xs₂
@@ -162,18 +164,17 @@ Eq._≟_ IListEq (─ xs₁ , a₁) (─ xs₂ , a₂) = eqIListWF a₁ a₂ (<-
 IListEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
 IListEq≋ = Eq⇒Eq≋ (IListEq ⦃ Eq≋⇒Eq it ⦄)
 
-@0 nonmalleable : ∀ {A : @0 List Σ → Set} {R : Raw A} → NonEmpty A → NonNesting A → NonMalleable A R → NonMalleable (IList A) (RawIList R)
-NonMalleable.unambiguous (nonmalleable {R = R} ne nn N) = unambiguous (NonMalleable.unambiguous N) ne nn
-NonMalleable.injective (nonmalleable{A}{R} ne nn N) a₁ a₂ = inj a₁ a₂ (Nat.<-wellFounded _)
-    where
-    import Data.Nat.Induction
-    module Nat = Data.Nat.Induction
+@0 nonmalleable : ∀ {A : @0 List Σ → Set} {R : Raw A} → NonEmpty A → NoSubstrings A → NonMalleable R → NonMalleable (RawIList R)
+nonmalleable {A} {R} ne nn N a₁ a₂ eq = noma a₁ a₂ eq (Nat.<-wellFounded _)
+  where
+  import Data.Nat.Induction as Nat
 
-    to = Raw.to (RawIList R)
-
-    inj : (a₁ a₂ : Exists─ (List Σ) (IList A)) → @0 Acc _<_ (lengthIList (proj₂ a₂)) → to a₁ ≡ to a₂ → a₁ ≡ a₂
-    inj (─ .[] , nil) (─ .[] , nil) _ eq = refl
-    inj (─ ._ , consIList h₁ t₁ refl) (─ ._ , consIList h₂ t₂ refl) (WellFounded.acc rs) eq =
-      case NonMalleable.injective N (─ _ , h₁) (─ _ , h₂) (∷-injectiveˡ eq) ret (const _) of λ where
-        refl → case (‼ inj (─ _ , t₁) (─ _ , t₂) (rs _ ≤-refl) (∷-injectiveʳ eq)) ret (const _) of λ where
-          refl → refl
+  noma : ∀ {@0 bs₁ bs₂} → (a₁ : IList A bs₁) (a₂ : IList A bs₂)
+         → Raw.to (RawIList R) a₁ ≡ Raw.to (RawIList R) a₂
+         → @0 Acc _<_ (lengthIList a₂)
+         → _≡_{A = Exists─ (List Σ) (IList A)} (─ bs₁ , a₁) (─ bs₂ , a₂)
+  noma nil nil eq (Nat.acc rs) = refl
+  noma (consIList head₁ tail₁ refl) (consIList head₂ tail₂ refl) eq (Nat.acc rs) =
+    case N head₁ head₂ (∷-injectiveˡ eq) ret (const _) of λ where
+      refl → case ‼ noma tail₁ tail₂ (∷-injectiveʳ eq) (rs _ ≤-refl) ret (const _) of λ where
+        refl → refl

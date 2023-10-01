@@ -25,7 +25,7 @@ IA5String xs = TLV Tag.IA5String IA5StringValue xs
 
 RawIA5StringValue : Raw IA5StringValue
 Raw.D RawIA5StringValue = List UInt8
-Raw.to RawIA5StringValue = uncurry─ (↑_ ∘ IA5StringValue.str)
+Raw.to RawIA5StringValue = ↑_ ∘ IA5StringValue.str
 
 RawIA5String : Raw IA5String 
-RawIA5String = RawTLV RawIA5StringValue
+RawIA5String = RawTLV _ RawIA5StringValue

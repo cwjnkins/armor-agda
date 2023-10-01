@@ -8,13 +8,15 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.AIA.AccessDesc.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 @0 unambiguous : Unambiguous (DefinedByOIDFields AccessDescParam)
 unambiguous =
   DefinedByOID.unambiguous _
-    (λ o → unambiguous×ₚ GeneralName.unambiguous (λ a₁ a₂ → T-unique a₁ a₂))
+    (λ o → Parallel.unambiguous×ₚ GeneralName.unambiguous (λ a₁ a₂ → T-unique a₁ a₂))

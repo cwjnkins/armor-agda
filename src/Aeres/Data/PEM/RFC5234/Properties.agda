@@ -7,16 +7,16 @@ open import Aeres.Data.Base64
 open import Aeres.Data.PEM.RFC5234.TCB
   hiding (module EOL)
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 
 module Aeres.Data.PEM.RFC5234.Properties where
 
-open Aeres.Grammar.Definitions          Char
-open Aeres.Grammar.Relation.Definitions Char
-open Aeres.Grammar.Sum                  Char
+open Aeres.Grammar.Definitions Char
+open Aeres.Grammar.Parallel    Char
+open Aeres.Grammar.Sum         Char
 
 module EOL where
   Rep =  Sum (_≡ '\r' ∷ [ '\n' ])
@@ -89,15 +89,15 @@ module EOL where
               contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) λ ()
             (inj₂ refl) → contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) (λ ())
 
-  noOverlap' : NoOverlap EOL (NotEmpty Base64Str)
+  noOverlap' : NoOverlap EOL (Length≥ Base64Str 1)
   noOverlap' .('\r' ∷ [ '\n' ]) .[] ys₁ xs₂ ys₂ x crlf crlf = inj₁ refl
   noOverlap' .([ '\r' ]) .([ '\n' ]) ys₁ xs₂ ys₂ ++≡ crlf cr =
     inj₂ λ where
-      x₁@(mk×ₚ x₁' x₁'Len refl) → contradiction₂ (Base64.Str.char∈ ('\n' ∈ xs₂ ∋ n∈ x₁ x₁'Len) x₁')
+      x₁@(mk×ₚ x₁' x₁'Len) → contradiction₂ (Base64.Str.char∈ ('\n' ∈ xs₂ ∋ n∈ x₁ x₁'Len) x₁')
         (toWitnessFalse{Q = _ ∈? _} tt)
         (λ ())
     where
-    module _ (x₁ : NotEmpty Base64Str xs₂) (x₁Len : Erased (length xs₂ > 0)) where
+    module _ (x₁ : Length≥ Base64Str 1 xs₂) (x₁Len : Erased (length xs₂ > 0)) where
       n∈ : '\n' ∈ xs₂
       n∈ = case singleton xs₂ refl ret (const _) of λ where
         (singleton [] refl) → contradiction (¡ x₁Len) (λ ())

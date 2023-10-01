@@ -190,8 +190,8 @@ module MonthDayHourMinSecFields where
     @0 s₂≡ : s₂ ≡ s₂'
     s₂≡ = ∷-injectiveˡ (proj₂ (Lemmas.length-++-≡ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ (_ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ _ ∷ [ _ ]) _ bs≡' refl))
 
-  @0 nonnesting : NonNesting MonthDayHourMinSecFields
-  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange bs≡) (mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ bs≡₁)
+  @0 nosubstrings : NoSubstrings MonthDayHourMinSecFields
+  nosubstrings {xs₁ = xs₁} {xs₂ = xs₂} x (mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange bs≡) (mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
@@ -296,8 +296,8 @@ module UTC where
                     (no ¬eq) → no λ where refl → contradiction refl ¬eq
                     (yes refl) → yes refl
 
-  @0 nonnesting : NonNesting UTCTimeFields
-  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (mkUTCTimeFields year yearRange mmddhhmmss term bs≡) (mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
+  @0 nosubstrings : NoSubstrings UTCTimeFields
+  nosubstrings {xs₁ = xs₁} {xs₂ = xs₂} x (mkUTCTimeFields year yearRange mmddhhmmss term bs≡) (mkUTCTimeFields year₁ yearRange₁ mmddhhmmss₁ term₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
@@ -412,8 +412,8 @@ module GenTime where
                     (no ¬eq) → no λ where refl → contradiction refl ¬eq
                     (yes refl) → yes refl
 
-  @0 nonnesting : NonNesting GenTimeFields
-  nonnesting {xs₁ = xs₁} {xs₂ = xs₂} x (mkGenTimeFields year yearRange (mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange refl) z≡ bs≡) (mkGenTimeFields year₁ yearRange₁ (mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ refl) z≡₁ bs≡₁)
+  @0 nosubstrings : NoSubstrings GenTimeFields
+  nosubstrings {xs₁ = xs₁} {xs₂ = xs₂} x (mkGenTimeFields year yearRange (mkMDHMSFields mon monRange day dayRange hour hourRange min minRange sec secRange refl) z≡ bs≡) (mkGenTimeFields year₁ yearRange₁ (mkMDHMSFields mon₁ monRange₁ day₁ dayRange₁ hour₁ hourRange₁ min₁ minRange₁ sec₁ secRange₁ refl) z≡₁ bs≡₁)
     with Lemmas.length-++-≡ xs₁ _ xs₂ _ x (trans₀ (cong length bs≡) (cong length (sym bs≡₁)))
   ... | fst , snd = fst
 
@@ -463,11 +463,11 @@ module GenTime where
              length (y₁ ∷ y₂ ∷ y₃ ∷ y₄ ∷ (mo₁ ∷ mo₂ ∷ d₁ ∷ d₂ ∷ h₁ ∷ h₂ ∷ mi₁ ∷ mi₂ ∷ s₁ ∷ [ s₂ ]) ∷ʳ (# 'Z')) ∎)
     where open ≡-Reasoning
 
-@0 nonnesting : NonNesting Time
-nonnesting x (utctm x₁) (utctm x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (utctm x₁) (gentm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (gentm x₁) (utctm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (gentm x₁) (gentm x₂) = ‼ TLV.nonnesting x x₁ x₂
+@0 nosubstrings : NoSubstrings Time
+nosubstrings x (utctm x₁) (utctm x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (utctm x₁) (gentm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (gentm x₁) (utctm x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (gentm x₁) (gentm x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
 @0 unambiguous : Unambiguous Time
 unambiguous (utctm x) (utctm x₁) = cong utctm $ TLV.unambiguous UTC.unambiguous x x₁

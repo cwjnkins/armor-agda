@@ -4,6 +4,7 @@ open import Aeres.Prelude
 
 open import Aeres.Binary
 import      Aeres.Grammar.Definitions
+open import Aeres.Grammar.Parallel
 open import Aeres.Grammar.Parser
 open import Aeres.Data.X690-DER.Length.TCB
 open import Aeres.Data.X690-DER.Length.Properties
@@ -14,13 +15,12 @@ open import Data.List.Properties
 
 module Aeres.Data.X690-DER.Length.Parser where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
 
 module parseShortLen where
   here' = "parseShortLen"
 
-  parseShortLen : Parser Dig (Logging ∘ Dec) Short
+  parseShortLen : Parser UInt8 (Logging ∘ Dec) Short
   runParser parseShortLen [] = do
     tell $ here' String.++ ": underflow reading length"
     return ∘ no $ λ where
@@ -41,7 +41,7 @@ module parseLongLen where
 
   open ≡-Reasoning
 
-  parseLongLen : Parser Dig (Logging ∘ Dec) Long
+  parseLongLen : Parser UInt8 (Logging ∘ Dec) Long
   runParser parseLongLen [] = do
     tell $ here' String.++ ": underflow reading length"
     return ∘ no $ λ where
@@ -65,13 +65,13 @@ module parseLongLen where
       (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
         contradiction lₕ≢0 lₕ≡0
   ... | yes lₕ≢0 = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suf₀ refl)
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton lₜ refl) (─ lₜLen)) suf₀ refl)
       ← runParser (parseN _ (toℕ l - 129) (return (Level.lift tt))) xs
       where no ¬parse → do
         tell $ here' String.++ ": underflow reading length sequence: " String.++ (String.showNat $ toℕ l - 128)
         return ∘ no $ λ where
           (success .(l ∷ lₕ ∷ lₜ) read read≡ (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen lₕₜMinRep refl) suffix refl) →
-            contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) (─ lₜLen) refl) suffix refl)
+            contradiction (success lₜ (length lₜ) refl (mk×ₚ (singleton lₜ refl) (─ lₜLen)) suffix refl)
               ¬parse
     case lₜ ≟ [] of λ where
       (no  lₜ≢[]) →
@@ -112,7 +112,7 @@ open parseLongLen public using (parseLongLen)
 module parseLen where
   here' = "parseLen"
 
-  parseLen : Parser Dig (Logging ∘ Dec) Length
+  parseLen : Parser UInt8 (Logging ∘ Dec) Length
   runParser parseLen xs = do
     no ¬short ← runParser parseShortLen xs
       where yes sho → return (yes (mapSuccess _ (λ {xs'} → short {xs'}) sho))

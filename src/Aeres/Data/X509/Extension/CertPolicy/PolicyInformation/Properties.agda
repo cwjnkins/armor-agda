@@ -10,6 +10,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Properties where
@@ -17,6 +18,7 @@ module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ OID (Option PolicyQualifiersSeq)
 
@@ -32,8 +34,8 @@ equiv = proj₁ iso
 unambiguous =
   Iso.unambiguous iso
     (Unambiguous.unambiguous-&₁option₁
-      OID.unambiguous TLV.nonnesting
+      OID.unambiguous TLV.nosubstrings
       (TLV.unambiguous
         (SequenceOf.Bounded.unambiguous
-          (TLV.unambiguous Qualifier.unambiguous) TLV.nonempty TLV.nonnesting))
+          (TLV.unambiguous Qualifier.unambiguous) TLV.nonempty TLV.nosubstrings))
       TLV.nonempty)

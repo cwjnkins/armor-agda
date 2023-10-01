@@ -8,6 +8,8 @@ open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 open import Data.List.Properties
@@ -17,6 +19,8 @@ open import Data.Nat.Properties
 module Aeres.Data.X509.Extension.AKI.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseAKIFields where
@@ -42,9 +46,9 @@ module parseAKIFields where
   -- (Try to parse all, then check lengths)
   parseAKIFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength AKIFieldsSeqFields n)
   parseAKIFieldsSeqFields n =
-    parseEquivalent (equivalent×ₚ equivalent)
-      (parseOption₃
-        TLV.nonnesting TLV.nonnesting TLV.nonnesting
+    parseEquivalent (Parallel.equivalent₁ equivalent)
+      (Option.parseOption₃
+        TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseAKIKeyId parseAKIAuthCertIssuer parseAKIAuthCertSN
         (tell $ Here.AKI String.++ ": underflow") n)
@@ -55,7 +59,7 @@ module parseAKIFields where
 
   parseAKIFields : Parser (Logging ∘ Dec) AKIFields
   parseAKIFields =
-    parseTLV _ Here.AKI _ (parseExactLength TLV.nonnesting
+    parseTLV _ Here.AKI _ (parseExactLength TLV.nosubstrings
       (tell $ Here.AKI String.++ ": overflow") parseAKIFieldsSeq)
 
 open parseAKIFields public using

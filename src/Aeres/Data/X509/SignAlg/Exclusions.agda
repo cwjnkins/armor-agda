@@ -14,6 +14,7 @@ import      Aeres.Data.X509.SignAlg.DSA.TCB           as DSA
 import      Aeres.Data.X509.SignAlg.RSA.Properties    as RSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB           as RSA
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 open import Relation.Nullary.Negation
@@ -22,12 +23,13 @@ open import Relation.Nullary.Negation
 module Aeres.Data.X509.SignAlg.Exclusions where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 @0 noConfusion-DSA-ECDSA : NoConfusion DSA.Supported ECDSA.Supported
 noConfusion-DSA-ECDSA xs₁++ys₁≡xs₂++ys₂ dsa' ecda =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈DSA refl) (mk×ₚ _ o∈ECDSA refl) →
+      o (mk×ₚ _ o∈DSA) (mk×ₚ _ o∈ECDSA) →
         let
           all : All (_∉ ECDSA.supportedSignAlgOIDs) DSA.supportedSignAlgOIDs
           all = toWitness{Q = All.all? (λ x → ¬? (x ∈? ECDSA.supportedSignAlgOIDs)) DSA.supportedSignAlgOIDs} tt
@@ -43,7 +45,7 @@ noConfusion-DSA-ECDSA xs₁++ys₁≡xs₂++ys₂ dsa' ecda =
 noConfusion-DSA-RSA xs₁++ys₁≡xs₂++ys₂ dsa' rsa' =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈DSA refl) (mk×ₚ _ o∈RSA refl) →
+      o (mk×ₚ _ o∈DSA) (mk×ₚ _ o∈RSA) →
         let
           all : All (_∉ RSA.supportedSignAlgOIDs) DSA.supportedSignAlgOIDs
           all = toWitness{Q = All.all? (λ x → ¬? (x ∈? RSA.supportedSignAlgOIDs)) DSA.supportedSignAlgOIDs} tt
@@ -59,7 +61,7 @@ noConfusion-DSA-RSA xs₁++ys₁≡xs₂++ys₂ dsa' rsa' =
 noConfusion-ECDSA-RSA xs₁++ys₁≡xs₂++ys₂  ecda' rsa' =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈ECDSA refl) (mk×ₚ _ o∈RSA refl) →
+      o (mk×ₚ _ o∈ECDSA) (mk×ₚ _ o∈RSA) →
         let
           all : All (_∉ RSA.supportedSignAlgOIDs) ECDSA.supportedSignAlgOIDs
           all = toWitness{Q = All.all? (λ x → ¬? (x ∈? RSA.supportedSignAlgOIDs)) ECDSA.supportedSignAlgOIDs} tt
@@ -75,7 +77,7 @@ noConfusion-ECDSA-RSA xs₁++ys₁≡xs₂++ys₂  ecda' rsa' =
 noConfusion-DSA-Unsupported xs₁++ys₁≡xs₂++ys₂ dsa' un =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
+      o (mk×ₚ _ o∈?) (mk×ₚ _ o∉?) →
         contradiction
           (Any.++⁺ˡ{xs = DSA.supportedSignAlgOIDs}{ys = ECDSA.supportedSignAlgOIDs ++ RSA.supportedSignAlgOIDs} (toWitness o∈?))
           (toWitnessFalse o∉?))
@@ -86,7 +88,7 @@ noConfusion-DSA-Unsupported xs₁++ys₁≡xs₂++ys₂ dsa' un =
 noConfusion-ECDSA-Unsupported xs₁++ys₁≡xs₂++ys₂  ecda' un =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
+      o (mk×ₚ _ o∈?) (mk×ₚ _ o∉?) →
         contradiction
           (Any.++⁺ʳ DSA.supportedSignAlgOIDs (Any.++⁺ˡ{ys = RSA.supportedSignAlgOIDs} (toWitness o∈?)))
           (toWitnessFalse o∉?))
@@ -96,7 +98,7 @@ noConfusion-ECDSA-Unsupported xs₁++ys₁≡xs₂++ys₂  ecda' un =
 noConfusion-RSA-Unsupported xs₁++ys₁≡xs₂++ys₂ rsa' un =
   DefinedByOID.noConfusionParam _
     (λ where
-      o (mk×ₚ _ o∈? refl) (mk×ₚ _ o∉? refl) →
+      o (mk×ₚ _ o∈?) (mk×ₚ _ o∉?) →
         contradiction
           (Any.++⁺ʳ DSA.supportedSignAlgOIDs (Any.++⁺ʳ ECDSA.supportedSignAlgOIDs (toWitness o∈?)))
           (toWitnessFalse o∉?))

@@ -10,12 +10,14 @@ open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Alg.Eq where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Sum         UInt8
 
 instance
@@ -23,8 +25,8 @@ instance
   eq≋Unsupported = DefinedByOID.eq≋ UnsupportedParam help
     where
     help : ∀ {@0 bs} → (o : OID bs) → Eq≋ (UnsupportedParam o)
-    help o = eq≋Σₚ it λ _ → record { _≟_ = λ x y → yes (T-unique x y) }
+    help o = Parallel.eq≋Σₚ it λ _ → record { _≟_ = λ x y → yes (T-unique x y) }
 
   eq≋ : Eq≋ PublicKeyAlg
   eq≋ =
-    sumEq≋ ⦃ eq₂ = sumEq≋  ⦄
+    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋  ⦄

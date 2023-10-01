@@ -11,6 +11,7 @@ open import Aeres.Data.X509.DisplayText
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.Eq where
@@ -18,7 +19,8 @@ module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNoti
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 instance
   eq≋ : Eq≋ UserNoticeFields
-  eq≋ = isoEq≋ iso (eq≋&ₚ it it)
+  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it it)

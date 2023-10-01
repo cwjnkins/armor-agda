@@ -5,6 +5,7 @@ import      Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -20,13 +21,13 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 module Aeres.Data.X509.Semantic.StringPrep.ExecDS where
 
 open Aeres.Binary
-open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 
 TranscodeDS : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) Unicode
 TranscodeDS (teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
-TranscodeDS (printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ bs≡)) = inj₂ (_ , (utf8 (proj₂ (helper val))))
+TranscodeDS (printableString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁≡)) = inj₂ (_ , (utf8 (proj₂ (helper val))))
   where
   helper :  ∀ {@0 bs} → IList UInt8 PrintableString.PrintableStringChar bs  → Exists─ (List UInt8) UTF8
   helper nil = _ , nil
@@ -45,9 +46,9 @@ TranscodeDS (printableString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val l
   helper (cons (mkIListCons (PrintableString.mkPrintableStringChar .(# 63) PrintableString.question bs≡₁) tail₁ bs≡)) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 (# 63) (toWitness {Q = 63 <? 128 } tt) bs≡₁)) (proj₂ (helper tail₁)) refl)
   helper (cons (mkIListCons (PrintableString.mkPrintableStringChar c (PrintableString.uppers (fst , snd)) bs≡₁) tail₁ bs≡)) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 c (Nat.≤-trans (s≤s snd) (toWitness {Q = 90 <? 128} tt)) bs≡₁)) (proj₂ (helper tail₁)) refl)
   helper (cons (mkIListCons (PrintableString.mkPrintableStringChar c (PrintableString.lowers (fst , snd)) bs≡₁) tail₁ bs≡)) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 c (Nat.≤-trans (s≤s snd) (toWitness {Q = 122 <? 128} tt)) bs≡₁)) (proj₂ (helper tail₁)) refl)
-TranscodeDS (universalString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf32 val)
-TranscodeDS (utf8String (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf8 val)
-TranscodeDS (bmpString (Aeres.Grammar.Definitions.mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁ refl)) = inj₂ (_ , utf16 val)
+TranscodeDS (universalString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf32 val)
+TranscodeDS (utf8String (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf8 val)
+TranscodeDS (bmpString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf16 val)
 
 ProcessStringDS : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) Unicode
 ProcessStringDS str

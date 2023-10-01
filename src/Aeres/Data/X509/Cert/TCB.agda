@@ -14,16 +14,16 @@ import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Time.TCB
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.OID
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
-import      Aeres.Grammar.Option
+import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.Option.TCB
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Cert.TCB where
 
-open Aeres.Grammar.IList  UInt8
-open Aeres.Grammar.Option UInt8
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.IList.TCB    UInt8
+open Aeres.Grammar.Option.TCB   UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
 
 record CertFields (@0 bs : List UInt8) : Set where
   constructor mkCertFields

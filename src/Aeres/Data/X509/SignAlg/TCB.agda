@@ -14,13 +14,13 @@ import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.SignAlg.ECDSA.TCB as ECDSA
 import      Aeres.Data.X509.SignAlg.DSA.TCB   as DSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Sum.TCB      UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
 
@@ -47,17 +47,17 @@ erase
     → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
 erase (dsa x) =
   case DSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
       mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
 erase (ecdsa x) =
   case ECDSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
       mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
 erase (rsa x) =
   case RSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈ refl) bs≡₁) len≡ bs≡) →
+    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
       mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
-erase (unsupported (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ _ refl) bs≡₁) len≡ bs≡)) =
+erase (unsupported (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ _) bs≡₁) len≡ bs≡)) =
   mkTLV len (mkOIDDefinedFields algOID (─ p₁) bs≡₁) len≡ bs≡
 
 getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID

@@ -7,17 +7,19 @@ open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 
 module Aeres.Data.X509.RDN.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 @0 unambiguousElems : Unambiguous RDNElems
 unambiguousElems =
-  unambiguousΣₚ
-    (SequenceOf.unambiguous ATV.unambiguous TLV.nonempty TLV.nonnesting)
+  Parallel.unambiguous
+    (SequenceOf.unambiguous ATV.unambiguous TLV.nonempty TLV.nosubstrings)
     (λ _ _ _ → Nat.≤-irrelevant _ _)
 
 @0 unambiguous : Unambiguous Name
@@ -25,7 +27,7 @@ unambiguous =
   TLV.unambiguous
     (SequenceOf.unambiguous (TLV.unambiguous unambiguousElems)
       TLV.nonempty
-      TLV.nonnesting)
+      TLV.nosubstrings)
 
 instance
   RDNElemsEq≋ : Eq≋ RDNElems

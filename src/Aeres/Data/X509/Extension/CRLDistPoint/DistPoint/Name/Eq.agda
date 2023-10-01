@@ -19,4 +19,4 @@ open Aeres.Grammar.Sum         UInt8
 
 instance
   eq≋ : Eq≋ DistPointNameChoice
-  eq≋ = isoEq≋ iso sumEq≋
+  eq≋ = Iso.isoEq≋ iso Sum.sumEq≋

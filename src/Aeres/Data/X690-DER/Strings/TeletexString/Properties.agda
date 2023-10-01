@@ -11,5 +11,5 @@ module Aeres.Data.X690-DER.Strings.TeletexString.Properties where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
-@0 nonmalleableTeletexString : NonMalleable TeletexString RawTeletexString
+@0 nonmalleableTeletexString : NonMalleable RawTeletexString
 nonmalleableTeletexString = TLV.nonmalleable OctetString.nonmalleableValue

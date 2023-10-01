@@ -8,8 +8,9 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExecIS
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Cert.Utils
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
 open import Aeres.Grammar.IList as IList
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 open import  Aeres.Data.X509.RDN.ATV.OIDs
@@ -17,9 +18,9 @@ open import  Aeres.Data.X509.RDN.ATV.OIDs
 module Aeres.Data.X509.Semantic.Chain where
 
 open Aeres.Binary
-open Base256
+open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Parallel    UInt8
 
 
 ------- helper functions ------
@@ -40,7 +41,7 @@ CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = Cert.getVersion h ≡ ℤ.+ 2 �
 helperMatchRDNATV : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : Dec ((-, TLV.val o) ∈ Supported)) → RDN.ATVParam o d bs₂ → RDN.ATVParam o d bs₃ → Set
 helperMatchRDNATV o (no ¬p) x x₁ = CompareDS x x₁
 helperMatchRDNATV o (yes (here px)) x x₁ = ComparePS x x₁
-helperMatchRDNATV o (yes (there (here px))) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = ComparePS fstₚ₁ fstₚ₂
+helperMatchRDNATV o (yes (there (here px))) (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = ComparePS fstₚ₁ fstₚ₂
 helperMatchRDNATV o (yes (there (there (here px)))) x x₁ = ComparePS x x₁
 helperMatchRDNATV o (yes (there (there (there (here px))))) x x₁ = CompareIS x x₁
   
@@ -48,19 +49,19 @@ MatchRDNATV : ∀ {@0 bs₁ bs₂} → RDN.ATV bs₁ → RDN.ATV bs₂ → Set
 MatchRDNATV (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len≡ bs≡) (mkTLV len₁ (Sequence.mkOIDDefinedFields oid₁ param₁ bs≡₃) len≡₁ bs≡₁)
   = Σ (_≋_ {A = OID} oid oid₁) (λ where ≋-refl → helperMatchRDNATV oid ((-, TLV.val oid) ∈? Supported) param param₁)
 
-data InSeq {@0 bs} (a : RDN.ATV bs) : (@0 b : List Dig) → SequenceOf RDN.ATV b → Set where
+data InSeq {@0 bs} (a : RDN.ATV bs) : (@0 b : List UInt8) → SequenceOf RDN.ATV b → Set where
   here  : ∀ {@0 bs₁ bs₂ bs₃} {x : RDN.ATV bs₁} {xs : SequenceOf RDN.ATV bs₂} (px : MatchRDNATV a x) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
   there : ∀ {@0 bs₁ bs₂ bs₃} {x : RDN.ATV bs₁} {xs : SequenceOf RDN.ATV bs₂} (pxs : InSeq a bs₂ xs) (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → InSeq a (bs₃) (cons (mkSequenceOf x xs bs≡))
 
-data AllInSeq {@0 bs} (xs : SequenceOf RDN.ATV bs) : (@0 b : List Dig) → SequenceOf RDN.ATV b → Set where
+data AllInSeq {@0 bs} (xs : SequenceOf RDN.ATV bs) : (@0 b : List UInt8) → SequenceOf RDN.ATV b → Set where
   []  : AllInSeq xs [] nil
   cons : ∀ {@0 bs₁ bs₂ bs₃} {x : RDN.ATV bs₁} {xs' : SequenceOf RDN.ATV bs₂} (px : InSeq x _ xs) (pxs : AllInSeq xs _ xs') (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → AllInSeq xs bs₃ (cons (mkSequenceOf x xs' bs≡))
 
 MatchRDNElemsLen : ∀ {@0 bs₁ bs₂} → RDNElems bs₁ → RDNElems bs₂ → Set
-MatchRDNElemsLen (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
+MatchRDNElemsLen (mk×ₚ fstₚ₁ sndₚ₁≡) (mk×ₚ fstₚ₂ sndₚ₂) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
 
 MatchRDN : ∀ {@0 bs₁ bs₂} → RDN bs₁ → RDN bs₂ → Set
-MatchRDN (mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ bs₂' fstₚ₂
+MatchRDN (mkTLV len x@(mk×ₚ fstₚ₁ sndₚ₁) len≡ refl) (mkTLV len₁ x'@(mk×ₚ fstₚ₂ sndₚ₂) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ _ fstₚ₂
 
 MatchRDNSeqHelper : ∀ {@0 bs₁ bs₂} → SequenceOfFields RDN bs₁ → SequenceOfFields RDN bs₂ → Set
 MatchRDNSeqHelper (mkSequenceOf h nil bs≡) (mkSequenceOf h₁ nil bs≡₁) = MatchRDN h h₁
@@ -74,7 +75,7 @@ MatchRDNSeq (mkTLV len nil len≡ bs≡) (mkTLV len₁ (cons x) len≡₁ bs≡�
 MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = ⊥
 MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡₁ bs≡₁) = MatchRDNSeqHelper x x₁
 
-CCP6Seq : List (Exists─ (List Dig) Cert) → Set
+CCP6Seq : List (Exists─ (List UInt8) Cert) → Set
 CCP6Seq [] = ⊥
 CCP6Seq ((fst , snd) ∷ []) = ⊤
 CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
@@ -91,7 +92,7 @@ helperCCP4₁-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldp
   
 helperCCP4₁ : Exists─ (List UInt8) (Option ExtensionFieldCRLDist) → Set
 helperCCP4₁ (─ .[] , none) = ⊤
-helperCCP4₁ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h head₁ tail₁
+helperCCP4₁ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h head₁ tail₁
 
 helperCCP4₂-h : ∀ {@0 h t} → Extension.CRLDistPoint.DistPoint h → IList UInt8 Extension.CRLDistPoint.DistPoint t  → Set
 helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn none bs≡₁) len≡ bs≡) x₁ = ⊥
@@ -102,9 +103,9 @@ helperCCP4₂-h (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x) cr
 
 helperCCP4₂ : Exists─ (List UInt8) (Option ExtensionFieldCRLDist) → Set
 helperCCP4₂ (─ .[] , none) = ⊤
-helperCCP4₂ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h head₁ tail₁
+helperCCP4₂ (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h head₁ tail₁
 
-helperCCP4 : (c : List (Exists─ (List Dig) Cert)) → Set
+helperCCP4 : (c : List (Exists─ (List UInt8) Cert)) → Set
 helperCCP4 [] = ⊥
 helperCCP4 (x₁ ∷ []) = ⊤
 helperCCP4 (x₁ ∷ x₂ ∷ t) with helperCCP4 (x₂ ∷ t) | isCRLSignPresent (Cert.getKU (proj₂ x₂))
@@ -130,7 +131,7 @@ helperMatchRDNATV-dec : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : 
   Dec (helperMatchRDNATV o d p₁ p₂)
 helperMatchRDNATV-dec o (no ¬p) x x₁ = CompareDS-dec x x₁
 helperMatchRDNATV-dec o (yes (here px)) x x₁ = ComparePS-dec x x₁
-helperMatchRDNATV-dec o (yes (there (here px))) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = ComparePS-dec fstₚ₁ fstₚ₂
+helperMatchRDNATV-dec o (yes (there (here px))) (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = ComparePS-dec fstₚ₁ fstₚ₂
 helperMatchRDNATV-dec o (yes (there (there (here px)))) x x₁ = ComparePS-dec x x₁
 helperMatchRDNATV-dec o (yes (there (there (there (here px))))) x x₁ = CompareIS-dec x x₁
 
@@ -143,7 +144,7 @@ MatchRDNATV-dec (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len�
           (no ¬p) → no λ where (≋-refl , snd) → contradiction snd ¬p
           (yes p) → yes (≋-refl , p)
 
-InSeq-dec : ∀ {@0 bs} (a : RDN.ATV bs) → (@0 b : List Dig) → (c : SequenceOf RDN.ATV b) → Dec (InSeq a b c)
+InSeq-dec : ∀ {@0 bs} (a : RDN.ATV bs) → (@0 b : List UInt8) → (c : SequenceOf RDN.ATV b) → Dec (InSeq a b c)
 InSeq-dec a .[] nil = no (λ ())
 InSeq-dec a b (cons (mkIListCons {bs₂ = g} head₁ tail₁ bs≡)) = case MatchRDNATV-dec a head₁ of λ where
   (no ¬p) → case (InSeq-dec a g tail₁) ret (const _) of λ where
@@ -153,7 +154,7 @@ InSeq-dec a b (cons (mkIListCons {bs₂ = g} head₁ tail₁ bs≡)) = case Matc
     (yes p) → yes (there p bs≡)
   (yes p) → yes (here p bs≡)
 
-AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf RDN.ATV bs) → (@0 b : List Dig) → (c : SequenceOf RDN.ATV b) → Dec (AllInSeq xs b c)
+AllInSeq-dec : ∀ {@0 bs} (xs : SequenceOf RDN.ATV bs) → (@0 b : List UInt8) → (c : SequenceOf RDN.ATV b) → Dec (AllInSeq xs b c)
 AllInSeq-dec xs .[] nil = yes AllInSeq.[]
 AllInSeq-dec xs b (cons (mkIListCons head₁ tail₁ bs≡)) = case (InSeq-dec head₁ _ xs) of λ where
   (no ¬p) → no λ where
@@ -164,10 +165,10 @@ AllInSeq-dec xs b (cons (mkIListCons head₁ tail₁ bs≡)) = case (InSeq-dec h
     (yes q) → yes (cons p q bs≡)
 
 MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : RDNElems bs₁) → (m : RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
-MatchRDNElemsLen-dec (Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) (Aeres.Grammar.Definitions.mk×ₚ fstₚ₂ sndₚ₂ bs≡₁) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
+MatchRDNElemsLen-dec (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
 
 MatchRDN-dec : ∀ {@0 bs₁ bs₂} → (n : RDN bs₁) → (m : RDN bs₂) → Dec (MatchRDN n m)
-MatchRDN-dec (mkTLV len x@(Aeres.Grammar.Definitions.mk×ₚ fstₚ₁ sndₚ₁ bs≡) len≡ refl) (mkTLV len₁ x'@(Aeres.Grammar.Definitions.mk×ₚ {bs = bs₂'} fstₚ₂ sndₚ₂ bs≡₁) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ bs₂' fstₚ₂
+MatchRDN-dec (mkTLV len x@(mk×ₚ fstₚ₁ sndₚ₁) len≡ refl) (mkTLV len₁ x'@(mk×ₚ fstₚ₂ sndₚ₂) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ _ fstₚ₂
 
 MatchRDNSeq-dec : ∀ {@0 bs₁ bs₂} → (a : Name bs₁) → (b : Name bs₂) → Dec (MatchRDNSeq a b)
 MatchRDNSeq-dec (mkTLV len nil len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = yes tt
@@ -190,7 +191,7 @@ helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x
 
 helperCCP4₂-dec : (c : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)) → Dec (helperCCP4₂ c)
 helperCCP4₂-dec (─ .[] , none) = yes tt
-helperCCP4₂-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h-dec head₁ tail₁
+helperCCP4₂-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₂-h-dec head₁ tail₁
 
 helperCCP4₁-h-dec : ∀ {@0 h t} → (a : Extension.CRLDistPoint.DistPoint h) → (b : IList UInt8 Extension.CRLDistPoint.DistPoint t)  → Dec (helperCCP4₁-h a b)
 helperCCP4₁-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp crldprsn none bs≡₁) len≡ bs≡) x₁ = no (λ())
@@ -199,9 +200,9 @@ helperCCP4₁-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp c
 
 helperCCP4₁-dec : (c : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)) → Dec (helperCCP4₁ c)
 helperCCP4₁-dec (─ .[] , none) = yes tt
-helperCCP4₁-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h-dec head₁ tail₁
+helperCCP4₁-dec (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons (mkIListCons head₁ tail₁ bs≡₄)) snd₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helperCCP4₁-h-dec head₁ tail₁
 
-helperCCP4-dec : (c : List (Exists─ (List Dig) Cert)) → Dec (helperCCP4 c)
+helperCCP4-dec : (c : List (Exists─ (List UInt8) Cert)) → Dec (helperCCP4 c)
 helperCCP4-dec [] = no λ()
 helperCCP4-dec (x₁ ∷ []) = yes tt
 helperCCP4-dec (x₁ ∷ x₂ ∷ t) with helperCCP4-dec (x₂ ∷ t) | isCRLSignPresent (Cert.getKU (proj₂ x₂))
@@ -273,7 +274,7 @@ CCP3 c = CCP3Seq (reverse (chainToList c))
 ccp3 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP3 c)
 ccp3 c = CCP3Seq-dec (reverse (chainToList c))
   where
-  CCP3Seq-dec : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP3Seq c)
+  CCP3Seq-dec : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP3Seq c)
   CCP3Seq-dec [] = yes tt
   CCP3Seq-dec (x ∷ x₁) = helperCCP3-dec x x₁ ×-dec CCP3Seq-dec x₁
 
@@ -305,7 +306,7 @@ CCP6 c = CCP6Seq (chainToList c)
 ccp6 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP6 c)
 ccp6 c = helper (chainToList c)
   where
-  helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP6Seq c)
+  helper : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP6Seq c)
   helper [] = no (λ ())
   helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
@@ -318,7 +319,7 @@ CCP10 c = CCP10Seq (chainToList c)
 ccp10 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP10 c)
 ccp10 c = helper (chainToList c)
   where
-  helper : (c : List (Exists─ (List Dig) Cert)) → Dec (CCP10Seq c)
+  helper : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP10Seq c)
   helper [] = no λ()
   helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ t) = T-dec ×-dec helper ((fst₁ , snd₁) ∷ t)

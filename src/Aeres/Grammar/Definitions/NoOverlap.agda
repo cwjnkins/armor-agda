@@ -3,7 +3,7 @@
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 
-module Aeres.Grammar.Relation.Definitions (Σ : Set) where
+module Aeres.Grammar.Definitions.NoOverlap (Σ : Set) where
 
 open ≡-Reasoning
 

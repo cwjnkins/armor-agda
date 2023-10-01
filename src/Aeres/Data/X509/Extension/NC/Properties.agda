@@ -9,6 +9,7 @@ open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.Properties where
@@ -16,6 +17,7 @@ module Aeres.Data.X509.Extension.NC.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ (Option PermittedSubtrees) (Option ExcludedSubtrees)
 
@@ -33,10 +35,10 @@ unambiguous = Iso.unambiguous iso
                 (Unambiguous.option₂&₁
                   (TLV.unambiguous
                     (SequenceOf.Bounded.unambiguous
-                      (TLV.unambiguous GeneralSubtree.unambiguous) TLV.nonempty TLV.nonnesting))
-                  TLV.nonnesting
+                      (TLV.unambiguous GeneralSubtree.unambiguous) TLV.nonempty TLV.nosubstrings))
+                  TLV.nosubstrings
                   TLV.nonempty
                   (TLV.unambiguous
                     (SequenceOf.Bounded.unambiguous
-                      (TLV.unambiguous GeneralSubtree.unambiguous)  TLV.nonempty TLV.nonnesting))
+                      (TLV.unambiguous GeneralSubtree.unambiguous)  TLV.nonempty TLV.nosubstrings))
                   TLV.nonempty (TLV.noconfusion λ ()))

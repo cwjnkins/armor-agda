@@ -7,25 +7,27 @@ open import Aeres.Data.PEM.CertText.FullLine.Properties
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.PEM.CertText.FullLine.Parser where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
+open Aeres.Grammar.Parallel             Char
 open Aeres.Grammar.Parser               Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Seq                  Char
 
 
 parseCertFullLine : LogDec.MaximalParser CertFullLine
 parseCertFullLine =
   LogDec.equivalent equiv
-    (LogDec.parse&₁
+    (Seq.MaximalParser.parse&₁
       (parseIList (tell "parseCertFullLine: underflow") _
-        Base64.Char.nonempty Base64.Char.nonnesting
+        Base64.Char.nonempty Base64.Char.nosubstrings
         parseBase64Char _)
-      exactLength-nonnesting
+      (Parallel.ExactLength.nosubstrings _)
       parseMaxEOL)
 

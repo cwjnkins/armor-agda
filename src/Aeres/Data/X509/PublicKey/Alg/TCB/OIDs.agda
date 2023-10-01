@@ -3,14 +3,14 @@
 open import Aeres.Binary
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.OID
-import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Alg.TCB.OIDs where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Parser       UInt8
 
 RSALit : List UInt8
 RSALit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]

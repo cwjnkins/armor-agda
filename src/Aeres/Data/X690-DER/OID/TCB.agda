@@ -36,16 +36,16 @@ record OIDSub (@0 bs : List UInt8) : Set where
 -- TODO: sharpen this
 RawOIDSub : Raw OIDSub
 Raw.D RawOIDSub = List UInt8
-Raw.to RawOIDSub (_ , mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) = lₚ ∷ʳ lₑ
+Raw.to RawOIDSub (mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) = lₚ ∷ʳ lₑ
 
 OIDValue : @0 List UInt8 → Set
 OIDValue = NonEmptySequenceOf OIDSub
 
 RawOIDValue : Raw OIDValue
-RawOIDValue = RawBoundedSequenceOf RawOIDSub
+RawOIDValue = RawBoundedSequenceOf RawOIDSub 1
 
 OID : @0 List UInt8 → Set
 OID = TLV Tag.ObjectIdentifier OIDValue
 
 RawOID : Raw OID
-RawOID = RawTLV RawOIDValue
+RawOID = RawTLV _ RawOIDValue

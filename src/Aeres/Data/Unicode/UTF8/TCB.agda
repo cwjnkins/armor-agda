@@ -1,14 +1,18 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import      Aeres.Grammar.IList
+import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.Definitions.Iso
 import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF8.TCB where
 
+open Aeres.Grammar.Definitions.Iso          UInt8
 open Aeres.Grammar.Definitions.NonMalleable UInt8
-open Aeres.Grammar.IList                    UInt8
+open Aeres.Grammar.IList.TCB                UInt8
+open Aeres.Grammar.Sum.TCB                  UInt8
 
 record UTF8Char1 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char1
@@ -19,7 +23,7 @@ record UTF8Char1 (@0 bs : List UInt8) : Set where
 
 RawUTF8Char1 : Raw UTF8Char1
 Raw.D RawUTF8Char1 = Vec UInt8 1
-Raw.to RawUTF8Char1 = uncurry─ (λ y → (UTF8Char1.b₁ y) ∷ [])
+Raw.to RawUTF8Char1 x = Vec.[ UTF8Char1.b₁ x ]
 
 record UTF8Char2 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char2
@@ -35,7 +39,7 @@ InRangeUTF8Char2 l₁ u₁ l₂ u₂ x = InRange l₁ u₁ b₁ × InRange l₂ 
 
 RawUTF8Char2 : Raw UTF8Char2
 Raw.D RawUTF8Char2 = Vec UInt8 2
-Raw.to RawUTF8Char2 = uncurry─ (λ y → (UTF8Char2.b₁ y) ∷ (UTF8Char2.b₂ y) ∷ [])
+Raw.to RawUTF8Char2 x = UTF8Char2.b₁ x ∷ Vec.[ UTF8Char2.b₂ x ]
 
 record UTF8Char3 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char3
@@ -53,7 +57,7 @@ InRangeUTF8Char3 l₁ u₁ l₂ u₂ l₃ u₃ x = InRange l₁ u₁ b₁ × InR
 
 RawUTF8Char3 : Raw UTF8Char3
 Raw.D RawUTF8Char3 = Vec UInt8 3
-Raw.to RawUTF8Char3 = uncurry─ (λ y → (UTF8Char3.b₁ y) ∷ (UTF8Char3.b₂ y) ∷ (UTF8Char3.b₃ y) ∷ [])
+Raw.to RawUTF8Char3 x = UTF8Char3.b₁ x ∷ UTF8Char3.b₂ x ∷ Vec.[ UTF8Char3.b₃ x ]
 
 record UTF8Char4 (@0 bs : List UInt8) : Set where
   constructor mkUTF8Char4
@@ -72,13 +76,30 @@ InRangeUTF8Char4 l₁ u₁ l₂ u₂ l₃ u₃ l₄ u₄ x =
 
 RawUTF8Char4 : Raw UTF8Char4
 Raw.D RawUTF8Char4 = Vec UInt8 4
-Raw.to RawUTF8Char4 = uncurry─ (λ y → (UTF8Char4.b₁ y) ∷ (UTF8Char4.b₂ y) ∷ (UTF8Char4.b₃ y) ∷ (UTF8Char4.b₄ y) ∷ [])
+Raw.to RawUTF8Char4 x = UTF8Char4.b₁ x ∷ UTF8Char4.b₂ x ∷ UTF8Char4.b₃ x ∷ Vec.[ UTF8Char4.b₄ x ]
 
 data UTF8Char (@0 bs : List UInt8) : Set where
   utf81 : UTF8Char1 bs → UTF8Char bs
   utf82 : UTF8Char2 bs → UTF8Char bs
   utf83 : UTF8Char3 bs → UTF8Char bs
   utf84 : UTF8Char4 bs → UTF8Char bs
+
+UTF8CharRep : @0 List UInt8 → Set
+UTF8CharRep =
+   Sum UTF8Char1
+  (Sum UTF8Char2
+  (Sum UTF8Char3
+       UTF8Char4))
+
+equivalentChar : Equivalent UTF8CharRep UTF8Char
+proj₁ equivalentChar (inj₁ x) = utf81 x
+proj₁ equivalentChar (inj₂ (inj₁ x)) = utf82 x
+proj₁ equivalentChar (inj₂ (inj₂ (inj₁ x))) = utf83 x
+proj₁ equivalentChar (inj₂ (inj₂ (inj₂ x))) = utf84 x
+proj₂ equivalentChar (utf81 x) = inj₁ x
+proj₂ equivalentChar (utf82 x) = inj₂ (inj₁ x)
+proj₂ equivalentChar (utf83 x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equivalentChar (utf84 x) = inj₂ (inj₂ (inj₂ x))
 
 InRangeUTF8Char : (n : Fin 4) (ranges : Vec (UInt8 × UInt8) (1 + toℕ n)) → ∀ {@0 bs} → UTF8Char bs → Set
 InRangeUTF8Char Fin.zero ((l₁ , u₁) ∷ []) (utf81 x) =
@@ -94,12 +115,15 @@ InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) ((l₁ , u₁) ∷ (l₂ 
   InRangeUTF8Char4 l₁ u₁ l₂ u₂ l₃ u₃ l₄ u₄ x
 InRangeUTF8Char (Fin.suc (Fin.suc (Fin.suc Fin.zero))) _ _ = ⊥
 
+RawUTF8CharRep : Raw UTF8CharRep
+RawUTF8CharRep =
+   RawSum RawUTF8Char1
+  (RawSum RawUTF8Char2
+  (RawSum RawUTF8Char3
+          RawUTF8Char4))
+
 RawUTF8Char : Raw UTF8Char
-Raw.D RawUTF8Char = Vec UInt8 1 ⊎ Vec UInt8 2 ⊎ Vec UInt8 3 ⊎ Vec UInt8 4
-Raw.to RawUTF8Char (fst , utf81 x) = inj₁ (Raw.to RawUTF8Char1 (fst , x))
-Raw.to RawUTF8Char (fst , utf82 x) = inj₂ (inj₁ (Raw.to RawUTF8Char2 (fst , x)))
-Raw.to RawUTF8Char (fst , utf83 x) = inj₂ (inj₂ (inj₁ (Raw.to RawUTF8Char3 (fst , x))))
-Raw.to RawUTF8Char (fst , utf84 x) = inj₂ (inj₂ (inj₂ (Raw.to RawUTF8Char4 (fst , x))))
+RawUTF8Char = Iso.raw equivalentChar RawUTF8CharRep
 
 UTF8 : @0 List UInt8 → Set
 UTF8 = IList UTF8Char

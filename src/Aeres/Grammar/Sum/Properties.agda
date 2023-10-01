@@ -14,11 +14,11 @@ nonempty : ∀ {@0 A B} → @0 NonEmpty A → @0 NonEmpty B → NonEmpty (Sum A 
 nonempty ne₁ ne₂ (inj₁ x) ≡[] = contradiction ≡[] (ne₁ x)
 nonempty ne₁ ne₂ (inj₂ x) ≡[] = contradiction ≡[] (ne₂ x)
 
-nonnesting : ∀ {@0 A B} → @0 NonNesting A → @0 NonNesting B → NoConfusion A B → NonNesting (Sum A B)
-nonnesting nn₁ nn₂ nc ++≡ (inj₁ x) (inj₁ x₁) = ‼ nn₁ ++≡ x x₁
-nonnesting nn₁ nn₂ nc ++≡ (inj₁ x) (inj₂ x₁) = ⊥-elim (nc ++≡ x x₁)
-nonnesting nn₁ nn₂ nc ++≡ (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (sym ++≡) x₁ x)
-nonnesting nn₁ nn₂ nc ++≡ (inj₂ x) (inj₂ x₁) = ‼ nn₂ ++≡ x x₁
+nosubstrings : ∀ {@0 A B} → @0 NoSubstrings A → @0 NoSubstrings B → NoConfusion A B → NoSubstrings (Sum A B)
+nosubstrings nn₁ nn₂ nc ++≡ (inj₁ x) (inj₁ x₁) = ‼ nn₁ ++≡ x x₁
+nosubstrings nn₁ nn₂ nc ++≡ (inj₁ x) (inj₂ x₁) = ⊥-elim (nc ++≡ x x₁)
+nosubstrings nn₁ nn₂ nc ++≡ (inj₂ x) (inj₁ x₁) = ⊥-elim (nc (sym ++≡) x₁ x)
+nosubstrings nn₁ nn₂ nc ++≡ (inj₂ x) (inj₂ x₁) = ‼ nn₂ ++≡ x x₁
 
 -- TODO: rename
 unambiguous' : ∀ {@0 A B} → @0 Unambiguous A → @0 Unambiguous B → @0 (∀ {xs} → A xs → ¬ B xs ) → Unambiguous (Sum A B)
@@ -48,11 +48,10 @@ sumEq≋ : ∀ {@0 A B : @0 List Σ → Set} → ⦃ eq₁ : Eq≋ A ⦄ → ⦃
          → Eq≋ (Sum A B)
 sumEq≋ ⦃ eq₁ ⦄ ⦃ eq₂ ⦄ = Eq⇒Eq≋ (sumEq ⦃ Eq≋⇒Eq eq₁ ⦄ ⦃ Eq≋⇒Eq eq₂ ⦄)
 
-@0 nonmalleable : ∀ {@0 A ra B rb} → @0 NonMalleable A ra → @0 NonMalleable B rb → @0 NoConfusion A B → NonMalleable (Sum A B) (RawSum ra rb)
-NonMalleable.unambiguous (nonmalleable x x₁ x₂) = unambiguous (NonMalleable.unambiguous x) (NonMalleable.unambiguous x₁) x₂
-NonMalleable.injective (nonmalleable x x₁ x₂) (─ x₄ , inj₁ x₆) (─ x₅ , inj₁ x₇) x₃ =
-  case NonMalleable.injective x _ _ (inj₁-injective x₃)  of λ where
+@0 nonmalleable : ∀ {A B} {ra : Raw A} {rb : Raw B} → NonMalleable ra → NonMalleable rb → NonMalleable (RawSum ra rb)
+nonmalleable x x₁ (inj₁ x₆) (inj₁ x₇) eq =
+  case x _ _ (inj₁-injective eq)  of λ where
     refl → refl
-NonMalleable.injective (nonmalleable x x₁ x₂) (─ x₄ , inj₂ x₆) (─ x₅ , inj₂ x₇) x₃ =
-  case NonMalleable.injective x₁ _ _ (inj₂-injective x₃)  of λ where
+nonmalleable x x₁ (inj₂ x₆) (inj₂ x₇) eq =
+  case x₁ _ _ (inj₂-injective eq)  of λ where
     refl → refl

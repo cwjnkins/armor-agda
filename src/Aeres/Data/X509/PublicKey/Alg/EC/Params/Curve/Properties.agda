@@ -9,6 +9,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.Properties where
@@ -16,6 +17,7 @@ module Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open ≡-Reasoning
 
 Rep = &ₚ (&ₚ OctetString OctetString) (Option BitString)
@@ -41,6 +43,6 @@ proj₂ (proj₂ iso) (mkCurveFields a b seed refl) = ‼
 
 @0 unambiguous : Unambiguous CurveFields
 unambiguous = Iso.unambiguous iso
-  (unambiguous&ₚ (unambiguous&ₚ (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting (TLV.unambiguous OctetString.unambiguous))
-    (NonNesting&ₚ TLV.nonnesting TLV.nonnesting)
+  (Seq.unambiguous (Seq.unambiguous (TLV.unambiguous OctetString.unambiguous) TLV.nosubstrings (TLV.unambiguous OctetString.unambiguous))
+    (Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings)
       (Unambiguous.option₁ (TLV.unambiguous BitString.unambiguous) TLV.nonempty))

@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -16,6 +17,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.SignAlg.DSA.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -26,7 +28,7 @@ module DSA-Like where
       (DefinedByOID.unambiguous
         _
         λ o' →
-          unambiguous×ₚ
+          Parallel.unambiguous×ₚ
             (TLV.unambiguous (λ where refl refl → refl))
             λ where ≋-refl ≋-refl → refl)
 
@@ -35,7 +37,7 @@ module DSA-Like where
                 → NoConfusion (DSA-Like o₁) (DSA-Like o₂)
   noConfusion o₁ o₂ {t} =
     TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡) bs'≡) →
        let
          @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
          ++≡ = ─ (begin
@@ -47,7 +49,7 @@ module DSA-Like where
            bs₁' ++ p' ++ ys₂ ∎)
 
          @0 bs₁≡ : Erased (bs₁ ≡ bs₁')
-         bs₁≡ = ─ TLV.nonnesting (¡ ++≡) o o'
+         bs₁≡ = ─ TLV.nosubstrings (¡ ++≡) o o'
 
          @0 o≋o' : _≋_{OID} o o'
          o≋o' = mk≋ (¡ bs₁≡) (OID.unambiguous _ o')
@@ -61,8 +63,8 @@ module DSA-Like where
 
 @0 unambiguous : Unambiguous Supported
 unambiguous =
-  unambiguousSum (DSA-Like.unambiguous _)
-    (unambiguousSum (DSA-Like.unambiguous _)
+  Sum.unambiguous (DSA-Like.unambiguous _)
+    (Sum.unambiguous (DSA-Like.unambiguous _)
       (DSA-Like.unambiguous _)
       (DSA-Like.noConfusion _ _))
     (NoConfusion.sumₚ{A = SHA1}

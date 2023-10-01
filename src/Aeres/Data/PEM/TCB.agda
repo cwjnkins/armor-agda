@@ -8,12 +8,14 @@ open import Aeres.Data.PEM.CertText.FinalLine.TCB
 open import Aeres.Data.PEM.CertText.FullLine.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 module Aeres.Data.PEM.TCB where
 
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Parallel    Char
 
 record Cert (@0 bs : List Char) : Set where
   constructor mkCert
@@ -32,7 +34,7 @@ extractCert (mkCert _ (mkCertText body final _) _ _) =
   where
   eb : ∀ {@0 bs} → IList CertFullLine bs → List UInt8
   eb nil = []
-  eb (cons (mkIListCons (mkCertFullLine (mk×ₚ line (─ len≡) refl) _ _) tail₁ _)) =
+  eb (cons (mkIListCons (mkCertFullLine (mk×ₚ line (─ len≡)) _ _) tail₁ _)) =
     decodeStr (mk64Str line (subst (λ x → x % 4 ≡ 0) (sym len≡) refl) (pad0 refl) refl) ++ eb tail₁
 
   ef : ∀ {@0 bs} → CertFinalLine bs → List UInt8

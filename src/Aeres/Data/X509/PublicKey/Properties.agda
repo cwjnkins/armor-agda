@@ -9,14 +9,16 @@ open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep : @0 List UInt8 → Set
-Rep = &ₚᵈ PublicKeyAlg λ _ a → PublicKeyVal (proj₂ (Alg.getOID a))
+Rep = &ₚᵈ PublicKeyAlg λ a → PublicKeyVal (proj₂ (Alg.getOID a))
 
 equiv : Equivalent Rep PublicKeyFields
 proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
@@ -31,7 +33,7 @@ proj₂ (proj₂ iso) (mkPublicKeyFields alg key bs≡) = refl
 unambiguous =
   TLV.unambiguous
     (Iso.unambiguous iso
-      (unambiguous&ₚᵈ
+      (Seq.unambiguousᵈ
         Alg.unambiguous
-        Alg.nonnesting
+        Alg.nosubstrings
         λ a → Val.unambiguous (proj₂ (Alg.getOID a))))

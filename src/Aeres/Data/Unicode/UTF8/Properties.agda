@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF8.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -16,6 +17,7 @@ module Aeres.Data.Unicode.UTF8.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.IList                    UInt8
+open Aeres.Grammar.Parallel                 UInt8
 open Aeres.Grammar.Properties               UInt8
 open Aeres.Grammar.Sum                      UInt8
 
@@ -24,8 +26,8 @@ module UTF8Char1Props where
   unambiguous (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 .b₁ b₁range₁ refl) =
     subst (λ b₁range' → _ ≡ mkUTF8Char1 _ b₁range' refl) (≤-unique b₁range b₁range₁) refl
 
-  nonnesting : NonNesting UTF8Char1
-  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 b₂ b₁range₁ refl) =
+  nosubstrings : NoSubstrings UTF8Char1
+  nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 b₂ b₁range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ [ b₁ ] _ [ b₂ ] _ xs₁++ys₁≡xs₂++ys₂ refl
 
   noconfusion : NoConfusion UTF8Char1 (Sum UTF8Char2 (Sum UTF8Char3 UTF8Char4))
@@ -90,9 +92,8 @@ module UTF8Char1Props where
       @0 b₁≡ : UTF8Char1.b₁ a ≡ UTF8Char4.b₁ x
       b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char1.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
-  @0 nonmalleable : NonMalleable UTF8Char1 RawUTF8Char1
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (─ _ , mkUTF8Char1 b₁ b₁range refl) (─ _ , mkUTF8Char1 ._ b₁range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawUTF8Char1
+  nonmalleable (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 ._ b₁range₁ refl) refl =
     case (‼ ≤-irrelevant b₁range b₁range₁) ret (const _) of λ where
       refl → refl
 
@@ -102,8 +103,8 @@ module UTF8Char2Props where
     subst₂ (λ b₁r b₂r → mkUTF8Char2 b₁ b₂ b₁range b₂range refl ≡ mkUTF8Char2 _ _ b₁r b₂r refl)
       (inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) (inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) refl
 
-  nonnesting : NonNesting UTF8Char2
-  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) =
+  nosubstrings : NoSubstrings UTF8Char2
+  nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ (b₁ ∷ [ b₂ ]) _ (b₃ ∷ [ b₄ ]) _ xs₁++ys₁≡xs₂++ys₂ refl
 
   noconfusion : NoConfusion UTF8Char2 (Sum UTF8Char3 UTF8Char4)
@@ -148,16 +149,15 @@ module UTF8Char2Props where
       @0 b₁≡ : UTF8Char2.b₁ a ≡ UTF8Char4.b₁ x
       b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char2.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
-  @0 nonmalleable : NonMalleable UTF8Char2 RawUTF8Char2
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (fst₁ , mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawUTF8Char2
+  nonmalleable (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) refl =
       case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
         refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
           refl → refl)
 
 module UTF8Char3Props where
-  nonnesting : NonNesting UTF8Char3
-  nonnesting xs₁++ys₁≡xs₂++ys₂
+  nosubstrings : NoSubstrings UTF8Char3
+  nosubstrings xs₁++ys₁≡xs₂++ys₂
     (mkUTF8Char3 b₁ b₂ b₃ b₁range  b₂range  b₃range refl)
     (mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ refl) =
     proj₁ (Lemmas.length-++-≡ (b₁ ∷ b₂ ∷ [ b₃ ]) _ (b₄ ∷ b₅ ∷ [ b₆ ]) _ xs₁++ys₁≡xs₂++ys₂ refl)
@@ -167,17 +167,17 @@ module UTF8Char3Props where
     Σₚ (ExactLengthString 3)
       λ _ els →
         Erased
-          (InRange 224 239 (lookupELS els (# 0))
-           × InRange 128 191 (lookupELS els (# 1))
-           × InRange 128 191 (lookupELS els (# 2)))
+          (InRange 224 239 (lookupExactLengthString els (# 0))
+           × InRange 128 191 (lookupExactLengthString els (# 1))
+           × InRange 128 191 (lookupExactLengthString els (# 2)))
 
   iso : Iso Rep UTF8Char3
-  proj₁ (proj₁ iso) (mk×ₚ els@(mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [] ) refl) sndₚ₂ refl) (─ (b₁range , b₂range , b₃range)) refl) =
+  proj₁ (proj₁ iso) (mk×ₚ els@(mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [] ) refl) sndₚ₂) (─ (b₁range , b₂range , b₃range))) =
     mkUTF8Char3
-      (lookupELS els (# 0)) (lookupELS els (# 1)) (lookupELS els (# 2)) b₁range b₂range b₃range refl
+      (lookupExactLengthString els (# 0)) (lookupExactLengthString els (# 1)) (lookupExactLengthString els (# 2)) b₁range b₂range b₃range refl
   proj₂ (proj₁ iso) (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) =
-    mk×ₚ (mk×ₚ self (─ refl) refl) (─ (b₁range , b₂range , b₃range)) refl
-  proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [] ) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range)) refl) =
+    mk×ₚ (mk×ₚ self (─ refl)) (─ (b₁range , b₂range , b₃range))
+  proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ []) refl) (─ refl)) (─ (b₁range , b₂range , b₃range))) =
     refl
   proj₂ (proj₂ iso) (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) =
     refl
@@ -185,8 +185,8 @@ module UTF8Char3Props where
   @0 unambiguous : Unambiguous UTF8Char3
   unambiguous =
     Iso.unambiguous iso
-      (unambiguousΣₚ
-        exactLengthString-unambiguous
+      (Parallel.unambiguous
+        Parallel.ExactLengthString.unambiguous
         (λ {xs} a →
           erased-unique
             (×-unique (inRange-unique{A = ℕ}{B = UInt8})
@@ -212,17 +212,16 @@ module UTF8Char3Props where
     @0 b₁≡ : UTF8Char3.b₁ a ≡ UTF8Char4.b₁ x
     b₁≡ = ∷-injectiveˡ (proj₁ (Lemmas.length-++-≡ [ UTF8Char3.b₁ a ] _ [ UTF8Char4.b₁ x ] _ bs≡ refl))
 
-  @0 nonmalleable : NonMalleable UTF8Char3 RawUTF8Char3
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (fst₁ , mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawUTF8Char3
+  nonmalleable (mkUTF8Char3 b₁ b₂ b₃ b₁range b₂range b₃range refl) (mkUTF8Char3 b₄ b₅ b₆ b₁range₁ b₂range₁ b₃range₁ refl) refl =
     case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
       refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
         refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₃range b₃range₁) ret (const _) of λ where
           refl → refl))
 
 module UTF8Char4Props where
-  nonnesting : NonNesting UTF8Char4
-  nonnesting xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄ranger refl) (mkUTF8Char4 b₅ b₆ b₇ b₈ b₁range₁ b₂range₁ b₃range₁ b₄range₁ refl) =
+  nosubstrings : NoSubstrings UTF8Char4
+  nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄ranger refl) (mkUTF8Char4 b₅ b₆ b₇ b₈ b₁range₁ b₂range₁ b₃range₁ b₄range₁ refl) =
     proj₁ (Lemmas.length-++-≡ (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]) _ (b₅ ∷ b₆ ∷ b₇ ∷ [ b₈ ]) _ xs₁++ys₁≡xs₂++ys₂ refl)
 
   Rep : @0 List UInt8 → Set
@@ -230,26 +229,26 @@ module UTF8Char4Props where
     Σₚ (ExactLengthString 4)
       λ _ els →
         Erased
-          (  InRange 240 247 (lookupELS els (# 0))
-           × InRange 128 191 (lookupELS els (# 1))
-           × InRange 128 191 (lookupELS els (# 2))
-           × InRange 128 191 (lookupELS els (# 3)))
+          (  InRange 240 247 (lookupExactLengthString els (# 0))
+           × InRange 128 191 (lookupExactLengthString els (# 1))
+           × InRange 128 191 (lookupExactLengthString els (# 2))
+           × InRange 128 191 (lookupExactLengthString els (# 3)))
 
   equiv : Equivalent Rep UTF8Char4
-  proj₁ equiv (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl) refl) (─ (fst , fst₁ , fst₂ , snd)) refl) =
+  proj₁ equiv (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl)) (─ (fst , fst₁ , fst₂ , snd))) =
     mkUTF8Char4 x x₁ x₂ x₃ fst fst₁ fst₂ snd refl
-  proj₂ equiv (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range bs≡) =
-    mk×ₚ (mk×ₚ (singleton (b₁ ∷ b₂ ∷ b₃ ∷ [ b₄ ]) refl) (─ refl) refl) (─ (b₁range , b₂range , b₃range , b₄range)) (sym bs≡)
+  proj₂ equiv (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) =
+    mk×ₚ (mk×ₚ self (─ refl)) (─ (b₁range , b₂range , b₃range , b₄range))
 
   iso : Iso Rep UTF8Char4
   proj₁ iso = equiv
-  proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl) refl) (─ (r₁ , r₂ , r₃ , r₄)) refl) = refl
+  proj₁ (proj₂ iso) (mk×ₚ (mk×ₚ (singleton (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ []) refl) (─ refl)) (─ (r₁ , r₂ , r₃ , r₄))) = refl
   proj₂ (proj₂ iso) (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) = refl
 
   @0 unambiguous : Unambiguous UTF8Char4
   unambiguous =
     Iso.unambiguous iso
-      (unambiguousΣₚ exactLengthString-unambiguous
+      (Parallel.unambiguous Parallel.ExactLengthString.unambiguous
         (λ {xs} a →
           erased-unique
             (×-unique (inRange-unique{A = ℕ}{B = UInt8})
@@ -257,9 +256,8 @@ module UTF8Char4Props where
                 (×-unique (inRange-unique{A = ℕ}{B = UInt8})
                   (inRange-unique{A = ℕ}{B = UInt8}))))))
 
-  @0 nonmalleable : NonMalleable UTF8Char4 RawUTF8Char4
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) (fst₁ , mkUTF8Char4 b₅ b₆ b₇ b₈ b₁range₁ b₂range₁ b₃range₁ b₄range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawUTF8Char4
+  nonmalleable (mkUTF8Char4 b₁ b₂ b₃ b₄ b₁range b₂range b₃range b₄range refl) (mkUTF8Char4 b₅ b₆ b₇ b₈ b₁range₁ b₂range₁ b₃range₁ b₄range₁ refl) refl =
     case (‼ inRange-unique{A = ℕ}{B = UInt8} b₁range b₁range₁) of λ where
       refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₂range b₂range₁) ret (const _) of λ where
         refl → (case (‼ inRange-unique{A = ℕ}{B = UInt8} b₃range b₃range₁) ret (const _) of λ where
@@ -267,24 +265,8 @@ module UTF8Char4Props where
             refl → refl)))
 
 module UTF8CharProps where
-  Rep : @0 List UInt8 → Set
-  Rep =  Sum UTF8Char1
-        (Sum UTF8Char2
-        (Sum UTF8Char3
-             UTF8Char4))
-
-  equiv : Equivalent Rep UTF8Char
-  proj₁ equiv (inj₁ u1) = utf81 u1
-  proj₁ equiv (inj₂ (inj₁ x)) = utf82 x
-  proj₁ equiv (inj₂ (inj₂ (inj₁ x))) = utf83 x
-  proj₁ equiv (inj₂ (inj₂ (inj₂ x))) = utf84 x
-  proj₂ equiv (utf81 x) = inj₁ x
-  proj₂ equiv (utf82 x) = inj₂ (inj₁ x)
-  proj₂ equiv (utf83 x) = inj₂ (inj₂ (inj₁ x))
-  proj₂ equiv (utf84 x) = inj₂ (inj₂ (inj₂ x))
-
-  iso : Iso Rep UTF8Char
-  proj₁ iso = equiv
+  iso : Iso UTF8CharRep UTF8Char
+  proj₁ iso = equivalentChar
   proj₁ (proj₂ iso) (inj₁ x) = refl
   proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
   proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl
@@ -297,11 +279,11 @@ module UTF8CharProps where
   @0 unambiguous : Unambiguous UTF8Char
   unambiguous =
     Iso.unambiguous iso
-      (unambiguousSum
+      (Sum.unambiguous
         UTF8Char1Props.unambiguous
-        (unambiguousSum
+        (Sum.unambiguous
           UTF8Char2Props.unambiguous
-          (unambiguousSum
+          (Sum.unambiguous
             UTF8Char3Props.unambiguous
             UTF8Char4Props.unambiguous
             UTF8Char3Props.noconfusion)
@@ -314,43 +296,35 @@ module UTF8CharProps where
   nonempty (utf83 ()) refl
   nonempty (utf84 ()) refl
 
-  nonnesting : NonNesting UTF8Char
-  nonnesting =
-    equivalent-nonnesting equiv
-      (nonnestingSum
-        UTF8Char1Props.nonnesting
-        (nonnestingSum UTF8Char2Props.nonnesting
-          (nonnestingSum
-            UTF8Char3Props.nonnesting
-            UTF8Char4Props.nonnesting
+  nosubstrings : NoSubstrings UTF8Char
+  nosubstrings =
+    Iso.nosubstrings equivalentChar
+      (Sum.nosubstrings
+        UTF8Char1Props.nosubstrings
+        (Sum.nosubstrings UTF8Char2Props.nosubstrings
+          (Sum.nosubstrings
+            UTF8Char3Props.nosubstrings
+            UTF8Char4Props.nosubstrings
             UTF8Char3Props.noconfusion)
           UTF8Char2Props.noconfusion)
         UTF8Char1Props.noconfusion)
 
-  @0 nonmalleable : NonMalleable UTF8Char RawUTF8Char
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , utf81 x₁) (fst₁ , utf81 x₂) refl =
-    case NonMalleable.injective (UTF8Char1Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
-      refl → refl
-  NonMalleable.injective nonmalleable (fst , utf82 x₁) (fst₁ , utf82 x₂) refl =
-    case NonMalleable.injective (UTF8Char2Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
-      refl → refl
-  NonMalleable.injective nonmalleable (fst , utf83 x₁) (fst₁ , utf83 x₂) refl =
-    case NonMalleable.injective (UTF8Char3Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
-      refl → refl
-  NonMalleable.injective nonmalleable (fst , utf84 x₁) (fst₁ , utf84 x₂) refl =
-    case NonMalleable.injective (UTF8Char4Props.nonmalleable) (fst , x₁) (fst₁ , x₂) refl  of λ where
-      refl → refl
+  @0 nonmalleable : NonMalleable RawUTF8Char
+  nonmalleable =
+    Iso.nonmalleable iso RawUTF8CharRep
+      (Sum.nonmalleable UTF8Char1Props.nonmalleable
+      (Sum.nonmalleable UTF8Char2Props.nonmalleable
+      (Sum.nonmalleable UTF8Char3Props.nonmalleable
+                        UTF8Char4Props.nonmalleable)))
 
 @0 unambiguous : Unambiguous UTF8
 unambiguous =
   IList.unambiguous
-    UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nonnesting
+    UTF8CharProps.unambiguous UTF8CharProps.nonempty UTF8CharProps.nosubstrings
 
-@0 nonmalleable : NonMalleable UTF8 RawUTF8
-NonMalleable.unambiguous nonmalleable = unambiguous
-NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
-  NonMalleable.injective (IList.nonmalleable UTF8CharProps.nonempty UTF8CharProps.nonnesting UTF8CharProps.nonmalleable) (fst , snd) (fst₁ , snd₁) x
+@0 nonmalleable : NonMalleable RawUTF8
+nonmalleable snd snd₁ x =
+  IList.nonmalleable UTF8CharProps.nonempty UTF8CharProps.nosubstrings UTF8CharProps.nonmalleable snd snd₁ x
 
 sizeUnique : ∀ {@0 bs} → (a₁ a₂ : UTF8 bs) → UTF8.size a₁ ≡ UTF8.size a₂
 sizeUnique a₁ a₂ = ‼ cong UTF8.size (unambiguous a₁ a₂)

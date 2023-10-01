@@ -3,9 +3,10 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.TLV.TCB
-open import Aeres.Data.X690-DER.TLV.Properties as TLV
+import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -15,6 +16,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X690-DER.TLV.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseTLV
@@ -50,7 +52,7 @@ module parseTLV
                                          x ∷ (l ++ v) ++ suffix ≡⟨ ps≡ ⟩
                                          x ∷ xs                 ∎))))
                   ¬parse
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ val (─ lenVal) refl) suf₁ ps≡₁) ← runParser (p (getLength len₀)) suf₀
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ val (─ lenVal)) suf₁ ps≡₁) ← runParser (p (getLength len₀)) suf₀
           where no ¬parse → do
             tell $ here' String.++ ": error parsing value: " String.++ show (map toℕ (take 10 (suf₀)))
             return ∘ no $ λ where
@@ -63,14 +65,14 @@ module parseTLV
                       l ++ v ++ suffix   ∎
 
                     @0 pre₀≡ : pre₀ ≡ l
-                    pre₀≡ = Length.nonnesting xs≡ len₀ len
+                    pre₀≡ = Length.nosubstrings xs≡ len₀ len
 
                     @0 len≡' : getLength len ≡ getLength len₀
                     len≡' = Length.unambiguous-getLength (sym pre₀≡) len len₀
                 in
                 contradiction
                   (success v _ refl
-                    (mk×ₚ val (─ trans (sym len≡) len≡') refl) suffix
+                    (mk×ₚ val (─ trans (sym len≡) len≡')) suffix
                     (++-cancelˡ pre₀
                       (begin (pre₀ ++ v ++ suffix ≡⟨ cong (λ x → x ++ v ++ suffix) pre₀≡ ⟩
                               l ++ v ++ suffix    ≡⟨ solve (++-monoid UInt8) ⟩
@@ -102,16 +104,16 @@ runParser (parseTLVLenBound l u tName p) xs = do
   yes (success pre r r≡ v suf bs≡) ← runParser p xs
     where no ¬parse → do
       return ∘ no $ λ where
-        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+        (success pre' r' r'≡ (mk×ₚ v' _) suf' bs≡') →
           contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
   case inRange? l u (getLength (TLV.len v)) of λ where
     (yes l≤len≤u) →
       return (yes
-        (success pre r r≡ (mk×ₚ v l≤len≤u refl) suf bs≡))
+        (success pre r r≡ (mk×ₚ v l≤len≤u) suf bs≡))
     (no  ¬l≤len≤u) → do
       tell $ "parseTLVLenBound: " String.++ tName String.++ ": given length bounds violated"
       return ∘ no $ λ where
-        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u refl) suf' bs≡') → ‼
+        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u) suf' bs≡') → ‼
           let @0 len≡ : getLength (TLV.len v) ≡ getLength (TLV.len v')
               len≡ = TLV.getLengthLen≡ (trans₀ bs≡ (sym bs≡')) v v'
           in
@@ -126,7 +128,7 @@ runParser (parseTLVSizeBound size uniqueSize l u tName p) xs = do
   yes (success pre r r≡ tlv@(mkTLV{v = v} len val len≡ bs≡) suf ps≡) ← runParser p xs
     where no ¬parse → do
       return ∘ no $ λ where
-        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+        (success pre' r' r'≡ (mk×ₚ v' _refl) suf' bs≡') →
           contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
   case inRange? l u (size val) of λ where
     (no ¬p) → do
@@ -135,16 +137,16 @@ runParser (parseTLVSizeBound size uniqueSize l u tName p) xs = do
         String.++ ": size " String.++ show (size val)
         String.++ " out of bounds: " String.++ show l String.++ "," String.++ show u
       return ∘ no $ λ where
-        (success prefix read read≡ (mk×ₚ tlv'@(mkTLV{v = v'} len' val' len≡' bs≡') ir refl) suffix ps≡') →
+        (success prefix read read≡ (mk×ₚ tlv'@(mkTLV{v = v'} len' val' len≡' bs≡') ir) suffix ps≡') →
           let
             xs≡ : Erased (prefix ++ suffix ≡ pre ++ suf)
             xs≡ = ─ trans ps≡' (sym ps≡)
 
             prefix≡ : Erased (prefix ≡ pre)
-            prefix≡ = ─ nonnesting (¡ xs≡) tlv' tlv
+            prefix≡ = ─ TLV.nosubstrings (¡ xs≡) tlv' tlv
 
             v≡ : Erased (v ≡ v')
-            v≡ = ─ TLVProps.valBS≡ (sym (¡ prefix≡)) tlv tlv' 
+            v≡ = ─ TLV.valBS≡ (sym (¡ prefix≡)) tlv tlv' 
 
             len≡ : Erased (size val' ≡ size val)
             len≡ = ─
@@ -153,7 +155,7 @@ runParser (parseTLVSizeBound size uniqueSize l u tName p) xs = do
           in
           contradiction (subst (InRange{B = ℕ} l u) (¡ len≡) ir) ¬p
     (yes p) →
-      return (yes (success pre r r≡ (mk×ₚ tlv p refl) suf ps≡))
+      return (yes (success pre r r≡ (mk×ₚ tlv p) suf ps≡))
   where
   open ≡-Reasoning
 
@@ -164,16 +166,16 @@ runParser (parseTLVNonEmpty p) xs = do
   yes (success pre r r≡ v suf bs≡) ← runParser p xs
     where no ¬parse → do
       return ∘ no $ λ where
-        (success pre' r' r'≡ (mk×ₚ v' _ refl) suf' bs≡') →
+        (success pre' r' r'≡ (mk×ₚ v' _) suf' bs≡') →
           contradiction (success pre' r' r'≡ v' suf' bs≡') ¬parse
   case 1 ≤? (getLength (TLV.len v)) of λ where
     (yes l≤len≤u) →
       return (yes
-        (success pre r r≡ (mk×ₚ v l≤len≤u refl) suf bs≡))
+        (success pre r r≡ (mk×ₚ v l≤len≤u) suf bs≡))
     (no  ¬l≤len≤u) → do
       tell $ "parseTLVLenBound" String.++ ": given length bounds violated"
       return ∘ no $ λ where
-        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u refl) suf' bs≡') → ‼
+        (success pre' r' r'≡ (mk×ₚ v' l≤len≤u) suf' bs≡') → ‼
           let @0 len≡ : getLength (TLV.len v) ≡ getLength (TLV.len v')
               len≡ = TLV.getLengthLen≡ (trans₀ bs≡ (sym bs≡')) v v'
           in

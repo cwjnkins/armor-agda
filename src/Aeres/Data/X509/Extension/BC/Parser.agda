@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
@@ -15,6 +16,7 @@ module Aeres.Data.X509.Extension.BC.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -22,8 +24,8 @@ private
 
 parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
 parseBCFieldsSeqFields n =
-  parseEquivalent (equivalent×ₚ equivalent)
-    (parseOption₂ TLV.nonnesting TLV.nonnesting
+  parseEquivalent (Parallel.equivalent₁ equivalent)
+    (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings
       (TLV.noconfusion λ where ())
       parseBool
       Int.parse
@@ -33,7 +35,7 @@ parseBCFieldsSeq : Parser (Logging ∘ Dec) BCFieldsSeq
 parseBCFieldsSeq = parseTLV _ (here' String.++ ": Seq") _ parseBCFieldsSeqFields
 
 parseBCFields : Parser (Logging ∘ Dec) BCFields
-parseBCFields = parseTLV _ here' _ (parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") parseBCFieldsSeq)
+parseBCFields = parseTLV _ here' _ (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") parseBCFieldsSeq)
 
 -- private
 --   module Test where

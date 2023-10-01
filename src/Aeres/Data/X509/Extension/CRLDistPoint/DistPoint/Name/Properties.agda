@@ -16,11 +16,11 @@ module Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum         UInt8
 
-nonnesting : NonNesting DistPointNameChoice
-nonnesting x (fullname x₁) (fullname x₂) = ‼ TLV.nonnesting x x₁ x₂
-nonnesting x (fullname x₁) (nameRTCrlissr x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (nameRTCrlissr x₁) (fullname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
-nonnesting x (nameRTCrlissr x₁) (nameRTCrlissr x₂) = ‼ TLV.nonnesting x x₁ x₂
+nosubstrings : NoSubstrings DistPointNameChoice
+nosubstrings x (fullname x₁) (fullname x₂) = ‼ TLV.nosubstrings x x₁ x₂
+nosubstrings x (fullname x₁) (nameRTCrlissr x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (nameRTCrlissr x₁) (fullname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
+nosubstrings x (nameRTCrlissr x₁) (nameRTCrlissr x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
 Rep = Sum FullName NameRTCrlIssuer
 
@@ -40,5 +40,5 @@ proj₂ (proj₂ iso) (nameRTCrlissr x) = refl
 @0 unambiguous : Unambiguous DistPointNameChoice
 unambiguous =
   Iso.unambiguous iso
-    (unambiguousSum (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
+    (Sum.unambiguous (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
       (TLV.unambiguous RDN.unambiguousElems) (TLV.noconfusion λ ()))

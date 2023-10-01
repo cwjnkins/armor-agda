@@ -15,4 +15,4 @@ UTF8String : @0 List UInt8 → Set
 UTF8String = TLV Tag.UTF8String UTF8
 
 RawUTF8String : Raw UTF8String 
-RawUTF8String = RawTLV RawUTF8
+RawUTF8String = RawTLV _ RawUTF8

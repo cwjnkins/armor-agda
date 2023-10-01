@@ -18,8 +18,10 @@ import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -27,24 +29,26 @@ module Aeres.Data.X509.TBSCert.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 private
   here' = "X509: TBSCert"
 
 parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields n)
 parseTBSCertFields n =
-  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (equivalent×ₚ equivalent))
-    (parse&ᵈ{A = WithinLength (&ₚ (Option Version) Int) n}
-      (withinLength-nonnesting (NonNesting.noconfusion-option&₁ TLV.nonnesting TLV.nonnesting (TLV.noconfusion λ ())))
-      (withinLength-unambiguous
+  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalent))
+    (parse&ᵈ{A = Length≤ (&ₚ (Option Version) Int) n}
+      (Parallel.nosubstrings₁ (NonNesting.noconfusion-option&₁ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())))
+      (Parallel.Length≤.unambiguous _
         (Unambiguous.unambiguous-option₁&₁
           (TLV.unambiguous
             (TLV.unambiguous λ{xs} → Int.unambiguous{xs}))
-          TLV.nonnesting
+          TLV.nosubstrings
           (TLV.unambiguous λ{xs} → Int.unambiguous{xs}) (TLV.noconfusion λ ())))
-      (parseOption₁&₁≤ parseVersion Int.parse TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ())) overflow n)
+      (Option.parseOption₁&₁≤ parseVersion Int.parse TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ())) overflow n)
       λ where
         (singleton r₁ r₁≡) _ →
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₇ (n - x)))
@@ -56,8 +60,8 @@ parseTBSCertFields n =
 
   p₆ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₂ n)
   p₆ n =
-      parseOption₃{A = IssUID}{B = SubUID}{C = Extensions}
-        TLV.nonnesting TLV.nonnesting TLV.nonnesting
+      Option.parseOption₃{A = IssUID}{B = SubUID}{C = Extensions}
+        TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseIssUID parseSubUID parseExtensions
         (tell $ here' String.++ ": underflow (issUID, subUID, extensions)")
@@ -66,11 +70,11 @@ parseTBSCertFields n =
   p₅ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₃ n)
   p₅ n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ {A = WithinLength (PublicKey ×ₚ Singleton) n}
-        (withinLength-nonnesting (nonnestingΣₚ₁ TLV.nonnesting))
-        (withinLength-unambiguous (unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl)))
+      (parse&ᵈ {A = Length≤ (PublicKey ×ₚ Singleton) n}
+        (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
+        (Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl)))
         (parse≤ _ (parse×Singleton parsePublicKey)
-        (nonnesting×ₚ₁ TLV.nonnesting) overflow)
+        (Parallel.nosubstrings₁ TLV.nosubstrings) overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₂ (n - x)))
@@ -79,10 +83,10 @@ parseTBSCertFields n =
   p₄ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₄ n)
   p₄ n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ {A = WithinLength Name n}
-        (withinLength-nonnesting TLV.nonnesting)
-        (withinLength-unambiguous RDN.unambiguous)
-        (parse≤ _ RDN.parse TLV.nonnesting overflow)
+      (parse&ᵈ {A = Length≤ Name n}
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Parallel.Length≤.unambiguous _ RDN.unambiguous)
+        (parse≤ _ RDN.parse TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₃ (n ∸ x)))
@@ -92,10 +96,10 @@ parseTBSCertFields n =
   p₃ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₅ n)
   p₃ n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ {A = WithinLength Validity n}
-        (withinLength-nonnesting TLV.nonnesting)
-        (withinLength-unambiguous (TLV.unambiguous Validity.unambiguous))
-        (parse≤ _ parseValidity TLV.nonnesting overflow)
+      (parse&ᵈ {A = Length≤ Validity n}
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Parallel.Length≤.unambiguous _ (TLV.unambiguous Validity.unambiguous))
+        (parse≤ _ parseValidity TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₄ (n ∸ x)))
@@ -104,10 +108,10 @@ parseTBSCertFields n =
   p₂ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₆ n)
   p₂ n  =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ{A = WithinLength Name n}
-        (withinLength-nonnesting TLV.nonnesting)
-        (withinLength-unambiguous RDN.unambiguous)
-        (parse≤ _ RDN.parse TLV.nonnesting overflow)
+      (parse&ᵈ{A = Length≤ Name n}
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Parallel.Length≤.unambiguous _ RDN.unambiguous)
+        (parse≤ _ RDN.parse TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₅ (n ∸ x)))
@@ -116,10 +120,10 @@ parseTBSCertFields n =
   p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₇ n)
   p₁ n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-      (parse&ᵈ{A = WithinLength SignAlg n}
-        (withinLength-nonnesting{A = SignAlg} SignAlg.nonnesting)
-        (withinLength-unambiguous SignAlg.unambiguous)
-        (parse≤ _ parseSignAlg SignAlg.nonnesting overflow)
+      (parse&ᵈ{A = Length≤ SignAlg n}
+        (Parallel.nosubstrings₁{A = SignAlg} SignAlg.nosubstrings)
+        (Parallel.Length≤.unambiguous _ SignAlg.unambiguous)
+        (parse≤ _ parseSignAlg SignAlg.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₆ (n - x)))

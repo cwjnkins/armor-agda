@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -15,6 +16,7 @@ open import Aeres.Prelude
 module Aeres.Data.X509.SignAlg.ECDSA.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -25,7 +27,7 @@ module ECDSA-Like where
       (DefinedByOID.unambiguous
         _
         λ where
-          o' (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) → refl)
+          o' (mk×ₚ refl ≋-refl) (mk×ₚ refl ≋-refl) → refl)
 
   @0 noConfusion
     : ∀ {@0 bs₁ bs₂} → (o₁ : OIDValue bs₁) (o₂ : OIDValue bs₂)
@@ -34,15 +36,15 @@ module ECDSA-Like where
   noConfusion o₁ o₂ {t} =
     DefinedByOID.noConfusionParam (ECDSA-Like-Params o₁)
       λ where
-        o (mk×ₚ refl ≋-refl refl) (mk×ₚ refl ≋-refl refl) →
+        o (mk×ₚ refl ≋-refl) (mk×ₚ refl ≋-refl) →
           contradiction ≋-refl (toWitnessFalse t)
 
 @0 unambiguous : Unambiguous Supported
 unambiguous =
-  unambiguousSum (ECDSA-Like.unambiguous _)
-    (unambiguousSum (ECDSA-Like.unambiguous _)
-      (unambiguousSum (ECDSA-Like.unambiguous _)
-        (unambiguousSum (ECDSA-Like.unambiguous _)
+  Sum.unambiguous (ECDSA-Like.unambiguous _)
+    (Sum.unambiguous (ECDSA-Like.unambiguous _)
+      (Sum.unambiguous (ECDSA-Like.unambiguous _)
+        (Sum.unambiguous (ECDSA-Like.unambiguous _)
           (ECDSA-Like.unambiguous _)
           (ECDSA-Like.noConfusion _ _))
         (NoConfusion.sumₚ {A = SHA256}

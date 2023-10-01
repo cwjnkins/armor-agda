@@ -11,5 +11,5 @@ module Aeres.Data.X690-DER.Strings.UTF8String.Properties where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
-@0 nonmalleableUTF8String : NonMalleable UTF8String RawUTF8String
+@0 nonmalleableUTF8String : NonMalleable RawUTF8String
 nonmalleableUTF8String = TLV.nonmalleable UTF8.nonmalleable

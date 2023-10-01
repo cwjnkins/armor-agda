@@ -4,14 +4,16 @@ open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
 open import Aeres.Grammar.IList as IList
+import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Semantic.Cert.Utils where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 
 ------- helper functions -----
@@ -144,7 +146,7 @@ isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (some (mkTLV len (
 -- get SAN length
 getSANLength : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.SANLit) Extension.SANFields)) → ℕ
 getSANLength (─ .[] , none) = 0
-getSANLength (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = lengthSequence fstₚ₁
+getSANLength (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = lengthSequence fstₚ₁
 
 
 -- is SAN present in Cert ?
@@ -162,7 +164,7 @@ isKUPresent (fst , some x) = true
 -- either distributionPoint or CRLIssuer MUST be present.
 checkCRLDistStruct : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.CRLDISTLit) Extension.CRLDistFields)) → Bool
 checkCRLDistStruct (─ .[] , none) = true
-checkCRLDistStruct (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁ bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
+checkCRLDistStruct (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
   where
   helper : ∀ {@0 bs} → SequenceOf Extension.CRLDistPoint.DistPoint bs → Bool
   helper nil = true

@@ -5,12 +5,14 @@ open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Val.EC.TCB where
 
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Seq.TCB      UInt8
 
 
 {- https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5

@@ -9,7 +9,8 @@ open import Aeres.Data.PEM.CertText.TCB
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 import      Data.Nat.Properties as Nat
@@ -19,15 +20,16 @@ module Aeres.Data.PEM.CertText.Exclusions where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Parallel             Char
+open Aeres.Grammar.Seq                  Char
 
 open ≡-Reasoning
 
 noOverlapLines : NoOverlap CertFullLine CertFinalLine
 noOverlapLines ws [] ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂ f₁ f₂ = inj₁ refl
 noOverlapLines ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂
-  fi₁@(mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs≡)
-  fi₂@(mkCertFullLine{l₁}{e₁} (mk×ₚ line₁ (─ lineLen₁) refl) eol₁ bs≡₁) =
+  fi₁@(mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen)) eol bs≡)
+  fi₂@(mkCertFullLine{l₁}{e₁} (mk×ₚ line₁ (─ lineLen₁)) eol₁ bs≡₁) =
   inj₂ noway
   where
   open ≡-Reasoning

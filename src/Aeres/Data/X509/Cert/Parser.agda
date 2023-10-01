@@ -16,8 +16,10 @@ open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Cert.Parser where
@@ -25,26 +27,28 @@ module Aeres.Data.X509.Cert.Parser where
 open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.IList        UInt8
 open Aeres.Grammar.Option       UInt8
+open Aeres.Grammar.Parallel     UInt8
 open Aeres.Grammar.Parser       UInt8
 open Aeres.Grammar.Properties   UInt8
+open Aeres.Grammar.Seq          UInt8
 
 private
   here' = "X509: Cert"
 
-parseCertFields : ExactLengthParser (Logging ∘ Dec) CertFields
+parseCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CertFields n)
 parseCertFields n =
   parseEquivalent
     (Iso.transEquivalent
       (Iso.symEquivalent Distribute.exactLength-&)
-      (equivalent×ₚ equiv))
-    (parse&ᵈ{A = WithinLength (TBSCert ×ₚ Singleton) n}
-      (withinLength-nonnesting (nonnesting×ₚ₁ TLV.nonnesting))
-      (withinLength-unambiguous
-        (unambiguous×ₚ
+      (Parallel.equivalent₁ equiv))
+    (parse&ᵈ{A = Length≤ (TBSCert ×ₚ Singleton) n}
+      (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
+      (Parallel.Length≤.unambiguous _
+        (Parallel.unambiguous×ₚ
           (TLV.unambiguous TBSCert.unambiguous)
           (λ where self self → refl)))
       (parse≤ _ (parse×Singleton parseTBSCert)
-        (nonnesting×ₚ₁ TLV.nonnesting)
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
         (tell $ here' String.++ ": overflow (TBS cert)"))
       λ where
         (singleton r r≡) a →
@@ -54,9 +58,9 @@ parseCertFields n =
   p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) n)
   p₁ n =
     parseExactLength
-      (NonNesting&ₚ SignAlg.nonnesting (nonnesting×ₚ₁ TLV.nonnesting))
+      (Seq.nosubstrings SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings))
       (tell $ here' String.++ ": length mismatch (sign alg, signature)")
-      (parse& SignAlg.nonnesting parseSignAlg
+      (parse& SignAlg.nosubstrings parseSignAlg
         (parse×Singleton parseBitstring)) _
 
 parseCert : Parser (Logging ∘ Dec) Cert
@@ -64,7 +68,7 @@ parseCert =
   parseTLV _ "Cert" _ parseCertFields
 
 parseChain : Parser (Logging ∘ Dec) Chain
-parseChain = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseChain: underflow"] tt) _ TLV.nonempty TLV.nonnesting  parseCert)
+parseChain = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseChain: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCert)
 
   -- LogDec.MaximalParser.parser
   --   (parseIListMax.parseIListLowerBounded

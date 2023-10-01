@@ -7,6 +7,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -17,6 +18,7 @@ module Aeres.Data.X690-DER.BitString.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Parallel    UInt8
 
 module parseBitstring where
   open ≡-Reasoning
@@ -25,23 +27,23 @@ module parseBitstring where
 
   parseBitstringValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength BitStringValue n)
   runParser (parseBitstringValue n) xs = do
-    yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) (─ bsLen) refl) suf₀ ps≡₀) ←
+    yes (success .(bₕ ∷ bₜ) r₀ r₀≡ (mk×ₚ (singleton (bₕ ∷ bₜ) refl) (─ bsLen)) suf₀ ps≡₀) ←
       runParser (parseN n (tell $ here' String.++ ": underflow")) xs
       where
-        (yes (success .[] .0 refl (mk×ₚ (singleton [] refl) (─ refl) refl) .xs refl)) →
+        (yes (success .[] .0 refl (mk×ₚ (singleton [] refl) (─ refl)) .xs refl)) →
           return ∘ no $ λ where
-            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) () refl) suffix ps≡)
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) ()) suffix ps≡)
         (no ¬parse) →
           return ∘ no $ λ where
-            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+            (success .(bₕ ∷ bₜ) read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁) suffix ps≡) →
               contradiction
-                (success (bₕ ∷ bₜ) _ read≡ (mk×ₚ self sndₚ₁ refl) suffix ps≡)
+                (success (bₕ ∷ bₜ) _ read≡ (mk×ₚ self sndₚ₁) suffix ps≡)
                 ¬parse
     case toℕ bₕ <? 8 of λ where
       (no bₕ≮8) → do
         tell $ here' String.++ ": unused bits field too large"
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁ refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 bits unusedBits refl) sndₚ₁) suffix ps≡) →
             contradiction
               (≤-trans (Lemmas.≡⇒≤ (cong (suc ∘ toℕ) (∷-injectiveˡ (trans₀ ps≡₀ (sym ps≡))))) bₕ<8)
               bₕ≮8
@@ -50,18 +52,18 @@ module parseBitstring where
           (no ¬validunused) → do
             tell $ here' String.++ ": bad unused bits"
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ' bₜ' _ _ unusedBits refl) (─ sndₚ₁) refl) suffix ps≡) →
+              (success prefix read read≡ (mk×ₚ (mkBitStringValue bₕ' bₜ' _ _ unusedBits refl) (─ sndₚ₁)) suffix ps≡) →
                 contradiction
                   (subst₂ UnusedBits{x = bₕ'}{u = bₜ'}{bₜ}
                     (∷-injectiveˡ (trans₀ ps≡ (sym ps≡₀)))
-                    (∷-injectiveʳ (exactLength-nonnesting (trans₀ ps≡ (sym ps≡₀))
-                                    (mk×ₚ{A = Singleton} self (─ sndₚ₁) refl)
-                                    (mk×ₚ self (─ bsLen) refl)))
+                    (∷-injectiveʳ (Parallel.ExactLength.nosubstrings _ (trans₀ ps≡ (sym ps≡₀))
+                                    (mk×ₚ{A = Singleton} self (─ sndₚ₁))
+                                    (mk×ₚ self (─ bsLen))))
                     unusedBits)
                   ¬validunused
           (yes validunused) →
             return (yes
-              (success (bₕ ∷ bₜ) _ r₀≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 self validunused refl) (─ bsLen) refl) suf₀ ps≡₀))
+              (success (bₕ ∷ bₜ) _ r₀≡ (mk×ₚ (mkBitStringValue bₕ bₜ bₕ<8 self validunused refl) (─ bsLen)) suf₀ ps≡₀))
 
   parseBitstring : Parser (Logging ∘ Dec) BitString
   parseBitstring =

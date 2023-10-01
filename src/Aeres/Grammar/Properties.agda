@@ -3,6 +3,8 @@
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -12,6 +14,8 @@ module Aeres.Grammar.Properties (Σ : Set) where
 
 open Aeres.Grammar.Definitions Σ
 open Aeres.Grammar.Option      Σ
+open Aeres.Grammar.Parallel    Σ
+open Aeres.Grammar.Seq         Σ
 open Aeres.Grammar.Sum         Σ
 
 module Distribute where
@@ -24,45 +28,44 @@ module Distribute where
       : ∀ {@0 C : (xs : List Σ) (a : A xs) → Set}
         → Iso ((Σₚ A C) ×ₚ B)
               (Σₚ (A ×ₚ B) λ _ x → C _ (fstₚ x))
-    proj₁ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c refl) b refl) =
-      mk×ₚ (mk×ₚ a b refl) c refl
-    proj₂ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b refl) c refl) =
-      mk×ₚ (mk×ₚ a c refl) b refl
-    proj₁ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c refl) b refl) = refl
-    proj₂ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b refl) c refl) = refl
+    proj₁ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c) b) =
+      mk×ₚ (mk×ₚ a b) c
+    proj₂ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b) c) =
+      mk×ₚ (mk×ₚ a c) b
+    proj₁ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c) b) = refl
+    proj₂ (proj₂ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a b) c) = refl
 
     exactLength-& : ∀ {n} → Equivalent (ExactLength (&ₚ A B) n)
-                          (&ₚᵈ (WithinLength A n)
-                               (λ bs₁ _ → ExactLength B (n - length bs₁)))
-    proj₁ (exactLength-&{n}) (mk×ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} fstₚ₁ sndₚ₂ refl) (─ sndₚ₁) refl) =
-      mk&ₚ (mk×ₚ fstₚ₁ (─ subst (length bs₁ ≤_) sndₚ₁ (Lemmas.length-++-≤₁ bs₁ _)) refl)
+                          (&ₚᵈ (Length≤ A n)
+                               (λ {bs₁} _ → ExactLength B (n - length bs₁)))
+    proj₁ (exactLength-&{n}) (mk×ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} fstₚ₁ sndₚ₂ refl) (─ sndₚ₁)) =
+      mk&ₚ (mk×ₚ fstₚ₁ (─ subst (length bs₁ ≤_) sndₚ₁ (Lemmas.length-++-≤₁ bs₁ _)))
         (mk×ₚ sndₚ₂ (─ (begin length bs₂ ≡⟨ sym (m+n∸m≡n (length bs₁) _) ⟩
                             length bs₁ + length bs₂ - length bs₁ ≡⟨ cong (_- length bs₁) (sym (length-++ bs₁)) ⟩
                             length (bs₁ ++ bs₂) - length bs₁ ≡⟨ cong (_- length bs₁) sndₚ₁ ⟩
-                            n - length bs₁ ∎)) refl)
+                            n - length bs₁ ∎)))
         refl
-    proj₂ (exactLength-&{n}) (mk&ₚ (mk×ₚ{bs = bs₁} fstₚ₁ (─ sndₚ₁) refl) (mk×ₚ{bs = bs₂} fstₚ₂ sndₚ₂ refl) refl) =
+    proj₂ (exactLength-&{n}) (mk&ₚ{bs₁}{bs₂} (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk×ₚ fstₚ₂ sndₚ₂) refl) =
       mk×ₚ (mk&ₚ fstₚ₁ fstₚ₂ refl)
         (─ (begin length (bs₁ ++ bs₂) ≡⟨ length-++ bs₁ ⟩
                   length bs₁ + length bs₂ ≡⟨ cong (length bs₁ +_) (̂‼ sndₚ₂) ⟩
                   length bs₁ + (n - length bs₁) ≡⟨ m+[n∸m]≡n sndₚ₁ ⟩
                   n ∎))
-        refl
 
     exactLength-Sum : ∀ {n} → Equivalent (ExactLength (Sum A B) n)
                                          (Sum (ExactLength A n) (ExactLength B n))
-    proj₁ exactLength-Sum (mk×ₚ (inj₁ x) sndₚ₁ refl) = Sum.inj₁ (mk×ₚ x sndₚ₁ refl)
-    proj₁ exactLength-Sum (mk×ₚ (inj₂ x) sndₚ₁ refl) = Sum.inj₂ (mk×ₚ x sndₚ₁ refl)
-    proj₂ exactLength-Sum (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₁ fstₚ₁) sndₚ₁ refl
-    proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ refl)) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁ refl
+    proj₁ exactLength-Sum (mk×ₚ (inj₁ x) sndₚ₁ ) = Sum.inj₁ (mk×ₚ x sndₚ₁ )
+    proj₁ exactLength-Sum (mk×ₚ (inj₂ x) sndₚ₁ ) = Sum.inj₂ (mk×ₚ x sndₚ₁ )
+    proj₂ exactLength-Sum (inj₁ (mk×ₚ fstₚ₁ sndₚ₁ )) = mk×ₚ (Sum.inj₁ fstₚ₁) sndₚ₁ 
+    proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ )) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁
 
   exactLength-&ᵈ
-    : ∀ {@0 A : @0 List Σ → Set} {@0 B : (@0 bs : List Σ) → A bs → @0 List Σ → Set} {n}
+    : ∀ {@0 A : @0 List Σ → Set} {@0 B : {@0 bs : List Σ} → A bs → @0 List Σ → Set} {n}
       → Equivalent (ExactLength (&ₚᵈ A B) n)
-                   (&ₚᵈ (WithinLength A n)
-                        λ bs₁ a → ExactLength (B _ (fstₚ a)) (n - length bs₁))
-  proj₁ (exactLength-&ᵈ{A}{B}{n}) (mk×ₚ (mk&ₚ{bs₁}{bs₂} a b refl) (─ len≡) refl) =
-    mk&ₚ (mk×ₚ a len≤ refl) (mk×ₚ b len-≡ refl) refl
+                   (&ₚᵈ (Length≤ A n)
+                        λ {bs₁} a → ExactLength (B (fstₚ a)) (n - length bs₁))
+  proj₁ (exactLength-&ᵈ{A}{B}{n}) (mk×ₚ (mk&ₚ{bs₁}{bs₂} a b refl) (─ len≡) ) =
+    mk&ₚ (mk×ₚ a len≤ ) (mk×ₚ b len-≡ ) refl
     where
     module ≤ = ≤-Reasoning
 
@@ -79,8 +82,8 @@ module Distribute where
       length bs₁ + length bs₂ - length bs₁ ≡⟨ cong (_- length bs₁) (sym (length-++ bs₁)) ⟩
       length (bs₁ ++ bs₂) - length bs₁ ≡⟨ cong (_∸ length bs₁) len≡ ⟩
       n - length bs₁ ∎))
-  proj₂ (exactLength-&ᵈ{A}{B}{n}) (mk&ₚ{bs₁}{bs₂} (mk×ₚ a (─ len≤) refl) (mk×ₚ b (─ len≡) refl) refl) =
-    mk×ₚ (mk&ₚ a b refl) len≡' refl
+  proj₂ (exactLength-&ᵈ{A}{B}{n}) (mk&ₚ{bs₁}{bs₂} (mk×ₚ a (─ len≤) ) (mk×ₚ b (─ len≡) ) refl) =
+    mk×ₚ (mk&ₚ a b refl) len≡' 
 
     where
     len≡' : Erased (length (bs₁ ++ bs₂) ≡ n)
@@ -96,7 +99,7 @@ module NonNesting where
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-  noconfusion-option&₁ : ∀ {@0 A B} → NonNesting A → NonNesting B → NoConfusion A B → NonNesting (&ₚ (Option A) B)
+  noconfusion-option&₁ : ∀ {@0 A B} → NoSubstrings A → NoSubstrings B → NoConfusion A B → NoSubstrings (&ₚ (Option A) B)
   noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ  none sndₚ₁ refl)    (mk&ₚ  none sndₚ₂ refl) = nn₂ ++≡ sndₚ₁ sndₚ₂
   noconfusion-option&₁ nn₁ nn₂ nc {xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ (mk&ₚ  none sndₚ₁ refl)    (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
     ⊥-elim (nc ++≡' x sndₚ₁)
@@ -115,15 +118,15 @@ module NonNesting where
                  xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
                  xs₂ ++ ys₂ ∎
   noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
-    ‼ (NonNesting&ₚ nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
+    ‼ (Seq.nosubstrings nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
-  erased : ∀ {@0 A} → NonNesting A → NonNesting (Erased ∘ A)
+  erased : ∀ {@0 A} → NoSubstrings A → NoSubstrings (Erased ∘ A)
   erased nn xs₁++ys₁≡ (─ a₁) (─ a₂) = ‼ (nn xs₁++ys₁≡ a₁ a₂)
 
   Restriction : (A B : List Σ → Set) → Set
   Restriction A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → B xs₂ → xs₁ ≡ xs₂
 
-  @0 sumRestriction : ∀ {@0 A B} → NonNesting A → NonNesting B → Restriction A B → NonNesting (Sum A B)
+  @0 sumRestriction : ∀ {@0 A B} → NoSubstrings A → NoSubstrings B → Restriction A B → NoSubstrings (Sum A B)
   sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₁ x₁) =
     nn₁ xs₁++ys₁≡xs₂++ys₂ x x₁
   sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₂ x₁) =
@@ -142,10 +145,10 @@ module NoConfusion where
   sumₚ nc₁ nc₂ ++≡ a (Sum.inj₂ x) = nc₂ ++≡ a x
 
   sigmaₚ₁ : ∀ {@0 A₁ B₁ A₂ B₂} → NoConfusion A₁ A₂ → NoConfusion (Σₚ A₁ B₁) (Σₚ A₂ B₂)
-  sigmaₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) (mk×ₚ fstₚ₂ sndₚ₂ refl) = nc ++≡ fstₚ₁ fstₚ₂
+  sigmaₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ ) (mk×ₚ fstₚ₂ sndₚ₂ ) = nc ++≡ fstₚ₁ fstₚ₂
 
   sigmaₚ₁ᵣ : ∀ {@0 A₁ A₂ B₂} → NoConfusion A₁ A₂ → NoConfusion A₁ (Σₚ A₂ B₂)
-  sigmaₚ₁ᵣ nc ++≡ v₁ (mk×ₚ fstₚ₂ sndₚ₂ refl) = nc ++≡ v₁ fstₚ₂
+  sigmaₚ₁ᵣ nc ++≡ v₁ (mk×ₚ fstₚ₂ sndₚ₂ ) = nc ++≡ v₁ fstₚ₂
 
 module Unambiguous where
 
@@ -158,7 +161,7 @@ module Unambiguous where
   option₁ ua ne (some x) none = contradiction refl (ne x)
   option₁ ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
 
-  unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NoSubstrings A → Unambiguous B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
   unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
     subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
   unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
@@ -181,13 +184,13 @@ module Unambiguous where
     cong (λ where (mk&ₚ v₀ v₁ eq) → mk&ₚ (some v₀) v₁ eq ) (‼ pf)
     where
     @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
-    pf = unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
+    pf = Seq.unambiguous ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
 
-  unambiguous-option₁& : ∀ {@0 A B} → Unambiguous A → NonNesting A → NonEmpty A → Unambiguous B → NoConfusion A (NotEmpty B) → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁& : ∀ {@0 A B} → Unambiguous A → NoSubstrings A → NonEmpty A → Unambiguous B → NoConfusion A (Length≥ B 1) → Unambiguous (&ₚ (Option A) B)
   unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
     subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
   unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =
-    ⊥-elim (nc bs≡'  x (mk×ₚ sndₚ₁ (─ 1≤len) refl) {- sndₚ₁ -})
+    ⊥-elim (nc bs≡'  x (mk×ₚ sndₚ₁ (─ 1≤len) ) {- sndₚ₁ -})
     where
     @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
     bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
@@ -206,7 +209,7 @@ module Unambiguous where
     @0 1≤len : 1 ≤ length xs
     1≤len = n≢0⇒n>0 lenxs≢0
   unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc {xs} (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₁ bs≡) (mk&ₚ  none sndₚ₂ refl) =
-    ⊥-elim (nc bs≡' x (mk×ₚ sndₚ₂ (─ 1≤len) refl))
+    ⊥-elim (nc bs≡' x (mk×ₚ sndₚ₂ (─ 1≤len) ))
     where
     @0 bs≡' : bs₁ ++ bs₂ ++ [] ≡ xs ++ []
     bs≡' = begin (bs₁ ++ bs₂ ++ [] ≡⟨ solve (++-monoid Σ) ⟩
@@ -227,10 +230,10 @@ module Unambiguous where
     cong (λ where (mk&ₚ v₀ v₁ eq) → mk&ₚ (some v₀) v₁ eq ) (‼ pf)
     where
     @0 pf : mk&ₚ x sndₚ₁ bs≡ ≡ mk&ₚ x₁ sndₚ₂ bs≡₁
-    pf = unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
+    pf = Seq.unambiguous ua₁ nn₁ ua₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁)
 
 
-  unambiguous-&₁option₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → Unambiguous B → NonEmpty B → Unambiguous (&ₚ A (Option B))
+  @0 unambiguous-&₁option₁ : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → NonEmpty B → Unambiguous (&ₚ A (Option B))
   unambiguous-&₁option₁{A}{B} ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂} fstₚ₂  none bs≡₁) = ‼
     subst₀ (λ x → ∀ (fstₚ₂ : A x) bs≡₁ → mk&ₚ{A = A} fstₚ₁ none bs≡ ≡ mk&ₚ fstₚ₂ none bs≡₁)
       bs≡'
@@ -251,9 +254,9 @@ module Unambiguous where
     @0 bs≡' : bs₁ ++ [] ≡ bs₂ ++ bs₃
     bs≡' = trans₀ (sym bs≡₁) bs≡
   unambiguous-&₁option₁ ua₁ nn₁ ua₂ nc (mk&ₚ fstₚ₁ (some x) bs≡) (mk&ₚ fstₚ₂ (some x₁) bs≡₁) =
-    cong (λ where (mk&ₚ x y bs≡) → mk&ₚ x (some y) bs≡) (unambiguous&ₚ ua₁ nn₁ ua₂ (mk&ₚ fstₚ₁ x bs≡) (mk&ₚ fstₚ₂ x₁ bs≡₁))
+    cong (λ where (mk&ₚ x y bs≡) → mk&ₚ x (some y) bs≡) (Seq.unambiguous ua₁ nn₁ ua₂ (mk&ₚ fstₚ₁ x bs≡) (mk&ₚ fstₚ₂ x₁ bs≡₁))
 
-  option₂&₁ : ∀ {@0 A B} → Unambiguous A → NonNesting A → NonEmpty A → Unambiguous B → NonEmpty B → NoConfusion A B → Unambiguous (&ₚ (Option A) (Option B))
+  option₂&₁ : ∀ {@0 A B} → Unambiguous A → NoSubstrings A → NonEmpty A → Unambiguous B → NonEmpty B → NoConfusion A B → Unambiguous (&ₚ (Option A) (Option B))
   option₂&₁{A}{B} ua₁ nn₁ ne₁ ua₂ ne₂ nc (mk&ₚ{bs₂ = bs₁} none sndₚ₁ bs≡) (mk&ₚ{bs₂ = bs₂} none sndₚ₂ bs≡₁) =
     subst₀ (λ bs → ∀ (sndₚ₂ : Option B bs) (@0 bs≡₁ : _ ≡ bs) → _ ≡ mk&ₚ _ sndₚ₂ bs≡₁)
       bs≡'
@@ -283,9 +286,9 @@ module Unambiguous where
     bs≡' = trans₀ (sym bs≡) bs≡₁
   option₂&₁ ua₁ nn₁ ne₁ ua₂ ne₂ nc (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
     cong (λ where (mk&ₚ x y eq) → mk&ₚ (some x) y eq)
-      (unambiguous-&₁option₁ ua₁ nn₁ ua₂ ne₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
+      (‼ unambiguous-&₁option₁ ua₁ nn₁ ua₂ ne₂ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
-  @0 option₃&₂ : ∀ {@0 A B C} → Unambiguous A → NonNesting A →  NonEmpty A → Unambiguous B → NonNesting B → NonEmpty B → Unambiguous C → NonEmpty C → NoConfusion A B → NoConfusion A C → NoConfusion B C → Unambiguous (&ₚ (Option A) (&ₚ (Option B) (Option C)))
+  @0 option₃&₂ : ∀ {@0 A B C} → Unambiguous A → NoSubstrings A →  NonEmpty A → Unambiguous B → NoSubstrings B → NonEmpty B → Unambiguous C → NonEmpty C → NoConfusion A B → NoConfusion A C → NoConfusion B C → Unambiguous (&ₚ (Option A) (&ₚ (Option B) (Option C)))
   option₃&₂ ua₁ nn₁ ne₁ ua₂ nn₂ ne₂ ua₃ ne₃ nc₁ nc₂ nc₃ (mk&ₚ none v₁ refl) (mk&ₚ none v₁' refl) =
     cong (λ x → mk&ₚ none x refl) (option₂&₁ ua₂ nn₂ ne₂ ua₃ ne₃ nc₃ v₁ v₁')
   option₃&₂ ua₁ nn₁ ne₁ ua₂ nn₂ ne₂ ua₃ ne₃ nc₁ nc₂ nc₃ (mk&ₚ none (mk&ₚ{bs₁ = bs₁}{bs₂} (some v₂) v₃ bs≡) refl) (mk&ₚ{bs₁ = bs₁'}{bs₂'} (some x) (mk&ₚ v₂' v₃' refl) bs≡') =

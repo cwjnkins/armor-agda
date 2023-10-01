@@ -26,7 +26,7 @@ VisibleString = TLV Tag.VisibleString VisibleStringValue
 
 RawVisibleStringValue : Raw VisibleStringValue
 Raw.D RawVisibleStringValue = List UInt8
-Raw.to RawVisibleStringValue = uncurry─ (λ y → VisibleStringValue.chars y)
+Raw.to RawVisibleStringValue = VisibleStringValue.chars
 
 RawVisibleString : Raw VisibleString 
-RawVisibleString = RawTLV RawVisibleStringValue
+RawVisibleString = RawTLV _ RawVisibleStringValue

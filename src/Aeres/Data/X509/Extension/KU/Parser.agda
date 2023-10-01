@@ -7,11 +7,13 @@ open import Aeres.Data.X509.Extension.KU.TCB
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 
 module Aeres.Data.X509.Extension.KU.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -20,7 +22,7 @@ private
 parseKUFields : Parser (Logging ∘ Dec) KUFields
 parseKUFields =
   parseTLV _ here' _
-    (parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow")
+    (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow")
       parseBitstring)
 
 -- private

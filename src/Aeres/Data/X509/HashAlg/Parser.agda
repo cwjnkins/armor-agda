@@ -9,6 +9,7 @@ open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
@@ -17,6 +18,7 @@ module Aeres.Data.X509.HashAlg.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 
@@ -29,9 +31,9 @@ parseSHA-Like o s =
   help n o =
     parseEquivalent
       (Iso.symEquivalent (proj₁ (Distribute.×ₚ-Σₚ-iso{A = Option Null}{B = _}{C = _})))
-      (parse×Dec exactLength-nonnesting
+      (parse×Dec (Parallel.ExactLength.nosubstrings _)
         (tell $ "X509: HashAlg: " String.++ s String.++ ": OID mismatch")
-        (parseOption₁ExactLength TLV.nonnesting
+        (Option.parseOption₁ExactLength TLV.nosubstrings
           (tell $ "X509: HashAlg:" String.++ s String.++ ": Param: underflow")
           parseNull _)
         λ x → _ ≋? _)

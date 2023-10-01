@@ -29,7 +29,9 @@ open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -39,37 +41,39 @@ open ≡-Reasoning
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
 eq≋Field eqP =
-  isoEq≋ Fields.iso
-    (eq≋&ₚ
-      (eq≋Σₚ it λ _ →
+  Iso.isoEq≋ Fields.iso
+    (Seq.eq≋&ₚ
+      (Parallel.eq≋Σₚ it λ _ →
         record
           { _≟_ = λ x y → yes (erased-unique eqP x y)
           })
-      (eq≋&ₚ it it))
+      (Seq.eq≋&ₚ it it))
 
 instance
   eq≋ : Eq≋ SelectExtn
   eq≋ =
-    isoEq≋ Select.iso
-             (sumEq≋ ⦃ eq₁ = eq≋Field λ {@0 xs} a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field (λ a b → ‼ ≡-unique a b) ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+    Iso.isoEq≋ Select.iso
+             (Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ {@0 xs} a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field (λ a b → ‼ ≡-unique a b) ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = eq≋Field (λ p₁ p₂ → ‼ T-unique p₁ p₂) ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄)
     where
     instance

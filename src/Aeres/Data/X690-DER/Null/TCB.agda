@@ -20,4 +20,4 @@ nullTLV = mkTLV (Length.shortₛ (# 0)) refl refl refl
 
 RawNull : Raw (_≡ [])
 Raw.D RawNull = ⊤
-Raw.to RawNull = const tt
+Raw.to RawNull _ = tt

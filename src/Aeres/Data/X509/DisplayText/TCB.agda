@@ -9,14 +9,14 @@ open import Aeres.Data.X690-DER.Strings.BMPString.TCB
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.Strings.UTF8String.TCB
 open import Aeres.Data.X690-DER.Strings.VisibleString.TCB
-import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.DisplayText.TCB where
 
-open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Parallel.TCB             UInt8
 
 data DisplayText : @0 List UInt8 → Set where
   ia5String     : ∀ {@0 bs} → Σₚ IA5String     (TLVSizeBounded IA5StringValue.size     1 200) bs → DisplayText bs

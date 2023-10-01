@@ -4,12 +4,16 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions.Iso
 import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB where
 
+open Aeres.Grammar.Definitions.Iso          UInt8
 open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Seq.TCB                  UInt8
 
 AnyDefinedByOID : Set₁
 AnyDefinedByOID = {@0 bs : List UInt8} → OID bs → @0 List UInt8 → Set
@@ -22,10 +26,18 @@ record DefinedByOIDFields (P : AnyDefinedByOID) (@0 bs : List UInt8) : Set where
     param  : P oid p
     @0 bs≡ : bs ≡ o ++ p
 
+DefinedByOIDFieldsRep : @0 AnyDefinedByOID → @0 List UInt8 → Set
+DefinedByOIDFieldsRep P = &ₚᵈ OID P
+
+equivalent : {@0 P : AnyDefinedByOID} → Equivalent (DefinedByOIDFieldsRep P) (DefinedByOIDFields P)
+proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkOIDDefinedFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (mkOIDDefinedFields oid param bs≡) = mk&ₚ oid param bs≡
+
 DefinedByOID : (@0 P : AnyDefinedByOID) → @0 List UInt8 → Set
 DefinedByOID P = TLV Tag.Sequence (DefinedByOIDFields P)
 
 RawDefinedByOIDFields : {P : AnyDefinedByOID} → Raw₁ RawOID P → Raw (DefinedByOIDFields P)
-Raw.D (RawDefinedByOIDFields R) = Σ (Raw.D RawOID) (Raw₁.D R)
-Raw.to (RawDefinedByOIDFields R) (─ _ , mkOIDDefinedFields oid param bs≡) =
-  (Raw.to RawOID (─ _ , oid)) , Raw₁.to R oid (─ _ , param)
+RawDefinedByOIDFields r = Iso.raw equivalent (Raw&ₚ RawOID r)
+
+RawDefinedByOID : {P : AnyDefinedByOID} → Raw₁ RawOID P → Raw (DefinedByOID P)
+RawDefinedByOID r = RawTLV _ (RawDefinedByOIDFields r)

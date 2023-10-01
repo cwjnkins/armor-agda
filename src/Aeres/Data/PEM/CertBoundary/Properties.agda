@@ -5,13 +5,13 @@ open import Aeres.Data.Base64.TCB
 open import Aeres.Data.PEM.CertBoundary.TCB
 open import Aeres.Data.PEM.RFC5234.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.PEM.CertBoundary.Properties where
 
 open Aeres.Grammar.Definitions Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Seq         Char
 
 Rep : (ctrl : String) → @0 List Char → Set
 Rep ctrl = &ₚ (_≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----"))

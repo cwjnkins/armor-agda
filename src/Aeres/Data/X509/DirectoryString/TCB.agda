@@ -9,12 +9,14 @@ open import Aeres.Data.X690-DER.Strings.UTF8String.TCB
 open import Aeres.Data.X690-DER.Strings.UniversalString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.DirectoryString.TCB where
 
 open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Parallel.TCB             UInt8
 open Aeres.Grammar.Sum.TCB                  UInt8
 
 data DirectoryString : @0 List UInt8 → Set where

@@ -17,8 +17,8 @@ open Aeres.Grammar.Definitions UInt8
 @0 nonempty : NonEmpty PrintableStringChar
 nonempty () refl
 
-@0 nonnesting : NonNesting PrintableStringChar
-nonnesting xs₁++ys₁≡xs₂++ys₂ (mkPrintableStringChar c range refl) (mkPrintableStringChar c₁ range₁ refl) =
+@0 nosubstrings : NoSubstrings PrintableStringChar
+nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkPrintableStringChar c range refl) (mkPrintableStringChar c₁ range₁ refl) =
   cong [_] (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
 
 @0 unambiguousRange : ∀ {c} → Unique (PrintableStringCharRange c)
@@ -202,9 +202,8 @@ unambiguous (mkPrintableStringChar c range refl) (mkPrintableStringChar .c range
   case unambiguousRange range range₁ of λ where
     refl → refl
 
-@0 nonmalleable : NonMalleable PrintableStringChar RawPrintableStringChar
-NonMalleable.unambiguous nonmalleable = unambiguous
-NonMalleable.injective nonmalleable (fst , mkPrintableStringChar c range refl) (fst₁ , mkPrintableStringChar c₁ range₁ refl) refl =
+@0 nonmalleable : NonMalleable RawPrintableStringChar
+nonmalleable (mkPrintableStringChar c range refl) (mkPrintableStringChar c₁ range₁ refl) refl =
   case (‼ unambiguousRange range range₁) of λ where
     refl → refl
 

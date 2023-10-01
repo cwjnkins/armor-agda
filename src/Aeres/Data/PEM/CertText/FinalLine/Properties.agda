@@ -10,7 +10,8 @@ open import Aeres.Data.PEM.RFC5234.TCB
 import      Aeres.Data.PEM.RFC5234.Properties as RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 import      Data.List.Relation.Unary.Any.Properties as Any
@@ -18,24 +19,25 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.PEM.CertText.FinalLine.Properties where
 
-open  Aeres.Grammar.Definitions          Char
-open  Aeres.Grammar.IList                Char
-open  Aeres.Grammar.Relation.Definitions Char
+open  Aeres.Grammar.Definitions Char
+open  Aeres.Grammar.IList       Char
+open  Aeres.Grammar.Seq         Char
+open  Aeres.Grammar.Parallel    Char
 
 Rep : @0 List Char → Set
 Rep = Σₚ (&ₚ Base64Str EOL)
          (λ _ → Erased ∘ InRange 1 64 ∘ length ∘ &ₚᵈ.bs₁ )
 
 equiv : Equivalent Rep CertFinalLine
-proj₁ equiv (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) (─ range) refl) =
+proj₁ equiv (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) (─ range)) =
   mkCertFinalLine fstₚ₁ range sndₚ₂ refl
 proj₂ equiv (mkCertFinalLine line lineLen eol refl) =
-  mk×ₚ (mk&ₚ line eol refl) (─ lineLen) refl
+  mk×ₚ (mk&ₚ line eol refl) (─ lineLen)
 
 fromCertFullLine : ∀ {@0 bs} → CertFullLine bs → CertFinalLine bs
-fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen) refl) eol refl) =
+fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen)) eol refl) =
   mkCertFinalLine
-    (Base64.Str.fromExactLength (mk×ₚ line (─ lineLen) refl))
+    (Base64.Str.fromExactLength (mk×ₚ line (─ lineLen)))
       (Nat.≤-trans (toWitness{Q = 1 ≤? 64} tt) (Lemmas.≡⇒≤ (sym lineLen))
     , Lemmas.≡⇒≤ lineLen)
     eol refl

@@ -14,8 +14,8 @@ open Aeres.Grammar.Definitions              UInt8
 nonempty : NonEmpty BoolValue
 nonempty () refl
 
-@0 nonnesting : NonNesting BoolValue
-nonnesting x (mkBoolValue v b vᵣ bs≡) (mkBoolValue v₁ b₁ vᵣ₁ bs≡₁) =
+@0 nosubstrings : NoSubstrings BoolValue
+nosubstrings x (mkBoolValue v b vᵣ bs≡) (mkBoolValue v₁ b₁ vᵣ₁ bs≡₁) =
   proj₁ $ Lemmas.length-++-≡ _ _ _ _ x (trans (cong length bs≡) (cong length (sym bs≡₁)))
 
 @0 unambiguous : Unambiguous BoolValue
@@ -24,10 +24,9 @@ unambiguous (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#1 .(# 255) tru
 unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ ())
 unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ refl) = refl
 
-@0 nonmalleableValue : NonMalleable BoolValue RawBoolValue
-NonMalleable.unambiguous nonmalleableValue = unambiguous
-NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #0 ._ falseᵣ refl) (─ ._ , mkBoolValue #0 ._ falseᵣ refl) _ = refl
-NonMalleable.injective nonmalleableValue (─ ._ , mkBoolValue #1 ._ trueᵣ refl) (─ ._ , mkBoolValue #1 ._ trueᵣ refl) _ = refl
+@0 nonmalleableValue : NonMalleable RawBoolValue
+nonmalleableValue (mkBoolValue #0 ._ falseᵣ refl) (mkBoolValue #0 ._ falseᵣ refl) _ = refl
+nonmalleableValue (mkBoolValue #1 ._ trueᵣ refl)  (mkBoolValue #1 ._ trueᵣ refl) _ = refl
 
-@0 nonmalleable : NonMalleable Boool RawBoool
+@0 nonmalleable : NonMalleable RawBoool
 nonmalleable = TLV.nonmalleable nonmalleableValue

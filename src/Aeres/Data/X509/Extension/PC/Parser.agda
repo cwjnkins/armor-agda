@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
@@ -15,6 +16,7 @@ module Aeres.Data.X509.Extension.PC.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -23,13 +25,13 @@ private
 parsePCFields : Parser (Logging ∘ Dec) PCFields
 parsePCFields =
   parseTLV _ here' _
-    (parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow")
+    (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow")
       (parseTLV _ here' _ helper))
   where
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (PCFieldsSeqFields) n)
   helper n =
-    parseEquivalent (equivalent×ₚ equivalent)
-      (parseOption₂ TLV.nonnesting TLV.nonnesting (TLV.noconfusion (λ ()))
+    parseEquivalent (Parallel.equivalent₁ equivalent)
+      (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ()))
         (parseTLV _ (here' String.++ ": require explicit policy") _ Int.parseValue)
         (parseTLV _ (here' String.++ ": inhibit policy mapping") _ Int.parseValue)
         (tell $ here' String.++ ": underflow") n)

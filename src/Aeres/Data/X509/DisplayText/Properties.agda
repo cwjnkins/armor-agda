@@ -9,7 +9,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -21,7 +21,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.DisplayText.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -60,19 +60,19 @@ proj₂ (proj₂ iso) (utf8String x) = refl
 
 @0 nonempty : NonEmpty DisplayText
 nonempty =
-  equivalent-nonempty equivalent
-    (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
-      (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
-        (nonemptySum (nonemptyΣₚ₁ TLV.nonempty)
-          (nonemptyΣₚ₁ TLV.nonempty))))
+  Iso.nonempty equivalent
+    (Sum.nonempty (Parallel.nonempty₁ TLV.nonempty)
+      (Sum.nonempty (Parallel.nonempty₁ TLV.nonempty)
+        (Sum.nonempty (Parallel.nonempty₁ TLV.nonempty)
+          (Parallel.nonempty₁ TLV.nonempty))))
 
-@0 nonnesting : NonNesting DisplayText
-nonnesting =
-  equivalent-nonnesting equivalent
-    (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
-      (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
-        (nonnestingSum (nonnestingΣₚ₁ TLV.nonnesting)
-          (nonnestingΣₚ₁ TLV.nonnesting)
+@0 nosubstrings : NoSubstrings DisplayText
+nosubstrings =
+  Iso.nosubstrings equivalent
+    (Sum.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
+      (Sum.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Sum.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
+          (Parallel.nosubstrings₁ TLV.nosubstrings)
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
         (NoConfusion.sumₚ{A = Σₚ VisibleString _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
@@ -117,14 +117,14 @@ noconfusionSeq = noconfusionTLV pf
 @0 unambiguous : Unambiguous DisplayText
 unambiguous =
   Iso.unambiguous iso
-    (unambiguousSum
-      (unambiguousΣₚ (TLV.unambiguous IA5String.unambiguous) λ _ → inRange-unique{A = ℕ}{B = ℕ})
-      (unambiguousSum (unambiguousΣₚ (TLV.unambiguous VisibleString.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
-        (unambiguousSum
-          (unambiguousΣₚ
-            (TLV.unambiguous (IList.unambiguous UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nonnesting))
+    (Sum.unambiguous
+      (Parallel.unambiguous (TLV.unambiguous IA5String.unambiguous) λ _ → inRange-unique{A = ℕ}{B = ℕ})
+      (Sum.unambiguous (Parallel.unambiguous (TLV.unambiguous VisibleString.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+        (Sum.unambiguous
+          (Parallel.unambiguous
+            (TLV.unambiguous (IList.unambiguous UTF16.BMP.unambiguous UTF16.BMP.nonempty UTF16.BMP.nosubstrings))
             λ _ → inRange-unique{A = ℕ}{B = ℕ})
-          (unambiguousΣₚ (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
+          (Parallel.unambiguous (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
         (NoConfusion.sumₚ{A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
@@ -142,14 +142,14 @@ unambiguous =
 instance
   DisplayTextEq : Eq (Exists─ _ DisplayText)
   DisplayTextEq =
-    isoEq iso
-      (sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
-        ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
-            ⦃ sumEq ⦃ eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
-                ⦃ eqΣₚ (TLV.eqTLV ⦃ UTF8.UTF8Eq ⦄) λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)
+    Iso.isoEq iso
+      (Sum.sumEq ⦃ Parallel.eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+        ⦃ Sum.sumEq ⦃ Parallel.eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+            ⦃ Sum.sumEq ⦃ Parallel.eqΣₚ it λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄
+                ⦃ Parallel.eqΣₚ (TLV.eqTLV ⦃ UTF8.UTF8Eq ⦄) λ a → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) } ⦄  ⦄ ⦄)
 
   eq≋ : Eq≋ DisplayText
   eq≋ = Eq⇒Eq≋ it
 
 postulate
-  @0 nonmalleable : NonMalleable DisplayText RawDisplayText
+  @0 nonmalleable : NonMalleable RawDisplayText

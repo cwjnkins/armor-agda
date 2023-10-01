@@ -2,13 +2,15 @@
 
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
   hiding (head ; tail)
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Grammar.IList.TCB (Σ : Set) where
 
-open Aeres.Grammar.Definitions Σ
+open Aeres.Grammar.Definitions  Σ
+open Aeres.Grammar.Parallel.TCB Σ
 
 data IList (@0 A : List Σ → Set) : @0 List Σ → Set
 
@@ -56,4 +58,4 @@ IListNonEmpty A = IListLowerBounded A 1
 
 RawIList : {A : @0 List Σ → Set} → Raw A → Raw (IList A)
 Raw.D (RawIList R) = List (Raw.D R)
-Raw.to (RawIList R) = uncurry─ (map (Raw.to R) ∘ toList)
+Raw.to (RawIList R) = map (λ where (─ xs , e) → Raw.to R{xs = xs} e) ∘ toList

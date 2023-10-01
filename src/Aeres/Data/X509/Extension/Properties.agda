@@ -28,7 +28,9 @@ open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -39,7 +41,9 @@ open ≡-Reasoning
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module Fields where
@@ -48,24 +52,24 @@ module Fields where
 
   equivalent : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
                → Equivalent (Rep P A) (ExtensionFields P A)
-  proj₁ equivalent (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
+  proj₁ equivalent (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
     mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
   proj₂ equivalent (mkExtensionFields extnId extnId≡ crit extension refl) =
-    mk&ₚ (mk×ₚ extnId (─ extnId≡) refl) (mk&ₚ crit extension refl) refl
+    mk&ₚ (mk×ₚ extnId (─ extnId≡)) (mk&ₚ crit extension refl) refl
 
   iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
         → Iso (Rep P A) (ExtensionFields P A)
   proj₁ iso = equivalent
-  proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁) refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
+  proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
   @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
   unambiguous ua₁ ua₂ nc =
     Iso.unambiguous iso
-      (unambiguous&ₚ
-        (unambiguousΣₚ OID.unambiguous λ a → erased-unique ua₁)
-        (nonnestingΣₚ₁ TLV.nonnesting)
-        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nonnesting ua₂ nc))
+      (Seq.unambiguous
+        (Parallel.unambiguous OID.unambiguous λ a → erased-unique ua₁)
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings ua₂ nc))
 
 module Select where
   Rep = (Sum (ExtensionFields (_≡ OIDs.AKILit      )            AKIFields)
@@ -151,38 +155,38 @@ module Select where
   @0 unambiguous : Unambiguous SelectExtn
   unambiguous =
     Iso.unambiguous iso
-      (unambiguousSum
+      (Sum.unambiguous
         (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKI.unambiguous)) (TLV.noconfusion λ ()))
-        (unambiguousSum
+        (Sum.unambiguous
           (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetString.unambiguous)) (TLV.noconfusion λ ()))
-          (unambiguousSum
+          (Sum.unambiguous
             (Fields.unambiguous ≡-unique ((TLV.unambiguous (TLV.unambiguous BitString.unambiguous))) (TLV.noconfusion λ ()))
-            (unambiguousSum
-              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous OID.unambiguous TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
-              (unambiguousSum
+            (Sum.unambiguous
+              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous OID.unambiguous TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+              (Sum.unambiguous
                 (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous BC.unambiguous)) (TLV.noconfusion λ ()))
-                (unambiguousSum
+                (Sum.unambiguous
                   (Fields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
-                  (unambiguousSum
+                  (Sum.unambiguous
                     (Fields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
-                    (unambiguousSum
-                       (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CertPolicy.PolicyInformation.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
-                      (unambiguousSum
-                        (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CRLDistPoint.DistPoint.unambiguous) TLV.nonempty TLV.nonnesting))) (TLV.noconfusion λ ()))
-                        (unambiguousSum
+                    (Sum.unambiguous
+                       (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CertPolicy.PolicyInformation.unambiguous) TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+                      (Sum.unambiguous
+                        (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CRLDistPoint.DistPoint.unambiguous) TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+                        (Sum.unambiguous
                           (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous NC.unambiguous)) (TLV.noconfusion λ ()))
-                          (unambiguousSum
+                          (Sum.unambiguous
                             (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous PC.unambiguous)) (TLV.noconfusion λ ()))
-                            (unambiguousSum
-                              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PM.unambiguous) TLV.nonempty TLV.nonnesting)) ) (TLV.noconfusion λ ()))
-                              (unambiguousSum
+                            (Sum.unambiguous
+                              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PM.unambiguous) TLV.nonempty TLV.nosubstrings)) ) (TLV.noconfusion λ ()))
+                              (Sum.unambiguous
                                 (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous {xs})) (TLV.noconfusion λ ()))
-                                (unambiguousSum
+                                (Sum.unambiguous
                                   (Fields.unambiguous ≡-unique
                                     (TLV.unambiguous
                                       (TLV.unambiguous
                                         (SequenceOf.Bounded.unambiguous
-                                          (TLV.unambiguous AIA.AccessDesc.unambiguous) TLV.nonempty TLV.nonnesting)))
+                                          (TLV.unambiguous AIA.AccessDesc.unambiguous) TLV.nonempty TLV.nosubstrings)))
                                     (TLV.noconfusion λ ()))
                                 (Fields.unambiguous ua
                                   (TLV.unambiguous OctetString.unambiguous) (TLV.noconfusion λ ()))
@@ -214,7 +218,7 @@ module Select where
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oex ≡ oex₁
-      oid≡ = TLV.nonnesting bs≡' extnId extnId₁
+      oid≡ = TLV.nosubstrings bs≡' extnId extnId₁
 
       @0 oidT≡ : _≋_{A = OID} extnId extnId₁
       oidT≡ = mk≋ oid≡ (OID.unambiguous _ _)
@@ -236,7 +240,7 @@ module Select where
                    oex₁ ++ cex₁ ++ ocex₁ ++ ys₂ ∎
 
       @0 oid≡ : oex ≡ oex₁
-      oid≡ = TLV.nonnesting bs≡' extnId extnId₁
+      oid≡ = TLV.nosubstrings bs≡' extnId extnId₁
 
       @0 oidT≡ : _≋_{A = OID} extnId extnId₁
       oidT≡ = mk≋ oid≡ (OID.unambiguous _ _)
@@ -477,12 +481,12 @@ module Select where
     ua : Unambiguous (False ∘ (_∈? supportedExtensions))
     ua = T-unique
 
-module Seq where
+module ExtensionSeq where
   @0 unambiguous : Unambiguous ExtensionsSeq
   unambiguous =
     TLV.unambiguous
       (SequenceOf.Bounded.unambiguous
         (TLV.unambiguous Select.unambiguous)
-        TLV.nonempty TLV.nonnesting)
+        TLV.nonempty TLV.nosubstrings)
 
 

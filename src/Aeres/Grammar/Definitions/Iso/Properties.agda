@@ -1,6 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
+import      Aeres.Grammar.Definitions.Eq
 import      Aeres.Grammar.Definitions.Iso.Base
+import      Aeres.Grammar.Definitions.NoSubstrings
+import      Aeres.Grammar.Definitions.NonEmpty
 import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Definitions.Unambiguous
 open import Aeres.Prelude
@@ -8,7 +11,10 @@ import      Data.Product.Properties as Product
 
 module Aeres.Grammar.Definitions.Iso.Properties (Σ : Set) where
 
+open Aeres.Grammar.Definitions.Eq           Σ
 open Aeres.Grammar.Definitions.Iso.Base     Σ
+open Aeres.Grammar.Definitions.NoSubstrings Σ
+open Aeres.Grammar.Definitions.NonEmpty     Σ
 open Aeres.Grammar.Definitions.NonMalleable Σ
 open Aeres.Grammar.Definitions.Unambiguous  Σ
 
@@ -23,6 +29,12 @@ symIso : ∀ {A B} → Iso A B → Iso B A
 proj₁ (symIso x) = symEquivalent (proj₁ x)
 proj₁ (proj₂ (symIso ((eq₁ , eq₂) , iso))) = proj₂ iso
 proj₂ (proj₂ (symIso ((eq₁ , eq₂) , iso))) = proj₁ iso
+
+nonempty : ∀ {@0 A B} → Equivalent A B → NonEmpty A → NonEmpty B
+nonempty eqv ne b ≡[] = contradiction ≡[] (ne (proj₂ eqv b))
+
+nosubstrings : ∀ {@0 A B} → Equivalent A B → NoSubstrings A → NoSubstrings B
+nosubstrings{A}{B} eqv nn ++≡ b₁ b₂ = ‼ nn ++≡ (proj₂ eqv b₁) (proj₂ eqv b₂)
 
 unambiguous : ∀ {A B} → Iso A B → Unambiguous A → Unambiguous B
 unambiguous ((a→b , b→a) , _ , id₂) ua{xs} b₁ b₂ =
@@ -57,20 +69,59 @@ injective₂ (equiv , iso){a₁ = a₁}{a₂} eq = begin
 
 raw : ∀ {A B} → Equivalent A B → Raw A → Raw B
 Raw.D (raw equiv r) = Raw.D r
-Raw.to (raw equiv r) (─ _ , b) = Raw.to r (─ _ , proj₂ equiv b)
+Raw.to (raw equiv r) b = Raw.to r (proj₂ equiv b)
 
-@0 nonmalleable : ∀ {A B} → (iso : Iso A B) (r₁ : Raw A) → NonMalleable A r₁ → NonMalleable B (raw (proj₁ iso) r₁)
-NonMalleable.unambiguous (nonmalleable iso r₁ nm) =
-  unambiguous iso (NonMalleable.unambiguous nm)
-NonMalleable.injective (nonmalleable (equiv , isIso) r₁ nm) x₁@(─ _ , a₁) x₂@(─ _ , a₂) eq =
+@0 nonmalleable : ∀ {A B} → (iso : Iso A B) (r₁ : Raw A) → NonMalleable r₁ → NonMalleable (raw (proj₁ iso) r₁)
+nonmalleable (equiv , isIso) r₁ nm a₁ a₂ eq =
   case
-    Inverse.f⁻¹ Product.Σ-≡,≡↔≡ (NonMalleable.injective nm (─ _ , proj₂ equiv a₁) (─ _ , proj₂ equiv a₂) eq)
+    Inverse.f⁻¹ Product.Σ-≡,≡↔≡ (nm (proj₂ equiv a₁) (proj₂ equiv a₂) eq)
   of λ where
     (refl , eq') → case injective₂ (equiv , isIso) eq' of λ where
       refl → refl
 
--- nonempty : ∀ {@0 A B} → Equivalent A B → NonEmpty A → NonEmpty B
--- nonempty eqv ne b ≡[] = contradiction ≡[] (ne (proj₂ eqv b))
+isoEq : ∀ {@0 A B} → Iso A B → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B)
+Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
+  case _≟_ ⦃ eq ⦄ x“ y“ ret (const _) of λ where
+    (no ¬p) →
+      no₀ λ where
+        refl →
+          contradiction refl ¬p
+    (yes p) →
+      case (‼ cong (proj₁₀{B = A ∘ Erased.x}) p) ret (const _) of λ where
+        refl →
+          yes₀ (‼ (begin
+            (─ bs₁ , x) ≡⟨ cong (λ z → ─ bs₁ , z) (sym (proj₂₀ (proj₂₀ iso) x)) ⟩
+            (─ bs₁ , proj₁ (proj₁₀ iso) x')
+              ≡⟨ cong (λ z → ─ bs₁ , proj₁ (proj₁₀ iso) z)
+                   (‼ ≡-elim{A = Exists─ (List Σ) A}
+                     (λ {z“} eq →
+                         x' ≡ subst (A ∘ Erased.x) (trans (sym (erasedEta (proj₁₀ z“))) (cong proj₁₀ (sym eq))) (proj₂₀ z“))
+                     refl p)
+               ⟩
+            (─ bs₁
+            , proj₁ (proj₁₀ iso)
+                (subst (A ∘ Erased.x) (─ bs₁ ≡ ─ bs₁ ∋ cong proj₁₀ (sym p)) y'))
+              ≡⟨ ≡-elimₖ
+                   (λ eq → (─ bs₁ , proj₁ (proj₁₀ iso) (subst (A ∘ Erased.x) eq y')) ≡ _)
+                   refl (cong proj₁₀ (sym p)) ⟩
+            (─ bs₁ , proj₁ (proj₁₀ iso) y') ≡⟨ cong (λ z → ─ bs₁ , z) (proj₂ (proj₂₀ iso) y) ⟩
+            (─ bs₁ , y) ∎))
 
--- nonnesting : ∀ {@0 A B} → Equivalent A B → NonNesting A → NonNesting B
--- nonnesting{A}{B} eqv nn ++≡ b₁ b₂ = ‼ nn ++≡ (proj₂ eqv b₁) (proj₂ eqv b₂)
+  where
+  open ≡-Reasoning
+
+  x' : A bs₁
+  x' = proj₂₀ (proj₁₀{A = Equivalent A B} iso){bs₁} x
+
+  x“ : Exists─ (List Σ) A
+  x“ = (─ bs₁) , x'
+
+  y' : A bs₂
+  y' = proj₂₀ (proj₁₀{A = Equivalent A B} iso){bs₂} y
+
+  y“ : Exists─ (List Σ) A
+  y“ = (─ bs₂) , y'
+
+isoEq≋ : ∀ {@0 A B} → Iso A B → Eq≋ A → Eq≋ B
+isoEq≋ iso eq = Eq⇒Eq≋ (isoEq iso (Eq≋⇒Eq eq))
+

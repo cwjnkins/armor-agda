@@ -37,4 +37,4 @@ record PrintableStringChar (@0 bs : List UInt8) : Set where
 
 RawPrintableStringChar : Raw PrintableStringChar
 Raw.D RawPrintableStringChar = UInt8
-Raw.to RawPrintableStringChar = uncurry─ λ y → (PrintableStringChar.c y)
+Raw.to RawPrintableStringChar = PrintableStringChar.c

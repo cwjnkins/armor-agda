@@ -10,7 +10,8 @@ open import Aeres.Data.PEM.CertText.TCB
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 import      Data.Nat.Properties as Nat
@@ -20,14 +21,15 @@ module Aeres.Data.PEM.CertText.Properties where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Parallel             Char
+open Aeres.Grammar.Seq                  Char
 
 open ≡-Reasoning
 
 finalLineFromLines : ∀ {@0 bs} → IList CertFullLine bs → Erased (bs ≡ []) ⊎ &ₚ (IList CertFullLine) (CertFinalLine ×ₚ CertFullLine) bs
 finalLineFromLines nil = inj₁ (─ refl)
 finalLineFromLines (consIList{bs₁}{.[]} head₁ nil bs≡) =
-  inj₂ (mk&ₚ nil (mk×ₚ (FinalLine.fromCertFullLine head₁) head₁ refl)
+  inj₂ (mk&ₚ nil (mk×ₚ (FinalLine.fromCertFullLine head₁) head₁)
           (begin (_ ≡⟨ bs≡ ⟩
                  bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
                  bs₁ ∎)))

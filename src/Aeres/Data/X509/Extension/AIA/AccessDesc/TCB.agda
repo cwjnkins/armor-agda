@@ -8,11 +8,13 @@ open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.AIA.AccessDesc.TCB where
 
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
 
 supportedAccessMethod : List (Exists─ _ OIDValue)
 supportedAccessMethod = (-, OIDs.OSCP) ∷ [ -, OIDs.CAIssuers ]

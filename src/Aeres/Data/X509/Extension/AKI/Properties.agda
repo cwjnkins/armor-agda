@@ -10,6 +10,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 
 open import Aeres.Prelude
 
@@ -18,6 +19,7 @@ module Aeres.Data.X509.Extension.AKI.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ (Option AKIKeyId) (&ₚ (Option AKIAuthCertIssuer) (Option AKIAuthCertSN))
 
@@ -34,7 +36,7 @@ proj₂ (proj₂ iso) (mkAKIFieldsSeqFields akeyid authcertiss authcertsn refl) 
 unambiguous =
   Iso.unambiguous iso
     (Unambiguous.option₃&₂
-      (TLV.unambiguous OctetString.unambiguous) TLV.nonnesting TLV.nonempty
-      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous OctetString.unambiguous) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

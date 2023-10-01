@@ -1,17 +1,17 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Prelude
-
 open import Aeres.Binary
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.IList
-import      Aeres.Grammar.Parser
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.SequenceOf.Properties as SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Parser
+open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -20,10 +20,11 @@ module Aeres.Data.X690-DER.SequenceOf.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseSequenceOf
-  (eName : String) (A : List UInt8 → Set) (@0 ne : NonEmpty A) (@0 nn : NonNesting A)
+  (eName : String) (A : List UInt8 → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (Logging ∘ Dec) A) where
 
   here' = "parseSeq: "
@@ -34,19 +35,17 @@ module parseSequenceOf
   parseSequenceOfWF : ∀ n → ParserWF (Logging ∘ Dec) (ExactLength (SequenceOf A) n)
   runParser (parseSequenceOfWF    zero) xs (WellFounded.acc rs) =
     return (yes
-      (success [] _ refl (mk×ₚ nil (─ refl) refl) xs refl))
+      (success [] _ refl (mk×ₚ nil (─ refl)) xs refl))
   runParser (parseSequenceOfWF n@(suc _)) xs (WellFounded.acc rs) = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len) refl) suf₀ ps≡₀)
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ r₀≤len)) suf₀ ps≡₀)
       ← runParser (parse≤ n p nn (tell $ here' String.++ "overflow")) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ nil (─ ()) refl) suffix ps≡)
-          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ nil (─ ())) suffix ps≡)
+          (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen)) suffix ps≡) →
             contradiction
               (success bs₁ _ refl
-                (mk×ₚ h
-                  (─ m+n≤o⇒m≤o _ {length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen)))
-                  refl)
+                (mk×ₚ h (─ m+n≤o⇒m≤o _ {length bs₂} (Lemmas.≡⇒≤ (trans (sym $ length-++ bs₁) bsLen))))
                 (bs₂ ++ suffix)
                 (begin (bs₁ ++ bs₂ ++ suffix ≡⟨ solve (++-monoid UInt8) ⟩
                         (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
@@ -58,16 +57,16 @@ module parseSequenceOf
       (tri≈ _ r₀≡n _) →
         return (yes
           (success pre₀ _ r₀≡
-            (mk×ₚ (cons (mkSequenceOf v₀ nil (solve (++-monoid UInt8)))) (─ trans (sym r₀≡) r₀≡n) refl) suf₀ ps≡₀))
+            (mk×ₚ (cons (mkSequenceOf v₀ nil (solve (++-monoid UInt8)))) (─ trans (sym r₀≡) r₀≡n)) suf₀ ps≡₀))
       (tri< r₀<n _ _) → do
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
-        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁) refl) suf₁ ps≡₁)
+        yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁)) suf₁ ps≡₁)
           ← runParser (parseSequenceOfWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ nil (─ ()) refl) suffix ps≡)
-              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen) refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mk×ₚ nil (─ ())) suffix ps≡)
+              (success .(bs₁ ++ bs₂) read read≡ (mk×ₚ (cons (mkSequenceOf{bs₁}{bs₂} h t refl)) (─ bsLen)) suffix ps≡) → ‼
                 let @0 xs≡ : pre₀ ++ suf₀ ≡ bs₁ ++ bs₂ ++ suffix
                     xs≡ = begin pre₀ ++ suf₀            ≡⟨ ps≡₀ ⟩
                                  xs                     ≡⟨ sym ps≡ ⟩
@@ -90,8 +89,8 @@ module parseSequenceOf
                                 n + (r₀ - r₀)            ≡⟨ sym (+-∸-assoc n {r₀} ≤-refl) ⟩
                                 (n + r₀) - r₀            ≡⟨ cong (_∸ r₀) (+-comm n _) ⟩
                                 (r₀ + n) - r₀            ≡⟨ +-∸-assoc r₀ {n} (<⇒≤ r₀<n) ⟩
-                                r₀ + (n - r₀)            ∎)))
-                      refl) suffix
+                                r₀ + (n - r₀)            ∎))))
+                    suffix
                     (++-cancelˡ bs₁ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
                   ¬parse
         return (yes
@@ -109,8 +108,7 @@ module parseSequenceOf
                          n + r₀ - r₀               ≡⟨ +-∸-assoc n {n = r₀} ≤-refl ⟩
                          n + (r₀ - r₀)             ≡⟨ cong (n +_) (n∸n≡0 r₀) ⟩
                          n + 0                     ≡⟨ +-identityʳ n ⟩
-                         n                         ∎)))
-              refl)
+                         n                         ∎))))
             suf₁
             (begin ((pre₀ ++ pre₁) ++ suf₁  ≡⟨ solve (++-monoid UInt8) ⟩
                     pre₀ ++ pre₁ ++ suf₁    ≡⟨ cong (pre₀ ++_) ps≡₁ ⟩
@@ -122,19 +120,19 @@ module parseSequenceOf
 
   parseBoundedSequenceOf : ∀ n b → Parser (Logging ∘ Dec) (ExactLength (BoundedSequenceOf A b) n)
   runParser (parseBoundedSequenceOf n b) xs = do
-    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len) refl) suf₀ ps≡₀)
+    yes (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (─ v₀Len)) suf₀ ps≡₀)
       ← runParser (parseSequenceOf n) xs
       where no ¬parse → do
         return ∘ no $ λ where
-          x → contradiction (mapSuccess (λ where (mk×ₚ (mk×ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) → mk×ₚ fstₚ₁ sndₚ₁ bs≡) x) ¬parse
+          x → contradiction (mapSuccess (λ where (mk×ₚ (mk×ₚ fstₚ₁ sndₚ₂) sndₚ₁) → mk×ₚ fstₚ₁ sndₚ₁) x) ¬parse
     case b ≤? lengthSequence v₀ of λ where
       (yes b≤len) →
         return (yes
-          (success pre₀ r₀ r₀≡ (mk×ₚ (mk×ₚ v₀ b≤len refl) (─ v₀Len) refl) suf₀ ps≡₀))
+          (success pre₀ r₀ r₀≡ (mk×ₚ (mk×ₚ v₀ b≤len) (─ v₀Len)) suf₀ ps≡₀))
       (no  b≰len) → do
         tell $ here' String.++ eName String.++ ": does not meet min length"
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (mk×ₚ fstₚ₁ sndₚ₂ refl) (─ sndₚ₁) refl) suffix ps≡) → ‼
+          (success prefix read read≡ (mk×ₚ (mk×ₚ fstₚ₁ sndₚ₂) (─ sndₚ₁)) suffix ps≡) → ‼
             let @0 pre₀≡ : prefix ≡ pre₀
                 pre₀≡ = proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans₀ ps≡ (sym ps≡₀)) (trans₀ sndₚ₁ (sym v₀Len)))
 
@@ -158,7 +156,7 @@ module parseSequenceOf
 open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseNonEmptySeq ; parseSeq)
 
 parseIntegerSeq : Parser (Logging ∘ Dec) IntegerSeq
-parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nonnesting Int.parse -- parseInt
+parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nosubstrings Int.parse -- parseInt
 
 -- private
 --   module Test where
@@ -185,7 +183,7 @@ parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nonnesting Int.parse -- pa
 --     SeqBad₁₂₃ = Tag.Sequence ∷ [ # 19 ] ++ elm₁ ++ elm₂ ++ elm₄
 
 --     test₁ : Seq Int Seq₁₂₃
---     test₁ = Success.value (toWitness {Q = Logging.val (runParser (parseSeq "int" Int Props.TLV.nonempty Props.TLV.nonnesting parseInt) Seq₁₂₃)} tt)
+--     test₁ = Success.value (toWitness {Q = Logging.val (runParser (parseSeq "int" Int Props.TLV.nonempty Props.TLV.nosubstrings parseInt) Seq₁₂₃)} tt)
 
 --     test₂ : IntegerSeq Seq₁₂₃
 --     test₂ = Success.value (toWitness {Q = Logging.val (runParser parseIntegerSeq Seq₁₂₃)} tt)

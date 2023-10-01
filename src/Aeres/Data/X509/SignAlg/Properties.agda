@@ -22,6 +22,7 @@ import      Aeres.Data.X509.SignAlg.DSA.TCB           as DSA
 import      Aeres.Data.X509.SignAlg.RSA.Properties    as RSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB           as RSA
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -30,6 +31,7 @@ open import Relation.Nullary.Negation
   using (¬?)
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -40,12 +42,12 @@ unambiguousUnsupported =
   TLV.unambiguous
     (DefinedByOID.unambiguous
       UnsupportedParam
-      (λ o → unambiguous×ₚ OctetString.unambiguous T-unique))
+      (λ o → Parallel.unambiguous×ₚ OctetString.unambiguous T-unique))
 
 private
   @0 ua₂ : Unambiguous (Sum RSA.Supported UnsupportedSignAlg)
   ua₂ =
-    unambiguousSum{A = RSA.Supported}{B = UnsupportedSignAlg}
+    Sum.unambiguous{A = RSA.Supported}{B = UnsupportedSignAlg}
       RSA.Supported.unambiguous
       unambiguousUnsupported
       noConfusion-RSA-Unsupported
@@ -58,7 +60,7 @@ private
 
   @0 ua₁ : Unambiguous (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
   ua₁ =
-    unambiguousSum{A = ECDSA.Supported}{B = Sum RSA.Supported UnsupportedSignAlg}
+    Sum.unambiguous{A = ECDSA.Supported}{B = Sum RSA.Supported UnsupportedSignAlg}
       ECDSA.unambiguous ua₂ nc₂
 
   @0 nc₁ : NoConfusion DSA.Supported (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
@@ -100,10 +102,10 @@ proj₂ (proj₂ iso) (unsupported x) = refl
 @0 unambiguous : Unambiguous SignAlg
 unambiguous =
   Iso.unambiguous iso
-    (unambiguousSum{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
+    (Sum.unambiguous{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
       DSA.unambiguous ua₁ nc₁)
 
-@0 nonnesting : NonNesting SignAlg
-nonnesting xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
-  TLV.nonnesting xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
+@0 nosubstrings : NoSubstrings SignAlg
+nosubstrings xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
+  TLV.nosubstrings xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
 

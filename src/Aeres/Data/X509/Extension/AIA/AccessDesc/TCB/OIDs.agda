@@ -4,12 +4,14 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.Parser
 open import Aeres.Data.X690-DER.OID.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 OSCPLit : List UInt8

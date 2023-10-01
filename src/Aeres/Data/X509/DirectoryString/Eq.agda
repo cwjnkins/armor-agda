@@ -9,6 +9,7 @@ open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -19,17 +20,18 @@ module Aeres.Data.X509.DirectoryString.Eq where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Sum         UInt8
 
 instance
   eq≋ : Eq≋ DirectoryString
   eq≋ =
-    isoEq≋ iso
-      (sumEq≋
-        ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-        ⦃ sumEq≋
-          ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-          ⦃ sumEq≋
-            ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-            ⦃ sumEq≋ ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
-                     ⦃ eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄ ⦄ ⦄ ⦄)
+    Iso.isoEq≋ iso
+      (Sum.sumEq≋
+        ⦃ Parallel.eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
+        ⦃ Sum.sumEq≋
+          ⦃ Parallel.eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
+          ⦃ Sum.sumEq≋
+            ⦃ Parallel.eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
+            ⦃ Sum.sumEq≋ ⦃ Parallel.eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄
+                     ⦃ Parallel.eq≋Σₚ it λ a → record { _≟_ = λ x y → yes (≤-irrelevant x y) } ⦄ ⦄ ⦄ ⦄)

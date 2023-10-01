@@ -6,12 +6,14 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.SequenceOf.TCB where
 
 open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.IList.TCB                UInt8
+open Aeres.Grammar.Parallel.TCB             UInt8
 
 SequenceOf       = IList
 SequenceOfFields = IListCons
@@ -33,8 +35,8 @@ IntegerSeq = Seq Int
 
 RawSequenceOf : {A : @0 List UInt8 → Set} → Raw A → Raw (SequenceOf A)
 Raw.D (RawSequenceOf R) = List (Raw.D R)
-Raw.to (RawSequenceOf R) = uncurry─ (map (Raw.to R) ∘ toList)
+Raw.to (RawSequenceOf R) sq = map (λ where (─ bs , e) → Raw.to R{bs} e) (toList sq)
 
-RawBoundedSequenceOf : ∀ {n} {A : @0 List UInt8 → Set} → Raw A → Raw (BoundedSequenceOf A n)
-Raw.D (RawBoundedSequenceOf R) = List (Raw.D R)
-Raw.to (RawBoundedSequenceOf R) = uncurry─ λ {_} → map (Raw.to R) ∘ toList ∘ Σₚ.fstₚ
+RawBoundedSequenceOf : ∀ {A : @0 List UInt8 → Set} → Raw A → (n : ℕ) → Raw (BoundedSequenceOf A n)
+Raw.D (RawBoundedSequenceOf R n) = List (Raw.D R)
+Raw.to (RawBoundedSequenceOf R n) sq = map (λ where (─ bs , e) → Raw.to R{bs} e) (toList (fstₚ sq))

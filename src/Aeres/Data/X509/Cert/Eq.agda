@@ -16,19 +16,23 @@ open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Cert.Eq where
 
 open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.IList        UInt8
+open Aeres.Grammar.Parallel     UInt8
 open Aeres.Grammar.Option       UInt8
+open Aeres.Grammar.Seq          UInt8
 
 instance
   eq≋ : Eq≋ CertFields
-  eq≋ = isoEq≋ iso
-          (eq≋&ₚ (eq≋Σₚ it λ _ → it)
-            (eq≋&ₚ it (eq≋Σₚ it λ _ → it)))
+  eq≋ = Iso.isoEq≋ iso
+          (Seq.eq≋&ₚ (Parallel.eq≋Σₚ it λ _ → it)
+            (Seq.eq≋&ₚ it (Parallel.eq≋Σₚ it λ _ → it)))
 
   eq : Eq (Exists─ _ CertFields)
   eq = Eq≋⇒Eq it

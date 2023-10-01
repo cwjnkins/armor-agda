@@ -11,6 +11,7 @@ open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -18,6 +19,7 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 module Aeres.Data.X509.HashAlg.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Option      UInt8
 
@@ -28,7 +30,7 @@ module SHA-Like where
                 → NoConfusion (SHA-Like o₁) (SHA-Like o₂)
   noConfusion o₁ o₂ {t} =
     TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡ refl) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡ refl) bs'≡) →
+     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡) bs'≡) →
        let
          @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
          ++≡ = ─ (begin
@@ -40,7 +42,7 @@ module SHA-Like where
            bs₁' ++ p' ++ ys₂ ∎)
 
          @0 bs₁≡ : Erased (bs₁ ≡ bs₁')
-         bs₁≡ = ─ TLV.nonnesting (¡ ++≡) o o'
+         bs₁≡ = ─ TLV.nosubstrings (¡ ++≡) o o'
 
          @0 o≋o' : _≋_{OID} o o'
          o≋o' = mk≋ (¡ bs₁≡) (OID.unambiguous _ o')
@@ -57,7 +59,7 @@ module SHA-Like where
       (DefinedByOID.unambiguous
         _
         (λ o₁ →
-         unambiguous×ₚ
+         Parallel.unambiguous×ₚ
             (Unambiguous.option₁
               (TLV.unambiguous (λ where refl refl → refl))
               TLV.nonempty)
@@ -68,7 +70,7 @@ module SHA-Like where
     eq≋ =
       DefinedByOID.eq≋ _
         λ o' →
-          eq≋Σₚ it
+          Parallel.eq≋Σₚ it
             λ _ → record { _≟_ = λ where ≋-refl ≋-refl → yes refl }
 
     eq : ∀ {@0 bs} → {o : OIDValue bs} → Eq (Exists─ _ (DefinedByOIDFields (SHA-Like-Param o)))

@@ -5,12 +5,14 @@ open import Aeres.Data.X509.Extension.SKI.TCB
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.SKI.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -19,7 +21,7 @@ private
 parseSKIFields : Parser (Logging ∘ Dec) SKIFields
 parseSKIFields =
   parseTLV _ "SKI Fields" _
-    (parseExactLength TLV.nonnesting (tell $ here' String.++ ": underflow") parseOctetString)
+    (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") parseOctetString)
 
 -- private
 --   module Test where

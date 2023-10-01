@@ -11,7 +11,7 @@ open import Aeres.Data.PEM.RFC5234
 open import Aeres.Data.PEM.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -20,7 +20,7 @@ module Aeres.Data.PEM.Properties where
 
 open Aeres.Grammar.Definitions          Char
 open Aeres.Grammar.IList                Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Seq                  Char
 
 Rep : @0 List Char → Set
 Rep = &ₚ CertHeader (&ₚ CertText CertFooter)

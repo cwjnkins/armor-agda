@@ -5,13 +5,17 @@ open import Aeres.Data.X509.Validity.TCB
 open import Aeres.Data.X509.Validity.Properties
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Validity.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Seq         UInt8
 
 module parseValidityFields where
   here' = "parseValidityFields"
@@ -21,7 +25,7 @@ module parseValidityFields where
   parseValidityFields : Parser (Logging ∘ Dec) ValidityFields
   runParser parseValidityFields xs = do
     yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)
-      ← runParser (parse& Time.nonnesting parseTime parseTime) xs
+      ← runParser (parse& Time.nosubstrings parseTime parseTime) xs
       where no ¬parse → do
         tell $ here'
         return ∘ no $ λ where
@@ -34,7 +38,7 @@ open parseValidityFields public using (parseValidityFields)
 parseValidity : Parser (Logging ∘ Dec) Validity
 parseValidity =
   parseTLV _ "Validity" _
-    (parseExactLength nonnesting (tell $ "validity: length mismatch") parseValidityFields)
+    (parseExactLength nosubstrings (tell $ "validity: length mismatch") parseValidityFields)
 
 
 -- private

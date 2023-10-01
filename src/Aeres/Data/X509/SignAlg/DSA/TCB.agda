@@ -8,13 +8,15 @@ open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.DSA.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.Sum.TCB      UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
 
 supportedSignAlgOIDs : List (Exists─ _ OIDValue)
 supportedSignAlgOIDs =
@@ -43,9 +45,9 @@ erase
     → DefinedByOID
         (λ o → (Erased ∘ OctetStringValue) ×ₚ const (True ((-, TLV.val o) ∈? supportedSignAlgOIDs)))
         bs
-erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡)) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl refl) bs≡₁) len≡ bs≡))) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt refl) bs≡₁) len≡ bs≡
+erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡)) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
+  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡

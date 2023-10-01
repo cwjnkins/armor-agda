@@ -13,6 +13,7 @@ open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -20,6 +21,7 @@ import      Aeres.Grammar.Sum
 module Aeres.Data.X509.SignAlg.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
@@ -37,17 +39,17 @@ parseUnsupported =
       (yes p₁) → do
         tell $ here' String.++ ": unsupported: OID is supported!"
         return ∘ no $ λ where
-          (success prefix read read≡ (mk×ₚ (mk×ₚ str str∉ refl) (─ uLen) refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ (mk×ₚ str str∉) (─ uLen)) suffix ps≡) →
             contradiction p₁ (toWitnessFalse str∉)
       (no ¬p) → do
-        (yes (success pre₁ r₁ r₁≡ (mk×ₚ os (─ osLen) refl) suf₁ ps≡₁)) ← runParser (parseOctetStringValue n) xs
+        (yes (success pre₁ r₁ r₁≡ (mk×ₚ os (─ osLen)) suf₁ ps≡₁)) ← runParser (parseOctetStringValue n) xs
           where no ¬p → do
             tell $ here' String.++ ": underflow parsing parameter"
             return ∘ no $ λ where
-              (success prefix read read≡ (mk×ₚ (mk×ₚ str str∉ refl) (─ uLen) refl) suffix ps≡) →
-                contradiction (success prefix _ read≡ (mk×ₚ str (─ uLen) refl) suffix ps≡) ¬p
+              (success prefix read read≡ (mk×ₚ (mk×ₚ str str∉) (─ uLen)) suffix ps≡) →
+                contradiction (success prefix _ read≡ (mk×ₚ str (─ uLen)) suffix ps≡) ¬p
         return (yes
-          (success pre₁ r₁ r₁≡ (mk×ₚ (mk×ₚ os (fromWitnessFalse{Q = (-, TLV.val o) ∈? supportedSignAlgOIDs} ¬p) refl) (─ osLen) refl)
+          (success pre₁ r₁ r₁≡ (mk×ₚ (mk×ₚ os (fromWitnessFalse{Q = (-, TLV.val o) ∈? supportedSignAlgOIDs} ¬p)) (─ osLen))
             suf₁ ps≡₁))
  
 parseSignAlg : Parser (Logging ∘ Dec) SignAlg

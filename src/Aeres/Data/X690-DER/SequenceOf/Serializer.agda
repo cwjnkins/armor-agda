@@ -1,13 +1,12 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open        Base256
 open import Aeres.Data.X690-DER.SequenceOf.TCB
-import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList
+open import Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel UInt8
 
 module Aeres.Data.X690-DER.SequenceOf.Serializer
   {@0 A : List UInt8 → Set} (ser : ∀ {@0 bs} → A bs → Singleton bs)
@@ -28,4 +27,4 @@ serializeSequenceOf {bs} (cons (mkIListCons{bs₁}{bs₂} head₁ tail₁ bs≡)
 
 serializeNonEmptySequenceOf
   : ∀ {@0 bs} → NonEmptySequenceOf A bs → Singleton bs
-serializeNonEmptySequenceOf (mk×ₚ fstₚ sndₚ refl) = serializeSequenceOf fstₚ
+serializeNonEmptySequenceOf (mk×ₚ fstₚ sndₚ) = serializeSequenceOf fstₚ

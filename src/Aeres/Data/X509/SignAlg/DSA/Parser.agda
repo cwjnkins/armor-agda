@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -15,6 +16,7 @@ open import Aeres.Prelude
 module Aeres.Data.X509.SignAlg.DSA.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -22,9 +24,9 @@ parseDSA-Like : ∀ {@0 bs} → (o : OIDValue bs) → String → Parser (Logging
 parseDSA-Like o s =
   DefinedByOID.parse s
     λ n o' →
-      parseExactLength (nonnesting×ₚ₁ TLV.nonnesting)
+      parseExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
         (tell $ s String.++ ": length mismatch")
-        (parse×Dec TLV.nonnesting
+        (parse×Dec TLV.nosubstrings
           (tell $ s String.++ ": mismatched OID")
           parseNull (λ _ → _ ≋? _))
         _

@@ -15,6 +15,8 @@ open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Cert.Properties where
@@ -22,19 +24,21 @@ module Aeres.Data.X509.Cert.Properties where
 open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.IList        UInt8
 open Aeres.Grammar.Option       UInt8
+open Aeres.Grammar.Parallel     UInt8
+open Aeres.Grammar.Seq          UInt8
 
 Rep : @0 List UInt8 → Set
 Rep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
 
 equiv : Equivalent Rep CertFields
-proj₁ equiv (mk&ₚ (mk×ₚ fstₚ₁ s refl) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s' refl) refl) bs≡) =
+proj₁ equiv (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s') refl) bs≡) =
   mkCertFields fstₚ₁ s fstₚ₂ sndₚ₁ s' bs≡
 proj₂ equiv (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
-  = mk&ₚ (mk×ₚ tbs tbsBytes refl) (mk&ₚ signAlg (mk×ₚ signature signatureBytes refl) refl) bs≡
+  = mk&ₚ (mk×ₚ tbs tbsBytes) (mk&ₚ signAlg (mk×ₚ signature signatureBytes) refl) bs≡
 
 iso   : Iso Rep CertFields
 proj₁ iso = equiv
-proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s refl) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _ refl) refl) refl) = refl
+proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _) refl) refl) = refl
 proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) = refl
 
 -- instance
@@ -49,9 +53,9 @@ proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) 
 @0 unambiguous : Unambiguous CertFields
 unambiguous =
   Iso.unambiguous iso
-    (unambiguous&ₚ
-      (unambiguous×ₚ (TLV.unambiguous TBSCert.unambiguous) (λ where self self → refl))
-      (nonnestingΣₚ₁ TLV.nonnesting)
-      (unambiguous&ₚ SignAlg.unambiguous SignAlg.nonnesting
-        (unambiguous×ₚ (TLV.unambiguous BitString.unambiguous) (λ where self self → refl))))
+    (Seq.unambiguous
+      (Parallel.unambiguous (TLV.unambiguous TBSCert.unambiguous) (λ where _ self self → refl))
+      (Parallel.nosubstrings₁ TLV.nosubstrings)
+      (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
+        (Parallel.unambiguous (TLV.unambiguous BitString.unambiguous) (λ where _ self self → refl))))
 

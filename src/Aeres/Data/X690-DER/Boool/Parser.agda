@@ -6,6 +6,7 @@ open import Aeres.Data.X690-DER.Boool.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 -- open import Data.List.Properties
@@ -16,6 +17,7 @@ open import Aeres.Prelude
 module Aeres.Data.X690-DER.Boool.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 private
@@ -45,7 +47,7 @@ runParser parseBoolValue (x ∷ xs)
 
 parseBool : Parser (Logging ∘ Dec) Boool
 parseBool = parseTLV Tag.Boolean here' BoolValue
-              (parseExactLength nonnesting (tell $ here' String.++ "bad length for bool") parseBoolValue)
+              (parseExactLength nosubstrings (tell $ here' String.++ "bad length for bool") parseBoolValue)
 
 
 -- private

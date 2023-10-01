@@ -15,4 +15,4 @@ TeletexString : @0 List UInt8 → Set
 TeletexString = TLV Tag.TeletexString OctetStringValue
 
 RawTeletexString : Raw TeletexString 
-RawTeletexString = RawTLV RawOctetStringValue
+RawTeletexString = RawTLV _ RawOctetStringValue

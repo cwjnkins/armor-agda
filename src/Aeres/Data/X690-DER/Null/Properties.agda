@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.Null.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 import      Data.Nat.Properties     as Nat
@@ -15,12 +16,11 @@ open Aeres.Grammar.Definitions              UInt8
 @0 unambiguous : Unambiguous Null
 unambiguous = TLV.unambiguous λ where refl refl → refl
 
-@0 nonmalleableValue : NonMalleable (_≡ []) RawNull
-NonMalleable.unambiguous nonmalleableValue = λ where refl refl → refl
-NonMalleable.injective nonmalleableValue (─ .[] , refl) (─ .[] , refl) _ = refl
+@0 nonmalleableValue : NonMalleable RawNull
+nonmalleableValue refl refl _ = refl
 
-@0 nonmalleable : NonMalleable Null _
-nonmalleable = TLV.nonmalleable nonmalleableValue
+@0 nonmalleable : NonMalleable _
+nonmalleable = TLV.nonmalleable{t = Tag.Null} nonmalleableValue
 
 instance
   eq≋ : Eq≋ (_≡ [])

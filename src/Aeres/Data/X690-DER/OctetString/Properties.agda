@@ -13,11 +13,10 @@ open Aeres.Grammar.Definitions              UInt8
 @0 unambiguous : Unambiguous OctetStringValue
 unambiguous (singleton x refl) (singleton .x refl) = refl
 
-@0 nonmalleableValue : NonMalleable OctetStringValue RawOctetStringValue
-NonMalleable.unambiguous nonmalleableValue = unambiguous
-NonMalleable.injective nonmalleableValue (─ _ , singleton bytes₁ refl) (─ _ , singleton bytes₂ refl) refl = refl
+@0 nonmalleableValue : NonMalleable RawOctetStringValue
+nonmalleableValue (singleton bytes₁ refl) (singleton bytes₂ refl) refl = refl
 
-@0 nonmalleable : NonMalleable OctetString RawOctetString
+@0 nonmalleable : NonMalleable RawOctetString
 nonmalleable = TLV.nonmalleable nonmalleableValue
 
 instance

@@ -28,6 +28,6 @@ TLVLenBounded l u bs tlv = InRange l u (getLength (TLV.len tlv))
 TLVSizeBounded : ∀ {t} {@0 A} (len : ∀ {@0 bs} → A bs → ℕ) (l u : ℕ) → ∀ (@0 bs) → TLV t A bs → Set
 TLVSizeBounded len l u bs tlv = InRange l u (len (TLV.val tlv))
 
-RawTLV : ∀ {t A} → Raw A → Raw (TLV t A)
-Raw.D (RawTLV R) = Raw.D R
-Raw.to (RawTLV R) (─ _ , tlv) = Raw.to R (─ _ , TLV.val tlv)
+RawTLV : ∀ t {A} → Raw A → Raw (TLV t A)
+Raw.D (RawTLV t R) = Raw.D R
+Raw.to (RawTLV t R) tlv = Raw.to R (TLV.val tlv)

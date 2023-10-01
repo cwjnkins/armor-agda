@@ -12,6 +12,7 @@ open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
@@ -20,6 +21,7 @@ open import Aeres.Prelude
 module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
@@ -30,9 +32,9 @@ private
 parseCPSURIQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength CPSURIQualifier n)
 parseCPSURIQualifier =
   DefinedByOID.parseDefinedByOIDFields here' λ n o →
-    parseExactLength (nonnesting×ₚ₁ TLV.nonnesting)
+    parseExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
       (tell $ here' String.++ ": CPSURI: length mismatch")
-      (parse×Dec TLV.nonnesting (tell $ here' String.++ ": CPSURI: wrong OID")
+      (parse×Dec TLV.nosubstrings (tell $ here' String.++ ": CPSURI: wrong OID")
         parseIA5String
         (λ x → _ ≋? _))
       _
@@ -40,9 +42,9 @@ parseCPSURIQualifier =
 parseUserNoticeQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeQualifier n)
 parseUserNoticeQualifier =
   DefinedByOID.parseDefinedByOIDFields here' λ n o →
-    parseExactLength (nonnesting×ₚ₁ TLV.nonnesting)
+    parseExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
       (tell $ here' String.++ ": UserNoticeQualifier: length mismatch")
-      (parse×Dec TLV.nonnesting
+      (parse×Dec TLV.nosubstrings
         (tell $ here' String.++ ": UserNoticeQualifier: wrong OID")
         parseUserNotice
         (λ x → _ ≋? _))
@@ -51,7 +53,7 @@ parseUserNoticeQualifier =
 parsePolicyQualifierInfoFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength PolicyQualifierInfoFields n)
 parsePolicyQualifierInfoFields n =
   parseEquivalent{A = Sum (ExactLength CPSURIQualifier n) (ExactLength UserNoticeQualifier n)}
-    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-Sum) (equivalent×ₚ equivalent))
+    (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-Sum) (Parallel.equivalent₁ equivalent))
     (parseSum (parseCPSURIQualifier n) (parseUserNoticeQualifier n))
 
 parsePolicyQualifierInfo : Parser (Logging ∘ Dec) PolicyQualifierInfo
@@ -60,5 +62,5 @@ parsePolicyQualifierInfo =
 
 parsePolicyQualifiersSeq : Parser (Logging ∘ Dec) PolicyQualifiersSeq
 parsePolicyQualifiersSeq =
-  parseNonEmptySeq here' _ TLV.nonempty TLV.nonnesting
+  parseNonEmptySeq here' _ TLV.nonempty TLV.nosubstrings
     parsePolicyQualifierInfo

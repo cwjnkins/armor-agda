@@ -47,7 +47,7 @@ getVal = Singleton.x ∘ IntegerValue.val ∘ TLV.val
 
 RawIntegerValue : Raw IntegerValue
 Raw.D RawIntegerValue = ℤ
-Raw.to RawIntegerValue = uncurry─ (Singleton.x ∘ IntegerValue.val)
+Raw.to RawIntegerValue = ↑_ ∘ IntegerValue.val
 
 RawInt : Raw Int
-RawInt = RawTLV RawIntegerValue
+RawInt = RawTLV _ RawIntegerValue

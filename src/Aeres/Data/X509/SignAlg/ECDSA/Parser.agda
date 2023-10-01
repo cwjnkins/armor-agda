@@ -9,12 +9,14 @@ open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.ECDSA.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -23,7 +25,7 @@ parseECDSA-Like o s =
   DefinedByOID.parse s
     λ n o' →
       parseExactLength
-        (λ where xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl _ refl) (mk×ₚ refl _ refl) → refl)
+        (λ where xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl _) (mk×ₚ refl _) → refl)
         (tell $ s String.++ ": length mismatch")
         (parse×Dec (λ where _ refl refl → refl)
           (tell $ s String.++ ": mismatched OID")

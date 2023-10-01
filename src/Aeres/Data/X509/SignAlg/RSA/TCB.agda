@@ -10,13 +10,15 @@ open import Aeres.Data.X509.SignAlg.TCB.OIDs  as OIDs
 import      Aeres.Data.X509.HashAlg.TCB       as HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs  as OIDs
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.RSA.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Sum.TCB      UInt8
 
 supportedSignAlgOIDs : List (Exists─ _ OIDValue)
 supportedSignAlgOIDs =
@@ -49,22 +51,22 @@ erase : ∀ {@0 bs}
             (λ o →    (Erased ∘ OctetStringValue)
                    ×ₚ const (True ((-, TLV.val o) ∈? supportedSignAlgOIDs)))
             bs
-erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡)) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡)))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡))))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡)))))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡))))))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡)))))))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl refl)bs≡') len≡ bs≡)))))))) =
-  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt refl)) bs≡') len≡ bs≡
+erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡)) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡)))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡))))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡)))))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡))))))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡)))))))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
+erase (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields o(mk×ₚ _ ≋-refl)bs≡') len≡ bs≡)))))))) =
+  mkTLV len (mkOIDDefinedFields o ((mk×ₚ (─ self) tt)) bs≡') len≡ bs≡
 
 getOID : ∀ {@0 bs} → Supported bs → Exists─ _ OID
 getOID s = -, DefinedByOIDFields.oid (TLV.val (erase s))

@@ -1,10 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+import      Aeres.Data.Unicode.UTF8.Properties as UTF8
 open import Aeres.Data.Unicode.UTF8.TCB
-import      Aeres.Data.Unicode.UTF8.Properties as UTF8Props
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -14,6 +15,7 @@ module Aeres.Data.Unicode.UTF8.Parser where
 open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -177,7 +179,7 @@ module parseUTF8 where
 
   parseUTF8Char : Parser (Logging ∘ Dec) UTF8Char
   parseUTF8Char =
-    parseEquivalent UTF8Props.UTF8CharProps.equiv
+    parseEquivalent equivalentChar
       (parseSum parseUTF8Char1
         (parseSum parseUTF8Char2
           (parseSum parseUTF8Char3
@@ -186,8 +188,8 @@ module parseUTF8 where
   parseUTF8 : ∀ n → Parser (Logging ∘ Dec) (ExactLength UTF8 n)
   parseUTF8 =
     parseIList (tell "parseUTF8: underflow") UTF8Char
-      UTF8Props.UTF8CharProps.nonempty
-      UTF8Props.UTF8CharProps.nonnesting
+      UTF8.UTF8CharProps.nonempty
+      UTF8.UTF8CharProps.nosubstrings
       parseUTF8Char
 
 open parseUTF8 public using (parseUTF8)

@@ -8,19 +8,12 @@ import      Aeres.Grammar.Sum.TCB
 
 module Aeres.Grammar.Sum (Σ : Set) where
 
--- TODO: have these be qualified names ("Sum.nonempty")
-open Aeres.Grammar.Sum.Properties Σ
-  public
-  renaming ( nonempty     to nonemptySum
-           ; nonnesting   to nonnestingSum
-           ; unambiguous' to unambiguousSum'
-           ; unambiguous  to unambiguousSum
-           ; nonmalleable  to nonmalleableSum)
 open Aeres.Grammar.Sum.TCB    Σ public
   hiding (module Sum)
 open Aeres.Grammar.Sum.Parser Σ public
 
 module Sum where
+  open Aeres.Grammar.Sum.Properties Σ public
   open Aeres.Grammar.Sum.Serializer Σ public
   open Aeres.Grammar.Sum.TCB        Σ public
     using (inj₁ ; inj₂)

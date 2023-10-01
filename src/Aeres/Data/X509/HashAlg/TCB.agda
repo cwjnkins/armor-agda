@@ -7,13 +7,15 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
+import      Aeres.Grammar.Option.TCB
+import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.HashAlg.TCB where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Definitions  UInt8
+open Aeres.Grammar.Option.TCB   UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
 
 SHA-Like-Param : ∀ {@0 bs} → (o : OIDValue bs) → ∀ {@0 bs'} → (o' : OID bs') → @0 List UInt8 → Set
 SHA-Like-Param o o' =

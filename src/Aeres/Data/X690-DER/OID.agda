@@ -39,5 +39,5 @@ isOID? xs =
               ps≡' = trans ps≡ (sym (++-identityʳ xs))
           in
           contradiction{P = _≡_{A = List UInt8} (c ∷ suffix) []}
-              (Lemmas.++-cancel≡ˡ _ _ (TLV.nonnesting ps≡' value o) ps≡')
+              (Lemmas.++-cancel≡ˡ _ _ (TLV.nosubstrings ps≡' value o) ps≡')
               λ ()

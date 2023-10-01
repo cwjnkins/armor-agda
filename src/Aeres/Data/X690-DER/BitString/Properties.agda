@@ -414,14 +414,15 @@ unambiguous (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs
   @0 bₜ≡ : _
   bₜ≡ = ∷-injectiveʳ bs≡
 
-postulate
-  @0 nonmalleableValue : NonMalleable BitStringValue RawBitStringValue
--- NonMalleable.unambiguous nonmalleableValue = unambiguous
--- NonMalleable.injective nonmalleableValue (─ _ , mkBitStringValue bₕ bₜ bₕ<8 (singleton bits refl) unusedBits refl) (─ _ , mkBitStringValue bₕ₁ bₜ₁ bₕ<9 (singleton bits₁ refl) unusedBits₁ refl) eq =
---   caseErased toBitRep-injective bₕ bₕ₁ bₜ bₜ₁ bₕ<8 bₕ<9 unusedBits unusedBits₁ eq ret (const _) of λ where
---     refl → ─ (caseErased (‼ ≤-irrelevant bₕ<8 bₕ<9) ret (const _) of λ where
---       refl → ─ (caseErased (‼ uniqueUnusedBits{bₕ}{bₜ} unusedBits unusedBits₁) ret (const _) of λ where
---         refl → ─ refl))
+@0 nonmalleableValue : NonMalleable RawBitStringValue
+nonmalleableValue{bs₁ = .(bₕ ∷ bₜ)}{bs₂ = .(bₕ₁ ∷ bₜ₁)} str₁@(mkBitStringValue bₕ bₜ bₕ<8 (singleton bits bits≡) unusedBits refl) str₂@(mkBitStringValue bₕ₁ bₜ₁ bₕ<9 (singleton .bits bits≡₁) unusedBits₁ refl) refl =
+  case
+    toBitRep-injective bₕ bₕ₁ bₜ bₜ₁ bₕ<8 bₕ<9
+      unusedBits unusedBits₁
+      (trans (sym bits≡) bits≡₁)
+  ret (const _) of λ where
+    refl → case (‼ unambiguous str₁ str₂) ret (const _) of λ where
+      refl → refl
 
-@0 nonmalleable : NonMalleable BitString RawBitString
+@0 nonmalleable : NonMalleable RawBitString
 nonmalleable = TLV.nonmalleable nonmalleableValue

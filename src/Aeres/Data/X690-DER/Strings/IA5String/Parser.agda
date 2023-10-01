@@ -5,29 +5,31 @@ open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Strings.IA5String.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 parseIA5StringValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength IA5StringValue n)
 runParser (parseIA5StringValue n) xs = do
-  yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen) refl) suf₀ ps≡₀) ← runParser (parseOctetStringValue n) xs
+  yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen)) suf₀ ps≡₀) ← runParser (parseOctetStringValue n) xs
     where no ¬parse → do
       return ∘ no $ λ where
-        (success prefix read read≡ (mk×ₚ (mkIA5StringValue str all<128) strLen refl) suffix ps≡) →
+        (success prefix read read≡ (mk×ₚ (mkIA5StringValue str all<128) strLen) suffix ps≡) →
           contradiction
             (success prefix _ read≡
-              (mk×ₚ str strLen refl) _ ps≡)
+              (mk×ₚ str strLen) _ ps≡)
             ¬parse
   case All.all? (Fin._<? (# 128)) os₀ of λ where
     (no  all≮128) → do
       tell $ here' String.++ ": value violation"
       return ∘ no $ λ where
-        (success .str' _ read≡ (mk×ₚ (mkIA5StringValue (singleton str' refl) all<128) (─ strLen) refl) suffix ps≡) → ‼
+        (success .str' _ read≡ (mk×ₚ (mkIA5StringValue (singleton str' refl) all<128) (─ strLen)) suffix ps≡) → ‼
           let @0 pre₀≡ : pre₀ ≡ str'
               pre₀≡ = proj₁ $
                 Lemmas.length-++-≡ _ suf₀ _ suffix
@@ -38,7 +40,7 @@ runParser (parseIA5StringValue n) xs = do
     (yes all<128) →
       return (yes
         (success pre₀ _ r₀≡
-          (mk×ₚ (mkIA5StringValue (singleton os₀ refl) (fromWitness all<128)) (─ osLen) refl)
+          (mk×ₚ (mkIA5StringValue (singleton os₀ refl) (fromWitness all<128)) (─ osLen))
           suf₀ ps≡₀))
   where here' = "parseIA5StringValue"
 

@@ -15,8 +15,8 @@ module BMP where
   @0 nonempty : NonEmpty BMPChar
   nonempty (mkBMPChar c₁ c₂ range refl) ()
 
-  @0 nonnesting : NonNesting BMPChar
-  nonnesting refl (mkBMPChar c₁ c₂ range refl) (mkBMPChar .c₁ .c₂ range₁ refl) = refl
+  @0 nosubstrings : NoSubstrings BMPChar
+  nosubstrings refl (mkBMPChar c₁ c₂ range refl) (mkBMPChar .c₁ .c₂ range₁ refl) = refl
 
   private
     open import Data.Nat.Properties
@@ -46,9 +46,8 @@ module BMP where
   unambiguous (mkBMPChar c₁ c₂ range refl) (mkBMPChar .c₁ .c₂ range₁ refl) =
     subst (λ x → mkBMPChar c₁ c₂ range refl ≡ mkBMPChar c₁ c₂ x refl) (‼ range≡ range range₁) refl
 
-  @0 nonmalleable : NonMalleable BMPChar RawBMPChar
-  NonMalleable.unambiguous nonmalleable = unambiguous
-  NonMalleable.injective nonmalleable (fst , mkBMPChar c₁ c₂ range refl) (fst₁ , mkBMPChar c₃ c₄ range₁ refl) refl =
+  @0 nonmalleable : NonMalleable RawBMPChar
+  nonmalleable (mkBMPChar c₁ c₂ range refl) (mkBMPChar c₃ c₄ range₁ refl) refl =
     case (‼ range≡ range range₁) of λ where
       refl → refl
 
@@ -77,9 +76,7 @@ sizeUnique (consIList (mkBMPChar c₁₁ c₁₂ _ refl) t₁ refl) (consIList (
 @0 unambiguous : Unambiguous BMP
 unambiguous =
   IList.unambiguous
-    BMP.unambiguous BMP.nonempty BMP.nonnesting
+    BMP.unambiguous BMP.nonempty BMP.nosubstrings
 
-@0 nonmalleable : NonMalleable BMP RawBMP
-NonMalleable.unambiguous nonmalleable = unambiguous
-NonMalleable.injective nonmalleable (fst , snd) (fst₁ , snd₁) x =
-  NonMalleable.injective (IList.nonmalleable BMP.nonempty BMP.nonnesting BMP.nonmalleable) (fst , snd) (fst₁ , snd₁) x
+@0 nonmalleable : NonMalleable RawBMP
+nonmalleable = IList.nonmalleable BMP.nonempty BMP.nosubstrings BMP.nonmalleable

@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -17,6 +18,7 @@ open import Aeres.Prelude
 module Aeres.Data.X509.MaskGenAlg.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -30,9 +32,9 @@ parseMGF1 =
   help : ∀ n {@0 bs} → (o : OID bs) → Parser _ _
   help n o =
     parseExactLength
-      (nonnesting×ₚ₁ MGF1.SupportedHashAlg.nonnesting)
+      (Parallel.nosubstrings₁ MGF1.SupportedHashAlg.nosubstrings)
       (tell $ "X509: MaskGenAlg: MGF1: length mismatch")
-      (parse×Dec MGF1.SupportedHashAlg.nonnesting
+      (parse×Dec MGF1.SupportedHashAlg.nosubstrings
         (tell $ "X509: MaskGenAlg: MGF1: mismatched maskgen OID")
         ( parseSum parseSHA1
          (parseSum parseSHA224

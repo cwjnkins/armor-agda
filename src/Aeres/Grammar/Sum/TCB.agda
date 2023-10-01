@@ -13,5 +13,5 @@ data Sum (@0 A B : List Σ → Set) (@0 xs : List Σ) : Set where
 
 RawSum : {A B : @0 List Σ → Set} → Raw A → Raw B → Raw (Sum A B)
 Raw.D (RawSum A B) = (Raw.D A) ⊎ (Raw.D B)
-Raw.to (RawSum A B) (fst , inj₁ x) = inj₁ (Raw.to A (fst , x))
-Raw.to (RawSum A B) (fst , inj₂ x) = inj₂ (Raw.to B (fst , x))
+Raw.to (RawSum A B) (inj₁ x) = inj₁ (Raw.to A x)
+Raw.to (RawSum A B) (inj₂ x) = inj₂ (Raw.to B x)

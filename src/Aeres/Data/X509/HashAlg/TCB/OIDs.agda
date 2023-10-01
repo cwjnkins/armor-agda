@@ -3,14 +3,14 @@
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.Parser
 open import Aeres.Data.X690-DER.OID.TCB
-import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
 module Aeres.Data.X509.HashAlg.TCB.OIDs where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Parser       UInt8
 
 {-
 https://datatracker.ietf.org/doc/html/rfc4055#section-2.1

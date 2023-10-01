@@ -9,21 +9,23 @@ open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Val.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel     UInt8
 
-@0 nonnesting : ∀ {@0 bs} → (o : OID bs) → NonNesting (PublicKeyVal o)
-nonnesting o ++≡ (mkPKVal v₁) (mkPKVal v₂) = help o (_ ∈? _) ++≡ v₁ v₂
+@0 nosubstrings : ∀ {@0 bs} → (o : OID bs) → NoSubstrings (PublicKeyVal o)
+nosubstrings o ++≡ (mkPKVal v₁) (mkPKVal v₂) = help o (_ ∈? _) ++≡ v₁ v₂
   where
   help : ∀ {@0 bs} → (o : OID bs)
          → (d : Dec ((-, TLV.val o) ∈ supportedPublicKeyAlgs))
-         → NonNesting (PublicKeyVal' o d)
-  help o (yes (here px)) = TLV.nonnesting
-  help o (yes (there (here px))) = nonnesting×ₚ₁ TLV.nonnesting
-  help o (no ¬p) = TLV.nonnesting
+         → NoSubstrings (PublicKeyVal' o d)
+  help o (yes (here px)) = TLV.nosubstrings
+  help o (yes (there (here px))) = Parallel.nosubstrings₁ TLV.nosubstrings
+  help o (no ¬p) = TLV.nosubstrings
 
 @0 unambiguous : ∀ {@0 bs} → (o : OID bs) → Unambiguous (PublicKeyVal o)
 unambiguous{bs} o (mkPKVal v₁) (mkPKVal v₂) = cong mkPKVal (help o (_ ∈? _) v₁ v₂)

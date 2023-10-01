@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
@@ -17,6 +18,7 @@ open import Aeres.Prelude
 module Aeres.Data.X509.MaskGenAlg.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
@@ -61,13 +63,13 @@ module MGF1 where
            (HashAlg.SHA-Like.noConfusion _ _)
            (HashAlg.SHA-Like.noConfusion _ _)))
 
-    @0 nonnesting : NonNesting SupportedHashAlg
-    nonnesting =
-      nonnestingSum TLV.nonnesting
-        (nonnestingSum TLV.nonnesting
-          (nonnestingSum TLV.nonnesting
-            (nonnestingSum TLV.nonnesting
-              TLV.nonnesting
+    @0 nosubstrings : NoSubstrings SupportedHashAlg
+    nosubstrings =
+      Sum.nosubstrings TLV.nosubstrings
+        (Sum.nosubstrings TLV.nosubstrings
+          (Sum.nosubstrings TLV.nosubstrings
+            (Sum.nosubstrings TLV.nosubstrings
+              TLV.nosubstrings
               noConfusion-SHA384-)
             noConfusion-SHA256-)
           noConfusion-SHA224-)
@@ -75,13 +77,13 @@ module MGF1 where
 
     @0 unambiguous : Unambiguous SupportedHashAlg
     unambiguous =
-      unambiguousSum
+      Sum.unambiguous
         (HashAlg.SHA-Like.unambiguous _)
-        (unambiguousSum
+        (Sum.unambiguous
           (HashAlg.SHA-Like.unambiguous _)
-          (unambiguousSum
+          (Sum.unambiguous
             (HashAlg.SHA-Like.unambiguous _)
-            (unambiguousSum
+            (Sum.unambiguous
               (HashAlg.SHA-Like.unambiguous _)
               (HashAlg.SHA-Like.unambiguous _)
               noConfusion-SHA384-)
@@ -94,16 +96,16 @@ module MGF1 where
     TLV.unambiguous
       (DefinedByOID.unambiguous Param
         λ o →
-         unambiguous×ₚ SupportedHashAlg.unambiguous (λ where ≋-refl ≋-refl → refl))
+         Parallel.unambiguous×ₚ SupportedHashAlg.unambiguous (λ where ≋-refl ≋-refl → refl))
 
   instance
     MG1Eq≋ : Eq≋ (DefinedByOIDFields Param)
     MG1Eq≋ =
       DefinedByOID.eq≋ Param λ o →
         Eq⇒Eq≋
-          (eqΣₚ
-            (sumEq ⦃ Eq≋⇒Eq it ⦄
-              ⦃ sumEq ⦃ it ⦄
-                ⦃ sumEq ⦃ it ⦄
-                  ⦃ sumEq ⦄ ⦄ ⦄)
+          (Parallel.eqΣₚ
+            (Sum.sumEq ⦃ Eq≋⇒Eq it ⦄
+              ⦃ Sum.sumEq ⦃ it ⦄
+                ⦃ Sum.sumEq ⦃ it ⦄
+                  ⦃ Sum.sumEq ⦄ ⦄ ⦄)
             (λ _ → record { _≟_ = λ where ≋-refl ≋-refl → yes refl }))

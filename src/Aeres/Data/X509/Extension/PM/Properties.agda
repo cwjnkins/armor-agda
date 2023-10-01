@@ -7,11 +7,13 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.PM.Properties where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ OID OID
 
@@ -27,7 +29,7 @@ proj₂ (proj₂ iso) (mkPolicyMapFields issuerDomainPolicy subjectDomainPolicy 
 @0 unambiguous : Unambiguous PolicyMapFields
 unambiguous =
   Iso.unambiguous iso
-    (unambiguous&ₚ OID.unambiguous TLV.nonnesting OID.unambiguous)
+    (Seq.unambiguous OID.unambiguous TLV.nosubstrings OID.unambiguous)
 
-@0 nonnesting : NonNesting PolicyMapFields
-nonnesting x x₁ x₂ = NonNesting&ₚ TLV.nonnesting TLV.nonnesting x (proj₂ equivalent x₁) (proj₂ equivalent x₂)
+@0 nosubstrings : NoSubstrings PolicyMapFields
+nosubstrings x x₁ x₂ = Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings x (proj₂ equivalent x₁) (proj₂ equivalent x₂)

@@ -18,7 +18,7 @@ open Aeres.Grammar.Serializer UInt8
 
 serialize : Serializer CurveFields
 serialize =
-  serializeEquivalent equivalent
+  Iso.serialize equivalent
     (serialize&ₚ
       (serialize&ₚ (TLV.serialize id) (TLV.serialize id))
       (Option.serialize BitString.serialize))

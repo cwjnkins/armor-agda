@@ -17,5 +17,5 @@ open Aeres.Grammar.Sum         UInt8
 instance
   eq≋Supported : Eq≋ Supported
   eq≋Supported =
-    sumEq≋ ⦃ eq₂ = sumEq≋ ⦃ eq₂ = sumEq≋ ⦃ eq₂ = sumEq≋ ⦃ eq₂ =
-    sumEq≋ ⦃ eq₂ = sumEq≋ ⦃ eq₂ = sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄
+    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ =
+    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄

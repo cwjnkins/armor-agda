@@ -8,7 +8,11 @@ open import Aeres.Data.PEM.CertText.FullLine.TCB
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Seq.Properties
+import      Aeres.Grammar.Seq.TCB
+import      Aeres.Grammar.Seq.MaximalParser
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 open import Tactic.MonoidSolver using (solve ; solve-macro)
@@ -17,7 +21,11 @@ module Aeres.Data.PEM.CertText.FinalLine.Parser where
 
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Parallel    Char
 open Aeres.Grammar.Parser      Char
+module Seq = Aeres.Grammar.Seq.Properties Char
+open Aeres.Grammar.Seq.TCB     Char
+open Aeres.Grammar.Seq.MaximalParser Char
 
 parseCertFinalLine : LogDec.MaximalParser CertFinalLine
 parseCertFinalLine =
@@ -28,11 +36,11 @@ parseCertFinalLine =
   help : ∀ xs → Σ _ _
   help xs =
     case LogDec.runMaximalParser
-           (LogDec.parse& parseMaxBase64Str parseMaxEOL RFC5234.EOL.noOverlap) xs
+           (parse& parseMaxBase64Str parseMaxEOL RFC5234.EOL.noOverlap) xs
     of λ where
       (mkLogged log (no ¬p) , max) →
         (mkLogged log (no λ where
-          (success prefix read read≡ (mk×ₚ fstₚ₁ sndₚ₁ refl) suffix ps≡) →
+          (success prefix read read≡ (mk×ₚ fstₚ₁ sndₚ₁) suffix ps≡) →
             contradiction
               (success prefix _ read≡ fstₚ₁ suffix ps≡)
               ¬p))
@@ -44,7 +52,7 @@ parseCertFinalLine =
         case inRange? 1 64 (length (↑ bs₁')) ret (const _) of λ where
           (no ¬p) →
             (mkLogged (log ++ ["parseMaxCertFinalLine: overrun"]) (no λ where
-              (success prefix read read≡ (mk×ₚ v₁'@(mk&ₚ{bs₁'}{bs₂'} str' eol' refl) ir refl) suffix ps≡) → ‼
+              (success prefix read read≡ (mk×ₚ v₁'@(mk&ₚ{bs₁'}{bs₂'} str' eol' refl) ir) suffix ps≡) → ‼
                 let
                   xs≡ : Erased (pre₁ ++ suf₁ ≡ prefix ++ suffix)
                   xs≡ = ─ (begin (pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
@@ -116,8 +124,8 @@ parseCertFinalLine =
                 ir = ─ subst (InRange 1 64 ∘ length) (Singleton.x≡ bs₁') p
             in
             (mkLogged log (yes
-              (success pre₁ _ r₁≡ (mk×ₚ v₁ ir refl) suf₁ ps≡₁)))
+              (success pre₁ _ r₁≡ (mk×ₚ v₁ ir) suf₁ ps≡₁)))
             , λ where
-              pre' suf' ps≡' (mk×ₚ{.pre'} v' _ refl) →
+              pre' suf' ps≡' (mk×ₚ v' _) →
                 max₁ _ _ ps≡' v'
 

@@ -61,4 +61,4 @@ toLength n = short (mkShort c c< refl)
 -- for nonmalleability
 RawLength : Raw Length
 Raw.D RawLength = ℕ
-Raw.to RawLength = uncurry─ getLength
+Raw.to RawLength = getLength

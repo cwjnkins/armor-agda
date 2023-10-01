@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 import      Aeres.Grammar.Serializer
+import      Aeres.Grammar.Option.Parser
 import      Aeres.Grammar.Option.Properties
 import      Aeres.Grammar.Option.TCB
 open import Aeres.Prelude
@@ -14,8 +15,8 @@ open Aeres.Grammar.Option.TCB Σ
   hiding (module Option)
 
 module Option where
-  open import Aeres.Grammar.Option.Properties Σ
-    public
+  open import Aeres.Grammar.Option.Parser Σ public
+  open import Aeres.Grammar.Option.Properties Σ public
 
   serialize : ∀ {@0 A} → Serializer A → Serializer (Option A)
   serialize s none = self

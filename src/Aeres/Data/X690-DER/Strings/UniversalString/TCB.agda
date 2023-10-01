@@ -15,4 +15,4 @@ UniversalString : @0 List UInt8 → Set
 UniversalString = TLV Tag.UniversalString UTF32
 
 RawUniversalString : Raw UniversalString 
-RawUniversalString = RawTLV RawUTF32
+RawUniversalString = RawTLV _ RawUTF32

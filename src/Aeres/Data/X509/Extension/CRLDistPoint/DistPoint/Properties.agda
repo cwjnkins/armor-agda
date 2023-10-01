@@ -10,6 +10,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Properties where
@@ -17,6 +18,7 @@ module Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ (Option DistPointName) (&ₚ (Option ReasonFlags) (Option CrlIssuer))
 
@@ -33,7 +35,7 @@ proj₂ (proj₂ iso) (mkDistPointFields crldp crldprsn crlissr refl) = refl
 unambiguous =
   Iso.unambiguous iso
     (Unambiguous.option₃&₂
-      (TLV.unambiguous Name.unambiguous) TLV.nonnesting TLV.nonempty
-      (TLV.unambiguous BitString.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous Name.unambiguous) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))

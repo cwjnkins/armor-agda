@@ -10,6 +10,7 @@ open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -19,6 +20,7 @@ module Aeres.Data.X690-DER.OID.Parser where
 
 open Base256
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseOIDSub where
@@ -57,7 +59,7 @@ module parseOIDField where
   here' = "parseOIDField"
 
   parseOIDValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength OIDValue n)
-  parseOIDValue n = parseBoundedSequenceOf "oid elems" OIDSub Sub.nonempty Sub.nonnesting parseOIDSub n 1
+  parseOIDValue n = parseBoundedSequenceOf "oid elems" OIDSub Sub.nonempty Sub.nosubstrings parseOIDSub n 1
 
   parseOID : Parser (Logging ∘ Dec) OID
   parseOID = parseTLV Tag.ObjectIdentifier "oid" _ parseOIDValue

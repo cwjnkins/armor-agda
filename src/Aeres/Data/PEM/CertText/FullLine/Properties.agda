@@ -7,16 +7,18 @@ open import Aeres.Data.PEM.CertText.FullLine.TCB
 open import Aeres.Data.PEM.RFC5234
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
-import      Aeres.Grammar.Relation.Definitions
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 import      Data.Nat.Properties as Nat
 
 module Aeres.Data.PEM.CertText.FullLine.Properties where
 
-open Aeres.Grammar.Definitions          Char
-open Aeres.Grammar.IList                Char
-open Aeres.Grammar.Relation.Definitions Char
+open Aeres.Grammar.Definitions Char
+open Aeres.Grammar.IList       Char
+open Aeres.Grammar.Parallel    Char
+open Aeres.Grammar.Seq         Char
 
 Rep = &ₚ (ExactLength (IList Base64Char) 64) EOL
 
@@ -25,13 +27,13 @@ proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkCertFullLine fstₚ₁ snd�
 proj₂ equiv (mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
 
 nonempty : NonEmpty CertFullLine
-nonempty (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ i refl) t refl) (─ len≡) refl) eol ()) refl
+nonempty (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ i refl) t refl) (─ len≡)) eol ()) refl
 
 nooverlap : NoOverlap CertFullLine CertFullLine
 nooverlap ws [] ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂ f₁ f₂ = inj₁ refl
 nooverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂
-  (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs≡)
-  (mkCertFullLine{l₁}{e₁} (mk×ₚ line₁ (─ lineLen₁) refl) eol₁ bs≡₁) =
+  (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen)) eol bs≡)
+  (mkCertFullLine{l₁}{e₁} (mk×ₚ line₁ (─ lineLen₁)) eol₁ bs≡₁) =
   inj₂ noway
   where
   open ≡-Reasoning
@@ -57,7 +59,7 @@ nooverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys�
     (inj₂ refl) → toWitnessFalse{Q = _ ∈? _} tt
 
   noway : ¬ CertFullLine xs₂
-  noway (mkCertFullLine{l'}{e'} (mk×ₚ line' (─ lineLen') refl) eol' bs≡“) =
+  noway (mkCertFullLine{l'}{e'} (mk×ₚ line' (─ lineLen')) eol' bs≡“) =
     contradiction l₁'∈ (subst₀ (_∉ B64.charset) l₁'≡ x₁∉)
     where
     abstract
@@ -86,7 +88,7 @@ nooverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys�
         ─ subst₀ (_∈ B64.charset) (∷-injectiveˡ (sym $ proj₂ l'≡)) c∈
 
 @0 fullLineLen : ∀ {@0 bs} → CertFullLine bs → InRange 65 66 (length bs)
-fullLineLen{bs} (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs≡) =
+fullLineLen{bs} (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen)) eol bs≡) =
     (≤.begin
       (64 + 1 ≤.≡⟨ cong (_+ 1) (sym lineLen) ⟩
       length l + 1 ≤.≤⟨ Nat.+-monoʳ-≤ (length l) (proj₁ eolLen) ⟩
@@ -104,7 +106,7 @@ fullLineLen{bs} (mkCertFullLine{l}{e} (mk×ₚ line (─ lineLen) refl) eol bs�
   eolLen = RFC5234.EOL.eolLen eol
 
 @0 char₁ : ∀ {@0 b bs} → CertFullLine (b ∷ bs) → b ∈ B64.charset
-char₁ (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ _ refl) t refl) (─ len≡) refl) eol bs≡) =
+char₁ (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ _ refl) t refl) (─ len≡)) eol bs≡) =
   subst₀ (_∈ B64.charset) (sym (∷-injectiveˡ bs≡)) c∈
 
 @0 char∈ : ∀ {@0 b bs} → b ∈ bs → CertFullLine bs → b ∈ B64.charset ++ (String.toList $ "=\r\n")

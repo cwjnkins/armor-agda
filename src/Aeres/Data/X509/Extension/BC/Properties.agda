@@ -8,6 +8,7 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.BC.Properties where
@@ -15,6 +16,7 @@ module Aeres.Data.X509.Extension.BC.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ (Option Boool) (Option Int)
 
@@ -31,6 +33,6 @@ proj₂ (proj₂ iso) (mkBCFieldsSeqFields bcca bcpathlen bs≡) = refl
 unambiguous =
   Iso.unambiguous iso
     (Unambiguous.option₂&₁
-      (TLV.unambiguous Boool.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous (λ {xs} → Int.unambiguous{xs})) TLV.nonempty
       (TLV.noconfusion λ ()))

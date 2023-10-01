@@ -10,12 +10,14 @@ open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.DSA.Eq where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Sum         UInt8
 
 instance
@@ -25,7 +27,7 @@ instance
       λ o₁ →
         record
           { _≋?_ = λ where
-            (mk×ₚ n ≋-refl refl) (mk×ₚ n' ≋-refl refl) →
+            (mk×ₚ n ≋-refl) (mk×ₚ n' ≋-refl) →
               case n ≋? n' ret (const _) of λ where
                 (no ¬p) → no λ where ≋-refl → contradiction ≋-refl ¬p
                 (yes ≋-refl) → yes ≋-refl
@@ -33,4 +35,4 @@ instance
 
   eq≋Supported : Eq≋ Supported
   eq≋Supported =
-    sumEq≋ ⦃ eq₂ = sumEq≋ ⦄
+    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄

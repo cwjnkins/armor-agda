@@ -10,6 +10,7 @@ open import Aeres.Data.X509.DisplayText
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Properties
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -18,6 +19,7 @@ module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNoti
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 Rep = &ₚ (Option NoticeReference) (Option DisplayText)
@@ -50,6 +52,6 @@ private
 unambiguous =
   Iso.unambiguous iso
     (Unambiguous.option₂&₁
-      (TLV.unambiguous NoticeReference.unambiguous) TLV.nonnesting TLV.nonempty
+      (TLV.unambiguous NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
       DisplayText.unambiguous DisplayText.nonempty
       nc)

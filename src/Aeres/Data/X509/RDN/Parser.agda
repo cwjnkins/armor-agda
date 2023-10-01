@@ -21,6 +21,6 @@ private
 
 parse : Parser (Logging ∘ Dec) Name
 parse =
-  parseSeq here' _ TLV.nonempty TLV.nonnesting
+  parseSeq here' _ TLV.nonempty TLV.nosubstrings
     (parseTLV _ (here' String.++ " (fields)") _
-      (λ n → parseBoundedSequenceOf (here' String.++ " (fields)") _ TLV.nonempty TLV.nonnesting ATV.parse n 1 ))
+      (λ n → parseBoundedSequenceOf (here' String.++ " (fields)") _ TLV.nonempty TLV.nosubstrings ATV.parse n 1 ))
