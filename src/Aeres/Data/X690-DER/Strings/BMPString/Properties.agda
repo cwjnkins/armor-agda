@@ -13,5 +13,5 @@ module Aeres.Data.X690-DER.Strings.BMPString.Properties where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
-@0 nonmalleableBMPString : NonMalleable RawBMPString
-nonmalleableBMPString = TLV.nonmalleable UTF16.nonmalleable
+@0 nonmalleable : NonMalleable RawBMPString
+nonmalleable = TLV.nonmalleable UTF16.nonmalleable

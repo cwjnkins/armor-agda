@@ -24,13 +24,13 @@ sizeUnique (consIList (mkPrintableStringChar c₁ _ refl) t₁ refl) (consIList 
 @0 unambiguous : Unambiguous PrintableString
 unambiguous = TLV.unambiguous (IList.unambiguous Char.unambiguous Char.nonempty Char.nosubstrings)
 
-@0 nonmalleable : NonMalleable RawPrintableStringValue
-nonmalleable snd snd₁ x =
+@0 nonmalleableValue : NonMalleable RawPrintableStringValue
+nonmalleableValue snd snd₁ x =
   IList.nonmalleable Char.nonempty Char.nosubstrings Char.nonmalleable snd snd₁ x
 
 instance
   PrintableStringEq≋ : Eq≋ (IList PrintableStringChar)
   PrintableStringEq≋ = IList.IListEq≋
 
-@0 nonmalleablePrintableString : NonMalleable RawPrintableString
-nonmalleablePrintableString = TLV.nonmalleable nonmalleable
+@0 nonmalleable : NonMalleable RawPrintableString
+nonmalleable = TLV.nonmalleable nonmalleableValue

@@ -88,19 +88,13 @@ proj₂ (proj₂ iso) (bmpString x) = refl
 nonmalleable =
   Iso.nonmalleable iso RawDirectoryStringRep nm
   where
-  postulate
-    nmTele : NonMalleable (RawΣₚ₁ RawTeletexString TLVNonEmptyVal)
-    nmPrin : NonMalleable (RawΣₚ₁ RawPrintableString TLVNonEmptyVal)
-    nmUniv : NonMalleable (RawΣₚ₁ RawUniversalString TLVNonEmptyVal)
-    nmUTF8 : NonMalleable (RawΣₚ₁ RawUTF8String TLVNonEmptyVal)
-    nmBMPS : NonMalleable (RawΣₚ₁ RawBMPString TLVNonEmptyVal)
-
   nm : NonMalleable RawDirectoryStringRep
   nm =
-    Sum.nonmalleable nmTele
-      (Sum.nonmalleable nmPrin
-        (Sum.nonmalleable nmUniv
-          (Sum.nonmalleable nmUTF8 nmBMPS)))
+     Sum.nonmalleable (Parallel.nonmalleable₁ RawTeletexString   TeletexString.nonmalleable   λ _ → ≤-unique)
+    (Sum.nonmalleable (Parallel.nonmalleable₁ RawPrintableString PrintableString.nonmalleable λ _ → ≤-unique)
+    (Sum.nonmalleable (Parallel.nonmalleable₁ RawUniversalString UniversalString.nonmalleable λ _ → ≤-unique)
+    (Sum.nonmalleable (Parallel.nonmalleable₁ RawUTF8String      UTF8String.nonmalleable      λ _ → ≤-unique)
+                      (Parallel.nonmalleable₁ RawBMPString       BMPString.nonmalleable       λ _ → ≤-unique))))
  
 @0 unambiguous : Unambiguous DirectoryString
 unambiguous = Iso.unambiguous iso

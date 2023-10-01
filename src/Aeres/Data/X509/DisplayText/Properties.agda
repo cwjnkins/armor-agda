@@ -25,29 +25,7 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
-equivalent
-  : Equivalent
-      (Sum (Σₚ IA5String     (TLVSizeBounded IA5StringValue.size 1 200))
-      (Sum (Σₚ VisibleString (TLVSizeBounded VisibleStringValue.size 1 200))
-      (Sum (Σₚ BMPString     (TLVSizeBounded UTF16.size 1 200))
-           (Σₚ UTF8String    (TLVSizeBounded UTF8.size 1 200)))))
-      DisplayText
-proj₁ equivalent (Sum.inj₁ x) = ia5String x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = visibleString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = bmpString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x))) = utf8String x
-proj₂ equivalent (ia5String x) = inj₁ x
-proj₂ equivalent (visibleString x) = inj₂ (inj₁ x)
-proj₂ equivalent (bmpString x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (utf8String x) = inj₂ (inj₂ (inj₂ x))
-
-iso
-  : Iso
-      (Sum (Σₚ IA5String     (TLVSizeBounded IA5StringValue.size 1 200))
-      (Sum (Σₚ VisibleString (TLVSizeBounded VisibleStringValue.size 1 200))
-      (Sum (Σₚ BMPString     (TLVSizeBounded UTF16.size 1 200))
-           (Σₚ UTF8String    (TLVSizeBounded UTF8.size 1 200)))))
-      DisplayText
+iso : Iso DisplayTextRep DisplayText
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
@@ -138,6 +116,18 @@ unambiguous =
   open import Aeres.Grammar.IList UInt8
 
 
+@0 nonmalleable : NonMalleable RawDisplayText
+nonmalleable = Iso.nonmalleable iso RawDisplayTextRep nm
+  where
+  nm : NonMalleable RawDisplayTextRep
+  nm =
+     Sum.nonmalleable
+       (Parallel.nonmalleable₁ RawIA5String IA5String.nonmalleable λ _ → inRange-unique{A = ℕ}{B = ℕ})
+    (Sum.nonmalleable
+      (Parallel.nonmalleable₁ RawVisibleString VisibleString.nonmalleable λ _ → inRange-unique{A = ℕ}{B = ℕ})
+    (Sum.nonmalleable
+      (Parallel.nonmalleable₁ RawBMPString BMPString.nonmalleable λ _ → inRange-unique{A = ℕ}{B = ℕ})
+      (Parallel.nonmalleable₁ RawUTF8String UTF8String.nonmalleable λ _ → inRange-unique{A = ℕ}{B = ℕ})))
 
 instance
   DisplayTextEq : Eq (Exists─ _ DisplayText)
@@ -150,6 +140,3 @@ instance
 
   eq≋ : Eq≋ DisplayText
   eq≋ = Eq⇒Eq≋ it
-
-postulate
-  @0 nonmalleable : NonMalleable RawDisplayText

@@ -23,11 +23,6 @@ unambiguous (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) =
   subst₀ (λ x → _ ≡ mkIA5StringValue self x)
     (T-unique all<128 all<129) refl
 
-@0 nonmalleable : NonMalleable RawIA5StringValue
-nonmalleable (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) refl = 
-  case (‼ T-unique all<128 all<129) of λ where
-    refl → ‼ refl
-
 sizeUnique : ∀ {@0 bs} → (a₁ a₂ : IA5StringValue bs) → size a₁ ≡ size a₂
 sizeUnique (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) = refl
 
@@ -57,5 +52,10 @@ instance
   IA5StringEq≋ : Eq≋ IA5StringValue
   IA5StringEq≋ = Eq⇒Eq≋ it
 
-@0 nonmalleableIA5String : NonMalleable RawIA5String
-nonmalleableIA5String = TLV.nonmalleable nonmalleable
+@0 nonmalleableValue : NonMalleable RawIA5StringValue
+nonmalleableValue (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) refl = 
+  case (‼ T-unique all<128 all<129) of λ where
+    refl → ‼ refl
+
+@0 nonmalleable : NonMalleable RawIA5String
+nonmalleable = TLV.nonmalleable nonmalleableValue
