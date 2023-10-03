@@ -254,6 +254,7 @@ open import Relation.Nullary.Sum public
 
 open import Relation.Unary public
   using (Decidable)
+  renaming (Irrelevant to Unique₁)
 
 -- Definitions
 infixl 7 _%2^_

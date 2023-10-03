@@ -73,7 +73,7 @@ noConfusionParam excl = TLV.noconfusionVal (noConfusionFieldsParam excl)
 @0 nonmalleableFields : {R : Raw₁ RawOID P} → NonMalleable₁ R
                         → NonMalleable (RawDefinedByOIDFields R)
 nonmalleableFields{R} N =
-  Iso.nonmalleable iso (Raw&ₚ RawOID R)
+  Iso.nonmalleable iso (Raw&ₚᵈ RawOID R)
     (Seq.nonmalleableᵈ OID.nonmalleable N)
 
 @0 nonmalleable

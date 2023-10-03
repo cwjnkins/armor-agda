@@ -19,7 +19,11 @@ open &ₚᵈ public using (fstₚ ; sndₚ)
 &ₚ : (@0 A B : List Σ → Set) (@0 bs : List Σ) → Set
 &ₚ A B = &ₚᵈ A λ _ → B
 
-Raw&ₚ : {A : List Σ → Set} {B : {bs : List Σ} → A bs → List Σ → Set} → (ra : Raw A) (rb : Raw₁ ra B)
+Raw&ₚᵈ : {A : List Σ → Set} {B : {bs : List Σ} → A bs → List Σ → Set} → (ra : Raw A) (rb : Raw₁ ra B)
         → Raw (&ₚᵈ A B)
-Raw.D (Raw&ₚ ra rb) = Sigma (Raw.D ra) (Raw₁.D rb)
-Raw.to (Raw&ₚ ra rb) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = (Raw.to ra fstₚ₁) , (Raw₁.to rb _ sndₚ₁)
+Raw.D  (Raw&ₚᵈ ra rb) = Sigma (Raw.D ra) (Raw₁.D rb)
+Raw.to (Raw&ₚᵈ ra rb) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = (Raw.to ra fstₚ₁) , (Raw₁.to rb _ sndₚ₁)
+
+Raw&ₚ : {A B : List Σ → Set} → (ra : Raw A) (rb : Raw B) → Raw (&ₚ A B)
+Raw.D  (Raw&ₚ ra rb) = (Raw.D ra) × (Raw.D rb)
+Raw.to (Raw&ₚ ra rb) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = (Raw.to ra fstₚ₁) , (Raw.to rb sndₚ₁)
