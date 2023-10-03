@@ -37,7 +37,7 @@ DefinedByOID : (@0 P : AnyDefinedByOID) → @0 List UInt8 → Set
 DefinedByOID P = TLV Tag.Sequence (DefinedByOIDFields P)
 
 RawDefinedByOIDFields : {P : AnyDefinedByOID} → Raw₁ RawOID P → Raw (DefinedByOIDFields P)
-RawDefinedByOIDFields r = Iso.raw equivalent (Raw&ₚ RawOID r)
+RawDefinedByOIDFields r = Iso.raw equivalent (Raw&ₚᵈ RawOID r)
 
 RawDefinedByOID : {P : AnyDefinedByOID} → Raw₁ RawOID P → Raw (DefinedByOID P)
 RawDefinedByOID r = RawTLV _ (RawDefinedByOIDFields r)

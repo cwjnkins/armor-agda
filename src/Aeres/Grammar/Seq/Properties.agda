@@ -103,7 +103,7 @@ unambiguousᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ b
 
 @0 nonmalleableᵈ
   : ∀ {A} {B : ∀ {bs} → A bs → List Σ → Set} {ra : Raw A} {rb : Raw₁ ra B}
-    → NonMalleable ra → NonMalleable₁ rb → NonMalleable (Raw&ₚ ra rb)
+    → NonMalleable ra → NonMalleable₁ rb → NonMalleable (Raw&ₚᵈ ra rb)
 nonmalleableᵈ nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) eq =
   case Inverse.f⁻¹ Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
     (fst≡ , snd≡) → case (nm₁ fstₚ₁ fstₚ₂ fst≡ ,′ singleton fst≡ refl) ret (const _) of λ where
@@ -111,6 +111,18 @@ nonmalleableᵈ nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ 
         refl → refl
   where
   import Data.Product.Properties as Product
+
+@0 nonmalleable
+  : ∀ {A B} {ra : Raw A} {rb : Raw B}
+    → NonMalleable ra → NonMalleable rb → NonMalleable (Raw&ₚ ra rb)
+nonmalleable nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) eq =
+  case Inverse.f⁻¹ Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
+    (fst≡ , snd≡) → case (nm₁ fstₚ₁ fstₚ₂ fst≡ ,′ singleton fst≡ refl) ret (const _) of λ where
+      (refl , singleton refl refl) → case nm₂ sndₚ₁ sndₚ₂ snd≡ ret (const _) of λ where
+        refl → refl
+  where
+  import Data.Product.Properties as Product
+
 
 @0 unambiguous : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → Unambiguous (&ₚ A B)
 unambiguous ua ns ub = unambiguousᵈ ua ns (λ _ → ub)
