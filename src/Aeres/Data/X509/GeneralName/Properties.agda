@@ -18,38 +18,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
-Rep =
-   Sum OtherName
-  (Sum RfcName
-  (Sum DnsName
-  (Sum X400Address
-  (Sum DirName
-  (Sum EdipartyName
-  (Sum URI
-  (Sum IpAddress
-       RegID)))))))
-
-equivalent : Equivalent Rep GeneralName
-proj₁ equivalent (Sum.inj₁ x) = oname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = rfcname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = dnsname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = x400add x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = dirname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) = ediname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) = uri x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) = ipadd x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))) = rid x
-proj₂ equivalent (oname x) = inj₁ x
-proj₂ equivalent (rfcname x) = inj₂ (inj₁ x)
-proj₂ equivalent (dnsname x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (x400add x) = inj₂ (inj₂ (inj₂ (inj₁ x)))
-proj₂ equivalent (dirname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))
-proj₂ equivalent (ediname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))
-proj₂ equivalent (uri x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))
-proj₂ equivalent (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))
-proj₂ equivalent (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
-
-iso : Iso Rep GeneralName
+iso : Iso GeneralNameRep GeneralName
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
@@ -272,6 +241,21 @@ module GeneralName where
                       (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
                         (TLV.noconfusion λ ())))))))
 
+  @0 nonmalleable : NonMalleable RawGeneralName
+  nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
+    where
+    postulate -- type checking is stuck
+      nm :  NonMalleable RawGeneralNameRep
+    -- nm = Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable ?)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --        (TLV.nonmalleable {!!}))))))))
+
 module GeneralNamesElems where
   @0 unambiguous : Unambiguous GeneralNamesElems
   unambiguous =
@@ -282,5 +266,13 @@ module GeneralNames where
   @0 unambiguous : Unambiguous GeneralNames
   unambiguous = TLV.unambiguous GeneralNamesElems.unambiguous
 
+  @0 nonmalleable : NonMalleable RawGeneralNames
+  nonmalleable = TLV.nonmalleable
+                 (SequenceOf.Bounded.nonmalleable nonempty nosubstrings
+                   GeneralName.nonmalleable)
+
 @0 unambiguous : _
 unambiguous = GeneralName.unambiguous
+
+@0 nonmalleable : _
+nonmalleable = GeneralName.nonmalleable

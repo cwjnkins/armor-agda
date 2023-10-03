@@ -47,3 +47,6 @@ ATVParam o (yes (there (there (there (here px))))) = IA5String
 ATV = DefinedByOID λ o → ATVParam o ((-, TLV.val o) ∈? Supported)
 
 pattern mkATVFields o p bs≡ = mkOIDDefinedFields o p bs≡
+
+postulate
+  RawATV : Raw ATV

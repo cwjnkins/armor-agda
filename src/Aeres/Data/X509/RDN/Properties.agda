@@ -32,3 +32,8 @@ unambiguous =
 instance
   RDNElemsEq≋ : Eq≋ RDNElems
   RDNElemsEq≋ = SequenceOf.BoundedSequenceOfEq≋
+
+postulate --type checking is stuck
+  @0 nonmalleable : NonMalleable RawName
+  -- nonmalleable = TLV.nonmalleable (SequenceOf.nonmalleable TLV.nonempty TLV.nosubstrings
+  --               (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable TLV.nonempty TLV.nosubstrings ATV.nonmalleable))

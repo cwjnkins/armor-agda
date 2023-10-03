@@ -8,9 +8,16 @@ open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.GeneralName.TCB where
+
+open      Aeres.Grammar.Definitions              UInt8
+open      Aeres.Grammar.Parallel.TCB             UInt8
+open      Aeres.Grammar.Sum.TCB                  UInt8
 
 --- we do not support OtherName since very rarely used
 OtherName : @0 List UInt8 → Set
@@ -55,3 +62,49 @@ data GeneralName : @0 List UInt8 → Set where
 
 GeneralNamesElems = NonEmptySequenceOf GeneralName
 GeneralNames = TLV Tag.Sequence GeneralNamesElems
+
+GeneralNameRep = Sum OtherName
+                   (Sum RfcName
+                     (Sum DnsName
+                       (Sum X400Address
+                         (Sum DirName
+                           (Sum EdipartyName
+                             (Sum URI
+                               (Sum IpAddress RegID)))))))
+
+equivalent : Equivalent GeneralNameRep GeneralName
+proj₁ equivalent (inj₁ x) = oname x
+proj₁ equivalent (inj₂ (inj₁ x)) = rfcname x
+proj₁ equivalent (inj₂ (inj₂ (inj₁ x))) = dnsname x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₁ x)))) = x400add x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))) = dirname x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))) = ediname x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))) = uri x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))) = ipadd x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))) = rid x
+proj₂ equivalent (oname x) = inj₁ x
+proj₂ equivalent (rfcname x) = inj₂ (inj₁ x)
+proj₂ equivalent (dnsname x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equivalent (x400add x) = inj₂ (inj₂ (inj₂ (inj₁ x)))
+proj₂ equivalent (dirname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))
+proj₂ equivalent (ediname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))
+proj₂ equivalent (uri x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))
+proj₂ equivalent (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))
+proj₂ equivalent (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
+
+RawGeneralNameRep : Raw GeneralNameRep
+RawGeneralNameRep = RawSum (RawTLV _ RawOctetStringValue)
+                      (RawSum (RawTLV _ RawIA5StringValue)
+                        (RawSum (RawTLV _ RawIA5StringValue)
+                          (RawSum (RawTLV _ RawOctetStringValue)
+                            (RawSum (RawTLV _ RawName)
+                              (RawSum (RawTLV _ RawOctetStringValue)
+                                (RawSum (RawTLV _ RawIA5StringValue)
+                                  (RawSum (RawTLV _ RawOctetStringValue)
+                                           (RawTLV _ RawOIDValue))))))))
+
+RawGeneralName : Raw GeneralName
+RawGeneralName = Iso.raw equivalent RawGeneralNameRep
+
+RawGeneralNames : Raw GeneralNames
+RawGeneralNames = RawTLV _ (RawBoundedSequenceOf RawGeneralName 1)

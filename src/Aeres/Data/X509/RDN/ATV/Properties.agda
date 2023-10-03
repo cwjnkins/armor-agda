@@ -40,3 +40,7 @@ instance
     eq o (yes (there (here px))) = Parallel.eq≋Σₚ it (λ _ → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) })
     eq o (yes (there (there (here px)))) = it
     eq o (yes (there (there (there (here px))))) = it
+
+
+postulate
+  @0 nonmalleable : NonMalleable RawATV 
