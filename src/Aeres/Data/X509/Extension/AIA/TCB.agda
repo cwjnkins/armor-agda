@@ -14,4 +14,3 @@ AIAFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf AccessDesc) xs
 
 AIAFields : @0 List UInt8 → Set
 AIAFields xs = TLV Tag.OctetString AIAFieldsSeq xs
-
