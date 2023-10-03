@@ -539,97 +539,245 @@ module Base256 where
     where
     open ≡-Reasoning
 
-  asciiNum-help : List UInt8 → ℕ
-  asciiNum-help [] = 0
-  asciiNum-help (x ∷ xs) = asciiNum₁ x + 10 * asciiNum-help xs
-
   asciiNum : List UInt8 → ℕ
-  asciiNum xs = asciiNum-help (reverse xs)
+  asciiNum [] = 0
+  asciiNum (x ∷ xs) = asciiNum₁ x * (10 ^ length xs) + asciiNum xs
+
+  asciiNum< : ∀ bs → All (InRange '0' '9') bs → asciiNum bs < 10 ^ length bs
+  asciiNum< [] allIR = s≤s z≤n
+  asciiNum< (x ∷ bs) (px ∷ allIR) = ≤.begin-strict
+    asciiNum (x ∷ bs) ≤.≡⟨⟩
+    asciiNum₁ x * 10 ^ length bs + asciiNum bs ≤.≡⟨⟩
+    (toℕ x - 48) * 10 ^ length bs + asciiNum bs
+      ≤.<⟨ +-monoʳ-< ((toℕ x - 48) * 10 ^ length bs) (asciiNum< bs allIR) ⟩
+    (toℕ x - 48) * 10 ^ length bs + 10 ^ length bs
+      ≤.≤⟨ +-monoˡ-≤ (10 ^ length bs)
+             (*-monoˡ-≤ (10 ^ length bs)
+               (∸-monoˡ-≤ 48 (proj₂ px))) ⟩
+    9 * 10 ^ length bs + 10 ^ length bs
+      ≤.≡⟨ cong (_+ (10 ^ length bs)) -- {(10 - 1) * 10 ^ length bs}{10 * 10 ^ length bs - 1 * 10 ^ length bs}
+             (begin
+               (10 - 1) * 10 ^ length bs ≡⟨ *-distribʳ-∸ (10 ^ length bs) 10 1 ⟩
+               10 ^ (1 + length bs) - 1 * 10 ^ length bs ≡⟨ cong ((10 ^ (1 + length bs)) ∸_) (*-identityˡ (10 ^ length bs)) ⟩
+               10 ^ (1 + length bs) - 10 ^ length bs ∎)
+      ⟩
+    (10 ^ (1 + length bs) - 10 ^ length bs) + 10 ^ length bs
+      ≤.≡⟨ m∸n+n≡m (Lemmas.^-monoʳ-≤ 10 (s≤s z≤n) (n≤1+n (length bs))) ⟩
+    10 ^ (1 + length bs) ≤.∎
+    where
+    module ≤ = ≤-Reasoning
+    open ≡-Reasoning
+
+  showFixed₁ : ℕ → Σ UInt8 (InRange '0' '9')
+  showFixed₁ n = c₁“ , ir'
+    where
+    module ≤ = ≤-Reasoning
+
+    c₁ : Fin 10
+    c₁ = n mod 10
+
+    c₁' = Fin.raise (toℕ '0') c₁
+
+    c₁“ : UInt8
+    c₁“ = Fin.inject≤ c₁' (toWitness{Q = _ Nat.≤? _} tt)
+
+    ir : InRange '0' '9' c₁'
+    proj₁ ir = ≤.begin
+      48 ≤.≤⟨ m≤m+n 48 (toℕ c₁) ⟩
+      48 + toℕ c₁ ≤.≡⟨⟩
+      toℕ c₁' ≤.∎
+    proj₂ ir = ≤.begin
+      toℕ c₁' ≤.≡⟨⟩
+      48 + toℕ c₁ ≤.≤⟨ +-monoʳ-≤ 48 (toℕ≤pred[n] c₁) ⟩
+      57 ≤.∎
+
+    ir' : InRange '0' '9' c₁“
+    ir' = subst₀ (λ x → toℕ '0' ≤ x × x ≤ toℕ '9') (sym (toℕ-inject≤ c₁' (toWitness{Q = _ Nat.≤? _} tt))) ir
+
+  showFixed' : (w n : ℕ) → Σ (List UInt8) λ bs → length bs ≡ w × All (InRange '0' '9') bs
+  showFixed' zero n = [] , (refl , All.[])
+  showFixed' w@(suc w') n =
+    let (c₁ , ir) = showFixed₁ quotient in
+    (c₁ ∷ cs) , (cong suc len≡) , (ir ∷ irs)
+    where
+    open DivMod ((n divMod 10 ^ w'){fromWitnessFalse (>⇒≢ (1≤10^n w'))})
+    ih = showFixed' w' (toℕ remainder)
+    cs = proj₁ ih
+    len≡ = proj₁ (proj₂ ih)
+    irs  = proj₂ (proj₂ ih)
+
+  showFixed : (w n : ℕ) → List UInt8
+  showFixed w n = proj₁ (showFixed' w n)
+
+  private
+    sf₁ : showFixed 4 1 ≡ (# '0') ∷ (# '0') ∷ (# '0') ∷ [ # '1' ]
+    sf₁ = refl
+
+    sf₂ : showFixed 4 9999 ≡ (# '9') ∷ (# '9') ∷ (# '9') ∷ [ # '9' ]
+    sf₂ = refl
+
+  asciiNum₁∘showFixed₁≗id : ∀ n → n < 10 → asciiNum₁ (proj₁ (showFixed₁ n)) ≡ n
+  asciiNum₁∘showFixed₁≗id n (s≤s n≤9) =
+    let (b , ir) = showFixed₁ n in
+    begin
+      asciiNum₁ b ≡⟨⟩
+      toℕ b - toℕ '0' ≡⟨⟩
+      toℕ (Fin.inject≤ (Fin.raise (toℕ '0') (n mod 10)) pf) - toℕ '0'
+        ≡⟨ cong (_∸ toℕ '0')
+             (begin
+               toℕ (Fin.inject≤ (Fin.raise (toℕ '0') (n mod 10)) pf) ≡⟨ toℕ-inject≤ _ pf ⟩
+               toℕ (Fin.raise (toℕ '0') (n mod 10)) ≡⟨ toℕ-raise (toℕ '0') (n mod 10) ⟩
+               toℕ '0' + toℕ (n mod 10) ∎) ⟩
+      toℕ '0' + toℕ (n mod 10) - toℕ '0' ≡⟨ m+n∸m≡n (toℕ '0') (toℕ (n mod 10)) ⟩
+      toℕ (n mod 10) ≡⟨⟩
+      toℕ (Fin.fromℕ< (m%n<n n 9) ) ≡⟨ toℕ-fromℕ< (m%n<n n 9) ⟩
+      n % 10 ≡⟨ m≤n⇒m%n≡m n≤9 ⟩
+      n ∎
+    where
+    open ≡-Reasoning
+
+    pf : 58 ≤ 256
+    pf = toWitness{Q = _ Nat.≤? _} tt
+
+  showFixed₁∘asciiNum₁≗id : ∀ b → InRange '0' '9' b → proj₁ (showFixed₁ (asciiNum₁ b)) ≡ b
+  showFixed₁∘asciiNum₁≗id b ir = Fin.toℕ-injective
+    (begin
+      toℕ (proj₁ (showFixed₁ (asciiNum₁ b))) ≡⟨⟩
+      toℕ (proj₁ (showFixed₁ (toℕ b - toℕ '0'))) ≡⟨⟩
+      toℕ c‴ ≡⟨ Fin.toℕ-inject≤ c“ pf ⟩
+      toℕ c“ ≡⟨ Fin.toℕ-raise (toℕ '0') c' ⟩
+      toℕ '0' + toℕ c'
+        ≡⟨ cong (toℕ '0' +_)
+             (begin
+               (toℕ (Fin.fromℕ< (m%n<n (toℕ b - toℕ '0') 9)) ≡⟨ Fin.toℕ-fromℕ< ((m%n<n (toℕ b - toℕ '0') 9)) ⟩
+               (toℕ b - toℕ '0') % 10 ≡⟨ m≤n⇒m%n≡m b-0<10 ⟩
+               toℕ b - toℕ '0' ∎)) ⟩
+      toℕ '0' + (toℕ b - toℕ '0') ≡⟨ m+[n∸m]≡n (proj₁ ir) ⟩
+      toℕ b ∎)
+    where
+    module ≤ = ≤-Reasoning
+    open ≡-Reasoning
+    pf : 57 < 256
+    pf = toWitness{Q = _ Nat.≤? _} tt
+
+    c = toℕ b - toℕ '0'
+    c' = c mod 10
+    c“ = Fin.raise (toℕ '0') c'
+    c‴ = Fin.inject≤ c“ pf
+
+    ir' : InRange '0' '9' c‴
+    ir' = proj₂ (showFixed₁ c)
+
+    b-0<10 : toℕ b - toℕ '0' ≤ 9
+    b-0<10 = ≤.begin
+      toℕ b - toℕ '0' ≤.≤⟨ ∸-monoˡ-≤ (toℕ '0') (proj₂ ir) ⟩
+      9 ≤.∎
+
+  asciiNum∘showFixed≗id : ∀ w n → n < 10 ^ w → asciiNum (showFixed w n) ≡ n
+  asciiNum∘showFixed≗id zero .zero (s≤s z≤n) = refl
+  asciiNum∘showFixed≗id (suc w) n n<10^w =
+    let
+      (c₁ , ir) = showFixed₁ quotient
+      (cs , len≡ , irs) = showFixed' w (toℕ remainder)
+    in
+    begin
+      asciiNum (showFixed (suc w) n) ≡⟨⟩
+      asciiNum (c₁ ∷ cs) ≡⟨⟩
+      asciiNum₁ c₁ * 10 ^ length cs + asciiNum cs
+        ≡⟨ cong₂ _+_
+             (cong (λ x → asciiNum₁ c₁ * (10 ^ x)) len≡)
+             (asciiNum∘showFixed≗id w (toℕ remainder) (toℕ<n _)) ⟩
+      asciiNum₁ c₁ * 10 ^ w + toℕ remainder
+        ≡⟨ cong (λ x → x * (10 ^ w) + toℕ remainder)
+             (asciiNum₁∘showFixed₁≗id quotient q<10) ⟩
+      quotient * 10 ^ w + toℕ remainder ≡⟨ +-comm _ (toℕ remainder) ⟩
+      toℕ remainder + quotient * 10 ^ w ≡˘⟨ property ⟩
+      n ∎
+    where
+    module ≤ = ≤-Reasoning
+    open ≡-Reasoning
+
+    pf : False (10 ^ w ≟ 0)
+    pf = fromWitnessFalse (>⇒≢ (1≤10^n w))
+
+    dm : DivMod n (10 ^ w)
+    dm = (n divMod (10 ^ w)){pf}
+
+    open DivMod dm
+
+    q<10 : quotient < 10
+    q<10 = *-cancelʳ-<{10 ^ w} quotient 10 (≤.begin-strict
+      quotient * 10 ^ w ≤.≤⟨ m≤n+m _ _ ⟩
+      toℕ remainder + quotient * 10 ^ w ≤.≡⟨ sym property ⟩
+      n ≤.<⟨ n<10^w ⟩
+      10 ^ (suc w) ≤.∎)
+
+  showFixed∘asciiNum≗id : ∀ bs → All (InRange '0' '9') bs → showFixed (length bs) (asciiNum bs) ≡ bs
+  showFixed∘asciiNum≗id [] irs = refl
+  showFixed∘asciiNum≗id (b ∷ bs) (ir ∷ irs) =
+    showFixed (suc (length bs)) (asciiNum₁ b * 10 ^ length bs + asciiNum bs)
+      ≡⟨ cong (showFixed (1 + length bs)) (+-comm (asciiNum₁ b * 10 ^ length bs) (asciiNum bs)) ⟩
+    showFixed (suc (length bs)) (asciiNum bs + asciiNum₁ b * 10 ^ length bs) ≡⟨⟩
+    proj₁ (showFixed₁ quotient) ∷ showFixed (length bs) (toℕ remainder)
+      ≡⟨ cong₂ _∷_ b≡ ih ⟩
+    b ∷ bs ∎
+    where
+    open ≡-Reasoning
+    module ≤ = ≤-Reasoning
+
+    pf = fromWitnessFalse (>⇒≢ (1≤10^n (length bs)))
+    n = asciiNum bs + asciiNum₁ b * 10 ^ length bs
+
+    open DivMod ((n divMod (10 ^ length bs)){pf})
+
+    q≡ : quotient ≡ asciiNum₁ b
+    q≡ = begin
+      quotient
+        ≡⟨ Lemmas.+-distrib-/-divMod (asciiNum bs) (asciiNum₁ b * 10 ^ length bs){10 ^ length bs}
+             (≤.begin-strict
+               (asciiNum bs % 10 ^ length bs + asciiNum₁ b * 10 ^ length bs % 10 ^ length bs
+                 ≤.≡⟨ cong₂ _+_{u = asciiNum₁ b * 10 ^ length bs % 10 ^ length bs}
+                        (Lemmas.m≤n⇒m%n≡m-mod' (asciiNum< bs irs))
+                        (Lemmas.m*n%n≡0-mod (asciiNum₁ b) (10 ^ length bs){pf}) ⟩
+               asciiNum bs + 0 ≤.≡⟨ +-identityʳ (asciiNum bs) ⟩
+               asciiNum bs ≤.<⟨ asciiNum< bs irs ⟩
+               _ ≤.∎)) ⟩
+      asciiNum bs / 10 ^ length bs + asciiNum₁ b * 10 ^ length bs / 10 ^ length bs
+        ≡⟨ cong₂ _+_ {x = asciiNum bs / 10 ^ length bs}
+             (m<n⇒m/n≡0 (asciiNum< bs irs))
+             (m*n/n≡m (asciiNum₁ b) (10 ^ length bs)) ⟩
+      asciiNum₁ b ∎
+
+    b≡ : proj₁ (showFixed₁ quotient) ≡ b
+    b≡ = begin
+      proj₁ (showFixed₁ quotient) ≡⟨ cong (λ x → proj₁ (showFixed₁ x)) q≡ ⟩
+      proj₁ (showFixed₁ (asciiNum₁ b)) ≡⟨ showFixed₁∘asciiNum₁≗id b ir ⟩
+      b ∎
+
+    ≡asciiNum : toℕ remainder ≡ asciiNum bs
+    ≡asciiNum = begin
+      toℕ remainder ≡⟨ cong Fin.toℕ (Lemmas.[m+kn]%n≡m%n-divMod (asciiNum bs) (asciiNum₁ b) (10 ^ length bs)) ⟩
+      toℕ ((asciiNum bs mod 10 ^ length bs){pf}) ≡⟨ Lemmas.m≤n⇒m%n≡m-mod (asciiNum< bs irs) ⟩
+      asciiNum bs ∎
+
+    ih : showFixed (length bs) (toℕ remainder) ≡ bs
+    ih = trans (cong (showFixed (length bs)) ≡asciiNum) (showFixed∘asciiNum≗id bs irs)
 
   asciiNum-injective
     : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
       → length xs₁ ≡ length xs₂
       → asciiNum xs₁ ≡ asciiNum xs₂
       → xs₁ ≡ xs₂
-  asciiNum-injective xs₁ xs₂ inr₁ inr₂ len≡ ascii≡ =
-    reverse-injective
-      (help _ _
-        (Lemmas.All-reverse xs₁ inr₁)
-        (Lemmas.All-reverse xs₂ inr₂)
-        (length (reverse xs₁) ≡⟨ length-reverse xs₁ ⟩
-        length xs₁ ≡⟨ len≡ ⟩
-        length xs₂ ≡⟨ sym (length-reverse xs₂) ⟩
-        length (reverse xs₂) ∎)
-        ascii≡)
+  asciiNum-injective xs₁ xs₂ ir₁ ir₂ len≡ ascii≡ = begin
+    xs₁ ≡˘⟨ showFixed∘asciiNum≗id xs₁ ir₁ ⟩
+    showFixed (length xs₁) (asciiNum xs₁)
+      ≡⟨ cong₂ showFixed len≡ ascii≡ ⟩
+    showFixed (length xs₂) (asciiNum xs₂)
+      ≡⟨ showFixed∘asciiNum≗id xs₂ ir₂ ⟩
+    xs₂ ∎
     where
     open ≡-Reasoning
 
-    help : (xs₁ xs₂ : List UInt8) → All (InRange '0' '9') xs₁ → All (InRange '0' '9') xs₂
-      → length xs₁ ≡ length xs₂
-      → asciiNum-help xs₁ ≡ asciiNum-help xs₂
-      → xs₁ ≡ xs₂
-    help [] [] inr₁ inr₂ len≡ ascii≡ = refl
-    help (x₁ ∷ xs₁) (x₂ ∷ xs₂) (p₁ ∷ inr₁) (p₂ ∷ inr₂) len≡ ascii≡ =
-      cong₂ _∷_ x₁≡x₂ (help xs₁ xs₂ inr₁ inr₂ (suc-injective len≡) xs₁≡xs₂an)
-      where
-      open import Data.Nat.DivMod
-      module ≤ = ≤-Reasoning
-
-      x₁an : asciiNum₁ x₁ ≤ 9
-      x₁an = ≤.begin
-        (asciiNum₁ x₁ ≤.≡⟨ refl ⟩
-        toℕ x₁ - toℕ '0' ≤.≤⟨ ∸-monoˡ-≤ 48 (proj₂ p₁) ⟩
-        9 ≤.∎)
-
-      x₂an : asciiNum₁ x₂ ≤ 9
-      x₂an = ≤.begin
-        (asciiNum₁ x₂ ≤.≡⟨ refl ⟩
-        toℕ x₂ - toℕ '0' ≤.≤⟨ ∸-monoˡ-≤ 48 (proj₂ p₂) ⟩
-        9 ≤.∎)
-
-      xan≡ : asciiNum₁ x₁ ≡ asciiNum₁ x₂
-      xan≡ = begin
-        asciiNum₁ x₁      ≡⟨ sym (m≤n⇒m%n≡m x₁an) ⟩
-        asciiNum₁ x₁ % 10 ≡⟨ sym ([m+kn]%n≡m%n (asciiNum₁ x₁) (asciiNum-help xs₁) 9) ⟩
-        (asciiNum₁ x₁ + asciiNum-help xs₁ * 10) % 10
-          ≡⟨ cong (_% 10)
-               (begin (asciiNum₁ x₁ + asciiNum-help xs₁ * 10 ≡⟨ cong (asciiNum₁ x₁ +_) (*-comm (asciiNum-help xs₁) 10) ⟩
-                      asciiNum₁ x₁ + 10 * asciiNum-help xs₁ ≡⟨ ascii≡ ⟩
-                      asciiNum₁ x₂ + 10 * asciiNum-help xs₂ ≡⟨ cong (asciiNum₁ x₂ +_) (*-comm 10 (asciiNum-help xs₂)) ⟩
-                      asciiNum₁ x₂ + asciiNum-help xs₂ * 10 ∎)) ⟩
-        (asciiNum₁ x₂ + asciiNum-help xs₂ * 10) % 10 ≡⟨ [m+kn]%n≡m%n (asciiNum₁ x₂) (asciiNum-help xs₂) 9 ⟩
-        asciiNum₁ x₂ % 10 ≡⟨ m≤n⇒m%n≡m x₂an ⟩
-        asciiNum₁ x₂ ∎
-
-      x₁≡x₂ : x₁ ≡ x₂
-      x₁≡x₂ = asciiNum₁-injective x₁ x₂ (proj₁ p₁ ∷ proj₁ p₂ ∷ []) xan≡
-
-      xs₁≡xs₂an : asciiNum-help xs₁ ≡ asciiNum-help xs₂
-      xs₁≡xs₂an =
-        *-cancelˡ-≡ 9
-          (+-cancelˡ-≡ (asciiNum₁ x₁)
-            (begin
-              asciiNum₁ x₁ + 10 * asciiNum-help xs₁ ≡⟨ ascii≡ ⟩
-              asciiNum₁ x₂ + 10 * asciiNum-help xs₂ ≡⟨ cong (_+ 10 * asciiNum-help xs₂) (sym xan≡) ⟩
-              asciiNum₁ x₁ + 10 * asciiNum-help xs₂ ∎))
-
-  showFixed : (w n : ℕ) → Vec UInt8 w
-  showFixed zero n = Vec.[]
-  showFixed w@(suc w') n =
-    c₁'
-    ∷ showFixed w'
-        (toℕ $ _mod_ n (10 ^ w'){fromWitnessFalse (Nat.>⇒≢ (1≤10^n w'))})
-    where
-    c₁ : Fin 10
-    c₁ = ((n div (10 ^ w')){fromWitnessFalse (>⇒≢ (1≤10^n w'))}) mod 10
-
-    c₁' : UInt8
-    c₁' = Fin.inject≤ (c₁ Fin.+ (#_ '0' {suc $ toℕ '0'}))
-            (≤.begin (toℕ c₁ + suc (toℕ '0') ≤.≤⟨ +-monoˡ-≤ (suc (toℕ '0')) (Fin.toℕ≤n c₁) ⟩
-                     10 + suc (toℕ '0') ≤.≤⟨ toWitness{Q = _ Nat.≤? _} tt ⟩
-                     256 ≤.∎))
-      where
-      module ≤ = ≤-Reasoning
 
 module UInt8 = Base256
 

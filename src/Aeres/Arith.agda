@@ -154,6 +154,10 @@ divmod2-mono-<' (suc (suc m)) (suc n) (s≤s m<2*n)
 divmod2-mono-<' (suc (suc m)) (suc n) (s≤s (s≤s m<2*n)) | .(suc (n + (n + 0))) | refl =
   s≤s (divmod2-mono-<' m n m<2*n)
 
+infixl 7 _mod10^n_
+
+_mod10^n_ : (m n : ℕ) → ℕ
+m mod10^n n = (m % (10 ^ n)) {fromWitnessFalse (>⇒≢ (1≤10^n n))}
 
 -- divmod2-mono-< : ∀ m n → m < n → proj₁ (divmod2 m) < proj₁ (divmod2 n)
 

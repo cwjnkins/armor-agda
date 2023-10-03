@@ -23,6 +23,7 @@ getStartTime v = _ , (ValidityFields.start ∘ TLV.val $ v)
 
 getEndTime   v = _ , (ValidityFields.end ∘ TLV.val $ v)
 
+-- TODO use windowing from RFC 5820
 getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
 getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear start
 getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ

@@ -540,6 +540,7 @@ module Lemmas where
   open import Data.List.Properties
   import      Data.Sign as Sign
 
+  -- TODO remove this, in the standard library already as m+[n∸m]≡n
   m+n-m≡n : ∀ {m n} → m ≤ n → m + (n - m) ≡ n
   m+n-m≡n{m}{n} m≤n = begin
     m + (n - m) ≡⟨ sym $ +-∸-assoc m m≤n ⟩
@@ -590,6 +591,44 @@ module Lemmas where
   m≤n⇒∃[o]o+m≡n {.(suc _)} {.(suc _)} (s≤s m≤n)
     with m≤n⇒∃[o]o+m≡n m≤n
   ... | (o , o+m≡n) = o , trans (+-suc o _) (cong suc o+m≡n)
+
+  -- DivMod properties in terms of _div_, _mod_, and _divMod_
+  m%n<n' : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m % n) {≢0} < n
+  m%n<n' m (suc n) = m%n<n m n
+
+  m*n%n≡0-mod : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m * n % n){≢0} ≡ 0
+  m*n%n≡0-mod m (suc n) = m*n%n≡0 m n
+
+  m≤n⇒m%n≡m-mod : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → toℕ ((m mod n){≢0}) ≡ m
+  m≤n⇒m%n≡m-mod {m} {suc n} {≢0} (s≤s m<n) = begin
+    Fin.toℕ (Fin.fromℕ< (m%n<n m n)) ≡⟨ Fin.toℕ-fromℕ< (m%n<n m n) ⟩
+    m % (suc n) ≡⟨ m≤n⇒m%n≡m m<n ⟩
+    m ∎
+    where
+    open ≡-Reasoning
+
+  m≤n⇒m%n≡m-mod' : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → (m % n){≢0} ≡ m
+  m≤n⇒m%n≡m-mod' {m} {suc n} {≢0} (s≤s m<n) = m≤n⇒m%n≡m m<n
+
+  [m+kn]%n≡m%n-divMod : ∀ m k n {≢0 : False (n Data.Nat.≟ 0)}
+                        → let (result q r _) = ((m + k * n) divMod n){≢0} in
+                          r ≡ (m mod n){≢0}
+  [m+kn]%n≡m%n-divMod m k (suc n) =
+    Fin.toℕ-injective (begin
+      toℕ (Fin.fromℕ< (m%n<n (m + k * (suc n)) n)) ≡⟨ Fin.toℕ-fromℕ< (m%n<n (m + k * (suc n)) n) ⟩
+      (m + k * (suc n)) % (suc n) ≡⟨ [m+kn]%n≡m%n m k n ⟩
+      m % (suc n) ≡⟨ sym (Fin.toℕ-fromℕ< (m%n<n m n)) ⟩
+      toℕ (m mod (suc n)) ∎)
+    where
+    open ≡-Reasoning
+
+  +-distrib-/-divMod
+    : ∀ m n {d} {≢0} →
+      let (result q r _) = ((m + n) divMod d){≢0} in
+      (m % d){≢0} + (n % d){≢0} < d
+      → q ≡ (m / d){≢0} + (n / d){≢0}
+  +-distrib-/-divMod m n {d'@(suc d)} <-pf =
+    +-distrib-/ m n{d'} <-pf
 
   neg◃-injective : ∀ {m n} → Sign.- ℤ.◃ m ≡ Sign.- ℤ.◃ n → m ≡ n
   neg◃-injective {zero} {zero} eq = refl
