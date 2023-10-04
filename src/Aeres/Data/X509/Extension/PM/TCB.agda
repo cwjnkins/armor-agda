@@ -5,9 +5,12 @@ open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.PM.TCB where
+
+open  Aeres.Grammar.Definitions              UInt8
 
 record PolicyMapFields (@0 bs : List UInt8) : Set where
   constructor mkPolicyMapFields
@@ -26,3 +29,8 @@ PMFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf PolicyMap) xs
 PMFields : @0 List UInt8 → Set
 PMFields xs = TLV Tag.OctetString  PMFieldsSeq xs
 
+postulate
+  RawPolicyMapFields : Raw PolicyMapFields
+
+RawPMFields : Raw PMFields
+RawPMFields = RawTLV _ (RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawPolicyMapFields) 1))

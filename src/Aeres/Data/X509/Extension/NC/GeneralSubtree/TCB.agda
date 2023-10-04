@@ -7,11 +7,13 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.GeneralSubtree.TCB where
 
 open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Definitions              UInt8
 
 MinBaseDistance : @0 List UInt8 → Set
 MinBaseDistance xs = TLV Tag.A80 IntegerValue xs
@@ -34,3 +36,8 @@ GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
 GeneralSubtrees : @0 List UInt8 → Set
 GeneralSubtrees xs = (NonEmptySequenceOf GeneralSubtree) xs
 
+postulate
+  RawGeneralSubtreeFields : Raw GeneralSubtreeFields
+
+RawGeneralSubtrees : Raw GeneralSubtrees
+RawGeneralSubtrees = RawBoundedSequenceOf (RawTLV _ RawGeneralSubtreeFields) 1

@@ -6,11 +6,13 @@ open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.TCB where
 
+open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option UInt8
 
 CrlIssuer : @0 List UInt8 → Set
@@ -30,3 +32,9 @@ record DistPointFields (@0 bs : List UInt8) : Set where
 
 DistPoint : @0 List UInt8 → Set
 DistPoint xs = TLV Tag.Sequence DistPointFields xs
+
+postulate
+ RawDistPointFields : Raw DistPointFields
+
+RawDistPoint : Raw DistPoint
+RawDistPoint = RawTLV _ RawDistPointFields

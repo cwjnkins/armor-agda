@@ -5,10 +5,12 @@ open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.PC.TCB where
 
+open Aeres.Grammar.Definitions    UInt8
 open Aeres.Grammar.Option UInt8
 
 RequireExplicitPolicy : @0 List UInt8 → Set
@@ -31,4 +33,8 @@ PCFieldsSeq xs = TLV Tag.Sequence PCFieldsSeqFields xs
 PCFields : @0 List UInt8 → Set
 PCFields xs = TLV Tag.OctetString  PCFieldsSeq xs
 
+postulate
+  RawPCFieldsSeqFields : Raw PCFieldsSeqFields
 
+RawPCFields : Raw PCFields
+RawPCFields = RawTLV _ (RawTLV _ RawPCFieldsSeqFields)

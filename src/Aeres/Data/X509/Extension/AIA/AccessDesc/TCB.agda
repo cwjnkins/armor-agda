@@ -26,3 +26,6 @@ AccessDescParam o =
 
 AccessDesc : @0 List UInt8 → Set
 AccessDesc = DefinedByOID AccessDescParam
+
+postulate
+  RawAccessDesc : Raw AccessDesc

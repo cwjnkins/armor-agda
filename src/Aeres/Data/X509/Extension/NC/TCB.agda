@@ -6,9 +6,12 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.TCB where
+
+open      Aeres.Grammar.Definitions              UInt8
 
 open Aeres.Grammar.Option UInt8
 
@@ -31,3 +34,9 @@ NCFieldsSeq xs = TLV Tag.Sequence NCFieldsSeqFields xs
 
 NCFields : @0 List UInt8 → Set
 NCFields xs = TLV Tag.OctetString  NCFieldsSeq xs
+
+postulate
+  RawNCFieldsSeqFields : Raw NCFieldsSeqFields
+
+RawNCFields : Raw NCFields
+RawNCFields = RawTLV _ (RawTLV _ RawNCFieldsSeqFields)

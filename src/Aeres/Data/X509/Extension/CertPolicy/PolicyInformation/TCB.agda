@@ -5,11 +5,13 @@ open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.TCB where
 
+open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Option UInt8
 
 record PolicyInformationFields (@0 bs : List UInt8) : Set where
@@ -22,3 +24,9 @@ record PolicyInformationFields (@0 bs : List UInt8) : Set where
 
 PolicyInformation : @0 List UInt8 → Set
 PolicyInformation xs = TLV Tag.Sequence PolicyInformationFields xs
+
+postulate
+  RawPolicyInformationFields : Raw PolicyInformationFields
+
+RawPolicyInformation : Raw PolicyInformation
+RawPolicyInformation = RawTLV _ RawPolicyInformationFields
