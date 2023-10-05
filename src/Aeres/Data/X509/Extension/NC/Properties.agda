@@ -30,15 +30,15 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkNCFieldsSeqFields permt excld refl) = refl
 
-@0 unambiguous : Unambiguous NCFieldsSeqFields
-unambiguous = Iso.unambiguous iso
-                (Unambiguous.option₂&₁
-                  (TLV.unambiguous
-                    (SequenceOf.Bounded.unambiguous
-                      (TLV.unambiguous GeneralSubtree.unambiguous) TLV.nonempty TLV.nosubstrings))
-                  TLV.nosubstrings
-                  TLV.nonempty
-                  (TLV.unambiguous
-                    (SequenceOf.Bounded.unambiguous
-                      (TLV.unambiguous GeneralSubtree.unambiguous)  TLV.nonempty TLV.nosubstrings))
-                  TLV.nonempty (TLV.noconfusion λ ()))
+@0 unambiguous : Unambiguous NCFields
+unambiguous = TLV.unambiguous  (TLV.unambiguous
+  (Iso.unambiguous iso
+    (Unambiguous.option₂&₁
+      (TLV.unambiguous GeneralSubtree.unambiguous)
+        TLV.nosubstrings TLV.nonempty
+       (TLV.unambiguous  GeneralSubtree.unambiguous)
+       TLV.nonempty (TLV.noconfusion (λ ()))))) 
+
+postulate
+  @0 nonmalleable : NonMalleable RawNCFields
+--nonmalleable = TLV.nonmalleable (TLV.nonmalleable {!!})

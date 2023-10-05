@@ -48,10 +48,15 @@ private
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ())))))))
 
-@0 unambiguous : Unambiguous UserNoticeFields
+@0 unambiguous : Unambiguous UserNotice
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₂&₁
-      (TLV.unambiguous NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
+      (NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
       DisplayText.unambiguous DisplayText.nonempty
-      nc)
+      nc))
+
+postulate
+  @0 nonmalleable : NonMalleable RawUserNotice
+-- nonmalleable = TLV.nonmalleable
+--                  (Iso.nonmalleable iso {!!} {!!})

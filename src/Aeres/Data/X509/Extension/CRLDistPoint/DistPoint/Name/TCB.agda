@@ -40,6 +40,6 @@ proj₂ equivalentDistPointNameChoice (nameRTCrlissr x) = inj₂ x
 
 RawDistPointNameChoiceRep : Raw DistPointNameChoiceRep
 RawDistPointNameChoiceRep = RawSum (RawTLV _ (RawBoundedSequenceOf RawGeneralName 1))
-                                    (RawTLV _ (RawBoundedSequenceOf RawATV 1))
+                                    (RawTLV _ RawRDNElems)
 RawDistPointName : Raw DistPointName
 RawDistPointName = RawTLV _ (Iso.raw equivalentDistPointNameChoice RawDistPointNameChoiceRep)

@@ -29,8 +29,18 @@ proj₁ (proj₂ iso) (Sum.inj₂ x) = refl
 proj₂ (proj₂ iso) (fullname x) = refl
 proj₂ (proj₂ iso) (nameRTCrlissr x) = refl
 
-@0 unambiguous : Unambiguous DistPointNameChoice
+@0 unambiguous : Unambiguous DistPointName
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Sum.unambiguous (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
-      (TLV.unambiguous RDN.unambiguousElems) (TLV.noconfusion λ ()))
+      (TLV.unambiguous RDN.unambiguousElems) (TLV.noconfusion λ ())))
+
+@0 nonmalleable : NonMalleable RawDistPointName
+nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawDistPointNameChoiceRep nm)
+  where
+  postulate
+    nm : NonMalleable RawDistPointNameChoiceRep
+  -- nm = Sum.nonmalleable
+  --       (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable GeneralName.nonempty
+  --         GeneralName.nosubstrings GeneralName.nonmalleable))
+  --       (TLV.nonmalleable RDN.nonmalleableElems)

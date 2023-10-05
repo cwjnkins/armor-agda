@@ -30,12 +30,16 @@ proj₂ (proj₂ iso) (mkPolicyInformationFields cpid cpqls bs≡) = refl
 
 equivalent = proj₁ iso
 
-@0 unambiguous : Unambiguous PolicyInformationFields
-unambiguous =
-  Iso.unambiguous iso
+@0 unambiguous : Unambiguous PolicyInformation
+unambiguous = TLV.unambiguous
+  (Iso.unambiguous iso
     (Unambiguous.unambiguous-&₁option₁
       OID.unambiguous TLV.nosubstrings
-      (TLV.unambiguous
-        (SequenceOf.Bounded.unambiguous
-          (TLV.unambiguous Qualifier.unambiguous) TLV.nonempty TLV.nosubstrings))
-      TLV.nonempty)
+      Qualifier.unambiguous
+      TLV.nonempty))
+
+postulate
+  @0 nonmalleable : NonMalleable RawPolicyInformation
+-- nonmalleable = TLV.nonmalleable
+--   (Iso.nonmalleable iso
+--     {!!} {!!})

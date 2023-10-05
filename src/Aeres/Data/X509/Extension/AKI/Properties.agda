@@ -32,11 +32,15 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (mkAKIFieldsSeqFields akeyid authcertiss authcertsn refl) = refl
 
-@0 unambiguous : Unambiguous AKIFieldsSeqFields
+@0 unambiguous : Unambiguous AKIFields
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₃&₂
       (TLV.unambiguous OctetString.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
-      (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))
+      (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
+
+postulate
+  @0 nonmalleable : NonMalleable RawAKIFields
+-- nonmalleable = TLV.nonmalleable (TLV.nonmalleable {!!})

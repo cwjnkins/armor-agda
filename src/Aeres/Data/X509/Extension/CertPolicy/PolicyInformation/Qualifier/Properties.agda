@@ -6,7 +6,7 @@ import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
-open import Aeres.Data.X690-DER.SequenceOf.TCB
+open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.Strings.IA5String
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -38,7 +38,7 @@ module UserNoticeQualifier where
   @0 unambiguous : Unambiguous UserNoticeQualifier
   unambiguous =
     DefinedByOID.unambiguous UserNoticeQualifierParam
-      λ o → Parallel.unambiguous×ₚ (TLV.unambiguous UserNotice.unambiguous) λ where ≋-refl ≋-refl → refl
+      λ o → Parallel.unambiguous×ₚ (UserNotice.unambiguous) λ where ≋-refl ≋-refl → refl
 
   @0 nosubstrings : NoSubstrings UserNoticeQualifier
   nosubstrings = DefinedByOID.nosubstrings _ (λ _ → Parallel.nosubstrings₁ TLV.nosubstrings)
@@ -59,10 +59,16 @@ nosubstrings =
       (DefinedByOID.noConfusionFieldsParam CPSURIQualifierParam
         (λ where o (mk×ₚ fstₚ₁ ≋-refl) (mk×ₚ fstₚ₂ ()))))
 
-@0 unambiguous : Unambiguous PolicyQualifierInfoFields
-unambiguous =
-  Iso.unambiguous iso
-    (Sum.unambiguous CPSURIQualifier.unambiguous UserNoticeQualifier.unambiguous
+@0 unambiguous : Unambiguous PolicyQualifiersSeq
+unambiguous = TLV.unambiguous (SequenceOf.Bounded.unambiguous
+  (TLV.unambiguous
+    (Iso.unambiguous iso
+   (Sum.unambiguous CPSURIQualifier.unambiguous UserNoticeQualifier.unambiguous
       (DefinedByOID.noConfusionFieldsParam CPSURIQualifierParam
         λ where
-          o (mk×ₚ _ ≋-refl) (mk×ₚ fstₚ₂ (mk≋ () _))))
+          o (mk×ₚ _ ≋-refl) (mk×ₚ fstₚ₂ (mk≋ () _))))))
+    TLV.nonempty
+    TLV.nosubstrings)
+
+postulate
+  @0 nonmalleable : NonMalleable RawPolicyQualifiersSeq

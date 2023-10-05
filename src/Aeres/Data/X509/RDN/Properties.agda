@@ -22,6 +22,9 @@ unambiguousElems =
     (SequenceOf.unambiguous ATV.unambiguous TLV.nonempty TLV.nosubstrings)
     (λ _ _ _ → Nat.≤-irrelevant _ _)
 
+postulate
+ @0 nonmalleableElems : NonMalleable RawRDNElems
+
 @0 unambiguous : Unambiguous Name
 unambiguous =
   TLV.unambiguous

@@ -29,9 +29,16 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkPCFieldsSeqFields require inhibit refl) = refl
 
-@0 unambiguous : Unambiguous PCFieldsSeqFields
-unambiguous =
-  Iso.unambiguous iso
+@0 unambiguous : Unambiguous PCFields
+unambiguous = TLV.unambiguous (TLV.unambiguous
+  (Iso.unambiguous iso
     (Unambiguous.option₂&₁
-      (TLV.unambiguous λ {xs} → Int.unambiguous{xs})  TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty (TLV.noconfusion λ ()))
+      (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty (TLV.noconfusion λ ()))))
+
+postulate
+  @0 nonmalleable : NonMalleable RawPCFields
+-- nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+--   (Iso.nonmalleable iso
+--     {!!}
+--     {!!}))

@@ -31,11 +31,15 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (mkDistPointFields crldp crldprsn crlissr refl) = refl
 
-@0 unambiguous : Unambiguous DistPointFields
+@0 unambiguous : Unambiguous DistPoint
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₃&₂
-      (TLV.unambiguous Name.unambiguous) TLV.nosubstrings TLV.nonempty
+      (Name.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonempty
-      (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))
+      (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
+
+postulate
+  @0 nonmalleable : NonMalleable RawDistPoint
+-- nonmalleable = TLV.nonmalleable {!!}

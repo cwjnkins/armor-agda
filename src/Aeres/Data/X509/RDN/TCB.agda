@@ -19,5 +19,8 @@ Name     = Seq RDN
 getSeqLen : ∀ {@0 bs} → Name bs → ℕ
 getSeqLen = lengthSequence ∘ TLV.val
 
+RawRDNElems : Raw RDNElems
+RawRDNElems = RawBoundedSequenceOf RawATV 1
+
 RawName : Raw Name
-RawName = RawTLV _ (RawSequenceOf (RawTLV _ (RawBoundedSequenceOf RawATV 1)))
+RawName = RawTLV _ (RawSequenceOf (RawTLV _ RawRDNElems))

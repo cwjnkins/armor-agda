@@ -7,11 +7,13 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X509.DisplayText.TCB
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.TCB where
 
 open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Definitions UInt8
 
 record UserNoticeFields (@0 bs : List UInt8) : Set where
   constructor mkUserNoticeFields
@@ -23,3 +25,9 @@ record UserNoticeFields (@0 bs : List UInt8) : Set where
 
 UserNotice : (@0 _ : List UInt8) → Set
 UserNotice xs = TLV Tag.Sequence UserNoticeFields xs
+
+postulate
+  RawUserNoticeFields : Raw UserNoticeFields
+
+RawUserNotice : Raw UserNotice
+RawUserNotice = RawTLV _ RawUserNoticeFields
