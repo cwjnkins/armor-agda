@@ -15,8 +15,8 @@ module Aeres.Data.X509.Extension.KU.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
-@0 unambiguousKUFields : Unambiguous KUFields
-unambiguousKUFields = TLV.unambiguous (TLV.unambiguous BitString.unambiguous)
+@0 unambiguous : Unambiguous KUFields
+unambiguous = TLV.unambiguous (TLV.unambiguous BitString.unambiguous)
 
-@0 nonmalleableKUFields : NonMalleable RawKUFields
-nonmalleableKUFields = TLV.nonmalleable BitString.nonmalleable
+@0 nonmalleable : NonMalleable RawKUFields
+nonmalleable = TLV.nonmalleable BitString.nonmalleable

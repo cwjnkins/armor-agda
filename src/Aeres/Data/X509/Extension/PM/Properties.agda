@@ -16,28 +16,28 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq         UInt8
 
 iso : Iso PolicyMapFieldsRep PolicyMapFields
-proj₁ iso = equivalent
+proj₁ iso = equivalentPolicyMapFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkPolicyMapFields issuerDomainPolicy subjectDomainPolicy refl) = refl
 
-@0 unambiguous : Unambiguous PolicyMapFields
-unambiguous =
+@0 unambiguousPolicyMapFields : Unambiguous PolicyMapFields
+unambiguousPolicyMapFields =
   Iso.unambiguous iso
     (Seq.unambiguous OID.unambiguous TLV.nosubstrings OID.unambiguous)
 
-@0 nonmalleable : NonMalleable RawPolicyMapFields
-nonmalleable = Iso.nonmalleable iso RawPolicyMapFieldsRep nm
+@0 nonmalleablePolicyMapFields : NonMalleable RawPolicyMapFields
+nonmalleablePolicyMapFields = Iso.nonmalleable iso RawPolicyMapFieldsRep nm
   where
   nm : NonMalleable RawPolicyMapFieldsRep
   nm = Seq.nonmalleable OID.nonmalleable OID.nonmalleable
 
 @0 nosubstrings : NoSubstrings PolicyMapFields
-nosubstrings x x₁ x₂ = Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings x (proj₂ equivalent x₁) (proj₂ equivalent x₂)
+nosubstrings x x₁ x₂ = Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings x (proj₂ equivalentPolicyMapFields x₁) (proj₂ equivalentPolicyMapFields x₂)
 
-@0 unambiguousPMFields : Unambiguous PMFields
-unambiguousPMFields = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
-  (TLV.unambiguous unambiguous) TLV.nonempty TLV.nosubstrings))
+@0 unambiguous : Unambiguous PMFields
+unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
+  (TLV.unambiguous unambiguousPolicyMapFields) TLV.nonempty TLV.nosubstrings))
 
-@0 nonmalleablePMFields : NonMalleable RawPMFields
-nonmalleablePMFields = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable
-  TLV.nonempty TLV.nosubstrings (TLV.nonmalleable nonmalleable)))
+@0 nonmalleable : NonMalleable RawPMFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable
+  TLV.nonempty TLV.nosubstrings (TLV.nonmalleable nonmalleablePolicyMapFields)))

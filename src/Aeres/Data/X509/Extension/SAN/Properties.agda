@@ -15,8 +15,8 @@ module Aeres.Data.X509.Extension.SAN.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
-@0 unambiguousSANFields : Unambiguous SANFields
-unambiguousSANFields = TLV.unambiguous GeneralName.GeneralNames.unambiguous
+@0 unambiguous : Unambiguous SANFields
+unambiguous = TLV.unambiguous GeneralName.GeneralNames.unambiguous
 
-@0 nonmalleableSANFields : NonMalleable RawSANFields
-nonmalleableSANFields = TLV.nonmalleable GeneralName.GeneralNames.nonmalleable
+@0 nonmalleable : NonMalleable RawSANFields
+nonmalleable = TLV.nonmalleable GeneralName.GeneralNames.nonmalleable

@@ -8,4 +8,6 @@ module Aeres.Data.X509.Extension.SKI where
 
 open Aeres.Data.X509.Extension.SKI.Parser public
 open Aeres.Data.X509.Extension.SKI.TCB    public
-open Aeres.Data.X509.Extension.SKI.Properties public
+
+module SKI where
+  open Aeres.Data.X509.Extension.SKI.Properties public

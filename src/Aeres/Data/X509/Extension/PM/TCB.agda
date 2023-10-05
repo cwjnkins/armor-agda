@@ -37,12 +37,12 @@ PolicyMapFieldsRep = &ₚ OID OID
 RawPolicyMapFieldsRep : Raw PolicyMapFieldsRep
 RawPolicyMapFieldsRep = Raw&ₚ RawOID RawOID
 
-equivalent : Equivalent PolicyMapFieldsRep PolicyMapFields
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkPolicyMapFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalent (mkPolicyMapFields issuerDomainPolicy subjectDomainPolicy bs≡) = mk&ₚ issuerDomainPolicy subjectDomainPolicy bs≡
+equivalentPolicyMapFields : Equivalent PolicyMapFieldsRep PolicyMapFields
+proj₁ equivalentPolicyMapFields (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkPolicyMapFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalentPolicyMapFields (mkPolicyMapFields issuerDomainPolicy subjectDomainPolicy bs≡) = mk&ₚ issuerDomainPolicy subjectDomainPolicy bs≡
 
 RawPolicyMapFields : Raw PolicyMapFields
-RawPolicyMapFields =  Iso.raw equivalent RawPolicyMapFieldsRep
+RawPolicyMapFields =  Iso.raw equivalentPolicyMapFields RawPolicyMapFieldsRep
 
 RawPMFields : Raw PMFields
 RawPMFields = RawTLV _ (RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawPolicyMapFields) 1))

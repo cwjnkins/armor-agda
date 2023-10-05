@@ -43,14 +43,8 @@ module UserNoticeQualifier where
   @0 nosubstrings : NoSubstrings UserNoticeQualifier
   nosubstrings = DefinedByOID.nosubstrings _ (λ _ → Parallel.nosubstrings₁ TLV.nosubstrings)
 
-equivalent : Equivalent (Sum CPSURIQualifier UserNoticeQualifier) PolicyQualifierInfoFields
-proj₁ equivalent (Sum.inj₁ x) = cpsURI x
-proj₁ equivalent (Sum.inj₂ x) = userNotice x
-proj₂ equivalent (cpsURI x) = Sum.inj₁ x
-proj₂ equivalent (userNotice x) = Sum.inj₂ x
-
-iso : Iso (Sum CPSURIQualifier UserNoticeQualifier) PolicyQualifierInfoFields
-proj₁ iso = equivalent
+iso : Iso PolicyQualifierInfoFieldsRep PolicyQualifierInfoFields
+proj₁ iso = equivalentPolicyQualifierInfoFields
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ x) = refl
 proj₂ (proj₂ iso) (cpsURI x) = refl
@@ -58,7 +52,7 @@ proj₂ (proj₂ iso) (userNotice x) = refl
 
 @0 nosubstrings : NoSubstrings PolicyQualifierInfoFields
 nosubstrings =
-  Iso.nosubstrings equivalent
+  Iso.nosubstrings equivalentPolicyQualifierInfoFields
     (Sum.nosubstrings
       CPSURIQualifier.nosubstrings
       UserNoticeQualifier.nosubstrings

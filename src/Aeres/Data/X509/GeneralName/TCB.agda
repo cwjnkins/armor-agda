@@ -72,25 +72,25 @@ GeneralNameRep = Sum OtherName
                              (Sum URI
                                (Sum IpAddress RegID)))))))
 
-equivalent : Equivalent GeneralNameRep GeneralName
-proj₁ equivalent (inj₁ x) = oname x
-proj₁ equivalent (inj₂ (inj₁ x)) = rfcname x
-proj₁ equivalent (inj₂ (inj₂ (inj₁ x))) = dnsname x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₁ x)))) = x400add x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))) = dirname x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))) = ediname x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))) = uri x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))) = ipadd x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))) = rid x
-proj₂ equivalent (oname x) = inj₁ x
-proj₂ equivalent (rfcname x) = inj₂ (inj₁ x)
-proj₂ equivalent (dnsname x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (x400add x) = inj₂ (inj₂ (inj₂ (inj₁ x)))
-proj₂ equivalent (dirname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))
-proj₂ equivalent (ediname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))
-proj₂ equivalent (uri x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))
-proj₂ equivalent (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))
-proj₂ equivalent (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
+equivalentGeneralName : Equivalent GeneralNameRep GeneralName
+proj₁ equivalentGeneralName (inj₁ x) = oname x
+proj₁ equivalentGeneralName (inj₂ (inj₁ x)) = rfcname x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₁ x))) = dnsname x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₁ x)))) = x400add x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))) = dirname x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))) = ediname x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))) = uri x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))) = ipadd x
+proj₁ equivalentGeneralName (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))) = rid x
+proj₂ equivalentGeneralName (oname x) = inj₁ x
+proj₂ equivalentGeneralName (rfcname x) = inj₂ (inj₁ x)
+proj₂ equivalentGeneralName (dnsname x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equivalentGeneralName (x400add x) = inj₂ (inj₂ (inj₂ (inj₁ x)))
+proj₂ equivalentGeneralName (dirname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))
+proj₂ equivalentGeneralName (ediname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))
+proj₂ equivalentGeneralName (uri x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))
+proj₂ equivalentGeneralName (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))
+proj₂ equivalentGeneralName (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
 
 RawGeneralNameRep : Raw GeneralNameRep
 RawGeneralNameRep = RawSum (RawTLV _ RawOctetStringValue)
@@ -104,7 +104,7 @@ RawGeneralNameRep = RawSum (RawTLV _ RawOctetStringValue)
                                            (RawTLV _ RawOIDValue))))))))
 
 RawGeneralName : Raw GeneralName
-RawGeneralName = Iso.raw equivalent RawGeneralNameRep
+RawGeneralName = Iso.raw equivalentGeneralName RawGeneralNameRep
 
 RawGeneralNames : Raw GeneralNames
 RawGeneralNames = RawTLV _ (RawBoundedSequenceOf RawGeneralName 1)

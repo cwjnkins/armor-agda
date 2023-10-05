@@ -19,7 +19,7 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
 iso : Iso GeneralNameRep GeneralName
-proj₁ iso = equivalent
+proj₁ iso = equivalentGeneralName
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = refl

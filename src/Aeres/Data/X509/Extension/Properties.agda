@@ -178,7 +178,7 @@ module Select where
                           (Sum.unambiguous
                             (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous PC.unambiguous)) (TLV.noconfusion λ ()))
                             (Sum.unambiguous
-                              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PM.unambiguous) TLV.nonempty TLV.nosubstrings)) ) (TLV.noconfusion λ ()))
+                              (Fields.unambiguous ≡-unique PM.unambiguous (TLV.noconfusion λ ()))
                               (Sum.unambiguous
                                 (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous {xs})) (TLV.noconfusion λ ()))
                                 (Sum.unambiguous

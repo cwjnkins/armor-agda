@@ -22,12 +22,12 @@ open Aeres.Grammar.Seq         UInt8
 
 Rep = &ₚ GeneralName (&ₚ (Option MinBaseDistance) (Option MaxBaseDistance))
 
-equivalent : Equivalent Rep GeneralSubtreeFields
-proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
-proj₂ equivalent (mkGeneralSubtreeFields base minimum maximum refl) = (mk&ₚ base (mk&ₚ minimum maximum refl) refl)
+equivalentGeneralSubtreeFields : Equivalent Rep GeneralSubtreeFields
+proj₁ equivalentGeneralSubtreeFields (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
+proj₂ equivalentGeneralSubtreeFields (mkGeneralSubtreeFields base minimum maximum refl) = (mk&ₚ base (mk&ₚ minimum maximum refl) refl)
 
 iso : Iso Rep GeneralSubtreeFields
-proj₁ iso = equivalent
+proj₁ iso = equivalentGeneralSubtreeFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (mkGeneralSubtreeFields base minimum maximum refl) = refl
 

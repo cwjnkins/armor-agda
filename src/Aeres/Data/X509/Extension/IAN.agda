@@ -8,4 +8,6 @@ module Aeres.Data.X509.Extension.IAN where
 
 open Aeres.Data.X509.Extension.IAN.Parser public
 open Aeres.Data.X509.Extension.IAN.TCB    public
-open Aeres.Data.X509.Extension.IAN.Properties public
+
+module IAN where
+  open Aeres.Data.X509.Extension.IAN.Properties public

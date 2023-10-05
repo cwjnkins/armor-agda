@@ -15,8 +15,8 @@ module Aeres.Data.X509.Extension.IAN.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
-@0 unambiguousIANFields : Unambiguous IANFields
-unambiguousIANFields = TLV.unambiguous GeneralName.GeneralNames.unambiguous
+@0 unambiguous : Unambiguous IANFields
+unambiguous = TLV.unambiguous GeneralName.GeneralNames.unambiguous
 
-@0 nonmalleableIANFields : NonMalleable RawIANFields
-nonmalleableIANFields = TLV.nonmalleable GeneralName.GeneralNames.nonmalleable
+@0 nonmalleable : NonMalleable RawIANFields
+nonmalleable = TLV.nonmalleable GeneralName.GeneralNames.nonmalleable

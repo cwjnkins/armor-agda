@@ -50,14 +50,14 @@ postulate
 
 PolicyQualifierInfoFieldsRep = Sum CPSURIQualifier UserNoticeQualifier
 
-equivalent : Equivalent PolicyQualifierInfoFieldsRep PolicyQualifierInfoFields
-proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₁ x) = cpsURI x
-proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ x) = userNotice x
-proj₂ equivalent (cpsURI x) = inj₁ x
-proj₂ equivalent (userNotice x) = inj₂ x
+equivalentPolicyQualifierInfoFields : Equivalent PolicyQualifierInfoFieldsRep PolicyQualifierInfoFields
+proj₁ equivalentPolicyQualifierInfoFields (Aeres.Grammar.Sum.TCB.inj₁ x) = cpsURI x
+proj₁ equivalentPolicyQualifierInfoFields (Aeres.Grammar.Sum.TCB.inj₂ x) = userNotice x
+proj₂ equivalentPolicyQualifierInfoFields (cpsURI x) = inj₁ x
+proj₂ equivalentPolicyQualifierInfoFields (userNotice x) = inj₂ x
 
 RawPolicyQualifierInfoFieldsRep : Raw PolicyQualifierInfoFieldsRep
 RawPolicyQualifierInfoFieldsRep = RawSum RawCPSURIQualifier RawUserNoticeQualifier
 
 RawPolicyQualifiersSeq : Raw PolicyQualifiersSeq
-RawPolicyQualifiersSeq = RawTLV _ (RawBoundedSequenceOf (RawTLV _ (Iso.raw equivalent RawPolicyQualifierInfoFieldsRep)) 1)
+RawPolicyQualifiersSeq = RawTLV _ (RawBoundedSequenceOf (RawTLV _ (Iso.raw equivalentPolicyQualifierInfoFields RawPolicyQualifierInfoFieldsRep)) 1)

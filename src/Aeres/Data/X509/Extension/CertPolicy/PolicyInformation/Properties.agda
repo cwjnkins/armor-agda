@@ -28,7 +28,7 @@ proj₂ (proj₁ iso) (mkPolicyInformationFields cpid cpqls bs≡) = mk&ₚ cpid
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkPolicyInformationFields cpid cpqls bs≡) = refl
 
-equiv = proj₁ iso
+equivalent = proj₁ iso
 
 @0 unambiguous : Unambiguous PolicyInformationFields
 unambiguous =

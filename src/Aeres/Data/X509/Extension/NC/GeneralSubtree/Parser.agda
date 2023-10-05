@@ -41,7 +41,7 @@ parseExactLengthGeneralSubtrees n =
     parseEquivalent
       (Iso.transEquivalent
         (Iso.symEquivalent Distribute.exactLength-&)
-        (Parallel.equivalent₁ equivalent))
+        (Parallel.equivalent₁ equivalentGeneralSubtreeFields))
       (parse&ᵈ (Parallel.nosubstrings₁ GeneralName.nosubstrings)
         (Parallel.Length≤.unambiguous _ GeneralName.unambiguous)
         (parse≤ n parseGeneralName GeneralName.nosubstrings (tell $ here' String.++ ": underflow"))

@@ -22,16 +22,8 @@ nosubstrings x (fullname x₁) (nameRTCrlissr x₂) = ⊥-elim (TLV.noconfusion 
 nosubstrings x (nameRTCrlissr x₁) (fullname x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
 nosubstrings x (nameRTCrlissr x₁) (nameRTCrlissr x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
-Rep = Sum FullName NameRTCrlIssuer
-
-equivalent : Equivalent Rep DistPointNameChoice
-proj₁ equivalent (Sum.inj₁ x) = fullname x
-proj₁ equivalent (Sum.inj₂ x) = nameRTCrlissr x
-proj₂ equivalent (fullname x) = Sum.inj₁ x
-proj₂ equivalent (nameRTCrlissr x) = Sum.inj₂ x
-
-iso : Iso Rep DistPointNameChoice
-proj₁ iso = equivalent
+iso : Iso DistPointNameChoiceRep DistPointNameChoice
+proj₁ iso = equivalentDistPointNameChoice
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ x) = refl
 proj₂ (proj₂ iso) (fullname x) = refl

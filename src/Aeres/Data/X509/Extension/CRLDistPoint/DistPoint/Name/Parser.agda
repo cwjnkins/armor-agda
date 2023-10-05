@@ -31,5 +31,5 @@ parseNameRTCrlIssuer =
 
 parseDistPointNameChoice : Parser (Logging ∘ Dec) DistPointNameChoice
 parseDistPointNameChoice =
-  parseEquivalent equivalent
+  parseEquivalent equivalentDistPointNameChoice
     (parseSum parseFullName parseNameRTCrlIssuer)
