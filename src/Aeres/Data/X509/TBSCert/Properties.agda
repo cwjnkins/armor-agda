@@ -14,7 +14,6 @@ open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel  
@@ -74,15 +73,15 @@ unambiguous =
         (TLV.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
         TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ()))
-      (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
-        (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
-          (Seq.unambiguous (TLV.unambiguous Validity.unambiguous) TLV.nosubstrings
-            (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
-              (Seq.unambiguous
-                (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
-                  (Parallel.nosubstrings₁ TLV.nosubstrings)
-                  (Unambiguous.option₃&₂
-                    (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
-                    (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
-                    (TLV.unambiguous Extension.ExtensionSeq.unambiguous)
-                    TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))
+    (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
+    (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
+    (Seq.unambiguous Validity.unambiguous TLV.nosubstrings
+    (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
+    (Seq.unambiguous
+      (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
+        (Parallel.nosubstrings₁ TLV.nosubstrings)
+        (Unambiguous.option₃&₂
+          (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
+          (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
+          (TLV.unambiguous Extension.ExtensionSeq.unambiguous)
+          TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))

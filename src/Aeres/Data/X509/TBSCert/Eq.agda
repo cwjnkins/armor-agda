@@ -17,7 +17,6 @@ import      Aeres.Data.X690-DER.OctetString.Properties
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel

@@ -17,19 +17,30 @@ open Aeres.Grammar.Seq         UInt8
 
 @0 nosubstrings : NoSubstrings GeneralizedTimeFields
 nosubstrings = Iso.nosubstrings equivalent
-  (Seq.nosubstrings TimeType.nosubstrings
-  (Seq.nosubstrings MDHMS.nosubstrings λ where _ refl refl → refl))
+  (Seq.nosubstrings (Seq.nosubstrings TimeType.nosubstrings MDHMS.nosubstrings)
+  (λ where _ refl refl → refl))
 
 iso : Iso GeneralizedTimeFieldsRep GeneralizedTimeFields
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ year (mk&ₚ mdhms refl refl) bs≡) = refl
-proj₂ (proj₂ iso) (mkGeneralizedTime year mdhms bs≡) = refl
+proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ{y}{m} year mdhms refl) refl refl) =
+  subst₀ (λ eq → _≡_{A = GeneralizedTimeFieldsRep _}
+                   (mk&ₚ (mk&ₚ year mdhms refl) refl eq)
+                   (mk&ₚ (mk&ₚ year mdhms refl) refl refl))
+         (sym (trans-symʳ (++-assoc y m [ # 'Z' ]))) refl
+proj₂ (proj₂ iso) (mkGeneralizedTime{y}{m} year mdhms refl) =
+  subst₀
+    (λ eq → _≡_{A = GeneralizedTimeFields _}
+             (mkGeneralizedTime year mdhms eq)
+             (mkGeneralizedTime year mdhms refl))
+    (sym (trans-symˡ (++-assoc y m [ # 'Z' ]))) refl
 
 @0 unambiguousFields : Unambiguous GeneralizedTimeFields
 unambiguousFields =
   Iso.unambiguous iso
-    (Seq.unambiguous TimeType.unambiguous TimeType.nosubstrings
-    (Seq.unambiguous MDHMS.unambiguous MDHMS.nosubstrings ≡-unique))
+    (Seq.unambiguous
+      (Seq.unambiguous TimeType.unambiguous TimeType.nosubstrings MDHMS.unambiguous)
+      (Seq.nosubstrings TimeType.nosubstrings MDHMS.nosubstrings)
+      ≡-unique)
 
 @0 unambiguous : Unambiguous GeneralizedTime
 unambiguous = TLV.unambiguous unambiguousFields
@@ -39,9 +50,14 @@ nonmalleableFields =
   Iso.nonmalleable iso RawGeneralizedTimeFieldsRep nm
   where
   nm : NonMalleable RawGeneralizedTimeFieldsRep
-  nm =  Seq.nonmalleable TimeType.nonmalleable
-       (Seq.nonmalleable MDHMS.nonmalleable
-                         (subsingleton⇒nonmalleable λ where (─ _ , refl) (─ _ , refl) → refl))
+  nm =
+    Seq.nonmalleable
+      (Seq.nonmalleable TimeType.nonmalleable MDHMS.nonmalleable)
+      (subsingleton⇒nonmalleable (λ where (─ _ , refl) (─ _ , refl) → refl))
 
 @0 nonmalleable : NonMalleable RawGeneralizedTime
 nonmalleable = TLV.nonmalleable nonmalleableFields
+
+instance
+  eq : Eq (Exists─ (List UInt8) GeneralizedTimeFields)
+  eq = Iso.isoEq iso (Seq.eq&ₚ (Seq.eq&ₚ it it) (record { _≟_ = λ where (─ _ , refl) (─ _ , refl) → yes refl }))

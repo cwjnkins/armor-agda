@@ -6,12 +6,13 @@ open import Aeres.Data.X509.RDN.TCB
 open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert.TCB
 import      Aeres.Data.X509.TBSCert.UID.TCB as TBSCert
+open import Aeres.Data.X509.Validity.TCB
+open import Aeres.Data.X509.Validity.Time.TCB
 import      Aeres.Data.X690-DER.BitString.Serializer as BitString
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.OID
 import      Aeres.Grammar.IList.TCB
@@ -42,36 +43,40 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSerial : ℤ
   getSerial = TBSCertFields.getSerial (TLV.val tbs)
 
-  getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+  getValidity : Validity _
+  getValidity = TBSCertFields.validity (TLV.val tbs)
+
+  getValidityStartTime : Time _
+  getValidityEndTime   : Time _
 
   getValidityStartTime = TBSCertFields.getValidityStartTime ∘ TLV.val $ tbs
   getValidityEndTime   = TBSCertFields.getValidityEndTime  ∘ TLV.val $ tbs 
 
-  getYearNB :  ℕ
-  getYearNB = TBSCertFields.getYearNB (TLV.val tbs)
-  getMonthNB :  ℕ
-  getMonthNB = TBSCertFields.getMonthNB (TLV.val tbs)
-  getDayNB :  ℕ
-  getDayNB = TBSCertFields.getDayNB (TLV.val tbs)
-  getHourNB :  ℕ
-  getHourNB = TBSCertFields.getHourNB (TLV.val tbs)
-  getMinNB :  ℕ
-  getMinNB = TBSCertFields.getMinNB (TLV.val tbs)
-  getSecNB :  ℕ
-  getSecNB = TBSCertFields.getSecNB (TLV.val tbs)
+  -- getYearNB :  ℕ
+  -- getYearNB = TBSCertFields.getYearNB (TLV.val tbs)
+  -- getMonthNB :  ℕ
+  -- getMonthNB = TBSCertFields.getMonthNB (TLV.val tbs)
+  -- getDayNB :  ℕ
+  -- getDayNB = TBSCertFields.getDayNB (TLV.val tbs)
+  -- getHourNB :  ℕ
+  -- getHourNB = TBSCertFields.getHourNB (TLV.val tbs)
+  -- getMinNB :  ℕ
+  -- getMinNB = TBSCertFields.getMinNB (TLV.val tbs)
+  -- getSecNB :  ℕ
+  -- getSecNB = TBSCertFields.getSecNB (TLV.val tbs)
 
-  getYearNA :  ℕ
-  getYearNA = TBSCertFields.getYearNA (TLV.val tbs)
-  getMonthNA :  ℕ
-  getMonthNA = TBSCertFields.getMonthNA (TLV.val tbs)
-  getDayNA :  ℕ
-  getDayNA = TBSCertFields.getDayNA (TLV.val tbs)
-  getHourNA :  ℕ
-  getHourNA = TBSCertFields.getHourNA (TLV.val tbs)
-  getMinNA :  ℕ
-  getMinNA = TBSCertFields.getMinNA (TLV.val tbs)
-  getSecNA :  ℕ
-  getSecNA = TBSCertFields.getSecNA (TLV.val tbs)
+  -- getYearNA :  ℕ
+  -- getYearNA = TBSCertFields.getYearNA (TLV.val tbs)
+  -- getMonthNA :  ℕ
+  -- getMonthNA = TBSCertFields.getMonthNA (TLV.val tbs)
+  -- getDayNA :  ℕ
+  -- getDayNA = TBSCertFields.getDayNA (TLV.val tbs)
+  -- getHourNA :  ℕ
+  -- getHourNA = TBSCertFields.getHourNA (TLV.val tbs)
+  -- getMinNA :  ℕ
+  -- getMinNA = TBSCertFields.getMinNA (TLV.val tbs)
+  -- getSecNA :  ℕ
+  -- getSecNA = TBSCertFields.getSecNA (TLV.val tbs)
 
   getIssuerLen :  ℕ
   getIssuerLen = TBSCertFields.getIssuerLen (TLV.val tbs)
@@ -138,36 +143,40 @@ module Cert where
     getTBSBytes : List UInt8
     getTBSBytes = ↑ (CertFields.tbsBytes (TLV.val c))
 
-    getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+    getValidity : Validity _
+    getValidity = CertFields.getValidity (TLV.val c)
+
+    getValidityStartTime : Time _
+    getValidityEndTime   : Time _
 
     getValidityStartTime = CertFields.getValidityStartTime ∘ TLV.val $ c
     getValidityEndTime   = CertFields.getValidityEndTime   ∘ TLV.val $ c
 
-    getYearNB :  ℕ
-    getYearNB = CertFields.getYearNB (TLV.val c)
-    getMonthNB :  ℕ
-    getMonthNB = CertFields.getMonthNB (TLV.val c)
-    getDayNB :  ℕ
-    getDayNB = CertFields.getDayNB (TLV.val c)
-    getHourNB :  ℕ
-    getHourNB = CertFields.getHourNB (TLV.val c)
-    getMinNB :  ℕ
-    getMinNB = CertFields.getMinNB (TLV.val c)
-    getSecNB :  ℕ
-    getSecNB = CertFields.getSecNB (TLV.val c)
+    -- getYearNB :  ℕ
+    -- getYearNB = CertFields.getYearNB (TLV.val c)
+    -- getMonthNB :  ℕ
+    -- getMonthNB = CertFields.getMonthNB (TLV.val c)
+    -- getDayNB :  ℕ
+    -- getDayNB = CertFields.getDayNB (TLV.val c)
+    -- getHourNB :  ℕ
+    -- getHourNB = CertFields.getHourNB (TLV.val c)
+    -- getMinNB :  ℕ
+    -- getMinNB = CertFields.getMinNB (TLV.val c)
+    -- getSecNB :  ℕ
+    -- getSecNB = CertFields.getSecNB (TLV.val c)
 
-    getYearNA :  ℕ
-    getYearNA = CertFields.getYearNA (TLV.val c)
-    getMonthNA :  ℕ
-    getMonthNA = CertFields.getMonthNA (TLV.val c)
-    getDayNA :  ℕ
-    getDayNA = CertFields.getDayNA (TLV.val c)
-    getHourNA :  ℕ
-    getHourNA = CertFields.getHourNA (TLV.val c)
-    getMinNA :  ℕ
-    getMinNA = CertFields.getMinNA (TLV.val c)
-    getSecNA :  ℕ
-    getSecNA = CertFields.getSecNA (TLV.val c)
+    -- getYearNA :  ℕ
+    -- getYearNA = CertFields.getYearNA (TLV.val c)
+    -- getMonthNA :  ℕ
+    -- getMonthNA = CertFields.getMonthNA (TLV.val c)
+    -- getDayNA :  ℕ
+    -- getDayNA = CertFields.getDayNA (TLV.val c)
+    -- getHourNA :  ℕ
+    -- getHourNA = CertFields.getHourNA (TLV.val c)
+    -- getMinNA :  ℕ
+    -- getMinNA = CertFields.getMinNA (TLV.val c)
+    -- getSecNA :  ℕ
+    -- getSecNA = CertFields.getSecNA (TLV.val c)
 
     getIssuerLen :  ℕ
     getIssuerLen = CertFields.getIssuerLen (TLV.val c)

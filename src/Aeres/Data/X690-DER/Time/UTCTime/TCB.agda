@@ -27,10 +27,11 @@ record UTCTimeFields (@0 bs : List UInt8) : Set where
   getYear  : Window₂ → ℕ
   getYear w = TimeType.getTime (proj₂ (w year))
 
-  getMonth = MDHMS.getMonth mdhms
-  getDay   = MDHMS.getDay mdhms
-  getHour  = MDHMS.getHour mdhms
-  getSec   = MDHMS.getSec mdhms
+  getMonth  = MDHMS.getMonth mdhms
+  getDay    = MDHMS.getDay mdhms
+  getHour   = MDHMS.getHour mdhms
+  getMinute = MDHMS.getMinute mdhms
+  getSec    = MDHMS.getSec mdhms
 
 UTCTime : @0 List UInt8 → Set
 UTCTime = TLV Tag.UTCTime UTCTimeFields

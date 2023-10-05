@@ -49,3 +49,13 @@ nonmalleable{bs₁ = bs₁}{bs₂} time₁@(mkTimeType charset (singleton t₁ t
   ret (const _) of λ where
     refl → case (‼ unambiguous time₁ time₂) ret (const _) of λ where
       refl → refl
+
+instance
+  eq : ∀ {size l u} → Eq (Exists─ (List UInt8) (TimeType size l u))
+  Eq._≟_ eq (─ _ , t₁) (─ _ , t₂) =
+    case Raw.to (RawTimeType _ _ _) t₁ ≟ Raw.to (RawTimeType _ _ _) t₂ ret (const _) of λ where
+      (no ¬p) → no (λ where refl → contradiction refl ¬p)
+      (yes p) → yes (‼ nonmalleable t₁ t₂ p)
+
+  eq≋ : ∀ {size l u} → Eq≋ (TimeType size l u)
+  eq≋ = Eq⇒Eq≋ eq

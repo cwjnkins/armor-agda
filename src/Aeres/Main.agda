@@ -192,15 +192,14 @@ main = IO.run $
     runCheck c "SCP19" scp19 IO.>>
     Aeres.IO.getCurrentTime IO.>>= λ now →
     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
-    case Time.fromFFI now of λ where
-      nothing →
+    case GeneralizedTime.fromForeignUTC now of λ where
+      (no ¬p) →
         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
         Aeres.IO.exitFailure
-      (just (bs , t)) →
-        -- Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (show t)) IO.>>
-        runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
-        IO.putStrLn (showOutput (certOutput c)) IO.>>
-        runChecks' (n + 1) tail
+      (yes p) →
+        runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
+        (IO.putStrLn (showOutput (certOutput c)) IO.>>
+        runChecks' (n + 1) tail)
 
   runCertChecks : ∀ {@0 bs₁ bs₂} → (roots : Chain bs₁) → (certs : Chain bs₂) → _
   runCertChecks nil nil = Aeres.IO.putStrLnErr "Error: error parsing trust anchors and certificate chain"

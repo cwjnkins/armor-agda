@@ -19,6 +19,37 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Seq         UInt8
 
+@0 length≡ : ∀ {@0 bs} → MDHMS bs → length bs ≡ 10
+length≡ {bs} (mkMDHMS{mo}{da}{ho}{mi}{se} month day dayRange hour minute sec bs≡) =
+  begin
+    length bs
+      ≡⟨ cong length bs≡ ⟩
+    length (mo ++ da ++ ho ++ mi ++ se)
+      ≡⟨ length-++ mo ⟩
+    length mo + length (da ++ ho ++ mi ++ se)
+      ≡⟨ cong₂ _+_
+           (TimeType.bsLen month)
+           (begin
+             length (da ++ ho ++ mi ++ se) ≡⟨ length-++ da ⟩
+             length da + length (ho ++ mi ++ se)
+               ≡⟨ cong₂ _+_
+                    (TimeType.bsLen day)
+                    (begin
+                      length (ho ++ mi ++ se) ≡⟨ length-++ ho ⟩
+                      length ho + length (mi ++ se)
+                        ≡⟨ cong₂ _+_
+                             (TimeType.bsLen hour)
+                             (begin
+                               length (mi ++ se) ≡⟨ length-++ mi ⟩
+                               length mi + length se
+                                 ≡⟨ cong₂ _+_ (TimeType.bsLen minute) (TimeType.bsLen sec) ⟩
+                               4 ∎) ⟩
+                      6 ∎) ⟩
+             8 ∎) ⟩
+    10 ∎
+  where
+  open ≡-Reasoning
+
 @0 nosubstrings : NoSubstrings MDHMS
 nosubstrings =
   Iso.nosubstrings equivalent
@@ -71,3 +102,16 @@ nonmalleable = Iso.nonmalleable iso RawMDHMSRep nm
     (Seq.nonmalleable TimeType.nonmalleable
     (Seq.nonmalleable TimeType.nonmalleable
                       TimeType.nonmalleable))
+
+instance
+  eq≋ : Eq≋ MDHMS
+  eq≋ = Iso.isoEq≋ iso
+          (Seq.eq≋&ₚ
+            (Seq.eq≋&ₚᵈ it
+              (λ mo → Parallel.eq≋Σₚ it
+               λ da → record { _≟_ = λ x y → yes (erased-unique ≤-unique x y) }))
+          (Seq.eq≋&ₚ it
+          (Seq.eq≋&ₚ it it)))
+
+  eq : Eq (Exists─ (List UInt8) MDHMS)
+  eq = Eq≋⇒Eq eq≋

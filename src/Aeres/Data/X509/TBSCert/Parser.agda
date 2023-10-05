@@ -15,7 +15,6 @@ open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel
@@ -98,7 +97,7 @@ parseTBSCertFields n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ {A = Length≤ Validity n}
         (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (Parallel.Length≤.unambiguous _ (TLV.unambiguous Validity.unambiguous))
+        (Parallel.Length≤.unambiguous _ Validity.unambiguous)
         (parse≤ _ parseValidity TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →

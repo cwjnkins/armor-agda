@@ -2,43 +2,52 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.Validity.TCB
+open import Aeres.Data.X509.Validity.Time
+open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Time
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Seq
 open import Aeres.Prelude
-open import Data.Nat.Properties
-  hiding (_≟_)
 
 module Aeres.Data.X509.Validity.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq         UInt8
 
-iso : Iso (&ₚ Time Time) ValidityFields
-proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkValidityFields fstₚ₁ sndₚ₁ bs≡
-proj₂ (proj₁ iso) (mkValidityFields start end bs≡) = mk&ₚ start end bs≡
+iso : Iso ValidityFieldsRep ValidityFields
+proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkValidityFields start end bs≡) = refl
 
-equivalent : _
-equivalent = proj₁ iso
-
 @0 nosubstrings : NoSubstrings ValidityFields
-nosubstrings x x₁ x₂ = foo
-  where
-  v2& : ∀ {bs} → ValidityFields bs → (&ₚ Time Time) bs
-  v2& (mkValidityFields start end bs≡) = mk&ₚ start end bs≡
-  foo = Seq.nosubstrings Time.nosubstrings Time.nosubstrings x (v2& x₁) (v2& x₂)
+nosubstrings =
+  Iso.nosubstrings equivalent
+    (Seq.nosubstrings Time.nosubstrings Time.nosubstrings)
 
-@0 unambiguous : Unambiguous ValidityFields
-unambiguous =
-  Iso.unambiguous iso
-    (Seq.unambiguous Time.unambiguous Time.nosubstrings
-      Time.unambiguous)
+@0 unambiguousFields : Unambiguous ValidityFields
+unambiguousFields = Iso.unambiguous iso (Seq.unambiguous Time.unambiguous Time.nosubstrings Time.unambiguous)
+
+@0 unambiguous : Unambiguous Validity
+unambiguous = TLV.unambiguous unambiguousFields
+
+@0 nonmalleableFields : NonMalleable RawValidityFields
+nonmalleableFields =
+  Iso.nonmalleable iso RawValidityFieldsRep
+    (Seq.nonmalleable Time.nonmalleable Time.nonmalleable)
+
+@0 nonmalleable : NonMalleable RawValidity
+nonmalleable = TLV.nonmalleable nonmalleableFields
 
 instance
-  EqValidity : Eq (Exists─ (List UInt8) ValidityFields)
-  EqValidity = Iso.isoEq iso (Seq.eq&ₚ it it)
+  eq : Eq (Exists─ (List UInt8) ValidityFields)
+  eq = Iso.isoEq iso (Seq.eq&ₚ it it)
 
   eq≋ : Eq≋ ValidityFields
   eq≋ = Eq⇒Eq≋ it
+
+-- instance
+--   EqValidity : Eq (Exists─ (List UInt8) ValidityFields)
+--   EqValidity = Iso.isoEq iso (Seq.eq&ₚ it it)
+
+--   eq≋ : Eq≋ ValidityFields
+--   eq≋ = Eq⇒Eq≋ it

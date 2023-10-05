@@ -1,10 +1,21 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X690-DER
+open import Aeres.Data.X509.Validity.Time.Ordering
+open import Aeres.Data.X509.Validity.Time.TCB
+  hiding (equivalent)
+open import Aeres.Data.X690-DER.TLV.TCB
+import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions.Iso
+import      Aeres.Grammar.Definitions.NonMalleable.Base
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Validity.TCB where
+
+open Aeres.Grammar.Definitions.Iso UInt8
+open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
+open Aeres.Grammar.Seq.TCB UInt8
 
 record ValidityFields (@0 bs : List UInt8) : Set where
   constructor mkValidityFields
@@ -14,38 +25,33 @@ record ValidityFields (@0 bs : List UInt8) : Set where
     end : Time na
     @0 bs≡  : bs ≡ nb ++ na
 
+ValidityFieldsRep : @0 List UInt8 → Set
+ValidityFieldsRep = &ₚ Time Time
+
+equivalent : Equivalent ValidityFieldsRep ValidityFields
+proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkValidityFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (mkValidityFields start end bs≡) = mk&ₚ start end bs≡
+
+RawValidityFieldsRep : Raw ValidityFieldsRep
+RawValidityFieldsRep = Raw&ₚ RawTime RawTime
+
+RawValidityFields : Raw ValidityFields
+RawValidityFields = Iso.raw equivalent RawValidityFieldsRep
+
 Validity : @0 List UInt8 → Set
-Validity xs = TLV Tag.Sequence ValidityFields xs
+Validity = TLV Tag.Sequence ValidityFields
 
-getStartTime getEndTime : ∀ {@0 bs} → Validity bs → Exists─ (List UInt8) Time
+RawValidity : Raw Validity
+RawValidity = RawTLV _ RawValidityFields
 
-getStartTime v = _ , (ValidityFields.start ∘ TLV.val $ v)
+getNBTime : ∀ {@0 bs} → (v : Validity bs) → Time (ValidityFields.nb (TLV.val v))
+getNBTime v = ValidityFields.start (TLV.val v)
 
-getEndTime   v = _ , (ValidityFields.end ∘ TLV.val $ v)
+getNATime : ∀ {@0 bs} → (v : Validity bs) → Time (ValidityFields.na (TLV.val v))
+getNATime v = ValidityFields.end (TLV.val v)
 
--- TODO use windowing from RFC 5820
-getYearNB : ∀ {@0 bs} → Validity bs →  ℕ
-getYearNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear start
-getMonthNB : ∀ {@0 bs} → Validity bs →  ℕ
-getMonthNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth start
-getDayNB : ∀ {@0 bs} → Validity bs →  ℕ
-getDayNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay start
-getHourNB : ∀ {@0 bs} → Validity bs →  ℕ
-getHourNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour start
-getMinNB : ∀ {@0 bs} → Validity bs →  ℕ
-getMinNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin start
-getSecNB : ∀ {@0 bs} → Validity bs →  ℕ
-getSecNB (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec start
+ValidTime : {@0 bs₁ bs₂ : List UInt8} → Time bs₁ → Validity bs₂ → Set
+ValidTime t v = getNBTime v Time≤ t × t Time≤ getNATime v
 
-getYearNA : ∀ {@0 bs} → Validity bs →  ℕ
-getYearNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getYear end
-getMonthNA : ∀ {@0 bs} → Validity bs →  ℕ
-getMonthNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMonth end
-getDayNA : ∀ {@0 bs} → Validity bs →  ℕ
-getDayNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getDay end
-getHourNA : ∀ {@0 bs} → Validity bs →  ℕ
-getHourNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getHour end
-getMinNA : ∀ {@0 bs} → Validity bs →  ℕ
-getMinNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getMin end
-getSecNA : ∀ {@0 bs} → Validity bs →  ℕ
-getSecNA (mkTLV len (mkValidityFields start end bs≡₁) len≡ bs≡) = Time.getSec end
+validTime? : ∀ {@0 bs₁ bs₂} → (t : Time bs₁) (v : Validity bs₂) → Dec (ValidTime t v)
+validTime? t v = (getNBTime v Time≤? t) ×-dec (t Time≤? getNATime v)

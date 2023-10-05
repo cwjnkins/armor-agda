@@ -25,11 +25,9 @@ parseFields : Parser (Logging ∘ Dec) GeneralizedTimeFields
 parseFields = parseEquivalent equivalent p
   where
   p : Parser (Logging ∘ Dec) GeneralizedTimeFieldsRep
-  p =  parse& TimeType.nosubstrings
-         Year.parse₄
-      (parse& MDHMS.nosubstrings MDHMS.parse
-        (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch (Z)")
-          [ # 'Z' ]))
+  p =  parse& (Seq.nosubstrings TimeType.nosubstrings MDHMS.nosubstrings)
+      (parse& TimeType.nosubstrings Year.parse₄ MDHMS.parse)
+      (parseLit (tell $ here' String.++ ": underflow (Z)") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ])
 
 parse : Parser (Logging ∘ Dec) GeneralizedTime
 parse = parseTLV _ here' _

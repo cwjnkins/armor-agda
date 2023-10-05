@@ -7,16 +7,20 @@ open import Aeres.Data.X690-DER.Time.Minute.TCB
 open import Aeres.Data.X690-DER.Time.Month.TCB
 open import Aeres.Data.X690-DER.Time.TimeType.TCB
 open import Aeres.Data.X690-DER.Time.Sec.TCB
+import      Aeres.Grammar.Definitions.Eq
 import      Aeres.Grammar.Definitions.Iso
 import      Aeres.Grammar.Definitions.NonMalleable.Base
 import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
+open import Data.Product.Relation.Binary.Lex.Strict
+open import Data.Product.Relation.Binary.Pointwise.NonDependent
+open import Relation.Binary.Core
 open import Tactic.MonoidSolver
-  using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.Time.MDHMS.TCB where
 
+open Aeres.Grammar.Definitions.Eq                UInt8
 open Aeres.Grammar.Definitions.Iso               UInt8
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 open Aeres.Grammar.Parallel.TCB                  UInt8
@@ -60,3 +64,19 @@ RawMDHMSRep =
 
 RawMDHMS : Raw MDHMS
 RawMDHMS = Iso.raw equivalent RawMDHMSRep
+
+infix 4 _MDHMS<'_ _MDHMS<_ _MDHMS≤_
+
+_MDHMS<'_ : Rel (Raw.D RawMDHMS) Level.0ℓ
+_MDHMS<'_ =
+  ×-Lex (Pointwise _≡_ _≡_)
+    (×-Lex _≡_ _<_ _<_)
+    (×-Lex _≡_ _<_
+      (×-Lex _≡_ _<_ _<_))
+
+_MDHMS<_ : {@0 bs₁ bs₂ : List UInt8} → (m₁ : MDHMS bs₁) (m₂ : MDHMS bs₂) → Set
+m₁ MDHMS< m₂ = (Raw.to RawMDHMS m₁) MDHMS<' (Raw.to RawMDHMS m₂)
+
+
+_MDHMS≤_ : {@0 bs₁ bs₂ : List UInt8} → (m₁ : MDHMS bs₁) (m₂ : MDHMS bs₂) → Set
+m₁ MDHMS≤ m₂ = _≋_{A = MDHMS} m₁ m₂ ⊎ m₁ MDHMS< m₂

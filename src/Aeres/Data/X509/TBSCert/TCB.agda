@@ -8,10 +8,10 @@ open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert.UID.TCB
 import      Aeres.Data.X509.TBSCert.Version.TCB as Version
 import      Aeres.Data.X509.Validity.TCB as Validity
+open import Aeres.Data.X509.Validity.Time.TCB
 import      Aeres.Data.X690-DER.Int.TCB as Int
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Option
 open import Aeres.Prelude
 
@@ -46,36 +46,37 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getSerial : ℤ
   getSerial = Int.getVal serial
 
-  getValidityStartTime getValidityEndTime : Exists─ (List UInt8) Time
+  getValidityStartTime : Time _
+  getValidityEndTime : Time _
 
-  getValidityStartTime = Validity.getStartTime validity
-  getValidityEndTime   = Validity.getEndTime validity
+  getValidityStartTime = Validity.getNBTime validity
+  getValidityEndTime   = Validity.getNATime validity
 
-  getYearNB :  ℕ
-  getYearNB = Validity.getYearNB validity
-  getMonthNB :  ℕ
-  getMonthNB = Validity.getMonthNB validity
-  getDayNB :  ℕ
-  getDayNB = Validity.getDayNB validity
-  getHourNB :  ℕ
-  getHourNB = Validity.getHourNB validity
-  getMinNB :  ℕ
-  getMinNB = Validity.getMinNB validity
-  getSecNB :  ℕ
-  getSecNB = Validity.getSecNB validity
+  -- getYearNB :  ℕ
+  -- getYearNB = Validity.getYearNB validity
+  -- getMonthNB :  ℕ
+  -- getMonthNB = Validity.getMonthNB validity
+  -- getDayNB :  ℕ
+  -- getDayNB = Validity.getDayNB validity
+  -- getHourNB :  ℕ
+  -- getHourNB = Validity.getHourNB validity
+  -- getMinNB :  ℕ
+  -- getMinNB = Validity.getMinNB validity
+  -- getSecNB :  ℕ
+  -- getSecNB = Validity.getSecNB validity
 
-  getYearNA :  ℕ
-  getYearNA = Validity.getYearNA validity
-  getMonthNA :  ℕ
-  getMonthNA = Validity.getMonthNA validity
-  getDayNA :  ℕ
-  getDayNA = Validity.getDayNA validity
-  getHourNA :  ℕ
-  getHourNA = Validity.getHourNA validity
-  getMinNA :  ℕ
-  getMinNA = Validity.getMinNA validity
-  getSecNA :  ℕ
-  getSecNA = Validity.getSecNA validity
+  -- getYearNA :  ℕ
+  -- getYearNA = Validity.getYearNA validity
+  -- getMonthNA :  ℕ
+  -- getMonthNA = Validity.getMonthNA validity
+  -- getDayNA :  ℕ
+  -- getDayNA = Validity.getDayNA validity
+  -- getHourNA :  ℕ
+  -- getHourNA = Validity.getHourNA validity
+  -- getMinNA :  ℕ
+  -- getMinNA = Validity.getMinNA validity
+  -- getSecNA :  ℕ
+  -- getSecNA = Validity.getSecNA validity
 
   -- getPublicKeyOIDbs : List UInt8
   -- getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk

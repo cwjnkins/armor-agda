@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.Validity.TCB
+open import Aeres.Data.X509.Validity.Time
 open import Aeres.Data.X509.Validity.Properties
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -18,28 +19,21 @@ open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Seq         UInt8
 
 module parseValidityFields where
-  here' = "parseValidityFields"
-
-  open ≡-Reasoning
+  here' = "X509: Validity"
 
   parseValidityFields : Parser (Logging ∘ Dec) ValidityFields
-  runParser parseValidityFields xs = do
-    yes (success pre₀ r₀ r₀≡ v₀ suf₀ ps≡₀)
-      ← runParser (parse& Time.nosubstrings parseTime parseTime) xs
-      where no ¬parse → do
-        tell $ here'
-        return ∘ no $ λ where
-          (success ._ read read≡ (mkValidityFields{nb = nb}{na} start end refl) suffix ps≡) →
-            contradiction (success _ _ read≡ (mk&ₚ start end refl) suffix ps≡) ¬parse
-    return (yes (success pre₀ _ r₀≡ (mkValidityFields (fstₚ v₀) (sndₚ v₀) (&ₚᵈ.bs≡ v₀)) _ ps≡₀))
+  parseValidityFields =
+    parseEquivalent equivalent
+      (parse& Time.nosubstrings Time.parse Time.parse)
 
 open parseValidityFields public using (parseValidityFields)
 
 parseValidity : Parser (Logging ∘ Dec) Validity
 parseValidity =
-  parseTLV _ "Validity" _
-    (parseExactLength nosubstrings (tell $ "validity: length mismatch") parseValidityFields)
-
+  parseTLV _ parseValidityFields.here' _
+    (parseExactLength nosubstrings
+      (tell $ parseValidityFields.here' String.++ ": length mismatch")
+      parseValidityFields)
 
 -- private
 --   module Test where

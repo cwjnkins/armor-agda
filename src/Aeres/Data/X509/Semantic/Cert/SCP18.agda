@@ -15,8 +15,9 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
 -- The certificate Validity period includes the current time
-SCP18 : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Time bs₂ → Set
-SCP18 c t = T (Time.lessEq (proj₂ (Cert.getValidityStartTime c)) t ∧ Time.lessEq t (proj₂ (Cert.getValidityEndTime c)))
+SCP18 : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Validity.Time bs₂ → Set
+SCP18 c t = Validity.ValidTime t (Cert.getValidity c)
+  -- T (Time.lessEq (proj₂ (Cert.getValidityStartTime c)) t ∧ Time.lessEq t (proj₂ (Cert.getValidityEndTime c)))
 
-scp18 : ∀ {@0 bs₁ bs₂} → (c : Cert bs₁) → (t : Time bs₂) → Dec (SCP18 c t)
-scp18 c t = T-dec
+scp18 : ∀ {@0 bs₁ bs₂} → (c : Cert bs₁) → (t : Validity.Time bs₂) → Dec (SCP18 c t)
+scp18 c t = Validity.validTime? t (Cert.getValidity c)

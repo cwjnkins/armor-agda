@@ -15,6 +15,20 @@ module Aeres.Data.X690-DER.Time.UTCTime.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq         UInt8
 
+@0 length≡ : ∀ {@0 bs} → UTCTimeFields bs → length bs ≡ 13
+length≡ (mkUTCTime{y}{m} year mdhms refl) = begin
+  length (y ++ m ++ [ # 'Z' ]) ≡⟨ length-++ y ⟩
+  length y + length (m ++ [ # 'Z' ])
+    ≡⟨ cong₂ _+_
+         (TimeType.bsLen year)
+         (begin
+           length (m ++ [ # 'Z' ]) ≡⟨ length-++ m ⟩
+           length m + 1 ≡⟨ cong (_+ 1) (MDHMS.length≡ mdhms) ⟩
+           11 ∎) ⟩
+  13 ∎
+  where
+  open ≡-Reasoning
+
 @0 nosubstrings : NoSubstrings UTCTimeFields
 nosubstrings =
   Iso.nosubstrings equivalent
@@ -47,3 +61,7 @@ nonmalleableFields =
 
 @0 nonmalleable : NonMalleable RawUTCTime
 nonmalleable = TLV.nonmalleable nonmalleableFields
+
+instance
+  eq : Eq (Exists─ (List UInt8) UTCTimeFields)
+  eq = Iso.isoEq iso (Seq.eq&ₚ it (Seq.eq&ₚ it (record { _≟_ = λ where (─ _ , refl) (─ _ , refl) → yes refl })))

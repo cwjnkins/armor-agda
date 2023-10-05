@@ -23,7 +23,7 @@ Year₄ = TimeType 4 0 9999
 --
 -}
 Window₂ : Set
-Window₂ = ∀ {@0 bs} → Year₂ bs → Exists─ (List UInt8) λ bs' → Year₄ (bs' ++ bs)
+Window₂ = ∀ {@0 bs} → Year₂ bs → Exists─ (UInt8 × UInt8) λ bs' → Year₄ (proj₁ bs' ∷ [ proj₂ bs' ] ++ bs)
 
 RawYear₂ : Raw Year₂
 RawYear₂ = RawTimeType _ _ _

@@ -11,7 +11,6 @@ open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.Time.TCB
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
