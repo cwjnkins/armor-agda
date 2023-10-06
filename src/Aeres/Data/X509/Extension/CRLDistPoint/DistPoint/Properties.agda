@@ -20,14 +20,8 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep = &ₚ (Option DistPointName) (&ₚ (Option ReasonFlags) (Option CrlIssuer))
-
-equivalent : Equivalent Rep DistPointFields
-proj₁ equivalent (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkDistPointFields fstₚ₁ fstₚ₂ sndₚ₁ refl
-proj₂ equivalent (mkDistPointFields crldp crldprsn crlissr bs≡) = mk&ₚ crldp (mk&ₚ crldprsn crlissr refl) bs≡
-
-iso : Iso Rep DistPointFields
-proj₁ iso = equivalent
+iso : Iso DistPointFieldsRep DistPointFields
+proj₁ iso = equivalentDistPointFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (mkDistPointFields crldp crldprsn crlissr refl) = refl
 
@@ -40,6 +34,8 @@ unambiguous =
       (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 
-postulate
-  @0 nonmalleable : NonMalleable RawDistPoint
--- nonmalleable = TLV.nonmalleable {!!}
+@0 nonmalleable : NonMalleable RawDistPoint
+nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawDistPointFieldsRep
+               (Seq.nonmalleable (Option.nonmalleable _ Name.nonmalleable)
+               (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
+                                 (Option.nonmalleable _ (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable)))))

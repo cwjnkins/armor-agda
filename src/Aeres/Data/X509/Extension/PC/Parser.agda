@@ -30,7 +30,7 @@ parsePCFields =
   where
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (PCFieldsSeqFields) n)
   helper n =
-    parseEquivalent (Parallel.equivalent₁ equivalent)
+    parseEquivalent (Parallel.equivalent₁ equivalentPCFieldsSeqFields)
       (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ()))
         (parseTLV _ (here' String.++ ": require explicit policy") _ Int.parseValue)
         (parseTLV _ (here' String.++ ": inhibit policy mapping") _ Int.parseValue)

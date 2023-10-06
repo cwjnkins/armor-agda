@@ -37,6 +37,8 @@ unambiguous =
       (TLV.unambiguous (λ {xs} → Int.unambiguous{xs})) TLV.nonempty
       (TLV.noconfusion λ ()))))
 
-postulate
-  @0 nonmalleable : NonMalleable RawBCFields
---nonmalleable = TLV.nonmalleable (TLV.nonmalleable {!!})
+@0 nonmalleable : NonMalleable RawBCFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+                (Iso.nonmalleable iso RawBCFieldsSeqFieldsRep
+                  (Seq.nonmalleable (Option.nonmalleable _ Boool.nonmalleable)
+                                    (Option.nonmalleable _ Int.nonmalleable))))

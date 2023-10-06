@@ -28,7 +28,7 @@ private
 
 parseUserNoticeFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeFields n)
 parseUserNoticeFields n =
-  parseEquivalent (Parallel.equivalent₁ equivalent)
+  parseEquivalent (Parallel.equivalent₁ equivalentUserNoticeFields)
     (Option.parseOption₂ TLV.nosubstrings DisplayText.nosubstrings
       (DisplayText.noconfusionTLV (toWitnessFalse{Q = _ ∈? _} tt))
       parseNoticeReference parseDisplayText
