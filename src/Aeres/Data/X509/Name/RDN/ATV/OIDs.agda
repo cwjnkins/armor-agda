@@ -7,7 +7,7 @@ import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
-module Aeres.Data.X509.RDN.ATV.OIDs where
+module Aeres.Data.X509.Name.RDN.ATV.OIDs where
 
 open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.Parallel.TCB UInt8

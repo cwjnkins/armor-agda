@@ -242,8 +242,25 @@ unambiguous =
 @0 nonmalleable : NonMalleable RawGeneralName
 nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
     where
-    postulate
-      nm :  NonMalleable RawGeneralNameRep
+    Rep₇ = RawSum (RawTLV Tag.A87 RawOctetStringValue) (RawTLV Tag.A88 RawOIDValue)
+    Rep₆ = RawSum (RawTLV Tag.A86 RawIA5StringValue) Rep₇
+    Rep₅ = RawSum (RawTLV Tag.AA5 RawOctetStringValue) Rep₆
+    Rep₄ = RawSum (RawTLV Tag.AA4 RawName) Rep₅
+    Rep₃ = RawSum (RawTLV Tag.AA3 RawOctetStringValue) Rep₄
+    Rep₂ = RawSum (RawTLV Tag.A82 RawIA5StringValue) Rep₃
+    Rep₁ = RawSum (RawTLV Tag.A81 RawIA5StringValue) Rep₂
+
+    nm :  NonMalleable RawGeneralNameRep
+    nm =  Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₁} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₂} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₃} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₄} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawName}            {rb = Rep₅} (TLV.nonmalleable {!!})
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₆} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₇} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}            (TLV.nonmalleable OctetString.nonmalleableValue)
+                                                                         (TLV.nonmalleable OID.nonmalleableValue))))))))
+
     -- nm = Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
     --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
     --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)

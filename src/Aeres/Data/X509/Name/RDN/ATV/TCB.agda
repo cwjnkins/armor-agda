@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.DirectoryString.TCB
 open import Aeres.Data.X690-DER.OID.Properties
 open import Aeres.Data.X690-DER.OID.TCB
-open import Aeres.Data.X509.RDN.ATV.OIDs
+open import Aeres.Data.X509.Name.RDN.ATV.OIDs
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.Strings.PrintableString.TCB
@@ -15,7 +15,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
-module Aeres.Data.X509.RDN.ATV.TCB where
+module Aeres.Data.X509.Name.RDN.ATV.TCB where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8

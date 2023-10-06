@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.RDN.TCB
+open import Aeres.Data.X509.Name.TCB
 open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB

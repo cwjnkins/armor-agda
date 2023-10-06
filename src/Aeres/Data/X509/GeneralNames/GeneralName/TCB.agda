@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.RDN.TCB
+open import Aeres.Data.X509.Name.TCB
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Strings
@@ -87,15 +87,15 @@ proj₂ equivalentGeneralName (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂
 proj₂ equivalentGeneralName (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
 
 RawGeneralNameRep : Raw GeneralNameRep
-RawGeneralNameRep = RawSum (RawTLV _ RawOctetStringValue)
-                      (RawSum (RawTLV _ RawIA5StringValue)
-                        (RawSum (RawTLV _ RawIA5StringValue)
-                          (RawSum (RawTLV _ RawOctetStringValue)
-                            (RawSum (RawTLV _ RawName)
-                              (RawSum (RawTLV _ RawOctetStringValue)
-                                (RawSum (RawTLV _ RawIA5StringValue)
-                                  (RawSum (RawTLV _ RawOctetStringValue)
-                                           (RawTLV _ RawOIDValue))))))))
+RawGeneralNameRep =  RawSum (RawTLV _ RawOctetStringValue)
+                    (RawSum (RawTLV _ RawIA5StringValue)
+                    (RawSum (RawTLV _ RawIA5StringValue)
+                    (RawSum (RawTLV _ RawOctetStringValue)
+                    (RawSum (RawTLV _ RawName)
+                    (RawSum (RawTLV _ RawOctetStringValue)
+                    (RawSum (RawTLV _ RawIA5StringValue)
+                    (RawSum (RawTLV _ RawOctetStringValue)
+                            (RawTLV _ RawOIDValue))))))))
 
 RawGeneralName : Raw GeneralName
 RawGeneralName = Iso.raw equivalentGeneralName RawGeneralNameRep

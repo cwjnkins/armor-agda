@@ -3,12 +3,13 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.TCB
 open import Aeres.Data.X509.PublicKey.TCB
-import      Aeres.Data.X509.RDN.TCB as RDN
+import      Aeres.Data.X509.Name.TCB as Name
 open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert.UID.TCB
 import      Aeres.Data.X509.TBSCert.Version.TCB as Version
 import      Aeres.Data.X509.Validity.TCB as Validity
 import      Aeres.Data.X690-DER.Int.TCB as Int
+import      Aeres.Data.X690-DER.SequenceOf as SequenceOf
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.Time.TCB
@@ -19,7 +20,8 @@ module Aeres.Data.X509.TBSCert.TCB where
 
 open Aeres.Grammar.Option UInt8
 open Int     hiding (getVal)
-open RDN     using  (RDN; Name)
+open Name     using  (Name)
+open SequenceOf using (SequenceOf)
 open Validity using (Validity)
 open Version hiding (getVal)
 
@@ -81,10 +83,10 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   -- getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
 
   getIssuerLen : ℕ
-  getIssuerLen = RDN.getSeqLen issuer
+  getIssuerLen = SequenceOf.lengthSequence (TLV.val issuer)
 
   getSubjectLen :  ℕ
-  getSubjectLen = RDN.getSeqLen subject
+  getSubjectLen = SequenceOf.lengthSequence (TLV.val subject)
 
   getIssuer : Exists─ (List UInt8) Name
   getIssuer = _ , issuer
