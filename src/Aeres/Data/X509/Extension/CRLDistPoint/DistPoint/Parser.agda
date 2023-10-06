@@ -29,7 +29,7 @@ private
 parseDistPointFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength DistPointFields n)
 parseDistPointFields n =
   parseEquivalent
-    (Parallel.equivalent₁ equivalent)
+    (Parallel.equivalent₁ equivalentDistPointFields)
     (Option.parseOption₃ TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
       (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ()))
       (parseTLV Tag.AA0 (here' String.++ ": name") DistPointNameChoice

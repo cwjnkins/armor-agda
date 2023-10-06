@@ -8,12 +8,14 @@ import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.GeneralSubtree.TCB where
 
 open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Definitions              UInt8
+open Aeres.Grammar.Seq.TCB UInt8
 
 MinBaseDistance : @0 List UInt8 → Set
 MinBaseDistance xs = TLV Tag.A80 IntegerValue xs
@@ -36,8 +38,19 @@ GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
 GeneralSubtrees : @0 List UInt8 → Set
 GeneralSubtrees xs = (NonEmptySequenceOf GeneralSubtree) xs
 
-postulate
-  RawGeneralSubtreeFields : Raw GeneralSubtreeFields
+GeneralSubtreeFieldsRep = &ₚ GeneralName (&ₚ (Option MinBaseDistance) (Option MaxBaseDistance))
+
+equivalentGeneralSubtreeFields : Equivalent GeneralSubtreeFieldsRep GeneralSubtreeFields
+proj₁ equivalentGeneralSubtreeFields (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
+proj₂ equivalentGeneralSubtreeFields (mkGeneralSubtreeFields base minimum maximum refl) = (mk&ₚ base (mk&ₚ minimum maximum refl) refl)
+
+RawGeneralSubtreeFieldsRep : Raw GeneralSubtreeFieldsRep
+RawGeneralSubtreeFieldsRep = Raw&ₚ RawGeneralName
+                              (Raw&ₚ (RawOption (RawTLV _ RawIntegerValue))
+                                      (RawOption (RawTLV _ RawIntegerValue)))
+
+RawGeneralSubtreeFields : Raw GeneralSubtreeFields
+RawGeneralSubtreeFields = Iso.raw equivalentGeneralSubtreeFields RawGeneralSubtreeFieldsRep
 
 RawGeneralSubtrees : Raw GeneralSubtrees
 RawGeneralSubtrees = RawBoundedSequenceOf (RawTLV _ RawGeneralSubtreeFields) 1

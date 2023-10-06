@@ -19,14 +19,8 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep = &ₚ (Option PermittedSubtrees) (Option ExcludedSubtrees)
-
-equivalent : Equivalent Rep NCFieldsSeqFields
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ refl) = mkNCFieldsSeqFields fstₚ₁ sndₚ₁ refl
-proj₂ equivalent (mkNCFieldsSeqFields permt excld refl) = mk&ₚ permt excld refl
-
-iso : Iso Rep NCFieldsSeqFields
-proj₁ iso = equivalent
+iso : Iso NCFieldsSeqFieldsRep NCFieldsSeqFields
+proj₁ iso = equivalentNCFieldsSeqFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
 proj₂ (proj₂ iso) (mkNCFieldsSeqFields permt excld refl) = refl
 
@@ -39,6 +33,8 @@ unambiguous = TLV.unambiguous  (TLV.unambiguous
        (TLV.unambiguous  GeneralSubtree.unambiguous)
        TLV.nonempty (TLV.noconfusion (λ ()))))) 
 
-postulate
-  @0 nonmalleable : NonMalleable RawNCFields
---nonmalleable = TLV.nonmalleable (TLV.nonmalleable {!!})
+@0 nonmalleable : NonMalleable RawNCFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+                 (Iso.nonmalleable iso RawNCFieldsSeqFieldsRep
+                 (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable GeneralSubtree.nonmalleable))
+                                   (Option.nonmalleable _ (TLV.nonmalleable GeneralSubtree.nonmalleable)))))
