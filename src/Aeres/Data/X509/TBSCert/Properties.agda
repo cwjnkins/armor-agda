@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.Extension
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X509.SignAlg
 open import Aeres.Data.X509.TBSCert.TCB
 open import Aeres.Data.X509.TBSCert.UID.TCB
@@ -75,9 +75,9 @@ unambiguous =
       (NonNesting.noconfusion-option&₁
         TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ()))
       (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
-        (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
+        (Seq.unambiguous Name.unambiguous TLV.nosubstrings
           (Seq.unambiguous (TLV.unambiguous Validity.unambiguous) TLV.nosubstrings
-            (Seq.unambiguous RDN.unambiguous TLV.nosubstrings
+            (Seq.unambiguous Name.unambiguous TLV.nosubstrings
               (Seq.unambiguous
                 (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
                   (Parallel.nosubstrings₁ TLV.nosubstrings)

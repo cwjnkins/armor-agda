@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.GeneralNames.GeneralName.Properties
 open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Sum

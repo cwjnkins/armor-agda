@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.GeneralNames.TCB
 open import Aeres.Data.X509.Name.TCB
+open import Aeres.Data.X509.Name.RDN.ATV.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -49,7 +50,7 @@ FullName : @0 List UInt8 → Set
 FullName xs = TLV Tag.AA0 GeneralNamesElems xs
 
 NameRTCrlIssuer : @0 List UInt8 → Set
-NameRTCrlIssuer xs = TLV Tag.AA1 RDN xs
+NameRTCrlIssuer xs = TLV Tag.AA1 RDNElems xs
 
 data DistPointNameChoice : @0 List UInt8 → Set where
   fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
@@ -68,6 +69,6 @@ proj₂ equivalentDistPointNameChoice (nameRTCrlissr x) = inj₂ x
 
 RawDistPointNameChoiceRep : Raw DistPointNameChoiceRep
 RawDistPointNameChoiceRep = RawSum (RawTLV _ RawGeneralNamesElems)
-                                    (RawTLV _ RawRDN)
+                                    (RawTLV _ (RawBoundedSequenceOf RawATV 1))
 RawDistPointName : Raw DistPointName
 RawDistPointName = RawTLV _ (Iso.raw equivalentDistPointNameChoice RawDistPointNameChoiceRep)

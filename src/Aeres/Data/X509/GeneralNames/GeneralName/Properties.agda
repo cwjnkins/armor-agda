@@ -2,7 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -181,7 +181,7 @@ unambiguous =
                 (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 
     ua₄ : Unambiguous Rep₄
-    ua₄ = Sum.unambiguous (TLV.unambiguous RDN.unambiguous) ua₅ nc₄
+    ua₄ = Sum.unambiguous (TLV.unambiguous Name.unambiguous) ua₅ nc₄
 
     nc₃ : NoConfusion X400Address Rep₄
     nc₃ = NoConfusion.sumₚ {A = X400Address}
@@ -255,7 +255,7 @@ nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
          (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₂} (TLV.nonmalleable IA5String.nonmalleableValue)
          (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₃} (TLV.nonmalleable IA5String.nonmalleableValue)
          (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₄} (TLV.nonmalleable OctetString.nonmalleableValue)
-         (Sum.nonmalleable{ra = RawTLV _ RawName}            {rb = Rep₅} (TLV.nonmalleable {!!})
+         (Sum.nonmalleable{ra = RawTLV _ RawName}            {rb = Rep₅} (TLV.nonmalleable Name.nonmalleable)
          (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₆} (TLV.nonmalleable OctetString.nonmalleableValue)
          (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₇} (TLV.nonmalleable IA5String.nonmalleableValue)
          (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}            (TLV.nonmalleable OctetString.nonmalleableValue)

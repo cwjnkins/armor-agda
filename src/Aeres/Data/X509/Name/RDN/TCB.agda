@@ -12,8 +12,11 @@ module Aeres.Data.X509.Name.RDN.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
+RDNElems : @0 List UInt8 → Set
+RDNElems = NonEmptySequenceOf ATV
+
 RDN : @0 List UInt8 → Set
-RDN = TLV Tag.Sett (NonEmptySequenceOf ATV)
+RDN = TLV Tag.Sett RDNElems
 
 RawRDN : Raw RDN
 RawRDN = RawTLV Tag.Sett (RawBoundedSequenceOf RawATV 1)

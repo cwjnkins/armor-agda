@@ -23,7 +23,7 @@ open import Aeres.Data.X509.Extension       public
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.GeneralNames     public
 open import Aeres.Data.X509.PublicKey       public
-open import Aeres.Data.X509.RDN             public
+open import Aeres.Data.X509.Name             public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.TBSCert         public
 open import Aeres.Data.X509.Validity        public

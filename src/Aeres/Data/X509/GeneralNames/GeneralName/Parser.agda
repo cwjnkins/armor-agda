@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.GeneralNames.GeneralName.Properties
 open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -41,7 +41,7 @@ parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ parseOctetStr
 parseDirName : Parser (Logging ∘ Dec) DirName
 parseDirName =
   parseTLV _ (here' String.++ ": directory name") _
-    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") RDN.parse n
+    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") Name.parse n
 
 parseEdipartyName : Parser (Logging ∘ Dec) EdipartyName
 parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ parseOctetStringValue

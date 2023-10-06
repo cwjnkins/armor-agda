@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.Extension
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X509.SignAlg
 open import Aeres.Data.X509.TBSCert.Properties
 open import Aeres.Data.X509.TBSCert.TCB
@@ -85,8 +85,8 @@ parseTBSCertFields n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ {A = Length≤ Name n}
         (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (Parallel.Length≤.unambiguous _ RDN.unambiguous)
-        (parse≤ _ RDN.parse TLV.nosubstrings overflow)
+        (Parallel.Length≤.unambiguous _ Name.unambiguous)
+        (parse≤ _ Name.parse TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₃ (n ∸ x)))
@@ -110,8 +110,8 @@ parseTBSCertFields n =
     parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
       (parse&ᵈ{A = Length≤ Name n}
         (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (Parallel.Length≤.unambiguous _ RDN.unambiguous)
-        (parse≤ _ RDN.parse TLV.nosubstrings overflow)
+        (Parallel.Length≤.unambiguous _ Name.unambiguous)
+        (parse≤ _ Name.parse TLV.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₅ (n ∸ x)))

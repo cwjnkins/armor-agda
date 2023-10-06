@@ -5,7 +5,7 @@ open import Aeres.Data.X509.GeneralNames.Properties
 open import Aeres.Data.X509.GeneralNames.GeneralName
 open import Aeres.Data.X509.GeneralNames.GeneralName.Parser
 open import Aeres.Data.X509.GeneralNames.TCB
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
