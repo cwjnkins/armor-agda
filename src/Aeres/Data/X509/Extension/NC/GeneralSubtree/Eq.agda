@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.Int
 import      Aeres.Data.X690-DER.OctetString.Properties as OctetString
 open import Aeres.Data.X690-DER.TLV

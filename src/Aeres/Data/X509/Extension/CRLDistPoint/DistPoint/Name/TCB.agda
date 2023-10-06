@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName.TCB
+open import Aeres.Data.X509.GeneralNames.TCB
 open import Aeres.Data.X509.RDN.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -39,7 +39,7 @@ proj₂ equivalentDistPointNameChoice (fullname x) = inj₁ x
 proj₂ equivalentDistPointNameChoice (nameRTCrlissr x) = inj₂ x
 
 RawDistPointNameChoiceRep : Raw DistPointNameChoiceRep
-RawDistPointNameChoiceRep = RawSum (RawTLV _ (RawBoundedSequenceOf RawGeneralName 1))
+RawDistPointNameChoiceRep = RawSum (RawTLV _ RawGeneralNamesElems)
                                     (RawTLV _ RawRDNElems)
 RawDistPointName : Raw DistPointName
 RawDistPointName = RawTLV _ (Iso.raw equivalentDistPointNameChoice RawDistPointNameChoiceRep)

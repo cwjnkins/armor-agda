@@ -17,7 +17,7 @@ open import Aeres.Data.X509.Extension.SAN
 open import Aeres.Data.X509.Extension.SKI
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Boool
 open import Aeres.Data.X690-DER.Int

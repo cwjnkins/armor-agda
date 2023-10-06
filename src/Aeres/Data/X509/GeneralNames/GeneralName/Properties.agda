@@ -1,8 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName.TCB
-  hiding (module GeneralName)
+open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
 open import Aeres.Data.X509.RDN
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -12,7 +11,7 @@ open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.GeneralName.Properties where
+module Aeres.Data.X509.GeneralNames.GeneralName.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
@@ -133,9 +132,8 @@ nosubstrings x (rid x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x
 nosubstrings x (rid x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
 nosubstrings x (rid x₁) (rid x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
-module GeneralName where
-  @0 unambiguous : Unambiguous GeneralName
-  unambiguous =
+@0 unambiguous : Unambiguous GeneralName
+unambiguous =
     Iso.unambiguous iso
       (Sum.unambiguous (TLV.unambiguous OctetString.unambiguous)
         ua₁ nc₀)
@@ -241,10 +239,10 @@ module GeneralName where
                       (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
                         (TLV.noconfusion λ ())))))))
 
-  @0 nonmalleable : NonMalleable RawGeneralName
-  nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
+@0 nonmalleable : NonMalleable RawGeneralName
+nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
     where
-    postulate -- type checking is stuck
+    postulate
       nm :  NonMalleable RawGeneralNameRep
     -- nm = Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
     --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
@@ -255,24 +253,3 @@ module GeneralName where
     --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
     --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
     --        (TLV.nonmalleable {!!}))))))))
-
-module GeneralNamesElems where
-  @0 unambiguous : Unambiguous GeneralNamesElems
-  unambiguous =
-    SequenceOf.Bounded.unambiguous
-      GeneralName.unambiguous nonempty nosubstrings
-
-module GeneralNames where
-  @0 unambiguous : Unambiguous GeneralNames
-  unambiguous = TLV.unambiguous GeneralNamesElems.unambiguous
-
-  @0 nonmalleable : NonMalleable RawGeneralNames
-  nonmalleable = TLV.nonmalleable
-                 (SequenceOf.Bounded.nonmalleable nonempty nosubstrings
-                   GeneralName.nonmalleable)
-
-@0 unambiguous : _
-unambiguous = GeneralName.unambiguous
-
-@0 nonmalleable : _
-nonmalleable = GeneralName.nonmalleable

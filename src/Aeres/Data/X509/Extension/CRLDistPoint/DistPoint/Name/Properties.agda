@@ -2,7 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X509.RDN
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
@@ -32,7 +32,7 @@ proj₂ (proj₂ iso) (nameRTCrlissr x) = refl
 @0 unambiguous : Unambiguous DistPointName
 unambiguous =
   TLV.unambiguous (Iso.unambiguous iso
-    (Sum.unambiguous (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous)
+    (Sum.unambiguous (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous)
       (TLV.unambiguous RDN.unambiguousElems) (TLV.noconfusion λ ())))
 
 @0 nonmalleable : NonMalleable RawDistPointName

@@ -3,7 +3,6 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AIA.TCB
 open import Aeres.Data.X509.Extension.AIA.AccessDesc
-open import Aeres.Data.X509.GeneralName
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions

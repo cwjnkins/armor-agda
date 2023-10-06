@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.TCB
 open import Aeres.Data.X690-DER.BitString
@@ -37,7 +37,7 @@ unambiguous =
     (Unambiguous.option₃&₂
       (Name.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous GeneralName.GeneralNamesElems.unambiguous) TLV.nonempty
+      (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 
 postulate

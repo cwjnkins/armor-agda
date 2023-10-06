@@ -7,16 +7,13 @@ open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Strings
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
-module Aeres.Data.X509.GeneralName.TCB where
+module Aeres.Data.X509.GeneralNames.GeneralName.TCB where
 
 open      Aeres.Grammar.Definitions              UInt8
-open      Aeres.Grammar.Parallel.TCB             UInt8
 open      Aeres.Grammar.Sum.TCB                  UInt8
 
 --- we do not support OtherName since very rarely used
@@ -60,9 +57,6 @@ data GeneralName : @0 List UInt8 → Set where
   ipadd : ∀ {@0 bs} → IpAddress bs → GeneralName bs
   rid : ∀ {@0 bs} → RegID bs → GeneralName bs
 
-GeneralNamesElems = NonEmptySequenceOf GeneralName
-GeneralNames = TLV Tag.Sequence GeneralNamesElems
-
 GeneralNameRep = Sum OtherName
                    (Sum RfcName
                      (Sum DnsName
@@ -105,6 +99,3 @@ RawGeneralNameRep = RawSum (RawTLV _ RawOctetStringValue)
 
 RawGeneralName : Raw GeneralName
 RawGeneralName = Iso.raw equivalentGeneralName RawGeneralNameRep
-
-RawGeneralNames : Raw GeneralNames
-RawGeneralNames = RawTLV _ (RawBoundedSequenceOf RawGeneralName 1)
