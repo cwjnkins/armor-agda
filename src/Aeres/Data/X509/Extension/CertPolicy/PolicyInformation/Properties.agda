@@ -34,10 +34,9 @@ unambiguous = TLV.unambiguous
       Qualifier.unambiguous
       TLV.nonempty))
 
-postulate
-  @0 nonmalleable : NonMalleable RawPolicyInformation
--- nonmalleable = TLV.nonmalleable
---   (Iso.nonmalleable iso
---     RawPolicyInformationFieldsRep
---       (Seq.nonmalleable OID.nonmalleable
---         {!Option.nonmalleable!}))
+@0 nonmalleable : NonMalleable RawPolicyInformation
+nonmalleable = TLV.nonmalleable
+  (Iso.nonmalleable iso
+    RawPolicyInformationFieldsRep
+      (Seq.nonmalleable OID.nonmalleable
+        (Option.nonmalleable _ Qualifier.nonmalleable)))

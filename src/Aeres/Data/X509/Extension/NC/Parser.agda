@@ -34,7 +34,7 @@ parseNCFields =
   where
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (NCFieldsSeqFields) n)
   helper n =  parseEquivalent
-      (Parallel.equivalent₁ equivalent)
+      (Parallel.equivalent₁ equivalentNCFieldsSeqFields)
       (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
         (parseTLV _ here' _ parseExactLengthGeneralSubtrees)
         (parseTLV _ here' _ parseExactLengthGeneralSubtrees)

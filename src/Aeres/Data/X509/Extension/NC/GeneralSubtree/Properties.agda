@@ -20,13 +20,7 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep = &ₚ GeneralName (&ₚ (Option MinBaseDistance) (Option MaxBaseDistance))
-
-equivalentGeneralSubtreeFields : Equivalent Rep GeneralSubtreeFields
-proj₁ equivalentGeneralSubtreeFields (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
-proj₂ equivalentGeneralSubtreeFields (mkGeneralSubtreeFields base minimum maximum refl) = (mk&ₚ base (mk&ₚ minimum maximum refl) refl)
-
-iso : Iso Rep GeneralSubtreeFields
+iso : Iso GeneralSubtreeFieldsRep GeneralSubtreeFields
 proj₁ iso = equivalentGeneralSubtreeFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = refl
 proj₂ (proj₂ iso) (mkGeneralSubtreeFields base minimum maximum refl) = refl
@@ -41,8 +35,10 @@ unambiguous = SequenceOf.Bounded.unambiguous
         (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonempty (TLV.noconfusion λ ())))))
     TLV.nonempty TLV.nosubstrings
 
-postulate
-  @0 nonmalleable : NonMalleable RawGeneralSubtrees
-  -- nonmalleable = SequenceOf.Bounded.nonmalleable TLV.nonempty TLV.nosubstrings
-  -- (TLV.nonmalleable
-  --   (Iso.nonmalleable iso {!!} {!!}))
+@0 nonmalleable : NonMalleable RawGeneralSubtrees
+nonmalleable = SequenceOf.Bounded.nonmalleable TLV.nonempty TLV.nosubstrings
+  (TLV.nonmalleable
+    (Iso.nonmalleable iso RawGeneralSubtreeFieldsRep
+      (Seq.nonmalleable GeneralName.nonmalleable
+      (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal))
+                        (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal))))))
