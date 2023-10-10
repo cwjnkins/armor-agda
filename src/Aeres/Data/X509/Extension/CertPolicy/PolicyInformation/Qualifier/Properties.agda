@@ -34,6 +34,14 @@ module CPSURIQualifier where
   @0 nosubstrings : NoSubstrings CPSURIQualifier
   nosubstrings = DefinedByOID.nosubstrings _ (λ _ → Parallel.nosubstrings₁ TLV.nosubstrings)
 
+  @0 nonmalleable : NonMalleable RawCPSURIQualifier
+  nonmalleable = DefinedByOID.nonmalleableFields CPSURIQualifierParam λ {bs} {a} {bs₁} {bs₂} → nm{bs}{a}{bs₁}{bs₂}
+    where
+    nm : NonMalleable₁ RawCPSURIQualifierParam
+    nm p₁ p₂ eq =
+      Parallel.nonmalleable₁ RawIA5String IA5String.nonmalleable (λ where _ ≋-refl ≋-refl → refl)
+        p₁ p₂ eq
+
 module UserNoticeQualifier where
   @0 unambiguous : Unambiguous UserNoticeQualifier
   unambiguous =
@@ -42,6 +50,14 @@ module UserNoticeQualifier where
 
   @0 nosubstrings : NoSubstrings UserNoticeQualifier
   nosubstrings = DefinedByOID.nosubstrings _ (λ _ → Parallel.nosubstrings₁ TLV.nosubstrings)
+
+  @0 nonmalleable : NonMalleable RawUserNoticeQualifier
+  nonmalleable = DefinedByOID.nonmalleableFields UserNoticeQualifierParam λ {bs}{a}{bs₁}{bs₂} → nm{bs}{a}{bs₁}{bs₂}
+    where
+    nm : NonMalleable₁ RawUserNoticeQualifierParam
+    nm p₁ p₂ eq =
+      Parallel.nonmalleable₁ RawUserNotice UserNotice.nonmalleable (λ where _ ≋-refl ≋-refl → refl)
+        p₁ p₂ eq
 
 iso : Iso PolicyQualifierInfoFieldsRep PolicyQualifierInfoFields
 proj₁ iso = equivalentPolicyQualifierInfoFields
@@ -70,5 +86,11 @@ unambiguous = TLV.unambiguous (SequenceOf.Bounded.unambiguous
     TLV.nonempty
     TLV.nosubstrings)
 
-postulate
-  @0 nonmalleable : NonMalleable RawPolicyQualifiersSeq
+@0 nonmalleable : NonMalleable RawPolicyQualifiersSeq
+nonmalleable =
+  TLV.nonmalleable
+    (SequenceOf.Bounded.nonmalleable TLV.nonempty TLV.nosubstrings
+      (TLV.nonmalleable (Iso.nonmalleable iso RawPolicyQualifierInfoFieldsRep nm)))
+  where
+  nm : NonMalleable RawPolicyQualifierInfoFieldsRep
+  nm = Sum.nonmalleable CPSURIQualifier.nonmalleable UserNoticeQualifier.nonmalleable

@@ -27,12 +27,20 @@ CPSURIQualifierParam o =
 
 CPSURIQualifier = DefinedByOIDFields CPSURIQualifierParam
 
+RawCPSURIQualifierParam : Raw₁ RawOID CPSURIQualifierParam
+Raw₁.D RawCPSURIQualifierParam _ = Raw.D RawIA5String
+Raw₁.to RawCPSURIQualifierParam _ cps = Raw.to RawIA5String (fstₚ cps)
+
 UserNoticeQualifierParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
 UserNoticeQualifierParam o =
      UserNotice
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.UserNotice)
 
 UserNoticeQualifier = DefinedByOIDFields UserNoticeQualifierParam
+
+RawUserNoticeQualifierParam : Raw₁ RawOID UserNoticeQualifierParam
+Raw₁.D RawUserNoticeQualifierParam o = Raw.D RawUserNotice
+Raw₁.to RawUserNoticeQualifierParam o unq = Raw.to RawUserNotice (fstₚ unq)
 
 data PolicyQualifierInfoFields : @0 List UInt8 → Set where
   cpsURI : ∀ {@0 bs} → CPSURIQualifier bs → PolicyQualifierInfoFields bs
@@ -44,9 +52,11 @@ PolicyQualifierInfo xs = TLV Tag.Sequence PolicyQualifierInfoFields xs
 PolicyQualifiersSeq : @0 List UInt8 → Set
 PolicyQualifiersSeq xs = TLV Tag.Sequence (NonEmptySequenceOf PolicyQualifierInfo) xs
 
-postulate
-  RawUserNoticeQualifier : Raw UserNoticeQualifier
-  RawCPSURIQualifier : Raw CPSURIQualifier
+RawUserNoticeQualifier : Raw UserNoticeQualifier
+RawUserNoticeQualifier = RawDefinedByOIDFields RawUserNoticeQualifierParam
+
+RawCPSURIQualifier : Raw CPSURIQualifier
+RawCPSURIQualifier = RawDefinedByOIDFields RawCPSURIQualifierParam
 
 PolicyQualifierInfoFieldsRep = Sum CPSURIQualifier UserNoticeQualifier
 
