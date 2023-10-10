@@ -14,6 +14,7 @@ import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
+open import Data.Sum.Properties
 
 module Aeres.Data.X509.Name.RDN.ATV.Properties where
 
@@ -41,5 +42,27 @@ instance
     eq o (yes (there (there (here px)))) = it
     eq o (yes (there (there (there (here px))))) = it
 
-postulate
-  @0 nonmalleable : NonMalleable RawATV
+@0 nonmalleable : NonMalleable RawATV
+nonmalleable = DefinedByOID.nonmalleable ATVParam' _ {R = RawATVParam} nm 
+  where
+  nm : NonMalleable₁ RawATVParam
+  nm {a = o}{bs₁}{bs₂} =
+    case (-, TLV.val o) ∈? Supported
+    ret (λ o? →
+           (p₁ : ATVParam o o? bs₁) (p₂ : ATVParam o o? bs₂)
+           → toRawATVParam o? p₁ ≡ toRawATVParam o? p₂
+           → _≡_{A = Exists─ (List UInt8) (ATVParam o o?)} (─ bs₁ , p₁) (─ bs₂ , p₂))
+    of λ where
+      (no ¬p) p₁ p₂ eq →
+        ‼ (DirectoryString.nonmalleable p₁ p₂ (inj₁-injective eq))
+      (yes (here px)) p₁ p₂ eq →
+        ‼ (PrintableString.nonmalleable p₁ p₂ (inj₁-injective (inj₂-injective eq)))
+      (yes (there (here px))) p₁ p₂ eq →
+        ‼ Parallel.nonmalleable₁ _ PrintableString.nonmalleable (λ _ → inRange-unique{A = ℕ}{B = ℕ}) p₁ p₂
+            (inj₁-injective (inj₂-injective (inj₂-injective eq)))
+      (yes (there (there (here px)))) p₁ p₂ eq →
+        ‼ PrintableString.nonmalleable p₁ p₂
+            (inj₁-injective (inj₂-injective (inj₂-injective (inj₂-injective eq))))
+      (yes (there (there (there (here px))))) p₁ p₂ eq →
+        ‼ IA5String.nonmalleable p₁ p₂
+            (inj₂-injective (inj₂-injective (inj₂-injective (inj₂-injective eq))))

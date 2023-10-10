@@ -44,9 +44,34 @@ ATVParam o (yes (there (there (here px)))) = PrintableString
 -- PCKS-9 email address
 ATVParam o (yes (there (there (there (here px))))) = IA5String
 
+ATVParam' : AnyDefinedByOID
+ATVParam' o = ATVParam o ((-, TLV.val o) ∈? Supported)
+
 ATV = DefinedByOID λ o → ATVParam o ((-, TLV.val o) ∈? Supported)
 
 pattern mkATVFields o p bs≡ = mkOIDDefinedFields o p bs≡
 
-postulate
-  RawATV : Raw ATV
+RawATVParam : Raw₁ RawOID ATVParam'
+toRawATVParam : ∀ {@0 bs₁} {o : OID bs₁} {@0 bs₂} → (o? : Dec ((-, TLV.val o) ∈ Supported)) → ATVParam o o? bs₂ → Raw₁.D RawATVParam (Raw.to RawOID o)
+
+Raw₁.D RawATVParam ro =
+    Raw.D RawDirectoryString
+  ⊎ Raw.D RawPrintableString
+  ⊎ Raw.D (RawΣₚ₁ RawPrintableString (TLVSizeBounded sizePrintableString 2 2))
+  ⊎ Raw.D RawPrintableString
+  ⊎ Raw.D RawIA5String
+Raw₁.to RawATVParam o {bs} = toRawATVParam ((-, TLV.val o) ∈? Supported)
+
+toRawATVParam {o} (no ¬p) p =
+  inj₁ (Raw.to RawDirectoryString p)
+toRawATVParam {o} (yes (here px)) p =
+  inj₂ (inj₁ (Raw.to RawPrintableString p))
+toRawATVParam {o} (yes (there (here px))) p =
+  inj₂ (inj₂ (inj₁ (Raw.to (RawΣₚ₁ RawPrintableString (TLVSizeBounded sizePrintableString 2 2)) p)))
+toRawATVParam {o} (yes (there (there (here px)))) p =
+  inj₂ ∘ inj₂ ∘ inj₂ ∘ inj₁ $ Raw.to RawPrintableString p
+toRawATVParam {o} (yes (there (there (there (here px))))) p =
+  inj₂ (inj₂ (inj₂ (inj₂ $ Raw.to RawIA5String p)))
+
+RawATV : Raw ATV
+RawATV = RawDefinedByOID RawATVParam
