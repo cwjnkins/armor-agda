@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AKI.Properties
 open import Aeres.Data.X509.Extension.AKI.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV

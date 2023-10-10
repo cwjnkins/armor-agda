@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Properties
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.TCB
@@ -29,7 +29,7 @@ private
 parseDistPointFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength DistPointFields n)
 parseDistPointFields n =
   parseEquivalent
-    (Parallel.equivalent₁ equivalent)
+    (Parallel.equivalent₁ equivalentDistPointFields)
     (Option.parseOption₃ TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
       (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ())) (TLV.noconfusion (λ where ()))
       (parseTLV Tag.AA0 (here' String.++ ": name") DistPointNameChoice

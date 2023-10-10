@@ -1,9 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName.TCB
-  hiding (module GeneralName)
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Properties
@@ -12,45 +11,14 @@ open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.GeneralName.Properties where
+module Aeres.Data.X509.GeneralNames.GeneralName.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Sum         UInt8
 
-Rep =
-   Sum OtherName
-  (Sum RfcName
-  (Sum DnsName
-  (Sum X400Address
-  (Sum DirName
-  (Sum EdipartyName
-  (Sum URI
-  (Sum IpAddress
-       RegID)))))))
-
-equivalent : Equivalent Rep GeneralName
-proj₁ equivalent (Sum.inj₁ x) = oname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = rfcname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = dnsname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = x400add x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = dirname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) = ediname x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) = uri x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) = ipadd x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))) = rid x
-proj₂ equivalent (oname x) = inj₁ x
-proj₂ equivalent (rfcname x) = inj₂ (inj₁ x)
-proj₂ equivalent (dnsname x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (x400add x) = inj₂ (inj₂ (inj₂ (inj₁ x)))
-proj₂ equivalent (dirname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))
-proj₂ equivalent (ediname x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))
-proj₂ equivalent (uri x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x))))))
-proj₂ equivalent (ipadd x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₁ x)))))))
-proj₂ equivalent (rid x) = inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ (inj₂ x)))))))
-
-iso : Iso Rep GeneralName
-proj₁ iso = equivalent
+iso : Iso GeneralNameRep GeneralName
+proj₁ iso = equivalentGeneralName
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = refl
@@ -164,9 +132,8 @@ nosubstrings x (rid x₁) (uri x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x
 nosubstrings x (rid x₁) (ipadd x₂) = ⊥-elim (TLV.noconfusion (λ where ()) x x₁ x₂)
 nosubstrings x (rid x₁) (rid x₂) = ‼ TLV.nosubstrings x x₁ x₂
 
-module GeneralName where
-  @0 unambiguous : Unambiguous GeneralName
-  unambiguous =
+@0 unambiguous : Unambiguous GeneralName
+unambiguous =
     Iso.unambiguous iso
       (Sum.unambiguous (TLV.unambiguous OctetString.unambiguous)
         ua₁ nc₀)
@@ -214,7 +181,7 @@ module GeneralName where
                 (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 
     ua₄ : Unambiguous Rep₄
-    ua₄ = Sum.unambiguous (TLV.unambiguous RDN.unambiguous) ua₅ nc₄
+    ua₄ = Sum.unambiguous (TLV.unambiguous Name.unambiguous) ua₅ nc₄
 
     nc₃ : NoConfusion X400Address Rep₄
     nc₃ = NoConfusion.sumₚ {A = X400Address}
@@ -272,15 +239,34 @@ module GeneralName where
                       (NoConfusion.sumₚ {A = OtherName} (TLV.noconfusion λ ())
                         (TLV.noconfusion λ ())))))))
 
-module GeneralNamesElems where
-  @0 unambiguous : Unambiguous GeneralNamesElems
-  unambiguous =
-    SequenceOf.Bounded.unambiguous
-      GeneralName.unambiguous nonempty nosubstrings
+@0 nonmalleable : NonMalleable RawGeneralName
+nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
+    where
+    Rep₇ = RawSum (RawTLV Tag.A87 RawOctetStringValue) (RawTLV Tag.A88 RawOIDValue)
+    Rep₆ = RawSum (RawTLV Tag.A86 RawIA5StringValue) Rep₇
+    Rep₅ = RawSum (RawTLV Tag.AA5 RawOctetStringValue) Rep₆
+    Rep₄ = RawSum (RawTLV Tag.AA4 RawName) Rep₅
+    Rep₃ = RawSum (RawTLV Tag.AA3 RawOctetStringValue) Rep₄
+    Rep₂ = RawSum (RawTLV Tag.A82 RawIA5StringValue) Rep₃
+    Rep₁ = RawSum (RawTLV Tag.A81 RawIA5StringValue) Rep₂
 
-module GeneralNames where
-  @0 unambiguous : Unambiguous GeneralNames
-  unambiguous = TLV.unambiguous GeneralNamesElems.unambiguous
+    nm :  NonMalleable RawGeneralNameRep
+    nm =  Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₁} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₂} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₃} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₄} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawName}            {rb = Rep₅} (TLV.nonmalleable Name.nonmalleable)
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}{rb = Rep₆} (TLV.nonmalleable OctetString.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₇} (TLV.nonmalleable IA5String.nonmalleableValue)
+         (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}            (TLV.nonmalleable OctetString.nonmalleableValue)
+                                                                         (TLV.nonmalleable OID.nonmalleableValue))))))))
 
-@0 unambiguous : _
-unambiguous = GeneralName.unambiguous
+    -- nm = Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable ?)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
+    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
+    --        (TLV.nonmalleable {!!}))))))))

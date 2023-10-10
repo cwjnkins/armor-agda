@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Properties
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.TCB

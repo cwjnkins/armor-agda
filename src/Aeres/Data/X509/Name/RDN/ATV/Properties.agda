@@ -4,8 +4,8 @@ open import Aeres.Binary
 open import Aeres.Data.X509.DirectoryString
 import      Aeres.Data.X690-DER.OID.Properties as OID
 open import Aeres.Data.X690-DER.OID.TCB
-open import Aeres.Data.X509.RDN.ATV.OIDs
-open import Aeres.Data.X509.RDN.ATV.TCB
+open import Aeres.Data.X509.Name.RDN.ATV.OIDs
+open import Aeres.Data.X509.Name.RDN.ATV.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.Strings.IA5String
 open import Aeres.Data.X690-DER.Strings.PrintableString
@@ -15,7 +15,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 
-module Aeres.Data.X509.RDN.ATV.Properties where
+module Aeres.Data.X509.Name.RDN.ATV.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
@@ -40,3 +40,6 @@ instance
     eq o (yes (there (here px))) = Parallel.eq≋Σₚ it (λ _ → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) })
     eq o (yes (there (there (here px)))) = it
     eq o (yes (there (there (there (here px))))) = it
+
+postulate
+  @0 nonmalleable : NonMalleable RawATV

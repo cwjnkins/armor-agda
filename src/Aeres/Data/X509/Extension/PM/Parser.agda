@@ -25,7 +25,7 @@ private
 
 parsePolicyMapFields : Parser (Logging ∘ Dec) PolicyMapFields
 parsePolicyMapFields =
-  parseEquivalent equivalent
+  parseEquivalent equivalentPolicyMapFields
     (parse& TLV.nosubstrings parseOID parseOID)
 
 parsePMFields : Parser (Logging ∘ Dec) PMFields

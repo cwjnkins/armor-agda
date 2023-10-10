@@ -3,7 +3,7 @@
 open import Aeres.Binary
 import      Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.AIA.AccessDesc.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB

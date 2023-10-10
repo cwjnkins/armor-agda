@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Cert.TCB
 open import Aeres.Data.X509.Extension.TCB
-open import Aeres.Data.X509.RDN.TCB
+open import Aeres.Data.X509.Name.TCB
 open import Aeres.Data.X509.SignAlg
 open import Aeres.Data.X509.TBSCert
 import      Aeres.Data.X509.TBSCert.UID.TCB as TBSCert

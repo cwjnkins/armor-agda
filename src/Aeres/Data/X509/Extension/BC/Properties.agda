@@ -29,10 +29,16 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkBCFieldsSeqFields bcca bcpathlen bs≡) = refl
 
-@0 unambiguous : Unambiguous BCFieldsSeqFields
+@0 unambiguous : Unambiguous BCFields
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₂&₁
       (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous (λ {xs} → Int.unambiguous{xs})) TLV.nonempty
-      (TLV.noconfusion λ ()))
+      (TLV.noconfusion λ ()))))
+
+@0 nonmalleable : NonMalleable RawBCFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+                (Iso.nonmalleable iso RawBCFieldsSeqFieldsRep
+                  (Seq.nonmalleable (Option.nonmalleable _ Boool.nonmalleable)
+                                    (Option.nonmalleable _ Int.nonmalleable))))

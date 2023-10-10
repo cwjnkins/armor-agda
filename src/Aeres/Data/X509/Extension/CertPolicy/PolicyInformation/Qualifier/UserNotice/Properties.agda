@@ -22,14 +22,8 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
-Rep = &ₚ (Option NoticeReference) (Option DisplayText)
-
-equivalent : Equivalent Rep UserNoticeFields
-proj₂ equivalent (mkUserNoticeFields noticeRef expText bs≡) = mk&ₚ noticeRef expText bs≡
-proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkUserNoticeFields fstₚ₁ sndₚ₁ bs≡
-
-iso : Iso Rep UserNoticeFields
-proj₁ iso = equivalent
+iso : Iso UserNoticeFieldsRep UserNoticeFields
+proj₁ iso = equivalentUserNoticeFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkUserNoticeFields noticeRef expText bs≡) = refl
 
@@ -48,10 +42,16 @@ private
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ())))))))
 
-@0 unambiguous : Unambiguous UserNoticeFields
+@0 unambiguous : Unambiguous UserNotice
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₂&₁
-      (TLV.unambiguous NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
+      (NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
       DisplayText.unambiguous DisplayText.nonempty
-      nc)
+      nc))
+
+@0 nonmalleable : NonMalleable RawUserNotice
+nonmalleable = TLV.nonmalleable
+                 (Iso.nonmalleable iso RawUserNoticeFieldsRep
+                   (Seq.nonmalleable (Option.nonmalleable _ NoticeReference.nonmalleable)
+                     (Option.nonmalleable _ DisplayText.nonmalleable)))

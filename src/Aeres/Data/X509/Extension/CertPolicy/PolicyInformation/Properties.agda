@@ -20,22 +20,23 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep = &ₚ OID (Option PolicyQualifiersSeq)
-
-iso : Iso Rep PolicyInformationFields
+iso : Iso PolicyInformationFieldsRep PolicyInformationFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkPolicyInformationFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (mkPolicyInformationFields cpid cpqls bs≡) = mk&ₚ cpid cpqls bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkPolicyInformationFields cpid cpqls bs≡) = refl
 
-equiv = proj₁ iso
-
-@0 unambiguous : Unambiguous PolicyInformationFields
-unambiguous =
-  Iso.unambiguous iso
+@0 unambiguous : Unambiguous PolicyInformation
+unambiguous = TLV.unambiguous
+  (Iso.unambiguous iso
     (Unambiguous.unambiguous-&₁option₁
       OID.unambiguous TLV.nosubstrings
-      (TLV.unambiguous
-        (SequenceOf.Bounded.unambiguous
-          (TLV.unambiguous Qualifier.unambiguous) TLV.nonempty TLV.nosubstrings))
-      TLV.nonempty)
+      Qualifier.unambiguous
+      TLV.nonempty))
+
+@0 nonmalleable : NonMalleable RawPolicyInformation
+nonmalleable = TLV.nonmalleable
+  (Iso.nonmalleable iso
+    RawPolicyInformationFieldsRep
+      (Seq.nonmalleable OID.nonmalleable
+        (Option.nonmalleable _ Qualifier.nonmalleable)))

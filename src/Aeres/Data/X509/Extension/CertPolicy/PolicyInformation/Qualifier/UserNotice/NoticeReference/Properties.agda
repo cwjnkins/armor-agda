@@ -17,17 +17,23 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-iso : Iso (&ₚ DisplayText IntegerSeq) NoticeReferenceFields
+iso : Iso NoticeReferenceFieldsRep NoticeReferenceFields
 proj₁ (proj₁ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkNoticeReferenceFields fstₚ₁ sndₚ₁ bs≡
 proj₂ (proj₁ iso) (mkNoticeReferenceFields organization noticenums bs≡) = mk&ₚ organization noticenums bs≡
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkNoticeReferenceFields organization noticenums bs≡) = refl
 
-@0 unambiguous : Unambiguous NoticeReferenceFields
+@0 unambiguous : Unambiguous NoticeReference
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Seq.unambiguous
       DisplayText.unambiguous DisplayText.nosubstrings
       (TLV.unambiguous
         (SequenceOf.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
-          TLV.nonempty (NoSubstrings Int ∋ TLV.nosubstrings))))
+          TLV.nonempty (NoSubstrings Int ∋ TLV.nosubstrings)))))
+
+@0 nonmalleable : NonMalleable RawNoticeReference
+nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso
+                 RawNoticeReferenceFieldsRep
+                   (Seq.nonmalleable DisplayText.nonmalleable
+                     (TLV.nonmalleable (SequenceOf.nonmalleable TLV.nonempty TLV.nosubstrings Int.nonmalleable))))

@@ -105,8 +105,11 @@ module OID where
       (SequenceOf.Bounded.unambiguous
         Sub.unambiguous Sub.nonempty Sub.nosubstrings)
 
+  @0 nonmalleableValue : NonMalleable RawOIDValue
+  nonmalleableValue = SequenceOf.Bounded.nonmalleable Sub.nonempty Sub.nosubstrings Sub.nonmalleable
+
   @0 nonmalleable : NonMalleable RawOID
-  nonmalleable = TLV.nonmalleable (SequenceOf.Bounded.nonmalleable Sub.nonempty Sub.nosubstrings Sub.nonmalleable)
+  nonmalleable = TLV.nonmalleable nonmalleableValue
 
 module OIDSeq where
   @0 unambiguous : Unambiguous (SequenceOf OID)

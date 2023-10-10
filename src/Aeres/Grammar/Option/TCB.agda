@@ -1,8 +1,11 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Prelude
+import Aeres.Grammar.Definitions.NonMalleable
 
 module Aeres.Grammar.Option.TCB (Σ : Set) where
+
+open Aeres.Grammar.Definitions.NonMalleable Σ
 
 data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
@@ -26,3 +29,8 @@ mapOption f (some x) = some (f x)
 mapOptionK : ∀ {@0 A B xs} → (A xs → B xs) → Option A xs → Option B xs
 mapOptionK f none = none
 mapOptionK f (some x) = some (f x)
+
+RawOption : ∀ {A} → Raw A → Raw (Option A)
+Raw.D (RawOption x) = Maybe (Raw.D x)
+Raw.to (RawOption x) none = nothing
+Raw.to (RawOption x) (some x₁) = just (Raw.to x x₁)

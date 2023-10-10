@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AKI.Properties
 import      Aeres.Data.X509.Extension.AKI.TCB as AKI
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
@@ -46,7 +46,7 @@ module parseAKIFields where
   -- (Try to parse all, then check lengths)
   parseAKIFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength AKIFieldsSeqFields n)
   parseAKIFieldsSeqFields n =
-    parseEquivalent (Parallel.equivalent₁ equivalent)
+    parseEquivalent (Parallel.equivalent₁ equivalentAKIFieldsSeqFields)
       (Option.parseOption₃
         TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())

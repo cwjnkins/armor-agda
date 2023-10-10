@@ -1,10 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName.Properties
-open import Aeres.Data.X509.GeneralName.TCB
-  hiding (module GeneralName)
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.GeneralNames.GeneralName.Properties
+open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER
 import      Aeres.Grammar.Definitions
@@ -16,7 +15,7 @@ open import Data.List.Properties
 open import Data.Nat.Properties
   hiding (_≟_)
 
-module Aeres.Data.X509.GeneralName.Parser where
+module Aeres.Data.X509.GeneralNames.GeneralName.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
@@ -24,7 +23,7 @@ open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
 private
-  here' = "X509: GeneralName"
+  here' = "X509: GeneralNames : GeneralName"
 
 parseOtherName : Parser (Logging ∘ Dec) OtherName
 parseOtherName =
@@ -42,7 +41,7 @@ parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ parseOctetStr
 parseDirName : Parser (Logging ∘ Dec) DirName
 parseDirName =
   parseTLV _ (here' String.++ ": directory name") _
-    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") RDN.parse n
+    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") Name.parse n
 
 parseEdipartyName : Parser (Logging ∘ Dec) EdipartyName
 parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ parseOctetStringValue
@@ -56,10 +55,8 @@ parseIpAddress = parseTLV _ (here' String.++ ": IP") _ parseOctetStringValue
 parseRegID : Parser (Logging ∘ Dec) RegID
 parseRegID = parseTLV _ (here' String.++ ": registered name") _ parseOIDValue
 
-module parseGeneralName where
-
-  parseGeneralName : Parser (Logging ∘ Dec) GeneralName
-  runParser parseGeneralName xs = do
+parseGeneralName : Parser (Logging ∘ Dec) GeneralName
+runParser parseGeneralName xs = do
     no ¬other ← runParser parseOtherName xs
       where yes other → do
         return (yes (mapSuccess (λ {bs} → oname{bs}) other))
@@ -106,13 +103,3 @@ module parseGeneralName where
         contradiction (success _ _ read≡ x _ ps≡) ¬ipadd
       (success _ _ read≡ (rid x)     _ ps≡) →
         contradiction (success _ _ read≡ x _ ps≡) ¬rid
-
-  parseGeneralNamesElems : ∀ n → Parser (Logging ∘ Dec) (ExactLength GeneralNamesElems n)
-  parseGeneralNamesElems n =
-    parseBoundedSequenceOf here' _ nonempty nosubstrings parseGeneralName n 1
-
-  parseGeneralNames : Parser (Logging ∘ Dec) GeneralNames
-  parseGeneralNames = parseTLV _ here' _ parseGeneralNamesElems
-
-open parseGeneralName public
-  using (parseGeneralName ; parseGeneralNamesElems ; parseGeneralNames)

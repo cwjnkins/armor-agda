@@ -2,7 +2,7 @@
 
 open import Aeres.Binary
 import      Aeres.Data.X509.Extension.AIA.AccessDesc.TCB.OIDs as OIDs
-open import Aeres.Data.X509.GeneralName.TCB
+open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -26,3 +26,6 @@ AccessDescParam o =
 
 AccessDesc : @0 List UInt8 → Set
 AccessDesc = DefinedByOID AccessDescParam
+
+postulate
+  RawAccessDesc : Raw AccessDesc

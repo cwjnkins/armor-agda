@@ -3,8 +3,8 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name.Properties
 open import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint.Name.TCB
-open import Aeres.Data.X509.GeneralName
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.GeneralNames
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -26,10 +26,10 @@ parseFullName = parseTLV Tag.AA0 (here' String.++ ": full name") _ parseGeneralN
 
 parseNameRTCrlIssuer : Parser (Logging ∘ Dec) NameRTCrlIssuer
 parseNameRTCrlIssuer =
-  parseTLV Tag.AA1 (here' String.++ "RT CRL issuer") _
-    (λ n → parseBoundedSequenceOf (here' String.++ "RT CRL issuer") _ TLV.nonempty TLV.nosubstrings RDN.ATV.parse n 1)
+  parseTLV Tag.AA1 here' _
+    λ n → parseBoundedSequenceOf (here' String.++ "RT CRL issuer") _ TLV.nonempty TLV.nosubstrings Name.RDN.ATV.parse n 1
 
 parseDistPointNameChoice : Parser (Logging ∘ Dec) DistPointNameChoice
 parseDistPointNameChoice =
-  parseEquivalent equivalent
+  parseEquivalent equivalentDistPointNameChoice
     (parseSum parseFullName parseNameRTCrlIssuer)

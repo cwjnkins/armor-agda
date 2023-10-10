@@ -6,11 +6,16 @@ open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.TCB where
 
+open      Aeres.Grammar.Definitions              UInt8
+
 open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Seq.TCB UInt8
 
 PermittedSubtrees : @0 List UInt8 → Set
 PermittedSubtrees xs = TLV Tag.AA0 GeneralSubtrees xs
@@ -31,3 +36,18 @@ NCFieldsSeq xs = TLV Tag.Sequence NCFieldsSeqFields xs
 
 NCFields : @0 List UInt8 → Set
 NCFields xs = TLV Tag.OctetString  NCFieldsSeq xs
+
+NCFieldsSeqFieldsRep = &ₚ (Option PermittedSubtrees) (Option ExcludedSubtrees)
+
+equivalentNCFieldsSeqFields : Equivalent NCFieldsSeqFieldsRep NCFieldsSeqFields
+proj₁ equivalentNCFieldsSeqFields (mk&ₚ fstₚ₁ sndₚ₁ refl) = mkNCFieldsSeqFields fstₚ₁ sndₚ₁ refl
+proj₂ equivalentNCFieldsSeqFields (mkNCFieldsSeqFields permt excld refl) = mk&ₚ permt excld refl
+
+RawNCFieldsSeqFieldsRep : Raw NCFieldsSeqFieldsRep
+RawNCFieldsSeqFieldsRep = Raw&ₚ (RawOption (RawTLV _ RawGeneralSubtrees)) (RawOption (RawTLV _ RawGeneralSubtrees))
+
+RawNCFieldsSeqFields : Raw NCFieldsSeqFields
+RawNCFieldsSeqFields = Iso.raw equivalentNCFieldsSeqFields RawNCFieldsSeqFieldsRep
+
+RawNCFields : Raw NCFields
+RawNCFields = RawTLV _ (RawTLV _ RawNCFieldsSeqFields)

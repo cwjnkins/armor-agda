@@ -2,8 +2,8 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.DirectoryString
-open import Aeres.Data.X509.RDN.ATV.OIDs
-open import Aeres.Data.X509.RDN.ATV.TCB
+open import Aeres.Data.X509.Name.RDN.ATV.OIDs
+open import Aeres.Data.X509.Name.RDN.ATV.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.Strings.IA5String
@@ -14,14 +14,14 @@ import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
 
-module Aeres.Data.X509.RDN.ATV.Parser where
+module Aeres.Data.X509.Name.RDN.ATV.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Parallel    UInt8
 
 private
-  here' = "X509: RDN: ATV"
+  here' = "X509: Name: RDNSequence: RDN: ATV"
 
 parse : Parser (Logging ∘ Dec) ATV
 parse = DefinedByOID.parse here' λ n o → p n o ((-, TLV.val o) ∈? Supported)

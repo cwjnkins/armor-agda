@@ -3,7 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames.GeneralName
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -41,7 +41,7 @@ parseExactLengthGeneralSubtrees n =
     parseEquivalent
       (Iso.transEquivalent
         (Iso.symEquivalent Distribute.exactLength-&)
-        (Parallel.equivalent₁ equivalent))
+        (Parallel.equivalent₁ equivalentGeneralSubtreeFields))
       (parse&ᵈ (Parallel.nosubstrings₁ GeneralName.nosubstrings)
         (Parallel.Length≤.unambiguous _ GeneralName.unambiguous)
         (parse≤ n parseGeneralName GeneralName.nosubstrings (tell $ here' String.++ ": underflow"))

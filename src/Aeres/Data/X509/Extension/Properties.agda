@@ -17,7 +17,7 @@ open import Aeres.Data.X509.Extension.SAN
 open import Aeres.Data.X509.Extension.SKI
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.TCB
-open import Aeres.Data.X509.GeneralName
+open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Boool
 open import Aeres.Data.X690-DER.Int
@@ -156,38 +156,33 @@ module Select where
   unambiguous =
     Iso.unambiguous iso
       (Sum.unambiguous
-        (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous AKI.unambiguous)) (TLV.noconfusion λ ()))
+        (Fields.unambiguous ≡-unique AKI.unambiguous (TLV.noconfusion λ ()))
         (Sum.unambiguous
-          (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous OctetString.unambiguous)) (TLV.noconfusion λ ()))
+          (Fields.unambiguous ≡-unique SKI.unambiguous (TLV.noconfusion λ ()))
           (Sum.unambiguous
-            (Fields.unambiguous ≡-unique ((TLV.unambiguous (TLV.unambiguous BitString.unambiguous))) (TLV.noconfusion λ ()))
+            (Fields.unambiguous ≡-unique KU.unambiguous (TLV.noconfusion λ ()))
             (Sum.unambiguous
-              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous OID.unambiguous TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+              (Fields.unambiguous ≡-unique EKU.unambiguous (TLV.noconfusion λ ()))
               (Sum.unambiguous
-                (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous BC.unambiguous)) (TLV.noconfusion λ ()))
+                (Fields.unambiguous ≡-unique BC.unambiguous (TLV.noconfusion λ ()))
                 (Sum.unambiguous
-                  (Fields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
+                  (Fields.unambiguous ≡-unique IAN.unambiguous (TLV.noconfusion λ ()))
                   (Sum.unambiguous
-                    (Fields.unambiguous ≡-unique (TLV.unambiguous GeneralName.GeneralNames.unambiguous) (TLV.noconfusion λ ()))
+                    (Fields.unambiguous ≡-unique SAN.unambiguous (TLV.noconfusion λ ()))
                     (Sum.unambiguous
-                       (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CertPolicy.PolicyInformation.unambiguous) TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+                       (Fields.unambiguous ≡-unique CertPolicy.unambiguous  (TLV.noconfusion λ ()))
                       (Sum.unambiguous
-                        (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous CRLDistPoint.DistPoint.unambiguous) TLV.nonempty TLV.nosubstrings))) (TLV.noconfusion λ ()))
+                        (Fields.unambiguous ≡-unique CRLDistPoint.unambiguous (TLV.noconfusion λ ()))
                         (Sum.unambiguous
-                          (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous NC.unambiguous)) (TLV.noconfusion λ ()))
+                          (Fields.unambiguous ≡-unique NC.unambiguous (TLV.noconfusion λ ()))
                           (Sum.unambiguous
-                            (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous PC.unambiguous)) (TLV.noconfusion λ ()))
+                            (Fields.unambiguous ≡-unique PC.unambiguous (TLV.noconfusion λ ()))
                             (Sum.unambiguous
-                              (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous (TLV.unambiguous PM.unambiguous) TLV.nonempty TLV.nosubstrings)) ) (TLV.noconfusion λ ()))
+                              (Fields.unambiguous ≡-unique PM.unambiguous (TLV.noconfusion λ ()))
                               (Sum.unambiguous
-                                (Fields.unambiguous ≡-unique (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous {xs})) (TLV.noconfusion λ ()))
+                                (Fields.unambiguous ≡-unique INAP.unambiguous (TLV.noconfusion λ ()))
                                 (Sum.unambiguous
-                                  (Fields.unambiguous ≡-unique
-                                    (TLV.unambiguous
-                                      (TLV.unambiguous
-                                        (SequenceOf.Bounded.unambiguous
-                                          (TLV.unambiguous AIA.AccessDesc.unambiguous) TLV.nonempty TLV.nosubstrings)))
-                                    (TLV.noconfusion λ ()))
+                                  (Fields.unambiguous ≡-unique AIA.unambiguous (TLV.noconfusion λ ()))
                                 (Fields.unambiguous ua
                                   (TLV.unambiguous OctetString.unambiguous) (TLV.noconfusion λ ()))
                               noconfusion₀)

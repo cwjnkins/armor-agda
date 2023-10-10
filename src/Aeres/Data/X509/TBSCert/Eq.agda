@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.Extension
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey
-open import Aeres.Data.X509.RDN
+open import Aeres.Data.X509.Name
 open import Aeres.Data.X509.SignAlg
 open import Aeres.Data.X509.TBSCert.Properties
 open import Aeres.Data.X509.TBSCert.TCB

@@ -1,17 +1,21 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.GeneralName.TCB
+open import Aeres.Data.X509.GeneralNames.TCB
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.AKI.TCB where
 
+open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Seq.TCB UInt8
 
 AKIKeyId : @0 List UInt8 → Set
 AKIKeyId = TLV Tag.A80 OctetStringValue
@@ -36,3 +40,20 @@ AKIFieldsSeq = TLV Tag.Sequence AKIFieldsSeqFields
 
 AKIFields : @0 List UInt8 → Set
 AKIFields = TLV Tag.OctetString AKIFieldsSeq
+
+AKIFieldsSeqFieldsRep = &ₚ (Option AKIKeyId) (&ₚ (Option AKIAuthCertIssuer) (Option AKIAuthCertSN))
+
+equivalentAKIFieldsSeqFields : Equivalent AKIFieldsSeqFieldsRep AKIFieldsSeqFields
+proj₁ equivalentAKIFieldsSeqFields (mk&ₚ v₁ (mk&ₚ v₂ v₃ refl) refl) = mkAKIFieldsSeqFields v₁ v₂ v₃ refl
+proj₂ equivalentAKIFieldsSeqFields (mkAKIFieldsSeqFields v₁ v₂ v₃ refl) = mk&ₚ v₁ (mk&ₚ v₂ v₃ refl) refl
+
+RawAKIFieldsSeqFieldsRep : Raw AKIFieldsSeqFieldsRep
+RawAKIFieldsSeqFieldsRep =  Raw&ₚ (RawOption (RawTLV _ RawOctetStringValue))
+                          (Raw&ₚ (RawOption (RawTLV _ RawGeneralNamesElems))
+                                  (RawOption (RawTLV _ RawIntegerValue)))
+
+RawAKIFieldsSeqFields : Raw AKIFieldsSeqFields
+RawAKIFieldsSeqFields = Iso.raw equivalentAKIFieldsSeqFields RawAKIFieldsSeqFieldsRep
+
+RawAKIFields : Raw AKIFields
+RawAKIFields = RawTLV _ (RawTLV _ RawAKIFieldsSeqFields)
