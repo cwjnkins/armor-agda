@@ -32,14 +32,24 @@ UnsupportedParam o =
      OctetStringValue
   ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))
 
+RawUnsupportedParam : Raw₁ RawOID UnsupportedParam
+Raw₁.D RawUnsupportedParam o = Raw.D RawOctetStringValue
+Raw₁.to RawUnsupportedParam o p = Raw.to RawOctetStringValue (fstₚ p)
+
 UnsupportedPublicKeyAlg =
   DefinedByOID UnsupportedParam
+
+RawUnsupportedPublicKeyAlg : Raw UnsupportedPublicKeyAlg
+RawUnsupportedPublicKeyAlg = RawDefinedByOID RawUnsupportedParam
 
 PublicKeyAlg : @0 List UInt8 → Set
 PublicKeyAlg =
    Sum RSA
   (Sum EC
        UnsupportedPublicKeyAlg)
+
+RawPublicKeyAlg : Raw PublicKeyAlg
+RawPublicKeyAlg = RawSum RSA.RawRSA (RawSum EC.RawEC RawUnsupportedPublicKeyAlg)
 
 getOID : ∀ {@0 bs} → PublicKeyAlg bs → Exists─ _ OID
 getOID (Sum.inj₁ x) =

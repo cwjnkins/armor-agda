@@ -1,5 +1,6 @@
 {-# OPTIONS --subtyping #-}
 
+open import Aeres.Binary
 open import Aeres.Data.X509.SignAlg.DSA.TCB
   using (DSA-Like)
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
@@ -14,3 +15,7 @@ RSA = DSA-Like OIDs.RSA
 
 getOID : ∀ {@0 bs} → RSA bs → Exists─ _ OID
 getOID x = -, DefinedByOIDFields.oid (TLV.val x)
+
+open import Aeres.Grammar.Definitions.NonMalleable UInt8
+postulate
+  RawRSA : Raw RSA

@@ -18,3 +18,6 @@ open Aeres.Grammar.Definitions UInt8
 @0 unambiguous : Unambiguous RSA
 unambiguous = DSA.DSA-Like.unambiguous OIDs.RSA
   -- DSA.unambiguous OIDs.RSA
+
+postulate
+  @0 nonmalleable : NonMalleable RawRSA

@@ -20,3 +20,6 @@ unambiguous =
   TLV.unambiguous
     (DefinedByOID.unambiguous Params
       (λ o → Parallel.unambiguous Params.unambiguous (λ where _ ≋-refl ≋-refl → refl)))
+
+postulate
+  @0 nonmalleable : NonMalleable RawEC

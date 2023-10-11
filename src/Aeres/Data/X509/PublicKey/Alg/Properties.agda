@@ -126,3 +126,14 @@ unambiguous =
             Parallel.unambiguous×ₚ OctetString.unambiguous T-unique))
       noConfusion-EC-Unsupported)
     (NoConfusion.sumₚ{A = RSA} noConfusion-RSA-EC noConfusion-RSA-Unsupported)
+
+@0 nonmalleableUnsupportedParam : NonMalleable₁ RawUnsupportedParam
+nonmalleableUnsupportedParam p₁ p₂ eq =
+  Parallel.nonmalleable₁ RawOctetStringValue OctetString.nonmalleableValue
+    (λ _ → T-unique) p₁ p₂ eq
+
+@0 nonmalleableUnsupported : NonMalleable RawUnsupportedPublicKeyAlg
+nonmalleableUnsupported = DefinedByOID.nonmalleable UnsupportedParam _ λ {bs} {o} → nonmalleableUnsupportedParam{bs}{o}
+
+@0 nonmalleable : NonMalleable RawPublicKeyAlg
+nonmalleable = Sum.nonmalleable RSA.nonmalleable (Sum.nonmalleable EC.nonmalleable nonmalleableUnsupported)

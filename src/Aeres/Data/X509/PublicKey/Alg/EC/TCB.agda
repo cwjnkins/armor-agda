@@ -26,3 +26,6 @@ EC = DefinedByOID Params
 
 getOID : ∀ {@0 bs} → EC bs → Exists─ _ OID
 getOID ec = -, (DefinedByOIDFields.oid (TLV.val ec))
+
+postulate
+  RawEC : Raw EC
