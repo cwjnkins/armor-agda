@@ -26,17 +26,17 @@ open Aeres.Grammar.Option       UInt8
 open Aeres.Grammar.Parallel     UInt8
 open Aeres.Grammar.Seq          UInt8
 
-Rep : @0 List UInt8 → Set
-Rep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
+CertFieldsRep : @0 List UInt8 → Set
+CertFieldsRep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
 
-equiv : Equivalent Rep CertFields
-proj₁ equiv (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s') refl) bs≡) =
+equivalentCertFields : Equivalent CertFieldsRep CertFields
+proj₁ equivalentCertFields (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s') refl) bs≡) =
   mkCertFields fstₚ₁ s fstₚ₂ sndₚ₁ s' bs≡
-proj₂ equiv (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
+proj₂ equivalentCertFields (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
   = mk&ₚ (mk×ₚ tbs tbsBytes) (mk&ₚ signAlg (mk×ₚ signature signatureBytes) refl) bs≡
 
-iso   : Iso Rep CertFields
-proj₁ iso = equiv
+iso   : Iso CertFieldsRep CertFields
+proj₁ iso = equivalentCertFields
 proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _) refl) refl) = refl
 proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) = refl
 

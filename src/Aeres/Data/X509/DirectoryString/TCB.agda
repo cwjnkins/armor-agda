@@ -33,17 +33,17 @@ DirectoryStringRep =
   (Sum (Σₚ UTF8String      TLVNonEmptyVal)
        (Σₚ BMPString       TLVNonEmptyVal)))))
 
-equivalent : Equivalent DirectoryStringRep DirectoryString
-proj₁ equivalent (Sum.inj₁ x) = teletexString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = printableString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = universalString x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = utf8String x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))) = bmpString x
-proj₂ equivalent (teletexString x) = Sum.inj₁ x
-proj₂ equivalent (printableString x) = Sum.inj₂ (Sum.inj₁ x)
-proj₂ equivalent (universalString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
-proj₂ equivalent (utf8String x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))
-proj₂ equivalent (bmpString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))
+equivalentDirectoryString : Equivalent DirectoryStringRep DirectoryString
+proj₁ equivalentDirectoryString (Sum.inj₁ x) = teletexString x
+proj₁ equivalentDirectoryString (Sum.inj₂ (Sum.inj₁ x)) = printableString x
+proj₁ equivalentDirectoryString (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = universalString x
+proj₁ equivalentDirectoryString (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = utf8String x
+proj₁ equivalentDirectoryString (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))) = bmpString x
+proj₂ equivalentDirectoryString (teletexString x) = Sum.inj₁ x
+proj₂ equivalentDirectoryString (printableString x) = Sum.inj₂ (Sum.inj₁ x)
+proj₂ equivalentDirectoryString (universalString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
+proj₂ equivalentDirectoryString (utf8String x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))
+proj₂ equivalentDirectoryString (bmpString x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))
 
 RawDirectoryStringRep : Raw DirectoryStringRep
 RawDirectoryStringRep =
@@ -54,4 +54,4 @@ RawDirectoryStringRep =
           (RawΣₚ₁ RawBMPString TLVNonEmptyVal)))))
 
 RawDirectoryString : Raw DirectoryString
-RawDirectoryString = Iso.raw equivalent RawDirectoryStringRep
+RawDirectoryString = Iso.raw equivalentDirectoryString RawDirectoryStringRep

@@ -14,11 +14,20 @@ import      Aeres.Data.X690-DER.SequenceOf as SequenceOf
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Option
+import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Seq
+import      Aeres.Grammar.Parallel
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X509.TBSCert.TCB where
 
-open Aeres.Grammar.Option UInt8
+open Aeres.Grammar.Sum    UInt8
+open Aeres.Grammar.Seq    UInt8
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Option      UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Int     hiding (getVal)
 open Name     using  (Name)
 open SequenceOf using (SequenceOf)
@@ -122,3 +131,23 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
 TBSCert : (@0 _ : List UInt8) → Set
 TBSCert xs = TLV Tag.Sequence TBSCertFields xs
 
+Rep₁ = &ₚ (Option SubUID) (Option Extensions)
+Rep₂ = &ₚ (Option IssUID) Rep₁
+Rep₃ = &ₚ (PublicKey ×ₚ Singleton) Rep₂
+Rep₄ = &ₚ Name Rep₃
+Rep₅ = &ₚ Validity Rep₄
+Rep₆ = &ₚ Name Rep₅
+Rep₇ = &ₚ SignAlg Rep₆
+
+Rep : @0 List UInt8 → Set
+Rep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
+
+equivalentTBSCertFields : Equivalent
+               Rep
+               TBSCertFields
+proj₁ equivalentTBSCertFields (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ (mk&ₚ (mk×ₚ fstₚ₆ s) (mk&ₚ fstₚ₇ (mk&ₚ fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
+  mkTBSCertFields fstₚ₁ sndₚ₁ fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ fstₚ₆ s fstₚ₇ fstₚ₈ sndₚ₂
+    (trans₀ bs≡ (solve (++-monoid UInt8)))
+proj₂ equivalentTBSCertFields (mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions bs≡) =
+  mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ (mk×ₚ pk pkBytes) (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
+    (trans₀ bs≡ (solve (++-monoid UInt8)))

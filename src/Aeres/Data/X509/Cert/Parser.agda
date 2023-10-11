@@ -39,7 +39,7 @@ parseCertFields n =
   parseEquivalent
     (Iso.transEquivalent
       (Iso.symEquivalent Distribute.exactLength-&)
-      (Parallel.equivalent₁ equiv))
+      (Parallel.equivalent₁ equivalentCertFields))
     (parse&ᵈ{A = Length≤ (TBSCert ×ₚ Singleton) n}
       (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
       (Parallel.Length≤.unambiguous _

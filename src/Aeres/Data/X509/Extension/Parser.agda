@@ -62,7 +62,7 @@ private
     parseEquivalent
       (Iso.transEquivalent
         (Iso.symEquivalent Distribute.exactLength-&)
-        (Parallel.equivalent₁ Fields.equivalent))
+        (Parallel.equivalent₁ equivalentExtensionFields))
       (parse&ᵈ
         (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
         (Parallel.Length≤.unambiguous _ (Parallel.unambiguous OID.unambiguous λ _ → erased-unique ua))
@@ -82,7 +82,7 @@ private
 parseSelectExtn : ∀ n → Parser (Logging ∘ Dec) (ExactLength SelectExtn n)
 parseSelectExtn n =
   parseEquivalent
-    (Iso.transEquivalent (Iso.symEquivalent (Distribute.exactLength-Sum)) (Parallel.equivalent₁ Select.equivalent))
+    (Iso.transEquivalent (Iso.symEquivalent (Distribute.exactLength-Sum)) (Parallel.equivalent₁ equivalent))
     (parseSum
       (parseExtensionFields (_≟ _) TLV.nosubstrings (TLV.noconfusion (λ ())) (λ where refl refl → refl)  parseAKIFields n)
       (parseEquivalent (Iso.symEquivalent (Distribute.exactLength-Sum))

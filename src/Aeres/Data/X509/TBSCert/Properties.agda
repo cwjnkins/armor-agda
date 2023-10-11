@@ -30,29 +30,8 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep₁ = &ₚ (Option SubUID) (Option Extensions)
-Rep₂ = &ₚ (Option IssUID) Rep₁
-Rep₃ = &ₚ (PublicKey ×ₚ Singleton) Rep₂
-Rep₄ = &ₚ Name Rep₃
-Rep₅ = &ₚ Validity Rep₄
-Rep₆ = &ₚ Name Rep₅
-Rep₇ = &ₚ SignAlg Rep₆
-
-Rep : @0 List UInt8 → Set
-Rep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
-
-equivalent : Equivalent
-               Rep
-               TBSCertFields
-proj₁ equivalent (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ (mk&ₚ (mk×ₚ fstₚ₆ s) (mk&ₚ fstₚ₇ (mk&ₚ fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
-  mkTBSCertFields fstₚ₁ sndₚ₁ fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ fstₚ₆ s fstₚ₇ fstₚ₈ sndₚ₂
-    (trans₀ bs≡ (solve (++-monoid UInt8)))
-proj₂ equivalent (mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions bs≡) =
-  mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ (mk×ₚ pk pkBytes) (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
-    (trans₀ bs≡ (solve (++-monoid UInt8)))
-
 iso : Iso Rep TBSCertFields
-proj₁ iso = equivalent
+proj₁ iso = equivalentTBSCertFields
 proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} fstₚ₁ sndₚ₁ refl) (mk&ₚ{bs₁ = bs₃} fstₚ₂ (mk&ₚ{bs₁ = bs₄} fstₚ₃ (mk&ₚ{bs₁ = bs₅} fstₚ₄ (mk&ₚ{bs₁ = bs₆} fstₚ₅ (mk&ₚ{bs₁ = bs₇} (mk×ₚ fstₚ₆ s) (mk&ₚ{bs₁ = bs₈} fstₚ₇ (mk&ₚ{bs₁ = bs₉}{bs₁₀} fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
   subst₀ (λ eq → mk&ₚ _ _ eq ≡ mk&ₚ _ _ bs≡) (≡-unique bs≡ (trans₀ (trans₀ bs≡ _) _)) refl
 proj₂ (proj₂ iso) (mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions bs≡) =
@@ -83,5 +62,5 @@ unambiguous =
           (Unambiguous.option₃&₂
             (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
             (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
-            (TLV.unambiguous Extension.ExtensionSeq.unambiguous)
+            (Extension.unambiguous)
             TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))

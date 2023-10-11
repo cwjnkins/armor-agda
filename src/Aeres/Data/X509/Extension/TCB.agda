@@ -26,6 +26,8 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Option.TCB
 import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Sum.TCB
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.TCB where
@@ -34,6 +36,8 @@ open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.IList.TCB    UInt8
 open Aeres.Grammar.Option.TCB   UInt8
 open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Sum.TCB      UInt8
+open Aeres.Grammar.Seq         UInt8
 
 supportedExtensions : List (List UInt8)
 supportedExtensions =
@@ -57,7 +61,7 @@ ExtensionFieldCPOL    = ExtensionFields (_≡ OIDs.CPOLLit)    CertPolFields
 ExtensionFieldCRLDist = ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields
 ExtensionFieldEKU     = ExtensionFields (_≡ OIDs.EKULit )    EKUFields
 ExtensionFieldIAN     = ExtensionFields (_≡ OIDs.IANLit )    IANFields     
-ExtensionFIeldINAP    = ExtensionFields (_≡ OIDs.INAPLit)    INAPFields
+ExtensionFieldINAP    = ExtensionFields (_≡ OIDs.INAPLit)    INAPFields
 ExtensionFieldKU      = ExtensionFields (_≡ OIDs.KULit  )    KUFields
 ExtensionFieldNC      = ExtensionFields (_≡ OIDs.NCLit  )    NCFields
 ExtensionFieldPC      = ExtensionFields (_≡ OIDs.PCLit  )    PCFields
@@ -80,7 +84,7 @@ data SelectExtn : @0 List UInt8 → Set where
   ncextn   : ∀ {@0 bs} → ExtensionFieldNC bs  → SelectExtn bs 
   pcextn   : ∀ {@0 bs} → ExtensionFieldPC bs → SelectExtn bs 
   pmextn   : ∀ {@0 bs} → ExtensionFieldPM bs → SelectExtn bs 
-  inapextn : ∀ {@0 bs} → ExtensionFIeldINAP bs → SelectExtn bs 
+  inapextn : ∀ {@0 bs} → ExtensionFieldINAP bs → SelectExtn bs 
   aiaextn  : ∀ {@0 bs} → ExtensionFieldAIA bs → SelectExtn bs
   other    : ∀ {@0 bs} → ExtensionFieldUnsupported bs → SelectExtn bs
 
@@ -92,6 +96,94 @@ ExtensionsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Extension) xs
 
 Extensions : @0 List UInt8 → Set
 Extensions xs = TLV Tag.AA3  ExtensionsSeq xs
+
+ExtensionFieldsRep : (@0 P : _) (@0 A : _) → @0 List UInt8 → Set
+ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ → Erased ∘ P ∘ TLV.v)) (&ₚ (Option Boool) A)
+
+equivalentExtensionFields : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
+               → Equivalent (ExtensionFieldsRep P A) (ExtensionFields P A)
+proj₁ equivalentExtensionFields (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
+    mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
+proj₂ equivalentExtensionFields (mkExtensionFields extnId extnId≡ crit extension refl) =
+    mk&ₚ (mk×ₚ extnId (─ extnId≡)) (mk&ₚ crit extension refl) refl
+
+RawExtensionFieldsRep : ∀ {P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFieldsRep P A)
+RawExtensionFieldsRep{P} ra = Raw&ₚ (RawΣₚ₁ RawOID (λ _ x → Erased (P (TLV.v x))))
+                            (Raw&ₚ (RawOption RawBoool) ra)
+
+RawExtensionFields : ∀ {P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFields P A)
+RawExtensionFields ra = Iso.raw equivalentExtensionFields (RawExtensionFieldsRep ra)
+
+SelectExtnRep = (Sum ExtensionFieldAKI
+        (Sum ExtensionFieldSKI
+        (Sum ExtensionFieldKU
+        (Sum ExtensionFieldEKU
+        (Sum ExtensionFieldBC
+        (Sum ExtensionFieldIAN
+        (Sum ExtensionFieldSAN
+        (Sum ExtensionFieldCPOL
+        (Sum ExtensionFieldCRLDist
+        (Sum ExtensionFieldNC
+        (Sum ExtensionFieldPC
+        (Sum ExtensionFieldPM
+        (Sum ExtensionFieldINAP
+        (Sum ExtensionFieldAIA
+             ExtensionFieldUnsupported))))))))))))))
+
+equivalent : Equivalent SelectExtnRep SelectExtn
+proj₁ equivalent (Sum.inj₁ x) = akiextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = skiextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = kuextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = ekuextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = bcextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) = ianextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) = sanextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) = cpextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))) = crlextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))) = ncextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))) = pcextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))) = pmextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))) = inapextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))) = aiaextn x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))) = other x
+proj₂ equivalent (akiextn x) = Sum.inj₁ x
+proj₂ equivalent (skiextn x) = Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (kuextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (ekuextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (bcextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (ianextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (sanextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (cpextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (crlextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (ncextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (pcextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (pmextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (inapextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (aiaextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
+proj₂ equivalent (other x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ $ x
+
+RawSelectExtnRep : Raw SelectExtnRep
+RawSelectExtnRep = RawSum (RawExtensionFields RawAKIFields)
+                   (RawSum (RawExtensionFields RawSKIFields)
+                   (RawSum (RawExtensionFields RawKUFields)
+                   (RawSum (RawExtensionFields RawEKUFields)
+                   (RawSum (RawExtensionFields RawBCFields)
+                   (RawSum (RawExtensionFields RawIANFields)
+                   (RawSum (RawExtensionFields RawSANFields)
+                   (RawSum (RawExtensionFields RawCertPolFields)
+                   (RawSum (RawExtensionFields RawCRLDistFields)
+                   (RawSum (RawExtensionFields RawNCFields)
+                   (RawSum (RawExtensionFields RawPCFields)
+                   (RawSum (RawExtensionFields RawPMFields)
+                   (RawSum (RawExtensionFields RawINAPFields)
+                   (RawSum (RawExtensionFields RawAIAFields)
+                           (RawExtensionFields RawOctetString))))))))))))))
+
+RawSelectExtn : Raw SelectExtn
+RawSelectExtn = Iso.raw equivalent RawSelectExtnRep
+
+RawExtensions : Raw Extensions
+RawExtensions = RawTLV _ (RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawSelectExtn) 1))
 
 module Extension where
   getBC : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldBC)

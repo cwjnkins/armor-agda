@@ -38,7 +38,7 @@ private
 
 parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields n)
 parseTBSCertFields n =
-  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalent))
+  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentTBSCertFields))
     (parse&ᵈ{A = Length≤ (&ₚ (Option Version) Int) n}
       (Parallel.nosubstrings₁ (NonNesting.noconfusion-option&₁ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())))
       (Parallel.Length≤.unambiguous _

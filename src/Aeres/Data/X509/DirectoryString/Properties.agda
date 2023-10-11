@@ -72,7 +72,7 @@ noconfusion₃ x x₁ (Sum.inj₁ x₂) = Parallel.noconfusionΣₚ₁ (TLV.noco
 noconfusion₃ x x₁ (Sum.inj₂ x₂) = Parallel.noconfusionΣₚ₁ (TLV.noconfusion (λ ())) x x₁ x₂
 
 iso : Iso DirectoryStringRep DirectoryString
-proj₁ iso = equivalent
+proj₁ iso = equivalentDirectoryString
 proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = refl

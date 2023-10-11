@@ -47,19 +47,9 @@ open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module Fields where
-  Rep : (@0 P : _) (@0 A : _) → @0 List UInt8 → Set
-  Rep P A = &ₚ (Σₚ OID (λ _ → Erased ∘ P ∘ TLV.v)) (&ₚ (Option Boool) A)
-
-  equivalent : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
-               → Equivalent (Rep P A) (ExtensionFields P A)
-  proj₁ equivalent (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
-    mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
-  proj₂ equivalent (mkExtensionFields extnId extnId≡ crit extension refl) =
-    mk&ₚ (mk×ₚ extnId (─ extnId≡)) (mk&ₚ crit extension refl) refl
-
   iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
-        → Iso (Rep P A) (ExtensionFields P A)
-  proj₁ iso = equivalent
+        → Iso (ExtensionFieldsRep P A) (ExtensionFields P A)
+  proj₁ iso = equivalentExtensionFields
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
@@ -71,55 +61,15 @@ module Fields where
         (Parallel.nosubstrings₁ TLV.nosubstrings)
         (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings ua₂ nc))
 
-module Select where
-  Rep = (Sum (ExtensionFields (_≡ OIDs.AKILit      )            AKIFields)
-        (Sum (ExtensionFields (_≡ OIDs.SKILit      )            SKIFields)
-        (Sum (ExtensionFields (_≡ OIDs.KULit       )            KUFields)
-        (Sum (ExtensionFields (_≡ OIDs.EKULit      )            EKUFields)
-        (Sum (ExtensionFields (_≡ OIDs.BCLit       )            BCFields)
-        (Sum (ExtensionFields (_≡ OIDs.IANLit      )            IANFields)
-        (Sum (ExtensionFields (_≡ OIDs.SANLit      )            SANFields)
-        (Sum (ExtensionFields (_≡ OIDs.CPOLLit     )            CertPolFields)
-        (Sum (ExtensionFields (_≡ OIDs.CRLDISTLit  )            CRLDistFields)
-        (Sum (ExtensionFields (_≡ OIDs.NCLit       )            NCFields)
-        (Sum (ExtensionFields (_≡ OIDs.PCLit       )            PCFields)
-        (Sum (ExtensionFields (_≡ OIDs.PMLit       )            PMFields)
-        (Sum (ExtensionFields (_≡ OIDs.INAPLit     )            INAPFields)
-        (Sum (ExtensionFields (_≡ OIDs.AIALit      )            AIAFields)
-             (ExtensionFields (False ∘ (_∈? supportedExtensions)) OctetString)))))))))))))))
-  equivalent : Equivalent Rep SelectExtn
-  proj₁ equivalent (Sum.inj₁ x) = akiextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = skiextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))) = kuextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))) = ekuextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))) = bcextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))) = ianextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))) = sanextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))) = cpextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))) = crlextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))) = ncextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))) = pcextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))) = pmextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))) = inapextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))) = aiaextn x
-  proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))) = other x
-  proj₂ equivalent (akiextn x) = Sum.inj₁ x
-  proj₂ equivalent (skiextn x) = Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (kuextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (ekuextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (bcextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (ianextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (sanextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (cpextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (crlextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (ncextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (pcextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (pmextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (inapextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (aiaextn x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₁ $ x
-  proj₂ equivalent (other x) = Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ ∘ Sum.inj₂ $ x
+  @0 nonmalleable : ∀ {P}{A : @0 List UInt8 → Set} {ra : Raw A} → Unambiguous P → NonMalleable ra → NonMalleable (RawExtensionFields{P} ra)
+  nonmalleable{ra = ra} x x₁ = Iso.nonmalleable iso (RawExtensionFieldsRep ra)
+    (Seq.nonmalleable
+     (Parallel.nonmalleable₁ RawOID OID.nonmalleable λ a p₁ p₂ → erased-unique x p₁ p₂)
+     (Seq.nonmalleable
+       (Option.nonmalleable RawBoool Boool.nonmalleable) x₁))
 
-  iso : Iso Rep SelectExtn
+module Select where
+  iso : Iso SelectExtnRep SelectExtn
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (Sum.inj₁ x) = refl
   proj₁ (proj₂ iso) (Sum.inj₂ (Sum.inj₁ x)) = refl
@@ -476,12 +426,34 @@ module Select where
     ua : Unambiguous (False ∘ (_∈? supportedExtensions))
     ua = T-unique
 
-module ExtensionSeq where
-  @0 unambiguous : Unambiguous ExtensionsSeq
-  unambiguous =
-    TLV.unambiguous
+  postulate
+    @0 nonmalleable : NonMalleable RawSelectExtn
+  -- nonmalleable = Iso.nonmalleable iso RawSelectExtnRep
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique AKI.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique SKI.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique KU.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique EKU.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique BC.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique IAN.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique SAN.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique CertPolicy.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique CRLDistPoint.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique NC.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique PC.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique PM.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique INAP.nonmalleable)
+  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique AIA.nonmalleable)
+  --                     (Fields.nonmalleable T-unique OctetString.nonmalleable)))))))))))))))
+
+@0 unambiguous : Unambiguous Extensions
+unambiguous =
+    TLV.unambiguous (TLV.unambiguous
       (SequenceOf.Bounded.unambiguous
         (TLV.unambiguous Select.unambiguous)
-        TLV.nonempty TLV.nosubstrings)
+        TLV.nonempty TLV.nosubstrings))
 
-
+@0 nonmalleable : NonMalleable RawExtensions
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+                 (SequenceOf.Bounded.nonmalleable
+                   TLV.nonempty TLV.nosubstrings (TLV.nonmalleable
+                     Select.nonmalleable)))
