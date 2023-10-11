@@ -85,6 +85,13 @@ module Parallel where
       refl → case (‼ ub _ sndₚ₁ sndₚ₂) ret (const _) of λ where
         refl → refl
 
+  @0 nonmalleable×ₚ
+    : {A B : @0 List Σ → Set} {ra : Raw A} {rb : Raw B}
+      → NonMalleable ra → NonMalleable rb → NonMalleable (Raw×ₚ ra rb)
+  nonmalleable×ₚ nm₁ nm₂ (mk×ₚ a₁ b₁) (mk×ₚ a₂ b₂) eq =
+    case nm₁ a₁ a₂ (cong proj₁ eq) ,′ nm₂ b₁ b₂ (cong (λ x → proj₂ x) eq) ret (const _) of λ where
+      (refl , refl) → refl
+
 module ExactLength {n : ℕ} (A : @0 List Σ → Set) where
   @0 nosubstrings : NoSubstrings (ExactLength A n)
   nosubstrings xs₁++ys₁≡xs₂++ys₂ (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) =

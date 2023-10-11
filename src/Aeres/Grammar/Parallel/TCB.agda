@@ -23,6 +23,10 @@ RawΣₚ₁ : {A : @0 List Σ → Set} → Raw A → (B : (xs : List Σ) (a : A 
 Raw.D (RawΣₚ₁ r B) = Raw.D r
 Raw.to (RawΣₚ₁ r B) (mk×ₚ a _) = Raw.to r a
 
+Raw×ₚ : {A B : @0 List Σ → Set} → Raw A → Raw B → Raw (A ×ₚ B)
+Raw.D (Raw×ₚ ra rb) = Raw.D ra × Raw.D rb
+Raw.to (Raw×ₚ ra rb) (mk×ₚ a b) = (Raw.to ra a) , (Raw.to rb b)
+
 map×ₚ : ∀ {@0 A₁ A₂ B} → (∀ {@0 xs} → A₁ xs → A₂ xs) → (∀ {@0 xs} → (A₁ ×ₚ B) xs → (A₂ ×ₚ B) xs)
 map×ₚ f (mk×ₚ fstₚ₁ sndₚ₁) = mk×ₚ (f fstₚ₁) sndₚ₁
 
