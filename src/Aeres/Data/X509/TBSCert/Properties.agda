@@ -30,7 +30,7 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-iso : Iso Rep TBSCertFields
+iso : Iso TBSCertFieldsRep TBSCertFields
 proj₁ iso = equivalentTBSCertFields
 proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ{bs₁ = bs₁}{bs₂} fstₚ₁ sndₚ₁ refl) (mk&ₚ{bs₁ = bs₃} fstₚ₂ (mk&ₚ{bs₁ = bs₄} fstₚ₃ (mk&ₚ{bs₁ = bs₅} fstₚ₄ (mk&ₚ{bs₁ = bs₆} fstₚ₅ (mk&ₚ{bs₁ = bs₇} (mk×ₚ fstₚ₆ s) (mk&ₚ{bs₁ = bs₈} fstₚ₇ (mk&ₚ{bs₁ = bs₉}{bs₁₀} fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
   subst₀ (λ eq → mk&ₚ _ _ eq ≡ mk&ₚ _ _ bs≡) (≡-unique bs≡ (trans₀ (trans₀ bs≡ _) _)) refl
@@ -64,3 +64,8 @@ unambiguous =
             (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
             (Extension.unambiguous)
             TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))
+
+postulate
+  @0 nonmalleable : NonMalleable RawTBSCertFields
+-- nonmalleable = Iso.nonmalleable iso RawTBSCertFieldsRep
+--  {!!}

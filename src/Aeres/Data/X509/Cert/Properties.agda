@@ -26,20 +26,6 @@ open Aeres.Grammar.Option       UInt8
 open Aeres.Grammar.Parallel     UInt8
 open Aeres.Grammar.Seq          UInt8
 
-CertFieldsRep : @0 List UInt8 → Set
-CertFieldsRep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
-
-equivalentCertFields : Equivalent CertFieldsRep CertFields
-proj₁ equivalentCertFields (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s') refl) bs≡) =
-  mkCertFields fstₚ₁ s fstₚ₂ sndₚ₁ s' bs≡
-proj₂ equivalentCertFields (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
-  = mk&ₚ (mk×ₚ tbs tbsBytes) (mk&ₚ signAlg (mk×ₚ signature signatureBytes) refl) bs≡
-
-iso   : Iso CertFieldsRep CertFields
-proj₁ iso = equivalentCertFields
-proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _) refl) refl) = refl
-proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) = refl
-
 -- instance
 --   CertEq : Eq (Exists─ (List UInt8) CertFields)
 --   CertEq = (isoEq iso eq)
@@ -49,12 +35,19 @@ proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) 
 --            (eq&ₚ it
 --              (eqΣₚ (Eq≋⇒Eq (TLV.EqTLV ⦃ Eq⇒Eq≋ BitString.eq ⦄)) λ _ → it))
 
-@0 unambiguous : Unambiguous CertFields
+iso   : Iso CertFieldsRep CertFields
+proj₁ iso = equivalentCertFields
+proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _) refl) refl) = refl
+proj₂ (proj₂ iso) (mkCertFields tbs tbsBytes signAlg signature sbytes refl) = refl
+
+@0 unambiguous : Unambiguous Cert
 unambiguous =
-  Iso.unambiguous iso
+  TLV.unambiguous (Iso.unambiguous iso
     (Seq.unambiguous
       (Parallel.unambiguous (TLV.unambiguous TBSCert.unambiguous) (λ where _ self self → refl))
       (Parallel.nosubstrings₁ TLV.nosubstrings)
       (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
-        (Parallel.unambiguous (TLV.unambiguous BitString.unambiguous) (λ where _ self self → refl))))
+        (Parallel.unambiguous (TLV.unambiguous BitString.unambiguous) (λ where _ self self → refl)))))
 
+postulate
+  @0 nonmalleable : NonMalleable RawCert

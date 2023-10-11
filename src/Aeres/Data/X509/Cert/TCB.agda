@@ -18,13 +18,17 @@ open import Aeres.Data.X690-DER.OID
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Option.TCB
 import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Cert.TCB where
 
+open Aeres.Grammar.Seq    UInt8
 open Aeres.Grammar.IList.TCB    UInt8
 open Aeres.Grammar.Option.TCB   UInt8
 open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Definitions UInt8
 
 record CertFields (@0 bs : List UInt8) : Set where
   constructor mkCertFields
@@ -246,10 +250,28 @@ module Cert where
       helper : ∀ {@0 bs} → SequenceOf OID bs → List (List UInt8)
       helper nil = []
       helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
-
 open Cert public using (Cert)
 
 module Chain where
   Chain : (@0 _ : List UInt8) → Set
   Chain = IList Cert
 open Chain public using (Chain)
+
+CertFieldsRep : @0 List UInt8 → Set
+CertFieldsRep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
+
+equivalentCertFields : Equivalent CertFieldsRep CertFields
+proj₁ equivalentCertFields (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ s') refl) bs≡) =
+  mkCertFields fstₚ₁ s fstₚ₂ sndₚ₁ s' bs≡
+proj₂ equivalentCertFields (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
+  = mk&ₚ (mk×ₚ tbs tbsBytes) (mk&ₚ signAlg (mk×ₚ signature signatureBytes) refl) bs≡
+
+postulate
+  RawCertFieldsRep : Raw CertFieldsRep
+-- RawCertFieldsRep = Raw&ₚ {!!} (Raw&ₚ {!!} {!!})
+
+RawCertFields : Raw CertFields
+RawCertFields = Iso.raw equivalentCertFields RawCertFieldsRep
+
+RawCert : Raw Cert
+RawCert = RawTLV _ RawCertFields

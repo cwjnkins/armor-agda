@@ -10,6 +10,7 @@ import      Aeres.Data.X509.TBSCert.Version.TCB as Version
 import      Aeres.Data.X509.Validity.TCB as Validity
 open import Aeres.Data.X509.Validity.Time.TCB
 import      Aeres.Data.X690-DER.Int.TCB as Int
+open import Aeres.Data.X690-DER.BitString.TCB as BitString
 import      Aeres.Data.X690-DER.SequenceOf as SequenceOf
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -139,11 +140,11 @@ Rep₅ = &ₚ Validity Rep₄
 Rep₆ = &ₚ Name Rep₅
 Rep₇ = &ₚ SignAlg Rep₆
 
-Rep : @0 List UInt8 → Set
-Rep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
+TBSCertFieldsRep : @0 List UInt8 → Set
+TBSCertFieldsRep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
 
 equivalentTBSCertFields : Equivalent
-               Rep
+               TBSCertFieldsRep
                TBSCertFields
 proj₁ equivalentTBSCertFields (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ (mk&ₚ (mk×ₚ fstₚ₆ s) (mk&ₚ fstₚ₇ (mk&ₚ fstₚ₈ sndₚ₂ refl) refl) refl) refl) refl) refl) refl) bs≡) =
   mkTBSCertFields fstₚ₁ sndₚ₁ fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ fstₚ₆ s fstₚ₇ fstₚ₈ sndₚ₂
@@ -151,3 +152,18 @@ proj₁ equivalentTBSCertFields (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&�
 proj₂ equivalentTBSCertFields (mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions bs≡) =
   mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ (mk×ₚ pk pkBytes) (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
     (trans₀ bs≡ (solve (++-monoid UInt8)))
+
+postulate
+  RawTBSCertFieldsRep : Raw TBSCertFieldsRep
+-- RawTBSCertFieldsRep = Raw&ₚ (Raw&ₚ (RawOption (RawTLV _ RawInt)) RawInt)
+--                       (Raw&ₚ {!!}
+--                       (Raw&ₚ Name.RawName
+--                       (Raw&ₚ Validity.RawValidity
+--                       (Raw&ₚ Name.RawName
+--                       (Raw&ₚ {!!}
+--                       (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
+--                       (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
+--                              (RawOption RawExtensions))))))))
+
+RawTBSCertFields : Raw TBSCertFields
+RawTBSCertFields = Iso.raw equivalentTBSCertFields RawTBSCertFieldsRep

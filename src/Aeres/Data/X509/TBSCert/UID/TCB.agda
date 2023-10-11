@@ -13,4 +13,3 @@ IssUID xs = TLV Tag.A81 BitStringValue xs
 
 SubUID : (@0 _ : List UInt8) → Set
 SubUID xs = TLV Tag.A82 BitStringValue xs
-
