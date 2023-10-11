@@ -260,13 +260,3 @@ nonmalleable = Iso.nonmalleable iso RawGeneralNameRep nm
          (Sum.nonmalleable{ra = RawTLV _ RawIA5StringValue}  {rb = Rep₇} (TLV.nonmalleable IA5String.nonmalleableValue)
          (Sum.nonmalleable{ra = RawTLV _ RawOctetStringValue}            (TLV.nonmalleable OctetString.nonmalleableValue)
                                                                          (TLV.nonmalleable OID.nonmalleableValue))))))))
-
-    -- nm = Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable ?)
-    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable IA5String.nonmalleableValue)
-    --      (Sum.nonmalleable (TLV.nonmalleable OctetString.nonmalleableValue)
-    --        (TLV.nonmalleable {!!}))))))))

@@ -18,5 +18,8 @@ RDNElems = NonEmptySequenceOf ATV
 RDN : @0 List UInt8 → Set
 RDN = TLV Tag.Sett RDNElems
 
+RawRDNElems : Raw RDNElems
+RawRDNElems = RawBoundedSequenceOf RawATV 1
+
 RawRDN : Raw RDN
-RawRDN = RawTLV Tag.Sett (RawBoundedSequenceOf RawATV 1)
+RawRDN = RawTLV Tag.Sett RawRDNElems

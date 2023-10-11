@@ -20,7 +20,13 @@ open Aeres.Grammar.Parallel    UInt8
 @0 unambiguous : Unambiguous AccessDesc
 unambiguous = TLV.unambiguous 
   (DefinedByOID.unambiguous _
-    (λ o → Parallel.unambiguous×ₚ GeneralNames.GeneralName.unambiguous (λ a₁ a₂ → T-unique a₁ a₂)))
+    (λ o → Parallel.unambiguous×ₚ GeneralNames.GeneralName.unambiguous λ a₁ a₂ → T-unique a₁ a₂))
 
-postulate
-  @0 nonmalleable : NonMalleable RawAccessDesc
+@0 nonmalleable : NonMalleable RawAccessDesc
+nonmalleable = TLV.nonmalleable
+    (DefinedByOID.nonmalleableFields AccessDescParam λ {bs} {a} {bs₁} {bs₂} → nm{bs}{a}{bs₁}{bs₂})
+  where
+  nm : NonMalleable₁ RawAccessDescParam
+  nm p₁ p₂ eq =
+      Parallel.nonmalleable₁ GeneralNames.RawGeneralName GeneralNames.GeneralName.nonmalleable (λ a p₃ p₄ → T-unique p₃ p₄)
+        p₁ p₂ eq

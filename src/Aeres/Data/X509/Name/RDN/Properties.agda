@@ -16,13 +16,15 @@ open Aeres.Grammar.Definitions UInt8
 @0 unambiguousElems : Unambiguous RDNElems
 unambiguousElems = SequenceOf.Bounded.unambiguous ATV.unambiguous TLV.nonempty TLV.nosubstrings
 
+@0 nonmalleableElems : NonMalleable RawRDNElems
+nonmalleableElems = SequenceOf.Bounded.nonmalleable{n = 1}{R = RawATV} TLV.nonempty TLV.nosubstrings ATV.nonmalleable
+
 @0 unambiguous : Unambiguous RDN
 unambiguous = TLV.unambiguous unambiguousElems
 
 @0 nonmalleable : NonMalleable RawRDN
 nonmalleable =
-  TLV.nonmalleable{A = NonEmptySequenceOf ATV}{R = RawBoundedSequenceOf RawATV 1}
-    (SequenceOf.Bounded.nonmalleable{n = 1}{R = RawATV} TLV.nonempty TLV.nosubstrings ATV.nonmalleable)
+  TLV.nonmalleable{A = NonEmptySequenceOf ATV}{R = RawBoundedSequenceOf RawATV 1} nonmalleableElems
 
 instance
   eq≋ : Eq≋ (NonEmptySequenceOf ATV)

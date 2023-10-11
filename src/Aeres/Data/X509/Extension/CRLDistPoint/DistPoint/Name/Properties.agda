@@ -38,9 +38,7 @@ unambiguous =
 @0 nonmalleable : NonMalleable RawDistPointName
 nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawDistPointNameChoiceRep nm)
   where
-  postulate
-    nm : NonMalleable RawDistPointNameChoiceRep
-  -- nm = Sum.nonmalleable
-  --       (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable GeneralName.nonempty
-  --         GeneralName.nosubstrings GeneralName.nonmalleable))
-  --       (TLV.nonmalleable Name.nonmalleableElems)
+  nm : NonMalleable RawDistPointNameChoiceRep
+  nm = Sum.nonmalleable{ra = RawTLV _ RawGeneralNamesElems}{rb = RawTLV _ Name.RawRDNElems}
+         (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable)
+         (TLV.nonmalleable Name.RDN.nonmalleableElems)

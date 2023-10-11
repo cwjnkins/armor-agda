@@ -35,9 +35,11 @@ unambiguous =
       (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
 
-postulate
-  @0 nonmalleable : NonMalleable RawAKIFields
--- nonmalleable = TLV.nonmalleable (TLV.nonmalleable
---                  (Iso.nonmalleable iso RawAKIFieldsSeqFieldsRep
---                  (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable OctetString.nonmalleableValue))
---                  (Seq.nonmalleable (Option.nonmalleable ? (TLV.nonmalleable ?)) ?))))
+@0 nonmalleable : NonMalleable RawAKIFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable
+                 (Iso.nonmalleable iso RawAKIFieldsSeqFieldsRep nm))
+  where
+  nm : NonMalleable RawAKIFieldsSeqFieldsRep
+  nm = Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable OctetString.nonmalleableValue))
+         (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable))
+                             (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal)))

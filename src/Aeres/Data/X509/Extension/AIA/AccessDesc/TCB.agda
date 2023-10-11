@@ -27,5 +27,9 @@ AccessDescParam o =
 AccessDesc : @0 List UInt8 → Set
 AccessDesc = DefinedByOID AccessDescParam
 
-postulate
-  RawAccessDesc : Raw AccessDesc
+RawAccessDescParam : Raw₁ RawOID AccessDescParam
+Raw₁.D RawAccessDescParam _ = Raw.D RawGeneralName
+Raw₁.to RawAccessDescParam _ x = Raw.to RawGeneralName (fstₚ x)
+
+RawAccessDesc : Raw AccessDesc
+RawAccessDesc = RawDefinedByOID RawAccessDescParam
