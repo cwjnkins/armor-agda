@@ -91,12 +91,29 @@ module MGF1 where
           noConfusion-SHA224-)
         noConfusion-SHA1-
 
+    @0 nonmalleable : NonMalleable RawSupportedHashAlg
+    nonmalleable =
+       Sum.nonmalleable (HashAlg.SHA-Like.nonmalleable SHA1)
+      (Sum.nonmalleable (HashAlg.SHA-Like.nonmalleable SHA224)
+      (Sum.nonmalleable (HashAlg.SHA-Like.nonmalleable SHA256)
+      (Sum.nonmalleable (HashAlg.SHA-Like.nonmalleable SHA384)
+                        (HashAlg.SHA-Like.nonmalleable SHA512))))
+
   @0 unambiguous : Unambiguous MaskGenAlg
   unambiguous =
     TLV.unambiguous
       (DefinedByOID.unambiguous Param
         λ o →
          Parallel.unambiguous×ₚ SupportedHashAlg.unambiguous (λ where ≋-refl ≋-refl → refl))
+
+  @0 nonmalleableParam : NonMalleable₁ RawParam
+  nonmalleableParam p₁ p₂ eq =
+    Parallel.nonmalleable₁ RawSupportedHashAlg SupportedHashAlg.nonmalleable
+      (λ where _ ≋-refl ≋-refl → refl)
+      p₁ p₂ eq
+
+  @0 nonmalleable : NonMalleable RawMaskGenAlg
+  nonmalleable = DefinedByOID.nonmalleable Param _ (λ {bs}{a} → nonmalleableParam{bs}{a})
 
   instance
     MG1Eq≋ : Eq≋ (DefinedByOIDFields Param)

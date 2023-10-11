@@ -51,8 +51,23 @@ module MGF1 where
     (Sum HashAlg.SHA384
          HashAlg.SHA512)))
 
+  RawSupportedHashAlg : Raw SupportedHashAlg
+  RawSupportedHashAlg =
+     RawSum (HashAlg.RawSHALike SHA1)
+    (RawSum (HashAlg.RawSHALike SHA224)
+    (RawSum (HashAlg.RawSHALike SHA256)
+    (RawSum (HashAlg.RawSHALike SHA384)
+            (HashAlg.RawSHALike SHA512))))
+
   Param : {@0 bs : List UInt8} (o : OID bs) → @0 List UInt8 → Set
   Param o =    SupportedHashAlg
             ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.MGF1)
 
+  RawParam : Raw₁ RawOID Param
+  Raw₁.D RawParam o = Raw.D RawSupportedHashAlg
+  Raw₁.to RawParam o p = Raw.to RawSupportedHashAlg (fstₚ p)
+
   MaskGenAlg = DefinedByOID Param
+
+  RawMaskGenAlg : Raw MaskGenAlg
+  RawMaskGenAlg = RawDefinedByOID RawParam
