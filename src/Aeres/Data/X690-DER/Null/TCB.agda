@@ -11,13 +11,11 @@ open import Aeres.Prelude
 module Aeres.Data.X690-DER.Null.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable UInt8
-  using (Raw)
 
 Null = TLV Tag.Null (_≡ [])
 
 nullTLV : Null (Tag.Null ∷ [ # 0 ])
 nullTLV = mkTLV (Length.shortₛ (# 0)) refl refl refl
 
-RawNull : Raw (_≡ [])
-Raw.D RawNull = ⊤
-Raw.to RawNull _ = tt
+RawNull : Raw Null
+RawNull = RawTLV _ RawSubSingleton

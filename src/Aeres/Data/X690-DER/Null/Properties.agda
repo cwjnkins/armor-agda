@@ -16,11 +16,8 @@ open Aeres.Grammar.Definitions              UInt8
 @0 unambiguous : Unambiguous Null
 unambiguous = TLV.unambiguous λ where refl refl → refl
 
-@0 nonmalleableValue : NonMalleable RawNull
-nonmalleableValue refl refl _ = refl
-
-@0 nonmalleable : NonMalleable _
-nonmalleable = TLV.nonmalleable{t = Tag.Null} nonmalleableValue
+@0 nonmalleable : NonMalleable RawNull
+nonmalleable = TLV.nonmalleable{t = Tag.Null} (subsingleton⇒nonmalleable (λ where (─ _ , refl) (─ _ , refl) → refl))
 
 instance
   eq≋ : Eq≋ (_≡ [])

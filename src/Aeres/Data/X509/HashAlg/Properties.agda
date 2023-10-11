@@ -65,6 +65,17 @@ module SHA-Like where
               TLV.nonempty)
             (λ where ≋-refl ≋-refl → refl)))
 
+  @0 nonmalleableParam : ∀ {bs} (o : OIDValue bs) → NonMalleable₁ (RawSHALikeParam o)
+  nonmalleableParam o p₁ p₂ eq =
+    Parallel.nonmalleable₁
+      (RawOption RawNull)
+      (Option.nonmalleable _ Null.nonmalleable)
+      (λ where _ ≋-refl ≋-refl → refl)
+      p₁ p₂ eq
+
+  @0 nonmalleable : ∀ {bs} (o : OIDValue bs) → NonMalleable (RawSHALike o)
+  nonmalleable o = DefinedByOID.nonmalleable (SHA-Like-Param o) _ λ {bs} {a} → nonmalleableParam o {bs}{a}
+
   instance
     eq≋ : ∀ {@0 bs} → {o : OIDValue bs} → Eq≋ (DefinedByOIDFields (SHA-Like-Param o))
     eq≋ =
