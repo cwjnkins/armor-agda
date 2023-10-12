@@ -21,11 +21,15 @@ Params o =
      EcPkAlgParams
   ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.EC)
 
+RawParams : Raw₁ RawOID Params
+Raw₁.D RawParams o = Raw.D {!!}
+Raw₁.to RawParams o p = {!!}
+
 EC : @0 List UInt8 → Set
 EC = DefinedByOID Params
 
 getOID : ∀ {@0 bs} → EC bs → Exists─ _ OID
 getOID ec = -, (DefinedByOIDFields.oid (TLV.val ec))
 
-postulate
-  RawEC : Raw EC
+RawEC : Raw EC
+RawEC = {!!}

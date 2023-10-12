@@ -18,18 +18,21 @@ module MinRep where
 nonempty : NonEmpty IntegerValue
 nonempty (mkIntVal bₕ bₜ minRep val ()) refl
 
-@0 unambiguous : Unambiguous IntegerValue
-unambiguous (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
+@0 unambiguousValue : Unambiguous IntegerValue
+unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
   case (trans (sym bs≡) bs≡₁) ret (const _) of λ where
     refl → case (‼ uniqueSingleton val val₁) ret (const _) of λ where
       refl → case (‼ MinRep.unique minRep minRep₁) ret (const _) of λ where
         refl → case (‼ ≡-unique bs≡ bs≡₁) ret (const _) of λ where
           refl → refl
 
+@0 unambiguous : Unambiguous Int
+unambiguous = TLV.unambiguous unambiguousValue
+
 @0 nonmalleableVal : NonMalleable RawIntegerValue
 nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁) i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂) eq =
   case bs₁≡bs₂ ret (const _) of λ where
-    refl → case (‼ unambiguous i₁ i₂) ret (const _) of λ where
+    refl → case (‼ unambiguousValue i₁ i₂) ret (const _) of λ where
       refl → refl
   where
   open ≡-Reasoning

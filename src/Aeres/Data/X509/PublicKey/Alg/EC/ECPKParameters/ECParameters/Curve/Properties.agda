@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.TCB
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.TCB
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
@@ -12,7 +12,7 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
-module Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.Properties where
+module Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.Properties where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
@@ -20,16 +20,7 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 open ≡-Reasoning
 
-Rep = &ₚ (&ₚ OctetString OctetString) (Option BitString)
-
-equivalent : Equivalent Rep CurveFields
-proj₁ equivalent (mk&ₚ (mk&ₚ{bs₁}{bs₂} fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) = mkCurveFields fstₚ₁ sndₚ₂ sndₚ₁
-  (begin (_ ≡⟨ bs≡ ⟩ ++-assoc bs₁ bs₂ _))
-proj₂ equivalent (mkCurveFields{p}{q} a b seed bs≡) = mk&ₚ (mk&ₚ a b refl) seed
-  (begin (_ ≡⟨ bs≡ ⟩ sym (++-assoc p q _)))
-
-
-iso : Iso (&ₚ (&ₚ OctetString OctetString) (Option BitString)) CurveFields
+iso : Iso CurveFieldsRep CurveFields
 proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ{bs₂ = bs₃} (mk&ₚ{bs₁ = bs₁}{bs₂} a b refl) seed refl) = ‼
   ≡-elimₖ
@@ -46,3 +37,12 @@ unambiguous = Iso.unambiguous iso
   (Seq.unambiguous (Seq.unambiguous (TLV.unambiguous OctetString.unambiguous) TLV.nosubstrings (TLV.unambiguous OctetString.unambiguous))
     (Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings)
       (Unambiguous.option₁ (TLV.unambiguous BitString.unambiguous) TLV.nonempty))
+
+@0 nonmalleableFields : NonMalleable RawCurveFields
+nonmalleableFields =
+  Iso.nonmalleable iso RawCurveFieldsRep
+    (Seq.nonmalleable (Seq.nonmalleable OctetString.nonmalleable OctetString.nonmalleable)
+      (Option.nonmalleable _ BitString.nonmalleable))
+
+@0 nonmalleable : NonMalleable RawCurve
+nonmalleable = TLV.nonmalleable nonmalleableFields

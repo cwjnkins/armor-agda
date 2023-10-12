@@ -1,0 +1,37 @@
+{-# OPTIONS --subtyping #-}
+
+open import Aeres.Binary
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.CharTwo.Basis
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.CharTwo.TCB
+open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.TLV
+import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Seq
+open import Aeres.Prelude
+
+module Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.CharTwo.Properties where
+
+open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Seq         UInt8
+
+iso : Iso CharTwoFieldsRep CharTwoFields
+proj₁ iso = equivalent
+proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (mkCharTwoFields m basis bs≡) = refl
+
+@0 nosubstrings : NoSubstrings CharTwoFields
+nosubstrings =
+  Iso.nosubstrings equivalent
+    (Seq.nosubstrings TLV.nosubstrings Basis.nosubstrings)
+
+@0 unambiguous : Unambiguous CharTwo
+unambiguous =
+  TLV.unambiguous
+    (Iso.unambiguous iso
+      (Seq.unambiguous Int.unambiguous TLV.nosubstrings Basis.unambiguous))
+
+@0 nonmalleable : NonMalleable RawCharTwo
+nonmalleable =
+  TLV.nonmalleable{R = RawCharTwoFields}
+    (Iso.nonmalleable iso RawCharTwoFieldsRep
+      (Seq.nonmalleable{ra = RawInt}{rb = RawBasisFields} Int.nonmalleable Basis.nonmalleable))

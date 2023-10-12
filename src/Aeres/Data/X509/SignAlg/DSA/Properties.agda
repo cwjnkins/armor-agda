@@ -60,6 +60,16 @@ module DSA-Like where
     where
     open ≡-Reasoning
 
+  @0 nonmalleableParam : ∀ {@0 bs} (o : OIDValue bs) → NonMalleable₁ (RawDSALikeParams o)
+  nonmalleableParam o p₁ p₂ eq =
+    Parallel.nonmalleable₁ RawNull Null.nonmalleable (λ where _ ≋-refl ≋-refl → refl)
+      p₁ p₂ eq
+
+  @0 nonmalleable : ∀ {@0 bs} (o : OIDValue bs) → NonMalleable (RawDSALike o)
+  nonmalleable o =
+    DefinedByOID.nonmalleable (DSA-Like-Params o) _
+      (λ {bs} {o'} → nonmalleableParam o{bs}{o'})
+
 
 @0 unambiguous : Unambiguous Supported
 unambiguous =
@@ -70,3 +80,9 @@ unambiguous =
     (NoConfusion.sumₚ{A = SHA1}
       (DSA-Like.noConfusion _ _)
       (DSA-Like.noConfusion _ _))
+
+@0 nonmalleable : NonMalleable RawSupported
+nonmalleable =
+   Sum.nonmalleable (DSA-Like.nonmalleable OIDs.DSA.SHA1)
+  (Sum.nonmalleable (DSA-Like.nonmalleable OIDs.DSA.SHA224)
+                    (DSA-Like.nonmalleable OIDs.DSA.SHA256))

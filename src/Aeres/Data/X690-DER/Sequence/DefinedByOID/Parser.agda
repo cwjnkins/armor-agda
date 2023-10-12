@@ -23,12 +23,12 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "Sequence: DefinedByOID"
 
-parseDefinedByOIDFields
+parseFields
   : ∀ {@0 P : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set}
     → (s : String)
     → (∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (P o) n))
     → ∀ n → Parser (Logging ∘ Dec) (ExactLength (DefinedByOIDFields P) n)
-parseDefinedByOIDFields{P} s p₁ n =
+parseFields{P} s p₁ n =
   parseEquivalent
     (Iso.transEquivalent{B = ExactLength (DefinedByOIDFieldsRep P) n}
       (Iso.symEquivalent Distribute.exactLength-&ᵈ)
@@ -47,4 +47,4 @@ parse
     → String
     → (∀ n {@0 bs} → (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (P o) n))
     → Parser (Logging ∘ Dec) (DefinedByOID P)
-parse{P} s p = parseTLV _ (s String.++ here') (DefinedByOIDFields P) λ n → parseDefinedByOIDFields s p n
+parse{P} s p = parseTLV _ (s String.++ here') (DefinedByOIDFields P) λ n → parseFields s p n

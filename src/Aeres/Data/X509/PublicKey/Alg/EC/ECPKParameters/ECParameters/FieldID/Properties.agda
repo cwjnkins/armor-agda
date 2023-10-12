@@ -1,0 +1,43 @@
+{-# OPTIONS --subtyping #-}
+
+open import Aeres.Binary
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.CharTwo
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.TCB
+import      Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.TCB.OIDs as OIDs
+open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
+import      Aeres.Grammar.Definitions
+open import Aeres.Prelude
+open import Data.Sum.Properties
+
+module Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.FieldID.Properties where
+
+open Aeres.Grammar.Definitions UInt8
+
+@0 unambiguousParams : ∀ {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported)) → Unambiguous (FieldIDParameters' o o∈?)
+unambiguousParams o (no ¬p) = λ ()
+unambiguousParams o (yes (here px)) = Int.unambiguous
+unambiguousParams o (yes (there (here px))) = CharTwo.unambiguous
+
+@0 unambiguous : Unambiguous FieldID
+unambiguous =
+  TLV.unambiguous
+    (DefinedByOID.unambiguous FieldIDParameters
+      λ {bs} o → unambiguousParams{bs} o ((-, TLV.val o) ∈? OIDs.Supported))
+
+@0 nonmalleableParameters : NonMalleable₁ RawFieldIDParameters
+nonmalleableParameters{bs}{o}{bs₁}{bs₂} =
+  case (-, TLV.val o) ∈? OIDs.Supported
+  ret (λ o∈? → (p₁ : FieldIDParameters' o o∈? bs₁) (p₂ : FieldIDParameters' o o∈? bs₂)
+             → toRawFieldIDParameters o o∈? p₁ ≡ toRawFieldIDParameters o o∈? p₂
+             → _≡_{A = Exists─ _ (FieldIDParameters' o o∈?)} (─ bs₁ , p₁) (─ bs₂ , p₂))
+  of λ where
+    (no ¬p) () _ _
+    (yes (here px)) p₁ p₂ eq →
+      ‼ Int.nonmalleable p₁ p₂ (inj₁-injective eq)
+    (yes (there (here px))) p₁ p₂ eq → ‼ CharTwo.nonmalleable p₁ p₂ (inj₂-injective eq)
+
+@0 nonmalleable : NonMalleable RawFieldID
+nonmalleable = DefinedByOID.nonmalleable FieldIDParameters _ {R = RawFieldIDParameters} λ {bs}{a} → nonmalleableParameters{bs}{a} 

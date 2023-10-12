@@ -1,8 +1,8 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.Properties
-open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.TCB
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.Properties
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.TCB
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
@@ -14,7 +14,7 @@ import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
-module Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.Parser where
+module Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
@@ -24,7 +24,7 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
 private
-  here' = "parseCurveFields"
+  here' = "X509: PublicKey: Alg: EC: ECPKParameters: ECParameters: Curve"
 
 parseCurveFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CurveFields n)
 parseCurveFields n =
@@ -45,5 +45,5 @@ parseCurveFields n =
                   parseBitstring _))
 
 parseCurve : Parser (Logging ∘ Dec) Curve
-parseCurve = parseTLV _ "Curve" _ parseCurveFields
+parseCurve = parseTLV _ here' _ parseCurveFields
 

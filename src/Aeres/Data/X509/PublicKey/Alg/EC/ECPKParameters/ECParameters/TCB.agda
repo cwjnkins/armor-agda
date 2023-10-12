@@ -1,7 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-open import Aeres.Data.X509.PublicKey.Alg.EC.Params.Curve.TCB
+open import Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.Curve.TCB
   hiding (equivalent)
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.Int.TCB
@@ -18,13 +18,29 @@ import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-module Aeres.Data.X509.PublicKey.Alg.EC.Params.TCB where
+module Aeres.Data.X509.PublicKey.Alg.EC.ECPKParameters.ECParameters.TCB where
 
 open Aeres.Grammar.Definitions.Iso          UInt8
 open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.Option.TCB               UInt8
 open Aeres.Grammar.Seq.TCB                  UInt8
 open Aeres.Grammar.Sum.TCB                  UInt8
+
+{- https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5
+-- ECParameters ::= SEQUENCE {
+--    version   ECPVer,          -- version is always 1
+--    fieldID   FieldID,         -- identifies the finite field over
+--                               -- which the curve is defined
+--    curve     Curve,           -- coefficients a and b of the
+--                               -- elliptic curve
+--    base      ECPoint,         -- specifies the base point P
+--                               -- on the elliptic curve
+--    order     INTEGER,         -- the order n of the base point
+--    cofactor  INTEGER OPTIONAL -- The integer h = #E(Fq)/n
+--    }
+-- 
+-- ECPVer ::= INTEGER {ecpVer1(1)}
+-}
 
 FieldID : (@0 _ : List UInt8) → Set
 FieldID xs = TLV Tag.Sequence OctetStringValue xs
@@ -83,20 +99,4 @@ EcParams xs = TLV Tag.Sequence EcParamsFields xs
 
 RawEcParams : Raw EcParams
 RawEcParams = RawTLV _ RawEcParamsFields
-
-data EcPkAlgParams : @0 List UInt8 → Set where
-  ecparams : ∀ {@0 bs} → EcParams bs → EcPkAlgParams bs
-  namedcurve : ∀ {@0 bs} → OID bs → EcPkAlgParams bs
-  implicitlyCA : ∀ {@0 bs} → Null bs → EcPkAlgParams bs
-
-EcPkAlgParamsRep : @0 List UInt8 → Set
-EcPkAlgParamsRep = Sum EcParams (Sum OID Null)
-
-equivalent : Equivalent EcPkAlgParamsRep EcPkAlgParams
-proj₁ equivalent (Sum.inj₁ x) = ecparams x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₁ x)) = namedcurve x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ x)) = implicitlyCA x
-proj₂ equivalent (ecparams x) = inj₁ x
-proj₂ equivalent (namedcurve x) = inj₂ (inj₁ x)
-proj₂ equivalent (implicitlyCA x) = inj₂ (inj₂ x)
 
