@@ -109,3 +109,5 @@ unambiguous =
 nosubstrings xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
   TLV.nosubstrings xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
 
+postulate
+  @0 nonmalleable : NonMalleable RawSignAlg

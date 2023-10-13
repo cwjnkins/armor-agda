@@ -10,6 +10,7 @@ open import Aeres.Data.X509.Validity.TCB
 open import Aeres.Data.X509.Validity.Time.TCB
 import      Aeres.Data.X690-DER.BitString.Serializer as BitString
 open import Aeres.Data.X690-DER.BitString.TCB
+open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -266,9 +267,9 @@ proj₁ equivalentCertFields (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk
 proj₂ equivalentCertFields (mkCertFields tbs tbsBytes signAlg signature signatureBytes bs≡)
   = mk&ₚ (mk×ₚ tbs tbsBytes) (mk&ₚ signAlg (mk×ₚ signature signatureBytes) refl) bs≡
 
-postulate
-  RawCertFieldsRep : Raw CertFieldsRep
--- RawCertFieldsRep = Raw&ₚ {!!} (Raw&ₚ {!!} {!!})
+RawCertFieldsRep : Raw CertFieldsRep
+RawCertFieldsRep = Raw&ₚ (Raw×ₚ RawTBSCert RawOctetStringValue)
+                      (Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue))
 
 RawCertFields : Raw CertFields
 RawCertFields = Iso.raw equivalentCertFields RawCertFieldsRep

@@ -426,24 +426,41 @@ module Select where
     ua : Unambiguous (False ∘ (_∈? supportedExtensions))
     ua = T-unique
 
-  postulate
-    @0 nonmalleable : NonMalleable RawSelectExtn
-  -- nonmalleable = Iso.nonmalleable iso RawSelectExtnRep
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique AKI.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique SKI.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique KU.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique EKU.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique BC.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique IAN.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique SAN.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique CertPolicy.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique CRLDistPoint.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique NC.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique PC.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique PM.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique INAP.nonmalleable)
-  --   (Sum.nonmalleable (Fields.nonmalleable ≡-unique AIA.nonmalleable)
-  --                     (Fields.nonmalleable T-unique OctetString.nonmalleable)))))))))))))))
+  @0 nonmalleable : NonMalleable RawSelectExtn
+  nonmalleable = Iso.nonmalleable iso RawSelectExtnRep nm
+    where
+    RawRep₀ = RawSum (RawExtensionFields RawAIAFields) (RawExtensionFields RawOctetString)
+    RawRep₁ = RawSum (RawExtensionFields RawINAPFields) RawRep₀
+    RawRep₂ = RawSum (RawExtensionFields RawPMFields) RawRep₁
+    RawRep₃ = RawSum (RawExtensionFields RawPCFields) RawRep₂
+    RawRep₄ = RawSum (RawExtensionFields RawNCFields) RawRep₃
+    RawRep₅ = RawSum (RawExtensionFields RawCRLDistFields) RawRep₄
+    RawRep₆ = RawSum (RawExtensionFields RawCertPolFields) RawRep₅
+    RawRep₇ = RawSum (RawExtensionFields RawSANFields) RawRep₆
+    RawRep₈ = RawSum (RawExtensionFields RawIANFields) RawRep₇
+    RawRep₉ = RawSum (RawExtensionFields RawBCFields) RawRep₈
+    RawRep₁₀ = RawSum (RawExtensionFields RawEKUFields) RawRep₉
+    RawRep₁₁ = RawSum (RawExtensionFields RawKUFields) RawRep₁₀
+    RawRep₁₂ = RawSum (RawExtensionFields RawSKIFields) RawRep₁₁
+    RawRep = RawSum (RawExtensionFields RawAKIFields) RawRep₁₂
+                           
+    nm : NonMalleable RawSelectExtnRep
+    nm = Sum.nonmalleable{ra = RawExtensionFields RawAKIFields}{rb = RawRep₁₂} ((Fields.nonmalleable ≡-unique AKI.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawSKIFields}{rb = RawRep₁₁} ((Fields.nonmalleable ≡-unique SKI.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawKUFields}{rb = RawRep₁₀} ((Fields.nonmalleable ≡-unique KU.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawEKUFields}{rb = RawRep₉} ((Fields.nonmalleable ≡-unique EKU.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawBCFields}{rb = RawRep₈} ((Fields.nonmalleable ≡-unique BC.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawIANFields}{rb = RawRep₇} ((Fields.nonmalleable ≡-unique IAN.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawSANFields}{rb = RawRep₆} ((Fields.nonmalleable ≡-unique SAN.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawCertPolFields}{rb = RawRep₅} ((Fields.nonmalleable ≡-unique CertPolicy.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawCRLDistFields}{rb = RawRep₄} ((Fields.nonmalleable ≡-unique CRLDistPoint.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawNCFields}{rb = RawRep₃} ((Fields.nonmalleable ≡-unique NC.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawPCFields}{rb = RawRep₂} ((Fields.nonmalleable ≡-unique PC.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawPMFields}{rb = RawRep₁} ((Fields.nonmalleable ≡-unique PM.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawINAPFields}{rb = RawRep₀} ((Fields.nonmalleable ≡-unique INAP.nonmalleable))
+      (Sum.nonmalleable{ra = RawExtensionFields RawAIAFields}{rb = RawExtensionFields RawOctetString}
+                        (Fields.nonmalleable ≡-unique AIA.nonmalleable)
+                         (Fields.nonmalleable T-unique OctetString.nonmalleable))))))))))))))
 
 @0 unambiguous : Unambiguous Extensions
 unambiguous =

@@ -37,3 +37,6 @@ unambiguous =
         Alg.unambiguous
         Alg.nosubstrings
         λ a → Val.unambiguous (proj₂ (Alg.getOID a))))
+
+postulate
+  @0 nonmalleable : NonMalleable RawPublicKey

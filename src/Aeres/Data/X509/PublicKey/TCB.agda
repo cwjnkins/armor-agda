@@ -27,3 +27,6 @@ PublicKey = TLV Tag.Sequence PublicKeyFields
 
 getOID : ∀ {@0 bs} → PublicKey bs → Exists─ _ OID
 getOID x = Alg.getOID (PublicKeyFields.alg (TLV.val x))
+
+postulate
+  RawPublicKey : Raw PublicKey
