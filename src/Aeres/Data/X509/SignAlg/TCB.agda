@@ -16,11 +16,13 @@ import      Aeres.Data.X509.SignAlg.DSA.TCB   as DSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
 import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Sum.TCB
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 
 open Aeres.Grammar.Parallel.TCB UInt8
 open Aeres.Grammar.Sum.TCB      UInt8
+open Aeres.Grammar.Definitions UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
 
@@ -65,3 +67,6 @@ getOID s = -, DefinedByOIDFields.oid (TLV.val (erase s))
 
 getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
 getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
+
+postulate
+  RawSignAlg : Raw SignAlg

@@ -44,7 +44,7 @@ parseCertFields n =
       (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
       (Parallel.Length≤.unambiguous _
         (Parallel.unambiguous×ₚ
-          (TLV.unambiguous TBSCert.unambiguous)
+          (TBSCert.unambiguous)
           (λ where self self → refl)))
       (parse≤ _ (parse×Singleton parseTBSCert)
         (Parallel.nosubstrings₁ TLV.nosubstrings)

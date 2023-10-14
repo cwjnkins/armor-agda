@@ -27,3 +27,6 @@ unambiguous =
   TLV.unambiguous
     (Iso.unambiguous iso
       (Seq.unambiguousᵈ Alg.unambiguous TLV.nosubstrings Val.unambiguous))
+
+postulate
+  @0 nonmalleable : NonMalleable RawPublicKey

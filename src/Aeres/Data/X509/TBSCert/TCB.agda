@@ -11,6 +11,7 @@ import      Aeres.Data.X509.Validity.TCB as Validity
 open import Aeres.Data.X509.Validity.Time.TCB
 import      Aeres.Data.X690-DER.Int.TCB as Int
 open import Aeres.Data.X690-DER.BitString.TCB as BitString
+open import Aeres.Data.X690-DER.OctetString.TCB as OctetString
 import      Aeres.Data.X690-DER.SequenceOf as SequenceOf
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -153,17 +154,19 @@ proj₂ equivalentTBSCertFields (mkTBSCertFields version serial signAlg issuer v
   mk&ₚ (mk&ₚ version serial refl) (mk&ₚ signAlg (mk&ₚ issuer (mk&ₚ validity (mk&ₚ subject (mk&ₚ (mk×ₚ pk pkBytes) (mk&ₚ issuerUID (mk&ₚ subjectUID extensions refl) refl) refl) refl) refl) refl) refl)
     (trans₀ bs≡ (solve (++-monoid UInt8)))
 
-postulate
-  RawTBSCertFieldsRep : Raw TBSCertFieldsRep
--- RawTBSCertFieldsRep = Raw&ₚ (Raw&ₚ (RawOption (RawTLV _ RawInt)) RawInt)
---                       (Raw&ₚ {!!}
---                       (Raw&ₚ Name.RawName
---                       (Raw&ₚ Validity.RawValidity
---                       (Raw&ₚ Name.RawName
---                       (Raw&ₚ {!!}
---                       (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
---                       (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
---                              (RawOption RawExtensions))))))))
+RawTBSCertFieldsRep : Raw TBSCertFieldsRep
+RawTBSCertFieldsRep = Raw&ₚ (Raw&ₚ (RawOption (RawTLV _ RawInt)) RawInt)
+                      (Raw&ₚ RawSignAlg
+                      (Raw&ₚ Name.RawName
+                      (Raw&ₚ Validity.RawValidity
+                      (Raw&ₚ Name.RawName
+                      (Raw&ₚ (Raw×ₚ RawPublicKey RawOctetStringValue)
+                      (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
+                      (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
+                             (RawOption RawExtensions))))))))
 
 RawTBSCertFields : Raw TBSCertFields
 RawTBSCertFields = Iso.raw equivalentTBSCertFields RawTBSCertFieldsRep
+
+RawTBSCert : Raw TBSCert
+RawTBSCert = RawTLV _ RawTBSCertFields
