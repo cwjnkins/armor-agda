@@ -28,5 +28,9 @@ unambiguous =
     (Iso.unambiguous iso
       (Seq.unambiguousᵈ Alg.unambiguous TLV.nosubstrings Val.unambiguous))
 
-postulate
-  @0 nonmalleable : NonMalleable RawPublicKey
+@0 nonmalleable : NonMalleable RawPublicKey
+nonmalleable =
+  TLV.nonmalleable
+    (Iso.nonmalleable iso RawPublicKeyFieldsRep
+      (Seq.nonmalleableᵈ{ra = RawPublicKeyAlg}{rb = RawPublicKeyVal} Alg.nonmalleable
+        λ {bs}{a} → Val.nonmalleable{bs}{a}))

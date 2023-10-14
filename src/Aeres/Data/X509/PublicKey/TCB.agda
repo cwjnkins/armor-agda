@@ -37,10 +37,15 @@ proj₂ equivalent (mkPublicKeyFields alg key bs≡) = mk&ₚ alg key bs≡
 RawPublicKeyFieldsRep : Raw PublicKeyFieldsRep
 RawPublicKeyFieldsRep = Raw&ₚᵈ RawPublicKeyAlg RawPublicKeyVal
 
+RawPublicKeyFields : Raw PublicKeyFields
+RawPublicKeyFields =
+  Iso.raw equivalent RawPublicKeyFieldsRep
+
 PublicKey = TLV Tag.Sequence PublicKeyFields
+
+RawPublicKey : Raw PublicKey
+RawPublicKey = RawTLV _ RawPublicKeyFields
 
 getOID : ∀ {@0 bs} → (pk : PublicKey bs) → OID _
 getOID x = Alg.getOID (PublicKeyFields.alg (TLV.val x))
 
-postulate
-  RawPublicKey : Raw PublicKey
