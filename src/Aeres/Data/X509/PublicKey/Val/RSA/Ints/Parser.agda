@@ -21,10 +21,10 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "X509: PublicKey: Val: RSA: Ints:"
 
-parseRSAPkIntsFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSAPkIntsFields n)
-parseRSAPkIntsFields n =
+parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSAPkIntsFields n)
+parseFields =
   parseExactLength nosubstrings (tell $ here' String.++ ": underflow")
-    (parseEquivalent equivalent (parse& TLV.nosubstrings Int.parse Int.parse)) n
+    (parseEquivalent equivalent (parse& TLV.nosubstrings Int.parse Int.parse))
 
-parseRSAPkInts :  Parser (Logging ∘ Dec) RSAPkInts
-parseRSAPkInts = parseTLV _ here' _ parseRSAPkIntsFields
+parse :  Parser (Logging ∘ Dec) RSAPkInts
+parse = parseTLV _ here' _ parseFields

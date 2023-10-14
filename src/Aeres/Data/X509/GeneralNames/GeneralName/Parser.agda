@@ -27,7 +27,7 @@ private
 
 parseOtherName : Parser (Logging ∘ Dec) OtherName
 parseOtherName =
-  parseTLV _ (here' String.++ ": other name") _ parseOctetStringValue
+  parseTLV _ (here' String.++ ": other name") _ OctetString.parseValue
 
 parseRfcName : Parser (Logging ∘ Dec) RfcName
 parseRfcName = parseTLV _ (here' String.++ ": RFC") _ parseIA5StringValue
@@ -36,7 +36,7 @@ parseDnsName : Parser (Logging ∘ Dec) DnsName
 parseDnsName = parseTLV _ (here' String.++ ": DNS") _ parseIA5StringValue
 
 parseX400Address : Parser (Logging ∘ Dec) X400Address
-parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ parseOctetStringValue
+parseX400Address = parseTLV _ (here' String.++ ": X400 address") _ OctetString.parseValue
 
 parseDirName : Parser (Logging ∘ Dec) DirName
 parseDirName =
@@ -44,13 +44,13 @@ parseDirName =
     λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++  "X509: RDN") Name.parse n
 
 parseEdipartyName : Parser (Logging ∘ Dec) EdipartyName
-parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ parseOctetStringValue
+parseEdipartyName = parseTLV _ (here' String.++ ": EDI") _ OctetString.parseValue
 
 parseURI : Parser (Logging ∘ Dec) URI
 parseURI = parseTLV _ (here' String.++ ": URI") _ parseIA5StringValue
 
 parseIpAddress : Parser (Logging ∘ Dec) IpAddress
-parseIpAddress = parseTLV _ (here' String.++ ": IP") _ parseOctetStringValue
+parseIpAddress = parseTLV _ (here' String.++ ": IP") _ OctetString.parseValue
 
 parseRegID : Parser (Logging ∘ Dec) RegID
 parseRegID = parseTLV _ (here' String.++ ": registered name") _ parseOIDValue

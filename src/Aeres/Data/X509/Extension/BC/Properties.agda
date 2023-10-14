@@ -34,7 +34,7 @@ unambiguous =
   TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₂&₁
       (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous (λ {xs} → Int.unambiguous{xs})) TLV.nonempty
+      Int.unambiguous TLV.nonempty
       (TLV.noconfusion λ ()))))
 
 @0 nonmalleable : NonMalleable RawBCFields

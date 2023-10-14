@@ -18,6 +18,7 @@ import Aeres.Data.X509.Extension.Properties
 import Aeres.Data.X509.Extension.SAN
 import Aeres.Data.X509.Extension.SKI
 import Aeres.Data.X509.Extension.TCB
+  hiding (equivalent)
 
 module Aeres.Data.X509.Extension where
 
@@ -42,4 +43,6 @@ module Extension where
   open Aeres.Data.X509.Extension.Properties    public
   open Aeres.Data.X509.Extension.SAN           public
   open Aeres.Data.X509.Extension.SKI           public
+  open Aeres.Data.X509.Extension.TCB           public
+    hiding (equivalent)
   open Aeres.Data.X509.Extension.TCB.Extension public

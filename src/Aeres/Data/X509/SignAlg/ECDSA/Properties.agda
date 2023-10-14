@@ -47,13 +47,13 @@ unambiguous =
         (Sum.unambiguous (ECDSA-Like.unambiguous _)
           (ECDSA-Like.unambiguous _)
           (ECDSA-Like.noConfusion _ _))
-        (NoConfusion.sumₚ {A = SHA256}
+        (Sum.noconfusion {A = SHA256}
           (ECDSA-Like.noConfusion _ _)
           (ECDSA-Like.noConfusion _ _)))
-      (NoConfusion.sumₚ{A = SHA224}
+      (Sum.noconfusion{A = SHA224}
         (ECDSA-Like.noConfusion _ _)
-          (NoConfusion.sumₚ {A = SHA224} (ECDSA-Like.noConfusion _ _)
+          (Sum.noconfusion {A = SHA224} (ECDSA-Like.noConfusion _ _)
             (ECDSA-Like.noConfusion _ _))))
-    (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _)
-      (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _)
-        (NoConfusion.sumₚ {A = SHA1} (ECDSA-Like.noConfusion _ _) (ECDSA-Like.noConfusion _ _))))
+    (Sum.noconfusion {A = SHA1} (ECDSA-Like.noConfusion _ _)
+      (Sum.noconfusion {A = SHA1} (ECDSA-Like.noConfusion _ _)
+        (Sum.noconfusion {A = SHA1} (ECDSA-Like.noConfusion _ _) (ECDSA-Like.noConfusion _ _))))

@@ -16,7 +16,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
 @0 unambiguous : Unambiguous KUFields
-unambiguous = TLV.unambiguous (TLV.unambiguous BitString.unambiguous)
+unambiguous = TLV.unambiguous BitString.unambiguous
 
 @0 nonmalleable : NonMalleable RawKUFields
 nonmalleable = TLV.nonmalleable BitString.nonmalleable

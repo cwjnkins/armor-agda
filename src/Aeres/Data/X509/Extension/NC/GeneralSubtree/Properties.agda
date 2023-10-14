@@ -31,8 +31,8 @@ unambiguous = SequenceOf.Bounded.unambiguous
     (Iso.unambiguous iso
     (Seq.unambiguous GeneralName.unambiguous GeneralName.nosubstrings
       (Unambiguous.option₂&₁
-        (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nosubstrings TLV.nonempty
-        (TLV.unambiguous  λ {xs} → Int.unambiguous {xs})  TLV.nonempty (TLV.noconfusion λ ())))))
+        (TLV.unambiguous  λ {xs} → Int.unambiguousValue {xs})  TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous  λ {xs} → Int.unambiguousValue {xs})  TLV.nonempty (TLV.noconfusion λ ())))))
     TLV.nonempty TLV.nosubstrings
 
 @0 nonmalleable : NonMalleable RawGeneralSubtrees

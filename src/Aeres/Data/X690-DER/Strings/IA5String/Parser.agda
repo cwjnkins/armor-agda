@@ -17,7 +17,7 @@ open Aeres.Grammar.Parser      UInt8
 
 parseIA5StringValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength IA5StringValue n)
 runParser (parseIA5StringValue n) xs = do
-  yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen)) suf₀ ps≡₀) ← runParser (parseOctetStringValue n) xs
+  yes (success pre₀ r₀ r₀≡ (mk×ₚ (singleton os₀ refl) (─ osLen)) suf₀ ps≡₀) ← runParser (OctetString.parseValue n) xs
     where no ¬parse → do
       return ∘ no $ λ where
         (success prefix read read≡ (mk×ₚ (mkIA5StringValue str all<128) strLen) suffix ps≡) →

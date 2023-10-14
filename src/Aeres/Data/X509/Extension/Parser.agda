@@ -124,7 +124,7 @@ parseSelectExtn n =
                                                              (parseEquivalent (Iso.symEquivalent (Distribute.exactLength-Sum))
                                                                (parseSum
                                                                  (parseExtensionFields (_≟ _) TLV.nosubstrings (TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
-                                                                 (parseExtensionFields (λ bs → T-dec) TLV.nosubstrings (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) parseOctetString n))))))))))))))))))))))))))))
+                                                                 (parseExtensionFields (λ bs → T-dec) TLV.nosubstrings (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) OctetString.parse n))))))))))))))))))))))))))))
 
 parseExtension : Parser (Logging ∘ Dec) Extension
 parseExtension = parseTLV _ (here' String.++ ": field") _ parseSelectExtn

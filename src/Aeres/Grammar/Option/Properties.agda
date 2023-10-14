@@ -35,6 +35,12 @@ instance
       → Eq (Exists─ (List Σ) (Option A))
   OptionEq = Eq≋⇒Eq (OptionEq≋ ⦃ Eq⇒Eq≋ it ⦄)
 
+@0 unambiguous : ∀ {A} → Unambiguous A → NonEmpty A → Unambiguous (Option A)
+unambiguous ua ne none none = refl
+unambiguous ua ne none (some x) = contradiction refl (ne x)
+unambiguous ua ne (some x) none = contradiction refl (ne x)
+unambiguous ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
+
 @0 nonmalleable : ∀ {A} → (r : Raw A) → NonMalleable r → NonMalleable (RawOption r) 
 nonmalleable r x none none eq = refl
 nonmalleable r x (some x₁) (some x₂) eq = case x x₁ x₂ (just-injective eq) ret (const _) of λ where

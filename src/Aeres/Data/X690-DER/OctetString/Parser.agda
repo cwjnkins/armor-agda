@@ -18,8 +18,8 @@ open Aeres.Grammar.Parser      UInt8
 private
   here' = "X690-DER: OctetString"
 
-parseOctetStringValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength OctetStringValue n)
-parseOctetStringValue = λ n → parseN n (tell $ here' String.++ " (value): underflow")
+parseValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength OctetStringValue n)
+parseValue = λ n → parseN n (tell $ here' String.++ " (value): underflow")
 
-parseOctetString : Parser (Logging ∘ Dec) OctetString
-parseOctetString = parseTLV Tag.OctetString here' OctetStringValue parseOctetStringValue
+parse : Parser (Logging ∘ Dec) OctetString
+parse = parseTLV Tag.OctetString here' OctetStringValue parseValue

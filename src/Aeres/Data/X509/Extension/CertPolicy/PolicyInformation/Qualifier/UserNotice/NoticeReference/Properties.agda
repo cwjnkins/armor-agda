@@ -29,7 +29,7 @@ unambiguous =
     (Seq.unambiguous
       DisplayText.unambiguous DisplayText.nosubstrings
       (TLV.unambiguous
-        (SequenceOf.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs})
+        (SequenceOf.unambiguous Int.unambiguous
           TLV.nonempty (NoSubstrings Int ∋ TLV.nosubstrings)))))
 
 @0 nonmalleable : NonMalleable RawNoticeReference

@@ -9,12 +9,15 @@ import Aeres.Data.X509.PublicKey.Val
 
 module Aeres.Data.X509.PublicKey where
 
-open  Aeres.Data.X509.PublicKey.Parser  public
-open  Aeres.Data.X509.PublicKey.TCB     public
+open Aeres.Data.X509.PublicKey.TCB public
+  hiding (equivalent)
 
 module PublicKey where
   open Aeres.Data.X509.PublicKey.Alg        public
   open Aeres.Data.X509.PublicKey.Eq         public
+  open Aeres.Data.X509.PublicKey.Parser     public
   open Aeres.Data.X509.PublicKey.Properties public
+  open Aeres.Data.X509.PublicKey.TCB        public
+    using (equivalent)
   open Aeres.Data.X509.PublicKey.Val        public
 

@@ -32,7 +32,7 @@ module MGF1 where
       NoConfusion HashAlg.SHA256
                   (Sum HashAlg.SHA384 HashAlg.SHA512)
     noConfusion-SHA256- =
-      NoConfusion.sumₚ{A = HashAlg.SHA256}
+      Sum.noconfusion{A = HashAlg.SHA256}
        (HashAlg.SHA-Like.noConfusion _ _)
        (HashAlg.SHA-Like.noConfusion _ _)
 
@@ -42,9 +42,9 @@ module MGF1 where
                   (Sum HashAlg.SHA384
                        HashAlg.SHA512))
     noConfusion-SHA224- =
-      NoConfusion.sumₚ{A = HashAlg.SHA224}
+      Sum.noconfusion{A = HashAlg.SHA224}
        (HashAlg.SHA-Like.noConfusion _ _)
-       (NoConfusion.sumₚ{A = HashAlg.SHA224}
+       (Sum.noconfusion{A = HashAlg.SHA224}
          (HashAlg.SHA-Like.noConfusion _ _)
          (HashAlg.SHA-Like.noConfusion _ _))
 
@@ -55,11 +55,11 @@ module MGF1 where
                   (Sum HashAlg.SHA384
                        HashAlg.SHA512)))
     noConfusion-SHA1- =
-      NoConfusion.sumₚ{A = HashAlg.SHA1}
+      Sum.noconfusion{A = HashAlg.SHA1}
        (HashAlg.SHA-Like.noConfusion _ _)
-       (NoConfusion.sumₚ{A = HashAlg.SHA1}
+       (Sum.noconfusion{A = HashAlg.SHA1}
          (HashAlg.SHA-Like.noConfusion _ _)
-         (NoConfusion.sumₚ{A = HashAlg.SHA1}
+         (Sum.noconfusion{A = HashAlg.SHA1}
            (HashAlg.SHA-Like.noConfusion _ _)
            (HashAlg.SHA-Like.noConfusion _ _)))
 

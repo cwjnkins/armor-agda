@@ -77,7 +77,7 @@ unambiguous =
     (Sum.unambiguous (DSA-Like.unambiguous _)
       (DSA-Like.unambiguous _)
       (DSA-Like.noConfusion _ _))
-    (NoConfusion.sumₚ{A = SHA1}
+    (Sum.noconfusion{A = SHA1}
       (DSA-Like.noConfusion _ _)
       (DSA-Like.noConfusion _ _))
 

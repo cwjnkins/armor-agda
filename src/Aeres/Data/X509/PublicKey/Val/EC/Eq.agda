@@ -17,17 +17,5 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  eq≋ : Eq≋ ECBitString
-  Eq≋._≋?_ eq≋ (mk×ₚ bits₁ (─ os₁)) (mk×ₚ bits₂ (─ os₂)) =
-    case bits₁ ≋? bits₂ ret (const _) of λ where
-      (yes ≋-refl) →
-        case (‼ TLV.unambiguous
-               (Seq.unambiguous
-                 (λ where refl refl → refl)
-                 (λ where _ refl refl → refl)
-                 OctetString.unambiguous)
-               os₁ os₂)
-        ret (const _) of λ where
-          refl → yes ≋-refl
-      (no ¬≋) →
-        no λ where ≋-refl → contradiction ≋-refl ¬≋
+  eq≋ : Eq≋ ECBitStringValue
+  eq≋ = Seq.eq≋&ₚ (record { _≋?_ = λ where refl refl → yes ≋-refl }) it

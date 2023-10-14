@@ -44,9 +44,9 @@ parseTBSCertFields n =
       (Parallel.Length≤.unambiguous _
         (Unambiguous.unambiguous-option₁&₁
           (TLV.unambiguous
-            (TLV.unambiguous λ{xs} → Int.unambiguous{xs}))
+            Int.unambiguous)
           TLV.nosubstrings
-          (TLV.unambiguous λ{xs} → Int.unambiguous{xs}) (TLV.noconfusion λ ())))
+          Int.unambiguous (TLV.noconfusion λ ())))
       (Option.parseOption₁&₁≤ parseVersion Int.parse TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ())) overflow n)
       λ where
         (singleton r₁ r₁≡) _ →
@@ -72,7 +72,7 @@ parseTBSCertFields n =
       (parse&ᵈ {A = Length≤ (PublicKey ×ₚ Singleton) n}
         (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
         (Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl)))
-        (parse≤ _ (parse×Singleton parsePublicKey)
+        (parse≤ _ (parse×Singleton PublicKey.parse)
         (Parallel.nosubstrings₁ TLV.nosubstrings) overflow)
         λ where
           (singleton r r≡) _ →

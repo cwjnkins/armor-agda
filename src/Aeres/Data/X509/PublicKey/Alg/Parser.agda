@@ -3,9 +3,10 @@
 open import Aeres.Prelude
 
 open import Aeres.Binary
-open import Aeres.Data.X509.PublicKey.Alg.EC
-open import Aeres.Data.X509.PublicKey.Alg.RSA
+open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters
 open import Aeres.Data.X509.PublicKey.Alg.TCB
+import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
+open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
@@ -14,28 +15,27 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Sum
 
 module Aeres.Data.X509.PublicKey.Alg.Parser where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Sum         UInt8
+-- open Aeres.Grammar.Properties  UInt8
+-- open Aeres.Grammar.Sum         UInt8
 
-parseUnsupported : Parser (Logging ∘ Dec) UnsupportedPublicKeyAlg
-parseUnsupported =
-  DefinedByOID.parse "X509: PublicKey: Alg: unsupported" λ n o →
-    parseEquivalent{A = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
-      (Iso.symEquivalent{B = (ExactLength OctetStringValue n) ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))}
-        (proj₁ (Distribute.×ₚ-Σₚ-iso{A = OctetStringValue}{C = λ _ _ → False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs)})))
-      (parse×Dec{A = ExactLength OctetStringValue n}
-        (Parallel.ExactLength.nosubstrings _) (tell $ "X509: PublicKey: Alg: supported failed to parse")
-        (parseOctetStringValue n) λ x → T-dec)
+private
+  here' = "X509: PublicKey: Alg"
 
-parsePublicKeyAlg : Parser (Logging ∘ Dec) PublicKeyAlg
-parsePublicKeyAlg =
-   parseSum parseRSA
-  (parseSum parseEC
-            parseUnsupported)
+parseParams : ∀ n {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported))
+              → Parser (Logging ∘ Dec) (ExactLength (PKParameters' o o∈?) n)
+parseParams n o (no ¬p) =
+  OctetString.parseValue n
+parseParams n o (yes (here px)) =
+  parseExactLength TLV.nosubstrings (tell $ here' String.++ " (params): length mismatch (null)") parseNull n
+parseParams n o (yes (there (here px))) =
+  parseExactLength ECPKParameters.nosubstrings (tell $ here' String.++ " (params): length mismatch (EC)")
+    ECPKParameters.parse n
+
+parse : Parser (Logging ∘ Dec) PublicKeyAlg
+parse = DefinedByOID.parse here' λ n o → parseParams n o ((-, TLV.val o) ∈? OIDs.Supported)

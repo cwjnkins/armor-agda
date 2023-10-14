@@ -46,9 +46,9 @@ unambiguous =
   Iso.unambiguous iso
     (Seq.unambiguous
       (Unambiguous.unambiguous-option₁&₁
-        (TLV.unambiguous (TLV.unambiguous λ {xs} → Int.unambiguous{xs}))
-        TLV.nosubstrings
         (TLV.unambiguous Int.unambiguous)
+        TLV.nosubstrings
+        Int.unambiguous
         (TLV.noconfusion λ ()))
       (NonNesting.noconfusion-option&₁
         TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ()))
@@ -60,8 +60,8 @@ unambiguous =
         (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
           (Parallel.nosubstrings₁ TLV.nosubstrings)
           (Unambiguous.option₃&₂
-            (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
-            (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
+            (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
+            (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
             (Extension.unambiguous)
             TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ())))))))))
 

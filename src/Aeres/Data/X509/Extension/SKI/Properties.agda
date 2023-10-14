@@ -15,7 +15,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
 @0 unambiguous : Unambiguous SKIFields
-unambiguous = TLV.unambiguous (TLV.unambiguous OctetString.unambiguous)
+unambiguous = TLV.unambiguous OctetString.unambiguous
 
 @0 nonmalleable : NonMalleable RawSKIFields
 nonmalleable = TLV.nonmalleable OctetString.nonmalleable

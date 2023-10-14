@@ -42,7 +42,7 @@ unambiguousUnsupported =
   TLV.unambiguous
     (DefinedByOID.unambiguous
       UnsupportedParam
-      (λ o → Parallel.unambiguous×ₚ OctetString.unambiguous T-unique))
+      (λ o → Parallel.unambiguous×ₚ OctetString.unambiguousValue T-unique))
 
 private
   @0 ua₂ : Unambiguous (Sum RSA.Supported UnsupportedSignAlg)
@@ -54,7 +54,7 @@ private
 
   @0 nc₂ : NoConfusion ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)
   nc₂ =
-    NoConfusion.sumₚ{A = ECDSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+    Sum.noconfusion{A = ECDSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
       noConfusion-ECDSA-RSA
       noConfusion-ECDSA-Unsupported
 
@@ -65,9 +65,9 @@ private
 
   @0 nc₁ : NoConfusion DSA.Supported (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
   nc₁ =
-    NoConfusion.sumₚ{A = DSA.Supported}{B = ECDSA.Supported}{C = Sum RSA.Supported UnsupportedSignAlg}
+    Sum.noconfusion{A = DSA.Supported}{B = ECDSA.Supported}{C = Sum RSA.Supported UnsupportedSignAlg}
       noConfusion-DSA-ECDSA
-      (NoConfusion.sumₚ{A = DSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+      (Sum.noconfusion{A = DSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
         noConfusion-DSA-RSA
         noConfusion-DSA-Unsupported)
 

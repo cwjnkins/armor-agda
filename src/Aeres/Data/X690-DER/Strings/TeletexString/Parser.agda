@@ -17,4 +17,4 @@ private
 
 parseTeletexString : Parser (Logging ∘ Dec) TeletexString
 parseTeletexString =
-  parseTLV Tag.TeletexString here' _ parseOctetStringValue
+  parseTLV Tag.TeletexString here' _ OctetString.parseValue

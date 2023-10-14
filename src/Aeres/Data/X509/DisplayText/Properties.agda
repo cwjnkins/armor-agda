@@ -52,12 +52,12 @@ nosubstrings =
         (Sum.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
           (Parallel.nosubstrings₁ TLV.nosubstrings)
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
-        (NoConfusion.sumₚ{A = Σₚ VisibleString _}
+        (Sum.noconfusion{A = Σₚ VisibleString _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
-      (NoConfusion.sumₚ{A = Σₚ IA5String _}
+      (Sum.noconfusion{A = Σₚ IA5String _}
         (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
-        (NoConfusion.sumₚ{A = Σₚ IA5String _}
+        (Sum.noconfusion{A = Σₚ IA5String _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
 
@@ -68,13 +68,13 @@ noconfusionTLV{t}{A} t∉ =
   symNoConfusion{A = DisplayText}{B = TLV _ A}
     (NoConfusion.equivalent{B = TLV _ A} equivalent
       (symNoConfusion{A = TLV _ A}{B = Sum _ _}
-        (NoConfusion.sumₚ{A = TLV _ A}
+        (Sum.noconfusion{A = TLV _ A}
           (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV _ A}
             (TLV.noconfusion (λ where refl → t∉ (here refl))))
-          (NoConfusion.sumₚ{A = TLV t A}
+          (Sum.noconfusion{A = TLV t A}
             (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
               (TLV.noconfusion (λ where refl → t∉ (there (here refl)))))
-            (NoConfusion.sumₚ{A = TLV t A}
+            (Sum.noconfusion{A = TLV t A}
               (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
                 (TLV.noconfusion (λ where refl → t∉ (there (there (here refl))))))
               (NoConfusion.sigmaₚ₁ᵣ{A₁ = TLV t A}
@@ -104,12 +104,12 @@ unambiguous =
             λ _ → inRange-unique{A = ℕ}{B = ℕ})
           (Parallel.unambiguous (TLV.unambiguous UTF8.unambiguous) (λ _ → inRange-unique{A = ℕ}{B = ℕ}))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))
-        (NoConfusion.sumₚ{A = Σₚ _ _}
+        (Sum.noconfusion{A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))))
-      (NoConfusion.sumₚ {A = Σₚ _ _}
+      (Sum.noconfusion {A = Σₚ _ _}
         (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
-        (NoConfusion.sumₚ {A = Σₚ _ _}
+        (Sum.noconfusion {A = Σₚ _ _}
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ()))
           (NoConfusion.sigmaₚ₁ (TLV.noconfusion λ ())))))
   where

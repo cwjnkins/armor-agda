@@ -13,26 +13,32 @@ module Aeres.Data.X509.PublicKey.Val.RSA.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq         UInt8
 
-@0 nosubstrings : NoSubstrings RSABitStringFields
-nosubstrings x a₁ a₂ = foo
-  where
-  v2& :  ∀ {bs} → RSABitStringFields bs → (&ₚ (_≡ [ # 0 ]) RSAPkInts) bs
-  v2& (mkRSABitStringFields self rsane bs≡) = mk&ₚ refl rsane bs≡
-  foo = Seq.nosubstrings (λ xs₁++ys₁≡xs₂++ys₂ a₃ a₄ → trans a₃ (sym a₄)) TLV.nosubstrings x (v2& a₁) (v2& a₂)
-
-
-equivalent : Equivalent (&ₚ (_≡ [ # 0 ]) RSAPkInts) RSABitStringFields
-proj₁ equivalent (mk&ₚ refl sndₚ₁ bs≡) = mkRSABitStringFields self sndₚ₁ bs≡
-proj₂ equivalent (mkRSABitStringFields self rsane bs≡) = mk&ₚ refl rsane bs≡
-
-iso : Iso (&ₚ (_≡ [ # 0 ]) RSAPkInts) RSABitStringFields
+iso : Iso RSABitStringFieldsRep RSABitStringFields
 proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ refl sndₚ₁ refl) = refl
-proj₂ (proj₂ iso) (mkRSABitStringFields self rsane refl) = refl
+proj₁ (proj₂ iso) (mk&ₚ refl sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (mkRSABitStringFields self rsane bs≡) = refl
 
-@0 unambiguous : Unambiguous RSABitStringFields
-unambiguous = Iso.unambiguous iso
-                (Seq.unambiguous
-                  ≡-unique
-                  (λ where _ refl refl → refl)
-                  (TLV.unambiguous Ints.unambiguous))
+@0 nosubstrings : NoSubstrings RSABitStringFields
+nosubstrings =
+  Iso.nosubstrings equivalent
+    (Seq.nosubstrings (λ where _ refl refl → refl) TLV.nosubstrings)
+
+@0 unambiguousFields : Unambiguous RSABitStringFields
+unambiguousFields =
+  Iso.unambiguous iso
+    (Seq.unambiguous
+      ≡-unique (λ where _ refl refl → refl)
+      Ints.unambiguous)
+
+@0 unambiguous : Unambiguous RSABitString
+unambiguous = TLV.unambiguous unambiguousFields
+
+@0 nonmalleableFields : NonMalleable RawRSABitStringFields
+nonmalleableFields =
+  Iso.nonmalleable iso RawRSABitStringFieldsRep
+    (Seq.nonmalleable
+      (subsingleton⇒nonmalleable (λ where (─ _ , refl) (─ _ , refl) → refl))
+      Ints.nonmalleable)
+
+@0 nonmalleable : NonMalleable RawRSABitString
+nonmalleable = TLV.nonmalleable nonmalleableFields

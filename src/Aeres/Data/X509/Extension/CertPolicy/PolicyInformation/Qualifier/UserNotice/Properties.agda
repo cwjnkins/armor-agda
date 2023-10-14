@@ -33,12 +33,12 @@ private
          (NoConfusion.equivalent{A₁ = Sum _ _}{A₂ = DisplayText}{NoticeReference}
            DisplayText.equivalent
            (symNoConfusion{NoticeReference}{Sum _ _}
-             (NoConfusion.sumₚ{NoticeReference}
+             (Sum.noconfusion{NoticeReference}
                (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference}
                  (TLV.noconfusion λ ()))
-               (NoConfusion.sumₚ{NoticeReference}
+               (Sum.noconfusion{NoticeReference}
                  (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
-                 (NoConfusion.sumₚ{NoticeReference}
+                 (Sum.noconfusion{NoticeReference}
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ()))
                    (NoConfusion.sigmaₚ₁ᵣ{A₁ = NoticeReference} (TLV.noconfusion λ ())))))))
 

@@ -9,7 +9,7 @@ import Aeres.Data.X509.TBSCert.Version
 
 module Aeres.Data.X509.TBSCert where
 
-open Aeres.Data.X509.TBSCert.TCB public
+open Aeres.Data.X509.TBSCert.TCB    public
 open Aeres.Data.X509.TBSCert.Parser public
 
 module TBSCert where

@@ -30,10 +30,10 @@ module UTF8Char1Props where
   nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char1 b₁ b₁range refl) (mkUTF8Char1 b₂ b₁range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ [ b₁ ] _ [ b₂ ] _ xs₁++ys₁≡xs₂++ys₂ refl
 
-  noconfusion : NoConfusion UTF8Char1 (Sum UTF8Char2 (Sum UTF8Char3 UTF8Char4))
+  @0 noconfusion : NoConfusion UTF8Char1 (Sum UTF8Char2 (Sum UTF8Char3 UTF8Char4))
   noconfusion =
-    NoConfusion.sumₚ{A = UTF8Char1} nc₁
-      (NoConfusion.sumₚ{A = UTF8Char1} nc₂ nc₃)
+    Sum.noconfusion{A = UTF8Char1} nc₁
+      (Sum.noconfusion{A = UTF8Char1} nc₂ nc₃)
     where
     nc₁ : NoConfusion UTF8Char1 UTF8Char2
     nc₁{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
@@ -107,9 +107,9 @@ module UTF8Char2Props where
   nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkUTF8Char2 b₁ b₂ b₁range b₂range refl) (mkUTF8Char2 b₃ b₄ b₁range₁ b₂range₁ refl) =
     proj₁ $ Lemmas.length-++-≡ (b₁ ∷ [ b₂ ]) _ (b₃ ∷ [ b₄ ]) _ xs₁++ys₁≡xs₂++ys₂ refl
 
-  noconfusion : NoConfusion UTF8Char2 (Sum UTF8Char3 UTF8Char4)
+  @0 noconfusion : NoConfusion UTF8Char2 (Sum UTF8Char3 UTF8Char4)
   noconfusion =
-    NoConfusion.sumₚ{A = UTF8Char2} nc₁ nc₂
+    Sum.noconfusion{A = UTF8Char2} nc₁ nc₂
     where
     nc₁ : NoConfusion UTF8Char2 UTF8Char3
     nc₁{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
@@ -290,13 +290,13 @@ module UTF8CharProps where
           UTF8Char2Props.noconfusion)
         UTF8Char1Props.noconfusion)
 
-  nonempty : NonEmpty UTF8Char
+  @0 nonempty : NonEmpty UTF8Char
   nonempty (utf81 ()) refl
   nonempty (utf82 ()) refl
   nonempty (utf83 ()) refl
   nonempty (utf84 ()) refl
 
-  nosubstrings : NoSubstrings UTF8Char
+  @0 nosubstrings : NoSubstrings UTF8Char
   nosubstrings =
     Iso.nosubstrings equivalentChar
       (Sum.nosubstrings

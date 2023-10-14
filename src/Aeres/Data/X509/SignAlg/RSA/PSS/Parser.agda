@@ -54,7 +54,7 @@ parseFields“ n =
       (Parallel.nosubstrings₁ TLV.nosubstrings)
       (Parallel.Length≤.unambiguous _
         (TLV.unambiguous
-          (Unambiguous.option₁ (TLV.unambiguous Int.unambiguous)
+          (Option.unambiguous Int.unambiguous
             TLV.nonempty)))
       (parse≤ _
         (parseTLV _ (here' String.++ ": Params: SaltLength") _
@@ -73,7 +73,7 @@ parseFields“ n =
               (parseTLV _ (here' String.++ "Params: trailerField") _
                 (Option.parseOption₁ExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
                   (tell $ here' String.++ ": Params: trailerField: underflow")
-                  (parseSigma TLV.nosubstrings (TLV.unambiguous Int.unambiguous) Int.parse (λ i → _ ≟ _))))
+                  (parseSigma TLV.nosubstrings Int.unambiguous Int.parse (λ i → _ ≟ _))))
               (n - x))))
 
 parseFields' : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep' n)
@@ -82,7 +82,7 @@ parseFields' n =
     (parse&ᵈ
       (Parallel.nosubstrings₁ TLV.nosubstrings)
       (Parallel.Length≤.unambiguous _
-        (TLV.unambiguous (Unambiguous.option₁ MGF1.unambiguous TLV.nonempty)))
+        (TLV.unambiguous (Option.unambiguous MGF1.unambiguous TLV.nonempty)))
       (parse≤ _
         (parseTLV _ (here' String.++ ": Params: MaskGenAlg") _
           (Option.parseOption₁ExactLength TLV.nosubstrings
@@ -109,7 +109,7 @@ parsePSSParam n o =
           (Parallel.nosubstrings₁ TLV.nosubstrings)
           (Parallel.unambiguous×ₚ
             (TLV.unambiguous
-              (Unambiguous.option₁
+              (Option.unambiguous
                 Fields.SupportedHashAlg.unambiguous
                 Fields.SupportedHashAlg.nonempty))
             (erased-unique ≤-unique))

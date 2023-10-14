@@ -22,8 +22,8 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "X509: PublicKey: Val: RSA" 
 
-parseRSABitStringFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSABitStringFields n)
-parseRSABitStringFields n =
+parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSABitStringFields n)
+parseFields n =
   parseExactLength nosubstrings (tell $ here' String.++ ": underflow")
     (parseEquivalent equivalent
       (parse& (λ where _ refl refl → refl)
@@ -31,8 +31,8 @@ parseRSABitStringFields n =
           (tell $ here' String.++ ": zero bit: underflow")
           (tell $ here' String.++ ": zero bit: mismatch")
           [ # 0 ])
-        parseRSAPkInts))
+        Ints.parse))
     n
 
-parseRSABitString :  Parser (Logging ∘ Dec) RSABitString
-parseRSABitString = parseTLV _ here' _ parseRSABitStringFields
+parse :  Parser (Logging ∘ Dec) RSABitString
+parse = parseTLV _ here' _ parseFields

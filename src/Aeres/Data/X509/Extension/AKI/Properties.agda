@@ -30,9 +30,9 @@ proj₂ (proj₂ iso) (mkAKIFieldsSeqFields akeyid authcertiss authcertsn refl) 
 unambiguous =
   TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₃&₂
-      (TLV.unambiguous OctetString.unambiguous) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous OctetString.unambiguousValue) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous λ {xs} → Int.unambiguous{xs}) TLV.nonempty
+      (TLV.unambiguous λ {xs} → Int.unambiguousValue{xs}) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
 
 @0 nonmalleable : NonMalleable RawAKIFields

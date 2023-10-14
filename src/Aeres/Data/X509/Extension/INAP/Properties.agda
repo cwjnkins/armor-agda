@@ -15,7 +15,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Properties  UInt8
 
 @0 unambiguous : Unambiguous INAPFields
-unambiguous = TLV.unambiguous (TLV.unambiguous Int.unambiguous)
+unambiguous = TLV.unambiguous Int.unambiguous
 
 @0 nonmalleable : NonMalleable RawINAPFields
 nonmalleable = TLV.nonmalleable Int.nonmalleable

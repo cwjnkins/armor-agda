@@ -98,7 +98,7 @@ nonmalleable =
  
 @0 unambiguous : Unambiguous DirectoryString
 unambiguous = Iso.unambiguous iso
-  (Sum.unambiguous (TLV.NonEmptyVal.unambiguous OctetString.unambiguous)
+  (Sum.unambiguous (TLV.NonEmptyVal.unambiguous OctetString.unambiguousValue)
     (Sum.unambiguous
       (TLV.NonEmptyVal.unambiguous
         (IList.unambiguous

@@ -16,19 +16,14 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Seq         UInt8
 
-@0 nosubstrings : NoSubstrings ECBitString
-nosubstrings = Parallel.nosubstrings₁ TLV.nosubstrings
-
 @0 unambiguous : Unambiguous ECBitString
 unambiguous =
-  Parallel.unambiguous×ₚ
-    (TLV.unambiguous BitString.unambiguous)
-    λ where
-      (─ a₁) (─ a₂) →
-        cong ─_
-          (‼ TLV.unambiguous
-            (Seq.unambiguous
-              (λ where refl refl → refl)
-              (λ where _ refl refl → refl)
-              OctetString.unambiguous)
-            a₁ a₂)
+  TLV.unambiguous
+    (Seq.unambiguous ≡-unique (λ where _ refl refl → refl) OctetString.unambiguousValue)
+
+@0 nonmalleable : NonMalleable RawECBitString
+nonmalleable =
+  TLV.nonmalleable
+    (Seq.nonmalleable
+      (subsingleton⇒nonmalleable (λ where (─ _ , refl) (─ _ , refl) → refl))
+      OctetString.nonmalleableValue)

@@ -393,8 +393,8 @@ instance
   eq≋ : Eq≋ BitStringValue
   eq≋ = Eq⇒Eq≋ it
 
-@0 unambiguous : Unambiguous BitStringValue
-unambiguous (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁) (mkBitStringValue bₕ₂ bₜ₂ bₕ₂<8 bits₂ unusedBits₂ bs≡₂) =
+@0 unambiguousValue : Unambiguous BitStringValue
+unambiguousValue (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁) (mkBitStringValue bₕ₂ bₜ₂ bₕ₂<8 bits₂ unusedBits₂ bs≡₂) =
   ≡-elim (λ {bₕ₂} bₕ≡ → ∀ bₕ₂<8 bits₂ unusedBits₂ bs≡₂ → mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁ ≡ mkBitStringValue bₕ₂ bₜ₂ bₕ₂<8 bits₂ unusedBits₂ bs≡₂)
     (λ bₕ₂<8 bits₂ unusedBits₂ bs≡₂' →
       ≡-elim (λ {bₜ₂} bₜ≡ → ∀ (bits₂ : Singleton (toBitRep bₕ₁ bₜ₂)) unusedBits₂ bs≡₂ → mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs≡₁ ≡ mkBitStringValue bₕ₁ bₜ₂ bₕ₂<8 bits₂ unusedBits₂ bs≡₂)
@@ -414,6 +414,9 @@ unambiguous (mkBitStringValue bₕ₁ bₜ₁ bₕ₁<8 bits₁ unusedBits₁ bs
   @0 bₜ≡ : _
   bₜ≡ = ∷-injectiveʳ bs≡
 
+@0 unambiguous : Unambiguous BitString
+unambiguous = TLV.unambiguous unambiguousValue
+
 @0 nonmalleableValue : NonMalleable RawBitStringValue
 nonmalleableValue{bs₁ = .(bₕ ∷ bₜ)}{bs₂ = .(bₕ₁ ∷ bₜ₁)} str₁@(mkBitStringValue bₕ bₜ bₕ<8 (singleton bits bits≡) unusedBits refl) str₂@(mkBitStringValue bₕ₁ bₜ₁ bₕ<9 (singleton .bits bits≡₁) unusedBits₁ refl) refl =
   case
@@ -421,7 +424,7 @@ nonmalleableValue{bs₁ = .(bₕ ∷ bₜ)}{bs₂ = .(bₕ₁ ∷ bₜ₁)} str�
       unusedBits unusedBits₁
       (trans (sym bits≡) bits≡₁)
   ret (const _) of λ where
-    refl → case (‼ unambiguous str₁ str₂) ret (const _) of λ where
+    refl → case (‼ unambiguousValue str₁ str₂) ret (const _) of λ where
       refl → refl
 
 @0 nonmalleable : NonMalleable RawBitString

@@ -2,59 +2,54 @@
 
 open import Aeres.Binary
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
-import      Aeres.Data.X509.PublicKey.Alg.EC.TCB   as EC
-import      Aeres.Data.X509.PublicKey.Alg.RSA.TCB  as RSA
+open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.TCB
+  hiding (equivalent)
+open import Aeres.Data.X509.PublicKey.Alg.RSAPKParameters
+open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
-import      Aeres.Data.X690-DER.Tag as Tag
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Definitions.Iso
+import      Aeres.Grammar.Definitions.NonMalleable
+-- import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Alg.TCB where
 
-open Aeres.Grammar.Definitions  UInt8
-open Aeres.Grammar.Parallel.TCB UInt8
-open Aeres.Grammar.Sum.TCB      UInt8
+open Aeres.Grammar.Definitions.Iso          UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Sum.TCB                  UInt8
 
-open EC  using (EC)
-open RSA using (RSA)
+PKParameters' : ∀ {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported)) → @0 List UInt8 → Set
+PKParameters' o (no ¬p) = OctetStringValue
+PKParameters' o (yes (here px)) = RSAPKParameters
+PKParameters' o (yes (there (here px))) = ECPKParameters
 
-supportedPublicKeyAlgs : List (Exists─ _ OIDValue)
-supportedPublicKeyAlgs =
-  (-, OIDs.RSA) ∷ [ -, OIDs.EC ]
+PKParameters : AnyDefinedByOID
+PKParameters o = PKParameters' o ((-, TLV.val o) ∈? OIDs.Supported)
 
-UnsupportedParam : ∀ {@0 bs} → (o : OID bs) → @0 List UInt8 → Set
-UnsupportedParam o =
-     OctetStringValue
-  ×ₚ const (False (((-, TLV.val o)) ∈? supportedPublicKeyAlgs))
+RawPKParameters“ : Raw (Sum OctetStringValue (Sum Null ECPKParameters))
+RawPKParameters“ = RawSum RawOctetStringValue (RawSum RawNull RawECPKParameters)
 
-RawUnsupportedParam : Raw₁ RawOID UnsupportedParam
-Raw₁.D RawUnsupportedParam o = Raw.D RawOctetStringValue
-Raw₁.to RawUnsupportedParam o p = Raw.to RawOctetStringValue (fstₚ p)
+RawPKParameters : Raw₁ RawOID PKParameters
+toRawPKParameters
+  : ∀ {@0 bs₁} → (o : OID bs₁) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported)) → ∀ {@0 bs₂}
+    → PKParameters' o o∈? bs₂ → Raw₁.D RawPKParameters (Raw.to RawOID o)
 
-UnsupportedPublicKeyAlg =
-  DefinedByOID UnsupportedParam
+Raw₁.D RawPKParameters o = Raw.D RawPKParameters“
+Raw₁.to RawPKParameters o p = toRawPKParameters o ((-, TLV.val o) ∈? OIDs.Supported) p
 
-RawUnsupportedPublicKeyAlg : Raw UnsupportedPublicKeyAlg
-RawUnsupportedPublicKeyAlg = RawDefinedByOID RawUnsupportedParam
+toRawPKParameters o (no ¬p) p = Raw.to RawPKParameters“ (inj₁ p)
+toRawPKParameters o (yes (here px)) p = Raw.to RawPKParameters“ (inj₂ (inj₁ p))
+toRawPKParameters o (yes (there (here px))) p = Raw.to RawPKParameters“ (inj₂ (inj₂ p))
 
 PublicKeyAlg : @0 List UInt8 → Set
-PublicKeyAlg =
-   Sum RSA
-  (Sum EC
-       UnsupportedPublicKeyAlg)
+PublicKeyAlg = DefinedByOID PKParameters
 
 RawPublicKeyAlg : Raw PublicKeyAlg
-RawPublicKeyAlg = RawSum RSA.RawRSA (RawSum EC.RawEC RawUnsupportedPublicKeyAlg)
+RawPublicKeyAlg = RawDefinedByOID RawPKParameters
 
-getOID : ∀ {@0 bs} → PublicKeyAlg bs → Exists─ _ OID
-getOID (Sum.inj₁ x) =
-  RSA.getOID x
-getOID (Sum.inj₂ (Sum.inj₁ x)) =
-  EC.getOID x
-getOID (Sum.inj₂ (Sum.inj₂ x)) =
-  -, DefinedByOIDFields.oid (TLV.val x)
+getOID : ∀ {@0 bs} → (a : PublicKeyAlg bs) → OID _
+getOID a = DefinedByOIDFields.oid (TLV.val a) 

@@ -9,17 +9,11 @@ import Aeres.Data.X509.PublicKey.Val.TCB
 
 module Aeres.Data.X509.PublicKey.Val where
 
-module Val where
-  module EC where
-    open Aeres.Data.X509.PublicKey.Val.EC public
-    open EC public
-
-  module RSA where
-    open Aeres.Data.X509.PublicKey.Val.RSA public
-    open RSA public
-
-  open Aeres.Data.X509.PublicKey.Val.Eq         public
-  open Aeres.Data.X509.PublicKey.Val.Properties public
-
-open Aeres.Data.X509.PublicKey.Val.Parser public
 open Aeres.Data.X509.PublicKey.Val.TCB public
+
+module Val where
+  open Aeres.Data.X509.PublicKey.Val.EC         public
+  open Aeres.Data.X509.PublicKey.Val.Eq         public
+  open Aeres.Data.X509.PublicKey.Val.Parser     public
+  open Aeres.Data.X509.PublicKey.Val.Properties public
+  open Aeres.Data.X509.PublicKey.Val.RSA        public

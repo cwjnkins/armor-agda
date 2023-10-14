@@ -22,4 +22,4 @@ instance
   eq≋ : Eq≋ PublicKeyFields
   eq≋ =
     Iso.isoEq≋ iso
-      (Seq.eq≋&ₚᵈ Alg.eq≋ λ a → Val.eq≋{o = proj₂ (Alg.getOID a)})
+      (Seq.eq≋&ₚᵈ{A = PublicKeyAlg} (TLV.EqTLV ⦃ Alg.eq≋ ⦄) λ a → Val.eq≋{a = a})

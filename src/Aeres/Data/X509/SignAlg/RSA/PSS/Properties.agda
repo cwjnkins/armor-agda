@@ -40,22 +40,22 @@ module Fields where
           (Sum HashAlg.SHA384
                HashAlg.SHA512)))
     noConfusion-SHA1- =
-      (NoConfusion.sumₚ {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _)
-        (NoConfusion.sumₚ {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _)
-          (NoConfusion.sumₚ {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _) (HashAlg.SHA-Like.noConfusion _ _))))
+      (Sum.noconfusion {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _)
+        (Sum.noconfusion {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _)
+          (Sum.noconfusion {A = HashAlg.SHA1} (HashAlg.SHA-Like.noConfusion _ _) (HashAlg.SHA-Like.noConfusion _ _))))
 
     @0 noConfusion-SHA224-
       : NoConfusion HashAlg.SHA224
           (Sum HashAlg.SHA256 (Sum HashAlg.SHA384 HashAlg.SHA512))
     noConfusion-SHA224- =
-      NoConfusion.sumₚ {A = HashAlg.SHA224} (HashAlg.SHA-Like.noConfusion _ _)
-       (NoConfusion.sumₚ{A = HashAlg.SHA224}
+      Sum.noconfusion {A = HashAlg.SHA224} (HashAlg.SHA-Like.noConfusion _ _)
+       (Sum.noconfusion{A = HashAlg.SHA224}
          (HashAlg.SHA-Like.noConfusion _ _) (HashAlg.SHA-Like.noConfusion _ _))
 
     @0 noConfusion-SHA256-
       : NoConfusion HashAlg.SHA256 (Sum HashAlg.SHA384 HashAlg.SHA512)
     noConfusion-SHA256- =
-      NoConfusion.sumₚ{A = HashAlg.SHA256}
+      Sum.noconfusion{A = HashAlg.SHA256}
        (HashAlg.SHA-Like.noConfusion _ _)
        (HashAlg.SHA-Like.noConfusion _ _)
 
@@ -108,19 +108,19 @@ module Fields where
     Iso.unambiguous iso
       (Seq.unambiguous
         (TLV.unambiguous
-          (Unambiguous.option₁ SupportedHashAlg.unambiguous SupportedHashAlg.nonempty))
+          (Option.unambiguous SupportedHashAlg.unambiguous SupportedHashAlg.nonempty))
         TLV.nosubstrings
         (Seq.unambiguous
           (TLV.unambiguous
-            (Unambiguous.option₁ MGF1.unambiguous TLV.nonempty))
+            (Option.unambiguous MGF1.unambiguous TLV.nonempty))
           TLV.nosubstrings
           (Seq.unambiguous
-            (TLV.unambiguous (Unambiguous.option₁ (TLV.unambiguous Int.unambiguous)
+            (TLV.unambiguous (Option.unambiguous Int.unambiguous
               TLV.nonempty))
             TLV.nosubstrings
             (TLV.unambiguous
-              (Unambiguous.option₁
-                (Parallel.unambiguous (TLV.unambiguous Int.unambiguous)
+              (Option.unambiguous
+                (Parallel.unambiguous Int.unambiguous
                   (λ _ → ≡-unique))
                 (Parallel.nonempty₁ TLV.nonempty))))))
 

@@ -31,7 +31,7 @@ private
 
 parseCPSURIQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength CPSURIQualifier n)
 parseCPSURIQualifier =
-  DefinedByOID.parseDefinedByOIDFields here' λ n o →
+  DefinedByOID.parseFields here' λ n o →
     parseExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
       (tell $ here' String.++ ": CPSURI: length mismatch")
       (parse×Dec TLV.nosubstrings (tell $ here' String.++ ": CPSURI: wrong OID")
@@ -41,7 +41,7 @@ parseCPSURIQualifier =
 
 parseUserNoticeQualifier : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeQualifier n)
 parseUserNoticeQualifier =
-  DefinedByOID.parseDefinedByOIDFields here' λ n o →
+  DefinedByOID.parseFields here' λ n o →
     parseExactLength (Parallel.nosubstrings₁ TLV.nosubstrings)
       (tell $ here' String.++ ": UserNoticeQualifier: length mismatch")
       (parse×Dec TLV.nosubstrings

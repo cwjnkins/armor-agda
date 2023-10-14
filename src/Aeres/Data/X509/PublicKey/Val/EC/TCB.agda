@@ -5,15 +5,16 @@ open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
+import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Seq.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.PublicKey.Val.EC.TCB where
 
-open Aeres.Grammar.Parallel.TCB UInt8
-open Aeres.Grammar.Seq.TCB      UInt8
-
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Parallel.TCB             UInt8
+open Aeres.Grammar.Seq.TCB                  UInt8
 
 {- https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5
  The elliptic curve public key (an ECPoint which is an OCTET STRING) is mapped
@@ -26,7 +27,14 @@ open Aeres.Grammar.Seq.TCB      UInt8
  form and MAY support the compressed form.
 -}
 
+ECBitStringValue : @0 List UInt8 → Set
+ECBitStringValue = &ₚ (_≡ [ # 0 ]) OctetStringValue
 
--- TODO: it would be nicer to say "BitString such that unused bits is 0"
+RawECBitStringValue : Raw ECBitStringValue
+RawECBitStringValue = Raw&ₚ RawSubSingleton RawOctetStringValue
+
 ECBitString : @0 List UInt8 → Set
-ECBitString = BitString ×ₚ (Erased ∘ TLV Tag.BitString (&ₚ (_≡ [ # 0 ]) OctetStringValue))
+ECBitString = TLV Tag.BitString ECBitStringValue
+
+RawECBitString : Raw ECBitString
+RawECBitString = RawTLV _ RawECBitStringValue

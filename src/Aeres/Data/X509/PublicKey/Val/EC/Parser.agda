@@ -24,28 +24,20 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "X509: PublicKey: Val: EC"
 
-parseECBitString : Parser (Logging ∘ Dec) ECBitString
-parseECBitString =
-  parse× TLV.nosubstrings
-    (λ where
-      xs₁++ys₁≡xs₂++ys₂ (─ a₁) (─ a₂) →
-        ‼ TLV.nosubstrings xs₁++ys₁≡xs₂++ys₂ a₁ a₂)
-    (return (Level.lift tt))
-    parseBitstring
-    (parseErased (parseTLV _ "X509: PublicKey: Val: EC:" _
-      λ n →
-        parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
-         (parse&ᵈ
-           (Parallel.nosubstrings₁ λ where _ refl refl → refl)
-           (Parallel.Length≤.unambiguous _ (λ where refl refl → refl))
-           (parse≤ _
-             (parseLit
-               (tell $ "X509: PublicKey: Val: EC: underflow")
-               (tell $ "X509: PublicKey: Val: EC: unused bits not 0")
-               _)
-             (λ where _ refl refl → refl)
-             (tell $ "X509: PublicKey: Val: EC: overlfow"))
-           λ where
-             (singleton r r≡) _ →
-               subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength OctetStringValue (n - x)))
-                 r≡ (parseOctetStringValue (n - r)))))
+parseValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength ECBitStringValue n)
+parseValue n =
+  parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
+    (parse&ᵈ
+      (Parallel.nosubstrings₁ λ where _ refl refl → refl)
+      (Parallel.Length≤.unambiguous _ ≡-unique)
+      (parse≤ n
+        (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # 0 ])
+        (λ where _ refl refl → refl)
+        (tell $ here' String.++ ": length overflow"))
+        λ where
+          (singleton r r≡) _ →
+            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength OctetStringValue (n ∸ x)))
+              r≡ (OctetString.parseValue (n - r)))
+
+parse : Parser (Logging ∘ Dec) ECBitString
+parse = parseTLV _ here' _ parseValue

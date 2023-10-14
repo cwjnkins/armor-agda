@@ -10,8 +10,11 @@ module Aeres.Data.X690-DER.OctetString.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
 
-@0 unambiguous : Unambiguous OctetStringValue
-unambiguous (singleton x refl) (singleton .x refl) = refl
+@0 unambiguousValue : Unambiguous OctetStringValue
+unambiguousValue (singleton x refl) (singleton .x refl) = refl
+
+@0 unambiguous : Unambiguous OctetString
+unambiguous = TLV.unambiguous unambiguousValue
 
 @0 nonmalleableValue : NonMalleable RawOctetStringValue
 nonmalleableValue (singleton bytes₁ refl) (singleton bytes₂ refl) refl = refl

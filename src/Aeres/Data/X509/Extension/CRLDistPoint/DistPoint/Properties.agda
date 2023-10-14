@@ -30,7 +30,7 @@ unambiguous =
   TLV.unambiguous (Iso.unambiguous iso
     (Unambiguous.option₃&₂
       (Name.unambiguous) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous BitString.unambiguous) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())))
 

@@ -60,7 +60,7 @@ module SHA-Like where
         _
         (λ o₁ →
          Parallel.unambiguous×ₚ
-            (Unambiguous.option₁
+            (Option.unambiguous
               (TLV.unambiguous (λ where refl refl → refl))
               TLV.nonempty)
             (λ where ≋-refl ≋-refl → refl)))

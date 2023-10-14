@@ -17,15 +17,8 @@ module Aeres.Data.X509.PublicKey.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep : @0 List UInt8 → Set
-Rep = &ₚᵈ PublicKeyAlg λ a → PublicKeyVal (proj₂ (Alg.getOID a))
-
-equiv : Equivalent Rep PublicKeyFields
-proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkPublicKeyFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equiv (mkPublicKeyFields alg key bs≡) = mk&ₚ alg key bs≡
-
-iso   : Iso Rep PublicKeyFields
-proj₁ iso = equiv
+iso   : Iso PublicKeyFieldsRep PublicKeyFields
+proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkPublicKeyFields alg key bs≡) = refl
 
@@ -33,7 +26,4 @@ proj₂ (proj₂ iso) (mkPublicKeyFields alg key bs≡) = refl
 unambiguous =
   TLV.unambiguous
     (Iso.unambiguous iso
-      (Seq.unambiguousᵈ
-        Alg.unambiguous
-        Alg.nosubstrings
-        λ a → Val.unambiguous (proj₂ (Alg.getOID a))))
+      (Seq.unambiguousᵈ Alg.unambiguous TLV.nosubstrings Val.unambiguous))

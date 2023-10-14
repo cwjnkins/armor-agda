@@ -134,7 +134,7 @@ module Select where
                                 (Sum.unambiguous
                                   (Fields.unambiguous ≡-unique AIA.unambiguous (TLV.noconfusion λ ()))
                                 (Fields.unambiguous ua
-                                  (TLV.unambiguous OctetString.unambiguous) (TLV.noconfusion λ ()))
+                                  OctetString.unambiguous (TLV.noconfusion λ ()))
                               noconfusion₀)
                             noconfusion₁₃)
                           noconfusion₁₂)
@@ -196,228 +196,228 @@ module Select where
 
     noconfusion₁ : NoConfusion (ExtensionFields (_≡ OIDs.AKILit) AKIFields) (Sum _ _)
     noconfusion₁ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                      (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                        (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                          (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                             (noconfusionOIDS λ ())
-                            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                            (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                               (noconfusionOIDS λ ())
-                              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
+                              (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                                 (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))))
 
     noconfusion₂ : NoConfusion (ExtensionFields (_≡ OIDs.SKILit) SKIFields) (Sum _ _)
     noconfusion₂ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                      (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                        (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                          (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                             (noconfusionOIDS λ ())
-                            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
+                            (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                               (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))))
 
 
     noconfusion₃ : NoConfusion (ExtensionFields (_≡ OIDs.KULit)  KUFields)  (Sum _ _)
     noconfusion₃ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                      (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                        (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                           (noconfusionOIDS λ ())
-                          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.KULit) KUFields}
+                          (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                             (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))
 
 
     noconfusion₄ : NoConfusion (ExtensionFields (_≡ OIDs.EKULit) EKUFields) (Sum _ _)
     noconfusion₄ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+                      (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                         (noconfusionOIDS λ ())
-                        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
+                        (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                           (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))
 
 
     noconfusion₅ : NoConfusion (ExtensionFields (_≡ OIDs.BCLit)  BCFields)  (Sum _ _)
     noconfusion₅ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                       (noconfusionOIDS λ ())
-                      (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.BCLit) BCFields}
+                      (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                         (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))
 
 
     noconfusion₆ : NoConfusion (ExtensionFields (_≡ OIDs.IANLit) IANFields) (Sum _ _)
     noconfusion₆ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
                     (noconfusionOIDS λ ())
-                    (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.IANLit) IANFields}
+                    (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
                       (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))
 
 
     noconfusion₇ : NoConfusion (ExtensionFields (_≡ OIDs.SANLit) SANFields) (Sum _ _)
     noconfusion₇ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
                   (noconfusionOIDS λ ())
-                  (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.SANLit) SANFields}
+                  (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
                     (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))
 
     noconfusion₈ : NoConfusion (ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields) (Sum _ _)
     noconfusion₈ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
                   (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))
 
     noconfusion₉ : NoConfusion (ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields) (Sum _ _)
     noconfusion₉ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
         (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
           (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
               (noconfusionOIDS λ ())
-              (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
+              (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
                 (noconfusionOIDS λ ())
-                (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
+                (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
                   (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))
 
     noconfusion₁₀ : NoConfusion (ExtensionFields (_≡ OIDs.NCLit) NCFields) (Sum _ _)
     noconfusion₁₀ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.NCLit) NCFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.NCLit) NCFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.NCLit) NCFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
             (noconfusionOIDS λ ())
-            (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.NCLit) NCFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
               (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))
 
     noconfusion₁₁ : NoConfusion (ExtensionFields (_≡ OIDs.PCLit) PCFields) (Sum _ _)
     noconfusion₁₁ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.PCLit) PCFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.PCLit) PCFields}
         (noconfusionOIDS λ ())
-        (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.PCLit) PCFields}
+        (Sum.noconfusion{ExtensionFields (_≡ OIDs.PCLit) PCFields}
           (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.PCLit) PCFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.PCLit) PCFields}
             (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))
 
     noconfusion₁₂ : NoConfusion (ExtensionFields (_≡ OIDs.PMLit) PMFields) (Sum _ _)
     noconfusion₁₂ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.PMLit) PMFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.PMLit) PMFields}
         (noconfusionOIDS λ ())
-          (NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.PMLit) PMFields}
+          (Sum.noconfusion{ExtensionFields (_≡ OIDs.PMLit) PMFields}
             (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
 
     noconfusion₁₃ : NoConfusion (ExtensionFields (_≡ OIDs.INAPLit) INAPFields) (Sum _ _)
     noconfusion₁₃ =
-      NoConfusion.sumₚ{ExtensionFields (_≡ OIDs.INAPLit) INAPFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDs.INAPLit) INAPFields}
         (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))
 
     noconfusion₀ : NoConfusion (ExtensionFields (_≡ OIDs.AIALit) AIAFields) (ExtensionFields _ _)

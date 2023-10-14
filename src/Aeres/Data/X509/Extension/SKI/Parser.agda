@@ -21,7 +21,7 @@ private
 parseSKIFields : Parser (Logging ∘ Dec) SKIFields
 parseSKIFields =
   parseTLV _ "SKI Fields" _
-    (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") parseOctetString)
+    (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") OctetString.parse)
 
 -- private
 --   module Test where

@@ -42,7 +42,7 @@ parseUnsupported =
           (success prefix read read≡ (mk×ₚ (mk×ₚ str str∉) (─ uLen)) suffix ps≡) →
             contradiction p₁ (toWitnessFalse str∉)
       (no ¬p) → do
-        (yes (success pre₁ r₁ r₁≡ (mk×ₚ os (─ osLen)) suf₁ ps≡₁)) ← runParser (parseOctetStringValue n) xs
+        (yes (success pre₁ r₁ r₁≡ (mk×ₚ os (─ osLen)) suf₁ ps≡₁)) ← runParser (OctetString.parseValue n) xs
           where no ¬p → do
             tell $ here' String.++ ": underflow parsing parameter"
             return ∘ no $ λ where

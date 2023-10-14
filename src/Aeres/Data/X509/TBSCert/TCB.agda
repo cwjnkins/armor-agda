@@ -47,7 +47,7 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
     subject  : Name u
     pk       : PublicKey p
     pkBytes  : Singleton p -- TODO: eventually this should come from serialization
-    issuerUID : Option IssUID u₁ -- if this takes a lot of time, this and the lower can be dropped
+    issuerUID : Option IssUID u₁
     subjectUID : Option SubUID u₂
     extensions : Option Extensions e
     @0 bs≡  : bs ≡ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e

@@ -72,47 +72,47 @@ module Supported where
                   (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA512)
                   PSS.unambiguous
                   (noConfusion OIDs.RSA.SHA512))
-                (NoConfusion.sumₚ{A = RSA.SHA384}
+                (Sum.noconfusion{A = RSA.SHA384}
                   (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA384 OIDs.RSA.SHA512)
                   (noConfusion OIDs.RSA.SHA384)))
-              (NoConfusion.sumₚ{A = RSA.SHA256}
+              (Sum.noconfusion{A = RSA.SHA256}
                 (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA256 OIDs.RSA.SHA384)
-                (NoConfusion.sumₚ{A = RSA.SHA256}
+                (Sum.noconfusion{A = RSA.SHA256}
                   (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA256 OIDs.RSA.SHA512)
                   (noConfusion OIDs.RSA.SHA256))))
-            (NoConfusion.sumₚ{A = RSA.SHA224}
+            (Sum.noconfusion{A = RSA.SHA224}
               (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA256)
-              (NoConfusion.sumₚ{A = RSA.SHA224}
+              (Sum.noconfusion{A = RSA.SHA224}
                 (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA384)
-                (NoConfusion.sumₚ{A = RSA.SHA224}
+                (Sum.noconfusion{A = RSA.SHA224}
                   (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA512)
                   (noConfusion OIDs.RSA.SHA224)))))
-          (NoConfusion.sumₚ{A = RSA.SHA1}
+          (Sum.noconfusion{A = RSA.SHA1}
             (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA1 OIDs.RSA.SHA224)
-            (NoConfusion.sumₚ{A = RSA.SHA1}
+            (Sum.noconfusion{A = RSA.SHA1}
               (HashAlg.SHA-Like.noConfusion _ _)
-              (NoConfusion.sumₚ {A = RSA.SHA1}
+              (Sum.noconfusion {A = RSA.SHA1}
                 (HashAlg.SHA-Like.noConfusion _ _)
-                (NoConfusion.sumₚ{A = RSA.SHA1}
+                (Sum.noconfusion{A = RSA.SHA1}
                   (HashAlg.SHA-Like.noConfusion _ _)
                   (noConfusion OIDs.RSA.SHA1))))))
-        (NoConfusion.sumₚ{A = RSA.MD5}
+        (Sum.noconfusion{A = RSA.MD5}
           (HashAlg.SHA-Like.noConfusion _ _)
-          (NoConfusion.sumₚ{A = RSA.MD5}
+          (Sum.noconfusion{A = RSA.MD5}
             (HashAlg.SHA-Like.noConfusion _ _)
-            (NoConfusion.sumₚ{A = RSA.MD5}
+            (Sum.noconfusion{A = RSA.MD5}
               (HashAlg.SHA-Like.noConfusion _ _)
-              (NoConfusion.sumₚ{A = RSA.MD5}
+              (Sum.noconfusion{A = RSA.MD5}
                 (HashAlg.SHA-Like.noConfusion _ _)
-                (NoConfusion.sumₚ{A = RSA.MD5}
+                (Sum.noconfusion{A = RSA.MD5}
                   (HashAlg.SHA-Like.noConfusion _ _)
                   (noConfusion OIDs.RSA.MD5)))))))
-      (NoConfusion.sumₚ{A = RSA.MD2}
+      (Sum.noconfusion{A = RSA.MD2}
         (HashAlg.SHA-Like.noConfusion _ _)
-        (NoConfusion.sumₚ{A = RSA.MD2}
+        (Sum.noconfusion{A = RSA.MD2}
           (HashAlg.SHA-Like.noConfusion _ _)
-          (NoConfusion.sumₚ{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-            (NoConfusion.sumₚ{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-              (NoConfusion.sumₚ{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-                (NoConfusion.sumₚ{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
+          (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
+            (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
+              (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
+                (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
                   (noConfusion OIDs.RSA.MD2)))))))

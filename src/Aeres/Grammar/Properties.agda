@@ -140,10 +140,6 @@ module NoConfusion where
   equivalent : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → NoConfusion A₁ B → NoConfusion A₂ B
   equivalent eqv nc {xs₁}{ys₁}{xs₂}{ys₂}++≡ a b = ‼ nc {xs₁}{xs₂ = xs₂}++≡ (proj₂ eqv a) b
 
-  sumₚ : ∀ {@0 A B C} → NoConfusion A B → NoConfusion A C → NoConfusion A (Sum B C)
-  sumₚ nc₁ nc₂ ++≡ a (Sum.inj₁ x) = nc₁ ++≡ a x
-  sumₚ nc₁ nc₂ ++≡ a (Sum.inj₂ x) = nc₂ ++≡ a x
-
   sigmaₚ₁ : ∀ {@0 A₁ B₁ A₂ B₂} → NoConfusion A₁ A₂ → NoConfusion (Σₚ A₁ B₁) (Σₚ A₂ B₂)
   sigmaₚ₁ nc ++≡ (mk×ₚ fstₚ₁ sndₚ₁ ) (mk×ₚ fstₚ₂ sndₚ₂ ) = nc ++≡ fstₚ₁ fstₚ₂
 
@@ -155,11 +151,11 @@ module Unambiguous where
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)
 
-  option₁ : ∀ {@0 A} → Unambiguous A → NonEmpty A → Unambiguous (Option A)
-  option₁ ua ne none none = refl
-  option₁ ua ne none (some x) = contradiction refl (ne x)
-  option₁ ua ne (some x) none = contradiction refl (ne x)
-  option₁ ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
+  -- option₁ : ∀ {@0 A} → Unambiguous A → NonEmpty A → Unambiguous (Option A)
+  -- option₁ ua ne none none = refl
+  -- option₁ ua ne none (some x) = contradiction refl (ne x)
+  -- option₁ ua ne (some x) none = contradiction refl (ne x)
+  -- option₁ ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
 
   unambiguous-option₁&₁ : ∀ {@0 A B} → Unambiguous A → NoSubstrings A → Unambiguous B → NoConfusion A B → Unambiguous (&ₚ (Option A) B)
   unambiguous-option₁&₁ ua₁ nn₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
@@ -261,7 +257,7 @@ module Unambiguous where
     subst₀ (λ bs → ∀ (sndₚ₂ : Option B bs) (@0 bs≡₁ : _ ≡ bs) → _ ≡ mk&ₚ _ sndₚ₂ bs≡₁)
       bs≡'
       (λ sndₚ₂ bs≡₁ → ‼
-        subst₂ (λ sndₚ₂ bs≡₁ → _ ≡ mk&ₚ none sndₚ₂ bs≡₁) (option₁{B} ua₂ ne₂ sndₚ₁ sndₚ₂) (‼ ≡-unique bs≡ bs≡₁)
+        subst₂ (λ sndₚ₂ bs≡₁ → _ ≡ mk&ₚ none sndₚ₂ bs≡₁) (Option.unambiguous{B} ua₂ ne₂ sndₚ₁ sndₚ₂) (‼ ≡-unique bs≡ bs≡₁)
           refl)
       sndₚ₂ bs≡₁
     where

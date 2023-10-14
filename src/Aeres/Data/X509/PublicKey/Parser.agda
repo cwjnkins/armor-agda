@@ -24,42 +24,32 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "X509: PublicKey"
 
-parsePublicKeyFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength PublicKeyFields n)
-parsePublicKeyFields n =
+parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength PublicKeyFields n)
+parseFields n =
   parseEquivalent eq p₁
   where
   A = Length≤ PublicKeyAlg n
   B : {@0 bs : List UInt8} → (a : A bs) → @0 List UInt8 → Set
-  B{bs} a = ExactLength (PublicKeyVal (proj₂ (Alg.getOID (fstₚ a)))) (n - length bs)
+  B{bs} a = ExactLength (PublicKeyVal (fstₚ a)) (n - length bs)
 
   eq : Equivalent (&ₚᵈ A B) (ExactLength PublicKeyFields n)
-  eq = Iso.transEquivalent (Iso.symEquivalent (Distribute.exactLength-&ᵈ)) (Parallel.equivalent₁ equiv)
-
-  @0 nn₁ : NoSubstrings A
-  nn₁ = Parallel.nosubstrings₁ Alg.nosubstrings
-
-  @0 ua₁ : Unambiguous A
-  ua₁ = Parallel.Length≤.unambiguous _ Alg.unambiguous
-
-  p₂ : Parser (Logging ∘ Dec) A
-  p₂ = parse≤ _ parsePublicKeyAlg Alg.nosubstrings
-         (tell $ here' String.++ ": overflow (Alg)")
-
-  p₃ : ∀ {@0 bs} → Singleton (length bs) → (a : A bs) → Parser (Logging ∘ Dec) (B a)
-  p₃ (singleton x x≡) a =
-    subst₀
-      (λ y → Parser (Logging ∘ Dec) (ExactLength (PublicKeyVal o) (n - y)))
-      x≡
-      p
-    where
-    o = proj₂ (Alg.getOID (fstₚ a))
-    p : Parser (Logging ∘ Dec) (ExactLength (PublicKeyVal o) (n - x))
-    p = parseExactLength (Val.nosubstrings o)
-          (tell $ here' String.++ ": length mismatch (Val)")
-          (parsePublicKeyVal o) (n - x)
+  eq = Iso.transEquivalent (Iso.symEquivalent (Distribute.exactLength-&ᵈ)) (Parallel.equivalent₁ equivalent)
 
   p₁ : Parser (Logging ∘ Dec) (&ₚᵈ A B)
-  p₁ = parse&ᵈ{A = A} {B = B} nn₁ ua₁ p₂ p₃
+  p₁ =
+    parse&ᵈ
+      (Parallel.nosubstrings₁ TLV.nosubstrings)
+      (Parallel.Length≤.unambiguous PublicKeyAlg Alg.unambiguous)
+      (parse≤ n Alg.parse TLV.nosubstrings
+        (tell $ here' String.++ " (alg): overflow"))
+      λ where
+        (singleton r r≡) a →
+          subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (PublicKeyVal (fstₚ a)) (n - x)))
+            r≡
+            (parseExactLength
+              (Val.nosubstrings (fstₚ a))
+              (tell $ here' String.++ " (val): length mismatch")
+              (Val.parse (fstₚ a)) (n - r))
 
-parsePublicKey : Parser (Logging ∘ Dec) PublicKey
-parsePublicKey = parseTLV _ here' _ parsePublicKeyFields
+parse : Parser (Logging ∘ Dec) PublicKey
+parse = parseTLV _ here' _ parseFields

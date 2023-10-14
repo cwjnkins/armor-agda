@@ -47,7 +47,7 @@ unambiguous =
       (Parallel.unambiguous (TLV.unambiguous TBSCert.unambiguous) (λ where _ self self → refl))
       (Parallel.nosubstrings₁ TLV.nosubstrings)
       (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
-        (Parallel.unambiguous (TLV.unambiguous BitString.unambiguous) (λ where _ self self → refl)))))
+        (Parallel.unambiguous BitString.unambiguous (λ where _ self self → refl)))))
 
 postulate
   @0 nonmalleable : NonMalleable RawCert
