@@ -71,25 +71,8 @@ private
         noConfusion-DSA-RSA
         noConfusion-DSA-Unsupported)
 
-Rep : @0 List UInt8 → Set
-Rep =
-   Sum DSA.Supported
-  (Sum ECDSA.Supported
-  (Sum RSA.Supported
-       UnsupportedSignAlg))
-
-equiv : Equivalent Rep SignAlg
-proj₁ equiv (inj₁ x) = dsa x
-proj₁ equiv (inj₂ (inj₁ x)) = ecdsa x
-proj₁ equiv (inj₂ (inj₂ (inj₁ x))) = rsa x
-proj₁ equiv (inj₂ (inj₂ (inj₂ x))) = unsupported x
-proj₂ equiv (dsa x) = inj₁ x
-proj₂ equiv (ecdsa x) = inj₂ (inj₁ x)
-proj₂ equiv (rsa x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equiv (unsupported x) = inj₂ (inj₂ (inj₂ x))
-
-iso : Iso Rep SignAlg
-proj₁ iso = equiv
+iso : Iso SignAlgRep SignAlg
+proj₁ iso = equivalent
 proj₁ (proj₂ iso) (inj₁ x) = refl
 proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
 proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl

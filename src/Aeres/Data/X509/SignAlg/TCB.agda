@@ -7,6 +7,7 @@ open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
+  hiding (equivalent)
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X509.HashAlg.TCB
@@ -44,6 +45,29 @@ data SignAlg (@0 bs : List UInt8) : Set where
   rsa   : RSA.Supported bs → SignAlg bs
   unsupported : UnsupportedSignAlg bs → SignAlg bs
 
+SignAlgRep : @0 List UInt8 → Set
+SignAlgRep =
+   Sum DSA.Supported
+  (Sum ECDSA.Supported
+  (Sum RSA.Supported
+       UnsupportedSignAlg))
+
+equivalent : Equivalent SignAlgRep SignAlg
+proj₁ equivalent (inj₁ x) = dsa x
+proj₁ equivalent (inj₂ (inj₁ x)) = ecdsa x
+proj₁ equivalent (inj₂ (inj₂ (inj₁ x))) = rsa x
+proj₁ equivalent (inj₂ (inj₂ (inj₂ x))) = unsupported x
+proj₂ equivalent (dsa x) = inj₁ x
+proj₂ equivalent (ecdsa x) = inj₂ (inj₁ x)
+proj₂ equivalent (rsa x) = inj₂ (inj₂ (inj₁ x))
+proj₂ equivalent (unsupported x) = inj₂ (inj₂ (inj₂ x))
+
+postulate
+  RawSignAlgRep : Raw SignAlgRep
+
+RawSignAlg : Raw SignAlg
+RawSignAlg = Iso.raw equivalent RawSignAlgRep
+
 erase
   : ∀ {@0 bs} → SignAlg bs
     → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
@@ -67,6 +91,3 @@ getOID s = -, DefinedByOIDFields.oid (TLV.val (erase s))
 
 getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
 getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
-
-postulate
-  RawSignAlg : Raw SignAlg
