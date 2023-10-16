@@ -4,62 +4,51 @@ open import Aeres.Binary
 open import Aeres.Data.X690-DER.Null.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 open import Aeres.Data.X690-DER.OID
-open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parallel.TCB
-import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.DSA.TCB where
 
 open Aeres.Grammar.Definitions  UInt8
-open Aeres.Grammar.Sum.TCB      UInt8
-open Aeres.Grammar.Parallel.TCB UInt8
 
-supportedSignAlgOIDs : List (Exists─ _ OIDValue)
-supportedSignAlgOIDs =
-  (-, OIDs.DSA.SHA1) ∷ (-, OIDs.DSA.SHA224) ∷ [ -, OIDs.DSA.SHA256 ]
+-- TODO: Previously we had the parameter as an explicit null. The documentation
+-- says it must be absent. Which is it?
 
-DSA-Like-Params : ∀ {@0 bs} → (o : OIDValue bs) → ∀ {@0 bs'} → (o' : OID bs')
-                  → @0 List UInt8 → Set
-DSA-Like-Params o o' = Null ×ₚ const (_≋_{A = OIDValue} (TLV.val o') o)
+DSAParams' : ∀ {@0 bs} → (o : OID bs) → Dec ((-, TLV.val o) ∈ OIDs.DSA.Supported) → @0 List UInt8 → Set
+DSAParams' o (no ¬p) bs = ⊥
+DSAParams' o (yes p) bs = Erased (bs ≡ [])
 
-RawDSALikeParams : ∀ {@0 bs} (o : OIDValue bs) → Raw₁ RawOID (DSA-Like-Params o)
-Raw₁.D (RawDSALikeParams o) o' = Raw.D RawNull
-Raw₁.to (RawDSALikeParams o) o' p = Raw.to RawNull (fstₚ p)
+DSAParams : AnyDefinedByOID
+DSAParams o = DSAParams' o ((-, TLV.val o) ∈? OIDs.DSA.Supported)
 
-DSA-Like : {@0 bs : List UInt8} (o : OIDValue bs) → @0 List UInt8 → Set
-DSA-Like o = DefinedByOID (DSA-Like-Params o)
+RawDSAParamsRep : Raw (λ bs → Erased (bs ≡ []))
+RawDSAParamsRep = RawSubSingleton
 
-RawDSALike : ∀ {@0 bs} (o : OIDValue bs) → Raw (DSA-Like o)
-RawDSALike o = RawDefinedByOID (RawDSALikeParams o)
+RawDSAParams : Raw₁ RawOID DSAParams
+toRawDSAParams : ∀ {@0 bs} → (o : OID bs) → (o∈? : Dec ((-, TLV.val o) ∈ OIDs.DSA.Supported))
+                   → ∀ {@0 bs'} → DSAParams' o o∈? bs' → Raw₁.D RawDSAParams (Raw.to RawOID o)
 
-SHA1   = DSA-Like OIDs.DSA.SHA1
-SHA224 = DSA-Like OIDs.DSA.SHA224
-SHA256 = DSA-Like OIDs.DSA.SHA256
+Raw₁.D RawDSAParams o = Raw.D RawDSAParamsRep
+Raw₁.to RawDSAParams o p = toRawDSAParams o ((-, TLV.val o) ∈? OIDs.DSA.Supported) p
 
-Supported : @0 List UInt8 → Set
-Supported =
-   Sum SHA1
-  (Sum SHA224
-       SHA256)
+toRawDSAParams o (yes p₁) p = Raw.to RawDSAParamsRep p
 
-RawSupported : Raw Supported
-RawSupported =
-   RawSum (RawDSALike OIDs.DSA.SHA1)
-  (RawSum (RawDSALike OIDs.DSA.SHA224)
-          (RawDSALike OIDs.DSA.SHA256))
+DSA : @0 List UInt8 → Set
+DSA = DefinedByOID DSAParams
 
-erase
-  : ∀ {@0 bs} → Supported bs
-    → DefinedByOID
-        (λ o → (Erased ∘ OctetStringValue) ×ₚ const (True ((-, TLV.val o) ∈? supportedSignAlgOIDs)))
-        bs
-erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡)) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
-erase (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
-  mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
+RawDSA : Raw DSA
+RawDSA = RawDefinedByOID RawDSAParams
+
+-- erase
+--   : ∀ {@0 bs} → Supported bs
+--     → DefinedByOID
+--         (λ o → (Erased ∘ OctetStringValue) ×ₚ const (True ((-, TLV.val o) ∈? supportedSignAlgOIDs)))
+--         bs
+-- erase (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡)) =
+--   mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
+-- erase (Sum.inj₂ (Sum.inj₁ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
+--   mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡
+-- erase (Sum.inj₂ (Sum.inj₂ (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ _ ≋-refl) bs≡₁) len≡ bs≡))) =
+--   mkTLV len (mkOIDDefinedFields algOID (mk×ₚ (─ self) tt) bs≡₁) len≡ bs≡

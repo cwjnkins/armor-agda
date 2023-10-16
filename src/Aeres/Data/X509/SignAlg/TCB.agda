@@ -2,92 +2,105 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString.TCB
-open import Aeres.Data.X690-DER.Int.TCB
-open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString.TCB
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
   hiding (equivalent)
 open import Aeres.Data.X690-DER.TLV.TCB
-import      Aeres.Data.X690-DER.Tag as Tag
-open import Aeres.Data.X509.HashAlg.TCB
+open import Aeres.Data.X509.HashAlg.RFC4055.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
 import      Aeres.Data.X509.SignAlg.ECDSA.TCB as ECDSA
 import      Aeres.Data.X509.SignAlg.DSA.TCB   as DSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
-import      Aeres.Grammar.Parallel.TCB
 import      Aeres.Grammar.Sum.TCB
-import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Definitions.NonMalleable
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
+open import Data.Sum as Sum
 
-open Aeres.Grammar.Parallel.TCB UInt8
-open Aeres.Grammar.Sum.TCB      UInt8
-open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Sum.TCB                  UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
 
-supportedSignAlgOIDs : List (Exists─ _ OIDValue)
-supportedSignAlgOIDs =
-  DSA.supportedSignAlgOIDs ++ ECDSA.supportedSignAlgOIDs ++ RSA.supportedSignAlgOIDs
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.1.2
+--
+-- The signatureAlgorithm field contains the identifier for the
+-- cryptographic algorithm used by the CA to sign this certificate.
+-- [RFC3279], [RFC4055], and [RFC4491] list supported signature
+-- algorithms, but other signature algorithms MAY also be supported.
+--
+-- An algorithm identifier is defined by the following ASN.1 structure:
+--
+-- AlgorithmIdentifier  ::=  SEQUENCE  {
+--      algorithm               OBJECT IDENTIFIER,
+--      parameters              ANY DEFINED BY algorithm OPTIONAL  }
+--
+-- The algorithm identifier is used to identify a cryptographic
+-- algorithm.  The OBJECT IDENTIFIER component identifies the algorithm
+-- (such as DSA with SHA-1).  The contents of the optional parameters
+-- field will vary according to the algorithm identified.
+--
+-- This field MUST contain the same algorithm identifier as the
+-- signature field in the sequence tbsCertificate (Section 4.1.2.3).
+-}
 
-UnsupportedParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
-UnsupportedParam o =
-     OctetStringValue
-  ×ₚ const (False ((-, TLV.val o) ∈? supportedSignAlgOIDs))
+LookupSignAlg : ∀ {@0 bs} → (o : OID bs) → Set
+LookupSignAlg o =
+    (-, TLV.val o) ∈ OIDs.DSA.Supported
+  ⊎ (-, TLV.val o) ∈ OIDs.ECDSA.Supported
+  ⊎ (-, TLV.val o) ∈ OIDs.RSA.Supported
 
-UnsupportedSignAlg =
-  DefinedByOID UnsupportedParam
+lookupSignAlg : ∀ {@0 bs} → (o : OID bs) → (-, TLV.val o) ∈ OIDs.Supported → LookupSignAlg o
+lookupSignAlg o o∈ = Sum.map₂ (Any.++⁻ OIDs.ECDSA.Supported) (Any.++⁻ OIDs.DSA.Supported o∈)
 
-data SignAlg (@0 bs : List UInt8) : Set where
-  dsa : DSA.Supported bs → SignAlg bs
-  ecdsa : ECDSA.Supported bs → SignAlg bs
-  rsa   : RSA.Supported bs → SignAlg bs
-  unsupported : UnsupportedSignAlg bs → SignAlg bs
+SignAlgParam“ : ∀ {@0 bs} → (o : OID bs) → LookupSignAlg o → @0 List UInt8 → Set
+SignAlgParam“ o (inj₁ x)        = DSA.DSAParams' o (yes x)
+SignAlgParam“ o (inj₂ (inj₁ x)) = ECDSA.ECDSAParams' o (yes x)
+SignAlgParam“ o (inj₂ (inj₂ y)) = RSA.RSAParams' o (yes y)
 
-SignAlgRep : @0 List UInt8 → Set
-SignAlgRep =
-   Sum DSA.Supported
-  (Sum ECDSA.Supported
-  (Sum RSA.Supported
-       UnsupportedSignAlg))
+SignAlgParam' : ∀ {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported))
+               → @0 List UInt8 → Set
+SignAlgParam' o (no ¬p) = OctetStringValue
+SignAlgParam' o (yes p) = SignAlgParam“ o (lookupSignAlg o p)
 
-equivalent : Equivalent SignAlgRep SignAlg
-proj₁ equivalent (inj₁ x) = dsa x
-proj₁ equivalent (inj₂ (inj₁ x)) = ecdsa x
-proj₁ equivalent (inj₂ (inj₂ (inj₁ x))) = rsa x
-proj₁ equivalent (inj₂ (inj₂ (inj₂ x))) = unsupported x
-proj₂ equivalent (dsa x) = inj₁ x
-proj₂ equivalent (ecdsa x) = inj₂ (inj₁ x)
-proj₂ equivalent (rsa x) = inj₂ (inj₂ (inj₁ x))
-proj₂ equivalent (unsupported x) = inj₂ (inj₂ (inj₂ x))
+isSupported : ∀ {@0 bs} → (o : OID bs) → Dec ((-, TLV.val o) ∈ OIDs.Supported)
+isSupported o = (-, TLV.val o) ∈? OIDs.Supported
 
-postulate
-  RawSignAlgRep : Raw SignAlgRep
+SignAlgParam : AnyDefinedByOID
+SignAlgParam o = SignAlgParam' o (isSupported o)
+
+RawSignAlgParamRep : Raw _
+RawSignAlgParamRep =
+   RawSum RawOctetStringValue
+  (RawSum DSA.RawDSAParamsRep
+  (RawSum ECDSA.RawECDSAParamsRep
+          RSA.RawRSAParamsRep))
+
+RawSignAlgParam : Raw₁ RawOID SignAlgParam
+toRawSignAlgParam' : ∀ {@0 bs} → (o : OID bs) → (o∈? : Dec ((-, TLV.val o) ∈ OIDs.Supported))
+                     → ∀ {@0 bs'} → SignAlgParam' o o∈? bs' → Raw₁.D RawSignAlgParam (Raw.to RawOID o)
+toRawSignAlgParam“ : ∀ {@0 bs} → (o : OID bs) → (o∈? : LookupSignAlg o)
+                     → ∀ {@0 bs'} → SignAlgParam“ o o∈? bs' → Raw₁.D RawSignAlgParam (Raw.to RawOID o)
+
+Raw₁.D RawSignAlgParam o = Raw.D RawSignAlgParamRep
+Raw₁.to RawSignAlgParam o = toRawSignAlgParam' o (isSupported o)
+
+toRawSignAlgParam' o (no ¬p) p = Raw.to RawSignAlgParamRep (inj₁ p)
+toRawSignAlgParam' o (yes p) p' = toRawSignAlgParam“ o (lookupSignAlg o p) p'
+
+toRawSignAlgParam“ o (inj₁ x) p = Raw.to RawSignAlgParamRep (inj₂ (inj₁ p))
+toRawSignAlgParam“ o (inj₂ (inj₁ x)) p = Raw.to RawSignAlgParamRep (inj₂ (inj₂ (inj₁ p)))
+toRawSignAlgParam“ o (inj₂ (inj₂ y)) p = inj₂ (inj₂ (inj₂ (RSA.toRawRSAParams' o (yes y) p)))
+
+SignAlg : @0 List UInt8 → Set
+SignAlg = DefinedByOID SignAlgParam
 
 RawSignAlg : Raw SignAlg
-RawSignAlg = Iso.raw equivalent RawSignAlgRep
+RawSignAlg = RawDefinedByOID RawSignAlgParam
 
-erase
-  : ∀ {@0 bs} → SignAlg bs
-    → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
-erase (dsa x) =
-  case DSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
-erase (ecdsa x) =
-  case ECDSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
-erase (rsa x) =
-  case RSA.erase x ret (const _) of λ where
-    (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ o∈) bs≡₁) len≡ bs≡) →
-      mkTLV len (mkOIDDefinedFields algOID p₁ bs≡₁) len≡ bs≡
-erase (unsupported (mkTLV len (mkOIDDefinedFields algOID (mk×ₚ p₁ _) bs≡₁) len≡ bs≡)) =
-  mkTLV len (mkOIDDefinedFields algOID (─ p₁) bs≡₁) len≡ bs≡
+getOID : ∀ {@0 bs} → (s : SignAlg bs) → OID _
+getOID s = DefinedByOIDFields.oid (TLV.val s)
 
-getOID : ∀ {@0 bs} → SignAlg bs → Exists─ _ OID
-getOID s = -, DefinedByOIDFields.oid (TLV.val (erase s))
-
-getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
-getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
+-- -- getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
+-- -- getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID

@@ -3,12 +3,10 @@
 open import Aeres.Binary
 open import Aeres.Data.X509.SignAlg.ECDSA.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
-open import Aeres.Data.X690-DER.Null
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Sum
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
 open import Aeres.Prelude
@@ -18,31 +16,18 @@ module Aeres.Data.X509.SignAlg.ECDSA.Parser where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
-open Aeres.Grammar.Sum         UInt8
 
-parseECDSA-Like : ∀ {@0 bs} → (o : OIDValue bs) → String → Parser (Logging ∘ Dec) (ECDSA-Like o)
-parseECDSA-Like o s =
-  DefinedByOID.parse s
-    λ n o' →
-      parseExactLength
-        (λ where xs₁++ys₁≡xs₂++ys₂ (mk×ₚ refl _) (mk×ₚ refl _) → refl)
-        (tell $ s String.++ ": length mismatch")
-        (parse×Dec (λ where _ refl refl → refl)
-          (tell $ s String.++ ": mismatched OID")
-            (parseLit silent silent [])
-            (λ _ → _ ≋? _))
-        _
+private
+  here' = "X509: SignAlg: ECDSA"
 
-parseSHA1   = parseECDSA-Like OIDs.ECDSA.SHA1   "X509: SignAlg: ECDSA: SHA1"
-parseSHA224 = parseECDSA-Like OIDs.ECDSA.SHA224 "X509: SignAlg: ECDSA: SHA224"
-parseSHA256 = parseECDSA-Like OIDs.ECDSA.SHA256 "X509: SignAlg: ECDSA: SHA256"
-parseSHA384 = parseECDSA-Like OIDs.ECDSA.SHA384 "X509: SignAlg: ECDSA: SHA384"
-parseSHA512 = parseECDSA-Like OIDs.ECDSA.SHA512 "X509: SignAlg: ECDSA: SHA512"
+parseParams : ∀ n {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.ECDSA.Supported))
+              → Parser (Logging ∘ Dec) (ExactLength (ECDSAParams' o o∈?) n)
+parseParams n o (no ¬p) =
+  parseExactLength (λ where _ ()) silent parseFalse n
+parseParams n o (yes p) =
+  parseExactLength (λ where _ (─ refl) (─ refl) → refl)
+    (tell $ here' String.++ ": parameter should be absent")
+    (parseErased (parseLit silent silent [])) n
 
-parseSupported : Parser (Logging ∘ Dec) Supported
-parseSupported =
-   parseSum parseSHA1
-  (parseSum parseSHA224
-  (parseSum parseSHA256
-  (parseSum parseSHA384
-            parseSHA512)))
+parse : Parser (Logging ∘ Dec) ECDSA
+parse = DefinedByOID.parse here' λ n o → parseParams n o ((-, TLV.val o) ∈? OIDs.ECDSA.Supported)

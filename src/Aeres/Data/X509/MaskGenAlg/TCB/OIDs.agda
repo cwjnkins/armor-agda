@@ -29,3 +29,6 @@ MGF1Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 �
 
 MGF1 : OIDValue MGF1Lit
 MGF1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length MGF1Lit)) MGF1Lit)} tt))
+
+RFC4055 : List (Exists─ _ OIDValue)
+RFC4055 = [ -, MGF1 ]

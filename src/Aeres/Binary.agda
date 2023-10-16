@@ -799,7 +799,7 @@ module Base64 where
   ∈charsetUnique = ∈-unique (toWitness{Q = List.unique? _≟_ charset} tt)
 
   isByteRep : ∀ c → Dec (c ∈ charset)
-  isByteRep c = Any.any (c ≟_) charset
+  isByteRep c = Any.any? (c ≟_) charset
 
   toDig : Char → Maybe Dig
   toDig c

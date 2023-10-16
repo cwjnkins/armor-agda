@@ -10,9 +10,8 @@ open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
-import      Aeres.Data.X509.HashAlg.Properties as HashAlg
-open import Aeres.Data.X509.HashAlg.TCB
-open import Aeres.Data.X509.SignAlg.Exclusions
+open import Aeres.Data.X509.HashAlg.RFC4055
+-- open import Aeres.Data.X509.SignAlg.Exclusions
 open import Aeres.Data.X509.SignAlg.TCB
 import      Aeres.Data.X509.SignAlg.TCB.OIDs          as OIDs
 import      Aeres.Data.X509.SignAlg.ECDSA.TCB         as ECDSA
@@ -37,60 +36,60 @@ open Aeres.Grammar.Sum         UInt8
 
 module Aeres.Data.X509.SignAlg.Properties where
 
-@0 unambiguousUnsupported : Unambiguous UnsupportedSignAlg
-unambiguousUnsupported =
-  TLV.unambiguous
-    (DefinedByOID.unambiguous
-      UnsupportedParam
-      (λ o → Parallel.unambiguous×ₚ OctetString.unambiguousValue T-unique))
+-- @0 unambiguousUnsupported : Unambiguous UnsupportedSignAlg
+-- unambiguousUnsupported =
+--   TLV.unambiguous
+--     (DefinedByOID.unambiguous
+--       UnsupportedParam
+--       (λ o → Parallel.unambiguous×ₚ OctetString.unambiguousValue T-unique))
 
-private
-  @0 ua₂ : Unambiguous (Sum RSA.Supported UnsupportedSignAlg)
-  ua₂ =
-    Sum.unambiguous{A = RSA.Supported}{B = UnsupportedSignAlg}
-      RSA.Supported.unambiguous
-      unambiguousUnsupported
-      noConfusion-RSA-Unsupported
+-- private
+--   @0 ua₂ : Unambiguous (Sum RSA.Supported UnsupportedSignAlg)
+--   ua₂ =
+--     Sum.unambiguous{A = RSA.Supported}{B = UnsupportedSignAlg}
+--       RSA.Supported.unambiguous
+--       unambiguousUnsupported
+--       noConfusion-RSA-Unsupported
 
-  @0 nc₂ : NoConfusion ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)
-  nc₂ =
-    Sum.noconfusion{A = ECDSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
-      noConfusion-ECDSA-RSA
-      noConfusion-ECDSA-Unsupported
+--   @0 nc₂ : NoConfusion ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)
+--   nc₂ =
+--     Sum.noconfusion{A = ECDSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+--       noConfusion-ECDSA-RSA
+--       noConfusion-ECDSA-Unsupported
 
-  @0 ua₁ : Unambiguous (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
-  ua₁ =
-    Sum.unambiguous{A = ECDSA.Supported}{B = Sum RSA.Supported UnsupportedSignAlg}
-      ECDSA.unambiguous ua₂ nc₂
+--   @0 ua₁ : Unambiguous (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
+--   ua₁ =
+--     Sum.unambiguous{A = ECDSA.Supported}{B = Sum RSA.Supported UnsupportedSignAlg}
+--       ECDSA.unambiguous ua₂ nc₂
 
-  @0 nc₁ : NoConfusion DSA.Supported (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
-  nc₁ =
-    Sum.noconfusion{A = DSA.Supported}{B = ECDSA.Supported}{C = Sum RSA.Supported UnsupportedSignAlg}
-      noConfusion-DSA-ECDSA
-      (Sum.noconfusion{A = DSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
-        noConfusion-DSA-RSA
-        noConfusion-DSA-Unsupported)
+--   @0 nc₁ : NoConfusion DSA.Supported (Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg))
+--   nc₁ =
+--     Sum.noconfusion{A = DSA.Supported}{B = ECDSA.Supported}{C = Sum RSA.Supported UnsupportedSignAlg}
+--       noConfusion-DSA-ECDSA
+--       (Sum.noconfusion{A = DSA.Supported}{B = RSA.Supported}{C = UnsupportedSignAlg}
+--         noConfusion-DSA-RSA
+--         noConfusion-DSA-Unsupported)
 
-iso : Iso SignAlgRep SignAlg
-proj₁ iso = equivalent
-proj₁ (proj₂ iso) (inj₁ x) = refl
-proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
-proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl
-proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₂ x))) = refl
-proj₂ (proj₂ iso) (dsa x) = refl
-proj₂ (proj₂ iso) (ecdsa x) = refl
-proj₂ (proj₂ iso) (rsa x) = refl
-proj₂ (proj₂ iso) (unsupported x) = refl
+-- iso : Iso SignAlgRep SignAlg
+-- proj₁ iso = equivalent
+-- proj₁ (proj₂ iso) (inj₁ x) = refl
+-- proj₁ (proj₂ iso) (inj₂ (inj₁ x)) = refl
+-- proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₁ x))) = refl
+-- proj₁ (proj₂ iso) (inj₂ (inj₂ (inj₂ x))) = refl
+-- proj₂ (proj₂ iso) (dsa x) = refl
+-- proj₂ (proj₂ iso) (ecdsa x) = refl
+-- proj₂ (proj₂ iso) (rsa x) = refl
+-- proj₂ (proj₂ iso) (unsupported x) = refl
 
-@0 unambiguous : Unambiguous SignAlg
-unambiguous =
-  Iso.unambiguous iso
-    (Sum.unambiguous{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
-      DSA.unambiguous ua₁ nc₁)
+-- @0 unambiguous : Unambiguous SignAlg
+-- unambiguous =
+--   Iso.unambiguous iso
+--     (Sum.unambiguous{A = DSA.Supported}{B = Sum ECDSA.Supported (Sum RSA.Supported UnsupportedSignAlg)}
+--       DSA.unambiguous ua₁ nc₁)
 
-@0 nosubstrings : NoSubstrings SignAlg
-nosubstrings xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
-  TLV.nosubstrings xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
+-- @0 nosubstrings : NoSubstrings SignAlg
+-- nosubstrings xs₁++ys₁≡xs₂++ys₂ a₁ a₂ =
+--   TLV.nosubstrings xs₁++ys₁≡xs₂++ys₂ (erase a₁) (erase a₂)
 
-postulate
-  @0 nonmalleable : NonMalleable RawSignAlg
+-- postulate
+--   @0 nonmalleable : NonMalleable RawSignAlg

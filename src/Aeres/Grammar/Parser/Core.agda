@@ -72,3 +72,6 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
             λ ()
       (yes (success prefix read read≡ value [] ps≡)) →
         yes (subst₀ A (trans (sym $ ++-identityʳ _) ps≡) value)
+
+  parseFalse : Parser (M ∘ Dec) (λ _ → ⊥)
+  runParser parseFalse xs = return ∘ no $ λ ()

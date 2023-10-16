@@ -138,6 +138,15 @@ pair.
   PSS : OIDValue PSSLit
   PSS = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PSSLit)) PSSLit)} tt))
 
+  ExplicitNullParam : List (Exists─ _ OIDValue)
+  ExplicitNullParam = (-, MD2) ∷ (-, MD5) ∷ (-, SHA1) ∷ []
+
+  ExplicitOrImplicitNullParam : List (Exists─ _ OIDValue)
+  ExplicitOrImplicitNullParam = (-, SHA224) ∷ (-, SHA256 ) ∷ (-, SHA384) ∷ (-, SHA512) ∷ []
+
+  Supported : List (Exists─ _ OIDValue)
+  Supported = ExplicitNullParam ++ ExplicitOrImplicitNullParam ++ [ -, PSS ]
+
 module DSA where
 
 {-
@@ -195,6 +204,9 @@ dsa-with-sha224 or id-dsa-with-sha256.
 
   SHA256 : OIDValue SHA256Lit
   SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+
+  Supported : List (Exists─ _ OIDValue)
+  Supported = (-, SHA1) ∷ (-, SHA224) ∷ [ -, SHA256 ]
 
 module ECDSA where
 
@@ -276,14 +288,8 @@ SHA384, or ecdsa-with-SHA512.
   SHA512 : OIDValue SHA512Lit
   SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
 
-NullOrAbsentParam : List (Exists─ _ OIDValue)
-NullOrAbsentParam =
-  (-, RSA.MD2) ∷ (-, RSA.MD5) ∷ (-, RSA.SHA1) ∷ (-, RSA.SHA224) ∷ (-, RSA.SHA256) ∷ [ -, RSA.SHA384 ]
+  Supported : List (Exists─ _ OIDValue)
+  Supported = (-, SHA1) ∷ (-, SHA224) ∷ (-, SHA256) ∷ (-, SHA384) ∷ [ -, SHA512 ]
 
-AbsentParam : List (Exists─ _ OIDValue)
-AbsentParam =
-    (-, DSA.SHA1) ∷ (-, DSA.SHA224) ∷ (-, DSA.SHA256) ∷ (-, ECDSA.SHA1)
-  ∷ (-, ECDSA.SHA224) ∷ (-, ECDSA.SHA256) ∷ (-, ECDSA.SHA384) ∷ [ (-, ECDSA.SHA512) ]
-
-SupportedParam : List (Exists─ _ OIDValue)
-SupportedParam = NullOrAbsentParam ++ AbsentParam ++ [ -, RSA.PSS ]
+Supported : List (Exists─ _ OIDValue)
+Supported = DSA.Supported ++ ECDSA.Supported ++ RSA.Supported

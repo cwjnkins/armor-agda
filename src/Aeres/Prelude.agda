@@ -62,7 +62,9 @@ open All public using (All ; [] ; _∷_)
 
 open import Data.List.Relation.Unary.Any public
   using (here ; there)
-module Any = Data.List.Relation.Unary.Any
+module Any where
+  open import Data.List.Relation.Unary.Any            public
+  open import Data.List.Relation.Unary.Any.Properties public
 Any = Any.Any
 
 open import Data.List.Membership.Propositional public

@@ -15,18 +15,14 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
-module parseNull where
-  here' = "parseNull"
+private
+  here' = "X690-DER: Null"
 
-  open ≡-Reasoning
-
-  parseNull : Parser (Logging ∘ Dec) Null
-  parseNull =
-    (parseTLV Tag.Null "null" (_≡ [])
-      (parseExactLength (λ where _ refl refl → refl) (tell $ here' String.++ ": nonzero length")
-        (parseLit (return (Level.lift tt)) (return (Level.lift tt)) [])))
-
-open parseNull public using (parseNull)
+parse : Parser (Logging ∘ Dec) Null
+parse =
+  (parseTLV Tag.Null here' (_≡ [])
+    (parseExactLength (λ where _ refl refl → refl) (tell $ here' String.++ ": nonzero length")
+      (parseLit (return (Level.lift tt)) (return (Level.lift tt)) [])))
 
 -- private
 --   module Test where

@@ -1,9 +1,9 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import      Aeres.Data.X509.HashAlg.TCB             as HashAlg
+import      Aeres.Data.X509.HashAlg.RFC4055.TCB     as RFC4055
 import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
-import      Aeres.Data.X509.MaskGenAlg.TCB          as MaskGenAlg
+import      Aeres.Data.X509.MaskGenAlg.RFC4055.TCB  as RFC4055
 import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.OID.TCB
@@ -14,6 +14,7 @@ import      Aeres.Data.X690-DER.Tag                 as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option.TCB
 import      Aeres.Grammar.Parallel.TCB
+import      Aeres.Grammar.Seq.TCB
 import      Aeres.Grammar.Sum.TCB
 open import Aeres.Prelude
 
@@ -22,28 +23,29 @@ module Aeres.Data.X509.SignAlg.RSA.PSS.TCB where
 open Aeres.Grammar.Definitions  UInt8
 open Aeres.Grammar.Option.TCB   UInt8
 open Aeres.Grammar.Parallel.TCB UInt8
+open Aeres.Grammar.Seq.TCB      UInt8
 open Aeres.Grammar.Sum.TCB      UInt8
 
-SupportedHashAlg : @0 List UInt8 → Set
-SupportedHashAlg =
-   Sum HashAlg.SHA1
-  (Sum HashAlg.SHA224
-  (Sum HashAlg.SHA256
-  (Sum HashAlg.SHA384
-       HashAlg.SHA512)))
+-- SupportedHashAlg : @0 List UInt8 → Set
+-- SupportedHashAlg =
+--    Sum HashAlg.SHA1
+--   (Sum HashAlg.SHA224
+--   (Sum HashAlg.SHA256
+--   (Sum HashAlg.SHA384
+--        HashAlg.SHA512)))
 
-module SupportedHashAlg where
-  erase : ∀ {@0 bs} → SupportedHashAlg bs → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
-  erase (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)) =
-    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))) =
-    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)))) =
-    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
-    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
-  erase (inj₂ (inj₂ (inj₂ (inj₂ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
-    mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+-- module SupportedHashAlg where
+--   erase : ∀ {@0 bs} → SupportedHashAlg bs → DefinedByOID (λ _ bs → Erased (OctetStringValue bs)) bs
+--   erase (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)) =
+--     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+--   erase (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))) =
+--     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+--   erase (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡)))) =
+--     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+--   erase (inj₂ (inj₂ (inj₂ (inj₁ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
+--     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
+--   erase (inj₂ (inj₂ (inj₂ (inj₂ (mkTLV len (mkOIDDefinedFields o p refl) len≡ bs≡))))) =
+--     mkTLV len (mkOIDDefinedFields o (─ self) refl) len≡ bs≡
 
 --   {- https://datatracker.ietf.org/doc/html/rfc4055#section-3.1 -}
 {-
@@ -57,6 +59,13 @@ module SupportedHashAlg where
          saltLength         [2] INTEGER DEFAULT 20,
          trailerField       [3] INTEGER DEFAULT 1  }
 -}
+PSSHashAlg PSSMaskGenAlg PSSSaltLen PSSTrailer : @0 List UInt8 → Set
+
+PSSHashAlg    = TLV Tag.AA0 (Option RFC4055.HashAlg)
+PSSMaskGenAlg = TLV Tag.AA1 (Option RFC4055.MGF1)
+PSSSaltLen    = TLV Tag.AA2 (Option Int)
+PSSTrailer    = TLV Tag.AA3 (Option (Σₚ Int (λ _ i → getVal i ≡ ℤ.1ℤ)))
+
 record PSSParamFields (@0 bs : List UInt8) : Set where
   constructor mkPSSParam
   field
@@ -74,10 +83,7 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    recognize both the sha1Identifier algorithm identifier and an
 --    absent hashAlgorithm field as an indication that SHA-1 was
 --    used.
---
-
-  field
-    hashAlg : TLV Tag.AA0 (Option SupportedHashAlg) h
+    hashAlg : PSSHashAlg h
 
 -- maskGenAlgorithm
 
@@ -103,7 +109,7 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    this field, implementations MUST accept both the default value
 --    encoding (i.e., an absent field) and mfg1SHA1Identifier to be
 --    explicitly present in the encoding.
-    maskGenAlgo : TLV Tag.AA1 (Option MaskGenAlg.MGF1.MaskGenAlg) m
+    maskGenAlg : PSSMaskGenAlg m
 
 -- saltLength
 
@@ -113,7 +119,7 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    type RSASSA-PSS-params, saltLength does not need to be fixed
 --    for a given RSA key pair; a different value could be used for
 --    each RSASSA-PSS signature generated.
-    saltLength : TLV Tag.AA2 (Option Int) s
+    saltLength : PSSSaltLen s
 
 -- trailerField
 
@@ -128,13 +134,35 @@ record PSSParamFields (@0 bs : List UInt8) : Set where
 --    Implementations that perform signature validation MUST
 --    recognize both a present trailerField field with value 1 and an
 --    absent trailerField field.
-    trailerField : TLV Tag.AA3 (Option (Σₚ Int λ _ i → getVal i ≡ ℤ.1ℤ)) t
+    trailerField : PSSTrailer t
 
     @0 bs≡ : bs ≡ h ++ m ++ s ++ t
 
-PSSParam : {@0 bs : List UInt8} → OID bs → @0 List UInt8 → Set
-PSSParam o =
-     PSSParamFields
-  ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.RSA.PSS) 
+PSSParamFieldsRep : @0 List UInt8 → Set
+PSSParamFieldsRep =
+   &ₚ PSSHashAlg
+  (&ₚ PSSMaskGenAlg
+  (&ₚ PSSSaltLen
+      PSSTrailer))
 
-PSS = DefinedByOID PSSParam
+equivalent : Equivalent PSSParamFieldsRep PSSParamFields
+proj₁ equivalent (mk&ₚ hash (mk&ₚ mask (mk&ₚ salt trail refl) refl) refl) =
+  mkPSSParam hash mask salt trail refl
+proj₂ equivalent (mkPSSParam hashAlg maskGenAlg saltLength trailerField refl) =
+  mk&ₚ hashAlg (mk&ₚ maskGenAlg (mk&ₚ saltLength trailerField refl) refl) refl
+
+RawPSSParamFieldsRep : Raw PSSParamFieldsRep
+RawPSSParamFieldsRep =
+   Raw&ₚ (RawTLV _ (RawOption RFC4055.RawHashAlg))
+  (Raw&ₚ (RawTLV _ (RawOption RFC4055.RawMGF1))
+  (Raw&ₚ (RawTLV _ (RawOption RawInt))
+         (RawTLV _ (RawOption (RawΣₚ₁ RawInt _)))))
+
+RawPSSParamFields : Raw PSSParamFields
+RawPSSParamFields = Iso.raw equivalent RawPSSParamFieldsRep
+
+PSSParamSeq : @0 List UInt8 → Set
+PSSParamSeq = TLV Tag.Sequence PSSParamFields
+
+RawPSSParamSeq : Raw PSSParamSeq
+RawPSSParamSeq = RawTLV _ RawPSSParamFields
