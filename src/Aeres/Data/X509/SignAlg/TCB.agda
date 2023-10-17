@@ -110,13 +110,13 @@ postulate
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₁ (mkTLV len val len≡ refl)) = {!!}
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₁ x)) = {!!}
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₂ x)) = {!!}
--- proj₂ equivalent (mkOIDDefinedFields oid param bs≡) =
---   case (-, TLV.val oid) ∈? OIDs.Supported
---   of λ where
---     (no ¬p) → {!!}
---     (yes p) →
---       case lookupSignAlg oid p
---       of λ where
---         (inj₁ x) → inj₁ {!!}
---         (inj₂ (inj₁ x)) → inj₂ (inj₁ {!!})
---         (inj₂ (inj₂ y)) → inj₂ (inj₂ {!!})
+-- proj₂ equivalent (mkOIDDefinedFields oid param bs≡) = {!!}
+  -- case (-, TLV.val oid) ∈? OIDs.Supported
+  -- of λ where
+  --   (no ¬p) → {!!}
+  --   (yes p) →
+  --     case lookupSignAlg oid p
+  --     of λ where
+  --       (inj₁ x) → inj₁ {!!}
+  --       (inj₂ (inj₁ x)) → inj₂ (inj₁ {!!})
+  --       (inj₂ (inj₂ y)) → inj₂ (inj₂ {!!})
