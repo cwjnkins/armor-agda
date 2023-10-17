@@ -12,8 +12,8 @@ module Aeres.Data.X509.SignAlg where
 
 open Aeres.Data.X509.SignAlg.Parser public
 open Aeres.Data.X509.SignAlg.TCB    public
-  using (SignAlg)
-  hiding (module SignAlg)
+  -- using (SignAlg)
+  -- hiding (module SignAlg)
 
 module SignAlg where
   open Aeres.Data.X509.SignAlg.DSA        public

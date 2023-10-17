@@ -4,7 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.Properties
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.TCB
-open import Aeres.Data.X690-DER.Null
+open import Aeres.Data.X690-DER.Null as Null
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
@@ -19,4 +19,4 @@ open Aeres.Grammar.Parser      UInt8
 open Aeres.Grammar.Sum         UInt8
 
 parse : Parser (Logging ∘ Dec) ECPKParameters
-parse = parseEquivalent equivalent (parseSum ECParameters.parse (parseSum parseOID parseNull))
+parse = parseEquivalent equivalent (parseSum ECParameters.parse (parseSum parseOID Null.parse))

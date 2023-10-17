@@ -34,14 +34,14 @@ parseParameters n o =
       tell $ here' String.++ ": unsupported OID: " String.++ show (map (map toℕ) (Raw.to RawOID o))
       return ∘ no $ λ ()
     (yes (here px)) →
-      parseExactLength TLV.nosubstrings (tell $ here' String.++ ": GNBasis: could not parse null parameter") parseNull _
+      parseExactLength TLV.nosubstrings (tell $ here' String.++ ": GNBasis: could not parse null parameter") Null.parse _
     (yes (there (here px))) →
       parseExactLength TLV.nosubstrings (tell $ here' String.++ ": TPBasis: could not parse parameter") Int.parse _
     (yes (there (there (here px)))) →
       parseExactLength (Seq.nosubstrings TLV.nosubstrings (Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings))
         (tell $ here' String.++ ": PPBasis: could not parse parameter")
         (parse& TLV.nosubstrings Int.parse (parse& TLV.nosubstrings Int.parse Int.parse))
-        _
+       _
 
 parse : ∀ n → Parser (Logging ∘ Dec) (ExactLength BasisFields n)
 parse = DefinedByOID.parseFields here' parseParameters

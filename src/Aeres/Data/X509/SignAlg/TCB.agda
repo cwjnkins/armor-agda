@@ -13,12 +13,12 @@ import      Aeres.Data.X509.SignAlg.ECDSA.TCB as ECDSA
 import      Aeres.Data.X509.SignAlg.DSA.TCB   as DSA
 import      Aeres.Data.X509.SignAlg.RSA.TCB   as RSA
 import      Aeres.Grammar.Sum.TCB
-import      Aeres.Grammar.Definitions.NonMalleable
+import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 open import Data.Sum as Sum
 
-open Aeres.Grammar.Definitions.NonMalleable UInt8
+open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Sum.TCB                  UInt8
 
 module Aeres.Data.X509.SignAlg.TCB where
@@ -104,3 +104,19 @@ getOID s = DefinedByOIDFields.oid (TLV.val s)
 
 -- -- getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
 -- -- getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
+
+postulate
+  equivalent : Equivalent (Sum DSA.DSA (Sum ECDSA.ECDSA RSA.RSA)) (DefinedByOIDFields SignAlgParam)
+-- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₁ (mkTLV len val len≡ refl)) = {!!}
+-- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₁ x)) = {!!}
+-- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₂ x)) = {!!}
+-- proj₂ equivalent (mkOIDDefinedFields oid param bs≡) =
+--   case (-, TLV.val oid) ∈? OIDs.Supported
+--   of λ where
+--     (no ¬p) → {!!}
+--     (yes p) →
+--       case lookupSignAlg oid p
+--       of λ where
+--         (inj₁ x) → inj₁ {!!}
+--         (inj₂ (inj₁ x)) → inj₂ (inj₁ {!!})
+--         (inj₂ (inj₂ y)) → inj₂ (inj₂ {!!})

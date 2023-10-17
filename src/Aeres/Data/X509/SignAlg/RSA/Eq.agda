@@ -14,8 +14,8 @@ module Aeres.Data.X509.SignAlg.RSA.Eq where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Sum         UInt8
 
-instance
-  eq≋Supported : Eq≋ Supported
-  eq≋Supported =
-    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ =
-    Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄
+-- instance
+--   eq≋Supported : Eq≋ Supported
+--   eq≋Supported =
+--     Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ =
+--     Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄

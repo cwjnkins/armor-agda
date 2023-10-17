@@ -1,45 +1,44 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import      Aeres.Data.X509.HashAlg.Parser as HashAlg
-open import Aeres.Data.X509.MaskGenAlg.Parser
 open import Aeres.Data.X509.SignAlg.RSA.TCB
-import      Aeres.Data.X509.SignAlg.RSA.Properties as RSA
-open import Aeres.Data.X509.SignAlg.RSA.PSS
 import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
-open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID
+open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.Null
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
-import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Sum
+open import Aeres.Grammar.Option
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.RSA.Parser where
 
 open Aeres.Grammar.Definitions UInt8
+open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Sum         UInt8
-open HashAlg
-  using (parseSHA-Like)
 
-parseMD2     = parseSHA-Like OIDs.RSA.MD2    "RSA (MD2)"
-parseMD5     = parseSHA-Like OIDs.RSA.MD5    "RSA (MD5)"
-parseSHA1    = parseSHA-Like OIDs.RSA.SHA1   "RSA (SHA1)"
-parseSHA224  = parseSHA-Like OIDs.RSA.SHA224 "RSA (SHA224)"
-parseSHA256  = parseSHA-Like OIDs.RSA.SHA256 "RSA (SHA256)"
-parseSHA384  = parseSHA-Like OIDs.RSA.SHA384 "RSA (SHA384)"
-parseSHA512  = parseSHA-Like OIDs.RSA.SHA512 "RSA (SHA512)"
+private
+  here' = "X509: SignAlg: RSA"
 
-parseSupported : Parser (Logging ∘ Dec) Supported
-parseSupported =
-   parseSum parseMD2
-  (parseSum parseMD5
-  (parseSum parseSHA1
-  (parseSum parseSHA224
-  (parseSum parseSHA256
-  (parseSum parseSHA384
-  (parseSum parseSHA512
-            parsePSS))))))
+parseParams : ∀ n {@0 bs} → (o : OID bs) (o∈? : Dec ((-, TLV.val o) ∈ OIDs.RSA.Supported))
+              → Parser (Logging ∘ Dec) (ExactLength (RSAParams' o o∈?) n)
+parseParams n o (no ¬p) =
+  parseExactLength (λ where _ ()) silent parseFalse n
+parseParams n o (yes p) =
+  case splitRSA∈ o p
+    ret (λ ∈? → Parser (Logging ∘ Dec) (ExactLength (RSAParams“ o ∈?) n))
+    of λ where
+    (inj₁ x) → parseExactLength TLV.nosubstrings
+                 (tell $ here' String.++ ": parameter should be null") Null.parse n
+    (inj₂ (inj₁ x)) → Option.parseOption₁ExactLength _ TLV.nosubstrings
+                  (tell $ here' String.++ ": parameter should be null or absent") Null.parse n
+    (inj₂ (inj₂ y)) → parseExactLength TLV.nosubstrings
+                         (tell $ here' String.++ ": parameter must be present")
+                         (parseTLV _ "TLV underflow" _ OctetString.parseValue)
+                         n
+ 
+parse : Parser (Logging ∘ Dec) RSA
+parse = DefinedByOID.parse here' λ n o → parseParams n o (((-, TLV.val o) ∈? OIDs.RSA.Supported))

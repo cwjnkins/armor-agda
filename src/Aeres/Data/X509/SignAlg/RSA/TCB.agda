@@ -6,7 +6,8 @@ open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.OctetString.TCB
-open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
+import      Aeres.Data.X690-DER.Tag as Tag
+-- open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
 open import Aeres.Data.X509.SignAlg.TCB.OIDs  as OIDs
 import      Aeres.Data.X509.HashAlg.RFC4055   as HashAlg
 import      Aeres.Data.X509.HashAlg.TCB.OIDs  as OIDs
@@ -112,13 +113,13 @@ RSAParams“ : ∀ {@0 bs} → (o : OID bs) → SplitRSA∈ o → @0 List UInt8 
 
 RSAParams“ o (inj₁ x) = Null
 RSAParams“ o (inj₂ (inj₁ x)) = Option Null
-RSAParams“ o (inj₂ (inj₂ y)) = Option PSSParamSeq
+RSAParams“ o (inj₂ (inj₂ y)) = TLV Tag.Sequence OctetStringValue --PSSParamSeq
 
 RSAParamsRep : @0 List UInt8 → Set
-RSAParamsRep = Sum Null (Sum (Option Null) (Option PSSParamSeq))
+RSAParamsRep = Sum Null (Sum (Option Null) (TLV Tag.Sequence OctetStringValue)) --PSSParamSeq))
 
 RawRSAParamsRep : Raw RSAParamsRep
-RawRSAParamsRep = RawSum RawNull (RawSum (RawOption RawNull) (RawOption RawPSSParamSeq))
+RawRSAParamsRep = RawSum RawNull (RawSum (RawOption RawNull) (RawTLV _ RawOctetStringValue)) --RawPSSParamSeq))
 
 RSAParams' : ∀ {@0 bs} → (o : OID bs) → Dec ((-, TLV.val o) ∈ OIDs.RSA.Supported) → @0 List UInt8 → Set
 RSAParams' o (no ¬p) bs = ⊥

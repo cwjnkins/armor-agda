@@ -1,64 +1,64 @@
 {-# OPTIONS --subtyping #-}
 
-open import Aeres.Binary
-open import Aeres.Data.X509.HashAlg
-import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
-open import Aeres.Data.X509.MaskGenAlg
-open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
-import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
-open import Aeres.Data.X690-DER.Int
-open import Aeres.Data.X690-DER.OID.TCB
-open import Aeres.Data.X690-DER.OctetString.TCB
-open import Aeres.Data.X690-DER.Sequence.DefinedByOID
-open import Aeres.Data.X690-DER.TLV
-import      Aeres.Data.X690-DER.Tag                 as Tag
-import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Option
-import      Aeres.Grammar.Parallel
-import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Seq
-import      Aeres.Grammar.Sum
-open import Aeres.Prelude
+-- open import Aeres.Binary
+-- open import Aeres.Data.X509.HashAlg
+-- import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs
+-- open import Aeres.Data.X509.MaskGenAlg
+-- open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB
+-- import      Aeres.Data.X509.SignAlg.TCB.OIDs        as OIDs
+-- open import Aeres.Data.X690-DER.Int
+-- open import Aeres.Data.X690-DER.OID.TCB
+-- open import Aeres.Data.X690-DER.OctetString.TCB
+-- open import Aeres.Data.X690-DER.Sequence.DefinedByOID
+-- open import Aeres.Data.X690-DER.TLV
+-- import      Aeres.Data.X690-DER.Tag                 as Tag
+-- import      Aeres.Grammar.Definitions
+-- import      Aeres.Grammar.Option
+-- import      Aeres.Grammar.Parallel
+-- import      Aeres.Grammar.Properties
+-- import      Aeres.Grammar.Seq
+-- import      Aeres.Grammar.Sum
+-- open import Aeres.Prelude
 
 module Aeres.Data.X509.SignAlg.RSA.PSS.Properties where
 
-open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Option      UInt8
-open Aeres.Grammar.Parallel    UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Seq         UInt8
-open Aeres.Grammar.Sum         UInt8
+-- open Aeres.Grammar.Definitions UInt8
+-- open Aeres.Grammar.Option      UInt8
+-- open Aeres.Grammar.Parallel    UInt8
+-- open Aeres.Grammar.Properties  UInt8
+-- open Aeres.Grammar.Seq         UInt8
+-- open Aeres.Grammar.Sum         UInt8
 
-iso : Iso PSSParamFieldsRep PSSParamFields
-proj₁ iso = equivalent
-proj₁ (proj₂ iso) (mk&ₚ hashAlg (mk&ₚ maskGenAlg (mk&ₚ saltLen trailerField refl) refl) refl) = refl
-proj₂ (proj₂ iso) (mkPSSParam hashAlg maskGenAlg saltLength trailerField refl) = refl
+-- iso : Iso PSSParamFieldsRep PSSParamFields
+-- proj₁ iso = equivalent
+-- proj₁ (proj₂ iso) (mk&ₚ hashAlg (mk&ₚ maskGenAlg (mk&ₚ saltLen trailerField refl) refl) refl) = refl
+-- proj₂ (proj₂ iso) (mkPSSParam hashAlg maskGenAlg saltLength trailerField refl) = refl
 
-@0 unambiguous : Unambiguous PSSParamSeq
-unambiguous =
-  TLV.unambiguous
-    (Iso.unambiguous iso
-      (Seq.unambiguous{A = PSSHashAlg}
-        (TLV.unambiguous
-          (Option.unambiguous HashAlg.RFC4055.unambiguous TLV.nonempty))
-        TLV.nosubstrings
-      (Seq.unambiguous
-        (TLV.unambiguous
-          (Option.unambiguous MaskGenAlg.RFC4055.unambiguous TLV.nonempty))
-        TLV.nosubstrings
-      (Seq.unambiguous
-        (TLV.unambiguous (Option.unambiguous Int.unambiguous TLV.nonempty))
-        TLV.nosubstrings
-          (TLV.unambiguous
-            (Option.unambiguous
-              (Parallel.unambiguous Int.unambiguous (λ _ → ≡-unique))
-              (Parallel.nonempty₁ TLV.nonempty)))))))
+-- @0 unambiguous : Unambiguous PSSParamSeq
+-- unambiguous =
+--   TLV.unambiguous
+--     (Iso.unambiguous iso
+--       (Seq.unambiguous{A = PSSHashAlg}
+--         (TLV.unambiguous
+--           (Option.unambiguous HashAlg.RFC4055.unambiguous TLV.nonempty))
+--         TLV.nosubstrings
+--       (Seq.unambiguous
+--         (TLV.unambiguous
+--           (Option.unambiguous MaskGenAlg.RFC4055.unambiguous TLV.nonempty))
+--         TLV.nosubstrings
+--       (Seq.unambiguous
+--         (TLV.unambiguous (Option.unambiguous Int.unambiguous TLV.nonempty))
+--         TLV.nosubstrings
+--           (TLV.unambiguous
+--             (Option.unambiguous
+--               (Parallel.unambiguous Int.unambiguous (λ _ → ≡-unique))
+--               (Parallel.nonempty₁ TLV.nonempty)))))))
 
-@0 nonmalleable : NonMalleable RawPSSParamSeq
-nonmalleable =
-  TLV.nonmalleable {R = RawPSSParamFields}
-    (Iso.nonmalleable iso RawPSSParamFieldsRep
-      (Seq.nonmalleable{ra = RawTLV _ (RawOption HashAlg.RawHashAlg)} {!!} {!!}))
+-- @0 nonmalleable : NonMalleable RawPSSParamSeq
+-- nonmalleable =
+--   TLV.nonmalleable {R = RawPSSParamFields}
+--     (Iso.nonmalleable iso RawPSSParamFieldsRep
+--       (Seq.nonmalleable{ra = RawTLV _ (RawOption HashAlg.RawHashAlg)} {!!} {!!}))
 
 -- module Fields where
 --   module SupportedHashAlg where

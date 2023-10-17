@@ -1,118 +1,69 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
-import      Aeres.Data.X509.SignAlg.TCB.OIDs            as OIDs
-import      Aeres.Data.X509.SignAlg.RSA.TCB             as RSA
-open import Aeres.Data.X509.SignAlg.RSA.PSS.TCB         as PSS
-import      Aeres.Data.X509.SignAlg.RSA.PSS.Properties  as PSS
-import      Aeres.Data.X509.HashAlg.TCB                 as HashAlg
-import      Aeres.Data.X509.HashAlg.Properties          as HashAlg
-import      Aeres.Data.X509.HashAlg.TCB.OIDs            as OIDs
+import      Aeres.Data.X509.SignAlg.TCB.OIDs as OIDs
+open import Aeres.Data.X509.SignAlg.RSA.TCB
 open import Aeres.Data.X690-DER.OID
-open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Sequence.DefinedByOID
 open import Aeres.Data.X690-DER.TLV
+open import Aeres.Data.X690-DER.Null
 import      Aeres.Grammar.Definitions
-import      Aeres.Grammar.Parallel
-import      Aeres.Grammar.Properties
-import      Aeres.Grammar.Sum
+import      Aeres.Grammar.Option
 open import Aeres.Prelude
-open import Tactic.MonoidSolver using (solve ; solve-macro)
+open import Data.Sum.Properties
 
 module Aeres.Data.X509.SignAlg.RSA.Properties where
 
 open Aeres.Grammar.Definitions UInt8
-open Aeres.Grammar.Parallel    UInt8
-open Aeres.Grammar.Properties  UInt8
-open Aeres.Grammar.Sum         UInt8
+open Aeres.Grammar.Option      UInt8
 
-module Supported where
-  @0 noConfusion : ∀ {@0 bs} → (o : OIDValue bs) → {_ : False (_≋?_{A = OIDValue} o OIDs.RSA.PSS)}
-                → NoConfusion (HashAlg.SHA-Like o) PSS
-  noConfusion o {t} =
-    TLV.noconfusionVal λ where
-     {xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkOIDDefinedFields{bs₁}{p} o (mk×ₚ _ o≡) bs≡) (mkOIDDefinedFields{bs₁'}{p'} o' (mk×ₚ _ o'≡) bs'≡) →
-       let
-         @0 ++≡ : Erased (bs₁ ++ p ++ ys₁ ≡ bs₁' ++ p' ++ ys₂)
-         ++≡ = ─ (begin
-           bs₁ ++ p ++ ys₁ ≡⟨ solve (++-monoid UInt8) ⟩
-           (bs₁ ++ p) ++ ys₁ ≡⟨ cong (_++ ys₁) (sym bs≡) ⟩
-           xs₁ ++ ys₁ ≡⟨ xs₁++ys₁≡xs₂++ys₂ ⟩
-           xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) bs'≡ ⟩
-           (bs₁' ++ p') ++ ys₂ ≡⟨ solve (++-monoid UInt8) ⟩
-           bs₁' ++ p' ++ ys₂ ∎)
-  
-         @0 bs₁≡ : Erased (bs₁ ≡ bs₁')
-         bs₁≡ = ─ TLV.nosubstrings (¡ ++≡) o o'
-  
-         @0 o≋o' : _≋_{OID} o o'
-         o≋o' = mk≋ (¡ bs₁≡) (OID.unambiguous _ o')
-       in
-       contradiction
-         (trans≋ (sym≋ o≡) (trans≋ (cong≋ (λ x → -, TLV.val x) o≋o') o'≡))
-         (toWitnessFalse t)
-    where
-    open ≡-Reasoning
+@0 unambiguous : Unambiguous RSA
+unambiguous =
+  TLV.unambiguous
+    (DefinedByOID.unambiguous RSAParams
+      λ {bs} o →
+        case (-, TLV.val o) ∈? OIDs.RSA.Supported
+        ret (λ o∈? → Unambiguous (RSAParams' o o∈?))
+        of λ where
+          (no ¬p) → λ ()
+          (yes (here px)) a₁ a₂ →
+            ‼ Null.unambiguous a₁ a₂
+          (yes (there (here px))) a₁ a₂ →
+            ‼ Null.unambiguous a₁ a₂
+          (yes (there (there (here px)))) a₁ a₂ →
+            ‼ Null.unambiguous a₁ a₂
+          (yes (there (there (there (here px))))) a₁ a₂ →
+            ‼ Option.unambiguous Null.unambiguous TLV.nonempty a₁ a₂
+          (yes (there (there (there (there (here px)))))) a₁ a₂ →
+            ‼ Option.unambiguous Null.unambiguous TLV.nonempty a₁ a₂
+          (yes (there (there (there (there (there (here px))))))) a₁ a₂ →
+            ‼ Option.unambiguous Null.unambiguous TLV.nonempty a₁ a₂
+          (yes (there (there (there (there (there (there (here px)))))))) a₁ a₂ →
+            ‼ Option.unambiguous Null.unambiguous TLV.nonempty a₁ a₂
+          (yes (there (there (there (there (there (there (there (here px))))))))) a₁ a₂ →
+            ‼ TLV.unambiguous OctetString.unambiguousValue a₁ a₂)
 
-  @0 unambiguous : Unambiguous RSA.Supported
-  unambiguous =
-    Sum.unambiguous{A = RSA.MD2}
-      (HashAlg.SHA-Like.unambiguous OIDs.RSA.MD2)
-      (Sum.unambiguous{A = RSA.MD5}
-        (HashAlg.SHA-Like.unambiguous OIDs.RSA.MD5)
-        (Sum.unambiguous{A = RSA.SHA1}
-          (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA1)
-          (Sum.unambiguous{A = RSA.SHA224}
-            (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA224)
-            (Sum.unambiguous{A = RSA.SHA256}
-              (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA256)
-              (Sum.unambiguous{A = RSA.SHA384}
-                (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA384)
-                (Sum.unambiguous{A = RSA.SHA512}
-                  (HashAlg.SHA-Like.unambiguous OIDs.RSA.SHA512)
-                  PSS.unambiguous
-                  (noConfusion OIDs.RSA.SHA512))
-                (Sum.noconfusion{A = RSA.SHA384}
-                  (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA384 OIDs.RSA.SHA512)
-                  (noConfusion OIDs.RSA.SHA384)))
-              (Sum.noconfusion{A = RSA.SHA256}
-                (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA256 OIDs.RSA.SHA384)
-                (Sum.noconfusion{A = RSA.SHA256}
-                  (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA256 OIDs.RSA.SHA512)
-                  (noConfusion OIDs.RSA.SHA256))))
-            (Sum.noconfusion{A = RSA.SHA224}
-              (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA256)
-              (Sum.noconfusion{A = RSA.SHA224}
-                (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA384)
-                (Sum.noconfusion{A = RSA.SHA224}
-                  (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA224 OIDs.RSA.SHA512)
-                  (noConfusion OIDs.RSA.SHA224)))))
-          (Sum.noconfusion{A = RSA.SHA1}
-            (HashAlg.SHA-Like.noConfusion OIDs.RSA.SHA1 OIDs.RSA.SHA224)
-            (Sum.noconfusion{A = RSA.SHA1}
-              (HashAlg.SHA-Like.noConfusion _ _)
-              (Sum.noconfusion {A = RSA.SHA1}
-                (HashAlg.SHA-Like.noConfusion _ _)
-                (Sum.noconfusion{A = RSA.SHA1}
-                  (HashAlg.SHA-Like.noConfusion _ _)
-                  (noConfusion OIDs.RSA.SHA1))))))
-        (Sum.noconfusion{A = RSA.MD5}
-          (HashAlg.SHA-Like.noConfusion _ _)
-          (Sum.noconfusion{A = RSA.MD5}
-            (HashAlg.SHA-Like.noConfusion _ _)
-            (Sum.noconfusion{A = RSA.MD5}
-              (HashAlg.SHA-Like.noConfusion _ _)
-              (Sum.noconfusion{A = RSA.MD5}
-                (HashAlg.SHA-Like.noConfusion _ _)
-                (Sum.noconfusion{A = RSA.MD5}
-                  (HashAlg.SHA-Like.noConfusion _ _)
-                  (noConfusion OIDs.RSA.MD5)))))))
-      (Sum.noconfusion{A = RSA.MD2}
-        (HashAlg.SHA-Like.noConfusion _ _)
-        (Sum.noconfusion{A = RSA.MD2}
-          (HashAlg.SHA-Like.noConfusion _ _)
-          (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-            (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-              (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-                (Sum.noconfusion{A = RSA.MD2} (HashAlg.SHA-Like.noConfusion _ _)
-                  (noConfusion OIDs.RSA.MD2)))))))
+@0 nonmalleable : NonMalleable RawRSA
+nonmalleable =
+  DefinedByOID.nonmalleable RSAParams _ {R = RawRSAParams}
+    λ {bs} {a} → nm {bs} {a}
+  where
+  nm : NonMalleable₁ RawRSAParams
+  nm{bs}{o}{bs₁}{bs₂} =
+    case (-, TLV.val o) ∈? OIDs.RSA.Supported
+    ret (λ o∈? → (p₁ : RSAParams' o o∈? bs₁) (p₂ : RSAParams' o o∈? bs₂)
+               → toRawRSAParams' o o∈? p₁ ≡ toRawRSAParams' o o∈? p₂
+               → _≡_{A = Exists─ _ (RSAParams' o o∈?)} (─ bs₁ , p₁) (─ bs₂ , p₂))
+    of λ where
+      (no ¬p) → λ ()
+      (yes p) →
+        (case splitRSA∈ o p
+          ret (λ o∈? → (p₁ : RSAParams“ o o∈? bs₁) (p₂ : RSAParams“ o o∈? bs₂)
+               → toRawRSAParams“ o o∈? p₁ ≡ toRawRSAParams“ o o∈? p₂
+               → _≡_{A = Exists─ _ (RSAParams“ o o∈?)} (─ bs₁ , p₁) (─ bs₂ , p₂))
+          of λ where
+          (inj₁ x) p₁ p₂ x₁ → ‼ Null.nonmalleable  p₁ p₂ refl
+          (inj₂ (inj₁ x)) p₁ p₂ x₁ → ‼ Option.nonmalleable RawNull Null.nonmalleable
+            p₁ p₂ (inj₁-injective (inj₂-injective x₁))
+          (inj₂ (inj₂ y)) p₁ p₂ refl → ‼ TLV.nonmalleable OctetString.nonmalleableValue p₁ p₂ refl)

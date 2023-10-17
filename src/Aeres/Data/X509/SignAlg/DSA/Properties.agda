@@ -38,4 +38,3 @@ nonmalleable =
     of λ where
       (no ¬p) → λ ()
       (yes p) → λ where (─ refl) (─  refl) _ → refl
-
