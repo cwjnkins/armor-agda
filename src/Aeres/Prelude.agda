@@ -155,9 +155,10 @@ module WellFounded where
   open Induction.WellFounded public
 Acc = WellFounded.Acc
 
+
 open import Relation.Binary public
   using ()
-  renaming (Irrelevant to Unique₂)
+  renaming (Irrelevant to Unique₂ ; Decidable to Decidable₂)
 
 open import Relation.Binary.PropositionalEquality public
   hiding (decSetoid ; cong)
@@ -316,6 +317,10 @@ uneraseDec x (yes p) = p
 
 erased-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique A → Unique (Erased A)
 erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) refl
+
+@0 liftMapErase : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → (A → B) → List (Erased A) → List B
+liftMapErase f [] = []
+liftMapErase f (x ∷ xs) = f (¡ x) ∷ liftMapErase f xs
 
 Exists─ : (@0 A : Set) (B : @0 A → Set) → Set
 Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
