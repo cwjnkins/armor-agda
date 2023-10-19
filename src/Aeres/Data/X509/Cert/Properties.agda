@@ -9,6 +9,7 @@ open import Aeres.Data.X509.TBSCert
 import      Aeres.Data.X509.TBSCert.UID.TCB as TBSCert
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -75,7 +76,8 @@ nonmalleableFields =
       (Parallel.nonmalleable×ₚ TBSCert.nonmalleable λ where self self refl → refl)
       nm₂
 
--- @0 nonmalleable : NonMalleable RawCert
--- nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawCertFieldsRep
---     (Seq.nonmalleable{ra = (Raw×ₚ RawTBSCert RawOctetStringValue)}{rb = RawRep₁} (Parallel.nonmalleable×ₚ TBSCert.nonmalleable (λ where self self refl → refl))
---       (Seq.nonmalleable SignAlg.nonmalleable (Parallel.nonmalleable×ₚ BitString.nonmalleable (λ where self self refl → refl))))) 
+@0 nonmalleable : NonMalleable RawCert
+nonmalleable = TLV.nonmalleable{R = RawCertFields} nonmalleableFields
+
+@0 nonmalleableChain : NonMalleable RawChain
+nonmalleableChain = SequenceOf.nonmalleable{R = RawCert} TLV.nonempty TLV.nosubstrings nonmalleable

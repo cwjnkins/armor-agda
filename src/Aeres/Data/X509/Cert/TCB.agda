@@ -276,3 +276,6 @@ RawCertFields = Iso.raw equivalentCertFields RawCertFieldsRep
 
 RawCert : Raw Cert
 RawCert = RawTLV _ RawCertFields
+
+RawChain : Raw Chain
+RawChain = RawIList RawCert
