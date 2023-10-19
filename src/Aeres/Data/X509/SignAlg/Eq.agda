@@ -29,20 +29,21 @@ open Aeres.Grammar.Sum         UInt8
 module Aeres.Data.X509.SignAlg.Eq where
 
 instance
---   eq≋Unsupported : Eq≋ (DefinedByOIDFields UnsupportedParam)
---   eq≋Unsupported =
---     DefinedByOID.eq≋ UnsupportedParam
---       (λ o →
---         record
---           { _≋?_ = λ where
---             (mk×ₚ os₁ o∉₁) (mk×ₚ os₂ o∉₂) →
---               case os₁ ≋? os₂ ret (const _) of λ where
---                 (no ¬p) → no λ where ≋-refl → contradiction ≋-refl ¬p
---                 (yes ≋-refl) →
---                   case T-unique o∉₁ o∉₂ ret (const _) of λ where
---                     refl → yes ≋-refl
---           })
+  eq≋ : Eq≋ (DefinedByOIDFields SignAlgParam)
+  eq≋ =
+    DefinedByOID.eq≋ SignAlgParam
+      λ o →
+        case isSupported o
+        ret (λ o∈? → Eq≋ (SignAlgParam' o o∈?))
+        of λ where
+          (no ¬p) → it
+          (yes p) →
+            case lookupSignAlg o p
+            ret (λ o∈ → Eq≋ (SignAlgParam“ o o∈))
+            of λ where
+              (inj₁ x) → record { _≋?_ = λ { (─ refl) (─ refl) → yes ≋-refl } }
+              (inj₂ (inj₁ x)) → record { _≋?_ = λ { (─ refl) (─ refl) → yes ≋-refl } }
+              (inj₂ (inj₂ y)) → RSA.eq≋Params'{o = o}{y}
 
-  postulate
-    eq≋ : Eq≋ SignAlg
---   eq≋ = Iso.isoEq≋ iso (Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₂ = Sum.sumEq≋ ⦄ ⦄)
+  eq : Eq (Exists─ _ (DefinedByOIDFields SignAlgParam))
+  eq = Eq≋⇒Eq it

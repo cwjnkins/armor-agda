@@ -8,18 +8,16 @@ open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.BitString where
 
+open Aeres.Data.X690-DER.BitString.TCB public
+  hiding (UnusedBits ; toBitRep)
+
 module BitString where
   open Aeres.Data.X690-DER.BitString.Properties
     public
   open Aeres.Data.X690-DER.BitString.Serializer
     public
-  open Aeres.Data.X690-DER.BitString.TCB
-    public
-    hiding (BitString ; BitStringValue)
-
-open Aeres.Data.X690-DER.BitString.TCB
-  public
-  using (BitString ; BitStringValue ; mkBitStringValue)
+  open Aeres.Data.X690-DER.BitString.TCB public
+    using (UnusedBits ; toBitRep)
 
 open Aeres.Data.X690-DER.BitString.Parser
   public

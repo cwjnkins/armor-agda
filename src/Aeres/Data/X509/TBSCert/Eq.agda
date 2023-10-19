@@ -33,26 +33,21 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  postulate
-    eq≋ : Eq≋ TBSCertFields
-  -- eq≋ =
-  --   Iso.isoEq≋ iso
-  --     (Seq.eq≋&ₚ (Seq.eq≋&ₚ it it)
-  --       (Seq.eq≋&ₚ it
-  --         (Seq.eq≋&ₚ it
-  --           (Seq.eq≋&ₚ it
-  --             (Seq.eq≋&ₚ it
-  --               (Seq.eq≋&ₚ
-  --                 (Parallel.eq≋Σₚ it λ _ →
-  --                   record
-  --                     { _≟_ = λ where
-  --                       self self → yes refl
-  --                     })
-  --                 (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))))))))
-  --   where
-  --   instance
-  --     e₁ : Eq≋ (NonEmptySequenceOf Extension)
-  --     e₁ = SequenceOf.BoundedSequenceOfEq≋
+  eq≋ : Eq≋ TBSCertFields
+  eq≋ =
+    Iso.isoEq≋ iso
+      (Seq.eq≋&ₚ (Seq.eq≋&ₚ it it)
+      (Seq.eq≋&ₚ it
+      (Seq.eq≋&ₚ it
+      (Seq.eq≋&ₚ it
+      (Seq.eq≋&ₚ it
+      (Seq.eq≋&ₚ (Parallel.eq≋Σₚ it λ _ → record { _≟_ = λ where self self → yes refl })
+      (Seq.eq≋&ₚ it
+      (Seq.eq≋&ₚ it it))))))))
+    where
+    instance
+      e₁ : Eq≋ (NonEmptySequenceOf Extension)
+      e₁ = SequenceOf.BoundedSequenceOfEq≋
 
   eq : Eq (Exists─ _ TBSCertFields)
   eq = Eq≋⇒Eq it

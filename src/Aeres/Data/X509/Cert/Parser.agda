@@ -36,40 +36,47 @@ private
 
 parseCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CertFields n)
 parseCertFields n =
-  parseEquivalent
-    (Iso.transEquivalent
-      (Iso.symEquivalent Distribute.exactLength-&)
-      (Parallel.equivalent₁ equivalentCertFields))
-    (parse&ᵈ{A = Length≤ (TBSCert ×ₚ Singleton) n}
-      (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
-      (Parallel.Length≤.unambiguous _
-        (Parallel.unambiguous×ₚ
-          (TBSCert.unambiguous)
-          (λ where self self → refl)))
-      (parse≤ _ (parse×Singleton parseTBSCert)
-        (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (tell $ here' String.++ ": overflow (TBS cert)"))
-      λ where
-        (singleton r r≡) a →
-          subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - x)))
-            r≡ (p₁ (n - r)))
+  parseEquivalent eq p₁
   where
-  p₁ : ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) n)
-  p₁ n =
-    parseExactLength
-      (Seq.nosubstrings SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings))
-      (tell $ here' String.++ ": length mismatch (sign alg, signature)")
-      (parse& SignAlg.nosubstrings parseSignAlg
-        (parse×Singleton parseBitstring)) _
+  A = Length≤ (TBSCert ×ₚ Singleton) n
+  B : {@0 bs : List UInt8} (a : A bs) → _
+  B {bs} _ = ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - length bs)
+  eq : Equivalent
+         (&ₚᵈ A B)
+         (ExactLength CertFields n)
+  eq = Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentCertFields)
+
+  @0 nsₐ : NoSubstrings A
+  nsₐ = Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings)
+
+  @0 uaₐ : Unambiguous A
+  uaₐ = Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ TBSCert.unambiguous (λ where self self → refl))
+
+  pₐ : Parser (Logging ∘ Dec) A
+  pₐ = parse≤ n (parse×Singleton parseTBSCert) (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " (fields): overflow")
+
+  @0 ns' : NoSubstrings (&ₚ SignAlg (BitString ×ₚ Singleton))
+  ns' = Seq.nosubstrings{A = SignAlg}{B = BitString ×ₚ Singleton} SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
+
+  pb : {@0 bs : List UInt8} → Singleton (length bs) → (a : A bs) → Parser (Logging ∘ Dec) (B a)
+  pb (singleton r r≡) _ =
+    subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n ∸ x)))
+      r≡
+      (parseExactLength{A = &ₚ SignAlg (BitString ×ₚ Singleton)} ns'
+        (tell $ here' String.++ " (fields): length mismatch")
+        (parse& {A = SignAlg} {B = BitString ×ₚ Singleton}
+          SignAlg.nosubstrings SignAlg.parse
+          (parse×Singleton parseBitstring))
+        (n - r))
+
+  p₁ : Parser (Logging ∘ Dec) (&ₚᵈ A B)
+  p₁ =
+    parse&ᵈ{A = A} nsₐ uaₐ pₐ pb
 
 parseCert : Parser (Logging ∘ Dec) Cert
 parseCert =
-  parseTLV _ "Cert" _ parseCertFields
+  parseTLV _ here' _ parseCertFields
 
 parseChain : Parser (Logging ∘ Dec) Chain
 parseChain = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseChain: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCert)
 
-  -- LogDec.MaximalParser.parser
-  --   (parseIListMax.parseIListLowerBounded
-  --     (mkLogged ["parseChain: underflow"] tt)
-  --     _ TLV.nonempty TLV.nonnesting parseCert _)

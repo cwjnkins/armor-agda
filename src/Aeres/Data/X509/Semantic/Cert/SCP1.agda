@@ -19,8 +19,5 @@ open Aeres.Grammar.Option      UInt8
 SCP1 : ∀ {@0 bs} → Cert bs → Set
 SCP1 c = Cert.getTBSCertSignAlg c ≡ Cert.getCertSignAlg c
 
-scp1 :  ∀ {@0 bs} (c : Cert bs) → Dec (SCP1 c)
-scp1 c = 
-  case (proj₂ (Cert.getTBSCertSignAlg c) ≋? proj₂ (Cert.getCertSignAlg c)) ret (const _) of λ where
-      (yes ≋-refl) → yes refl
-      (no ¬eq) → no λ where refl → contradiction ≋-refl ¬eq
+scp1 : ∀ {@0 bs} (c : Cert bs) → Dec (SCP1 c)
+scp1 c = Cert.getTBSCertSignAlg c ≟ Cert.getCertSignAlg c

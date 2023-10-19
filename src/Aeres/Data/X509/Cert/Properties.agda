@@ -5,13 +5,10 @@ open import Aeres.Data.X509.Cert.TCB
 open import Aeres.Data.X509.Extension.TCB
 open import Aeres.Data.X509.Name.TCB
 open import Aeres.Data.X509.SignAlg
-open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert
 import      Aeres.Data.X509.TBSCert.UID.TCB as TBSCert
 open import Aeres.Data.X690-DER.BitString
-open import Aeres.Data.X690-DER.BitString.TCB
-open import Aeres.Data.X690-DER.OctetString.TCB
-open import Aeres.Data.X690-DER.Int.TCB
+open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -55,7 +52,30 @@ unambiguous =
       (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
         (Parallel.unambiguous BitString.unambiguous (λ where _ self self → refl)))))
 
-@0 nonmalleable : NonMalleable RawCert
-nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawCertFieldsRep
-    (Seq.nonmalleable{ra = (Raw×ₚ RawTBSCert RawOctetStringValue)}{rb = RawRep₁} (Parallel.nonmalleable×ₚ TBSCert.nonmalleable (λ where self self refl → refl))
-      (Seq.nonmalleable SignAlg.nonmalleable (Parallel.nonmalleable×ₚ BitString.nonmalleable (λ where self self refl → refl))))) 
+@0 nonmalleableFields : NonMalleable RawCertFields
+nonmalleableFields =
+  Iso.nonmalleable iso RawCertFieldsRep
+    nm₁
+  where
+  nm₂ : NonMalleable (Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue))
+  nm₂ =
+    Seq.nonmalleable
+      {ra = RawSignAlg}
+      {rb = Raw×ₚ RawBitString RawOctetStringValue}
+      SignAlg.nonmalleable
+      (Parallel.nonmalleable×ₚ{ra = RawBitString}{rb = RawOctetStringValue}
+        BitString.nonmalleable
+        OctetString.nonmalleableValue)
+
+  nm₁ : NonMalleable RawCertFieldsRep
+  nm₁ =
+    Seq.nonmalleable
+      {ra = Raw×ₚ RawTBSCert RawOctetStringValue}
+      {rb = Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue)}
+      (Parallel.nonmalleable×ₚ TBSCert.nonmalleable λ where self self refl → refl)
+      nm₂
+
+-- @0 nonmalleable : NonMalleable RawCert
+-- nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawCertFieldsRep
+--     (Seq.nonmalleable{ra = (Raw×ₚ RawTBSCert RawOctetStringValue)}{rb = RawRep₁} (Parallel.nonmalleable×ₚ TBSCert.nonmalleable (λ where self self refl → refl))
+--       (Seq.nonmalleable SignAlg.nonmalleable (Parallel.nonmalleable×ₚ BitString.nonmalleable (λ where self self refl → refl))))) 

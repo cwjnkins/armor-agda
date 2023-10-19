@@ -67,3 +67,12 @@ nonmalleable =
           (inj₂ (inj₁ x)) p₁ p₂ x₁ → ‼ Option.nonmalleable RawNull Null.nonmalleable
             p₁ p₂ (inj₁-injective (inj₂-injective x₁))
           (inj₂ (inj₂ y)) p₁ p₂ refl → ‼ TLV.nonmalleable OctetString.nonmalleableValue p₁ p₂ refl)
+
+eq≋Params' : ∀ {@0 bs} {o : OID bs} {o∈ : (-, TLV.val o) ∈ OIDs.RSA.Supported} → Eq≋ (RSAParams“ o (splitRSA∈ o o∈))
+eq≋Params'{o = o}{o∈} =
+  case splitRSA∈ o o∈
+  ret (λ x → Eq≋ (RSAParams“ o x))
+  of λ where
+    (inj₁ x) → it
+    (inj₂ (inj₁ x)) → it
+    (inj₂ (inj₂ y)) → it

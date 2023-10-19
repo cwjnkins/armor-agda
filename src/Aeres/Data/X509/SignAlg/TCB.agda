@@ -102,11 +102,9 @@ RawSignAlg = RawDefinedByOID RawSignAlgParam
 getOID : ∀ {@0 bs} → (s : SignAlg bs) → OID _
 getOID s = DefinedByOIDFields.oid (TLV.val s)
 
--- -- getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
--- -- getOIDBS = ↑_ ∘ OID.serialize ∘ proj₂ ∘ getOID
+getOIDBS : ∀ {@0 bs} → SignAlg bs → List UInt8
+getOIDBS = ↑_ ∘ OID.serialize ∘ getOID
 
-postulate
-  equivalent : Equivalent (Sum DSA.DSA (Sum ECDSA.ECDSA RSA.RSA)) (DefinedByOIDFields SignAlgParam)
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₁ (mkTLV len val len≡ refl)) = {!!}
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₁ x)) = {!!}
 -- proj₁ equivalent (Aeres.Grammar.Sum.TCB.inj₂ (Aeres.Grammar.Sum.TCB.inj₂ x)) = {!!}

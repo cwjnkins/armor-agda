@@ -40,9 +40,6 @@ open Aeres.Grammar.Option      UInt8
 
 module Aeres.Data.X509.SignAlg.Properties where
 
-postulate
-  @0 nosubstringsParam : {@0 bs : List UInt8} (a : OID bs) → NoSubstrings (SignAlgParam a)
-
 @0 nosubstrings : NoSubstrings SignAlg
 nosubstrings = TLV.nosubstrings
 

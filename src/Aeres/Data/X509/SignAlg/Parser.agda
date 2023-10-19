@@ -29,14 +29,31 @@ open Aeres.Grammar.Sum         UInt8
 private
   here' = "X509: SignAlg"
 
-parseSignAlg : Parser (Logging ∘ Dec) SignAlg
-parseSignAlg = parseTLV _ (here' String.++ ": unsupported") _
-    (parseExactLength (DefinedByOID.nosubstrings _ nosubstringsParam)
-      (tell $ here' String.++ ": underflow parsing parameter") pp)
-  where
-  pp : Parser (Logging ∘ Dec) (DefinedByOIDFields SignAlgParam)
-  pp = parseEquivalent
-         equivalent
-         (parseSum DSA.parse
-         (parseSum ECDSA.parse
-                   RSA.parse))
+parseParam : ∀ n {@0 bs} (o : OID bs) → Parser (Logging ∘ Dec) (ExactLength (SignAlgParam o) n)
+parseParam n o =
+  case isSupported o
+  ret (λ o∈? → Parser (Logging ∘ Dec) (ExactLength (SignAlgParam' o o∈?) n))
+  of λ where
+    (no ¬p) → parseN _ (tell $ here' String.++ " (param): underflow")
+    (yes o∈) →
+      case lookupSignAlg o o∈
+      ret (λ o∈ → Parser (Logging ∘ Dec) (ExactLength (SignAlgParam“ o o∈) n))
+      of λ where
+        (inj₁ x) →
+          parseExactLength
+            (λ where _ (─ refl) (─ refl) → refl)
+            silent
+            (parseErased (parseLit silent silent []))
+            _
+        (inj₂ (inj₁ x)) →
+          parseExactLength
+            (λ where _ (─ refl) (─ refl) → refl)
+            silent
+            (parseErased (parseLit silent silent []))
+            _
+        (inj₂ (inj₂ y)) →
+          RSA.parseParams n o (yes y)
+
+parse : Parser (Logging ∘ Dec) SignAlg
+parse =
+  DefinedByOID.parse here' parseParam

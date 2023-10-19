@@ -122,7 +122,7 @@ parseTBSCertFields n =
       (parse&ᵈ{A = Length≤ SignAlg n}
         (Parallel.nosubstrings₁{A = SignAlg} SignAlg.nosubstrings)
         (Parallel.Length≤.unambiguous _ SignAlg.unambiguous)
-        (parse≤ _ parseSignAlg SignAlg.nosubstrings overflow)
+        (parse≤ _ SignAlg.parse SignAlg.nosubstrings overflow)
         λ where
           (singleton r r≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₆ (n - x)))

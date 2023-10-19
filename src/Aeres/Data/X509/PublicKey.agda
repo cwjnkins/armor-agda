@@ -10,7 +10,7 @@ import Aeres.Data.X509.PublicKey.Val
 module Aeres.Data.X509.PublicKey where
 
 open Aeres.Data.X509.PublicKey.TCB public
-  hiding (equivalent)
+  hiding (equivalent ; getOID)
 
 module PublicKey where
   open Aeres.Data.X509.PublicKey.Alg        public
@@ -18,6 +18,6 @@ module PublicKey where
   open Aeres.Data.X509.PublicKey.Parser     public
   open Aeres.Data.X509.PublicKey.Properties public
   open Aeres.Data.X509.PublicKey.TCB        public
-    using (equivalent)
+    using (equivalent ; getOID)
   open Aeres.Data.X509.PublicKey.Val        public
 
