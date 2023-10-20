@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.X690-DER.SetOf
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
@@ -19,6 +20,11 @@ open Aeres.Grammar.Parser      UInt8
 private
   here' = "X509: Name: RDNSequence: RDN"
 
+[_]parse : ∀ t → Parser (Logging ∘ Dec) [ t ]RDN
+[ t ]parse = parseTLV t here' _ (SetOf.parseFields here' TLV.nonempty TLV.nosubstrings ATV.parse)
+
 parse : Parser (Logging ∘ Dec) RDN
-parse = parseTLV _ here' _ λ n →
-          parseBoundedSequenceOf (here' String.++ " (elems)") _ TLV.nonempty TLV.nosubstrings ATV.parse n 1
+parse = [ Tag.Sett ]parse
+
+parseSequence : Parser (Logging ∘ Dec) RDNSequence
+parseSequence = parseSeq (here' String.++ "Sequence") _ TLV.nonempty TLV.nosubstrings parse

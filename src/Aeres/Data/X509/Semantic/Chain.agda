@@ -57,11 +57,11 @@ data AllInSeq {@0 bs} (xs : SequenceOf Name.RDN.ATV bs) : (@0 b : List UInt8) �
   []  : AllInSeq xs [] nil
   cons : ∀ {@0 bs₁ bs₂ bs₃} {x : Name.RDN.ATV bs₁} {xs' : SequenceOf Name.RDN.ATV bs₂} (px : InSeq x _ xs) (pxs : AllInSeq xs _ xs') (@0 bs≡ : bs₃ ≡ bs₁ ++ bs₂) → AllInSeq xs bs₃ (cons (mkSequenceOf x xs' bs≡))
 
-MatchRDNElemsLen : ∀ {@0 bs₁ bs₂} → Name.RDNElems bs₁ → Name.RDNElems bs₂ → Set
-MatchRDNElemsLen (mk×ₚ fstₚ₁ sndₚ₁≡) (mk×ₚ fstₚ₂ sndₚ₂) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
+MatchRDNElemsLen : ∀ {@0 bs₁ bs₂} → SetOfFields Name.RDN.ATV bs₁ → SetOfFields Name.RDN.ATV bs₂ → Set
+MatchRDNElemsLen (mkSetOfFields (mk×ₚ fstₚ₁ sndₚ₁≡) _) (mkSetOfFields (mk×ₚ fstₚ₂ sndₚ₂) _) = (lengthSequence fstₚ₁) ≡ (lengthSequence fstₚ₂)
 
 MatchRDN : ∀ {@0 bs₁ bs₂} → Name.RDN bs₁ → Name.RDN bs₂ → Set
-MatchRDN (mkTLV len x@(mk×ₚ fstₚ₁ sndₚ₁) len≡ refl) (mkTLV len₁ x'@(mk×ₚ fstₚ₂ sndₚ₂) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ _ fstₚ₂
+MatchRDN (mkTLV len x@(mkSetOfFields (mk×ₚ fstₚ₁ sndₚ₁) _) len≡ refl) (mkTLV len₁ x'@(mkSetOfFields (mk×ₚ fstₚ₂ sndₚ₂) _) len≡₁ refl) = (MatchRDNElemsLen x x') × AllInSeq fstₚ₁ _ fstₚ₂
 
 MatchRDNSeqHelper : ∀ {@0 bs₁ bs₂} → SequenceOfFields Name.RDN bs₁ → SequenceOfFields Name.RDN bs₂ → Set
 MatchRDNSeqHelper (mkSequenceOf h nil bs≡) (mkSequenceOf h₁ nil bs≡₁) = MatchRDN h h₁
@@ -164,11 +164,11 @@ AllInSeq-dec xs b (cons (mkIListCons head₁ tail₁ bs≡)) = case (InSeq-dec h
       (cons px z bs≡) → contradiction z ¬p
     (yes q) → yes (cons p q bs≡)
 
-MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : Name.RDNElems bs₁) → (m : Name.RDNElems bs₂) → Dec (MatchRDNElemsLen n m)
-MatchRDNElemsLen-dec (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
+MatchRDNElemsLen-dec : ∀ {@0 bs₁ bs₂} → (n : SetOfFields Name.RDN.ATV bs₁) → (m : SetOfFields Name.RDN.ATV bs₂) → Dec (MatchRDNElemsLen n m)
+MatchRDNElemsLen-dec (mkSetOfFields (mk×ₚ fstₚ₁ sndₚ₁) _) (mkSetOfFields (mk×ₚ fstₚ₂ sndₚ₂) _) = (lengthSequence fstₚ₁) ≟ (lengthSequence fstₚ₂)
 
 MatchRDN-dec : ∀ {@0 bs₁ bs₂} → (n : Name.RDN bs₁) → (m : Name.RDN bs₂) → Dec (MatchRDN n m)
-MatchRDN-dec (mkTLV len x@(mk×ₚ fstₚ₁ sndₚ₁) len≡ refl) (mkTLV len₁ x'@(mk×ₚ fstₚ₂ sndₚ₂) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ _ fstₚ₂
+MatchRDN-dec (mkTLV len x@(mkSetOfFields (mk×ₚ fstₚ₁ sndₚ₁) _) len≡ refl) (mkTLV len₁ x'@(mkSetOfFields (mk×ₚ fstₚ₂ sndₚ₂) _) len≡₁ refl) = (MatchRDNElemsLen-dec x x') ×-dec AllInSeq-dec fstₚ₁ _ fstₚ₂
 
 MatchRDNSeq-dec : ∀ {@0 bs₁ bs₂} → (a : Name bs₁) → (b : Name bs₂) → Dec (MatchRDNSeq a b)
 MatchRDNSeq-dec (mkTLV len nil len≡ bs≡) (mkTLV len₁ nil len≡₁ bs≡₁) = yes tt

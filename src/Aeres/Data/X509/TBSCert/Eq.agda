@@ -14,6 +14,7 @@ open import Aeres.Data.X509.Validity
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Int
 import      Aeres.Data.X690-DER.OctetString.Properties
+open import Aeres.Data.X690-DER.SetOf
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag

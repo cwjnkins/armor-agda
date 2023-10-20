@@ -12,8 +12,18 @@ module Aeres.Data.X509.Name.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.4
+-- Name ::= CHOICE { -- only one possibility for now --
+--   rdnSequence  RDNSequence }
+--
+-- RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
+--
+-- RelativeDistinguishedName ::=
+--   SET SIZE (1..MAX) OF AttributeTypeAndValue
+-}
+
 Name : @0 List UInt8 → Set
-Name = Seq RDN
+Name = RDNSequence
 
 RawName : Raw Name
-RawName = RawTLV _ (RawSequenceOf RawRDN)
+RawName = RawRDNSequence

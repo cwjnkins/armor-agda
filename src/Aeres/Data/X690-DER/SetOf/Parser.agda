@@ -21,10 +21,10 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 open Sorted                    bytesTotalOrder
 
-module _ {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 ns : NoSubstrings A) (p : Parser (Logging ∘ Dec) A) where
+module _ (caller : String) {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 ns : NoSubstrings A) (p : Parser (Logging ∘ Dec) A) where
 
   private
-    here' = "X690-DER: SetOf"
+    here' = caller String.++ " (X690-DER: SetOf)"
 
   parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength (SetOfFields A) n)
   runParser (parseFields n) xs = do

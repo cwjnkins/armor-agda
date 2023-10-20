@@ -33,12 +33,12 @@ proj₂ (proj₂ iso) (nameRTCrlissr x) = refl
 unambiguous =
   TLV.unambiguous (Iso.unambiguous iso
     (Sum.unambiguous (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous)
-                     (TLV.unambiguous Name.RDN.unambiguousElems) (TLV.noconfusion λ ())))
+                     Name.RDN.[ Tag.AA1 ]unambiguous (TLV.noconfusion λ ())))
 
 @0 nonmalleable : NonMalleable RawDistPointName
 nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawDistPointNameChoiceRep nm)
   where
   nm : NonMalleable RawDistPointNameChoiceRep
-  nm = Sum.nonmalleable{ra = RawTLV _ RawGeneralNamesElems}{rb = RawTLV _ Name.RawRDNElems}
+  nm = Sum.nonmalleable{ra = RawTLV _ RawGeneralNamesElems}{rb = Name.[ Tag.AA1 ]RawRDN}
          (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable)
-         (TLV.nonmalleable Name.RDN.nonmalleableElems)
+         Name.RDN.[ Tag.AA1 ]nonmalleable

@@ -25,10 +25,10 @@ module GeneralNamesElems where
       GeneralName.unambiguous GeneralName.nonempty GeneralName.nosubstrings
 
   @0 nonmalleable : NonMalleable RawGeneralNamesElems
-  nonmalleable = SequenceOf.Bounded.nonmalleable GeneralName.nonempty GeneralName.nosubstrings GeneralName.nonmalleable
+  nonmalleable = SequenceOf.Bounded.nonmalleable{R = RawGeneralName} GeneralName.nonempty GeneralName.nosubstrings GeneralName.nonmalleable
 
 @0 unambiguous : Unambiguous GeneralNames
 unambiguous = TLV.unambiguous GeneralNamesElems.unambiguous
 
 @0 nonmalleable : NonMalleable RawGeneralNames
-nonmalleable = TLV.nonmalleable GeneralNamesElems.nonmalleable
+nonmalleable = TLV.nonmalleable{R = RawGeneralNamesElems} GeneralNamesElems.nonmalleable

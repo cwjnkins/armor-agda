@@ -2,6 +2,7 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf.TCB
+open import Aeres.Data.X690-DER.SetOf.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X509.Name.RDN.ATV.TCB
@@ -12,14 +13,31 @@ module Aeres.Data.X509.Name.RDN.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base UInt8
 
-RDNElems : @0 List UInt8 → Set
-RDNElems = NonEmptySequenceOf ATV
+
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.4
+-- Name ::= CHOICE { -- only one possibility for now --
+--   rdnSequence  RDNSequence }
+--
+-- RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
+--
+-- RelativeDistinguishedName ::=
+--   SET SIZE (1..MAX) OF AttributeTypeAndValue
+-}
+
+[_]RDN : UInt8 → @0 List UInt8 → Set
+[ t ]RDN = TLV t (SetOfFields ATV)
 
 RDN : @0 List UInt8 → Set
-RDN = TLV Tag.Sett RDNElems
+RDN = [ Tag.Sett ]RDN
 
-RawRDNElems : Raw RDNElems
-RawRDNElems = RawBoundedSequenceOf RawATV 1
+[_]RawRDN : ∀ t → Raw [ t ]RDN
+[ t ]RawRDN = RawTLV t (RawSetOfFields RawATV)
 
 RawRDN : Raw RDN
-RawRDN = RawTLV Tag.Sett RawRDNElems
+RawRDN = [ Tag.Sett ]RawRDN
+
+RDNSequence : @0 List UInt8 → Set
+RDNSequence = Seq RDN
+
+RawRDNSequence : Raw RDNSequence
+RawRDNSequence = RawTLV _ (RawSequenceOf RawRDN)

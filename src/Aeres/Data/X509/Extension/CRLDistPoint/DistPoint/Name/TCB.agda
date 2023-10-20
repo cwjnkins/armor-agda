@@ -50,7 +50,7 @@ FullName : @0 List UInt8 → Set
 FullName xs = TLV Tag.AA0 GeneralNamesElems xs
 
 NameRTCrlIssuer : @0 List UInt8 → Set
-NameRTCrlIssuer xs = TLV Tag.AA1 RDNElems xs
+NameRTCrlIssuer = [ Tag.AA1 ]RDN
 
 data DistPointNameChoice : @0 List UInt8 → Set where
   fullname : ∀ {@0 bs} → FullName bs → DistPointNameChoice bs
@@ -69,6 +69,6 @@ proj₂ equivalentDistPointNameChoice (nameRTCrlissr x) = inj₂ x
 
 RawDistPointNameChoiceRep : Raw DistPointNameChoiceRep
 RawDistPointNameChoiceRep = RawSum (RawTLV _ RawGeneralNamesElems)
-                                    (RawTLV _ (RawBoundedSequenceOf RawATV 1))
+                                    [ Tag.AA1 ]RawRDN
 RawDistPointName : Raw DistPointName
 RawDistPointName = RawTLV _ (Iso.raw equivalentDistPointNameChoice RawDistPointNameChoiceRep)

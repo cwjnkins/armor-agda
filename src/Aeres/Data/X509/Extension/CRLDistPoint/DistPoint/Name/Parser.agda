@@ -25,9 +25,7 @@ private
 parseFullName = parseTLV Tag.AA0 (here' String.++ ": full name") _ parseGeneralNamesElems
 
 parseNameRTCrlIssuer : Parser (Logging ∘ Dec) NameRTCrlIssuer
-parseNameRTCrlIssuer =
-  parseTLV Tag.AA1 here' _
-    λ n → parseBoundedSequenceOf (here' String.++ "RT CRL issuer") _ TLV.nonempty TLV.nosubstrings Name.RDN.ATV.parse n 1
+parseNameRTCrlIssuer = Name.RDN.[ Tag.AA1 ]parse
 
 parseDistPointNameChoice : Parser (Logging ∘ Dec) DistPointNameChoice
 parseDistPointNameChoice =
