@@ -11,6 +11,7 @@ open import Aeres.Data.X690-DER.Length      public
 open import Aeres.Data.X690-DER.Null        public
 open import Aeres.Data.X690-DER.OID         public
 open import Aeres.Data.X690-DER.OctetString public
+open import Aeres.Data.X690-DER.SetOf       public
 open import Aeres.Data.X690-DER.Sequence    public
 open import Aeres.Data.X690-DER.SequenceOf  public
 open import Aeres.Data.X690-DER.Strings     public

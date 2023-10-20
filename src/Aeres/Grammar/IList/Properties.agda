@@ -40,6 +40,11 @@ proj₁ (proj₂ iso) (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) = refl
 proj₂ (proj₂ iso) nil = refl
 proj₂ (proj₂ iso) (consIList h t bs≡) = refl
 
+mapIListLength : ∀ {A B : @0 List Σ → Set} → (f : ∀ {@0 bs} → A bs → B bs) → ∀ {@0 bs} (xs : IList A bs)
+                 → lengthIList (mapIList (λ {bs} → f{bs}) xs) ≡ lengthIList xs
+mapIListLength f nil = refl
+mapIListLength f (consIList _ t refl) = cong suc (mapIListLength f t)
+
 @0 unambiguous : ∀ {@0 A} → Unambiguous A → NonEmpty A → NoSubstrings A → Unambiguous (IList A)
 unambiguous ua ne nn nil nil = refl
 unambiguous ua ne nn{xs} nil (cons (mkIListCons{bs₁}{bs₂} h t bs≡)) =

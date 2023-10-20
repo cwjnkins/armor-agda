@@ -29,6 +29,10 @@ data IList A where
 
 pattern consIList{bs₁}{bs₂} h t bs≡ = cons (mkIListCons{bs₁}{bs₂} h t bs≡)
 
+mapIList : ∀ {A B} → (∀ {@0 bs} → A bs → B bs) → ∀ {@0 bs} → IList A bs → IList B bs
+mapIList f nil = nil
+mapIList f (consIList{bs₁}{bs₂} h t refl) = consIList (f h) (mapIList (λ {bs'} → f{bs'}) t) refl
+
 toList : ∀ {@0 A : @0 List Σ → Set} {@0 bs} → IList A bs → List (Exists─ (List Σ) A)
 toList nil = []
 toList (consIList h₁ t₁ bs≡₁) = (─ _ , h₁) ∷ toList t₁

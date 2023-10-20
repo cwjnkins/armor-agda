@@ -318,9 +318,9 @@ uneraseDec x (yes p) = p
 erased-unique : ∀ {ℓ} {@0 A : Set ℓ} → Unique A → Unique (Erased A)
 erased-unique u (─ x) (─ y) = subst₀ (λ y → ─ x ≡ ─ y) (u x y) refl
 
-@0 liftMapErase : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → (A → B) → List (Erased A) → List B
+@0 liftMapErase : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} → (A → Erased B) → List A → List B
 liftMapErase f [] = []
-liftMapErase f (x ∷ xs) = f (¡ x) ∷ liftMapErase f xs
+liftMapErase f (x ∷ xs) = (¡ f x) ∷ liftMapErase f xs
 
 Exists─ : (@0 A : Set) (B : @0 A → Set) → Set
 Exists─ A B = Σ[ x ∈ Erased A ] let (─ y) = x in B y
