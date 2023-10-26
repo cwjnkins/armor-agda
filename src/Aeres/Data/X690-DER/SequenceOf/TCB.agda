@@ -15,6 +15,13 @@ open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.IList.TCB                UInt8
 open Aeres.Grammar.Parallel.TCB             UInt8
 
+-- https://www.itu.int/rec/T-REC-X.690-202102-I/en
+-- 8.10.1 The encoding of a sequence-of value shall be constructed.
+-- 8.10.2 The contents octets shall consist of zero, one or more complete encodings of data values from the type listed in the
+-- ASN.1 definition.
+-- 8.10.3 The order of the encodings of the data values shall be the same as the order of the data values in the sequence-of
+-- value to be encoded.
+
 SequenceOf       = IList
 SequenceOfFields = IListCons
 lengthSequence   = lengthIList

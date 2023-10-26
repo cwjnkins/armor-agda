@@ -19,6 +19,12 @@ open Aeres.Grammar.Definitions.Iso          UInt8
 open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.Seq.TCB                  UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1
+
+--    SubjectPublicKeyInfo  ::=  SEQUENCE  {
+--         algorithm            AlgorithmIdentifier,
+--         subjectPublicKey     BIT STRING  }
+        
 record PublicKeyFields (@0 bs : List UInt8) : Set where
   constructor mkPublicKeyFields
   field

@@ -14,7 +14,9 @@ module Aeres.Data.X509.Semantic.Cert.SCP16 where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.4
 -- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
+
 SCP16 : ∀ {@0 bs} → Cert bs → Set
 SCP16 c = List.Unique _≟_ (getPolicyOIDList (Cert.getCPOL c))
 

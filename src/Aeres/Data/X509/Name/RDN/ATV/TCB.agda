@@ -20,9 +20,7 @@ module Aeres.Data.X509.Name.RDN.ATV.TCB where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 
-{-
 -- https://datatracker.ietf.org/doc/html/rfc5280#appendix-A.1
---
 -- AttributeType           ::= OBJECT IDENTIFIER
 --
 -- AttributeValue          ::= ANY -- DEFINED BY AttributeType
@@ -30,7 +28,6 @@ open Aeres.Grammar.Parallel    UInt8
 -- AttributeTypeAndValue   ::= SEQUENCE {
 --         type    AttributeType,
 --         value   AttributeValue }
--}
 
 ATVParam : {@0 bs : List UInt8} → (o : OID bs) → Dec ((-, TLV.val o) ∈ Supported) → @0 List UInt8 → Set
 -- Default

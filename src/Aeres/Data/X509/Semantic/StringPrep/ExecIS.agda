@@ -23,7 +23,23 @@ open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.1
+   -- Each non-Unicode string value is transcoded to Unicode.
 
+   -- PrintableString [X.680] values are transcoded directly to Unicode.
+
+   -- UniversalString, UTF8String, and bmpString [X.680] values need not be
+   -- transcoded as they are Unicode-based strings (in the case of
+   -- bmpString, a subset of Unicode).
+
+   -- TeletexString [X.680] values are transcoded to Unicode.  As there is
+   -- no standard for mapping TeletexString values to Unicode, the mapping
+   -- is left a local matter.
+
+   -- For these and other reasons, use of TeletexString is NOT RECOMMENDED.
+
+   -- The output is the transcoded string.
+   
 TranscodeIS : ∀ {@0 bs} → IA5String bs → String ⊎ Exists─ (List UInt8) Unicode
 TranscodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = inj₂ (_ , utf8 (helper (toWitness all<128)))
   where
@@ -31,6 +47,19 @@ TranscodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = inj₂ (_ 
   helper {[]} x = nil
   helper {x₁ ∷ bs} (px ∷ x) = cons (mkIListCons (utf81 (mkUTF8Char1 x₁ px refl)) (helper x) refl)
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2
+   -- The following six-step process SHALL be applied to each presented and
+   -- attribute value in preparation for character string matching rule
+   -- evaluation.
+
+   --    1) Transcode
+   --    2) Map
+   --    3) Normalize
+   --    4) Prohibit
+   --    5) Check bidi
+   --    6) Insignificant Character Handling
+
+-- Note: TODO: Check bidi (https://datatracker.ietf.org/doc/html/rfc4518#section-2.5)
 
 ProcessStringIS : ∀ {@0 bs} → IA5String bs → String ⊎ Exists─ (List UInt8) Unicode
 ProcessStringIS str

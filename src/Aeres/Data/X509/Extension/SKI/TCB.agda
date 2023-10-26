@@ -11,6 +11,11 @@ module Aeres.Data.X509.Extension.SKI.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.2
+--    id-ce-subjectKeyIdentifier OBJECT IDENTIFIER ::=  { id-ce 14 }
+
+--    SubjectKeyIdentifier ::= KeyIdentifier
+
 SKIFields : @0 List UInt8 → Set
 SKIFields = TLV Tag.OctetString OctetString
 

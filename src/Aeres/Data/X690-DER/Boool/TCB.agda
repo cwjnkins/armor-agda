@@ -11,6 +11,17 @@ module Aeres.Data.X690-DER.Boool.TCB where
 open Aeres.Grammar.Definitions.NonMalleable UInt8
   using (Raw)
 
+-- https://www.itu.int/rec/T-REC-X.690-202102-I/en
+-- 8.2.1 The encoding of a boolean value shall be primitive. The contents octets shall consist of a single octet.
+-- 8.2.2 If the boolean value is:
+-- FALSE
+-- the octet shall be zero.
+-- If the boolean value is
+-- TRUE
+-- the octet shall have any non-zero value, as a sender's option.
+-- If the encoding represents the boolean value TRUE, its single contents octet shall have all eight bits set to one. (Contrast with
+-- 8.2.2.)
+
 data BoolRep : Bool → UInt8 → Set where
   falseᵣ : BoolRep false (# 0)
   trueᵣ  : BoolRep true (# 255)

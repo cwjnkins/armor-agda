@@ -39,6 +39,18 @@ open Aeres.Grammar.Parallel.TCB UInt8
 open Aeres.Grammar.Sum.TCB      UInt8
 open Aeres.Grammar.Seq         UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1
+--    Extensions  ::=  SEQUENCE SIZE (1..MAX) OF Extension
+
+--    Extension  ::=  SEQUENCE  {
+--         extnID      OBJECT IDENTIFIER,
+--         critical    BOOLEAN DEFAULT FALSE,
+--         extnValue   OCTET STRING
+--                     -- contains the DER encoding of an ASN.1 value
+--                     -- corresponding to the extension type identified
+--                     -- by extnID
+--         }
+        
 supportedExtensions : List (List UInt8)
 supportedExtensions =
     OIDs.AKILit ∷ OIDs.SKILit ∷ OIDs.KULit ∷ OIDs.EKULit ∷ OIDs.BCLit ∷ OIDs.IANLit ∷ OIDs.SANLit

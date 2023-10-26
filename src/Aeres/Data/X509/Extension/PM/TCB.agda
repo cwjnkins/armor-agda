@@ -14,6 +14,13 @@ module Aeres.Data.X509.Extension.PM.TCB where
 open  Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Seq                       UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.5
+--    id-ce-policyMappings OBJECT IDENTIFIER ::=  { id-ce 33 }
+
+--    PolicyMappings ::= SEQUENCE SIZE (1..MAX) OF SEQUENCE {
+--         issuerDomainPolicy      CertPolicyId,
+--         subjectDomainPolicy     CertPolicyId }
+
 record PolicyMapFields (@0 bs : List UInt8) : Set where
   constructor mkPolicyMapFields
   field

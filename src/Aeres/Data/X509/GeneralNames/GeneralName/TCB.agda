@@ -16,6 +16,26 @@ module Aeres.Data.X509.GeneralNames.GeneralName.TCB where
 open      Aeres.Grammar.Definitions              UInt8
 open      Aeres.Grammar.Sum.TCB                  UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
+--    GeneralName ::= CHOICE {
+--         otherName                       [0]     OtherName,
+--         rfc822Name                      [1]     IA5String,
+--         dNSName                         [2]     IA5String,
+--         x400Address                     [3]     ORAddress,
+--         directoryName                   [4]     Name,
+--         ediPartyName                    [5]     EDIPartyName,
+--         uniformResourceIdentifier       [6]     IA5String,
+--         iPAddress                       [7]     OCTET STRING,
+--         registeredID                    [8]     OBJECT IDENTIFIER }
+
+--    OtherName ::= SEQUENCE {
+--         type-id    OBJECT IDENTIFIER,
+--         value      [0] EXPLICIT ANY DEFINED BY type-id }
+
+--    EDIPartyName ::= SEQUENCE {
+--         nameAssigner            [0]     DirectoryString OPTIONAL,
+--         partyName               [1]     DirectoryString }
+
 --- we do not support OtherName since very rarely used
 OtherName : @0 List UInt8 → Set
 OtherName xs = TLV Tag.AA0 OctetStringValue xs --abstracted

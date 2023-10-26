@@ -17,6 +17,22 @@ open      Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.10
+--       id-ce-nameConstraints OBJECT IDENTIFIER ::=  { id-ce 30 }
+
+--       NameConstraints ::= SEQUENCE {
+--            permittedSubtrees       [0]     GeneralSubtrees OPTIONAL,
+--            excludedSubtrees        [1]     GeneralSubtrees OPTIONAL }
+
+--       GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
+
+--       GeneralSubtree ::= SEQUENCE {
+--            base                    GeneralName,
+--            minimum         [0]     BaseDistance DEFAULT 0,
+--            maximum         [1]     BaseDistance OPTIONAL }
+
+--       BaseDistance ::= INTEGER (0..MAX)
+      
 PermittedSubtrees : @0 List UInt8 → Set
 PermittedSubtrees xs = TLV Tag.AA0 GeneralSubtrees xs
 

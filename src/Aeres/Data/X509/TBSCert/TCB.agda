@@ -36,6 +36,26 @@ open SequenceOf using (SequenceOf)
 open Validity using (Validity)
 open Version hiding (getVal)
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1
+--    CertificateSerialNumber  ::=  INTEGER
+
+--    TBSCertificate  ::=  SEQUENCE  {
+--         version         [0]  EXPLICIT Version DEFAULT v1,
+--         serialNumber         CertificateSerialNumber,
+--         signature            AlgorithmIdentifier,
+--         issuer               Name,
+--         validity             Validity,
+--         subject              Name,
+--         subjectPublicKeyInfo SubjectPublicKeyInfo,
+--         issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
+--                              -- If present, version MUST be v2 or v3
+
+--         subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
+--                              -- If present, version MUST be v2 or v3
+--         extensions      [3]  EXPLICIT Extensions OPTIONAL
+--                              -- If present, version MUST be v3
+--         }
+
 record TBSCertFields (@0 bs : List UInt8) : Set where
   constructor mkTBSCertFields
   field

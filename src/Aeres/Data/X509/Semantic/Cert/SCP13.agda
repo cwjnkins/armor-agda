@@ -15,7 +15,9 @@ module Aeres.Data.X509.Semantic.Cert.SCP13 where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
 -- If the KeyCertSign bit is asserted, then the CA bit in the Basic Constraints extension MUST also be asserted.
+
 SCP13 : ∀ {@0 bs} → Cert bs → Set
 SCP13 c = T (isKeyCertSignPresent (Cert.getKU c)) → T (isCA (Cert.getBC c))
 

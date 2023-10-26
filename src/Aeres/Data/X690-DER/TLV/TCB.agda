@@ -10,6 +10,12 @@ module Aeres.Data.X690-DER.TLV.TCB where
 open Aeres.Grammar.Definitions.NonMalleable UInt8
   using (Raw)
 
+-- https://www.itu.int/rec/T-REC-X.690-202102-I/en
+-- 8.1.1.1 The encoding of a data value shall consist of four components which shall appear in the following order:
+-- a) identifier octets (see 8.1.2);
+-- b) length octets (see 8.1.3);
+-- c) contents octets (see 8.1.4);
+
 record TLV (t : UInt8) (@0 A : List UInt8 → Set) (@0 bs : List UInt8) : Set where
   constructor mkTLV
   field

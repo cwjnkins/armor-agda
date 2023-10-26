@@ -14,7 +14,9 @@ module Aeres.Data.X509.Semantic.Cert.SCP18 where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.3 (2)
 -- The certificate Validity period includes the current time
+
 SCP18 : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Validity.Time bs₂ → Set
 SCP18 c t = Validity.ValidTime t (Cert.getValidity c)
   -- T (Time.lessEq (proj₂ (Cert.getValidityStartTime c)) t ∧ Time.lessEq t (proj₂ (Cert.getValidityEndTime c)))

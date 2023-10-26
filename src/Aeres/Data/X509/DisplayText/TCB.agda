@@ -20,6 +20,13 @@ open Aeres.Grammar.Definitions   UInt8
 open Aeres.Grammar.Parallel.TCB  UInt8
 open Aeres.Grammar.Sum.TCB       UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.4
+--    DisplayText ::= CHOICE {
+--         ia5String        IA5String      (SIZE (1..200)),
+--         visibleString    VisibleString  (SIZE (1..200)),
+--         bmpString        BMPString      (SIZE (1..200)),
+--         utf8String       UTF8String     (SIZE (1..200)) }
+        
 data DisplayText : @0 List UInt8 → Set where
   ia5String     : ∀ {@0 bs} → Σₚ IA5String     (TLVSizeBounded IA5StringValue.size     1 200) bs → DisplayText bs
   visibleString : ∀ {@0 bs} → Σₚ VisibleString (TLVSizeBounded VisibleStringValue.size 1 200) bs → DisplayText bs

@@ -19,20 +19,17 @@ module Aeres.Data.X690-DER.Time.GeneralizedTime.TCB where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq.TCB     UInt8
 
-{- RFC 5820
--- 4.1.2.5.2.  GeneralizedTime
---
--- The generalized time type, GeneralizedTime, is a standard ASN.1 type
--- for variable precision representation of time.  Optionally, the
--- GeneralizedTime field can include a representation of the time
--- differential between local and Greenwich Mean Time.
---
--- For the purposes of this profile, GeneralizedTime values MUST be
--- expressed in Greenwich Mean Time (Zulu) and MUST include seconds
--- (i.e., times are YYYYMMDDHHMMSSZ), even where the number of seconds
--- is zero.  GeneralizedTime values MUST NOT include fractional seconds.
--}
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.5.2
+--    The generalized time type, GeneralizedTime, is a standard ASN.1 type
+--    for variable precision representation of time.  Optionally, the
+--    GeneralizedTime field can include a representation of the time
+--    differential between local and Greenwich Mean Time.
 
+--    For the purposes of this profile, GeneralizedTime values MUST be
+--    expressed in Greenwich Mean Time (Zulu) and MUST include seconds
+--    (i.e., times are YYYYMMDDHHMMSSZ), even where the number of seconds
+--    is zero.  GeneralizedTime values MUST NOT include fractional seconds.
+   
 record GeneralizedTimeFields (@0 bs : List UInt8) : Set where
   constructor mkGeneralizedTime
   field

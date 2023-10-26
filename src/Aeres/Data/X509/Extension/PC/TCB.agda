@@ -15,6 +15,15 @@ open Aeres.Grammar.Definitions    UInt8
 open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.11
+--    id-ce-policyConstraints OBJECT IDENTIFIER ::=  { id-ce 36 }
+
+--    PolicyConstraints ::= SEQUENCE {
+--         requireExplicitPolicy           [0] SkipCerts OPTIONAL,
+--         inhibitPolicyMapping            [1] SkipCerts OPTIONAL }
+
+--    SkipCerts ::= INTEGER (0..MAX)
+   
 RequireExplicitPolicy : @0 List UInt8 → Set
 RequireExplicitPolicy xs = TLV Tag.A80 IntegerValue xs
 

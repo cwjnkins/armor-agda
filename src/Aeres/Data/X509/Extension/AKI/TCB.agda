@@ -17,6 +17,16 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.1
+--    id-ce-authorityKeyIdentifier OBJECT IDENTIFIER ::=  { id-ce 35 }
+
+--    AuthorityKeyIdentifier ::= SEQUENCE {
+--       keyIdentifier             [0] KeyIdentifier           OPTIONAL,
+--       authorityCertIssuer       [1] GeneralNames            OPTIONAL,
+--       authorityCertSerialNumber [2] CertificateSerialNumber OPTIONAL  }
+
+--    KeyIdentifier ::= OCTET STRING
+   
 AKIKeyId : @0 List UInt8 → Set
 AKIKeyId = TLV Tag.A80 OctetStringValue
 

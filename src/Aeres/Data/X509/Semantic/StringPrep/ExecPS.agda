@@ -23,7 +23,23 @@ open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.1
+   -- Each non-Unicode string value is transcoded to Unicode.
 
+   -- PrintableString [X.680] values are transcoded directly to Unicode.
+
+   -- UniversalString, UTF8String, and bmpString [X.680] values need not be
+   -- transcoded as they are Unicode-based strings (in the case of
+   -- bmpString, a subset of Unicode).
+
+   -- TeletexString [X.680] values are transcoded to Unicode.  As there is
+   -- no standard for mapping TeletexString values to Unicode, the mapping
+   -- is left a local matter.
+
+   -- For these and other reasons, use of TeletexString is NOT RECOMMENDED.
+
+   -- The output is the transcoded string.
+   
 TranscodePS : ∀ {@0 bs} → PrintableString bs → String ⊎ Exists─ (List UInt8) Unicode
 TranscodePS (mkTLV len val len≡ bs≡) = inj₂ (_ , (utf8 (proj₂ (helper val))))
   where
@@ -45,6 +61,19 @@ TranscodePS (mkTLV len val len≡ bs≡) = inj₂ (_ , (utf8 (proj₂ (helper va
   helper (cons (mkIListCons (PrintableString.mkPrintableStringChar c (PrintableString.uppers (fst , snd)) bs≡₁) tail₁ bs≡)) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 c (Nat.≤-trans (s≤s snd) (toWitness {Q = 90 <? 128} tt)) bs≡₁)) (proj₂ (helper tail₁)) refl)
   helper (cons (mkIListCons (PrintableString.mkPrintableStringChar c (PrintableString.lowers (fst , snd)) bs≡₁) tail₁ bs≡)) = _ , cons (mkIListCons (utf81 (mkUTF8Char1 c (Nat.≤-trans (s≤s snd) (toWitness {Q = 122 <? 128} tt)) bs≡₁)) (proj₂ (helper tail₁)) refl)
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2
+   -- The following six-step process SHALL be applied to each presented and
+   -- attribute value in preparation for character string matching rule
+   -- evaluation.
+
+   --    1) Transcode
+   --    2) Map
+   --    3) Normalize
+   --    4) Prohibit
+   --    5) Check bidi
+   --    6) Insignificant Character Handling
+
+-- Note: TODO: Check bidi (https://datatracker.ietf.org/doc/html/rfc4518#section-2.5)
 
 ProcessStringPS : ∀ {@0 bs} → PrintableString bs → String ⊎ Exists─ (List UInt8) Unicode
 ProcessStringPS str
