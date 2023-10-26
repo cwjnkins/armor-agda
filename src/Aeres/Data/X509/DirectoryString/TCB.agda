@@ -19,6 +19,14 @@ open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Parallel.TCB             UInt8
 open Aeres.Grammar.Sum.TCB                  UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.4
+--    DirectoryString ::= CHOICE {
+--          teletexString           TeletexString (SIZE (1..MAX)),
+--          printableString         PrintableString (SIZE (1..MAX)),
+--          universalString         UniversalString (SIZE (1..MAX)),
+--          utf8String              UTF8String (SIZE (1..MAX)),
+--          bmpString               BMPString (SIZE (1..MAX)) }
+         
 data DirectoryString : @0 List UInt8 → Set where
   teletexString : ∀ {@0 bs} → Σₚ TeletexString TLVNonEmptyVal bs → DirectoryString bs
   printableString : ∀ {@0 bs} → Σₚ PrintableString TLVNonEmptyVal bs → DirectoryString bs

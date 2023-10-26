@@ -33,6 +33,12 @@ open Aeres.Grammar.Option.TCB   UInt8
 open Aeres.Grammar.Parallel.TCB UInt8
 open Aeres.Grammar.Definitions UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1
+--    Certificate  ::=  SEQUENCE  {
+--         tbsCertificate       TBSCertificate,
+--         signatureAlgorithm   AlgorithmIdentifier,
+--         signatureValue       BIT STRING  }
+        
 record CertFields (@0 bs : List UInt8) : Set where
   constructor mkCertFields
   field

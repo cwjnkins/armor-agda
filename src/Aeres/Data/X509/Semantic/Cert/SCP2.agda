@@ -15,7 +15,9 @@ module Aeres.Data.X509.Semantic.Cert.SCP2 where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.9
 -- Extension field MUST only appear if the Version is 3(2).
+
 SCP2 : ∀ {@0 bs} → Cert bs → Set
 SCP2 c = T (isSome (proj₂ (Cert.getExtensions c))) → Cert.getVersion c ≡ TBSCert.v3
 

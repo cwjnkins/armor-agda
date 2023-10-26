@@ -12,6 +12,22 @@ module Aeres.Data.X509.Extension.AIA.TCB where
 
 open Aeres.Grammar.Definitions UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.2.1
+--    id-pe-authorityInfoAccess OBJECT IDENTIFIER ::= { id-pe 1 }
+
+--    AuthorityInfoAccessSyntax  ::=
+--            SEQUENCE SIZE (1..MAX) OF AccessDescription
+
+--    AccessDescription  ::=  SEQUENCE {
+--            accessMethod          OBJECT IDENTIFIER,
+--            accessLocation        GeneralName  }
+
+--    id-ad OBJECT IDENTIFIER ::= { id-pkix 48 }
+
+--    id-ad-caIssuers OBJECT IDENTIFIER ::= { id-ad 2 }
+
+--    id-ad-ocsp OBJECT IDENTIFIER ::= { id-ad 1 }
+           
 AIAFieldsSeq : @0 List UInt8 → Set
 AIAFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf AccessDesc) xs
 

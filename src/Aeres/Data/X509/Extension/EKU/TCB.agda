@@ -13,6 +13,13 @@ module Aeres.Data.X509.Extension.EKU.TCB where
 
 open Aeres.Grammar.Definitions UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12
+--    id-ce-extKeyUsage OBJECT IDENTIFIER ::= { id-ce 37 }
+
+--    ExtKeyUsageSyntax ::= SEQUENCE SIZE (1..MAX) OF KeyPurposeId
+
+--    KeyPurposeId ::= OBJECT IDENTIFIER
+
 EKUFieldsSeq : @0 List UInt8 → Set
 EKUFieldsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf OID) xs
 

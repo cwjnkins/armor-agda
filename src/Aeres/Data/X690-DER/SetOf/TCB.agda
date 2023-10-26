@@ -17,6 +17,16 @@ open Aeres.Grammar.Definitions.NonMalleable UInt8
 open Aeres.Grammar.IList.TCB                UInt8
 open Aeres.Grammar.Parallel.TCB             UInt8
 
+-- https://www.itu.int/rec/T-REC-X.690-202102-I/en
+-- 8.12.1 The encoding of a set-of value shall be constructed.
+-- 8.12.2 The text of 8.10.2 applies.
+-- 8.12.3 The order of data values need not be preserved by the encoding and subsequent decoding.
+
+-- 11.6 Set-of components
+-- The encodings of the component values of a set-of value shall appear in ascending order, the encodings being compared as
+-- octet strings with the shorter components being padded at their trailing end with 0-octets.
+-- NOTE – The padding octets are for comparison purposes only and do not appear in the encodings.
+
 record SetOfFields (A : @0 List UInt8 → Set) (@0 bs : List UInt8) : Set where
   constructor mkSetOfFields
   field

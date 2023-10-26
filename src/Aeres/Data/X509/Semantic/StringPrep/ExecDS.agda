@@ -24,6 +24,22 @@ open Aeres.Binary
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.1
+   -- Each non-Unicode string value is transcoded to Unicode.
+
+   -- PrintableString [X.680] values are transcoded directly to Unicode.
+
+   -- UniversalString, UTF8String, and bmpString [X.680] values need not be
+   -- transcoded as they are Unicode-based strings (in the case of
+   -- bmpString, a subset of Unicode).
+
+   -- TeletexString [X.680] values are transcoded to Unicode.  As there is
+   -- no standard for mapping TeletexString values to Unicode, the mapping
+   -- is left a local matter.
+
+   -- For these and other reasons, use of TeletexString is NOT RECOMMENDED.
+
+   -- The output is the transcoded string.
 
 TranscodeDS : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) Unicode
 TranscodeDS (teletexString x) = inj₁ "error in stringprep : teletexstring not supported" 
@@ -49,6 +65,20 @@ TranscodeDS (printableString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁�
 TranscodeDS (universalString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf32 val)
 TranscodeDS (utf8String (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf8 val)
 TranscodeDS (bmpString (mk×ₚ (mkTLV len val len≡ bs≡₁) sndₚ₁)) = inj₂ (_ , utf16 val)
+
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2
+   -- The following six-step process SHALL be applied to each presented and
+   -- attribute value in preparation for character string matching rule
+   -- evaluation.
+
+   --    1) Transcode
+   --    2) Map
+   --    3) Normalize
+   --    4) Prohibit
+   --    5) Check bidi
+   --    6) Insignificant Character Handling
+
+-- Note: TODO: Check bidi (https://datatracker.ietf.org/doc/html/rfc4518#section-2.5)
 
 ProcessStringDS : ∀ {@0 bs} → DirectoryString bs → String ⊎ Exists─ (List UInt8) Unicode
 ProcessStringDS str

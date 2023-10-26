@@ -16,6 +16,13 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
+--    id-ce-basicConstraints OBJECT IDENTIFIER ::=  { id-ce 19 }
+
+--    BasicConstraints ::= SEQUENCE {
+--         cA                      BOOLEAN DEFAULT FALSE,
+--         pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
+ 
 record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
   constructor mkBCFieldsSeqFields
   field

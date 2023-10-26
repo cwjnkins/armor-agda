@@ -20,6 +20,9 @@ open      Aeres.Grammar.Definitions              UInt8
 open      Aeres.Grammar.Parallel.TCB             UInt8
 open      Aeres.Grammar.Sum.TCB                  UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
+--    GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+
 GeneralNamesElems = NonEmptySequenceOf GeneralName
 GeneralNames = TLV Tag.Sequence GeneralNamesElems
 

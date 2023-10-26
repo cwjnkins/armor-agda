@@ -16,6 +16,23 @@ module Aeres.Data.X690-DER.Time.UTCTime.TCB where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Seq.TCB     UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.5.1
+--    The universal time type, UTCTime, is a standard ASN.1 type intended
+--    for representation of dates and time.  UTCTime specifies the year
+--    through the two low-order digits and time is specified to the
+--    precision of one minute or one second.  UTCTime includes either Z
+--    (for Zulu, or Greenwich Mean Time) or a time differential.
+
+--    For the purposes of this profile, UTCTime values MUST be expressed in
+--    Greenwich Mean Time (Zulu) and MUST include seconds (i.e., times are
+--    YYMMDDHHMMSSZ), even where the number of seconds is zero.  Conforming
+--    systems MUST interpret the year field (YY) as follows:
+
+--       Where YY is greater than or equal to 50, the year SHALL be
+--       interpreted as 19YY; and
+
+--       Where YY is less than 50, the year SHALL be interpreted as 20YY.
+      
 record UTCTimeFields (@0 bs : List UInt8) : Set where
   constructor mkUTCTime
   field

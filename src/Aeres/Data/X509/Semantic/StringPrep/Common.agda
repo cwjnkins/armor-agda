@@ -26,12 +26,13 @@ open Aeres.Binary
 open Base256
 open Aeres.Grammar.Definitions Dig
 
-
--- Note: Currently, we only transform unicode strings encoded in UTF8. For UTF16 and UTF32, we do not perform any transformation yet.
+-- Note: Currently, we only transform unicode strings encoded in UTF8.
+-- For UTF16 and UTF32, we do not perform any transformation yet.
 
 appendUTF8 : Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8 → Exists─ (List UInt8) UTF8
 appendUTF8 (fst , snd) (fst₁ , snd₁) = _ , (appendIList _ snd snd₁)
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.2
 InitialMapping : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
 InitialMapping (utf8 nil) = _ , utf8 nil
 InitialMapping (utf8 (cons (mkIListCons h t bs≡))) = _ , (utf8 (proj₂ (helper h t)))
@@ -46,7 +47,18 @@ InitialMapping (utf8 (cons (mkIListCons h t bs≡))) = _ , (utf8 (proj₂ (helpe
 InitialMapping (utf16 x) = _ , (utf16 x) -- TODO
 InitialMapping (utf32 x) = _ , (utf32 x) -- TODO
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.3
+CaseFoldingNFKC : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
+CaseFoldingNFKC (utf8 nil) = _ , utf8 nil
+CaseFoldingNFKC (utf8 (cons (mkIListCons h t bs≡))) =  _ , (utf8 (proj₂ (helper h t)))
+  where
+  helper :  ∀ {@0 bs₁ bs₂} → UTF8Char bs₁ → IList UInt8 UTF8Char bs₂ → Exists─ (List UInt8) UTF8
+  helper x nil = lookupB2Map x
+  helper x (cons (mkIListCons head₁ tail₁ bs≡)) = appendUTF8 (lookupB2Map x) (helper head₁ tail₁)
+CaseFoldingNFKC (utf16 x) = _ , (utf16 x) -- TODO
+CaseFoldingNFKC (utf32 x) = _ , (utf32 x) -- TODO
 
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.4
 Prohibit : ∀ {@0 bs} → Unicode bs → Bool
 Prohibit (utf8 nil) = false
 Prohibit (utf8 (cons (mkIListCons h t bs≡))) = helper h t
@@ -59,18 +71,7 @@ Prohibit (utf8 (cons (mkIListCons h t bs≡))) = helper h t
 Prohibit (utf16 x) = false -- TODO
 Prohibit (utf32 x) = false -- TODO
 
-
-CaseFoldingNFKC : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
-CaseFoldingNFKC (utf8 nil) = _ , utf8 nil
-CaseFoldingNFKC (utf8 (cons (mkIListCons h t bs≡))) =  _ , (utf8 (proj₂ (helper h t)))
-  where
-  helper :  ∀ {@0 bs₁ bs₂} → UTF8Char bs₁ → IList UInt8 UTF8Char bs₂ → Exists─ (List UInt8) UTF8
-  helper x nil = lookupB2Map x
-  helper x (cons (mkIListCons head₁ tail₁ bs≡)) = appendUTF8 (lookupB2Map x) (helper head₁ tail₁)
-CaseFoldingNFKC (utf16 x) = _ , (utf16 x) -- TODO
-CaseFoldingNFKC (utf32 x) = _ , (utf32 x) -- TODO
-
-
+-- https://datatracker.ietf.org/doc/html/rfc4518#section-2.6
 InsigCharHandling : ∀ {@0 bs} → Unicode bs → Exists─ (List UInt8) Unicode
 InsigCharHandling (utf8 x)
   with checkOnlySpaces x

@@ -211,6 +211,6 @@ main = IO.run $
     runChainCheck (cons c) "CCP4" ccp4 IO.>>
     runChainCheck (cons c) "CCP5" ccp5 IO.>>
     runChainCheck (cons c) "CCP6" ccp6 IO.>>
-    runChainCheck (cons c) "CCP10" ccp10 IO.>>
     runRootStoreCheck (cons r) (cons c) "CCP7" ccp7 IO.>>
+    runChainCheck (cons c) "CCP10" ccp10 IO.>>
     Aeres.IO.exitSuccess

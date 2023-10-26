@@ -26,4 +26,3 @@ CAIssuersLit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 2 ]
 
 CAIssuers : OIDValue CAIssuersLit
 CAIssuers = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length CAIssuersLit)) CAIssuersLit)} tt))
-

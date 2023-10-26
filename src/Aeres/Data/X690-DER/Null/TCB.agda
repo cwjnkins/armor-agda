@@ -12,6 +12,11 @@ module Aeres.Data.X690-DER.Null.TCB where
 
 open Aeres.Grammar.Definitions.NonMalleable UInt8
 
+-- https://www.itu.int/rec/T-REC-X.690-202102-I/en
+-- 8.8.1 The encoding of a null value shall be primitive.
+-- 8.8.2 The contents octets shall not contain any octets.
+-- NOTE – The length octet is zero.
+
 Null = TLV Tag.Null (_≡ [])
 
 nullTLV : Null (Tag.Null ∷ [ # 0 ])

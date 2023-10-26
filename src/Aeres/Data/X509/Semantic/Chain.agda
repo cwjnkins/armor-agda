@@ -250,7 +250,9 @@ helperCCP3-dec (fst , snd) x₁
 ... | (fst , some x) = countNextIntCACerts x₁ (ℤ.+ 0) ℤ.≤? Int.getVal x
 -------------------------- CCP rules ---------------------------------------
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.4 (k)
 -- Conforming implementations may choose to reject all Version 1 and Version 2 intermediate CA certificates
+
 CCP2 : ∀ {@0 bs} → Chain bs → Set
 CCP2 nil = ⊤
 CCP2 (cons (mkIListCons h t bs≡)) = CCP2Seq t
@@ -264,10 +266,11 @@ ccp2 (cons (mkIListCons h t bs≡)) = helper t
   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
   helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ TBSCert.v3) ×-dec helper (cons x)
 
-
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
 --- The PathLenConstraint field is meaningful only if the CA boolean
 --- is asserted and the Key Usage extension, if present, asserts the KeyCertSign bit. In this case, it gives
 --- the maximum number of non-self-issued intermediate certificates that may follow this certificate in a valid certification path.
+
 CCP3 : ∀ {@0 bs} → Chain bs → Set
 CCP3 c = CCP3Seq (reverse (chainToList c))
 
@@ -278,28 +281,31 @@ ccp3 c = CCP3Seq-dec (reverse (chainToList c))
   CCP3Seq-dec [] = yes tt
   CCP3Seq-dec (x ∷ x₁) = helperCCP3-dec x x₁ ×-dec CCP3Seq-dec x₁
 
-
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.13
 -- For DistributionPoint field, if the certificate issuer is not the CRL issuer,
 -- then the CRLIssuer field MUST be present and contain the Name of the CRL issuer. If the
 -- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
 -- field and MUST include the distributionPoint field.
+
 CCP4 : ∀ {@0 bs} → Chain bs → Set
 CCP4 c = helperCCP4 (chainToList c)
 
 ccp4 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP4 c)
 ccp4 c = helperCCP4-dec (chainToList c)
 
-
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1
 -- A certificate MUST NOT appear more than once in a prospective certification path.
+
 CCP5 : ∀ {@0 bs} → Chain bs → Set
 CCP5 c = List.Unique _≟_ (chainToList c)
 
 ccp5 : ∀ {@0 bs} (c : Chain bs) → Dec (CCP5 c)
 ccp5 c = List.unique? _≟_ (chainToList c)
 
-
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.4
 -- Certificate users MUST be prepared to process the Issuer distinguished name
 -- and Subject distinguished name fields to perform name chaining for certification path validation.
+
 CCP6 : ∀ {@0 bs} → Chain bs → Set
 CCP6 c = CCP6Seq (chainToList c)
 
@@ -311,8 +317,18 @@ ccp6 c = helper (chainToList c)
   helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6
+--- check whether any of the certificate in given chain is trusted by the system's trust anchor
 
+CCP7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Set
+CCP7 r c = helperCCP7 (chainToList r) (chainToList c)
+
+ccp7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Dec (CCP7 r c)
+ccp7 r c = helperCCP7-dec (chainToList r) (chainToList c)
+
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6
 --- every issuer certificate in a chain must be CA certificate
+
 CCP10 : ∀ {@0 bs} → Chain bs → Set
 CCP10 c = CCP10Seq (chainToList c)
 
@@ -323,11 +339,3 @@ ccp10 c = helper (chainToList c)
   helper [] = no λ()
   helper ((fst , snd) ∷ []) = yes tt
   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ t) = T-dec ×-dec helper ((fst₁ , snd₁) ∷ t)
-
-
---- check whether any of the certificate in given chain is trusted by the system's trust anchor
-CCP7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Set
-CCP7 r c = helperCCP7 (chainToList r) (chainToList c)
-
-ccp7 : ∀ {@0 as bs} (r : Chain as) → (c : Chain bs) → Dec (CCP7 r c)
-ccp7 r c = helperCCP7-dec (chainToList r) (chainToList c)

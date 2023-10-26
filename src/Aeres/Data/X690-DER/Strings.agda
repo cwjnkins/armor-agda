@@ -18,3 +18,5 @@ open Aeres.Data.X690-DER.Strings.UTF8String public
 open Aeres.Data.X690-DER.Strings.UniversalString public
 open Aeres.Data.X690-DER.Strings.VisibleString public
 
+-- https://www.itu.int/rec/T-REC-X.680-202102-I/en
+-- Table 8 – List of restricted character string types

@@ -14,7 +14,9 @@ module Aeres.Data.X509.Semantic.Cert.SCP8 where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
 -- Where it appears, the PathLenConstraint field MUST be greater than or equal to zero.
+
 SCP8' : Exists─ (List UInt8) (Option Int) → Set
 SCP8' (─ .[] , none) = ⊤
 SCP8' (fst , some x) = ℤ.+ 0 ℤ.≤ Int.getVal x
