@@ -28,7 +28,7 @@ proj₂ (proj₂ iso) (mkDistPointFields crldp crldprsn crlissr refl) = refl
 @0 unambiguous : Unambiguous DistPoint
 unambiguous =
   TLV.unambiguous (Iso.unambiguous iso
-    (Unambiguous.option₃&₂
+    (Seq.unambiguous₂Option₃
       (Name.unambiguous) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nonempty

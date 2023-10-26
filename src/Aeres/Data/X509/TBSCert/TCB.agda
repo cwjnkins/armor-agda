@@ -6,13 +6,16 @@ open import Aeres.Data.X509.PublicKey.TCB
 import      Aeres.Data.X509.Name.TCB as Name
 open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert.UID.TCB
+import      Aeres.Data.X509.TBSCert.Version.Eq
 import      Aeres.Data.X509.TBSCert.Version.TCB as Version
 import      Aeres.Data.X509.Validity.TCB as Validity
 open import Aeres.Data.X509.Validity.Time.TCB
+open import Aeres.Data.X690-DER.Default.TCB
 import      Aeres.Data.X690-DER.Int.TCB as Int
 open import Aeres.Data.X690-DER.BitString.TCB as BitString
 open import Aeres.Data.X690-DER.OctetString.TCB as OctetString
 import      Aeres.Data.X690-DER.SequenceOf as SequenceOf
+import      Aeres.Data.X690-DER.TLV.Properties
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Option
@@ -34,13 +37,38 @@ open Int     hiding (getVal)
 open Name     using  (Name)
 open SequenceOf using (SequenceOf)
 open Validity using (Validity)
-open Version hiding (getVal)
+open Version
+  using (DecodedVersion ; [0]ExplicitVersion ; v1[0]ExplicitVersion ; Raw[0]ExplicitVersion)
+
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1
+-- The X.509 v3 certificate basic syntax is as follows.  For signature
+-- calculation, the data that is to be signed is encoded using the ASN.1
+-- distinguished encoding rules (DER) [X.690].  ASN.1 DER encoding is a
+-- tag, length, value encoding system for each element.
+--
+-- TBSCertificate  ::=  SEQUENCE  {
+--       version         [0]  EXPLICIT Version DEFAULT v1,
+--       serialNumber         CertificateSerialNumber,
+--       signature            AlgorithmIdentifier,
+--       issuer               Name,
+--       validity             Validity,
+--       subject              Name,
+--       subjectPublicKeyInfo SubjectPublicKeyInfo,
+--       issuerUniqueID  [1]  IMPLICIT UniqueIdentifier OPTIONAL,
+--                            -- If present, version MUST be v2 or v3
+--       subjectUniqueID [2]  IMPLICIT UniqueIdentifier OPTIONAL,
+--                            -- If present, version MUST be v2 or v3
+--       extensions      [3]  EXPLICIT Extensions OPTIONAL
+--                            -- If present, version MUST be v3
+--       }
+-- 
+-}
 
 record TBSCertFields (@0 bs : List UInt8) : Set where
   constructor mkTBSCertFields
   field
     @0 {ver ser sa i va u p u₁ u₂ e} : List UInt8
-    version : Option Version ver
+    version : Default [0]ExplicitVersion v1[0]ExplicitVersion ver
     serial  : Int ser
     signAlg : SignAlg sa
     issuer  : Name i
@@ -53,8 +81,8 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
     extensions : Option Extensions e
     @0 bs≡  : bs ≡ ver ++ ser ++ sa ++ i ++ va ++ u ++ p ++ u₁ ++ u₂ ++ e
 
-  getVersion : ℤ
-  getVersion = elimOption{X = const ℤ} (ℤ.+ 0) (λ v → Version.getVal v) version
+  getVersion : DecodedVersion
+  getVersion = Raw.to (RawDefault Raw[0]ExplicitVersion _) version
 
   getSerial : ℤ
   getSerial = Int.getVal serial
@@ -64,35 +92,6 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
 
   getValidityStartTime = Validity.getNBTime validity
   getValidityEndTime   = Validity.getNATime validity
-
-  -- getYearNB :  ℕ
-  -- getYearNB = Validity.getYearNB validity
-  -- getMonthNB :  ℕ
-  -- getMonthNB = Validity.getMonthNB validity
-  -- getDayNB :  ℕ
-  -- getDayNB = Validity.getDayNB validity
-  -- getHourNB :  ℕ
-  -- getHourNB = Validity.getHourNB validity
-  -- getMinNB :  ℕ
-  -- getMinNB = Validity.getMinNB validity
-  -- getSecNB :  ℕ
-  -- getSecNB = Validity.getSecNB validity
-
-  -- getYearNA :  ℕ
-  -- getYearNA = Validity.getYearNA validity
-  -- getMonthNA :  ℕ
-  -- getMonthNA = Validity.getMonthNA validity
-  -- getDayNA :  ℕ
-  -- getDayNA = Validity.getDayNA validity
-  -- getHourNA :  ℕ
-  -- getHourNA = Validity.getHourNA validity
-  -- getMinNA :  ℕ
-  -- getMinNA = Validity.getMinNA validity
-  -- getSecNA :  ℕ
-  -- getSecNA = Validity.getSecNA validity
-
-  -- getPublicKeyOIDbs : List UInt8
-  -- getPublicKeyOIDbs = PublicKey.getPkAlgOIDbs pk
 
   getIssuerLen : ℕ
   getIssuerLen = SequenceOf.lengthSequence (TLV.val issuer)
@@ -142,7 +141,7 @@ Rep₆ = &ₚ Name Rep₅
 Rep₇ = &ₚ SignAlg Rep₆
 
 TBSCertFieldsRep : @0 List UInt8 → Set
-TBSCertFieldsRep = (&ₚ (&ₚ (Option Version) Int) Rep₇)
+TBSCertFieldsRep = (&ₚ (&ₚ (Default [0]ExplicitVersion v1[0]ExplicitVersion) Int) Rep₇)
 
 equivalentTBSCertFields : Equivalent
                TBSCertFieldsRep
@@ -155,7 +154,7 @@ proj₂ equivalentTBSCertFields (mkTBSCertFields version serial signAlg issuer v
     (trans₀ bs≡ (solve (++-monoid UInt8)))
 
 RawTBSCertFieldsRep : Raw TBSCertFieldsRep
-RawTBSCertFieldsRep = Raw&ₚ (Raw&ₚ (RawOption (RawTLV _ RawInt)) RawInt)
+RawTBSCertFieldsRep = Raw&ₚ (Raw&ₚ (RawDefault Raw[0]ExplicitVersion v1[0]ExplicitVersion) RawInt)
                       (Raw&ₚ RawSignAlg
                       (Raw&ₚ Name.RawName
                       (Raw&ₚ Validity.RawValidity

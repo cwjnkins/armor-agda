@@ -3,7 +3,6 @@
 import      Aeres.Grammar.Parallel.Parser
 import      Aeres.Grammar.Parallel.Properties
 import      Aeres.Grammar.Parallel.TCB
-open import Aeres.Prelude
 
 module Aeres.Grammar.Parallel (Σ : Set) where
 

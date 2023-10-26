@@ -18,11 +18,14 @@ nonempty () refl
 nosubstrings x (mkBoolValue v b vᵣ bs≡) (mkBoolValue v₁ b₁ vᵣ₁ bs≡₁) =
   proj₁ $ Lemmas.length-++-≡ _ _ _ _ x (trans (cong length bs≡) (cong length (sym bs≡₁)))
 
-@0 unambiguous : Unambiguous BoolValue
-unambiguous (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ refl) = refl
-unambiguous (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ ())
-unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ ())
-unambiguous (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ refl) = refl
+@0 unambiguousValue : Unambiguous BoolValue
+unambiguousValue (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ refl) = refl
+unambiguousValue (mkBoolValue .#0 .(# 0) falseᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ ())
+unambiguousValue (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#0 .(# 0) falseᵣ ())
+unambiguousValue (mkBoolValue .#1 .(# 255) trueᵣ refl) (mkBoolValue .#1 .(# 255) trueᵣ refl) = refl
+
+@0 unambiguous : Unambiguous Boool
+unambiguous = TLV.unambiguous unambiguousValue
 
 @0 nonmalleableValue : NonMalleable RawBoolValue
 nonmalleableValue (mkBoolValue #0 ._ falseᵣ refl) (mkBoolValue #0 ._ falseᵣ refl) _ = refl

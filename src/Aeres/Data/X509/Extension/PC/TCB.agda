@@ -16,10 +16,10 @@ open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
 RequireExplicitPolicy : @0 List UInt8 → Set
-RequireExplicitPolicy xs = TLV Tag.A80 IntegerValue xs
+RequireExplicitPolicy = [ Tag.A80 ]Int
 
 InhibitPolicyMapping : @0 List UInt8 → Set
-InhibitPolicyMapping xs = TLV Tag.A81 IntegerValue xs
+InhibitPolicyMapping = [ Tag.A81 ]Int
 
 record PCFieldsSeqFields (@0 bs : List UInt8) : Set where
   constructor mkPCFieldsSeqFields

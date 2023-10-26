@@ -26,8 +26,11 @@ unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁
         refl → case (‼ ≡-unique bs≡ bs≡₁) ret (const _) of λ where
           refl → refl
 
+@0 [_]unambiguous : (t : UInt8) → Unambiguous [ t ]Int
+[ t ]unambiguous = TLV.unambiguous unambiguousValue
+
 @0 unambiguous : Unambiguous Int
-unambiguous = TLV.unambiguous unambiguousValue
+unambiguous = [ _ ]unambiguous
 
 @0 nonmalleableVal : NonMalleable RawIntegerValue
 nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁) i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂) eq =
@@ -65,8 +68,11 @@ nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (
               Base256.twosComplement (bₕ₂ ∷ bₜ₂) ≡⟨ cong Base256.twosComplement (sym bs≡₂) ⟩
               Base256.twosComplement bs₂ ∎)
 
+@0 [_]nonmalleable : ∀ t → NonMalleable Raw[ t ]Int
+[ t ]nonmalleable = TLV.nonmalleable nonmalleableVal
+
 @0 nonmalleable : NonMalleable RawInt
-nonmalleable = TLV.nonmalleable nonmalleableVal
+nonmalleable = [ _ ]nonmalleable
 
 instance
   IntegerValueEq : Eq (Exists─ (List UInt8) IntegerValue)

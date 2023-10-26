@@ -13,15 +13,15 @@ open import Aeres.Data.X509.TBSCert.UID.TCB
 open import Aeres.Data.X509.TBSCert.Version
 open import Aeres.Data.X509.Validity
 open import Aeres.Data.X690-DER.BitString
-open import Aeres.Data.X690-DER.BitString.TCB
-open import Aeres.Data.X690-DER.OctetString.TCB
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.OctetString
+open import Aeres.Data.X690-DER.Sequence
 open import Aeres.Data.X690-DER.TLV
-import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel  
-import      Aeres.Grammar.Properties
+-- import      Aeres.Grammar.Properties
 import      Aeres.Grammar.Seq
 open import Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Prelude
@@ -32,7 +32,7 @@ module Aeres.Data.X509.TBSCert.Properties where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8
-open Aeres.Grammar.Properties  UInt8
+-- open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
 iso : Iso TBSCertFieldsRep TBSCertFields
@@ -43,28 +43,42 @@ proj₂ (proj₂ iso) (mkTBSCertFields version serial signAlg issuer validity su
   subst₀ (λ eq → mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions eq ≡ mkTBSCertFields _ _ _ _ _ _ _ _ _ _ _ bs≡) (≡-unique bs≡ _) refl
 
 @0 unambiguous : Unambiguous TBSCert
-unambiguous =
-  TLV.unambiguous(Iso.unambiguous iso
-    (Seq.unambiguous
-      (Unambiguous.unambiguous-option₁&₁
-        (TLV.unambiguous Int.unambiguous)
-        TLV.nosubstrings
-        Int.unambiguous
-        (TLV.noconfusion λ ()))
-      (NonNesting.noconfusion-option&₁
-        TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ()))
-      (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
-      (Seq.unambiguous Name.unambiguous TLV.nosubstrings
-      (Seq.unambiguous Validity.unambiguous TLV.nosubstrings
-      (Seq.unambiguous Name.unambiguous TLV.nosubstrings
-      (Seq.unambiguous
-        (Parallel.unambiguous×ₚ PublicKey.unambiguous (λ where self self → refl))
-          (Parallel.nosubstrings₁ TLV.nosubstrings)
-          (Unambiguous.option₃&₂
-            (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
-            (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
-            (Extension.unambiguous)
-            TLV.nonempty (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion (λ ()))))))))))
+unambiguous = TLV.unambiguous (Iso.unambiguous iso ua₈)
+  where
+  ua₂ : Unambiguous Rep₂
+  ua₂ =
+    Seq.unambiguous₂Option₃
+      (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
+      (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
+      Extension.unambiguous TLV.nonempty
+      (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
+
+  ua₃ : Unambiguous Rep₃
+  ua₃ = Seq.unambiguous
+          (Parallel.unambiguous×ₚ PublicKey.unambiguous OctetString.unambiguousValue)
+          (Parallel.nosubstrings₁ TLV.nosubstrings) ua₂
+
+  ua₄ : Unambiguous Rep₄
+  ua₄ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₃
+
+  ua₅ : Unambiguous Rep₅
+  ua₅ = Seq.unambiguous Validity.unambiguous TLV.nosubstrings ua₄
+
+  ua₆ : Unambiguous Rep₆
+  ua₆ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₅
+
+  ua₇ : Unambiguous Rep₇
+  ua₇ = Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings ua₆
+
+  ua₈ : Unambiguous TBSCertFieldsRep
+  ua₈ = Seq.unambiguous
+          (Sequence.unambiguousDefault₁ v1[0]ExplicitVersion
+            Version.unambiguous[0]Explicit
+            TLV.nosubstrings
+            Int.unambiguous
+            (TLV.noconfusion λ ()))
+          (Sequence.nosubstringsDefault₁ v1[0]ExplicitVersion TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ()))
+          ua₇
 
 @0 nonmalleable : NonMalleable RawTBSCert
 nonmalleable = TLV.nonmalleable(Iso.nonmalleable iso RawTBSCertFieldsRep nm)
@@ -77,20 +91,25 @@ nonmalleable = TLV.nonmalleable(Iso.nonmalleable iso RawTBSCertFieldsRep nm)
   RawRep₄ = Raw&ₚ Validity.RawValidity RawRep₃
   RawRep₅ = Raw&ₚ Name.RawName RawRep₄
   RawRep₆ = Raw&ₚ RawSignAlg RawRep₅
-  RawRep₇ = Raw&ₚ (Raw&ₚ (RawOption (RawTLV Tag.AA0 RawInt)) RawInt) RawRep₆
+  RawRep₇ = Raw&ₚ (Raw&ₚ (RawDefault Raw[0]ExplicitVersion v1[0]ExplicitVersion) RawInt) RawRep₆
 
   nm : NonMalleable RawTBSCertFieldsRep
-  nm = Seq.nonmalleable{ra =  (Raw&ₚ (RawOption (RawTLV Tag.AA0 RawInt)) RawInt)}{rb = RawRep₆}
-                                       (Seq.nonmalleable (Option.nonmalleable (RawTLV _ RawInt)
-                                           (TLV.nonmalleable Int.nonmalleable)) Int.nonmalleable)
-              (Seq.nonmalleable{ra = RawSignAlg}{rb = RawRep₅} SignAlg.nonmalleable
-              (Seq.nonmalleable{ra = Name.RawName}{rb = RawRep₄} Name.nonmalleable
-              (Seq.nonmalleable{ra = Validity.RawValidity}{rb = RawRep₃} Validity.nonmalleable
-              (Seq.nonmalleable{ra = Name.RawName}{rb = RawRep₂} Name.nonmalleable
-              (Seq.nonmalleable{ra = (Raw×ₚ RawPublicKey RawOctetStringValue)}{rb = RawRep₁}
-                (Parallel.nonmalleable×ₚ PublicKey.nonmalleable (λ where self self refl → refl))
-              (Seq.nonmalleable{ra = (RawOption (RawTLV Tag.A81 RawBitStringValue))}{rb = RawRep}
-                (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
-              (Seq.nonmalleable{ra = (RawOption (RawTLV Tag.A82 RawBitStringValue))}
-                (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
-                                (Option.nonmalleable _ Extension.nonmalleable))))))))
+  nm =  Seq.nonmalleable
+          {ra = Raw&ₚ (RawDefault Raw[0]ExplicitVersion v1[0]ExplicitVersion) RawInt}
+          {rb = RawRep₆}
+          (Seq.nonmalleable (Default.nonmalleable v1[0]ExplicitVersion Version.nonmalleable[0]Explicit) Int.nonmalleable)
+       (Seq.nonmalleable{ra = RawSignAlg}{rb = RawRep₅}
+         SignAlg.nonmalleable
+       (Seq.nonmalleable{ra = Name.RawName}{rb = RawRep₄}
+         Name.nonmalleable
+       (Seq.nonmalleable{ra = Validity.RawValidity}{rb = RawRep₃}
+         Validity.nonmalleable
+       (Seq.nonmalleable{ra = RawName}{rb = RawRep₂}
+         Name.nonmalleable
+       (Seq.nonmalleable{rb = RawRep₁}
+         (Parallel.nonmalleable×ₚ PublicKey.nonmalleable OctetString.nonmalleableValue)
+       (Seq.nonmalleable{rb = RawRep}
+         (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
+       (Seq.nonmalleable{rb = RawOption RawExtensions}
+         (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
+         (Option.nonmalleable _ Extension.nonmalleable))))))))

@@ -49,8 +49,8 @@ parseExactLengthGeneralSubtrees n =
           {bs} (singleton read read≡) _ →
             subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
             (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
-              (parseTLV _ "MinBaseDistance" _ Int.parseValue)
-              (parseTLV _ "MaxBaseDistance" _ Int.parseValue)
+              (Int.[_]parse (here' String.++ ": MinBaseDistance") _)
+              (Int.[_]parse (here' String.++ ": MaxBaseDistance") _)
               (tell $ here' String.++ ": underflow")
               (n - read)))
 

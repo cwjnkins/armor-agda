@@ -19,7 +19,7 @@ open Aeres.Grammar.Option      UInt8
 -- note : but, version 1 and 2 certs can be present for CA certificates. So, we are checking whether
 -- the version is 1, 2, or 3 (0 - 2).
 SCP3 : ∀ {@0 bs} → Cert bs → Set
-SCP3 c = ((Cert.getVersion c ≡ ℤ.+ 0) ⊎ (Cert.getVersion c ≡  ℤ.+ 1)) ⊎ (Cert.getVersion c ≡  ℤ.+ 2)
+SCP3 c = ((Cert.getVersion c ≡ TBSCert.v1) ⊎ (Cert.getVersion c ≡ TBSCert.v2)) ⊎ (Cert.getVersion c ≡  TBSCert.v3)
 
 scp3 : ∀ {@0 bs} (c : Cert bs) → Dec (SCP3 c)
-scp3 c = ((Cert.getVersion c ≟ ℤ.+ 0) ⊎-dec (Cert.getVersion c ≟  ℤ.+ 1)) ⊎-dec (Cert.getVersion c ≟  ℤ.+ 2)
+scp3 c = ((Cert.getVersion c ≟ TBSCert.v1) ⊎-dec (Cert.getVersion c ≟ TBSCert.v2)) ⊎-dec (Cert.getVersion c ≟ TBSCert.v3)

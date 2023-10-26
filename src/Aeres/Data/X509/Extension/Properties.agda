@@ -59,7 +59,7 @@ module Fields where
       (Seq.unambiguous
         (Parallel.unambiguous OID.unambiguous λ a → erased-unique ua₁)
         (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (Unambiguous.unambiguous-option₁&₁ (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings ua₂ nc))
+        (Seq.unambiguousOption₁ Boool.unambiguous TLV.nosubstrings ua₂ nc))
 
   @0 nonmalleable : ∀ {P}{A : @0 List UInt8 → Set} {ra : Raw A} → Unambiguous P → NonMalleable ra → NonMalleable (RawExtensionFields{P} ra)
   nonmalleable{ra = ra} x x₁ = Iso.nonmalleable iso (RawExtensionFieldsRep ra)

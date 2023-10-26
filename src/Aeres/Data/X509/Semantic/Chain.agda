@@ -36,7 +36,7 @@ chainToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
 CCP2Seq : ∀ {@0 bs} → SequenceOf Cert bs → Set  
 CCP2Seq nil = ⊤
 CCP2Seq (cons (mkSequenceOf h nil bs≡)) = ⊤
-CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = Cert.getVersion h ≡ ℤ.+ 2 × CCP2Seq (cons x)
+CCP2Seq (cons (mkSequenceOf h (cons x) bs≡)) = Cert.getVersion h ≡ TBSCert.v3 × CCP2Seq (cons x)
 
 helperMatchRDNATV : ∀ {@0 bs₁ bs₂ bs₃} → (o : OID bs₁) → (d : Dec ((-, TLV.val o) ∈ Supported)) → Name.RDN.ATVParam o d bs₂ → Name.RDN.ATVParam o d bs₃ → Set
 helperMatchRDNATV o (no ¬p) x x₁ = CompareDS x x₁
@@ -262,7 +262,7 @@ ccp2 (cons (mkIListCons h t bs≡)) = helper t
   helper : ∀ {@0 bs} → (c : IList UInt8 Cert bs) → Dec (CCP2Seq c)  
   helper nil = yes tt
   helper (cons (mkSequenceOf h nil bs≡)) = yes tt
-  helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ ℤ.+ 2) ×-dec helper (cons x)
+  helper (cons (mkSequenceOf h (cons x) bs≡)) = (Cert.getVersion h ≟ TBSCert.v3) ×-dec helper (cons x)
 
 
 --- The PathLenConstraint field is meaningful only if the CA boolean

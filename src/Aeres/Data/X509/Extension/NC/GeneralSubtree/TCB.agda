@@ -18,10 +18,10 @@ open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
 MinBaseDistance : @0 List UInt8 → Set
-MinBaseDistance xs = TLV Tag.A80 IntegerValue xs
+MinBaseDistance = [ Tag.A80 ]Int
 
 MaxBaseDistance : @0 List UInt8 → Set
-MaxBaseDistance xs = TLV Tag.A81 IntegerValue xs
+MaxBaseDistance = [ Tag.A81 ]Int
 
 record GeneralSubtreeFields (@0 bs : List UInt8) : Set where
   constructor mkGeneralSubtreeFields

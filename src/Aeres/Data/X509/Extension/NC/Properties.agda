@@ -27,7 +27,7 @@ proj₂ (proj₂ iso) (mkNCFieldsSeqFields permt excld refl) = refl
 @0 unambiguous : Unambiguous NCFields
 unambiguous = TLV.unambiguous  (TLV.unambiguous
   (Iso.unambiguous iso
-    (Unambiguous.option₂&₁
+    (Seq.unambiguousOption₂
       (TLV.unambiguous GeneralSubtree.unambiguous)
         TLV.nosubstrings TLV.nonempty
        (TLV.unambiguous  GeneralSubtree.unambiguous)

@@ -56,7 +56,7 @@ parseFields n =
           (parse& TLV.nosubstrings FieldID.parse
           (parse& TLV.nosubstrings Curve.parse
           (parse& TLV.nosubstrings OctetString.parse
-                                   Int.parse))))
+                                   (Int.parse here')))))
         (Seq.nosubstrings (λ where _ refl refl → refl)
         (Seq.nosubstrings TLV.nosubstrings
         (Seq.nosubstrings TLV.nosubstrings
@@ -70,7 +70,7 @@ parseFields n =
             (Option.parseOption₁ExactLength
               TLV.nosubstrings
               (tell $ here' String.++ ": underflow")
-              Int.parse _))
+              (Int.parse here') _))
   where
   Reassoc = &ₚ (&ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ]) (&ₚ FieldID (&ₚ Curve (&ₚ OctetString Int)))) (Option Int)
 

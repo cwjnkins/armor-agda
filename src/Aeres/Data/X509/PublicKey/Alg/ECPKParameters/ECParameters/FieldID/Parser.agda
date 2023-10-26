@@ -33,7 +33,7 @@ parseParameters n o =
       tell $ here' String.++ ": unsupported OID: " String.++ show (map (map toℕ) (Raw.to RawOID o) )
       return ∘ no $ λ ()
     (yes (here px)) →
-      parseExactLength TLV.nosubstrings (tell $ here' String.++ ": Prime: length mismatch") Int.parse _
+      parseExactLength TLV.nosubstrings (tell $ here' String.++ ": Prime: length mismatch") (Int.parse here') _
     (yes (there (here px))) →
       parseExactLength TLV.nosubstrings (tell $ here' String.++ ": CharTwo: length mismatch") CharTwo.parse _
 

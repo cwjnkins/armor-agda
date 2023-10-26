@@ -21,5 +21,5 @@ private
 parseINAPFields : Parser (Logging ∘ Dec) INAPFields
 parseINAPFields =
   parseTLV _ here' _
-    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") Int.parse n
+    λ n → parseExactLength TLV.nosubstrings (tell $ here' String.++ ": underflow") (Int.parse here') n
 

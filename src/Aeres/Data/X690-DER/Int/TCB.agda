@@ -39,8 +39,11 @@ record IntegerValue (@0 bs : List UInt8) : Set where
     val : Singleton (Base256.twosComplement (bₕ ∷ bₜ))
     @0 bs≡ : bs ≡ bₕ ∷ bₜ
 
+[_]Int : UInt8 → @0 List UInt8 → Set
+[ t ]Int = TLV t IntegerValue
+
 Int : @0 List UInt8 → Set
-Int = TLV Tag.Integer IntegerValue
+Int = [ Tag.Integer ]Int
 
 getVal : ∀ {@0 bs} → Int bs → ℤ
 getVal = Singleton.x ∘ IntegerValue.val ∘ TLV.val
@@ -49,5 +52,8 @@ RawIntegerValue : Raw IntegerValue
 Raw.D RawIntegerValue = ℤ
 Raw.to RawIntegerValue = ↑_ ∘ IntegerValue.val
 
+Raw[_]Int : (t : UInt8) → Raw [ t ]Int
+Raw[ t ]Int = RawTLV t RawIntegerValue
+
 RawInt : Raw Int
-RawInt = RawTLV _ RawIntegerValue
+RawInt = Raw[ _ ]Int

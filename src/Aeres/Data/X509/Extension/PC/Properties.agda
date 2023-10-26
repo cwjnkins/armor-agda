@@ -26,13 +26,14 @@ proj₂ (proj₂ iso) (mkPCFieldsSeqFields require inhibit refl) = refl
 @0 unambiguous : Unambiguous PCFields
 unambiguous = TLV.unambiguous (TLV.unambiguous
   (Iso.unambiguous iso
-    (Unambiguous.option₂&₁
-      (TLV.unambiguous λ {xs} → Int.unambiguousValue{xs}) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous λ {xs} → Int.unambiguousValue{xs}) TLV.nonempty (TLV.noconfusion λ ()))))
+    (Seq.unambiguousOption₂
+      Int.[ _ ]unambiguous TLV.nosubstrings TLV.nonempty
+      Int.[ _ ]unambiguous TLV.nonempty
+      (TLV.noconfusion λ ()))))
 
 @0 nonmalleable : NonMalleable RawPCFields
 nonmalleable = TLV.nonmalleable (TLV.nonmalleable
   (Iso.nonmalleable iso
     RawPCFieldsSeqFieldsRep
-    (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal))
-      (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal)))))
+    (Seq.nonmalleable (Option.nonmalleable _ Int.[ _ ]nonmalleable)
+      (Option.nonmalleable _ Int.[ _ ]nonmalleable))))

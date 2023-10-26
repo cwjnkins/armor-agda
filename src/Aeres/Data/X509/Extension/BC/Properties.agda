@@ -32,8 +32,8 @@ proj₂ (proj₂ iso) (mkBCFieldsSeqFields bcca bcpathlen bs≡) = refl
 @0 unambiguous : Unambiguous BCFields
 unambiguous =
   TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
-    (Unambiguous.option₂&₁
-      (TLV.unambiguous Boool.unambiguous) TLV.nosubstrings TLV.nonempty
+    (Seq.unambiguousOption₂
+      Boool.unambiguous TLV.nosubstrings TLV.nonempty
       Int.unambiguous TLV.nonempty
       (TLV.noconfusion λ ()))))
 

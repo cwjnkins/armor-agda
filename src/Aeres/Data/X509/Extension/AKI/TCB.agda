@@ -24,7 +24,7 @@ AKIAuthCertIssuer : @0 List UInt8 → Set
 AKIAuthCertIssuer = TLV Tag.AA1 GeneralNamesElems
 
 AKIAuthCertSN : @0 List UInt8 → Set
-AKIAuthCertSN = TLV Tag.A82 IntegerValue
+AKIAuthCertSN = [ Tag.A82 ]Int
 
 record AKIFieldsSeqFields (@0 bs : List UInt8) : Set where
   constructor mkAKIFieldsSeqFields

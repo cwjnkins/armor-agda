@@ -12,7 +12,9 @@ open import Aeres.Data.X509.TBSCert.UID
 open import Aeres.Data.X509.TBSCert.Version
 open import Aeres.Data.X509.Validity
 open import Aeres.Data.X690-DER.BitString
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.Sequence
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Definitions
@@ -38,24 +40,30 @@ private
 
 parseTBSCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength TBSCertFields n)
 parseTBSCertFields n =
-  parseEquivalent (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentTBSCertFields))
-    (parse&ᵈ{A = Length≤ (&ₚ (Option Version) Int) n}
-      (Parallel.nosubstrings₁ (NonNesting.noconfusion-option&₁ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())))
+  parseEquivalent equiv -- (Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentTBSCertFields))
+    (parse&ᵈ{A = Length≤ (&ₚ (Default [0]ExplicitVersion v1[0]ExplicitVersion) Int) n}
+      (Parallel.nosubstrings₁ ns₁)
       (Parallel.Length≤.unambiguous _
-        (Unambiguous.unambiguous-option₁&₁
-          (TLV.unambiguous
-            Int.unambiguous)
-          TLV.nosubstrings
-          Int.unambiguous (TLV.noconfusion λ ())))
-      (Option.parseOption₁&₁≤ parseVersion Int.parse TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ())) overflow n)
+        (Sequence.unambiguousDefault₁
+          v1[0]ExplicitVersion Version.unambiguous[0]Explicit TLV.nosubstrings Int.unambiguous (TLV.noconfusion λ ())))
+      (parse≤ _
+        (Sequence.parseDefault₁{A = [0]ExplicitVersion} v1[0]ExplicitVersion here'
+          Version.unambiguous[0]Explicit TLV.nosubstrings (TLV.noconfusion λ ())
+          Version.parse[0]Explicit (Int.parse here'))
+        ns₁ overflow)
       λ where
         (singleton r₁ r₁≡) _ →
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength Rep₇ (n - x)))
             r₁≡ (p₁ (n - r₁)))
   where
+  equiv : Equivalent (&ₚᵈ (Length≤ (&ₚ (Default [0]ExplicitVersion v1[0]ExplicitVersion) Int) n) (λ {bs'} _ → ExactLength Rep₇ (n - length bs'))) (ExactLength TBSCertFields n)
+  equiv = Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentTBSCertFields)
+
   overflow : Logging (Level.Lift _ ⊤)
   overflow = tell $ here' String.++ ": overflow"
 
+  @0 ns₁ : NoSubstrings (&ₚ (Default [0]ExplicitVersion v1[0]ExplicitVersion) Int)
+  ns₁ = Sequence.nosubstringsDefault₁ v1[0]ExplicitVersion TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
 
   p₆ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₂ n)
   p₆ n =

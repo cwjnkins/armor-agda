@@ -29,10 +29,10 @@ proj₂ (proj₂ iso) (mkAKIFieldsSeqFields akeyid authcertiss authcertsn refl) 
 @0 unambiguous : Unambiguous AKIFields
 unambiguous =
   TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
-    (Unambiguous.option₃&₂
+    (Seq.unambiguous₂Option₃
       (TLV.unambiguous OctetString.unambiguousValue) TLV.nosubstrings TLV.nonempty
       (TLV.unambiguous GeneralNames.GeneralNamesElems.unambiguous) TLV.nosubstrings TLV.nonempty
-      (TLV.unambiguous λ {xs} → Int.unambiguousValue{xs}) TLV.nonempty
+      Int.[ _ ]unambiguous TLV.nonempty
       (TLV.noconfusion (λ ())) (TLV.noconfusion λ ()) (TLV.noconfusion λ ()))))
 
 @0 nonmalleable : NonMalleable RawAKIFields
@@ -41,5 +41,5 @@ nonmalleable = TLV.nonmalleable (TLV.nonmalleable
   where
   nm : NonMalleable RawAKIFieldsSeqFieldsRep
   nm = Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable OctetString.nonmalleableValue))
-         (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable))
-                             (Option.nonmalleable _ (TLV.nonmalleable Int.nonmalleableVal)))
+      (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable GeneralNames.GeneralNamesElems.nonmalleable))
+                        (Option.nonmalleable _ Int.[ _ ]nonmalleable))

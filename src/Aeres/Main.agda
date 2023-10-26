@@ -177,8 +177,7 @@ main = IO.run $
     runCheck c "SCP4" scp4 IO.>>
     runCheck c "SCP5" scp5 IO.>>
     runCheck c "SCP6" scp6 IO.>>
-    runCheck c "SCP7(1)" scp7₁ IO.>>
-    runCheck c "SCP7(2)" scp7₂ IO.>>
+    runCheck c "SCP7" scp7 IO.>>
     runCheck c "SCP8" scp8 IO.>>
     runCheck c "SCP9" scp9 IO.>>
     runCheck c "SCP10" scp10 IO.>>

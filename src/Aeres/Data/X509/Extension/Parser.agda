@@ -54,7 +54,7 @@ private
   here' = "X509: TBSCert: Extension"
 
   parseExtensionFields
-    : ∀ {@0 P} {@0 A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
+    : ∀ {P A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
       → @0 NoSubstrings A → @0 NoConfusion Boool A → Unambiguous P
       → Parser (Logging ∘ Dec) A
       → ∀ n → Parser (Logging ∘ Dec) (ExactLength (ExtensionFields P A) n)
@@ -71,13 +71,16 @@ private
             parseOID λ x →
               let (singleton v v≡) = OID.serializeVal (TLV.val x)
               in
-              subst₀ (Dec ∘ Erased ∘ P) v≡ (erased? (P? v)))
+              subst₀ (Dec ∘ Erased ∘ P) {y = TLV.v x}v≡ (erased? (P? v)))
               -- erased? (P? {!!}))
           (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " underflow (OID)"))
       λ where
         (singleton r r≡) (mk×ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (─ bsLen)) →
           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r≡
-            (Option.parseOption₁&₁ parseBool p TLV.nosubstrings nn nc ((tell $ here' String.++ ": length mismatch (bool)")) (n - r)))
+            (parseExactLength
+              (Seq.nosubstringsOption₁ TLV.nosubstrings nn nc)
+              (tell $ here' String.++ "(fields): length mismatch")
+              (parseOption₁ here' TLV.nosubstrings parseBool p) (n - r)))
 
 parseSelectExtn : ∀ n → Parser (Logging ∘ Dec) (ExactLength SelectExtn n)
 parseSelectExtn n =

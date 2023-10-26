@@ -5,6 +5,8 @@ open import Aeres.Data.X509.Extension.TCB
 open import Aeres.Data.X509.Name.TCB
 open import Aeres.Data.X509.SignAlg.TCB
 open import Aeres.Data.X509.TBSCert.TCB
+open import Aeres.Data.X509.TBSCert.Version.TCB
+  using (DecodedVersion)
 import      Aeres.Data.X509.TBSCert.UID.TCB as TBSCert
 open import Aeres.Data.X509.Validity.TCB
 open import Aeres.Data.X509.Validity.Time.TCB
@@ -42,7 +44,7 @@ record CertFields (@0 bs : List UInt8) : Set where
     signatureBytes : Singleton sig
     @0 bs≡  : bs ≡ t ++ sa ++ sig
 
-  getVersion : ℤ
+  getVersion : DecodedVersion
   getVersion = TBSCertFields.getVersion (TLV.val tbs)
 
   getSerial : ℤ
@@ -95,11 +97,11 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSubject :  Exists─ (List UInt8) Name
   getSubject = TBSCertFields.getSubject (TLV.val tbs)
 
-  getIssUID : Exists─ (List UInt8) (Option TBSCert.IssUID)
-  getIssUID = _ , (TBSCertFields.issuerUID (TLV.val tbs))
+  getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val tbs))
+  getIssUID = TBSCertFields.issuerUID (TLV.val tbs)
 
-  getSubUID : Exists─ (List UInt8) (Option TBSCert.SubUID)
-  getSubUID = _ , (TBSCertFields.subjectUID (TLV.val tbs))
+  getSubUID : Option TBSCert.SubUID (TBSCertFields.u₂ (TLV.val tbs))
+  getSubUID = TBSCertFields.subjectUID (TLV.val tbs)
 
   getTBSCertSignAlg : Exists─ (List UInt8) SignAlg
   getTBSCertSignAlg = TBSCertFields.getSignAlg (TLV.val tbs)
@@ -139,7 +141,7 @@ module Cert where
   Cert xs = TLV Tag.Sequence  CertFields xs
 
   module _ {@0 bs} (c : Cert bs) where
-    getVersion : ℤ
+    getVersion : DecodedVersion
     getVersion = CertFields.getVersion (TLV.val c)
 
     getSerial : ℤ
@@ -195,10 +197,10 @@ module Cert where
     getSubject :  Exists─ (List UInt8) Name
     getSubject = CertFields.getSubject (TLV.val c)
 
-    getIssUID : Exists─ (List UInt8) (Option TBSCert.IssUID)
+    getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val (CertFields.tbs (TLV.val c))))
     getIssUID = CertFields.getIssUID (TLV.val c)
 
-    getSubUID : Exists─ (List UInt8) (Option TBSCert.SubUID)
+    getSubUID : Option TBSCert.SubUID (TBSCertFields.u₂ (TLV.val (CertFields.tbs (TLV.val c))))
     getSubUID = CertFields.getSubUID (TLV.val c)
 
     getTBSCertSignAlg : Exists─ (List UInt8) SignAlg

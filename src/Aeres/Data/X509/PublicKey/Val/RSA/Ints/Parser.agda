@@ -24,7 +24,7 @@ private
 parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSAPkIntsFields n)
 parseFields =
   parseExactLength nosubstrings (tell $ here' String.++ ": underflow")
-    (parseEquivalent equivalent (parse& TLV.nosubstrings Int.parse Int.parse))
+    (parseEquivalent equivalent (parse& TLV.nosubstrings (Int.parse here') (Int.parse here')))
 
 parse :  Parser (Logging ∘ Dec) RSAPkInts
 parse = parseTLV _ here' _ parseFields

@@ -32,6 +32,5 @@ parsePCFields =
   helper n =
     parseEquivalent (Parallel.equivalent₁ equivalentPCFieldsSeqFields)
       (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ()))
-        (parseTLV _ (here' String.++ ": require explicit policy") _ Int.parseValue)
-        (parseTLV _ (here' String.++ ": inhibit policy mapping") _ Int.parseValue)
+        (Int.[_]parse here' _) (Int.[_]parse here' _)
         (tell $ here' String.++ ": underflow") n)

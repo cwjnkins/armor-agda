@@ -30,7 +30,7 @@ parseFields n =
      (parse&ᵈ
        (Parallel.nosubstrings₁ TLV.nosubstrings)
        (Parallel.Length≤.unambiguous _ Int.unambiguous)
-       (parse≤ n Int.parse TLV.nosubstrings (tell $ here' String.++ ": length overflow"))
+       (parse≤ n (Int.parse here') TLV.nosubstrings (tell $ here' String.++ ": length overflow"))
        λ where
          {bs} (singleton r r≡) m →
            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength BasisFields (n - x))) r≡

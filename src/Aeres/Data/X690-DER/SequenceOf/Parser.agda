@@ -156,7 +156,7 @@ module parseSequenceOf
 open parseSequenceOf public using (parseSequenceOf ; parseBoundedSequenceOf ; parseNonEmptySeq ; parseSeq)
 
 parseIntegerSeq : Parser (Logging ∘ Dec) IntegerSeq
-parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nosubstrings Int.parse -- parseInt
+parseIntegerSeq = parseSeq "int" Int TLV.nonempty TLV.nosubstrings (Int.parse "") -- parseInt
 
 -- private
 --   module Test where

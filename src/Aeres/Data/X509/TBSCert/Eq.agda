@@ -12,6 +12,7 @@ open import Aeres.Data.X509.TBSCert.UID.TCB
 open import Aeres.Data.X509.TBSCert.Version
 open import Aeres.Data.X509.Validity
 open import Aeres.Data.X690-DER.BitString
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
 import      Aeres.Data.X690-DER.OctetString.Properties
 open import Aeres.Data.X690-DER.SetOf
@@ -49,6 +50,9 @@ instance
     instance
       e₁ : Eq≋ (NonEmptySequenceOf Extension)
       e₁ = SequenceOf.BoundedSequenceOfEq≋
+
+      e₂ : Eq≋ (Default [0]ExplicitVersion v1[0]ExplicitVersion)
+      e₂ = Default.eq≋ v1[0]ExplicitVersion
 
   eq : Eq (Exists─ _ TBSCertFields)
   eq = Eq≋⇒Eq it

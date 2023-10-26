@@ -44,11 +44,12 @@ private
 
 @0 unambiguous : Unambiguous UserNotice
 unambiguous =
-  TLV.unambiguous (Iso.unambiguous iso
-    (Unambiguous.option₂&₁
-      (NoticeReference.unambiguous) TLV.nosubstrings TLV.nonempty
-      DisplayText.unambiguous DisplayText.nonempty
-      nc))
+  TLV.unambiguous
+    (Iso.unambiguous iso
+      (Seq.unambiguousOption₂
+        NoticeReference.unambiguous TLV.nosubstrings TLV.nonempty
+        DisplayText.unambiguous DisplayText.nonempty
+        nc))
 
 @0 nonmalleable : NonMalleable RawUserNotice
 nonmalleable = TLV.nonmalleable
