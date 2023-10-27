@@ -2,8 +2,12 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Boool.TCB
+open import Aeres.Data.X690-DER.Boool.Eq
+open import Aeres.Data.X690-DER.Default.TCB
 open import Aeres.Data.X690-DER.Int.TCB
+open import Aeres.Data.X690-DER.Length.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
+open import Aeres.Data.X690-DER.TLV.Properties
 import      Aeres.Data.X690-DER.Tag as Tag
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Definitions
@@ -22,12 +26,16 @@ open Aeres.Grammar.Seq.TCB UInt8
 --    BasicConstraints ::= SEQUENCE {
 --         cA                      BOOLEAN DEFAULT FALSE,
 --         pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
- 
+
+DefaultCAVal : Boool _
+DefaultCAVal = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
+      (mkBoolValue false (# 0) falseᵣ refl) refl refl
+
 record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
   constructor mkBCFieldsSeqFields
   field
     @0 {ca pl} : List UInt8
-    bcca : Option Boool ca
+    bcca : Default Boool DefaultCAVal ca
     bcpathlen : Option Int pl
     @0 bs≡  : bs ≡ ca ++ pl
 
@@ -37,14 +45,14 @@ BCFieldsSeq xs = TLV Tag.Sequence  BCFieldsSeqFields xs
 BCFields : @0 List UInt8 → Set
 BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
 
-BCFieldsSeqFieldsRep = &ₚ (Option Boool) (Option Int)
+BCFieldsSeqFieldsRep = &ₚ (Default Boool DefaultCAVal) (Option Int)
 
 equivalentBCFieldsSeqFields : Equivalent BCFieldsSeqFieldsRep BCFieldsSeqFields
 proj₁ equivalentBCFieldsSeqFields (Aeres.Grammar.Seq.TCB.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡
 proj₂ equivalentBCFieldsSeqFields (mkBCFieldsSeqFields bcca bcpathlen bs≡) = Aeres.Grammar.Seq.TCB.mk&ₚ bcca bcpathlen bs≡
 
 RawBCFieldsSeqFieldsRep : Raw BCFieldsSeqFieldsRep
-RawBCFieldsSeqFieldsRep = Raw&ₚ (RawOption RawBoool) (RawOption RawInt)
+RawBCFieldsSeqFieldsRep = Raw&ₚ (RawDefault RawBoool DefaultCAVal) (RawOption RawInt)
 
 RawBCFieldsSeqFields : Raw BCFieldsSeqFields
 RawBCFieldsSeqFields = Iso.raw equivalentBCFieldsSeqFields RawBCFieldsSeqFieldsRep

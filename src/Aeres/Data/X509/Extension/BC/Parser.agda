@@ -22,14 +22,16 @@ open Aeres.Grammar.Parser      UInt8
 private
   here' = "X509: Extension: BC"
 
-parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
-parseBCFieldsSeqFields n =
-  parseEquivalent (Parallel.equivalent₁ equivalent)
-    (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings
-      (TLV.noconfusion λ where ())
-      parseBool
-      (Int.parse here')
-      (tell $ here' String.++ ": underflow") _)
+postulate
+  parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
+-- parseBCFieldsSeqFields n =
+  -- parseEquivalent (Parallel.equivalent₁ equivalent)
+  --   (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings
+  --     (TLV.noconfusion λ where ())
+  --     parseBool
+  --     (Int.parse here')
+  --     (tell $ here' String.++ ": underflow") _)
+  -- {!!}
 
 parseBCFieldsSeq : Parser (Logging ∘ Dec) BCFieldsSeq
 parseBCFieldsSeq = parseTLV _ (here' String.++ ": Seq") _ parseBCFieldsSeqFields

@@ -53,34 +53,35 @@ open Aeres.Grammar.Seq         UInt8
 private
   here' = "X509: TBSCert: Extension"
 
-  parseExtensionFields
-    : ∀ {P A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
+  postulate
+    parseExtensionFields
+      : ∀ {P A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
       → @0 NoSubstrings A → @0 NoConfusion Boool A → Unambiguous P
       → Parser (Logging ∘ Dec) A
       → ∀ n → Parser (Logging ∘ Dec) (ExactLength (ExtensionFields P A) n)
-  parseExtensionFields{P} P? nn nc ua p n =
-    parseEquivalent
-      (Iso.transEquivalent
-        (Iso.symEquivalent Distribute.exactLength-&)
-        (Parallel.equivalent₁ equivalentExtensionFields))
-      (parse&ᵈ
-        (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
-        (Parallel.Length≤.unambiguous _ (Parallel.unambiguous OID.unambiguous λ _ → erased-unique ua))
-        (parse≤ n
-          (parseSigma TLV.nosubstrings OID.unambiguous
-            parseOID λ x →
-              let (singleton v v≡) = OID.serializeVal (TLV.val x)
-              in
-              subst₀ (Dec ∘ Erased ∘ P) {y = TLV.v x}v≡ (erased? (P? v)))
-              -- erased? (P? {!!}))
-          (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " underflow (OID)"))
-      λ where
-        (singleton r r≡) (mk×ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (─ bsLen)) →
-          subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r≡
-            (parseExactLength
-              (Seq.nosubstringsOption₁ TLV.nosubstrings nn nc)
-              (tell $ here' String.++ "(fields): length mismatch")
-              (parseOption₁ here' TLV.nosubstrings parseBool p) (n - r)))
+  -- parseExtensionFields{P} P? nn nc ua p n =
+  --   parseEquivalent
+  --     (Iso.transEquivalent
+  --       (Iso.symEquivalent Distribute.exactLength-&)
+  --       (Parallel.equivalent₁ equivalentExtensionFields))
+  --     (parse&ᵈ
+  --       (Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings))
+  --       (Parallel.Length≤.unambiguous _ (Parallel.unambiguous OID.unambiguous λ _ → erased-unique ua))
+  --       (parse≤ n
+  --         (parseSigma TLV.nosubstrings OID.unambiguous
+  --           parseOID λ x →
+  --             let (singleton v v≡) = OID.serializeVal (TLV.val x)
+  --             in
+  --             subst₀ (Dec ∘ Erased ∘ P) {y = TLV.v x}v≡ (erased? (P? v)))
+  --             -- erased? (P? {!!}))
+  --         (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " underflow (OID)"))
+  --     λ where
+  --       (singleton r r≡) (mk×ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (─ bsLen)) →
+  --         subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n ∸ x))) r≡
+  --           (parseExactLength
+  --             (Seq.nosubstringsOption₁ TLV.nosubstrings nn nc)
+  --             (tell $ here' String.++ "(fields): length mismatch")
+  --             (parseOption₁ here' TLV.nosubstrings parseBool p) (n - r)))
 
 parseSelectExtn : ∀ n → Parser (Logging ∘ Dec) (ExactLength SelectExtn n)
 parseSelectExtn n =

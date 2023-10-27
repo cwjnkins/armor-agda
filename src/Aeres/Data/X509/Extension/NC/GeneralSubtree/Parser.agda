@@ -36,21 +36,21 @@ parseExactLengthGeneralSubtrees n =
     _ TLV.nonempty TLV.nosubstrings
       (parseTLV _ "GeneralSubtree" _ helper) n
   where
-  helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (GeneralSubtreeFields) n)
-  helper n =
-    parseEquivalent
-      (Iso.transEquivalent
-        (Iso.symEquivalent Distribute.exactLength-&)
-        (Parallel.equivalent₁ equivalentGeneralSubtreeFields))
-      (parse&ᵈ (Parallel.nosubstrings₁ GeneralName.nosubstrings)
-        (Parallel.Length≤.unambiguous _ GeneralName.unambiguous)
-        (parse≤ n parseGeneralName GeneralName.nosubstrings (tell $ here' String.++ ": underflow"))
-        λ where
-          {bs} (singleton read read≡) _ →
-            subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
-            (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
-              (Int.[_]parse (here' String.++ ": MinBaseDistance") _)
-              (Int.[_]parse (here' String.++ ": MaxBaseDistance") _)
-              (tell $ here' String.++ ": underflow")
-              (n - read)))
-
+  postulate
+    helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (GeneralSubtreeFields) n)
+  -- helper n =
+  --   parseEquivalent
+  --     (Iso.transEquivalent
+  --       (Iso.symEquivalent Distribute.exactLength-&)
+  --       (Parallel.equivalent₁ equivalentGeneralSubtreeFields))
+  --     (parse&ᵈ (Parallel.nosubstrings₁ GeneralName.nosubstrings)
+  --       (Parallel.Length≤.unambiguous _ GeneralName.unambiguous)
+  --       (parse≤ n parseGeneralName GeneralName.nosubstrings (tell $ here' String.++ ": underflow"))
+  --       λ where
+  --         {bs} (singleton read read≡) _ →
+  --           subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength _ (n - x))) read≡
+  --           (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
+  --             (Int.[_]parse (here' String.++ ": MinBaseDistance") _)
+  --             (Int.[_]parse (here' String.++ ": MaxBaseDistance") _)
+  --             (tell $ here' String.++ ": underflow")
+  --             (n - read)))

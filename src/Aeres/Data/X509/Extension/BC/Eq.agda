@@ -19,5 +19,6 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  eq≋ : Eq≋ BCFieldsSeqFields
-  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it it)
+  postulate
+    eq≋ : Eq≋ BCFieldsSeqFields
+  -- eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it it)

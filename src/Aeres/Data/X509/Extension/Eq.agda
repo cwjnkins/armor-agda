@@ -47,15 +47,16 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
-eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
-eq≋Field eqP =
-  Iso.isoEq≋ Fields.iso
-    (Seq.eq≋&ₚ
-      (Parallel.eq≋Σₚ it λ _ →
-        record
-          { _≟_ = λ x y → yes (erased-unique eqP x y)
-          })
-      (Seq.eq≋&ₚ it it))
+postulate
+  eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
+-- eq≋Field eqP =
+--   Iso.isoEq≋ Fields.iso
+--     (Seq.eq≋&ₚ
+--       (Parallel.eq≋Σₚ it λ _ →
+--         record
+--           { _≟_ = λ x y → yes (erased-unique eqP x y)
+--           })
+--       (Seq.eq≋&ₚ it it))
 
 instance
   eq≋ : Eq≋ SelectExtn

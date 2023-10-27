@@ -2,8 +2,12 @@
 
 open import Aeres.Binary
 open import Aeres.Data.X509.GeneralNames.GeneralName.TCB
+open import Aeres.Data.X690-DER.Default.TCB
 open import Aeres.Data.X690-DER.Int.TCB
+open import Aeres.Data.X690-DER.Int.Properties
+open import Aeres.Data.X690-DER.Length.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
+open import Aeres.Data.X690-DER.TLV.Properties
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 import      Aeres.Grammar.Option
@@ -23,12 +27,16 @@ MinBaseDistance = [ Tag.A80 ]Int
 MaxBaseDistance : @0 List UInt8 → Set
 MaxBaseDistance = [ Tag.A81 ]Int
 
+DefaultMinBaseDistance : MinBaseDistance _
+DefaultMinBaseDistance = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
+  (mkIntVal (# 0) [] tt self refl) refl refl
+
 record GeneralSubtreeFields (@0 bs : List UInt8) : Set where
   constructor mkGeneralSubtreeFields
   field
     @0 {bse minb maxb} : List UInt8
     base : GeneralName bse
-    minimum : Option MinBaseDistance minb
+    minimum : Default MinBaseDistance DefaultMinBaseDistance minb
     maximum : Option MaxBaseDistance maxb
     @0 bs≡  : bs ≡ bse ++ minb ++ maxb
 
@@ -38,7 +46,7 @@ GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
 GeneralSubtrees : @0 List UInt8 → Set
 GeneralSubtrees xs = (NonEmptySequenceOf GeneralSubtree) xs
 
-GeneralSubtreeFieldsRep = &ₚ GeneralName (&ₚ (Option MinBaseDistance) (Option MaxBaseDistance))
+GeneralSubtreeFieldsRep = &ₚ GeneralName (&ₚ (Default MinBaseDistance DefaultMinBaseDistance) (Option MaxBaseDistance))
 
 equivalentGeneralSubtreeFields : Equivalent GeneralSubtreeFieldsRep GeneralSubtreeFields
 proj₁ equivalentGeneralSubtreeFields (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
@@ -46,7 +54,7 @@ proj₂ equivalentGeneralSubtreeFields (mkGeneralSubtreeFields base minimum maxi
 
 RawGeneralSubtreeFieldsRep : Raw GeneralSubtreeFieldsRep
 RawGeneralSubtreeFieldsRep = Raw&ₚ RawGeneralName
-                              (Raw&ₚ (RawOption (RawTLV _ RawIntegerValue))
+                              (Raw&ₚ (RawDefault (RawTLV _ RawIntegerValue) DefaultMinBaseDistance)
                                       (RawOption (RawTLV _ RawIntegerValue)))
 
 RawGeneralSubtreeFields : Raw GeneralSubtreeFields

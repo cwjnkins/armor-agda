@@ -20,6 +20,7 @@ open import Aeres.Data.X509.Extension.TCB
 open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Boool
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
@@ -53,20 +54,22 @@ module Fields where
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
-  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
-  unambiguous ua₁ ua₂ nc =
-    Iso.unambiguous iso
-      (Seq.unambiguous
-        (Parallel.unambiguous OID.unambiguous λ a → erased-unique ua₁)
-        (Parallel.nosubstrings₁ TLV.nosubstrings)
-        (Seq.unambiguousOption₁ Boool.unambiguous TLV.nosubstrings ua₂ nc))
+  postulate
+    @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
+  -- unambiguous ua₁ ua₂ nc = ?
+    -- Iso.unambiguous iso
+    --   (Seq.unambiguous
+    --     (Parallel.unambiguous OID.unambiguous λ a → erased-unique ua₁)
+    --     (Parallel.nosubstrings₁ TLV.nosubstrings)
+    --     (Seq.unambiguousOption₁ Boool.unambiguous TLV.nosubstrings ua₂ nc))
 
   @0 nonmalleable : ∀ {P}{A : @0 List UInt8 → Set} {ra : Raw A} → Unambiguous P → NonMalleable ra → NonMalleable (RawExtensionFields{P} ra)
-  nonmalleable{ra = ra} x x₁ = Iso.nonmalleable iso (RawExtensionFieldsRep ra)
+  nonmalleable{ra = ra} x x₁ =
+    Iso.nonmalleable iso (RawExtensionFieldsRep ra)
     (Seq.nonmalleable
      (Parallel.nonmalleable₁ RawOID OID.nonmalleable λ a p₁ p₂ → erased-unique x p₁ p₂)
      (Seq.nonmalleable
-       (Option.nonmalleable RawBoool Boool.nonmalleable) x₁))
+       (Default.nonmalleable _ Boool.nonmalleable) x₁))
 
 module Select where
   iso : Iso SelectExtnRep SelectExtn

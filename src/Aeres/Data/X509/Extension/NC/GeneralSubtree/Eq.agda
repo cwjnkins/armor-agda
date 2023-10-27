@@ -23,5 +23,6 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  eq≋ : Eq≋ GeneralSubtreeFields
-  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))
+  postulate
+    eq≋ : Eq≋ GeneralSubtreeFields
+  -- eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))

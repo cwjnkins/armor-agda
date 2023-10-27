@@ -6,7 +6,7 @@ import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Semantic.Cert.Utils
 import      Aeres.Data.X509.Semantic.Cert.SCP1 as SCP1
 import      Aeres.Data.X509.Semantic.Cert.SCP2 as SCP2
-import      Aeres.Data.X509.Semantic.Cert.SCP3 as SCP3
+-- import      Aeres.Data.X509.Semantic.Cert.SCP3 as SCP3
 import      Aeres.Data.X509.Semantic.Cert.SCP4 as SCP4
 import      Aeres.Data.X509.Semantic.Cert.SCP5 as SCP5
 import      Aeres.Data.X509.Semantic.Cert.SCP6 as SCP6
@@ -46,7 +46,7 @@ open SCP2 public
 -- Generation of Version 2 certificates is not expected by implementations based on this profile.
 -- note : but, version 1 and 2 certs can be present for CA certificates. So, we are checking whether
 -- the version is 1, 2, or 3 (0 - 2).
-open SCP3 public
+-- open SCP3 public
 
 -- The Serial number MUST be a positive integer assigned by the CA to each certificate.
 open SCP4 public

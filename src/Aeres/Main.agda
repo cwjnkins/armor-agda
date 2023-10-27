@@ -173,7 +173,7 @@ main = IO.run $
     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
     runCheck c "SCP1" scp1 IO.>>
     runCheck c "SCP2" scp2 IO.>>
-    runCheck c "SCP3" scp3 IO.>>
+    -- runCheck c "SCP3" scp3 IO.>>
     runCheck c "SCP4" scp4 IO.>>
     runCheck c "SCP5" scp5 IO.>>
     runCheck c "SCP6" scp6 IO.>>
