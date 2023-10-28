@@ -10,6 +10,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.PC.Parser where
@@ -18,6 +19,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Seq         UInt8
 
 private
   here' = "X509: Extension: PC"
@@ -31,6 +33,6 @@ parsePCFields =
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (PCFieldsSeqFields) n)
   helper n =
     parseEquivalent (Parallel.equivalent₁ equivalentPCFieldsSeqFields)
-      (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion (λ ()))
-        (Int.[_]parse here' _) (Int.[_]parse here' _)
-        (tell $ here' String.++ ": underflow") n)
+      (parseOption₂ here' TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
+        (Int.[_]parse (here' String.++ " (require)" ) _)
+        (Int.[_]parse (here' String.++ " (inhibit)") _) n)

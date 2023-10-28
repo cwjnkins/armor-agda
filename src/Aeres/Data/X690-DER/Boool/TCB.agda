@@ -1,6 +1,7 @@
 {-# OPTIONS --subtyping #-}
 
 open import Aeres.Binary
+open import Aeres.Data.X690-DER.Length.TCB
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Grammar.Definitions.NonMalleable
@@ -42,3 +43,9 @@ Raw.to RawBoolValue = BoolValue.v
 
 RawBoool : Raw Boool
 RawBoool = RawTLV Tag.Boolean RawBoolValue
+
+falseBoool : Boool _
+falseBoool = mkTLV (short (mkShort (# 1) (s≤s (s≤s z≤n)) refl)) (mkBoolValue _ _ falseᵣ refl) refl refl
+
+trueBoool : Boool _
+trueBoool = mkTLV (short (mkShort (# 1) (s≤s (s≤s z≤n)) refl)) (mkBoolValue  _ _ trueᵣ refl) refl refl

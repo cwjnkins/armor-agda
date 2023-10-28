@@ -27,15 +27,11 @@ open Aeres.Grammar.Seq.TCB UInt8
 --         cA                      BOOLEAN DEFAULT FALSE,
 --         pathLenConstraint       INTEGER (0..MAX) OPTIONAL }
 
-DefaultCAVal : Boool _
-DefaultCAVal = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
-      (mkBoolValue false (# 0) falseᵣ refl) refl refl
-
 record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
   constructor mkBCFieldsSeqFields
   field
     @0 {ca pl} : List UInt8
-    bcca : Default Boool DefaultCAVal ca
+    bcca : Default Boool falseBoool ca
     bcpathlen : Option Int pl
     @0 bs≡  : bs ≡ ca ++ pl
 
@@ -45,14 +41,14 @@ BCFieldsSeq xs = TLV Tag.Sequence  BCFieldsSeqFields xs
 BCFields : @0 List UInt8 → Set
 BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
 
-BCFieldsSeqFieldsRep = &ₚ (Default Boool DefaultCAVal) (Option Int)
+BCFieldsSeqFieldsRep = &ₚ (Default Boool falseBoool) (Option Int)
 
 equivalentBCFieldsSeqFields : Equivalent BCFieldsSeqFieldsRep BCFieldsSeqFields
 proj₁ equivalentBCFieldsSeqFields (Aeres.Grammar.Seq.TCB.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡
 proj₂ equivalentBCFieldsSeqFields (mkBCFieldsSeqFields bcca bcpathlen bs≡) = Aeres.Grammar.Seq.TCB.mk&ₚ bcca bcpathlen bs≡
 
 RawBCFieldsSeqFieldsRep : Raw BCFieldsSeqFieldsRep
-RawBCFieldsSeqFieldsRep = Raw&ₚ (RawDefault RawBoool DefaultCAVal) (RawOption RawInt)
+RawBCFieldsSeqFieldsRep = Raw&ₚ (RawDefault RawBoool falseBoool) (RawOption RawInt)
 
 RawBCFieldsSeqFields : Raw BCFieldsSeqFields
 RawBCFieldsSeqFields = Iso.raw equivalentBCFieldsSeqFields RawBCFieldsSeqFieldsRep

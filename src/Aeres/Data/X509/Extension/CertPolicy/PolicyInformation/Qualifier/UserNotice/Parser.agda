@@ -12,6 +12,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Seq
 import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 
@@ -21,6 +22,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 private
@@ -29,10 +31,10 @@ private
 parseUserNoticeFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoticeFields n)
 parseUserNoticeFields n =
   parseEquivalent (Parallel.equivalent₁ equivalentUserNoticeFields)
-    (Option.parseOption₂ TLV.nosubstrings DisplayText.nosubstrings
+    (parseOption₂ here' TLV.nosubstrings DisplayText.nosubstrings
       (DisplayText.noconfusionTLV (toWitnessFalse{Q = _ ∈? _} tt))
       parseNoticeReference parseDisplayText
-      (tell $ here' String.++ ": underflow") n)
+      n)
 
 parseUserNotice : Parser (Logging ∘ Dec) UserNotice
 parseUserNotice =

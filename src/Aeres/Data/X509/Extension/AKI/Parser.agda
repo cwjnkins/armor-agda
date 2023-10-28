@@ -11,6 +11,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 open import Data.List.Properties
 open import Data.Nat.Properties
@@ -22,6 +23,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Seq         UInt8
 
 module parseAKIFields where
   module Here where
@@ -47,11 +49,11 @@ module parseAKIFields where
   parseAKIFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength AKIFieldsSeqFields n)
   parseAKIFieldsSeqFields n =
     parseEquivalent (Parallel.equivalent₁ equivalentAKIFieldsSeqFields)
-      (Option.parseOption₃
+      (parse₂Option₃ "X509: Extension: AKI (fields)"
         TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseAKIKeyId parseAKIAuthCertIssuer parseAKIAuthCertSN
-        (tell $ Here.AKI String.++ ": underflow") n)
+        n)
 
   parseAKIFieldsSeq : Parser (Logging ∘ Dec) AKIFieldsSeq
   parseAKIFieldsSeq =

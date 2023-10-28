@@ -109,6 +109,43 @@ nosubstringsOption₁ ns₁ ns₂ nc {ys₁ = ys₁}{ys₂ = ys₂} xs₁++ys₁
 nosubstringsOption₁ ns₁ ns₂ nc xs₁++ys₁≡xs₂++ys₂ (mk&ₚ (some a₁) b₁ bs≡₁) (mk&ₚ (some a₂) b₂ bs≡₂) =
   nosubstrings ns₁ ns₂ xs₁++ys₁≡xs₂++ys₂ (mk&ₚ a₁ b₁ bs≡₁) (mk&ₚ a₂ b₂ bs≡₂)
 
+module ExactLength where
+  open import Aeres.Grammar.Parallel Σ
+
+  equivalent : ∀ {A B n} → Equivalent (&ₚᵈ (Length≤ A n) λ {bs} _ → ExactLength B (n - length bs)) (ExactLength (&ₚ A B) n)
+  proj₁ (equivalent{n = n}) {xs} (mk&ₚ{bs₁}{bs₂} (mk×ₚ a aLen) (mk×ₚ b bLen) bs≡) =
+    mk×ₚ (mk&ₚ a b bs≡) (─ (begin
+      length xs ≡⟨ cong length bs≡ ⟩
+      length (bs₁ ++ bs₂) ≡⟨ length-++ bs₁ ⟩
+      length bs₁ + length bs₂ ≡⟨ cong (length bs₁ +_) (¡ bLen) ⟩
+      length bs₁ + (n - length bs₁) ≡⟨ m+[n∸m]≡n{length bs₁}{n} (¡ aLen) ⟩
+      n ∎))
+    where
+    open ≡-Reasoning
+    open import Data.Nat.Properties
+  proj₂ (equivalent{n = n}) {xs} (mk×ₚ (mk&ₚ{bs₁}{bs₂} a b bs≡) abLen) =
+    mk&ₚ (mk×ₚ a (─ ≤n)) (mk×ₚ b (─ ≡n∸)) bs≡
+    where
+    open ≡-Reasoning
+    open import Data.Nat.Properties
+    module ≤ = ≤-Reasoning
+
+    @0 ≤n : length bs₁ ≤ n
+    ≤n = ≤.begin
+      length bs₁ ≤.≤⟨ m≤m+n (length bs₁) (length bs₂) ⟩
+      length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂) ≤.≡⟨ cong length (sym bs≡) ⟩
+      length xs ≤.≡⟨ ¡ abLen ⟩
+      n ≤.∎
+
+    @0 ≡n∸ : length bs₂ ≡ n - length bs₁
+    ≡n∸ = +-cancelˡ-≡ (length bs₁) (begin
+      length bs₁ + length bs₂ ≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂) ≡⟨ cong length (sym bs≡) ⟩
+      length xs ≡⟨ ¡ abLen ⟩
+      n ≡⟨ sym (m+[n∸m]≡n ≤n) ⟩
+      length bs₁ + (n - length bs₁) ∎)
+
 @0 unambiguousᵈ
   : ∀ {A} {B : ∀ {bs} → A bs → List Σ → Set} → Unambiguous A → NoSubstrings A
     → (∀ {@0 bs} (a : A bs) → Unambiguous (B a))

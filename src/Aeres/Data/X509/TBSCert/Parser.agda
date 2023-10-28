@@ -67,11 +67,11 @@ parseTBSCertFields n =
 
   p₆ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₂ n)
   p₆ n =
-      Option.parseOption₃{A = IssUID}{B = SubUID}{C = Extensions}
+      parse₂Option₃{A = IssUID}{B = SubUID}{C = Extensions}
+        here'
         TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
         (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
         parseIssUID parseSubUID parseExtensions
-        (tell $ here' String.++ ": underflow (issUID, subUID, extensions)")
         _
 
   p₅ : ∀ n → Parser (Logging ∘ Dec) (ExactLength Rep₃ n)

@@ -55,10 +55,6 @@ open Aeres.Grammar.Seq         UInt8
 --                     -- by extnID
 --         }
 
-DefaultCriticalVal : Boool _
-DefaultCriticalVal = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
-      (mkBoolValue false (# 0) falseᵣ refl) refl refl
-
 supportedExtensions : List (List UInt8)
 supportedExtensions =
     OIDs.AKILit ∷ OIDs.SKILit ∷ OIDs.KULit ∷ OIDs.EKULit ∷ OIDs.BCLit ∷ OIDs.IANLit ∷ OIDs.SANLit
@@ -70,7 +66,7 @@ record ExtensionFields (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) (
     @0 {oex cex ocex} : List UInt8
     extnId : OID oex
     @0 extnId≡ : P (TLV.v extnId) -- oex ≡ lit
-    crit : Default Boool DefaultCriticalVal cex
+    crit : Default Boool falseBoool cex
     extension : A ocex
     @0 bs≡ : bs ≡ oex ++ cex ++ ocex
 
@@ -118,7 +114,7 @@ Extensions : @0 List UInt8 → Set
 Extensions xs = TLV Tag.AA3  ExtensionsSeq xs
 
 ExtensionFieldsRep : (@0 P : _) (@0 A : _) → @0 List UInt8 → Set
-ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ → Erased ∘ P ∘ TLV.v)) (&ₚ (Default Boool DefaultCriticalVal) A)
+ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ → Erased ∘ P ∘ TLV.v)) (&ₚ (Default Boool falseBoool) A)
 
 equivalentExtensionFields : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
                → Equivalent (ExtensionFieldsRep P A) (ExtensionFields P A)
@@ -129,7 +125,7 @@ proj₂ equivalentExtensionFields (mkExtensionFields extnId extnId≡ crit exten
 
 RawExtensionFieldsRep : ∀ {P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFieldsRep P A)
 RawExtensionFieldsRep{P} ra = Raw&ₚ (RawΣₚ₁ RawOID (λ _ x → Erased (P (TLV.v x))))
-                            (Raw&ₚ (RawDefault RawBoool DefaultCriticalVal) ra)
+                            (Raw&ₚ (RawDefault RawBoool falseBoool) ra)
 
 RawExtensionFields : ∀ {P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFields P A)
 RawExtensionFields ra = Iso.raw equivalentExtensionFields (RawExtensionFieldsRep ra)

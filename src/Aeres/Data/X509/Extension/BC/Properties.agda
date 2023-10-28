@@ -19,7 +19,7 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
-Rep = &ₚ (Default Boool DefaultCAVal) (Option Int)
+Rep = &ₚ (Default Boool falseBoool) (Option Int)
 
 equivalent : Equivalent Rep BCFieldsSeqFields
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡

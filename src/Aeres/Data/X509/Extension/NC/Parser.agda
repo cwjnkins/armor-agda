@@ -8,10 +8,11 @@ open import Aeres.Data.X690-DER.TLV
 import      Aeres.Data.X690-DER.Tag as Tag
 open import Aeres.Data.X690-DER.SequenceOf
 import      Aeres.Grammar.Definitions
+import      Aeres.Grammar.IList
 import      Aeres.Grammar.Option
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Parser
-import      Aeres.Grammar.IList
+import      Aeres.Grammar.Seq
 open import Aeres.Prelude
 
 module Aeres.Data.X509.Extension.NC.Parser where
@@ -20,6 +21,7 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
+open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.IList       UInt8
 
 private
@@ -35,7 +37,7 @@ parseNCFields =
   helper : (n : ℕ) → Parser (Logging ∘ Dec) (ExactLength (NCFieldsSeqFields) n)
   helper n =  parseEquivalent
       (Parallel.equivalent₁ equivalentNCFieldsSeqFields)
-      (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
-        (parseTLV _ here' _ parseExactLengthGeneralSubtrees)
-        (parseTLV _ here' _ parseExactLengthGeneralSubtrees)
-        (tell $ here' String.++ ": underflow") n)
+      (parseOption₂ here' TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
+        (parseTLV _ (here' String.++ " (permit)") _ parseExactLengthGeneralSubtrees)
+        (parseTLV _ (here' String.++ " (exclude)") _ parseExactLengthGeneralSubtrees)
+        n)

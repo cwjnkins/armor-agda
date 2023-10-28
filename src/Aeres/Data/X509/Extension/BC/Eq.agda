@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.Extension.BC.Properties
 open import Aeres.Data.X509.Extension.BC.TCB
 open import Aeres.Data.X690-DER.Boool
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.TLV
@@ -19,6 +20,5 @@ open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  postulate
-    eq≋ : Eq≋ BCFieldsSeqFields
-  -- eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it it)
+  eq≋ : Eq≋ BCFieldsSeqFields
+  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ (Default.eq≋ falseBoool) it)
