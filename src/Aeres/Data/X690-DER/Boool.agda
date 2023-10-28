@@ -9,7 +9,7 @@ module Aeres.Data.X690-DER.Boool where
 
 module Boool where
   open Aeres.Data.X690-DER.Boool.Eq         public
+  open Aeres.Data.X690-DER.Boool.Parser public
   open Aeres.Data.X690-DER.Boool.Properties public
 
-open Aeres.Data.X690-DER.Boool.Parser public
 open Aeres.Data.X690-DER.Boool.TCB    public

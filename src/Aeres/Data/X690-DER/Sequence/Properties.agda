@@ -30,3 +30,14 @@ module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (
     of λ where
       refl → case ‼ Default.uniqueNotDefault default oa₁ nd₁ nd₂ ret (const _) of λ where
         refl → refl
+
+  @0 unambiguousDefaultOption
+    : ∀ {B : @0 List UInt8 → Set} → Unambiguous A → NoSubstrings A → NonEmpty A
+      → Unambiguous B → NonEmpty B
+      → NoConfusion A B
+      → Unambiguous (&ₚ (Default A default) (Option B))
+  unambiguousDefaultOption ua₁ ns₁ ne₁ ua₂ ne₂ nc (mk&ₚ (mkDefault a₁ nd₁) b₁ bs≡₁) (mk&ₚ (mkDefault a₂ nd₂) b₂ bs≡₂) =
+    case Seq.unambiguousOption₂ ua₁ ns₁ ne₁ ua₂ ne₂ nc (mk&ₚ a₁ b₁ bs≡₁) (mk&ₚ a₂ b₂ bs≡₂) ret (const _) of λ where
+      refl → case ‼ Default.uniqueNotDefault default a₁ nd₁ nd₂ ret (const _) of λ where
+        refl → refl
+

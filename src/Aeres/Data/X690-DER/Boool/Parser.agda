@@ -23,13 +23,13 @@ open Aeres.Grammar.Parser      UInt8
 private
   here' = "X690-DER: Bool"
 
-parseBoolValue : Parser (Logging ∘ Dec) BoolValue
-runParser parseBoolValue [] = do
+parseValue : Parser (Logging ∘ Dec) BoolValue
+runParser parseValue [] = do
   tell $ here' String.++ ": underflow"
   return ∘ no $ λ where
     (success prefix read read≡ value suffix ps≡) →
       contradiction (++-conicalˡ _ suffix ps≡) (nonempty value)
-runParser parseBoolValue (x ∷ xs)
+runParser parseValue (x ∷ xs)
   with x ≟ # 0
 ... | yes refl =
   return (yes (success [ # 0 ] _ refl (mkBoolValue false (# 0) falseᵣ refl) xs refl))
@@ -45,9 +45,9 @@ runParser parseBoolValue (x ∷ xs)
         falseᵣ → contradiction (∷-injectiveˡ (sym ps≡)) x≢0
         trueᵣ  → contradiction (∷-injectiveˡ (sym ps≡)) x≢255)
 
-parseBool : Parser (Logging ∘ Dec) Boool
-parseBool = parseTLV Tag.Boolean here' BoolValue
-              (parseExactLength nosubstrings (tell $ here' String.++ "bad length for bool") parseBoolValue)
+parse : Parser (Logging ∘ Dec) Boool
+parse = parseTLV Tag.Boolean here' BoolValue
+              (parseExactLength nosubstrings (tell $ here' String.++ "bad length for bool") parseValue)
 
 
 -- private

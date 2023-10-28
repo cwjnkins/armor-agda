@@ -21,14 +21,26 @@ open Aeres.Grammar.Option UInt8
 open Aeres.Grammar.Definitions              UInt8
 open Aeres.Grammar.Seq.TCB UInt8
 
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.10
+-- 
+--    GeneralSubtrees ::= SEQUENCE SIZE (1..MAX) OF GeneralSubtree
+--
+--    GeneralSubtree ::= SEQUENCE {
+--         base                    GeneralName,
+--         minimum         [0]     BaseDistance DEFAULT 0,
+--         maximum         [1]     BaseDistance OPTIONAL }
+--
+--    BaseDistance ::= INTEGER (0..MAX)
+-}
+
 MinBaseDistance : @0 List UInt8 → Set
 MinBaseDistance = [ Tag.A80 ]Int
 
 MaxBaseDistance : @0 List UInt8 → Set
 MaxBaseDistance = [ Tag.A81 ]Int
 
-DefaultMinBaseDistance : MinBaseDistance _
-DefaultMinBaseDistance = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
+defaultMinBaseDistance : MinBaseDistance _
+defaultMinBaseDistance = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
   (mkIntVal (# 0) [] tt self refl) refl refl
 
 record GeneralSubtreeFields (@0 bs : List UInt8) : Set where
@@ -36,7 +48,7 @@ record GeneralSubtreeFields (@0 bs : List UInt8) : Set where
   field
     @0 {bse minb maxb} : List UInt8
     base : GeneralName bse
-    minimum : Default MinBaseDistance DefaultMinBaseDistance minb
+    minimum : Default MinBaseDistance defaultMinBaseDistance minb
     maximum : Option MaxBaseDistance maxb
     @0 bs≡  : bs ≡ bse ++ minb ++ maxb
 
@@ -46,7 +58,7 @@ GeneralSubtree xs = TLV Tag.Sequence GeneralSubtreeFields xs
 GeneralSubtrees : @0 List UInt8 → Set
 GeneralSubtrees xs = (NonEmptySequenceOf GeneralSubtree) xs
 
-GeneralSubtreeFieldsRep = &ₚ GeneralName (&ₚ (Default MinBaseDistance DefaultMinBaseDistance) (Option MaxBaseDistance))
+GeneralSubtreeFieldsRep = &ₚ GeneralName (&ₚ (Default MinBaseDistance defaultMinBaseDistance) (Option MaxBaseDistance))
 
 equivalentGeneralSubtreeFields : Equivalent GeneralSubtreeFieldsRep GeneralSubtreeFields
 proj₁ equivalentGeneralSubtreeFields (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) = mkGeneralSubtreeFields fstₚ₁ fstₚ₂ sndₚ₁ refl
@@ -54,7 +66,7 @@ proj₂ equivalentGeneralSubtreeFields (mkGeneralSubtreeFields base minimum maxi
 
 RawGeneralSubtreeFieldsRep : Raw GeneralSubtreeFieldsRep
 RawGeneralSubtreeFieldsRep = Raw&ₚ RawGeneralName
-                              (Raw&ₚ (RawDefault (RawTLV _ RawIntegerValue) DefaultMinBaseDistance)
+                              (Raw&ₚ (RawDefault (RawTLV _ RawIntegerValue) defaultMinBaseDistance)
                                       (RawOption (RawTLV _ RawIntegerValue)))
 
 RawGeneralSubtreeFields : Raw GeneralSubtreeFields

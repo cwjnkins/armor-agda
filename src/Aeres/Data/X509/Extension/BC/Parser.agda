@@ -5,6 +5,7 @@ open import Aeres.Data.X509.Extension.BC.Properties
 open import Aeres.Data.X509.Extension.BC.TCB
 open import Aeres.Data.X690-DER.Boool
 open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.Sequence
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -22,16 +23,12 @@ open Aeres.Grammar.Parser      UInt8
 private
   here' = "X509: Extension: BC"
 
-postulate
-  parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
--- parseBCFieldsSeqFields n =
-  -- parseEquivalent (Parallel.equivalent₁ equivalent)
-  --   (Option.parseOption₂ TLV.nosubstrings TLV.nosubstrings
-  --     (TLV.noconfusion λ where ())
-  --     parseBool
-  --     (Int.parse here')
-  --     (tell $ here' String.++ ": underflow") _)
-  -- {!!}
+parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
+parseBCFieldsSeqFields n =
+  parseEquivalent (Parallel.equivalent₁ equivalent)
+    (Sequence.parseDefaultOption falseBoool here'
+      Boool.unambiguous TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
+        Boool.parse (Int.parse (here' String.++ ": CA")) _)
 
 parseBCFieldsSeq : Parser (Logging ∘ Dec) BCFieldsSeq
 parseBCFieldsSeq = parseTLV _ (here' String.++ ": Seq") _ parseBCFieldsSeqFields

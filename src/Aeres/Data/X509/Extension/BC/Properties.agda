@@ -5,6 +5,7 @@ open import Aeres.Data.X509.Extension.BC.TCB
 open import Aeres.Data.X690-DER.Boool
 open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
+open import Aeres.Data.X690-DER.Sequence
 open import Aeres.Data.X690-DER.TLV
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -30,12 +31,18 @@ proj₁ iso = equivalent
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
 proj₂ (proj₂ iso) (mkBCFieldsSeqFields bcca bcpathlen bs≡) = refl
 
-postulate
-  @0 unambiguous : Unambiguous BCFields
--- unambiguous =
---   TLV.unambiguous (TLV.unambiguous (Iso.unambiguous iso
---     (Seq.unambiguous (Default.unambiguous _ Boool.unambiguous TLV.nonempty) {!!}
---       (Option.unambiguous Int.unambiguous TLV.nonempty))))
+@0 unambiguous : Unambiguous BCFields
+unambiguous =
+  TLV.unambiguous
+    (TLV.unambiguous
+      (Iso.unambiguous iso ua))
+  where
+  ua : Unambiguous Rep
+  ua =
+    Sequence.unambiguousDefaultOption falseBoool
+      Boool.unambiguous TLV.nosubstrings TLV.nonempty
+      Int.unambiguous TLV.nonempty
+      (TLV.noconfusion λ ())
 
 @0 nonmalleable : NonMalleable RawBCFields
 nonmalleable =

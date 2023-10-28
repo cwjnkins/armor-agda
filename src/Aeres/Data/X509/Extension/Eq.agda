@@ -22,6 +22,7 @@ open import Aeres.Data.X509.GeneralNames
 open import Aeres.Data.X509.GeneralNames.GeneralName
 open import Aeres.Data.X690-DER.BitString
 open import Aeres.Data.X690-DER.Boool
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.OID
 open import Aeres.Data.X690-DER.OctetString
@@ -47,16 +48,13 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
-postulate
-  eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
--- eq≋Field eqP =
---   Iso.isoEq≋ Fields.iso
---     (Seq.eq≋&ₚ
---       (Parallel.eq≋Σₚ it λ _ →
---         record
---           { _≟_ = λ x y → yes (erased-unique eqP x y)
---           })
---       (Seq.eq≋&ₚ it it))
+eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
+eq≋Field eqP =
+  Iso.isoEq≋ Fields.iso
+    (Seq.eq≋&ₚ
+      (Parallel.eq≋Σₚ it λ _ →
+        record { _≟_ = λ x y → yes (erased-unique eqP x y) })
+      (Seq.eq≋&ₚ (Default.eq≋ _) it))
 
 instance
   eq≋ : Eq≋ SelectExtn

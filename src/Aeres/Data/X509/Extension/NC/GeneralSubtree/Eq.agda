@@ -4,6 +4,7 @@ open import Aeres.Binary
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.Properties
 open import Aeres.Data.X509.Extension.NC.GeneralSubtree.TCB
 open import Aeres.Data.X509.GeneralNames
+open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Int
 import      Aeres.Data.X690-DER.OctetString.Properties as OctetString
 open import Aeres.Data.X690-DER.TLV
@@ -23,6 +24,5 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 
 instance
-  postulate
-    eq≋ : Eq≋ GeneralSubtreeFields
-  -- eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it (Seq.eq≋&ₚ it it))
+  eq≋ : Eq≋ GeneralSubtreeFields
+  eq≋ = Iso.isoEq≋ iso (Seq.eq≋&ₚ it (Seq.eq≋&ₚ (Default.eq≋ _) it))
