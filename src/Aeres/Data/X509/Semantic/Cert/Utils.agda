@@ -3,6 +3,7 @@
 open import Aeres.Binary
 open import Aeres.Data.X509
 import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs
+open import Aeres.Data.X690-DER.Default
 import      Aeres.Grammar.Definitions
 open import Aeres.Grammar.IList as IList
 import      Aeres.Grammar.Option
@@ -21,8 +22,8 @@ open Aeres.Grammar.Parallel    UInt8
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
 isCA : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.BCLit) Extension.BCFields)) → Bool
 isCA (─ .[] , none) = false
-isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields none bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields (mkDefault none notDefault) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
+isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields (mkDefault (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) notDefault) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
 
 
 -- returns BCPathLen if exists
@@ -139,8 +140,8 @@ getKUBits (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV
 -- is SAN extension critical ? 
 isSANCritical : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.SANLit) Extension.SANFields)) → Bool
 isSANCritical (─ .[] , none) = false
-isSANCritical (fst , some (mkExtensionFields extnId extnId≡ none extension bs≡)) = false
-isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (some (mkTLV len (mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) extension bs≡)) = v
+isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡)) = false
+isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) notDefault) extension bs≡)) = v
 
 
 -- get SAN length
@@ -197,8 +198,8 @@ getEKUOIDList (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (m
 
 -- returns true only if the extension is unknown and has critical bit = true
 isUnkwnCriticalExtension : Exists─ (List UInt8) Extension → Bool
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ none extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) notDefault) extension bs≡₁)) len≡ bs≡) = v
 isUnkwnCriticalExtension (fst , mkTLV len _ len≡ bs≡) = false
 
 
