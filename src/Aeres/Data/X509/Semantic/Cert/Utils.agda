@@ -196,10 +196,32 @@ getEKUOIDList (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (m
 
 
 -- returns true only if the extension is unknown and has critical bit = true
+-- only relevant to extensions which are enforced during semantic validation
 isUnkwnCriticalExtension : Exists─ (List UInt8) Extension → Bool
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault none _) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) _) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len _ len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (akiextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (akiextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (skiextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (skiextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (kuextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (ekuextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (bcextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (sanextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (cpextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (crlextn x) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (ianextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (ianextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (ncextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (ncextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (pcextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (pcextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (pmextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (pmextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (inapextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (inapextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (aiaextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (aiaextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
+isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
+isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
 
 
 -- is any unknown extention critical from the list ?
