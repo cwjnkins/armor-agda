@@ -26,11 +26,11 @@ module Fin where
   open import Data.Nat
     renaming (_+_ to _+ℕ_ ; pred to predℕ)
   open import Data.Nat.Properties
+  open import Relation.Binary.PropositionalEquality
 
   2*_ : ∀ {m} → Fin m → Fin (predℕ (2 * m))
-  2*_  (zero{n}) rewrite +-suc n (n +ℕ 0) = zero
-  2* suc {suc n} i rewrite +-suc n (suc (n +ℕ 0)) =
-    suc (suc (2* i))
+  2* (zero{n}) = subst Fin (sym (+-suc n (n +ℕ 0))) zero
+  2* (suc{suc n} i) = subst Fin (cong suc (sym (+-suc n (suc (n +ℕ 0))))) (suc (suc (2* i)))
 
   open import Data.Fin.Properties public
 
@@ -869,6 +869,75 @@ module Lemmas where
              (≅.sym (Vec-unfold-reverse y ys)) ⟩
       Vec.reverse (y ∷ ys) Vec.++ xs ∎
 
+  Vec-++-identityʳ : ∀ {ℓ} {A : Set ℓ} {n} → (xs : Vec A n) → xs Vec.++ [] ≅ xs
+  Vec-++-identityʳ {n} [] = refl
+  Vec-++-identityʳ{A = A} {suc n} (x ∷ xs) = ≅.icong (Vec A) (+-identityʳ n) (x Vec.∷_) (Vec-++-identityʳ xs)
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
+  Vec-++-assoc
+    : ∀ {ℓ} {A : Set ℓ} {m} {n} {o}
+      → (xs : Vec A m) (ys : Vec A n) (zs : Vec A o)
+      → (xs Vec.++ ys) Vec.++ zs ≅ xs Vec.++ ys Vec.++ zs
+  Vec-++-assoc [] ys zs = refl
+  Vec-++-assoc{m = suc m}{n}{o} (x ∷ xs) ys zs =
+    ≅.icong (Vec _) {x = (xs Vec.++ ys) Vec.++ zs}{y = xs Vec.++ ys Vec.++ zs}
+      (+-assoc m n o)
+      (x Vec.∷_)
+      (Vec-++-assoc xs ys zs)
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
+  Vec-reverse-++
+    : ∀ {ℓ} {A : Set ℓ} {m n} → (xs : Vec A m) (ys : Vec A n)
+      → Vec.reverse (xs Vec.++ ys) ≅ Vec.reverse ys Vec.++ Vec.reverse xs
+  Vec-reverse-++ {m = .zero} {n} [] ys = begin
+    Vec.reverse ys ≅⟨ ≅.sym (Vec-++-identityʳ (Vec.reverse ys)) ⟩
+    Vec.reverse ys Vec.++ [] ∎
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
+  Vec-reverse-++{A = A} {suc m} {n} (x ∷ xs) ys = begin
+    Vec.reverse (x ∷ xs Vec.++ ys) ≅⟨ Vec-unfold-reverse x (xs Vec.++ ys) ⟩
+    Vec.reverse (xs Vec.++ ys) Vec.++ Vec.[ x ]
+      ≅⟨ ≅.icong (Vec A) {i = m + n} {j = n + m}
+           {x = Vec.reverse (xs Vec.++ ys)}
+           {y = Vec.reverse ys Vec.++ Vec.reverse xs}
+           (+-comm m n)
+           (Vec._++ Vec.[ x ])
+           (Vec-reverse-++ xs ys) ⟩
+    (Vec.reverse ys Vec.++ Vec.reverse xs) Vec.++ Vec.[ x ]
+      ≅⟨ Vec-++-assoc (Vec.reverse ys) (Vec.reverse xs) Vec.[ x ] ⟩
+    (Vec.reverse ys Vec.++ Vec.reverse xs Vec.++ Vec.[ x ]
+      ≅⟨ ≅.icong (Vec A)
+           {x = Vec.reverse xs Vec.++ Vec.[ x ]}{y = Vec.reverse (x ∷ xs)}
+           (+-comm m 1)
+           (Vec.reverse ys Vec.++_)
+           (≅.sym (Vec-unfold-reverse x xs)) ⟩
+    Vec.reverse ys Vec.++ Vec.reverse (x ∷ xs) ∎)
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
   Vec-reverse-injective : ∀ {ℓ} {A : Set ℓ} {n} (xs ys : Vec A n)
                           → Vec.reverse xs ≡ Vec.reverse ys
                         → xs ≡ ys
@@ -902,3 +971,35 @@ module Lemmas where
       Vec-reverse-injective xs ys
         (Vec.++-injectiveˡ (Vec.reverse xs) (Vec.reverse ys)
           (≅-Core.≅-to-≡ xs≅ys))
+
+  Vec-reverse-inverse : ∀ {ℓ} {A : Set ℓ} {n} → (xs : Vec A n) → Vec.reverse (Vec.reverse xs) ≡ xs
+  Vec-reverse-inverse {n} [] = refl
+  Vec-reverse-inverse{A = A} {suc n} (x ∷ xs) = ≅-Core.≅-to-≡ (begin
+    Vec.reverse (Vec.reverse (x ∷ xs))
+      ≅⟨ ≅.icong (Vec A){x = Vec.reverse (x ∷ xs)}{y = Vec.reverse xs Vec.++ Vec.[ x ]}
+           (+-comm 1 n)
+           Vec.reverse
+           (Vec-unfold-reverse x xs) ⟩
+    Vec.reverse (Vec.reverse xs Vec.++ Vec.[ x ]) ≅⟨ Vec-reverse-++ (Vec.reverse xs) Vec.[ x ] ⟩
+    (x ∷ Vec.reverse (Vec.reverse xs) ≅⟨ ≅.icong (Vec A) refl (x Vec.∷_) (≅-Core.≡-to-≅ (Vec-reverse-inverse xs)) ⟩
+    (x ∷ xs ∎)))
+    where
+    import Relation.Binary.HeterogeneousEquality as ≅
+    import Relation.Binary.HeterogeneousEquality.Core as ≅-Core
+    import Data.Vec.Properties as Vec
+
+    open ≅ using (_≅_ ; refl)
+    open ≅.≅-Reasoning
+
+  Fin-toℕ-subst : ∀ {m n} {eq : m ≡ n} → (i : Fin m) → toℕ (subst Fin eq i) ≡ toℕ i
+  Fin-toℕ-subst{eq = refl} i = refl
+
+  Fin-toℕ-2* : ∀ {m} → (i : Fin m) → toℕ (Fin.2* i) ≡ 2 * toℕ i
+  Fin-toℕ-2* {.(suc _)} Fin.zero = Fin-toℕ-subst Fin.zero
+  Fin-toℕ-2* {.(suc _)} (Fin.suc{suc _} i) = begin
+    toℕ (subst Fin _ (Fin.suc (Fin.suc (Fin.2* i)))) ≡⟨ Fin-toℕ-subst (Fin.suc (Fin.suc (Fin.2* i))) ⟩
+    suc (suc (toℕ (Fin.2* i))) ≡⟨ cong (2 +_) (Fin-toℕ-2* i) ⟩
+    suc (suc (toℕ i + (toℕ i + 0))) ≡⟨ cong suc (sym (+-suc (toℕ i) (toℕ i + 0))) ⟩
+    suc (toℕ i + suc (toℕ i + 0)) ∎
+    where
+    open ≡-Reasoning
