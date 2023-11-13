@@ -57,3 +57,10 @@ parse = DefinedByOID.parse here' λ n o → p n o ((-, TLV.val o) ∈? Supported
       (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": length mismatch")
         parseIA5String n)
       xs
+
+  runParser (p n o (yes (there (there (there (there (here px))))))) xs = do
+    tell $ here' String.++ ": DomainComponent"
+    runParser
+      (parseExactLength TLV.nosubstrings (tell $ here' String.++ ": length mismatch")
+        parseIA5String n)
+      xs

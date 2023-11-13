@@ -99,6 +99,8 @@ AIALit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 AIA : OIDValue AIALit
 AIA = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length AIALit)) AIALit)} tt))
 
+AnyExtendedKeyUsage : List UInt8
+AnyExtendedKeyUsage = ObjectIdentifier ∷ # 4 ∷ # 85 ∷ # 29 ∷ # 37 ∷ [ # 0 ]
 
 ServerAuthOID : List UInt8
 ServerAuthOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 1 ]

@@ -40,6 +40,8 @@ ATVParam o (yes (there (here px))) = Σₚ PrintableString (TLVSizeBounded sizeP
 ATVParam o (yes (there (there (here px)))) = PrintableString
 -- PCKS-9 email address
 ATVParam o (yes (there (there (there (here px))))) = IA5String
+-- domain component
+ATVParam o (yes (there (there (there (there (here px)))))) = IA5String
 
 ATVParam' : AnyDefinedByOID
 ATVParam' o = ATVParam o ((-, TLV.val o) ∈? Supported)
@@ -68,6 +70,8 @@ toRawATVParam {o} (yes (there (here px))) p =
 toRawATVParam {o} (yes (there (there (here px)))) p =
   inj₂ ∘ inj₂ ∘ inj₂ ∘ inj₁ $ Raw.to RawPrintableString p
 toRawATVParam {o} (yes (there (there (there (here px))))) p =
+  inj₂ (inj₂ (inj₂ (inj₁ $ Raw.to RawIA5String p)))
+toRawATVParam {o} (yes (there (there (there (there (here px)))))) p =
   inj₂ (inj₂ (inj₂ (inj₂ $ Raw.to RawIA5String p)))
 
 RawATV : Raw ATV

@@ -30,7 +30,7 @@ unambiguous = TLV.unambiguous (DefinedByOID.unambiguous _ λ o → u o ((-, TLV.
   u o (yes (there (here px))) = Parallel.unambiguous PrintableString.unambiguous (λ _ → inRange-unique{A = ℕ}{B = ℕ})
   u o (yes (there (there (here px)))) = PrintableString.unambiguous
   u o (yes (there (there (there (here px))))) = TLV.unambiguous IA5String.unambiguous
-
+  u o (yes (there (there (there (there (here px)))))) = TLV.unambiguous IA5String.unambiguous
 instance
   Eq≋ATV : Eq≋ (DefinedByOIDFields  λ o → ATVParam o ((-, TLV.val o) ∈? Supported))
   Eq≋ATV = DefinedByOID.eq≋ _ λ o → eq o ((-, TLV.val o) ∈? Supported)
@@ -41,6 +41,7 @@ instance
     eq o (yes (there (here px))) = Parallel.eq≋Σₚ it (λ _ → record { _≟_ = λ x y → yes (inRange-unique{A = ℕ}{B = ℕ} x y) })
     eq o (yes (there (there (here px)))) = it
     eq o (yes (there (there (there (here px))))) = it
+    eq o (yes (there (there (there (there (here px)))))) = it
 
 @0 nonmalleable : NonMalleable RawATV
 nonmalleable = DefinedByOID.nonmalleable ATVParam' _ {R = RawATVParam} nm 
@@ -64,5 +65,8 @@ nonmalleable = DefinedByOID.nonmalleable ATVParam' _ {R = RawATVParam} nm
         ‼ PrintableString.nonmalleable p₁ p₂
             (inj₁-injective (inj₂-injective (inj₂-injective (inj₂-injective eq))))
       (yes (there (there (there (here px))))) p₁ p₂ eq →
+        ‼ IA5String.nonmalleable p₁ p₂
+            (inj₁-injective (inj₂-injective (inj₂-injective (inj₂-injective eq))))
+      (yes (there (there (there (there (here px)))))) p₁ p₂ eq →
         ‼ IA5String.nonmalleable p₁ p₂
             (inj₂-injective (inj₂-injective (inj₂-injective (inj₂-injective eq))))

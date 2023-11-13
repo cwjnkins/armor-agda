@@ -168,37 +168,67 @@ main = IO.run $
     IO.return tt
 
   runChecks' : ∀ {@0 bs} → ℕ → Chain bs → _
+  runChecks' zero _ = IO.return tt
+  runChecks' (suc zero) nil = IO.return tt
+  runChecks' (suc zero) (cons (mkIListCons c tail bs≡)) =
+     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ (suc zero))) IO.>>
+     runCheck c "SCP1" scp1 IO.>>
+     runCheck c "SCP2" scp2 IO.>>
+     runCheck c "SCP4" scp4 IO.>>
+     runCheck c "SCP5" scp5 IO.>>
+     runCheck c "SCP6" scp6 IO.>>
+     runCheck c "SCP7" scp7 IO.>>
+     runCheck c "SCP8" scp8 IO.>>
+     runCheck c "SCP9" scp9 IO.>>
+     runCheck c "SCP10" scp10 IO.>>
+     runCheck c "SCP11" scp11 IO.>>
+     runCheck c "SCP12" scp12 IO.>>
+     runCheck c "SCP13" scp13 IO.>>
+     runCheck c "SCP14" scp14 IO.>>
+     runCheck c "SCP15" scp15 IO.>>
+     runCheck c "SCP16" scp16 IO.>>
+     runCheck c "SCP17" scp17 IO.>>
+     runCheck c "SCP19" scp19 IO.>>
+     Aeres.IO.getCurrentTime IO.>>= λ now →
+     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     case GeneralizedTime.fromForeignUTC now of λ where
+       (no ¬p) →
+         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Aeres.IO.exitFailure
+       (yes p) →
+         runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
+         (IO.putStrLn (showOutput (certOutput c)) IO.>>
+         runChecks' ((suc zero) + 1) tail)
   runChecks' n nil = IO.return tt
   runChecks' n (cons (mkIListCons c tail bs≡)) =
-    Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
-    runCheck c "SCP1" scp1 IO.>>
-    runCheck c "SCP2" scp2 IO.>>
-    -- runCheck c "SCP3" scp3 IO.>>
-    runCheck c "SCP4" scp4 IO.>>
-    runCheck c "SCP5" scp5 IO.>>
-    runCheck c "SCP6" scp6 IO.>>
-    runCheck c "SCP7" scp7 IO.>>
-    runCheck c "SCP8" scp8 IO.>>
-    runCheck c "SCP9" scp9 IO.>>
-    runCheck c "SCP10" scp10 IO.>>
-    runCheck c "SCP11" scp11 IO.>>
-    runCheck c "SCP12" scp12 IO.>>
-    runCheck c "SCP13" scp13 IO.>>
-    runCheck c "SCP14" scp14 IO.>>
-    runCheck c "SCP15" scp15 IO.>>
-    runCheck c "SCP16" scp16 IO.>>
-    runCheck c "SCP17" scp17 IO.>>
-    runCheck c "SCP19" scp19 IO.>>
-    Aeres.IO.getCurrentTime IO.>>= λ now →
-    Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
-    case GeneralizedTime.fromForeignUTC now of λ where
-      (no ¬p) →
-        Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
-        Aeres.IO.exitFailure
-      (yes p) →
-        runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
-        (IO.putStrLn (showOutput (certOutput c)) IO.>>
-        runChecks' (n + 1) tail)
+     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
+     runCheck c "SCP1" scp1 IO.>>
+     runCheck c "SCP2" scp2 IO.>>
+     runCheck c "SCP4" scp4 IO.>>
+     runCheck c "SCP5" scp5 IO.>>
+     runCheck c "SCP6" scp6 IO.>>
+     runCheck c "SCP7" scp7 IO.>>
+     runCheck c "SCP8" scp8 IO.>>
+     runCheck c "SCP9" scp9 IO.>>
+     runCheck c "SCP10" scp10 IO.>>
+     runCheck c "SCP11" scp11 IO.>>
+     runCheck c "SCP12" scp12 IO.>>
+     runCheck c "SCP13" scp13 IO.>>
+     runCheck c "SCP14" scp14 IO.>>
+     runCheck c "SCP15" scp15 IO.>>
+     runCheck c "SCP16" scp16 IO.>>
+     runCheck c "SCP17" scp17 IO.>>
+     -- runCheck c "SCP19" scp19 IO.>>
+     Aeres.IO.getCurrentTime IO.>>= λ now →
+     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     case GeneralizedTime.fromForeignUTC now of λ where
+       (no ¬p) →
+         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Aeres.IO.exitFailure
+       (yes p) →
+         runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
+         (IO.putStrLn (showOutput (certOutput c)) IO.>>
+         runChecks' (n + 1) tail)
 
   runCertChecks : ∀ {@0 bs₁ bs₂} → (roots : Chain bs₁) → (certs : Chain bs₂) → _
   runCertChecks nil nil = Aeres.IO.putStrLnErr "Error: error parsing trust anchors and certificate chain"

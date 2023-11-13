@@ -44,6 +44,7 @@ helperMatchRDNATV o (yes (here px)) x x₁ = ComparePS x x₁
 helperMatchRDNATV o (yes (there (here px))) (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = ComparePS fstₚ₁ fstₚ₂
 helperMatchRDNATV o (yes (there (there (here px)))) x x₁ = ComparePS x x₁
 helperMatchRDNATV o (yes (there (there (there (here px))))) x x₁ = CompareIS x x₁
+helperMatchRDNATV o (yes (there (there (there (there (here px)))))) x x₁ = CompareIS x x₁
   
 MatchRDNATV : ∀ {@0 bs₁ bs₂} → Name.RDN.ATV bs₁ → Name.RDN.ATV bs₂ → Set
 MatchRDNATV (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len≡ bs≡) (mkTLV len₁ (Sequence.mkOIDDefinedFields oid₁ param₁ bs≡₃) len≡₁ bs≡₁)
@@ -134,6 +135,7 @@ helperMatchRDNATV-dec o (yes (here px)) x x₁ = ComparePS-dec x x₁
 helperMatchRDNATV-dec o (yes (there (here px))) (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) = ComparePS-dec fstₚ₁ fstₚ₂
 helperMatchRDNATV-dec o (yes (there (there (here px)))) x x₁ = ComparePS-dec x x₁
 helperMatchRDNATV-dec o (yes (there (there (there (here px))))) x x₁ = CompareIS-dec x x₁
+helperMatchRDNATV-dec o (yes (there (there (there (there (here px)))))) x x₁ = CompareIS-dec x x₁
 
 MatchRDNATV-dec : ∀ {@0 bs₁ bs₂} → (n : Name.RDN.ATV bs₁) → (m : Name.RDN.ATV bs₂) → Dec (MatchRDNATV n m)
 MatchRDNATV-dec (mkTLV len (Sequence.mkOIDDefinedFields oid param bs≡₂) len≡ bs≡) (mkTLV len₁ (Sequence.mkOIDDefinedFields oid₁ param₁ bs≡₃) len≡₁ bs≡₁)

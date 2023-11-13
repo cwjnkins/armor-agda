@@ -18,6 +18,7 @@ open Aeres.Grammar.Option      UInt8
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12
 --- consistency of certificate purposes based on key usage bits and extended key usage OIDs
+--- only for end-entity certificate
 
 SCP19 : ∀ {@0 bs} → Cert bs → Set
 SCP19 c = T (checkPurposeConsistency (Cert.getKU c) (getEKUOIDList (Cert.getEKU c)))

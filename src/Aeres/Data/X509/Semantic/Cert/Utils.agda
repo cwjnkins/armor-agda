@@ -256,7 +256,6 @@ getExtensionsOIDList = map helper
   helper (fst , mkTLV len (aiaextn x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
   helper (fst , mkTLV len (other x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
 
-
 checkPurposeConsistency : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.KULit) Extension.KUFields)) → List (Exists─ (List UInt8) OID) → Bool
 checkPurposeConsistency x [] = true
 checkPurposeConsistency x ((fst , snd) ∷ y)
@@ -277,4 +276,7 @@ checkPurposeConsistency x ((fst , snd) ∷ y)
 ... | no ¬p
   with ↑ OID.serialize snd ≟ OIDs.OCSPSignOID
 ... | yes p = ((isDigSignPresent x) ∨ (isNonRepPresent x)) ∧ (checkPurposeConsistency x y)
-... | no ¬p = true ∧ (checkPurposeConsistency x y)
+... | no ¬p
+  with ↑ OID.serialize snd ≟ OIDs.AnyExtendedKeyUsage
+... | yes p = checkPurposeConsistency x y
+... | no ¬p = false

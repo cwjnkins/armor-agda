@@ -94,8 +94,23 @@ PCKS9-ID-EMAILADDRESS : OIDValue PCKS9-ID-EMAILADDRESS-Lit
 PCKS9-ID-EMAILADDRESS =
   fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PCKS9-ID-EMAILADDRESS-Lit)) PCKS9-ID-EMAILADDRESS-Lit)} tt))
 
+{-
+-- Naming attributes of type DomainComponent (from RFC 4519)
+
+-- id-domainComponent   AttributeType ::= { 0 9 2342 19200300 100 1 25 }
+
+-- DomainComponent ::=  IA5String
+-}
+
+DomainComponent-Lit : List UInt8
+DomainComponent-Lit = # 9 ∷ # 146 ∷ # 38 ∷ # 137 ∷ # 147 ∷ # 242 ∷ # 44 ∷ # 100 ∷ # 1 ∷ [ # 25 ]
+
+DomainComponent : OIDValue DomainComponent-Lit
+DomainComponent =
+  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length DomainComponent-Lit)) DomainComponent-Lit)} tt))
+
 -- For now, we assume anything not in the list of "supported" OIDs for ATV has a
 -- AttributeValue type of DirectoryString
 
 Supported : List (Exists─ _ OIDValue)
-Supported = (-, X520DNQUALIFIER) ∷ (-, X520COUNTRYNAME) ∷ (-, X520SERIALNUMBER) ∷ [ -, PCKS9-ID-EMAILADDRESS ]
+Supported = (-, X520DNQUALIFIER) ∷ (-, X520COUNTRYNAME) ∷ (-, X520SERIALNUMBER) ∷ (-, PCKS9-ID-EMAILADDRESS) ∷ [ -, DomainComponent ]
