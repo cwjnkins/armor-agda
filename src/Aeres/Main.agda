@@ -161,51 +161,93 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
+  runRootStoreCheck : ∀ {@0 as bs} → Chain as → Chain bs → String
+                  → {P : ∀ {@0 as bs} → Chain as → Chain bs → Set}
+                  → (∀ {@0 as bs} → (r : Chain as) → (c : Chain bs) → Dec (P r c))
+                  → IO.IO ⊤
+  runRootStoreCheck r c m d
+    with d r c
+  ... | no ¬p =
+    Aeres.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    Aeres.IO.exitFailure
+  ... | yes p =
+    Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
+    IO.return tt
+
   runChecks' : ∀ {@0 bs} → ℕ → Chain bs → _
+  runChecks' zero _ = IO.return tt
+  runChecks' (suc zero) nil = IO.return tt
+  runChecks' (suc zero) (cons (mkIListCons c tail bs≡)) =
+     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ (suc zero))) IO.>>
+     runCheck c "SCP1" scp1 IO.>>
+     runCheck c "SCP2" scp2 IO.>>
+     runCheck c "SCP4" scp4 IO.>>
+     runCheck c "SCP5" scp5 IO.>>
+     runCheck c "SCP6" scp6 IO.>>
+     runCheck c "SCP7" scp7 IO.>>
+     runCheck c "SCP8" scp8 IO.>>
+     runCheck c "SCP9" scp9 IO.>>
+     runCheck c "SCP10" scp10 IO.>>
+     runCheck c "SCP11" scp11 IO.>>
+     runCheck c "SCP12" scp12 IO.>>
+     runCheck c "SCP13" scp13 IO.>>
+     runCheck c "SCP14" scp14 IO.>>
+     runCheck c "SCP15" scp15 IO.>>
+     runCheck c "SCP16" scp16 IO.>>
+     runCheck c "SCP17" scp17 IO.>>
+     runCheck c "SCP19" scp19 IO.>>
+     Aeres.IO.getCurrentTime IO.>>= λ now →
+     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     case GeneralizedTime.fromForeignUTC now of λ where
+       (no ¬p) →
+         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Aeres.IO.exitFailure
+       (yes p) →
+         runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
+         (IO.putStrLn (showOutput (certOutput c)) IO.>>
+         runChecks' ((suc zero) + 1) tail)
   runChecks' n nil = IO.return tt
   runChecks' n (cons (mkIListCons c tail bs≡)) =
-    Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
-    runCheck c "SCP1" scp1 IO.>>
-    runCheck c "SCP2" scp2 IO.>>
-    runCheck c "SCP3" scp3 IO.>>
-    runCheck c "SCP4" scp4 IO.>>
-    runCheck c "SCP5" scp5 IO.>>
-    runCheck c "SCP6" scp6 IO.>>
-    runCheck c "SCP7(1)" scp7₁ IO.>>
-    runCheck c "SCP7(2)" scp7₂ IO.>>
-    runCheck c "SCP8" scp8 IO.>>
-    runCheck c "SCP9" scp9 IO.>>
-    runCheck c "SCP10" scp10 IO.>>
-    runCheck c "SCP11" scp11 IO.>>
-    runCheck c "SCP12" scp12 IO.>>
-    runCheck c "SCP13" scp13 IO.>>
-    runCheck c "SCP14" scp14 IO.>>
-    runCheck c "SCP15" scp15 IO.>>
-    runCheck c "SCP16" scp16 IO.>>
-    runCheck c "SCP17" scp17 IO.>>
-    runCheck c "SCP19" scp19 IO.>>
-    Aeres.IO.getCurrentTime IO.>>= λ now →
-    Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
-    case Time.fromFFI now of λ where
-      nothing →
-        Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
-        Aeres.IO.exitFailure
-      (just (bs , t)) →
-        -- Aeres.IO.putStrLnErr ("SCP18: system time: " String.++ (show t)) IO.>>
-        runCheck c "SCP18" (λ c₁ → scp18 c₁ t) IO.>>
-        IO.putStrLn (showOutput (certOutput c)) IO.>>
-        runChecks' (n + 1) tail
+     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
+     runCheck c "SCP1" scp1 IO.>>
+     runCheck c "SCP2" scp2 IO.>>
+     runCheck c "SCP4" scp4 IO.>>
+     runCheck c "SCP5" scp5 IO.>>
+     runCheck c "SCP6" scp6 IO.>>
+     runCheck c "SCP7" scp7 IO.>>
+     runCheck c "SCP8" scp8 IO.>>
+     runCheck c "SCP9" scp9 IO.>>
+     runCheck c "SCP10" scp10 IO.>>
+     runCheck c "SCP11" scp11 IO.>>
+     runCheck c "SCP12" scp12 IO.>>
+     runCheck c "SCP13" scp13 IO.>>
+     runCheck c "SCP14" scp14 IO.>>
+     runCheck c "SCP15" scp15 IO.>>
+     runCheck c "SCP16" scp16 IO.>>
+     runCheck c "SCP17" scp17 IO.>>
+     -- runCheck c "SCP19" scp19 IO.>>
+     Aeres.IO.getCurrentTime IO.>>= λ now →
+     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     case GeneralizedTime.fromForeignUTC now of λ where
+       (no ¬p) →
+         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Aeres.IO.exitFailure
+       (yes p) →
+         runCheck c "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
+         (IO.putStrLn (showOutput (certOutput c)) IO.>>
+         runChecks' (n + 1) tail)
 
   helper : Exists─ (List UInt8) Chain → _
   helper (─ .[] , nil) = Aeres.IO.putStrLnErr "Error: empty chain"
-  helper (fst , cons x) =
-    runChecks' 1 (cons x) IO.>>
-    runChainCheck (cons x) "CCP2" ccp2 IO.>>
-    runChainCheck (cons x) "CCP3" ccp3 IO.>>
-    runChainCheck (cons x) "CCP4" ccp3 IO.>>
-    runChainCheck (cons x) "CCP5" ccp5 IO.>>
-    runChainCheck (cons x) "CCP6" ccp6 IO.>>
-    runChainCheck (cons x) "CCP10" ccp10 IO.>>
+  helper (fst , cons c) =
+    runChecks' 1 (cons c) IO.>>
+    runChainCheck (cons c) "CCP2" ccp2 IO.>>
+    runChainCheck (cons c) "CCP3" ccp3 IO.>>
+    runChainCheck (cons c) "CCP4" ccp4 IO.>>
+    runChainCheck (cons c) "CCP5" ccp5 IO.>>
+    runChainCheck (cons c) "CCP6" ccp6 IO.>>
+    -- runRootStoreCheck (cons r) (cons c) "CCP7" ccp7 IO.>>
+    runChainCheck (cons c) "CCP10" ccp10 IO.>>
     Aeres.IO.exitSuccess
  
   runCertChecks : List (Exists─ (List UInt8) Chain) → _

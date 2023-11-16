@@ -35,15 +35,15 @@ getCertsbySubject (fst , snd) ((fst₁ , snd₁) ∷ x₂)
 ... | yes p = [(fst₁ , snd₁)] ++ getCertsbySubject ((fst , snd)) x₂
 
 
-certInList : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → Bool
-certInList c [] = false
-certInList (fst , snd) ((fst₁ , snd₁) ∷ l)
-  with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd)) (proj₂ (Cert.getSubject snd₁))
-... | no ¬p = certInList (fst , snd) l
-... | yes p
-  with MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getIssuer snd₁))
-... | no ¬q = certInList (fst , snd) l
-... | yes q = true  
+-- certInList : Exists─ (List UInt8) Cert →  List (Exists─ (List UInt8) Cert) → Bool
+-- certInList c [] = false
+-- certInList (fst , snd) ((fst₁ , snd₁) ∷ l)
+--   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd)) (proj₂ (Cert.getSubject snd₁))
+-- ... | no ¬p = certInList (fst , snd) l
+-- ... | yes p
+--   with MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getIssuer snd₁))
+-- ... | no ¬q = certInList (fst , snd) l
+-- ... | yes q = true  
 
 
 {-# TERMINATING #-}
