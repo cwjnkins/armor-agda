@@ -279,4 +279,4 @@ checkPurposeConsistency x ((fst , snd) ∷ y)
 ... | no ¬p
   with ↑ OID.serialize snd ≟ OIDs.AnyExtendedKeyUsage
 ... | yes p = checkPurposeConsistency x y
-... | no ¬p = false
+... | no ¬p = true
