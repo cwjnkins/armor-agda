@@ -20,7 +20,7 @@ open Base256
 
 candidateChains : List (List (Exists─ (List UInt8) Cert)) → List (Exists─ (List UInt8) Chain)
 candidateChains [] = []
-candidateChains (x ∷ x₁) = (helper (reverse x)) ∷ (candidateChains x₁)
+candidateChains (x ∷ x₁) = (candidateChains x₁) ++ [ helper (reverse x) ]
   where
   helper : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
   helper [] = _ , nil
