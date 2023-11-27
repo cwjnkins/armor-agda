@@ -35,6 +35,32 @@ usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"
 --   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
 
 -- TODO: bindings for returning error codes?
+parseDERCerts : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 Chain))
+parseDERCerts fn contents =
+  case runParser parseChain contents of λ where
+    (mkLogged log₂ (no  _)) →
+      Aeres.IO.putStrLnErr
+        (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
+         String.++ (foldl String._++_ "-- " log₂))
+      IO.>> Aeres.IO.exitFailure
+    (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+      Aeres.IO.putStrLnErr
+        (fn String.++ " (decoded): incomplete read\n"
+         String.++ "-- only read "
+           String.++ (showℕ (Aeres.Grammar.IList.lengthIList _ chainX509))
+           String.++ " certificate(s), but more bytes remain\n"
+         String.++ "-- attempting to parse remainder")
+      IO.>> ((case runParser parseCert suf of λ where
+        (mkLogged log₃ (yes _)) →
+          Aeres.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+          IO.>> Aeres.IO.exitFailure
+        (mkLogged log₃ (no _)) →
+          Aeres.IO.putStrLnErr (fn String.++ " (decoded): "
+            String.++ show (map toℕ (take 10 suf))
+            String.++ foldl String._++_ "" log₃)
+          IO.>> Aeres.IO.exitFailure))
+    (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
+
 parseCerts : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 Chain))
 parseCerts fn input =
   case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList input) of λ where
@@ -83,6 +109,16 @@ main : IO.Main
 main = IO.run $
   Aeres.IO.getArgs IO.>>= λ args →
   case args of λ where
+    ("--DER" ∷ certName ∷ rootName ∷ []) →
+      Aeres.IO.openFile certName Aeres.IO.Primitive.readMode
+      IO.>>= λ h → Aeres.IO.hGetByteStringContents h
+      IO.>>= λ contentBS → let bs = Aeres.Foreign.ByteString.toUInt8 contentBS in
+      parseDERCerts certName bs
+      IO.>>= λ certS → let (_ , success pre₁ r₁ r₁≡ cert suf₁ ps≡₁) = certS in
+      IO.readFiniteFile rootName
+      IO.>>= (parseCerts rootName ∘ String.toList)
+      IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ root suf₂ ps≡₂) = rootS in
+      runCertChecks (candidateChains (generateValidChains (chainToList cert) (chainToList root)))
     (certName ∷ rootName ∷ []) →
       IO.readFiniteFile certName
       IO.>>= (parseCerts certName ∘ String.toList)
