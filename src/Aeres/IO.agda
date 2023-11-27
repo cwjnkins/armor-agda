@@ -17,24 +17,43 @@ module Aeres.IO where
 module Primitive where
   open import IO.Primitive
   postulate
+    Handle IOMode  : Set
+
+    readMode : IOMode
+    openFile : String → IOMode → IO Handle
+
     getArgs : IO (List String)
-    Handle  : Set
     stderr  : Handle
     hPutStrLn : Handle → String → IO ⊤
 
     getContents    : IO ByteString.ByteString
+    hGetContents   : Handle → IO ByteString.ByteString
     getCurrentTime : IO UTCTime
 
-{-# COMPILE GHC Primitive.getArgs = fmap Data.Text.pack <$> System.Environment.getArgs #-}
 {-# COMPILE GHC Primitive.Handle = type System.IO.Handle #-}
+{-# COMPILE GHC Primitive.IOMode = type System.IO.IOMode #-}
+
+{-# FOREIGN GHC
+aeresOpenFile :: Data.Text.Text -> System.IO.IOMode -> IO System.IO.Handle
+aeresOpenFile path mode = System.IO.openFile (Data.Text.unpack path) mode
+#-}
+
+{-# COMPILE GHC Primitive.readMode = System.IO.ReadMode #-}
+{-# COMPILE GHC Primitive.openFile = aeresOpenFile #-}
+
+{-# COMPILE GHC Primitive.getArgs = fmap Data.Text.pack <$> System.Environment.getArgs #-}
 {-# COMPILE GHC Primitive.stderr = System.IO.stderr #-}
 {-# COMPILE GHC Primitive.hPutStrLn = TIO.hPutStrLn #-}
 
 {-# COMPILE GHC Primitive.getContents = ByteString.getContents #-}
+{-# COMPILE GHC Primitive.hGetContents = ByteString.hGetContents #-}
 {-# COMPILE GHC Primitive.getCurrentTime = getCurrentTime #-}
 
 open import IO
 open System.Exit public using (exitFailure ; exitSuccess)
+
+openFile : String → Primitive.IOMode → IO Primitive.Handle
+openFile path mode = lift (Primitive.openFile path mode)
 
 getArgs : IO (List String)
 getArgs = lift Primitive.getArgs
@@ -44,6 +63,9 @@ putStrLnErr str = Level.lift IO.<$> (lift (Primitive.hPutStrLn Primitive.stderr 
 
 getByteStringContents : IO ByteString.ByteString
 getByteStringContents = lift Primitive.getContents
+
+hGetByteStringContents : Primitive.Handle → IO ByteString.ByteString
+hGetByteStringContents h = lift (Primitive.hGetContents h)
 
 getCurrentTime : IO UTCTime
 getCurrentTime = lift Primitive.getCurrentTime
