@@ -1270,6 +1270,34 @@ module Digs where
   base64To256Valid (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ bs) v rewrite (proj₂ (base64To256Valid bs v)) =
     _ , refl
 
+  base256To64Valid : (bs : List UInt8) → Valid64Encoding (base256To64 bs)
+  base256To64Valid [] = tt
+  base256To64Valid (x ∷ []) = begin
+    Vec.drop 2 {4} (toBinary{6} (lookup xs₁ (# 1))) ≡⟨⟩
+    Vec.drop 2 {4} (toBinary{6} (fromBinary{6} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1))))
+      ≡⟨ cong (Vec.drop 2 {4}) (toBinary∘fromBinary{6} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1))) ⟩
+    Vec.drop 2 {4} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1)) ≡⟨⟩
+    (Vec.replicate #0 ∎)
+    where
+    open ≡-Reasoning
+
+    xs₁ : List UInt6
+    xs₁ = map (fromBinary{6}) (Vec.toList (Bytes.pad256To64₁ (toBinary x)))
+  base256To64Valid (x ∷ x₁ ∷ []) = begin
+    (Vec.drop 4 {2} (toBinary {6} (lookup xs₁ (# 2))) ≡⟨⟩
+    Vec.drop 4 {2} (toBinary {6} (fromBinary{6} (lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2))))
+      ≡⟨ cong (Vec.drop 4 {2}) (toBinary∘fromBinary {6} ((lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2)))) ⟩
+    Vec.drop 4 {2} ((lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2))) ≡⟨⟩
+    Vec.replicate #0 ∎)
+    where
+    open ≡-Reasoning
+
+    xs₁ : List UInt6
+    xs₁ = map fromBinary (Vec.toList (Bytes.pad256To64₂ (toBinary x , toBinary x₁)))
+  base256To64Valid (x ∷ x₁ ∷ x₂ ∷ bs) = base256To64Valid bs
+
+  base64To256! : (bs : List UInt6) → Valid64Encoding bs → List UInt8
+  base64To256! bs v = proj₁ (base64To256Valid bs v)
 
   base256To64∘base64To256 : (bs : List UInt6) → Valid64Encoding bs → maybe (just ∘ base256To64) nothing (base64To256 bs) ≡ just bs
   base256To64∘base64To256 [] _ = refl
@@ -1503,6 +1531,32 @@ module Digs where
   --   Vec._++_ {m = 3}{3 * n}
   --     (Vec.map fromBinary (Bytes.base64To256 (Vec.take 4 (Vec.map toBinary cs))))
   --     (base64To256{n} (Vec.drop 4 cs))
+
+  base256To64∘base64To256! : ∀ bs → (v : Valid64Encoding bs) → base256To64 (base64To256! bs v) ≡ bs
+  base256To64∘base64To256! bs v = Maybe.just-injective (begin
+    (just (base256To64 (base64To256! bs v)) ≡⟨⟩
+    just (base256To64 (proj₁ (base64To256Valid bs v))) ≡⟨⟩
+    maybe′ (just ∘ base256To64) nothing (just (proj₁ (base64To256Valid bs v)))
+      ≡⟨ cong (maybe′ (just ∘ base256To64) nothing)
+           (sym $ proj₂ (base64To256Valid bs v)) ⟩
+    maybe′ (just ∘ base256To64) nothing (base64To256 bs)
+      ≡⟨ base256To64∘base64To256 bs v ⟩
+    just bs ∎))
+
+    where
+    open ≡-Reasoning
+    import Data.Maybe.Properties as Maybe
+
+  base64To256!∘base256To64 : ∀ bs → base64To256! (base256To64 bs) (base256To64Valid bs) ≡ bs
+  base64To256!∘base256To64 bs = Maybe.just-injective (begin
+    (just (base64To256! (base256To64 bs) (base256To64Valid bs)) ≡⟨⟩
+    just (proj₁ (base64To256Valid (base256To64 bs) (base256To64Valid bs)))
+      ≡⟨ (sym $ proj₂ (base64To256Valid (base256To64 bs) (base256To64Valid bs))) ⟩
+    base64To256 (base256To64 bs) ≡⟨ base64To256∘base256To64 bs ⟩
+    just bs ∎))
+    where
+    open ≡-Reasoning
+    import Data.Maybe.Properties as Maybe
 
 module Decode where
 
