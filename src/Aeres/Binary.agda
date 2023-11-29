@@ -366,15 +366,41 @@ module Base256 where
   TwosComplementMinRep : UInt8 → List UInt8 → Set
   TwosComplementMinRep bₕ [] = ⊤
   TwosComplementMinRep bₕ (b ∷ bₜ) =
-    (toℕ bₕ ≡ 0 → toℕ b ≥ 128) × (toℕ bₕ ≡ 255 → toℕ b ≤ 127)
+    (toℕ bₕ > 0 ⊎ toℕ bₕ ≡ 0 × toℕ b ≥ 128) × (toℕ bₕ < 255 ⊎ toℕ bₕ ≡ 255 × toℕ b ≤ 127)
 
   twosComplementMinRep? : ∀ bₕ bₜ → Dec (TwosComplementMinRep bₕ bₜ)
   twosComplementMinRep? bₕ [] = yes tt
   twosComplementMinRep? bₕ (b ∷ bₜ) =
-          (toℕ bₕ ≟ 0 →-dec toℕ b ≥? 128)
-    ×-dec (toℕ bₕ ≟ 255 →-dec toℕ b Nat.≤? 127)
-    where
-    open import Relation.Nullary.Implication
+    case toℕ bₕ ≟ 0 of λ where
+      (yes bₕ≡0) → case toℕ b ≥? 128 of λ where
+        (yes b≥128) → yes ((inj₂ (bₕ≡0 , b≥128)) , (inj₁ (subst (_< 255) (sym bₕ≡0) (s≤s z≤n))))
+        (no ¬b≥128) → no λ where
+          (inj₁ bₕ>0 , _) → contradiction bₕ≡0 (Nat.>⇒≢ bₕ>0)
+          (inj₂ (_ , b≥128) , _) → contradiction b≥128 ¬b≥128
+      (no ¬bₕ≡0) →
+        let bₕ>0 : toℕ bₕ > 0
+            bₕ>0 = Nat.≤∧≢⇒< z≤n (¬bₕ≡0 ∘′ sym)
+        in
+        case toℕ bₕ ≟ 255 of λ where
+          (yes bₕ≡255) → case toℕ b Nat.≤? 127 of λ where
+            (yes b≤127) → yes ((inj₁ bₕ>0) , (inj₂ (bₕ≡255 , b≤127)))
+            (no ¬b≤127) → no λ where
+              (_ , inj₁ bₕ<255) → contradiction bₕ≡255 (Nat.<⇒≢ bₕ<255)
+              (_ , inj₂ (_ , b≤127)) → contradiction b≤127 ¬b≤127
+          (no ¬bₕ≡255) → yes ((inj₁ bₕ>0) , (inj₁ (Nat.≤∧≢⇒< (Nat.+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ)) ¬bₕ≡255)))
+
+  uniqueTwosCompletementMinRep : ∀ bₕ bₜ → Unique (TwosComplementMinRep bₕ bₜ)
+  uniqueTwosCompletementMinRep bₕ [] tt tt = refl
+  uniqueTwosCompletementMinRep bₕ (b ∷ bₜ) (mr₁₁ , mr₁₂) (mr₂₁ , mr₂₂) =
+    case ⊎-unique Nat.≤-irrelevant (×-unique ≡-unique Nat.≤-irrelevant)
+           (λ where (bₕ>0 , bₕ≡0 , _) → contradiction bₕ≡0 (Nat.>⇒≢ bₕ>0))
+           mr₁₁ mr₂₁
+    of λ where
+      refl → case ⊎-unique Nat.≤-irrelevant (×-unique ≡-unique Nat.≤-irrelevant)
+                    (λ where (bₕ<255 , bₕ≡255 , _) → contradiction bₕ≡255 (Nat.<⇒≢ bₕ<255))
+                    mr₁₂ mr₂₂
+             of λ where
+        refl → refl
 
   twosComplement<0 : ∀ b bs → ∃ λ n → twosComplement- b bs ≡ ℤ.-[1+ n ]
   twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
@@ -458,7 +484,8 @@ module Base256 where
               ≤.∎
           (singleton zero    n≡) → ≤.begin
             suc (toℕ bₕ₁) * 256 ^ length bₜ₂
-              ≤.≤⟨ *-monoˡ-≤ (256 ^ length bₜ₂) (≤-trans (s≤s bₕ₁≤127) (mr₂₁ (‼ sym n≡))) ⟩
+              ≤.≤⟨ *-monoˡ-≤ (256 ^ length bₜ₂) (≤-trans (s≤s bₕ₁≤127) ([_,_]′ (λ x → contradiction (‼ sym n≡) (Nat.>⇒≢ x )) proj₂ mr₂₁ )
+              ) ⟩
             toℕ b * 256 ^ length bₜ₂
               ≤.≤⟨ m≤m+n _ (unsigned bₜ₂) ⟩
             toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂
@@ -554,7 +581,8 @@ module Base256 where
         ≤.≡⟨ cong ((toℕ bₕ₂' * 256 ^ (1 + length bₜ₂)) +_) (sym (+-suc _ (unsigned bₜ₂))) ⟩
       toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + suc (unsigned bₜ₂))
         ≤.≤⟨ +-monoʳ-≤ (toℕ bₕ₂' * 256 ^ (1 + length bₜ₂))
-               (+-mono-≤ (*-monoˡ-≤ (256 ^ length bₜ₂) (mr₂₂ bₕ₂≡255)) (unsigned< bₜ₂)) ⟩
+               (+-mono-≤ (*-monoˡ-≤ (256 ^ length bₜ₂) ([ (λ x → contradiction bₕ₂≡255 (Nat.<⇒≢ x)) , proj₂ ]′ mr₂₂)
+               ) (unsigned< bₜ₂)) ⟩
       toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (127 * 256 ^ length bₜ₂ + 256 ^ length bₜ₂)
         ≤.≤⟨ +-monoˡ-≤ ((127 * 256 ^ length bₜ₂ + 256 ^ length bₜ₂))
                (*-monoˡ-≤ (256 ^ (1 + length bₜ₂)) bₕ₂'≤127) ⟩

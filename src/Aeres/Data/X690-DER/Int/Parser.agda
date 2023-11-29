@@ -52,11 +52,11 @@ module _ (loc : String) where
                            ps≡ (trans vLen (sym v₁Len)))
             in
             contradiction
-              (subst₂ UInt8.TwosComplementMinRep (∷-injectiveˡ (¡ bₕ∷bₜ≡v₁₁∷v₁)) (∷-injectiveʳ (¡ bₕ∷bₜ≡v₁₁∷v₁)) (toWitness minRep))
+              (subst₂ UInt8.TwosComplementMinRep (∷-injectiveˡ (¡ bₕ∷bₜ≡v₁₁∷v₁)) (∷-injectiveʳ (¡ bₕ∷bₜ≡v₁₁∷v₁)) minRep)
               ¬p
       (yes mr) →
         return (yes
-          (success (v₁₁ ∷ v₁) r refl (mk×ₚ (mkIntVal v₁₁ v₁ (fromWitness mr) self refl) (─ v₁Len)) suf₁ refl))
+          (success (v₁₁ ∷ v₁) r refl (mk×ₚ (mkIntVal v₁₁ v₁ mr self refl) (─ v₁Len)) suf₁ refl))
 
   [_]parse : ∀ t → Parser (Logging ∘ Dec) [ t ]Int
   [ t ]parse = parseTLV t here' _ parseValue

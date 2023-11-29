@@ -11,10 +11,6 @@ module Aeres.Data.X690-DER.Int.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
 
-module MinRep where
-  @0 unique : ∀ {b bs} → Unique (True (Base256.twosComplementMinRep? b bs))
-  unique p₁ p₂ = T-unique p₁ p₂
-
 nonempty : NonEmpty IntegerValue
 nonempty (mkIntVal bₕ bₜ minRep val ()) refl
 
@@ -22,7 +18,7 @@ nonempty (mkIntVal bₕ bₜ minRep val ()) refl
 unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
   case (trans (sym bs≡) bs≡₁) ret (const _) of λ where
     refl → case (‼ uniqueSingleton val val₁) ret (const _) of λ where
-      refl → case (‼ MinRep.unique minRep minRep₁) ret (const _) of λ where
+      refl → case (‼ Base256.uniqueTwosCompletementMinRep _ _ minRep minRep₁) ret (const _) of λ where
         refl → case (‼ ≡-unique bs≡ bs≡₁) ret (const _) of λ where
           refl → refl
 
@@ -49,12 +45,12 @@ nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (
       suc (length bₜ₂) ≡⟨ cong length (sym bs≡₂) ⟩
       length bs₂ ∎)
     (tri< bₜ₁<bₜ₂ _ _) →
-      contradiction (toWitness minRep₂)
+      contradiction minRep₂
         (Base256.¬twosComplementMinRep
           bₕ₁ bₜ₁ bₕ₂ bₜ₂ bₜ₁<bₜ₂
           (trans (sym v₁≡) (trans eq v₂≡)))
     (tri> _ _ bₜ₂<bₜ₁) →
-      contradiction (toWitness minRep₁)
+      contradiction minRep₁
         (Base256.¬twosComplementMinRep
           bₕ₂ bₜ₂ bₕ₁ bₜ₁ bₜ₂<bₜ₁
           (trans (sym v₂≡) (trans (sym eq) v₁≡)))
