@@ -49,16 +49,16 @@ buildChain' (([] , otherCerts) ∷ workList) trustedCert allChains = []
 buildChain' ((toAuth ∷ restCandidateChain , otherCerts) ∷ workList) trustedCerts allChains =
   buildChain' (newChainsForEntity ++ workList) trustedCerts allChains'
   where   
-  helper : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Cert → List (Exists─ _ Cert) →
-    List (List (Exists─ _ Cert))
-  helper [] toAuth restCandidateChain = []
-  helper (issuerForToAuthInTrust ∷ x₁) toAuth restCandidateChain =
-    ((issuerForToAuthInTrust ∷ toAuth ∷ restCandidateChain) ∷ allChains) ++ helper x₁ toAuth restCandidateChain
-
   allChains' : List (List (Exists─ _ Cert))
   allChains' = case findTrustedCert (Cert.getIssuer (proj₂ toAuth)) trustedCerts of λ where
     nothing → allChains
-    (just x) → helper x toAuth restCandidateChain
+    (just issuersForAuthInTrust) →
+         map (λ issuerForAuthInTrust →
+                if ⌊ issuerForAuthInTrust ≟ toAuth ⌋
+                then toAuth ∷ restCandidateChain
+                else issuerForAuthInTrust ∷ toAuth ∷ restCandidateChain)
+           issuersForAuthInTrust
+      ++ allChains
 
   otherIssuersForEntity : List (Exists─ _ Cert) × List (Exists─ _ Cert)
   otherIssuersForEntity =
