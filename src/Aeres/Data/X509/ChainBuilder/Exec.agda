@@ -31,7 +31,7 @@ findTrustedCert : Exists─ (List UInt8) Name → List (Exists─ (List UInt8) C
   →  Maybe (List (Exists─ (List UInt8) Cert))
 findTrustedCert (fst , snd) [] = nothing
 findTrustedCert (fst , snd) ((fst₁ , snd₁) ∷ tl)
-   with MatchRDNSeq-dec (proj₂ (Cert.getSubject snd₁)) snd
+   with MatchRDNSeq-dec (Cert.getSubject snd₁) snd
 ... | no _ = findTrustedCert (fst , snd) tl
 ... | yes _
   with findTrustedCert (fst , snd) tl
@@ -50,7 +50,7 @@ buildChain' ((toAuth ∷ restCandidateChain , otherCerts) ∷ workList) trustedC
   buildChain' (newChainsForEntity ++ workList) trustedCerts allChains'
   where   
   allChains' : List (List (Exists─ _ Cert))
-  allChains' = case findTrustedCert (Cert.getIssuer (proj₂ toAuth)) trustedCerts of λ where
+  allChains' = case findTrustedCert (─ _ , Cert.getIssuer (proj₂ toAuth)) trustedCerts of λ where
     nothing → allChains
     (just issuersForAuthInTrust) →
          map (λ issuerForAuthInTrust →
@@ -62,7 +62,7 @@ buildChain' ((toAuth ∷ restCandidateChain , otherCerts) ∷ workList) trustedC
 
   otherIssuersForEntity : List (Exists─ _ Cert) × List (Exists─ _ Cert)
   otherIssuersForEntity =
-    partition (λ c → MatchRDNSeq-dec (proj₂ (Cert.getSubject (proj₂ c))) (proj₂ (Cert.getIssuer (proj₂ toAuth))))
+    partition (λ c → MatchRDNSeq-dec (Cert.getSubject (proj₂ c)) (Cert.getIssuer (proj₂ toAuth)))
       otherCerts
 
   newChainsForEntity : List (List (Exists─ _ Cert) × List (Exists─ _ Cert))

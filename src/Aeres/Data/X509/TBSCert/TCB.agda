@@ -119,12 +119,6 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getSubjectLen :  ℕ
   getSubjectLen = SequenceOf.lengthSequence (TLV.val subject)
 
-  getIssuer : Exists─ (List UInt8) Name
-  getIssuer = _ , issuer
-
-  getSubject : Exists─ (List UInt8) Name
-  getSubject = _ , subject
-
   getSignAlg : Exists─ (List UInt8) SignAlg
   getSignAlg = _ , signAlg
 

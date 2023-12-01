@@ -97,11 +97,11 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSubjectLen :  ℕ
   getSubjectLen = TBSCertFields.getSubjectLen (TLV.val tbs)
 
-  getIssuer :  Exists─ (List UInt8) Name
-  getIssuer = TBSCertFields.getIssuer (TLV.val tbs)
+  getIssuer :  Name _
+  getIssuer = TBSCertFields.issuer (TLV.val tbs)
 
-  getSubject :  Exists─ (List UInt8) Name
-  getSubject = TBSCertFields.getSubject (TLV.val tbs)
+  getSubject :  Name _
+  getSubject = TBSCertFields.subject (TLV.val tbs)
 
   getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val tbs))
   getIssUID = TBSCertFields.issuerUID (TLV.val tbs)
@@ -197,10 +197,10 @@ module Cert where
     getSubjectLen :  ℕ
     getSubjectLen = CertFields.getSubjectLen (TLV.val c)
 
-    getIssuer :  Exists─ (List UInt8) Name
+    getIssuer : Name _
     getIssuer = CertFields.getIssuer (TLV.val c)
 
-    getSubject :  Exists─ (List UInt8) Name
+    getSubject :  Name _
     getSubject = CertFields.getSubject (TLV.val c)
 
     getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val (CertFields.tbs (TLV.val c))))

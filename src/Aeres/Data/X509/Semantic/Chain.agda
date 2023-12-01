@@ -79,7 +79,7 @@ MatchRDNSeq (mkTLV len (cons x) len≡ bs≡) (mkTLV len₁ (cons x₁) len≡�
 CCP6Seq : List (Exists─ (List UInt8) Cert) → Set
 CCP6Seq [] = ⊥
 CCP6Seq ((fst , snd) ∷ []) = ⊤
-CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁)) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
+CCP6Seq ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = MatchRDNSeq (Cert.getIssuer snd) (Cert.getSubject snd₁) × CCP6Seq ((fst₁ , snd₁) ∷ x₂)
 
 CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
 CCP10Seq [] = ⊥
@@ -225,7 +225,7 @@ countNextIntCACerts ((fst , snd) ∷ x₁) n
   with isCA (Cert.getBC snd)
 ... | false = countNextIntCACerts x₁ n
 ... | true
-  with MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd))
+  with MatchRDNSeq-dec (Cert.getIssuer snd) (Cert.getSubject snd)
 ... | no ¬p =  countNextIntCACerts x₁ (n ℤ.+ ℤ.+ 1) 
 ... | yes p =  countNextIntCACerts x₁ n
 
@@ -317,7 +317,7 @@ ccp6 c = helper (chainToList c)
   helper : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP6Seq c)
   helper [] = no (λ ())
   helper ((fst , snd) ∷ []) = yes tt
-  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (proj₂ (Cert.getIssuer snd)) (proj₂ (Cert.getSubject snd₁))) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
+  helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (Cert.getIssuer snd) (Cert.getSubject snd₁)) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-6
 --- check whether any of the certificate in given chain is trusted by the system's trust anchor
