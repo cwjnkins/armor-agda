@@ -261,10 +261,10 @@ module Cert where
       helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
 open Cert public using (Cert)
 
-module Chain where
-  Chain : (@0 _ : List UInt8) → Set
-  Chain = IList Cert
-open Chain public using (Chain)
+module CertList where
+  CertList : (@0 _ : List UInt8) → Set
+  CertList = IList Cert
+open CertList public using (CertList)
 
 CertFieldsRep : @0 List UInt8 → Set
 CertFieldsRep = &ₚ (TBSCert ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
@@ -285,5 +285,5 @@ RawCertFields = Iso.raw equivalentCertFields RawCertFieldsRep
 RawCert : Raw Cert
 RawCert = RawTLV _ RawCertFields
 
-RawChain : Raw Chain
-RawChain = RawIList RawCert
+RawCertList : Raw CertList
+RawCertList = RawIList RawCert

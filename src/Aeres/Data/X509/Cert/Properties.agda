@@ -79,5 +79,5 @@ nonmalleableFields =
 @0 nonmalleable : NonMalleable RawCert
 nonmalleable = TLV.nonmalleable{R = RawCertFields} nonmalleableFields
 
-@0 nonmalleableChain : NonMalleable RawChain
-nonmalleableChain = SequenceOf.nonmalleable{R = RawCert} TLV.nonempty TLV.nosubstrings nonmalleable
+@0 nonmalleableCertList : NonMalleable RawCertList
+nonmalleableCertList = SequenceOf.nonmalleable{R = RawCert} TLV.nonempty TLV.nosubstrings nonmalleable

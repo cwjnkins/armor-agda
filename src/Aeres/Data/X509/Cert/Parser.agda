@@ -77,6 +77,6 @@ parseCert : Parser (Logging ∘ Dec) Cert
 parseCert =
   parseTLV _ here' _ parseCertFields
 
-parseChain : Parser (Logging ∘ Dec) Chain
-parseChain = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseChain: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCert)
+parseCertList : Parser (Logging ∘ Dec) CertList
+parseCertList = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseCertList: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCert)
 

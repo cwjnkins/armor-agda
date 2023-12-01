@@ -35,9 +35,9 @@ usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"
 --   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
 
 -- TODO: bindings for returning error codes?
-parseDERCerts : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 Chain))
+parseDERCerts : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CertList))
 parseDERCerts fn contents =
-  case runParser parseChain contents of λ where
+  case runParser parseCertList contents of λ where
     (mkLogged log₂ (no  _)) →
       Aeres.IO.putStrLnErr
         (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
@@ -61,7 +61,7 @@ parseDERCerts fn contents =
           IO.>> Aeres.IO.exitFailure))
     (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
-parseCerts : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 Chain))
+parseCerts : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 CertList))
 parseCerts fn input =
   case proj₁ (LogDec.runMaximalParser Char PEM.parseCertList input) of λ where
     (mkLogged log₁ (no ¬p)) →
@@ -81,7 +81,7 @@ parseCerts fn input =
           Aeres.IO.putStrLnErr (foldl String._++_ "-- " log₂)
           IO.>> Aeres.IO.exitFailure)
     (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
-      case runParser parseChain (PEM.extractCerts chain) of λ where
+      case runParser parseCertList (PEM.extractCerts chain) of λ where
         (mkLogged log₂ (no  _)) →
           Aeres.IO.putStrLnErr
             (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
@@ -179,9 +179,9 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runChainCheck : ∀ {@0 bs} → Chain bs → String
-                  → {P : ∀ {@0 bs} → Chain bs → Set}
-                  → (∀ {@0 bs} → (c : Chain bs) → Dec (P c))
+  runChainCheck : ∀ {@0 bs} → CertList bs → String
+                  → {P : ∀ {@0 bs} → CertList bs → Set}
+                  → (∀ {@0 bs} → (c : CertList bs) → Dec (P c))
                   → IO.IO ⊤
   runChainCheck c m d
     with d c
@@ -192,7 +192,7 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runChecks' : ∀ {@0 bs} → ℕ → Chain bs → IO.IO ⊤
+  runChecks' : ∀ {@0 bs} → ℕ → CertList bs → IO.IO ⊤
   runChecks' n nil = IO.return tt
   runChecks' n (cons (mkIListCons c tail bs≡)) =
      Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
@@ -224,7 +224,7 @@ main = IO.run $
          (IO.putStrLn (showOutput (certOutput c)) IO.>>
          runChecks' (n + 1) tail)
 
-  helper : Exists─ (List UInt8) Chain → IO.IO Bool
+  helper : Exists─ (List UInt8) CertList → IO.IO Bool
   helper (─ .[] , nil) = IO.return false
   helper (fst , cons c) =
     runChecks' 1 (cons c) IO.>>
@@ -236,7 +236,7 @@ main = IO.run $
     runChainCheck (cons c) "CCP10" ccp10 IO.>>
     IO.return true
  
-  runCertChecks : List (Exists─ _ Chain) → _
+  runCertChecks : List (Exists─ _ CertList) → _
   runCertChecks [] = Aeres.IO.putStrLnErr "Error: no valid chain found" 
   runCertChecks (chain ∷ chains) =
     helper chain IO.>>= λ where

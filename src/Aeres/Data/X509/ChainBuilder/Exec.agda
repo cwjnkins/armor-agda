@@ -18,11 +18,11 @@ open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Base256
 
-candidateChains : List (List (Exists─ (List UInt8) Cert)) → List (Exists─ (List UInt8) Chain)
+candidateChains : List (List (Exists─ (List UInt8) Cert)) → List (Exists─ (List UInt8) CertList)
 candidateChains [] = []
 candidateChains (x ∷ x₁) = (candidateChains x₁) ++ [ helper (reverse x) ]
   where
-  helper : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) Chain
+  helper : List (Exists─ (List UInt8) Cert) → Exists─ (List UInt8) CertList
   helper [] = _ , nil
   helper ((─ ps , snd) ∷ x₁) = let (─ bs , tl) = helper x₁ in (─ (ps ++ bs)) , cons (mkIListCons snd tl refl)
 
