@@ -9,6 +9,7 @@ import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Parallel.TCB
 open import Aeres.Prelude
+  hiding (length)
 import      Data.List.Relation.Unary.Sorted.TotalOrder
 
 module Aeres.Data.X690-DER.SetOf.TCB where
@@ -38,6 +39,12 @@ record SetOfFields (A : @0 List UInt8 → Set) (@0 bs : List UInt8) : Set where
 
   field
     @0 order : True (sorted? _≲?_ orderingList)
+
+  toSequenceOf : SequenceOf A bs
+  toSequenceOf = fstₚ elems
+
+  length : ℕ
+  length = lengthSequence toSequenceOf
 
 SetOf : (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
 SetOf A = TLV Tag.Sett (SetOfFields A)
