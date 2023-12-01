@@ -29,19 +29,26 @@ open Aeres.Grammar.Parallel    UInt8
 --         type    AttributeType,
 --         value   AttributeValue }
 
+pattern atvParamUnsupported{¬p}      = no ¬p
+pattern atvParamX520DNQualifier{px}  = yes (here px)
+pattern atvParamX520CountryName{px}  = yes (there (here px))
+pattern atvParamX520SerialNumber{px} = yes (there (there (here px)))
+pattern atvParamPCKS9Email{px}       = yes (there (there (there (here px))))
+pattern atvParamDomainComponent{px}  = yes (there (there (there (there (here px)))))
+
 ATVParam : {@0 bs : List UInt8} → (o : OID bs) → Dec ((-, TLV.val o) ∈ Supported) → @0 List UInt8 → Set
 -- Default
-ATVParam o (no ¬p) = DirectoryString
+ATVParam o atvParamUnsupported = DirectoryString
 -- X520 DN Qualifier
-ATVParam o (yes (here px)) = PrintableString
+ATVParam o atvParamX520DNQualifier = PrintableString
 -- X520 Country Name
-ATVParam o (yes (there (here px))) = Σₚ PrintableString (TLVSizeBounded sizePrintableString 2 2)
+ATVParam o atvParamX520CountryName = Σₚ PrintableString (TLVSizeBounded sizePrintableString 2 2)
 -- X520 serial number
-ATVParam o (yes (there (there (here px)))) = PrintableString
+ATVParam o atvParamX520SerialNumber = PrintableString
 -- PCKS-9 email address
-ATVParam o (yes (there (there (there (here px))))) = IA5String
+ATVParam o atvParamPCKS9Email = IA5String
 -- domain component
-ATVParam o (yes (there (there (there (there (here px)))))) = IA5String
+ATVParam o atvParamDomainComponent = IA5String
 
 ATVParam' : AnyDefinedByOID
 ATVParam' o = ATVParam o ((-, TLV.val o) ∈? Supported)

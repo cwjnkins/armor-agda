@@ -641,6 +641,12 @@ module Lemmas where
   neg◃-injective {zero} {zero} eq = refl
   neg◃-injective {suc m} {suc n} eq = cong suc (ℤ.-[1+-injective eq)
 
+  import Data.List as List
+
+  length-─-< : ∀ {ℓ} {A : Set ℓ} (xs : List A) i → length (xs List.─ i) < length xs
+  length-─-< (x ∷ xs) Fin.zero = s≤s ≤-refl
+  length-─-< (x ∷ xs) (Fin.suc i) = s≤s (length-─-< xs i)
+
   take-length-++ : ∀ {ℓ} {A : Set ℓ} (xs ys : List A) → take (length xs) (xs ++ ys) ≡ xs
   take-length-++ [] ys = refl
   take-length-++ (x ∷ xs) ys = cong (x ∷_) (take-length-++ xs ys)
