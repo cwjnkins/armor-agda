@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Null.Parser
 import Aeres.Data.X690-DER.Null.Properties
 import Aeres.Data.X690-DER.Null.TCB

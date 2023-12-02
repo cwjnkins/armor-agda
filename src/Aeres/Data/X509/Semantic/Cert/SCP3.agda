@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 -- open import Aeres.Binary
 -- open import Aeres.Data.X509
 -- import      Aeres.Data.X509.Extension.TCB.OIDs as OIDs

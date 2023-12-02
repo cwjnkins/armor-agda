@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.SequenceOf
@@ -46,7 +44,7 @@ module Sub where
     Eq≋._≋?_ OIDSub≋ {bs} {bs₁} a₁@(mkOIDSub lₚ lₚ≥128 lₑ lₑ<128 leastDigs bs≡) a₂@(mkOIDSub lₚ₁ lₚ≥129 lₑ₁ lₑ<129 leastDigs₁ bs≡₁)
       with lₚ ∷ʳ lₑ ≟ lₚ₁ ∷ʳ lₑ₁
     ... | yes bs≡bs₁ =
-      yes (mk≋ bs≡bs₁' (unambiguous (subst OIDSub bs≡bs₁' a₁) a₂))
+      yes (mk≋ bs≡bs₁' (unambiguous (subst₀! OIDSub bs≡bs₁' a₁) a₂))
       where
       @0 bs≡bs₁' : bs ≡ bs₁
       bs≡bs₁' = trans bs≡ (trans bs≡bs₁ (sym bs≡₁))

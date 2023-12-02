@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.EC.TCB
 open import Aeres.Data.X690-DER.TLV
@@ -28,11 +26,11 @@ parseValue : ∀ n → Parser (Logging ∘ Dec) (ExactLength ECBitStringValue n)
 parseValue n =
   parseEquivalent (Iso.symEquivalent Distribute.exactLength-&)
     (parse&ᵈ
-      (Parallel.nosubstrings₁ λ where _ refl refl → refl)
-      (Parallel.Length≤.unambiguous _ ≡-unique)
+      (Parallel.nosubstrings₁ λ where _ (─ refl) (─ refl) → refl)
+      (Parallel.Length≤.unambiguous _ (erased-unique ≡-unique))
       (parse≤ n
-        (parseLit (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # 0 ])
-        (λ where _ refl refl → refl)
+        (parseLitE (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") [ # 0 ])
+        (λ where _ (─ refl) (─ refl) → refl)
         (tell $ here' String.++ ": length overflow"))
         λ where
           (singleton r r≡) _ →

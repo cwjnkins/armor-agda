@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Definitions.NonMalleable
 import      Aeres.Grammar.Parallel.TCB
@@ -12,9 +10,9 @@ module Aeres.Grammar.IList.TCB (Σ : Set) where
 open Aeres.Grammar.Definitions  Σ
 open Aeres.Grammar.Parallel.TCB Σ
 
-data IList (@0 A : List Σ → Set) : @0 List Σ → Set
+data IList (A : @0 List Σ → Set) : @0 List Σ → Set
 
-record IListCons (@0 A : List Σ → Set) (@0 bs : List Σ) : Set where
+record IListCons (A : @0 List Σ → Set) (@0 bs : List Σ) : Set where
   inductive
   constructor mkIListCons
   field
@@ -54,10 +52,10 @@ lengthIList : ∀ {@0 A xs} → IList A xs → ℕ
 lengthIList nil = 0
 lengthIList (cons (mkIListCons h t bs≡)) = 1 + lengthIList t
 
-IListLowerBounded : (@0 A : List Σ → Set) → @0 ℕ → @0 List Σ → Set
-IListLowerBounded A n = Σₚ (IList A) (λ s xs → lengthIList xs ≥ n)
+IListLowerBounded : (A : @0 List Σ → Set) → @0 ℕ → @0 List Σ → Set
+IListLowerBounded A n = Σₚ (IList A) (λ s xs → Erased (lengthIList xs ≥ n))
 
-IListNonEmpty : (@0 A : List Σ → Set) → @0 List Σ → Set
+IListNonEmpty : (A : @0 List Σ → Set) → @0 List Σ → Set
 IListNonEmpty A = IListLowerBounded A 1
 
 RawIList : {A : @0 List Σ → Set} → Raw A → Raw (IList A)

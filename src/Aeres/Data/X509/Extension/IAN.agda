@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.IAN.Parser
 import Aeres.Data.X509.Extension.IAN.TCB
 import Aeres.Data.X509.Extension.IAN.Properties

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.PublicKey.Val.RSA.Ints
 import Aeres.Data.X509.PublicKey.Val.RSA.Eq
 import Aeres.Data.X509.PublicKey.Val.RSA.Parser

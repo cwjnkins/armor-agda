@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 -- open import Aeres.Binary
 -- import      Aeres.Data.X509.HashAlg.RFC4055.TCB     as RFC4055
 -- import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs

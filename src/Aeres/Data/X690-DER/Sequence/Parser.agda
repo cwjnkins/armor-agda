@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Default
 open import Aeres.Data.X690-DER.Sequence.Properties

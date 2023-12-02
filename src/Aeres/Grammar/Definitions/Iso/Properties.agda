@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions.Eq
 import      Aeres.Grammar.Definitions.Iso.Base
 import      Aeres.Grammar.Definitions.NoSubstrings
@@ -87,7 +85,7 @@ Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
         refl →
           contradiction refl ¬p
     (yes p) →
-      case (‼ cong (proj₁₀{B = A ∘ Erased.x}) p) ret (const _) of λ where
+      case (‼ cong (proj₁₀{B = λ y → A (Erased.x y)}) p) ret (const _) of λ where
         refl →
           yes₀ (‼ (begin
             (─ bs₁ , x) ≡⟨ cong (λ z → ─ bs₁ , z) (sym (proj₂₀ (proj₂₀ iso) x)) ⟩
@@ -95,14 +93,14 @@ Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
               ≡⟨ cong (λ z → ─ bs₁ , proj₁ (proj₁₀ iso) z)
                    (‼ ≡-elim{A = Exists─ (List Σ) A}
                      (λ {z“} eq →
-                         x' ≡ subst (A ∘ Erased.x) (trans (sym (erasedEta (proj₁₀ z“))) (cong proj₁₀ (sym eq))) (proj₂₀ z“))
+                         x' ≡ subst (λ y → A (Erased.x y)) (trans (sym (erasedEta (proj₁₀ z“))) (cong proj₁₀ (sym eq))) (proj₂₀ z“))
                      refl p)
                ⟩
             (─ bs₁
             , proj₁ (proj₁₀ iso)
-                (subst (A ∘ Erased.x) (─ bs₁ ≡ ─ bs₁ ∋ cong proj₁₀ (sym p)) y'))
+                (subst (λ y → A (Erased.x y)) (─ bs₁ ≡ ─ bs₁ ∋ cong proj₁₀ (sym p)) y'))
               ≡⟨ ≡-elimₖ
-                   (λ eq → (─ bs₁ , proj₁ (proj₁₀ iso) (subst (A ∘ Erased.x) eq y')) ≡ _)
+                   (λ eq → (─ bs₁ , proj₁ (proj₁₀ iso) (subst (λ y → A (Erased.x y)) eq y')) ≡ _)
                    refl (cong proj₁₀ (sym p)) ⟩
             (─ bs₁ , proj₁ (proj₁₀ iso) y') ≡⟨ cong (λ z → ─ bs₁ , z) (proj₂ (proj₂₀ iso) y) ⟩
             (─ bs₁ , y) ∎))
@@ -122,6 +120,6 @@ Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =
   y“ : Exists─ (List Σ) A
   y“ = (─ bs₂) , y'
 
-isoEq≋ : ∀ {@0 A B} → Iso A B → Eq≋ A → Eq≋ B
+isoEq≋ : ∀ {A B : @0 List Σ → Set} → Iso A B → Eq≋ A → Eq≋ B
 isoEq≋ iso eq = Eq⇒Eq≋ (isoEq iso (Eq≋⇒Eq eq))
 

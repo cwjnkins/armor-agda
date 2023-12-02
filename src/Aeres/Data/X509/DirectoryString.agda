@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.DirectoryString.Eq
 import Aeres.Data.X509.DirectoryString.Parser
 import Aeres.Data.X509.DirectoryString.Properties

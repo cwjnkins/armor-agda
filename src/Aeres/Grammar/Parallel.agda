@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Parallel.Parser
 import      Aeres.Grammar.Parallel.Properties
 import      Aeres.Grammar.Parallel.TCB

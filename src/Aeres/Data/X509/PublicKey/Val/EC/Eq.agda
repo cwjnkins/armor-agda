@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.EC.TCB
 open import Aeres.Data.X690-DER.BitString
@@ -18,4 +16,4 @@ open Aeres.Grammar.Seq         UInt8
 
 instance
   eq≋ : Eq≋ ECBitStringValue
-  eq≋ = Seq.eq≋&ₚ (record { _≋?_ = λ where refl refl → yes ≋-refl }) it
+  eq≋ = Seq.eq≋&ₚ (record { _≋?_ = λ where (─ refl) (─ refl) → yes ≋-refl }) it

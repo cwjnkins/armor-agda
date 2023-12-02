@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option
@@ -22,10 +20,10 @@ module Distribute where
 
   open ≡-Reasoning
 
-  module _ {@0 A B : @0 List Σ → Set} where
+  module _ {A B : @0 List Σ → Set} where
 
     ×ₚ-Σₚ-iso
-      : ∀ {@0 C : (xs : List Σ) (a : A xs) → Set}
+      : ∀ {C : (@0 xs : List Σ) (a : A xs) → Set}
         → Iso ((Σₚ A C) ×ₚ B)
               (Σₚ (A ×ₚ B) λ _ x → C _ (fstₚ x))
     proj₁ (proj₁ ×ₚ-Σₚ-iso) (mk×ₚ (mk×ₚ a c) b) =
@@ -60,7 +58,7 @@ module Distribute where
     proj₂ exactLength-Sum (inj₂ (mk×ₚ fstₚ₁ sndₚ₁ )) = mk×ₚ (Sum.inj₂ fstₚ₁) sndₚ₁
 
   exactLength-&ᵈ
-    : ∀ {@0 A : @0 List Σ → Set} {@0 B : {@0 bs : List Σ} → A bs → @0 List Σ → Set} {n}
+    : ∀ {A : @0 List Σ → Set} {B : {@0 bs : List Σ} → A bs → @0 List Σ → Set} {n}
       → Equivalent (ExactLength (&ₚᵈ A B) n)
                    (&ₚᵈ (Length≤ A n)
                         λ {bs₁} a → ExactLength (B (fstₚ a)) (n - length bs₁))
@@ -120,13 +118,13 @@ module NonNesting where
   noconfusion-option&₁ nn₁ nn₂ nc ++≡ (mk&ₚ (some x) sndₚ₁ bs≡) (mk&ₚ (some x₁) sndₚ₂ bs≡₁) =
     ‼ (Seq.nosubstrings nn₁ nn₂ ++≡ (mk&ₚ x sndₚ₁ bs≡) (mk&ₚ x₁ sndₚ₂ bs≡₁))
 
-  erased : ∀ {@0 A} → NoSubstrings A → NoSubstrings (Erased ∘ A)
+  erased : ∀ {A : @0 List Σ → Set} → NoSubstrings A → NoSubstrings (λ x → Erased (A x))
   erased nn xs₁++ys₁≡ (─ a₁) (─ a₂) = ‼ (nn xs₁++ys₁≡ a₁ a₂)
 
-  Restriction : (A B : List Σ → Set) → Set
+  Restriction : (A B : @0 List Σ → Set) → Set
   Restriction A B = ∀ {xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂ → A xs₁ → B xs₂ → xs₁ ≡ xs₂
 
-  @0 sumRestriction : ∀ {@0 A B} → NoSubstrings A → NoSubstrings B → Restriction A B → NoSubstrings (Sum A B)
+  @0 sumRestriction : ∀ {A B : @0 List Σ → Set} → NoSubstrings A → NoSubstrings B → Restriction A B → NoSubstrings (Sum A B)
   sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₁ x₁) =
     nn₁ xs₁++ys₁≡xs₂++ys₂ x x₁
   sumRestriction nn₁ nn₂ r xs₁++ys₁≡xs₂++ys₂ (Sum.inj₁ x) (Sum.inj₂ x₁) =
@@ -157,7 +155,7 @@ module Unambiguous where
   -- option₁ ua ne (some x) none = contradiction refl (ne x)
   -- option₁ ua ne (some x) (some x₁) = ‼ cong some (ua x x₁)
 
-  unambiguous-option₁& : ∀ {@0 A B} → Unambiguous A → NoSubstrings A → NonEmpty A → Unambiguous B → NoConfusion A (Length≥ B 1) → Unambiguous (&ₚ (Option A) B)
+  unambiguous-option₁& : ∀ {A B} → Unambiguous A → NoSubstrings A → NonEmpty A → Unambiguous B → NoConfusion A (Length≥ B 1) → Unambiguous (&ₚ (Option A) B)
   unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ  none sndₚ₂ refl) =
     subst₀ (λ x → mk&ₚ none sndₚ₁ refl ≡ mk&ₚ none x refl) (ua₂ sndₚ₁ sndₚ₂) refl
   unambiguous-option₁& ua₁ nn₁ ne₁ ua₂ nc {xs} (mk&ₚ  none    sndₚ₁ refl) (mk&ₚ{bs₁ = bs₁}{bs₂} (some x) sndₚ₂ bs≡₁) =

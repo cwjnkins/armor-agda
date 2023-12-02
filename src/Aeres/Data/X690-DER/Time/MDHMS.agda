@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Time.MDHMS.Ordering
 import Aeres.Data.X690-DER.Time.MDHMS.Parser
 import Aeres.Data.X690-DER.Time.MDHMS.Properties

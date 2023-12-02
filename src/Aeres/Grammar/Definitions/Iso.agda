@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Grammar.Definitions.Iso.Base
 import Aeres.Grammar.Definitions.Iso.Properties
 

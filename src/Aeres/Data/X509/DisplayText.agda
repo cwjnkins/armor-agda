@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.DisplayText.Parser
 import Aeres.Data.X509.DisplayText.Properties
 import Aeres.Data.X509.DisplayText.TCB

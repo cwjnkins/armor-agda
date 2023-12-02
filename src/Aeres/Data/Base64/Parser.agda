@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.Base64.TCB
 open import Aeres.Data.Base64.Properties
@@ -52,7 +50,7 @@ module parseBase64 where
           (Parallel.nosubstrings₁ Base64Char.nosubstrings)
           (parseSigma Base64Char.nosubstrings Base64Char.unambiguous parseBase64Char
             (λ where (mk64 c c∈ i bs≡) → _ ≟ 0))
-          (parseLit
+          (parseLitE
             (tell $ here' String.++ ": underflow")
             (tell $ here' String.++ ": mismatch") _)))
     where here' = "parseBase64Pad1"
@@ -65,7 +63,7 @@ module parseBase64 where
           (parseSigma Base64Char.nosubstrings Base64Char.unambiguous
             parseBase64Char
               (λ where (mk64 c c∈ i bs≡) → _ ≟ 0))
-          (parseLit
+          (parseLitE
             (tell $ here' String.++ ": underflow") (tell $ here' String.++ ": mismatch") _)))
     where
     here' = "parseBase64Pad2"
@@ -177,10 +175,10 @@ module parseBase64 where
                              4 ≡⟨ ‼ sym r₁≡ ⟩
                              r₁ ∎))
                   pre' suf' eq (pad2 (mk64P2 c₁ c₂ pad bs≡)) →
-                    Lemmas.≡⇒≤ ∘ ‼_ $
+                    Lemmas.≡⇒≤ (‼
                       (begin (length pre' ≡⟨ cong length (‼ bs≡) ⟩
                              4 ≡⟨ ‼ (sym r₁≡) ⟩
-                             r₁ ∎))
+                             r₁ ∎)))
             (mkLogged log (no ¬p₂)) →
               (mkLogged [ "parseBase64Pad: not pad: " String.++ String.fromList (c₁ ∷ c₂ ∷ c₃ ∷ [ c₄ ])]
                 (yes (success [] _ refl (pad0 refl) xs' refl)))

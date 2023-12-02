@@ -1,10 +1,8 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 
 module Aeres.Grammar.Definitions.NoConfusion (Σ : Set) where
 
-NoConfusion : (A B : List Σ → Set) → Set
+NoConfusion : (A B : @0 List Σ → Set) → Set
 NoConfusion A B =
   ∀ {xs₁ ys₁ xs₂ ys₂}
   → (xs₁++ys₁≡xs₂++ys₂ : xs₁ ++ ys₁ ≡ xs₂ ++ ys₂)

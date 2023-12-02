@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 import      Aeres.Data.X509.PublicKey.Alg.TCB.OIDs as OIDs
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.TCB

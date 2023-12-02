@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 import      Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.TCB
@@ -23,7 +21,7 @@ open Aeres.Grammar.Sum.TCB     UInt8
 CPSURIQualifierParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
 CPSURIQualifierParam o =
      IA5String
-  ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.CPSURI)
+  ×ₚ (λ _ → (_≋_{A = OIDValue} (TLV.val o) OIDs.CPSURI))
 
 CPSURIQualifier = DefinedByOIDFields CPSURIQualifierParam
 
@@ -34,7 +32,7 @@ Raw₁.to RawCPSURIQualifierParam _ cps = Raw.to RawIA5String (fstₚ cps)
 UserNoticeQualifierParam : ∀ {@0 bs} → OID bs → @0 List UInt8 → Set
 UserNoticeQualifierParam o =
      UserNotice
-  ×ₚ const (_≋_{A = OIDValue} (TLV.val o) OIDs.UserNotice)
+  ×ₚ λ _ → (_≋_{A = OIDValue} (TLV.val o) OIDs.UserNotice)
 
 UserNoticeQualifier = DefinedByOIDFields UserNoticeQualifierParam
 

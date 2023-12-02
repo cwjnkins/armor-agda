@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length.TCB
 import      Aeres.Grammar.Definitions.NonMalleable
@@ -16,7 +14,7 @@ open Aeres.Grammar.Definitions.NonMalleable UInt8
 -- b) length octets (see 8.1.3);
 -- c) contents octets (see 8.1.4);
 
-record TLV (t : UInt8) (@0 A : List UInt8 → Set) (@0 bs : List UInt8) : Set where
+record TLV (t : UInt8) (A : @0 List UInt8 → Set) (@0 bs : List UInt8) : Set where
   constructor mkTLV
   field
     @0 {l v} : List UInt8
@@ -25,13 +23,13 @@ record TLV (t : UInt8) (@0 A : List UInt8 → Set) (@0 bs : List UInt8) : Set wh
     @0 len≡ : getLength len ≡ length v
     @0 bs≡  : bs ≡ t ∷ l ++ v
 
-TLVNonEmptyVal : ∀ {t}{@0 A} → (@0 bs : List UInt8) (tlv : TLV t A bs) → Set
+TLVNonEmptyVal : ∀ {t}{A : @0 List UInt8 → Set} → (@0 bs : List UInt8) (tlv : TLV t A bs) → Set
 TLVNonEmptyVal bs tlv = 1 ≤ getLength (TLV.len tlv)
 
-TLVLenBounded : ∀ {t}{@0 A} → (l u : ℕ) → (@0 bs : List UInt8) (tlv : TLV t A bs) → Set
+TLVLenBounded : ∀ {t}{A : @0 List UInt8 → Set} → (l u : ℕ) → (@0 bs : List UInt8) (tlv : TLV t A bs) → Set
 TLVLenBounded l u bs tlv = InRange l u (getLength (TLV.len tlv))
 
-TLVSizeBounded : ∀ {t} {@0 A} (len : ∀ {@0 bs} → A bs → ℕ) (l u : ℕ) → ∀ (@0 bs) → TLV t A bs → Set
+TLVSizeBounded : ∀ {t} {A : @0 List UInt8 → Set} (len : ∀ {@0 bs} → A bs → ℕ) (l u : ℕ) → ∀ (@0 bs) → TLV t A bs → Set
 TLVSizeBounded len l u bs tlv = InRange l u (len (TLV.val tlv))
 
 RawTLV : ∀ t {A} → Raw A → Raw (TLV t A)

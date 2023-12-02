@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 import      Aeres.Data.X690-DER.Length.Properties as Length
 open import Aeres.Data.X690-DER.Length.TCB
@@ -17,10 +15,10 @@ open Aeres.Grammar.Definitions.NonMalleable UInt8
 -- 8.8.2 The contents octets shall not contain any octets.
 -- NOTE – The length octet is zero.
 
-Null = TLV Tag.Null (_≡ [])
+Null = TLV Tag.Null (λ x → Erased (x ≡ []))
 
 nullTLV : Null (Tag.Null ∷ [ # 0 ])
-nullTLV = mkTLV (Length.shortₛ (# 0)) refl refl refl
+nullTLV = mkTLV (Length.shortₛ (# 0)) (─ refl) refl refl
 
 RawNull : Raw Null
 RawNull = RawTLV _ RawSubSingleton

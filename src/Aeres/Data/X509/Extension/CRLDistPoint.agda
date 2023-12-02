@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.CRLDistPoint.DistPoint
 import Aeres.Data.X509.Extension.CRLDistPoint.Parser
 import Aeres.Data.X509.Extension.CRLDistPoint.TCB

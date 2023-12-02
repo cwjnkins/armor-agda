@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.Curve
 import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.FieldID
 import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.Parser

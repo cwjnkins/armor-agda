@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.Curve.TCB
   hiding (equivalent)
@@ -82,13 +80,13 @@ record ECParametersFields (@0 bs : List UInt8) : Set where
 
 ECParametersFieldsRep : @0 List UInt8 → Set
 ECParametersFieldsRep =
-  &ₚ (_≡ # 2 ∷ # 1 ∷ [ # 1 ]) (&ₚ FieldID (&ₚ Curve (&ₚ OctetString (&ₚ Int (Option Int)))))
+  &ₚ (λ x → Erased (x ≡ # 2 ∷ # 1 ∷ [ # 1 ])) (&ₚ FieldID (&ₚ Curve (&ₚ OctetString (&ₚ Int (Option Int)))))
 
 equivalent : Equivalent ECParametersFieldsRep ECParametersFields
-proj₁ equivalent (mk&ₚ refl (mk&ₚ fieldID (mk&ₚ curve (mk&ₚ base (mk&ₚ order cofactor refl) refl) refl) refl) refl) =
+proj₁ equivalent (mk&ₚ (─ refl) (mk&ₚ fieldID (mk&ₚ curve (mk&ₚ base (mk&ₚ order cofactor refl) refl) refl) refl) refl) =
   mkECParametersFields self fieldID curve base order cofactor refl
 proj₂ equivalent (mkECParametersFields self fieldID curve base order cofactor refl) =
-  mk&ₚ refl (mk&ₚ fieldID (mk&ₚ curve (mk&ₚ base (mk&ₚ order cofactor refl) refl) refl) refl) refl
+  mk&ₚ (─ refl) (mk&ₚ fieldID (mk&ₚ curve (mk&ₚ base (mk&ₚ order cofactor refl) refl) refl) refl) refl
 
 RawECParametersFieldsRep : Raw ECParametersFieldsRep
 RawECParametersFieldsRep =

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.DirectoryString
 open import Aeres.Data.X509.Name.RDN.ATV.OIDs

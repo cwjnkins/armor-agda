@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64

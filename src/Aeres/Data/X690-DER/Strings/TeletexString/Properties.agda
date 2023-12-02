@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Strings.TeletexString.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Boool.Eq
 import Aeres.Data.X690-DER.Boool.Parser
 import Aeres.Data.X690-DER.Boool.Properties

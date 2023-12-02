@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.RSA.Ints.Properties
 open import Aeres.Data.X509.PublicKey.Val.RSA.Ints.TCB

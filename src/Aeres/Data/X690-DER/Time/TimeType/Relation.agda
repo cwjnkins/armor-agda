@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Prelude
 open import Aeres.Data.X690-DER.Time.TimeType.TCB

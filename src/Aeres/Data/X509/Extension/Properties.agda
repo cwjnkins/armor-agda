@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AIA
 open import Aeres.Data.X509.Extension.AKI
@@ -49,21 +47,21 @@ open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
 module Fields where
-  iso : ∀ {@0 P} {@0 A : @0 List UInt8 → Set}
+  iso : ∀ {@0 P} {A : @0 List UInt8 → Set}
         → Iso (ExtensionFieldsRep P A) (ExtensionFields P A)
   proj₁ iso = equivalentExtensionFields
   proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) = refl
   proj₂ (proj₂ iso) (mkExtensionFields extnId extnId≡ crit extension refl) = refl
 
-  @0 unambiguous : ∀ {@0 P}{@0 A : @0 List UInt8 → Set} → Unambiguous P → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
+  @0 unambiguous : ∀ {@0 P} {A : @0 List UInt8 → Set} → (∀ {x} → Unique (P x)) → Unambiguous A → NoConfusion Boool A → Unambiguous (ExtensionFields P A)
   unambiguous{P}{A} uaₚ ua₁ nc =
     Iso.unambiguous iso
-      (Seq.unambiguous{A = Σₚ OID λ _ → Erased ∘ P ∘ TLV.v}{B = &ₚ (Default Boool falseBoool) A}
+      (Seq.unambiguous{A = Σₚ OID λ _ x → Erased (P (TLV.v x))}{B = &ₚ (Default Boool falseBoool) A}
         (Parallel.unambiguous OID.unambiguous λ a → erased-unique uaₚ )
         (Parallel.nosubstrings₁ TLV.nosubstrings)
         (Sequence.unambiguousDefault₁ _ Boool.unambiguous TLV.nosubstrings ua₁ nc))
 
-  @0 nonmalleable : ∀ {P}{A : @0 List UInt8 → Set} {ra : Raw A} → Unambiguous P → NonMalleable ra → NonMalleable (RawExtensionFields{P} ra)
+  @0 nonmalleable : ∀ {@0 P : List UInt8 → Set}{A : @0 List UInt8 → Set} {ra : Raw A} → (∀ {x} → Unique (P x)) → NonMalleable ra → NonMalleable (RawExtensionFields{P} ra)
   nonmalleable{ra = ra} x x₁ =
     Iso.nonmalleable iso (RawExtensionFieldsRep ra)
     (Seq.nonmalleable
@@ -426,7 +424,7 @@ module Select where
     noconfusion₀ : NoConfusion (ExtensionFields (_≡ OIDs.AIALit) AIAFields) (ExtensionFields _ _)
     noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
 
-    ua : Unambiguous (False ∘ (_∈? supportedExtensions))
+    ua : Unambiguous (λ x → False (x ∈? supportedExtensions))
     ua = T-unique
 
   @0 nonmalleable : NonMalleable RawSelectExtn
@@ -445,7 +443,7 @@ module Select where
     RawRep₁₀ = RawSum (RawExtensionFields RawEKUFields) RawRep₉
     RawRep₁₁ = RawSum (RawExtensionFields RawKUFields) RawRep₁₀
     RawRep₁₂ = RawSum (RawExtensionFields RawSKIFields) RawRep₁₁
-    RawRep = RawSum (RawExtensionFields{P = AKIFields} RawAKIFields) RawRep₁₂
+    RawRep = RawSum (RawExtensionFields{P = (_≡ OIDs.AKILit)} RawAKIFields) RawRep₁₂
                            
     nm : NonMalleable RawSelectExtnRep
     nm = Sum.nonmalleable{ra = RawExtensionFields RawAKIFields}{rb = RawRep₁₂} ((Fields.nonmalleable ≡-unique AKI.nonmalleable))

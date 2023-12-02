@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.OctetString.Parser
 import Aeres.Data.X690-DER.OctetString.Properties
 import Aeres.Data.X690-DER.OctetString.TCB

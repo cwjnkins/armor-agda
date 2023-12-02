@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Seq.Properties
 import      Aeres.Grammar.Seq.TCB
@@ -24,8 +22,8 @@ open Aeres.Grammar.Seq.TCB        Σ
 
 open ≡-Reasoning
 
-parse& : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
-         → (@0 _ : NoSubstrings A)
+parse& : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : @0 List Σ → Set}
+         → @0 NoSubstrings A
          → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
          → Parser (M ∘ Dec) (&ₚ A B)
 runParser (parse& nn p₁ p₂) xs = do
@@ -69,7 +67,7 @@ runParser (parse& nn p₁ p₂) xs = do
              xs ∎)))
 
 parse&ᵈ : {M : Set → Set} ⦃ _ : Monad M ⦄
-          → {@0 A : List Σ → Set} {@0 B : {@0 bs : List Σ} → A bs → List Σ → Set}
+          → {A : @0 List Σ → Set} {B : {@0 bs : List Σ} → A bs → @0 List Σ → Set}
           → (@0 _ : NoSubstrings A) (@0 _ : Unambiguous A)
           → Parser (M ∘ Dec) A
           → (∀ {@0 bs} → Singleton (length bs) → (a : A bs) → Parser (M ∘ Dec) (B a))
@@ -98,15 +96,15 @@ runParser (parse&ᵈ{A = A}{B} nn ua p₁ p₂) xs = do
               @0 bs₁≡ : bs₁ ≡ pre₀
               bs₁≡ = nn xs≡ fstₚ v₀
 
-              @0 fstₚ≡ : subst A bs₁≡ fstₚ ≡ v₀
+              @0 fstₚ≡ : subst₀! A bs₁≡ fstₚ ≡ v₀
               fstₚ≡ =
-                ≡-elim (λ {bs} eq → ∀ v₀ → subst A eq fstₚ ≡ v₀)
+                ≡-elim (λ {bs} eq → ∀ v₀ → subst₀! A eq fstₚ ≡ v₀)
                   (ua fstₚ) bs₁≡ v₀
           in
           contradiction
             (success bs₂ _ refl
               (subst (λ x → B x bs₂) fstₚ≡
-                (≡-elim (λ {pre₀} eq → B (subst A eq fstₚ) bs₂)
+                (≡-elim (λ {pre₀} eq → B (subst₀! A eq fstₚ) bs₂)
                   sndₚ bs₁≡))
               suffix
               (++-cancelˡ pre₀ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))

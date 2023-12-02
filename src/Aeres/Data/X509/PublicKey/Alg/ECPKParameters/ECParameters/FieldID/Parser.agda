@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.FieldID.CharTwo
 open import Aeres.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.FieldID.TCB

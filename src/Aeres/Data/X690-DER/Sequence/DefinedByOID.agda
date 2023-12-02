@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Sequence.DefinedByOID.Parser
 import Aeres.Data.X690-DER.Sequence.DefinedByOID.Properties
 import Aeres.Data.X690-DER.Sequence.DefinedByOID.TCB

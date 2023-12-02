@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Int
 open import Aeres.Data.X690-DER.Length
@@ -24,7 +22,7 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseSequenceOf
-  (eName : String) (A : List UInt8 → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
+  (eName : String) (A : @0 List UInt8 → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (Logging ∘ Dec) A) where
 
   here' = "parseSeq: "
@@ -128,7 +126,7 @@ module parseSequenceOf
     case b ≤? lengthSequence v₀ of λ where
       (yes b≤len) →
         return (yes
-          (success pre₀ r₀ r₀≡ (mk×ₚ (mk×ₚ v₀ b≤len) (─ v₀Len)) suf₀ ps≡₀))
+          (success pre₀ r₀ r₀≡ (mk×ₚ (mk×ₚ v₀ (─ b≤len)) (─ v₀Len)) suf₀ ps≡₀))
       (no  b≰len) → do
         tell $ here' String.++ eName String.++ ": does not meet min length"
         return ∘ no $ λ where
@@ -139,12 +137,12 @@ module parseSequenceOf
                 @0 numElems≡ : lengthSequence fstₚ₁ ≡ lengthSequence v₀
                 numElems≡ =
                   trans₀
-                    (sameLength nn ne fstₚ₁ (subst₀ (SequenceOf _) (sym pre₀≡) v₀))
-                    (≡-elim (λ {ys} eq → (v : SequenceOf _ ys) → lengthSequence (subst₀ _ (sym eq) v) ≡ lengthSequence v)
+                    (sameLength nn ne fstₚ₁ (subst₀! (SequenceOf _) (sym pre₀≡) v₀))
+                    (≡-elim (λ {ys} eq → (v : SequenceOf _ ys) → lengthSequence (subst₀! _ (sym eq) v) ≡ lengthSequence v)
                       (λ _ → refl) pre₀≡ v₀)
             in
             contradiction
-              (subst (b ≤_) numElems≡ sndₚ₂)
+              (subst (b ≤_) numElems≡ (Erased.x sndₚ₂))
               b≰len
 
   parseSeq : Parser (Logging ∘ Dec) (Seq A)

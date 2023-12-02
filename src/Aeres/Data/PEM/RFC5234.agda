@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.PEM.RFC5234.Parser
 import Aeres.Data.PEM.RFC5234.Properties
 import Aeres.Data.PEM.RFC5234.TCB

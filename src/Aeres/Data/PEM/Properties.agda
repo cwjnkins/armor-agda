@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
@@ -84,7 +82,7 @@ noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
                  _ ∎)))
 
     @0 x₁∈ : x₁ ∈ B64.charset
-    x₁∈ = FinalLine.char₁ (subst₀ CertFinalLine (sym $ proj₂ bs₂≡) final)
+    x₁∈ = FinalLine.char₁ (subst₀! CertFinalLine (sym $ proj₂ bs₂≡) final)
   noway (mk&ₚ (mkCertText (consIList{f₁}{b₁} full₁ body refl) final refl) sndₚ₁ bs≡) =
     contradiction x₁∈
       (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt))
@@ -102,7 +100,7 @@ noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
           _ ∎))))
 
     @0 x₁∈ : x₁ ∈ B64.charset
-    x₁∈ = FullLine.char₁ (subst₀ CertFullLine (sym (proj₂ f₁≡)) full₁)
+    x₁∈ = FullLine.char₁ (subst₀! CertFullLine (sym (proj₂ f₁≡)) full₁)
 
 noOverlapTextFooter : NoOverlap CertText CertFooter
 noOverlapTextFooter ws [] ys₁ xs₂ ys₂ x x₁ x₂ = inj₁ refl

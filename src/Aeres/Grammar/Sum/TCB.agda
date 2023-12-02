@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions.NonMalleable
 
@@ -7,7 +5,7 @@ module Aeres.Grammar.Sum.TCB (Σ : Set) where
 
 open Aeres.Grammar.Definitions.NonMalleable Σ
 
-data Sum (@0 A B : List Σ → Set) (@0 xs : List Σ) : Set where
+data Sum (A B : @0 List Σ → Set) (@0 xs : List Σ) : Set where
   inj₁ : A xs → Sum A B xs
   inj₂ : B xs → Sum A B xs
 

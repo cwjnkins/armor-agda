@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Time.UTCTime.Parser
 import Aeres.Data.X690-DER.Time.UTCTime.Properties
 import Aeres.Data.X690-DER.Time.UTCTime.TCB

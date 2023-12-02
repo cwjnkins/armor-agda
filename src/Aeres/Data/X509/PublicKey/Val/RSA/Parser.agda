@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.RSA.Ints
 open import Aeres.Data.X509.PublicKey.Val.RSA.Properties
@@ -26,8 +24,8 @@ parseFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RSABitStringFields
 parseFields n =
   parseExactLength nosubstrings (tell $ here' String.++ ": underflow")
     (parseEquivalent equivalent
-      (parse& (λ where _ refl refl → refl)
-        (parseLit 
+      (parse& (λ where _ (─ refl) (─ refl) → refl)
+        (parseLitE
           (tell $ here' String.++ ": zero bit: underflow")
           (tell $ here' String.++ ": zero bit: mismatch")
           [ # 0 ])

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.SignAlg.RSA.Eq
 import Aeres.Data.X509.SignAlg.RSA.PSS
 import Aeres.Data.X509.SignAlg.RSA.Parser

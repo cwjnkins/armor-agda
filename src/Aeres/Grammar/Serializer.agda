@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 open import Aeres.Prelude
 

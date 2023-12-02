@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 import Aeres.Data.PEM.CertText.Exclusions
 import Aeres.Data.PEM.CertText.FinalLine
 import Aeres.Data.PEM.CertText.FullLine

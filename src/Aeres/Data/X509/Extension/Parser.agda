@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AIA
 open import Aeres.Data.X509.Extension.AKI
@@ -56,8 +54,8 @@ private
   here' = "X509: TBSCert: Extension"
 
   parseExtensionFields
-    : ∀ {P A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
-    → @0 NoSubstrings A → @0 NoConfusion Boool A → Unambiguous P
+    : ∀ {@0 P : List UInt8 → Set} {A : @0 List UInt8 → Set} (P? : ∀ bs → Dec (P bs))
+    → @0 NoSubstrings A → @0 NoConfusion Boool A → (∀ {x} → Unique (P x))
     → Parser (Logging ∘ Dec) A
     → ∀ n → Parser (Logging ∘ Dec) (ExactLength (ExtensionFields P A) n)
   parseExtensionFields{P}{A} P? nn nc ua p n =
@@ -88,7 +86,7 @@ private
            (parseSigma TLV.nosubstrings OID.unambiguous parseOID
              (λ x →
                let (singleton v v≡) = OID.serializeVal (TLV.val x)
-               in subst₀ (Dec ∘ Erased ∘ P) {y = TLV.v x}v≡ (erased? (P? v))))
+               in subst₀! (λ x → Dec (Erased (P x))) {y = TLV.v x}v≡ (erased? (P? v))))
            (Parallel.nosubstrings₁ TLV.nosubstrings)
            (tell $ here' String.++ " underflow (OID)")
 

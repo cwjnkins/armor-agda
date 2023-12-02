@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Serializer
 import      Aeres.Grammar.Option.Parser
 import      Aeres.Grammar.Option.Properties

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Grammar.IList
@@ -9,7 +7,7 @@ open import Aeres.Prelude
 open Aeres.Grammar.Parallel UInt8
 
 module Aeres.Data.X690-DER.SequenceOf.Serializer
-  {@0 A : List UInt8 → Set} (ser : ∀ {@0 bs} → A bs → Singleton bs)
+  {A : @0 List UInt8 → Set} (ser : ∀ {@0 bs} → A bs → Singleton bs)
   where
 
 serializeSequenceOf

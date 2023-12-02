@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option.TCB
 import      Aeres.Grammar.Parser.Core
@@ -21,7 +19,7 @@ open Aeres.Grammar.Seq            Σ
 
 open LogDec
 
-parseMax : ∀ {@0 A} → MaximalParser A → MaximalParser (Option A)
+parseMax : ∀ {A : @0 List Σ → Set} → MaximalParser A → MaximalParser (Option A)
 parseMax p = mkMaximalParser help
   where
   help : ∀ xs → Sigma _ _
@@ -39,7 +37,7 @@ parseMax p = mkMaximalParser help
           pre' suf' ps'≡ (some x) →
             max _ _ ps'≡ x
 
-parse&o₂ : ∀ {@0 A B} → MaximalParser A → MaximalParser (Option B) → @0 NoOverlap A B
+parse&o₂ : ∀ {A B : @0 List Σ → Set} → MaximalParser A → MaximalParser (Option B) → @0 NoOverlap A B
            → MaximalParser (&ₚ A (Option B))
 parse&o₂{A}{B} pa pb noo = mkMaximalParser help
   where
@@ -108,7 +106,7 @@ parse&o₂{A}{B} pa pb noo = mkMaximalParser help
                             pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (Erased.x pre₁≡) ⟩
                             (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ ++-assoc bs₁ _ suf₁ ⟩
                             bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ∎)))))
-                          (subst A (Erased.x pre₁≡) v₁) fstₚ₁)
+                          (subst₀! A (Erased.x pre₁≡) v₁) fstₚ₁)
                    of λ where
                     (inj₁ ≡[]) →
                       let pre₁≡' : Erased (pre₁ ≡ bs₁)

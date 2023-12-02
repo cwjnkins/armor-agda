@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --sized-types #-}
 
 import      Aeres.Binary
 open import Aeres.Data.X509

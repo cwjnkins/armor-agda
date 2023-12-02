@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Int.Parser
 import Aeres.Data.X690-DER.Int.Properties
 -- import Aeres.Data.X690-DER.Int.Serializer

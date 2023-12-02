@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.AIA.AccessDesc
 import Aeres.Data.X509.Extension.AIA.Parser
 import Aeres.Data.X509.Extension.AIA.TCB

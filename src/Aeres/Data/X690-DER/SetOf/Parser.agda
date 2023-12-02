@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.SetOf.Order.TCB
@@ -42,7 +40,7 @@ module _ (caller : String) {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 
                 (mk×ₚ
                   (mk×ₚ
                     (mapIList (λ x → mk×ₚ x self) (fstₚ elems))
-                    (subst₀ (_≥ 1) (sym (IList.mapIListLength _ (fstₚ elems))) (sndₚ elems)))
+                    (subst₀! (λ x → (Erased (x ≥ 1))) (sym (IList.mapIListLength _ (fstₚ elems))) (sndₚ elems)))
                   (─ fieldsBSLen)) suffix ps≡)
               ¬p
     let
@@ -58,8 +56,8 @@ module _ (caller : String) {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 
       @0 ol₁≡ol₂ : ol₁ ≡ ol₂
       ol₁≡ol₂ = orderingList≡ v₁
 
-      elemsLen : lengthIList elems' ≥ 1
-      elemsLen = subst₀ (_≥ 1) (sym (IList.mapIListLength fstₚ v₁)) v₁Len≥1
+      elemsLen : Erased (lengthIList elems' ≥ 1)
+      elemsLen = subst₀! (λ x → Erased (x ≥ 1)) (sym (IList.mapIListLength fstₚ v₁)) v₁Len≥1
     case sorted? _≲?_ ol₂ of λ where
       (no ¬sorted) → do
         tell $ here' String.++ " (fields): not sorted!"

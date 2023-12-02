@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Grammar.IList.All
 import Aeres.Grammar.IList.Parser
 import Aeres.Grammar.IList.Properties

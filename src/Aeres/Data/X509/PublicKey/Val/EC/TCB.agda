@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.TLV.TCB
 open import Aeres.Data.X690-DER.BitString.TCB
@@ -28,7 +26,7 @@ open Aeres.Grammar.Seq.TCB                  UInt8
 -}
 
 ECBitStringValue : @0 List UInt8 → Set
-ECBitStringValue = &ₚ (_≡ [ # 0 ]) OctetStringValue
+ECBitStringValue = &ₚ (λ x → Erased (x ≡ [ # 0 ])) OctetStringValue
 
 RawECBitStringValue : Raw ECBitStringValue
 RawECBitStringValue = Raw&ₚ RawSubSingleton RawOctetStringValue

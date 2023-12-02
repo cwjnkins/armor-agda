@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import      Aeres.Grammar.Sum.Parser
 import      Aeres.Grammar.Sum.Properties

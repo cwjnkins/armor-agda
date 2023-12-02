@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AIA
 open import Aeres.Data.X509.Extension.AKI
@@ -48,7 +46,7 @@ open Aeres.Grammar.Properties  UInt8
 open Aeres.Grammar.Seq         UInt8
 open Aeres.Grammar.Sum         UInt8
 
-eq≋Field : ∀ {@0 P} {@0 A} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
+eq≋Field : ∀ {@0 P : List UInt8 → Set} {A : @0 List UInt8 → Set} → (∀ {@0 bs} → Unique (P bs)) → ⦃ _ : Eq≋ A ⦄ → Eq≋ (ExtensionFields P A)
 eq≋Field eqP =
   Iso.isoEq≋ Fields.iso
     (Seq.eq≋&ₚ

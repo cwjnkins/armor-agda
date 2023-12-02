@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.SequenceOf.Serializer
 import Aeres.Data.X690-DER.SequenceOf.TCB
 import Aeres.Data.X690-DER.SequenceOf.Parser

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OctetString
 open import Aeres.Data.X690-DER.Strings.PrintableString.Char.TCB
@@ -207,7 +205,7 @@ nonmalleable (mkPrintableStringChar c range refl) (mkPrintableStringChar c₁ ra
   case (‼ unambiguousRange range range₁) of λ where
     refl → refl
 
-printableStringChar? : Decidable PrintableStringCharRange
+printableStringChar? : Decidable (λ x → PrintableStringCharRange x)
 printableStringChar? c =
   case
     (((c ≟ # 32 ⊎-dec c ≟ # 39) ⊎-dec (c ≟ # 40 ⊎-dec c ≟ # 41)) ⊎-dec ((c ≟ # 43 ⊎-dec c ≟ # 44) ⊎-dec (c ≟ # 45 ⊎-dec c ≟ # 46)))

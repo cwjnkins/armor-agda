@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --sized-types #-}
 
 open import Data.Nat.DivMod
 open import Aeres.Binary

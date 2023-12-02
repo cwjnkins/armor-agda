@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Arith
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Time.Day.TCB
@@ -57,7 +55,7 @@ fromForeignUTC u = case runParser parseFields (encodeForeignUTC u) ret (const _)
                                      (cong₂ _+_ (TimeType.bsLen minute) (TimeType.bsLen sec))))))))))) ⟩
               15 ∎)))
     in
-    yes (subst₀ GeneralizedTimeFields (¡ prefix≡) value)
+    yes (subst₀! GeneralizedTimeFields (¡ prefix≡) value)
 
     where
     open ≡-Reasoning

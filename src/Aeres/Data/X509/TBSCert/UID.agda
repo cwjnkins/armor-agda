@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.TBSCert.UID.Parser
 import Aeres.Data.X509.TBSCert.UID.TCB
 

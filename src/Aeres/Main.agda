@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --guardedness --sized-types #-}
+{-# OPTIONS --guardedness --sized-types #-}
 
 open import Aeres.Binary
   hiding (module Base64)

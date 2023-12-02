@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Data.Base64
 open import Aeres.Data.PEM.CertText.FinalLine.Properties
 open import Aeres.Data.PEM.CertText.FinalLine.TCB
@@ -88,7 +85,7 @@ parseCertFinalLine =
                                          (bs₁ ++ drop (length bs₁) bs₁') ++ bs₂' ++ suffix ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
                                          bs₁' ++ bs₂' ++ suffix ≡⟨ (sym $ ¡ xs≡') ⟩
                                          bs₁ ++ bs₂ ++ suf₁ ∎))
-                                       (subst Base64Str (¡ bs₁'≡) str') str
+                                       (subst₀! Base64Str (¡ bs₁'≡) str') str
                                      ret (const _) of λ where
                                     (inj₁ x) → ─ contradiction
                                                    (begin (length bs₁ ≡⟨ cong length (sym $ ++-identityʳ bs₁) ⟩
@@ -105,7 +102,7 @@ parseCertFinalLine =
                       (bs₁' ++ drop (length bs₁') bs₁) ++ bs₂ ++ suf₁ ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
                       bs₁ ++ bs₂ ++ suf₁ ≡⟨ ¡ xs≡' ⟩
                       bs₁' ++ bs₂' ++ suffix ∎))
-                    (subst Base64Str (¡ bs₁'≡) str) str'
+                    (subst₀! Base64Str (¡ bs₁'≡) str) str'
                 ret (const _) of λ where
                   (inj₁ x) → contradiction
                                (subst (InRange 1 64 ∘ length)

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions.NoSubstrings
 import      Aeres.Grammar.Definitions.Unambiguous
 import      Aeres.Grammar.Parallel.Properties
@@ -20,7 +18,7 @@ open ≡-Reasoning
 
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
   parseSigma'
-    : ∀ {@0 A B}
+    : ∀ {A : @0 List Σ → Set} {B : (@0 xs : List Σ) → A xs → Set}
       → @0 NoSubstrings A
       → (∀ {xs} → Decidable (B xs))
       → (∀ {@0 xs} → (a₁ a₂ : A xs) → B _ a₁ → B _ a₂)
@@ -38,7 +36,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
         pre₁≡ = ─ subst (λ x → pre₁ ≡ take x xs) (sym r₁≡)
                     (subst (λ x → pre₁ ≡ take (length pre₁) x) ps≡₁
                       (sym (Lemmas.take-length-++ pre₁ _)))
-    let v₁' = subst₀ A (Erased.x pre₁≡) v₁
+    let v₁' = subst₀! A (Erased.x pre₁≡) v₁
     case d {pre₁'} v₁' ret _ of λ where
       (no ¬p) →
         return ∘ no $ λ where
@@ -46,16 +44,16 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
             let @0 pre≡ : prefix ≡ take r₁ xs
                 pre≡ = trans (nn (trans₀ ps≡ (sym ps≡₁)) v v₁) (Erased.x pre₁≡)
 
-                v₁' = (subst₀ A (Erased.x pre₁≡) v₁)
+                v₁' = (subst₀! A (Erased.x pre₁≡) v₁)
 
                 p' : B pre₁' v₁'
-                p' = i (subst A pre≡ v) v₁'
-                       (≡-elim (λ {p} eq → B p (subst A eq v)) p pre≡)
+                p' = i (subst₀! A pre≡ v) v₁'
+                       (≡-elim (λ {p} eq → B p (subst₀! A eq v)) p pre≡)
             in
             contradiction p' ¬p
       (yes p) → do
         let p' : B pre₁ v₁
-            p' = (case pre₁≡ ret (λ x → v₁' ≡ subst₀ A (Erased.x x) v₁ → B pre₁ v₁) of λ where
+            p' = (case pre₁≡ ret (λ x → v₁' ≡ subst₀! A (Erased.x x) v₁ → B pre₁ v₁) of λ where
               (─ refl) → λ v₁≡ → subst₀ (B pre₁') v₁≡ p) refl
         return (yes
           (success pre₁ _ r₁≡ (mk×ₚ v₁ p') _ ps≡₁))
@@ -94,7 +92,7 @@ runParser (parseN (suc n) m) (x ∷ xs) = do
     (success _ _ (cong suc r₁≡) (mk×ₚ (singleton (x ∷ v₁) refl) (─ cong suc v₁Len)) suf₁ (cong (x ∷_) ps≡₁)))
 
 parseExactLength : {M : Set → Set} ⦃ _ : Monad M ⦄ →
-                   {@0 A : List Σ → Set} → @0 NoSubstrings A →
+                   {A : @0 List Σ → Set} → @0 NoSubstrings A →
                    M (Level.Lift _ ⊤) →
                    Parser (M ∘ Dec) A →
                    ∀ n → Parser (M ∘ Dec) (ExactLength A n)
@@ -124,7 +122,7 @@ runParser (parseExactLength nn m p n) xs = do
       return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (─ sym r₀≡)) suf₀ ps≡₀))
   where open ≡-Reasoning
 
-parse≤ : ∀ {@0 A} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
+parse≤ : ∀ {A : @0 List Σ → Set} {M : Set → Set} ⦃ _ : Monad M ⦄ (n : ℕ) →
   Parser (M ∘ Dec) A → @0 NoSubstrings A → M (Level.Lift _ ⊤) →
   Parser (M ∘ Dec) (Length≤ A n)
 runParser (parse≤{A} n p nn m) xs = do
@@ -145,11 +143,11 @@ runParser (parse≤{A} n p nn m) xs = do
                    n ≤.∎))
             r₀≰n
     (yes r₀≤n) →
-      return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (─ subst₀ (λ i → i ≤ n) r₀≡ r₀≤n)) suf₀ ps≡₀))
+      return (yes (success pre₀ _ r₀≡ (mk×ₚ v₀ (─ subst₀! (λ i → i ≤ n) r₀≡ r₀≤n)) suf₀ ps≡₀))
   where module ≤ = ≤-Reasoning
 
 parse×Singleton
-  : {M : Set → Set} ⦃ _ : Monad M ⦄ {@0 A : List Σ → Set}
+  : {M : Set → Set} ⦃ _ : Monad M ⦄ {A : @0 List Σ → Set}
     → Parser (M ∘ Dec) A
     → Parser (M ∘ Dec) (A ×ₚ Singleton)
 runParser (parse×Singleton p) xs = do
@@ -168,10 +166,10 @@ runParser (parse×Singleton p) xs = do
         )
       suf ps≡))
 
-parse×Dec : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
+parse×Dec : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : @0 List Σ → Set}
             → @0 NoSubstrings A
             → (decNo : M (Level.Lift _ ⊤))
-            → Parser (M ∘ Dec) A → Decidable B
+            → Parser (M ∘ Dec) A → Decidable (λ xs → B xs)
             → Parser (M ∘ Dec) (A ×ₚ B)
 runParser (parse×Dec{M}{A = A}{B} nn₁ decNo p b?) xs = do
   yes x ← runParser p xs
@@ -191,16 +189,16 @@ runParser (parse×Dec{M}{A = A}{B} nn₁ decNo p b?) xs = do
             let @0 prefix≡ : prefix ≡ prefix'
                 prefix≡ = nn₁ (trans₀ ps≡ (sym ps≡')) value v₀'
             in
-            contradiction (subst₀ B (sym prefix≡) b') ¬b
+            contradiction (subst₀! B (sym prefix≡) b') ¬b
       (yes b) → return (yes (success _ _ read≡ (mk×ₚ value b ) suffix ps≡))
     where
     v₁ : Dec (B prefix)
-    v₁ = subst₀ (Dec ∘ B) (take read xs ≡ prefix ∋ trans₀ (cong₂ take read≡ (sym ps≡)) (Lemmas.take-length-++ prefix suffix)) (b? (take read xs))
+    v₁ = subst₀ (λ xs → Dec (B xs)) (take read xs ≡ prefix ∋ trans₀ (cong₂ take read≡ (sym ps≡)) (Lemmas.take-length-++ prefix suffix)) (b? (take read xs))
 
   -- case b? (take r₀ xs) of λ where
   --   x → {!!}
 
-parse× : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : List Σ → Set}
+parse× : {M : Set → Set} ⦃ _ : Monad M ⦄ {A B : @0 List Σ → Set}
          → @0 NoSubstrings A → @0 NoSubstrings B
          → (mismatch : M (Level.Lift _ ⊤))
          → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B
@@ -234,6 +232,6 @@ runParser (parse×{B = B} nn₁ nn₂ m p₁ p₂) xs = do
             r₀≢r₁
     (yes refl) →
       return (yes
-        (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (subst₀ B (proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡₁ (sym ps≡₀)) (trans (sym r₁≡) r₀≡))) v₁) ) suf₀ ps≡₀))
+        (success pre₀ r₀ r₀≡ (mk×ₚ v₀ (subst₀! B (proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡₁ (sym ps≡₀)) (trans (sym r₁≡) r₀≡))) v₁) ) suf₀ ps≡₀))
 
 

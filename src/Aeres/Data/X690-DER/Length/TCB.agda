@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Prelude
 import      Aeres.Grammar.Definitions.NonMalleable

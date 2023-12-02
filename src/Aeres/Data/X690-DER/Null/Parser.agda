@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Null.TCB
 open import Aeres.Data.X690-DER.TLV
@@ -20,9 +18,14 @@ private
 
 parse : Parser (Logging ∘ Dec) Null
 parse =
-  (parseTLV Tag.Null here' (_≡ [])
-    (parseExactLength (λ where _ refl refl → refl) (tell $ here' String.++ ": nonzero length")
-      (parseLit (return (Level.lift tt)) (return (Level.lift tt)) [])))
+  (parseTLV Tag.Null here' (λ x → Erased (x ≡ []))
+    (parseExactLength (λ where _ (─ refl) (─ refl) → refl) (tell $ here' String.++ ": nonzero length")
+      (mkParser λ xs → do
+        (yes s) ← runParser (parseLit (return (Level.lift tt)) (return (Level.lift tt)) []) xs
+          where no ¬p → return ∘ no $ λ where
+            (success prefix read read≡ (─ v) suffix ps≡) →
+              contradiction (success prefix read read≡ v suffix ps≡) ¬p
+        return (yes (mapSuccess (λ eq → ─ eq) s)))))
 
 -- private
 --   module Test where

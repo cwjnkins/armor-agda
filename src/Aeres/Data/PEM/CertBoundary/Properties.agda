@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Data.Base64.TCB
 open import Aeres.Data.PEM.CertBoundary.TCB
 open import Aeres.Data.PEM.RFC5234.TCB
@@ -14,12 +11,12 @@ open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.Seq         Char
 
 Rep : (ctrl : String) → @0 List Char → Set
-Rep ctrl = &ₚ (_≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----"))
-              (Erased ∘ EOL)
+Rep ctrl = &ₚ (λ x → Erased (x ≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----")))
+              (λ x → Erased (EOL x))
 
 equiv : ∀ ctrl → Equivalent (Rep ctrl) (CertBoundary ctrl)
-proj₁ (equiv ctrl) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkCertBoundary fstₚ₁ (¡ sndₚ₁) bs≡
-proj₂ (equiv ctrl) (mkCertBoundary begin eol bs≡) = mk&ₚ (‼ begin) (─ eol) bs≡
+proj₁ (equiv ctrl) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkCertBoundary (¡ fstₚ₁) (¡ sndₚ₁) bs≡
+proj₂ (equiv ctrl) (mkCertBoundary begin eol bs≡) = mk&ₚ (─ begin) (─ eol) bs≡
 
 noOverlapTextEOL
   : ∀ {ctrl}

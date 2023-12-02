@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.PEM.CertText.FullLine.Parser
 import Aeres.Data.PEM.CertText.FullLine.Properties
 import Aeres.Data.PEM.CertText.FullLine.TCB

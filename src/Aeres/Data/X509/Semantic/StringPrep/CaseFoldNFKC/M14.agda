@@ -1,5 +1,4 @@
-
-{-# OPTIONS --subtyping --sized-types #-}
+{-# OPTIONS --sized-types #-}
 
 open import Aeres.Binary
 open import Aeres.Prelude

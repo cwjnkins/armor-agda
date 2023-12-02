@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -20,7 +18,7 @@ open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
 
 module parseTLV
-  (t : UInt8) (tName : String) (@0 A : List UInt8 → Set)
+  (t : UInt8) (tName : String) (A : @0 List UInt8 → Set)
   (p : ∀ n → Parser (Logging ∘ Dec) (ExactLength A n))
   where
 

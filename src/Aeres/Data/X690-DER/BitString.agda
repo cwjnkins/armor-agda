@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Data.X690-DER.BitString.Parser
 import      Aeres.Data.X690-DER.BitString.Properties
 import      Aeres.Data.X690-DER.BitString.Serializer

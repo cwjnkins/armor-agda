@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Time.UTCTime.Properties
@@ -27,7 +25,7 @@ parseFields = parseEquivalent equivalent p
   p : Parser (Logging ∘ Dec) UTCTimeFieldsRep
   p =  parse& TimeType.nosubstrings Year.parse₂
       (parse& MDHMS.nosubstrings MDHMS.parse
-      (parseLit
+      (parseLitE
         (tell $ here' String.++ ": underflow")
         (tell $ here' String.++ ": mismatch (Z)")
         [ # 'Z' ]))

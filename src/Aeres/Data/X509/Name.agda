@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Name.Parser
 import Aeres.Data.X509.Name.Properties
 import Aeres.Data.X509.Name.RDN

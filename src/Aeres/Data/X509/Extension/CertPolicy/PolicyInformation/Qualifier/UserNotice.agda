@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.Eq
 import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.NoticeReference
 import Aeres.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.Parser

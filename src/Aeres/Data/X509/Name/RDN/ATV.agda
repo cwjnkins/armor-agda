@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Name.RDN.ATV.OIDs
 import Aeres.Data.X509.Name.RDN.ATV.Parser
 import Aeres.Data.X509.Name.RDN.ATV.Properties

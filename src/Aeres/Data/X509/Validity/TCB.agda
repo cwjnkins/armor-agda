@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Validity.Time.Ordering
 open import Aeres.Data.X509.Validity.Time.TCB

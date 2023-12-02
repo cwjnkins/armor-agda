@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Strings.BMPString
 import Aeres.Data.X690-DER.Strings.IA5String
 import Aeres.Data.X690-DER.Strings.PrintableString

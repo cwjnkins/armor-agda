@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import Aeres.Grammar.Definitions.NonMalleable
 
@@ -7,7 +5,7 @@ module Aeres.Grammar.Option.TCB (Σ : Set) where
 
 open Aeres.Grammar.Definitions.NonMalleable Σ
 
-data Option (@0 A : List Σ → Set) : (@0 _ : List Σ) → Set where
+data Option (A : @0 List Σ → Set) : (@0 _ : List Σ) → Set where
  none : Option A []
  some : ∀ {@0 xs} → A xs → Option A xs
 

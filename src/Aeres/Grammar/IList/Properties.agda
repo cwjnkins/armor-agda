@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Data.X690-DER.TLV.TCB
 import      Aeres.Data.X690-DER.TLV.Properties as TLV
 import      Aeres.Grammar.Definitions
@@ -22,20 +20,20 @@ open Aeres.Grammar.Properties  Σ
 open Aeres.Grammar.Seq         Σ
 open Aeres.Grammar.Sum         Σ
 
-Rep : (List Σ → Set) → @0 List Σ → Set
-Rep A = Sum (_≡ []) (&ₚ A (IList A))
+Rep : (@0 List Σ → Set) → @0 List Σ → Set
+Rep A = Sum (λ x → Erased (x ≡ [])) (&ₚ A (IList A))
 
-equiv : ∀ {@0 A} → Equivalent (Rep A) (IList A)
-proj₁ equiv (Sum.inj₁ refl) = nil
+equiv : ∀ {A} → Equivalent (Rep A) (IList A)
+proj₁ equiv (Sum.inj₁ (─ refl)) = nil
 proj₁ equiv (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) =
   consIList fstₚ₁ sndₚ₁ bs≡
-proj₂ equiv nil = inj₁ refl
+proj₂ equiv nil = inj₁ (─ refl)
 proj₂ equiv (consIList h t bs≡) =
   inj₂ (mk&ₚ h t bs≡)
 
-iso : ∀ {@0 A} → Iso (Rep A) (IList A)
+iso : ∀ {A} → Iso (Rep A) (IList A)
 proj₁ iso = equiv
-proj₁ (proj₂ iso) (Sum.inj₁ refl) = refl
+proj₁ (proj₂ iso) (Sum.inj₁ (─ refl)) = refl
 proj₁ (proj₂ iso) (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) = refl
 proj₂ (proj₂ iso) nil = refl
 proj₂ (proj₂ iso) (consIList h t bs≡) = refl
@@ -86,7 +84,7 @@ lengthIList≡ ne nn (cons (mkIListCons head tail bs≡)) nil =
 lengthIList≡{A} ne nn (cons (mkIListCons{bs₂ = bs₂} head tail refl)) (cons (mkIListCons head₁ tail₁ bs≡₁)) =
   cong suc
     (trans (lengthIList≡ ne nn {bs₂} tail tail')
-      (‼ ≡-elim (λ {bs₁'} eq → lengthIList (subst₀ (IList A) eq tail₁) ≡ lengthIList tail₁) refl bs₂≡))
+      (‼ ≡-elim (λ {bs₁'} eq → lengthIList (subst₀! (IList A) eq tail₁) ≡ lengthIList tail₁) refl bs₂≡))
   where
   @0 bs₁≡ : _ ≡ _
   bs₁≡ = nn (sym bs≡₁) head₁ head
@@ -95,7 +93,7 @@ lengthIList≡{A} ne nn (cons (mkIListCons{bs₂ = bs₂} head tail refl)) (cons
   bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ (sym bs≡₁)
 
   tail' : IList A bs₂
-  tail' = subst₀ (IList A) bs₂≡ tail₁
+  tail' = subst₀! (IList A) bs₂≡ tail₁
 
 lengthIList≤
   : ∀ {@0 A} → NonEmpty A → NoSubstrings A
@@ -144,7 +142,7 @@ lengthIList≤ ne nn .(bs₁ ++ bs₂) xs₂{ys₁ = ys₁}{ys₂} ++≡ xs₁�
 
 private
   eqIListWF
-    : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
+    : ∀ {A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
       → {@0 xs ys : List Σ} (a₁ : IList A xs) (a₂ : IList A ys)
       → @0 Acc _<_ (lengthIList a₁)
       → Dec (_≡_{A = Exists─ (List Σ) (IList A)} (─ xs , a₁) (─ ys , a₂))
@@ -161,12 +159,12 @@ private
     where
     open import Data.Nat.Properties hiding (_≟_)
 
-IListEq : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
+IListEq : ∀ {A : @0 List Σ → Set} ⦃ _ : Eq (Exists─ (List Σ) A) ⦄
           → Eq (Exists─ (List Σ) (IList A))
 Eq._≟_ IListEq (─ xs₁ , a₁) (─ xs₂ , a₂) = eqIListWF a₁ a₂ (<-wellFounded _)
   where open import Data.Nat.Induction
 
-IListEq≋ : ∀ {@0 A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
+IListEq≋ : ∀ {A : @0 List Σ → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (IList A)
 IListEq≋ = Eq⇒Eq≋ (IListEq ⦃ Eq≋⇒Eq it ⦄)
 
 @0 nonmalleable : ∀ {A : @0 List Σ → Set} {R : Raw A} → NonEmpty A → NoSubstrings A → NonMalleable R → NonMalleable (RawIList R)

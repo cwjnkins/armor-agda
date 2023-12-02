@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Time.TimeType.Parser
 import Aeres.Data.X690-DER.Time.TimeType.Properties
 import Aeres.Data.X690-DER.Time.TimeType.Relation

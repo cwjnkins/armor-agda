@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.GeneralNames.GeneralName.Eq
 import Aeres.Data.X509.GeneralNames.GeneralName.Parser
 import Aeres.Data.X509.GeneralNames.GeneralName.Properties

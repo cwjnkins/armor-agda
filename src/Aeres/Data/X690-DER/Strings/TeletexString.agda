@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Strings.TeletexString.Parser
 import Aeres.Data.X690-DER.Strings.TeletexString.TCB
 import Aeres.Data.X690-DER.Strings.TeletexString.Properties

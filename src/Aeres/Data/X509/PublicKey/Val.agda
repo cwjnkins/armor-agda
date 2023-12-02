@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.PublicKey.Val.EC
 import Aeres.Data.X509.PublicKey.Val.Eq
 import Aeres.Data.X509.PublicKey.Val.Parser

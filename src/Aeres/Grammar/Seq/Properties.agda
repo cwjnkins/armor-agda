@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Option.TCB
 import      Aeres.Grammar.Option.Properties
@@ -16,11 +14,11 @@ private
   module Option = Aeres.Grammar.Option.Properties Σ
 open Aeres.Grammar.Seq.TCB     Σ
 
-@0 nonempty₁ : ∀ {A} {B : ∀ {bs} → A bs → List Σ → Set} → NonEmpty A → NonEmpty (&ₚᵈ A B)
+@0 nonempty₁ : ∀ {A : @0 List Σ → Set} {B : ∀ {@0 bs} → A bs → @0 List Σ → Set} → NonEmpty A → NonEmpty (&ₚᵈ A B)
 nonempty₁ ne (mk&ₚ fstₚ₁ sndₚ₁ bs≡) refl = ne fstₚ₁ (++-conicalˡ _ _ (sym bs≡))
 
 @0 nosubstringsᵈ
-  : {A : List Σ → Set} {B : {@0 bs₁ : List Σ} → A bs₁ → List Σ → Set}
+  : {A : @0 List Σ → Set} {B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
     → NoSubstrings A → Unambiguous A → (∀ {@0 bs} (a : A bs) → NoSubstrings (B a))
     → NoSubstrings (&ₚᵈ A B)
 nosubstringsᵈ{A}{B} nnA uA nnB {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
@@ -42,12 +40,12 @@ nosubstringsᵈ{A}{B} nnA uA nnB {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs�
   @0 bs₁≡ : bs₁₁ ≡ bs₁₂
   bs₁≡ = nnA xs++ys≡' fstₚ₁ fstₚ₂
 
-  fstₚ≡ : fstₚ₁ ≡ subst A (sym bs₁≡) fstₚ₂
+  fstₚ≡ : fstₚ₁ ≡ subst₀! A (sym bs₁≡) fstₚ₂
   fstₚ≡ = uA fstₚ₁ _
 
   B≡ : B fstₚ₁ bs₂₂ ≡ B fstₚ₂ bs₂₂
   B≡ = begin B fstₚ₁ bs₂₂ ≡⟨ cong (λ x → B x bs₂₂) fstₚ≡ ⟩
-             B (subst A (sym bs₁≡) fstₚ₂) bs₂₂ ≡⟨ ≡-elim (λ {y} e → B (subst A e fstₚ₂) bs₂₂ ≡ B _ bs₂₂) refl (sym bs₁≡) ⟩
+             B (subst₀! A (sym bs₁≡) fstₚ₂) bs₂₂ ≡⟨ ≡-elim (λ {y} e → B (subst₀! A e fstₚ₂) bs₂₂ ≡ B _ bs₂₂) refl (sym bs₁≡) ⟩
              B fstₚ₂ bs₂₂ ∎
 
   sndₚ₂' : B fstₚ₁ bs₂₂
@@ -147,7 +145,7 @@ module ExactLength where
       length bs₁ + (n - length bs₁) ∎)
 
 @0 unambiguousᵈ
-  : ∀ {A} {B : ∀ {bs} → A bs → List Σ → Set} → Unambiguous A → NoSubstrings A
+  : ∀ {A : @0 List Σ → Set} {B : ∀ {@0 bs} → A bs → @0 List Σ → Set} → Unambiguous A → NoSubstrings A
     → (∀ {@0 bs} (a : A bs) → Unambiguous (B a))
     → Unambiguous (&ₚᵈ A B)
 unambiguousᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ bs≡) (mk&ₚ{bs₁₂}{bs₂₂} fstₚ₂ sndₚ₂ bs≡₁) =
@@ -166,7 +164,7 @@ unambiguousᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ b
                     refl → refl
 
 @0 nonmalleableᵈ
-  : ∀ {A} {B : ∀ {bs} → A bs → List Σ → Set} {ra : Raw A} {rb : Raw₁ ra B}
+  : ∀ {A : @0 List Σ → Set} {B : ∀ {@0 bs} → A bs → @0 List Σ → Set} {ra : Raw A} {rb : Raw₁ ra B}
     → NonMalleable ra → NonMalleable₁ rb → NonMalleable (Raw&ₚᵈ ra rb)
 nonmalleableᵈ nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) eq =
   case Inverse.f⁻¹ Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
@@ -297,10 +295,10 @@ unambiguous₂Option₃{A}{B}{C} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ne₃
       refl → refl
   help (mk&ₚ{bs₁₁} none bc₁@(mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ refl) refl) (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) (mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ refl) bs≡₂) =
     contradiction
-      (subst₀ (&ₚ (Option B) (Option C)) bs≡₂ bc₁)
+      (subst₀! (&ₚ (Option B) (Option C)) bs≡₂ bc₁)
       (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₂₂'} a₂)
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) (mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ refl) bs≡₁) (mk&ₚ{bs₂₁} none bc₂@(mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ refl) refl) =
-    contradiction (subst₀ (&ₚ (Option B) (Option C)) bs≡₁ bc₂) (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₁₂'} a₁)
+    contradiction (subst₀! (&ₚ (Option B) (Option C)) bs≡₁ bc₂) (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₁₂'} a₁)
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bc₁@(mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ bs≡₁') bs≡₁) (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bc₂@(mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ bs≡₂') bs≡₂) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
@@ -317,7 +315,7 @@ unambiguous₂Option₃{A}{B}{C} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ne₃
                 bs₁₁ ++ bs₁₂' ≡⟨ ++≡' ⟩
                 bs₂₁ ++ bs₂₂' ≡⟨ cong (bs₂₁ ++_) bs≡₂' ⟩
                 bs₂₁ ++ bs₂₂ ++ bs₂₃ ∎
-eq&ₚᵈ : ∀ {@0 A : @0 List Σ → Set} {@0 B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
+eq&ₚᵈ : ∀ {A : @0 List Σ → Set} {B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
         → Eq (Exists─ (List Σ) A)
         → (∀ {@0 bs₁} → (a : A bs₁) → Eq (Exists─ (List Σ) (B a)))
         → Eq (Exists─ (List Σ) (&ₚᵈ A B))
@@ -329,7 +327,7 @@ Eq._≟_ (eq&ₚᵈ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b
         (no ¬p) → no λ where refl → contradiction refl ¬p
         (yes refl) → yes refl
 
-eq&ₚ : ∀ {@0 A B} → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B) → Eq (Exists─ (List Σ) (&ₚ A B))
+eq&ₚ : ∀ {A B : @0 List Σ → Set} → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B) → Eq (Exists─ (List Σ) (&ₚ A B))
 Eq._≟_ (eq&ₚ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁ refl)) (─ bs₂ , mk&ₚ{bs₂₁}{bs₂₂} a₂ b₂ refl) =
   case Eq._≟_ eq₁ (─ bs₁₁ , a₁) (─ bs₂₁ , a₂) ret (const _) of λ where
     (no ¬p) → no λ where
@@ -338,10 +336,10 @@ Eq._≟_ (eq&ₚ eq₁ eq₂) (─ bs₁ , (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁
       (no ¬p) → no λ where refl → contradiction refl ¬p
       (yes refl) → yes refl
 
-eq≋&ₚ : ∀ {@0 A B} → Eq≋ A → Eq≋ B → Eq≋ (&ₚ A B)
+eq≋&ₚ : ∀ {A B : @0 List Σ → Set} → Eq≋ A → Eq≋ B → Eq≋ (&ₚ A B)
 eq≋&ₚ eq₁ eq₂ = Eq⇒Eq≋ (eq&ₚ (Eq≋⇒Eq eq₁) (Eq≋⇒Eq eq₂))
 
-eq≋&ₚᵈ : ∀ {@0 A : @0 List Σ → Set} {@0 B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
+eq≋&ₚᵈ : ∀ {A : @0 List Σ → Set} {B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
          → Eq≋ A 
          → (∀ {@0 bs₁} → (a : A bs₁) → Eq≋ (B a))
          → Eq≋ (&ₚᵈ A B)

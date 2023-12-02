@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Definitions.Iso

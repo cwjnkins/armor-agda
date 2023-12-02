@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.TBSCert.Version.Eq
 import Aeres.Data.X509.TBSCert.Version.Parser
 import Aeres.Data.X509.TBSCert.Version.Properties

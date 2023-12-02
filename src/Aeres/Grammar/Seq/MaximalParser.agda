@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Seq.Properties
 import      Aeres.Grammar.Seq.TCB
@@ -22,7 +20,7 @@ open Aeres.Grammar.Seq.TCB        Σ
 open ≡-Reasoning
 open LogDec
 
-parse& : ∀ {@0 A B} → MaximalParser A → MaximalParser B → @0 NoOverlap A B
+parse& : ∀ {A B : @0 List Σ → Set} → MaximalParser A → MaximalParser B → @0 NoOverlap A B
          → MaximalParser (&ₚ A B)
 parse&{A} p₁ p₂ noo = mkMaximalParser help
   where
@@ -67,7 +65,7 @@ parse&{A} p₁ p₂ noo = mkMaximalParser help
                           (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ cong (_++ suf₁) (sym $ ¡ pre₁≡) ⟩
                           pre₁ ++ suf₁ ≡⟨ (sym $ ¡ xs≡) ⟩
                           bs₁ ++ bs₂ ++ suffix ∎)
-                        (subst A (¡ pre₁≡) v₁) v₁' ret (const _) of λ where
+                        (subst₀! A (¡ pre₁≡) v₁) v₁' ret (const _) of λ where
                    (inj₁ x) →
                      let bs₁≡ : Erased (pre₁ ≡ bs₁)
                          bs₁≡ = ─ (begin (pre₁ ≡⟨ ¡ pre₁≡ ⟩
@@ -119,7 +117,7 @@ parse&{A} p₁ p₂ noo = mkMaximalParser help
                        (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ (cong (_++ suf₁) ∘ sym $ ¡ pre₁≡) ⟩
                        pre₁ ++ suf₁ ≡⟨ sym (¡ xs≡) ⟩
                        bs₁ ++ bs₂ ++ suf' ∎)))
-                     (subst A (¡ pre₁≡) v₁) fstₚ₁
+                     (subst₀! A (¡ pre₁≡) v₁) fstₚ₁
                    ret (const _) of λ where
                    (inj₁ ≡[]) →
                      let
@@ -142,7 +140,7 @@ parse&{A} p₁ p₂ noo = mkMaximalParser help
                    (inj₂ ¬b) → contradiction sndₚ₁ ¬b)
                  (_ ≤? _)
 
-parse&ᵈ : {@0 A : @0 List Σ → Set} {@0 B : {@0 bs : List Σ} → A bs → List Σ → Set}
+parse&ᵈ : {A : @0 List Σ → Set} {B : {@0 bs : List Σ} → A bs → @0 List Σ → Set}
           → @0 NoSubstrings A → @0 Unambiguous A
           → Parser (Logging ∘ Dec) A
           → (∀ {@0 bs} → Singleton (length bs) → (a : A bs) → MaximalParser (B a))
@@ -228,13 +226,13 @@ parse&ᵈ{A}{B} nn ua p₁ p₂ = mkMaximalParser help
                       ≤.≤⟨ +-monoʳ-≤ r₁
                              (max bs₂ suf'
                                 (Lemmas.++-cancel≡ˡ bs₁ pre₁ (¡ bs₁≡) (¡ xs≡))
-                                (subst {A = Sigma (List Σ) A} (λ p → B (proj₂ p) bs₂ ) (¡ v₁≡) sndₚ₁))
+                                (subst₀! {A = Sigma (List Σ) (λ xs → A xs)} (λ p → B (proj₂ p) bs₂ ) (¡ v₁≡) sndₚ₁))
                       ⟩
                     r₁ + r₂ ≤.∎)
                   (_ ≤? _)
  
 
-parse&₁ : ∀ {@0 A B} → Parser (Logging ∘ Dec) A → @0 NoSubstrings A → MaximalParser B → MaximalParser (&ₚ A B)
+parse&₁ : ∀ {A B : @0 List Σ → Set} → Parser (Logging ∘ Dec) A → @0 NoSubstrings A → MaximalParser B → MaximalParser (&ₚ A B)
 parse&₁{A}{B} p₁ nn p₂ = mkMaximalParser help
   where
   help : ∀ xs

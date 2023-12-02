@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.RSA.Ints
 open import Aeres.Data.X509.PublicKey.Val.RSA.Properties
@@ -22,5 +20,5 @@ instance
         (Seq.eq&ₚ
           (record
             { _≟_ = λ where
-              (─ _ , refl) (─ _ , refl) → yes refl })
+              (─ _ , ─ refl) (─ _ , ─ refl) → yes refl })
           (Eq≋⇒Eq it)))

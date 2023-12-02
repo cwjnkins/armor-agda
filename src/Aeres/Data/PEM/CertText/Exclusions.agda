@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
@@ -86,7 +84,7 @@ noOverlapLines ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂
               (l₁' ∷ l“) ++ e' ++ ys₂ ∎)
 
     line“ : Base64Str (l₁' ∷ l“)
-    line“ = subst₀ Base64Str (sym (proj₂ l'≡)) line'
+    line“ = subst₀! Base64Str (sym (proj₂ l'≡)) line'
 
     @0 l₁'∈ : l₁' ∈ B64.charset ⊎ l₁' ≡ '='
     l₁'∈ = Base64.Str.char∈ (here refl) line“
@@ -133,7 +131,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
     cᵣ = proj₂ (proj₁ l≡∷)
 
     line“ : Base64Str (l₁ ++ cₗ ∷ cᵣ)
-    line“ = subst₀ Base64Str
+    line“ = subst₀! Base64Str
               (l ≡⟨ l≡ ⟩
               l₁ ++ drop (length l₁) l ≡⟨ cong (l₁ ++_) (sym $ proj₂ l≡∷) ⟩
               l₁ ++ cₗ ∷ cᵣ ∎)
@@ -194,7 +192,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
     cᵣ = proj₂ (proj₁ l≡∷)
 
     line“ : Base64Str (l ++ cₗ ∷ cᵣ)
-    line“ = subst₀ Base64Str
+    line“ = subst₀! Base64Str
               (l₁ ≡⟨ l₁≡ ⟩
               l ++ drop (length l) l₁ ≡⟨ cong (l ++_) (sym $ proj₂ l≡∷) ⟩
               l ++ cₗ ∷ cᵣ ∎)
@@ -272,7 +270,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
     cₗ = proj₁ l₂≡
 
     @0 x₁∈ : x₁ ∈ B64.charset ⊎ x₁ ≡ '='
-    x₁∈ = Base64.Str.char∈ (here refl) (subst₀ Base64Str (sym $ proj₂ l₂≡) fi)
+    x₁∈ = Base64.Str.char∈ (here refl) (subst₀! Base64Str (sym $ proj₂ l₂≡) fi)
 
   noway (mk&ₚ{bs₂ = bs₃} (consIList{bs₁}{bs₂} h t refl) sndₚ₁ bs≡) =
     contradiction x₁∈ (proj₁ x₁∉×≢)
@@ -290,6 +288,6 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
         (singleton (x ∷ x₃) refl) → ─ (x₃ , cong (_∷ x₃) (∷-injectiveˡ bbs≡))
 
     @0 x₁∈ : x₁ ∈ B64.charset
-    x₁∈ = FullLine.char₁ (subst₀ CertFullLine (sym $ proj₂ bs₂≡) h)
+    x₁∈ = FullLine.char₁ (subst₀! CertFullLine (sym $ proj₂ bs₂≡) h)
 
 

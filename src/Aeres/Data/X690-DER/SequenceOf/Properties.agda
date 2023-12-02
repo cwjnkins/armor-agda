@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -27,7 +25,7 @@ open Aeres.Grammar.Seq                      UInt8
 open Aeres.Grammar.Sum                      UInt8
 
 module SequenceOf where
-  equivalent : ∀ {@0 A} → Equivalent (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
+  equivalent : ∀ {A : @0 List UInt8 → Set} → Equivalent (Sum (Option (λ _ → ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
   proj₁ equivalent (Sum.inj₁ none) = nil
   proj₁ equivalent (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) =
     consSequenceOf fstₚ₁ sndₚ₁ bs≡
@@ -35,7 +33,7 @@ module SequenceOf where
   proj₂ equivalent (cons (mkSequenceOf h t bs≡)) =
     inj₂ (mk&ₚ h t bs≡)
 
-  iso : ∀ {@0 A} → Iso (Sum (Option (const ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
+  iso : ∀ {A : @0 List UInt8 → Set} → Iso (Sum (Option (λ _ → ⊥)) (&ₚ A (SequenceOf A))) (SequenceOf A)
   proj₁ iso = equivalent
   proj₁ (proj₂ iso) (Sum.inj₁ none) = refl
   proj₁ (proj₂ iso) (Sum.inj₂ (mk&ₚ fstₚ₁ sndₚ₁ bs≡)) = refl
@@ -71,7 +69,7 @@ module SequenceOf where
     bs₂≡ : bs₁₂ ≡ bs₂₂
     bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
-  @0 sameLength : ∀ {@0 A bs} → NoSubstrings A → NonEmpty A → (s₁ s₂ : SequenceOf A bs) → lengthSequence s₁ ≡ lengthSequence s₂
+  @0 sameLength : ∀ {A : @0 List UInt8 → Set} {bs} → NoSubstrings A → NonEmpty A → (s₁ s₂ : SequenceOf A bs) → lengthSequence s₁ ≡ lengthSequence s₂
   sameLength nn ne nil nil = refl
   sameLength nn ne nil (cons (mkSequenceOf h t bs≡)) =
     contradiction
@@ -91,7 +89,7 @@ module SequenceOf where
     bs₂≡ = proj₂ (Lemmas.length-++-≡ _ _ _ _ ((trans₀ (sym bs≡) bs≡₁)) (cong length bs₁≡))
 
     t₁' : SequenceOf _ bs₁₂
-    t₁' = subst₀ (SequenceOf _) (sym bs₂≡) t₁
+    t₁' = subst₀! (SequenceOf _) (sym bs₂≡) t₁
 
     ih : lengthSequence t ≡ lengthSequence t₁'
     ih = sameLength nn ne t t₁'
@@ -99,7 +97,7 @@ module SequenceOf where
     @0 lem : lengthSequence t₁' ≡ lengthSequence t₁
     lem =
       ≡-elim
-        (λ {ys} eq → ∀ (t' : SequenceOf _ ys) → lengthSequence (subst₀ _ (sym eq) t') ≡ lengthSequence t')
+        (λ {ys} eq → ∀ (t' : SequenceOf _ ys) → lengthSequence (subst₀! _ (sym eq) t') ≡ lengthSequence t')
         (λ t → refl) bs₂≡ t₁
 
   @0 nonmalleable : ∀ {A : @0 List UInt8 → Set} {R : Raw A} → NonEmpty A → NoSubstrings A → NonMalleable R → NonMalleable (RawSequenceOf R)
@@ -121,14 +119,14 @@ module SequenceOf where
 
 module Bounded where
 
-  @0 unambiguous : ∀ {@0 A n} → Unambiguous A → NonEmpty A → NoSubstrings A → Unambiguous (BoundedSequenceOf A n)
-  unambiguous uaₐ naₐ nnₐ = Parallel.unambiguous (SequenceOf.unambiguous uaₐ naₐ nnₐ) (λ _ → ≤-irrelevant)
+  @0 unambiguous : ∀ {A} {@0 n} → Unambiguous A → NonEmpty A → NoSubstrings A → Unambiguous (BoundedSequenceOf A n)
+  unambiguous uaₐ naₐ nnₐ = Parallel.unambiguous (SequenceOf.unambiguous uaₐ naₐ nnₐ) (λ _ → erased-unique ≤-irrelevant)
 
   @0 nonmalleable : ∀ {A : @0 List UInt8 → Set} {n} {R : Raw A} → NonEmpty A → NoSubstrings A → NonMalleable R → NonMalleable (RawBoundedSequenceOf R n)
   nonmalleable {A} {n} {R} ne nn N =
     Parallel.nonmalleable₁ (RawSequenceOf R)
       (SequenceOf.nonmalleable ne nn N)
-      λ _ → ≤-irrelevant
+      λ _ → erased-unique ≤-irrelevant
 
 open SequenceOf public
 
@@ -145,7 +143,7 @@ nonmalleableSeq ne nn N = TLV.nonmalleable (nonmalleable ne nn N)
 nonmalleableNonEmptySeq ne nn N = TLV.nonmalleable (Bounded.nonmalleable ne nn N)
 
 instance
-    SequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
+    SequenceOfEq≋ : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Eq≋ (SequenceOf A)
     Eq≋._≋?_ SequenceOfEq≋ {.[]} {.[]} nil nil = yes ≋-refl
     Eq≋._≋?_ SequenceOfEq≋ {.[]} {bs₂} nil (cons x) = no λ where (mk≋ refl ())
     Eq≋._≋?_ SequenceOfEq≋ {bs₁} {.[]} (cons x) nil = no λ where (mk≋ refl ())
@@ -158,7 +156,7 @@ instance
     ... | refl =
       yes (mk≋ (sym $ IListCons.bs≡ v₂)
             (‼ ≡-elim (λ {bs₂} bs₂≡ → (@0 bs≡ : bs₂ ≡ IListCons.bs₁ v₁ ++ _) →
-              subst _ (sym bs₂≡) (cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) bs≡)) ≡ cons v₂)
+              subst₀! _ (sym bs₂≡) (cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) bs≡)) ≡ cons v₂)
               (λ bs₂≡ → subst (λ x → cons (mkSequenceOf (IListCons.head v₂) (IListCons.tail v₂) x) ≡ cons v₂)
                 (‼ (≡-unique (IListCons.bs≡ v₂) bs₂≡)) refl)
               (IListCons.bs≡ v₂) (IListCons.bs≡ v₁)))
@@ -167,9 +165,9 @@ instance
     Eq≋._≋?_ SequenceOfEq≋ (cons v₁) (cons v₂) | no ¬v₁≋v₂ = no λ where
       ≋-refl → contradiction ≋-refl ¬v₁≋v₂
 
-    SequenceOfEq : {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq (Exists─ _ A) ⦄
+    SequenceOfEq : {A : @0 List UInt8 → Set} ⦃ _ : Eq (Exists─ _ A) ⦄
                    → Eq (Exists─ _ (SequenceOf A))
     SequenceOfEq = Eq≋⇒Eq (SequenceOfEq≋ ⦃ Eq⇒Eq≋ it ⦄)
 
-BoundedSequenceOfEq≋ : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {@0 n} → Eq≋ (BoundedSequenceOf A n)
-BoundedSequenceOfEq≋ = Parallel.eq≋Σₚ it (λ a → record { _≟_ = λ x y → yes (‼ ≤-irrelevant x y) })
+BoundedSequenceOfEq≋ : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {n} → Eq≋ (BoundedSequenceOf A n)
+BoundedSequenceOfEq≋ = Parallel.eq≋Σₚ it (λ a → record { _≟_ = λ x y → yes (erased-unique ≤-irrelevant x y) }) -- (‼ ≤-irrelevant x y)})

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser.Core
 open import Aeres.Prelude
@@ -25,12 +23,12 @@ module Generic (M : List Σ → Set → Set) (Lift : (A : Set) (P : A → Set) �
   Maximal : ∀ {A} → Parserᵢ M A → Set
   Maximal{A} p = ∀ xs → Lift (Success A xs) GreatestSuccess xs (runParser p xs)
 
-  record MaximalParser (@0 A : List Σ → Set) : Set where
+  record MaximalParser (A : @0 List Σ → Set) : Set where
     field
       parser : Parserᵢ M A
       max    : Maximal parser
 
-  runMaximalParser : ∀ {@0 A} → (p : MaximalParser A) → ∀ xs → Sigma (M xs (Success A xs)) (Lift (Success A xs) GreatestSuccess xs)
+  runMaximalParser : ∀ {A : @0 List Σ → Set} → (p : MaximalParser A) → ∀ xs → Sigma (M xs (Success A xs)) (Lift (Success A xs) GreatestSuccess xs)
   proj₁ (runMaximalParser p xs) = runParser (MaximalParser.parser p) xs
   proj₂ (runMaximalParser p xs) = MaximalParser.max p xs
 
@@ -47,7 +45,7 @@ module LogDec where
   open GenericSimple (Logging ∘ Dec) Lift public
   open ≡-Reasoning
 
-  unlift : ∀ {@0 A} → (p : MaximalParser A)
+  unlift : ∀ {A : @0 List Σ → Set} → (p : MaximalParser A)
            → ∀ xs {@0 pre} {suf} → pre ++ suf ≡ xs
            → A pre
            → Lift (Success A xs) GreatestSuccess (runParser (MaximalParser.parser p) xs)
@@ -66,7 +64,7 @@ module LogDec where
   MaximalParser.max (mkMaximalParser {A} f) xs =
     let (_ , m) = f xs in m
 
-  equivalent : ∀ {@0 A B} → Equivalent A B → MaximalParser A → MaximalParser B
+  equivalent : ∀ {A B : @0 List Σ → Set} → Equivalent A B → MaximalParser A → MaximalParser B
   equivalent{A}{B} eq@(eq₁ , eq₂) p = mkMaximalParser help
     where
     help : ∀ xs → Sigma (Logging ∘ Dec $ Success B xs) (Lift (Success B xs) GreatestSuccess)
@@ -81,20 +79,21 @@ module LogDec where
           (mkLogged l₁ (yes (mapSuccess eq₁ s))) ,e λ where
             pre' suf' xs≡ b → m pre' suf' xs≡ (eq₂ b)
 
-  nonnesting : ∀ {@0 A} → @0 NoSubstrings A → Parser (Logging ∘ Dec) A → MaximalParser A
+  nonnesting : ∀ {A : @0 List Σ → Set} → @0 NoSubstrings A → Parser (Logging ∘ Dec) A → MaximalParser A
   MaximalParser.parser (nonnesting nn p) = p
-  MaximalParser.max (nonnesting{A} nn p) xs
-    with runParser p xs
-  ... | mkLogged log (no ¬p) = tt
-  ... | (mkLogged log (yes p₁)) = help
+  MaximalParser.max (nonnesting{A} nn p) xs =
+    case runParser p xs ret (Lift _ _) of λ where
+      (mkLogged log (no ¬p)) → tt
+      (mkLogged log (yes p₁)) → help p₁
     where
-    help : (pre' suf' : List Σ) → pre' ++ suf' ≡ xs → A pre' → length pre' ≤ Success.read p₁
-    help pre' suf' eq a =
-      Lemmas.≡⇒≤
-        (trans₀
-          (‼ cong length
-            (nn (trans eq (sym (Success.ps≡ p₁))) a (Success.value p₁)))
-          (sym $ Success.read≡ p₁))
+    module _ (p₁ : Success A xs) where
+      help : (pre' suf' : List Σ) → pre' ++ suf' ≡ xs → A pre' → length pre' ≤ Success.read p₁
+      help pre' suf' eq a =
+        Lemmas.≡⇒≤
+          (trans₀
+            (‼ cong length
+              (nn (trans eq (sym (Success.ps≡ p₁))) a (Success.value p₁)))
+            (sym $ Success.read≡ p₁))
 
   -- parse& : ∀ {@0 A B} → MaximalParser A → MaximalParser B → @0 NoOverlap A B
   --          → MaximalParser (&ₚ A B)
@@ -310,10 +309,10 @@ module LogDec where
 
 
 
-  parseErased : ∀ {@0 A} → MaximalParser A → MaximalParser (Erased ∘ A)
+  parseErased : ∀ {A : @0 List Σ → Set} → MaximalParser A → MaximalParser (λ x → Erased (A x))
   parseErased{A} p = mkMaximalParser help
     where
-    help : ∀ xs → Sigma (Logging ∘ Dec $ Success (Erased ∘ A) xs) (Lift _ GreatestSuccess)
+    help : ∀ xs → Sigma (Logging ∘ Dec $ Success (λ x → Erased (A x)) xs) (Lift _ GreatestSuccess)
     help xs =
       case
         _,e_{B = Lift (Success A xs) GreatestSuccess}

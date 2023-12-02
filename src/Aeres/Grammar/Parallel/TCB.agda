@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions.NonMalleable.Base
 open import Aeres.Prelude
 open import Data.Nat.Properties
@@ -8,18 +6,18 @@ module Aeres.Grammar.Parallel.TCB (Σ : Set) where
 
 open Aeres.Grammar.Definitions.NonMalleable.Base Σ
 
-record Σₚ (@0 A : List Σ → Set) (@0 B : (xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
+record Σₚ (A : @0 List Σ → Set) (B : (@0 xs : List Σ) (a : A xs) → Set) (@0 xs : List Σ) : Set where
   constructor mk×ₚ
   field
     fstₚ : A xs
     sndₚ : B xs fstₚ
 open Σₚ public using (fstₚ ; sndₚ)
 
-_×ₚ_ : (@0 A B : List Σ → Set) (@0 xs : List Σ) → Set
+_×ₚ_ : (A B : @0 List Σ → Set) (@0 xs : List Σ) → Set
 A ×ₚ B = Σₚ A (λ xs _ → B xs)
 
 -- Raw values that drop the second component (for when it is only specificational)
-RawΣₚ₁ : {A : @0 List Σ → Set} → Raw A → (B : (xs : List Σ) (a : A xs) → Set) → Raw (Σₚ A B)
+RawΣₚ₁ : {A : @0 List Σ → Set} → Raw A → (B : (@0 xs : List Σ) (a : A xs) → Set) → Raw (Σₚ A B)
 Raw.D (RawΣₚ₁ r B) = Raw.D r
 Raw.to (RawΣₚ₁ r B) (mk×ₚ a _) = Raw.to r a
 
@@ -32,19 +30,19 @@ map×ₚ f (mk×ₚ fstₚ₁ sndₚ₁) = mk×ₚ (f fstₚ₁) sndₚ₁
 
 -- type definitions that place restrictions on the length of the string
 --- bounded below
-Length≥ : (A : List Σ → Set) → ℕ → @0 List Σ → Set
-Length≥ A n = A ×ₚ (Erased ∘ (_≥ n) ∘ length)
+Length≥ : (A : @0 List Σ → Set) → ℕ → @0 List Σ → Set
+Length≥ A n = A ×ₚ (λ x → Erased (length x ≥ n))
 
 --- bounded above
-Length≤ : (@0 A : List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
-Length≤ A n = A ×ₚ (Erased ∘ (_≤ n) ∘ length)
+Length≤ : (A : @0 List Σ → Set) → ℕ → (@0 _ : List Σ) → Set
+Length≤ A n = A ×ₚ (λ x → Erased (length x ≤ n))
 
 -- Bounded : (@0 A : List Σ → Set) (@0 l u : ℕ) → @0 List Σ → Set
 -- Bounded A l u = A ×ₚ (InRange l u ∘ length)
 
 --- bounded exactly
-ExactLength : (@0 A : List Σ → Set) → @0 ℕ → @0 List Σ → Set
-ExactLength A n = A ×ₚ (Erased ∘ (_≡ n) ∘ length)
+ExactLength : (A : @0 List Σ → Set) → @0 ℕ → @0 List Σ → Set
+ExactLength A n = A ×ₚ (λ x → Erased (length x ≡ n))
 
 ExactLengthString : ℕ → @0 List Σ → Set
 ExactLengthString n = ExactLength Singleton n

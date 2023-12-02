@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 -- TODO: make this depend on Aeres.Grammar.Definitions once dependencies have
 -- been sorted out
 import      Aeres.Grammar.Definitions.Eq
@@ -25,7 +23,7 @@ open Aeres.Grammar.Parallel.TCB                  Σ
 
 
 module Parallel where
-  equivalent₁ : ∀ {@0 A₁ A₂ B} → Equivalent A₁ A₂ → Equivalent (A₁ ×ₚ B) (A₂ ×ₚ B)
+  equivalent₁ : ∀ {A₁ A₂ B : @0 List Σ → Set} → Equivalent A₁ A₂ → Equivalent (A₁ ×ₚ B) (A₂ ×ₚ B)
   proj₁ (equivalent₁ equiv) (mk×ₚ fstₚ₁ sndₚ₁) = mk×ₚ (proj₁₀ equiv fstₚ₁) sndₚ₁
   proj₂ (equivalent₁ equiv) (mk×ₚ fstₚ₁ sndₚ₁) = mk×ₚ (proj₂₀ equiv fstₚ₁) sndₚ₁
 
@@ -60,7 +58,8 @@ module Parallel where
   @0 unambiguous×ₚ : ∀ {A B} → Unambiguous A → Unambiguous B → Unambiguous (A ×ₚ B)
   unambiguous×ₚ ua ub = unambiguous ua λ _ → ub
 
-  eqΣₚ : ∀ {@0 A B} → Eq (Exists─ (List Σ) A)
+  eqΣₚ : ∀ {A : @0 List Σ → Set} {B : (@0 xs : List Σ) → A xs → Set}
+         → Eq (Exists─ (List Σ) A)
          → (∀ {@0 bs} → (a : A bs) → Eq (B bs a))
          → Eq (Exists─ (List Σ) (Σₚ A B))
   Eq._≟_ (eqΣₚ eq₁ eq₂) (─ bs₁ , mk×ₚ a₁ b₁) (─ bs₂ , mk×ₚ a₂ b₂) =
@@ -71,13 +70,13 @@ module Parallel where
           (no ¬p) → no λ where refl → contradiction refl ¬p
           (yes refl) → yes refl
 
-  eq≋Σₚ : ∀ {@0 A B} → Eq≋ A
+  eq≋Σₚ : ∀ {A : @0 List Σ → Set} {B : (@0 xs : List Σ) → A xs → Set} → Eq≋ A
           → (∀ {@0 bs} → (a : A bs) → Eq (B bs a))
           → Eq≋ (Σₚ A B)
   eq≋Σₚ eq₁ eq₂ = Eq⇒Eq≋ (eqΣₚ (Eq≋⇒Eq eq₁) eq₂) 
 
   @0 nonmalleable₁
-    : {A : @0 List Σ → Set} {B : (xs : List Σ) → A xs → Set}
+    : {A : @0 List Σ → Set} {B : (@0 xs : List Σ) → A xs → Set}
       → (rₐ : Raw A) → NonMalleable rₐ → (∀ {xs} (a : A xs) → Unique (B _ a))
       → NonMalleable (RawΣₚ₁ rₐ B)
   nonmalleable₁ rₐ nm ub (mk×ₚ fstₚ₁ sndₚ₁) (mk×ₚ fstₚ₂ sndₚ₂) eq =
@@ -108,11 +107,11 @@ module ExactLengthString {n : ℕ} where
   @0 unambiguous : Unambiguous (ExactLengthString n)
   unambiguous = ExactLength.unambiguous Singleton uniqueSingleton
 
-module Length≥ {n : ℕ} (A : List Σ → Set) where
+module Length≥ {n : ℕ} (A : @0 List Σ → Set) where
   @0 unambiguous : Unambiguous A → Unambiguous (Length≥ A n)
   unambiguous ua = Parallel.unambiguous ua λ _ → erased-unique ≤-unique
 
-module Length≤ {n : ℕ} (A : List Σ → Set) where
+module Length≤ {n : ℕ} (A : @0 List Σ → Set) where
   @0 unambiguous : Unambiguous A → Unambiguous (Length≤ A n)
   unambiguous ua = Parallel.unambiguous ua λ _ → erased-unique ≤-unique
 

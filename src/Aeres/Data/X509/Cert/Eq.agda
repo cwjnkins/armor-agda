@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Cert.Properties
 open import Aeres.Data.X509.Cert.TCB

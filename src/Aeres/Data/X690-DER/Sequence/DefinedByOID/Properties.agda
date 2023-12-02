@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.TCB
 import      Aeres.Data.X690-DER.OID.Properties as OID
@@ -13,7 +11,7 @@ open import Aeres.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.Sequence.DefinedByOID.Properties
-  (@0 P : AnyDefinedByOID)
+  (P : AnyDefinedByOID)
   where
 
 open Aeres.Grammar.Definitions UInt8

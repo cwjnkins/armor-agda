@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.DirectoryString
 import      Aeres.Data.X690-DER.OID.Properties as OID

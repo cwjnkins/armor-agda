@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.Extension.AIA.AccessDesc
 open import Aeres.Data.X509.Extension.AIA.TCB

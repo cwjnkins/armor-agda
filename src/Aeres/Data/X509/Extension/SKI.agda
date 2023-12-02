@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.SKI.Parser
 import Aeres.Data.X509.Extension.SKI.TCB
 import Aeres.Data.X509.Extension.SKI.Properties

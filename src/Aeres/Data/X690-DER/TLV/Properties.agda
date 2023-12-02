@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Length
@@ -15,10 +13,10 @@ module Aeres.Data.X690-DER.TLV.Properties where
 
 open Aeres.Grammar.Definitions              UInt8
 
-nonempty : ∀ {t} {@0 A} → NonEmpty (TLV t A)
+nonempty : ∀ {t} {A : @0 List UInt8 → Set} → NonEmpty (TLV t A)
 nonempty (mkTLV len val len≡ ()) refl
 
-@0 nosubstrings : ∀ {t} {@0 A} → NoSubstrings (TLV t A)
+@0 nosubstrings : ∀ {t} {A : @0 List UInt8 → Set} → NoSubstrings (TLV t A)
 nosubstrings{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkTLV{l}{v} len val len≡ bs≡) (mkTLV{l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) =
   ‼ (begin xs₁ ≡⟨ bs≡ ⟩
            t ∷ l ++ v ≡⟨ cong (t ∷_) (cong (_++ v) l≡) ⟩
@@ -46,12 +44,12 @@ nosubstrings{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ 
                         getLength len₁ ≡⟨ len≡₁ ⟩
                         length v₁      ∎)
 
-@0 noconfusion : ∀ {@0 A₁ A₂} {t₁ t₂} → t₁ ≢ t₂ → NoConfusion (TLV t₁ A₁) (TLV t₂ A₂)
+@0 noconfusion : ∀ {A₁ A₂ : @0 List UInt8 → Set} {t₁ t₂} → t₁ ≢ t₂ → NoConfusion (TLV t₁ A₁) (TLV t₂ A₂)
 noconfusion t₁≢t₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ (mkTLV len val len≡ bs≡) (mkTLV len₁ val₁ len≡₁ bs≡₁) =
  contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡₁)))) t₁≢t₂
 
 @0 noconfusionVal
-  : ∀ {t} {@0 A B} → @0 NoConfusion A B
+  : ∀ {t} {A B : @0 List UInt8 → Set} → @0 NoConfusion A B
     → NoConfusion (TLV t A) (TLV t B)
 noconfusionVal{t} nc {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mkTLV{l}{v} len val len≡ bs≡) (mkTLV{l'}{v'} len₁ val₁ len≡₁ bs≡₁) =
   nc ++≡“ val val₁
@@ -77,7 +75,7 @@ noconfusionVal{t} nc {xs₁}{ys₁}{xs₂}{ys₂}xs₁++ys₁≡xs₂++ys₂ (mk
 
 private
   module TLVProps where
-    @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (TLV t A)
+    @0 unambiguous : ∀ {t} {A : @0 List UInt8 → Set} → Unambiguous A → Unambiguous (TLV t A)
     unambiguous{t}{A} ua (mkTLV{l = l₁}{v₁} len₁ val₁ len≡₁ bs≡₁) (mkTLV{l = l₂}{v₂} len₂ val₂ len≡₂ bs≡₂) =
       subst₀ (λ l₂ → ∀ (len₂ : Length l₂) len≡₂ bs≡₂ → mkTLV len₁ val₁ len≡₁ bs≡₁ ≡ mkTLV {l = l₂} len₂ val₂ len≡₂ bs≡₂ ) l≡
         (λ len₂ len≡₂ bs≡₂' →
@@ -111,13 +109,13 @@ private
       bs≡' = trans (sym bs≡) bs≡₁
 
 module NonEmptyVal where
-  @0 unambiguous : ∀ {t} {@0 A} → Unambiguous A → Unambiguous (Σₚ (TLV t A) TLVNonEmptyVal)
+  @0 unambiguous : ∀ {t} {A : @0 List UInt8 → Set} → Unambiguous A → Unambiguous (Σₚ (TLV t A) TLVNonEmptyVal)
   unambiguous ua = Parallel.unambiguous (TLVProps.unambiguous ua) λ _ → ≤-irrelevant
 
 open TLVProps public
 
 instance
-  EqTLV : ∀ {@0 A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (TLV t A)
+  EqTLV : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {t} → Eq≋ (TLV t A)
   Eq≋._≋?_ (EqTLV{t = t}) {bs₁} {bs₂} t₁ t₂
     with TLV.len t₁ ≋? TLV.len t₂
     |    TLV.val t₁ ≋? TLV.val t₂
@@ -136,10 +134,10 @@ instance
     with ‼ ≡-unique (TLV.bs≡ t₁) (TLV.bs≡ t₂)
   ... | refl = yes ≋-refl
 
-  eqTLV : ∀ {@0 A} {t} ⦃ _ : Eq (Exists─ (List UInt8) A) ⦄ → Eq (Exists─ (List UInt8) (TLV t A))
+  eqTLV : ∀ {A : @0 List UInt8 → Set} {t} ⦃ _ : Eq (Exists─ (List UInt8) A) ⦄ → Eq (Exists─ (List UInt8) (TLV t A))
   eqTLV{A} = Eq≋⇒Eq (EqTLV{A} ⦃ Eq⇒Eq≋ it ⦄)
 
-@0 getLengthLen≡ : ∀ {t} {A : List UInt8 → Set} {@0 xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
+@0 getLengthLen≡ : ∀ {t} {A : @0 List UInt8 → Set} {@0 xs₁ ys₁ xs₂ ys₂} → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
                    → (v₁ : TLV t A xs₁) (v₂ : TLV t A xs₂) → getLength (TLV.len v₁) ≡ getLength (TLV.len v₂)
 getLengthLen≡{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} ++≡ v₁ v₂
   with Length.nosubstrings (∷-injectiveʳ bs≡') (TLV.len v₁) (TLV.len v₂)

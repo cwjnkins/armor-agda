@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser.Core
 open import Aeres.Prelude
@@ -15,7 +13,7 @@ open Aeres.Grammar.Parser.Core Σ
 -- for which the guard is false (rather than from running out of symbols)
 -- TODO: erasure for prefix, allPrefix should be flipped
 -- TODO: either ¬term or EOF
-record ParseWhileₜ (A : Σ → Set) (xs : List Σ) : Set where
+record ParseWhileₜ (A : Σ → Set) (@0 xs : List Σ) : Set where
   constructor mkParseWhile
   field
     prefix : List Σ

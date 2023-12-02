@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.Serializer
 open import Aeres.Prelude
@@ -9,7 +7,7 @@ module Aeres.Grammar.IList.Serializer (Σ : Set) where
 open Aeres.Grammar.IList.TCB  Σ
 open Aeres.Grammar.Serializer Σ
 
-serializeIList : ∀ {@0 A} → Serializer A → Serializer (IList A)
+serializeIList : ∀ {A : @0 List Σ → Set} → Serializer A → Serializer (IList A)
 serializeIList s nil = self
 serializeIList s (consIList{bs₁}{bs₂} head tail bs≡) =
   let tl@(singleton t t≡) = serializeIList s tail

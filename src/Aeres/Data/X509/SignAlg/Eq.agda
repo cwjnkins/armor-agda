@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.HashAlg.RFC4055.TCB
 open import Aeres.Data.X509.SignAlg.TCB

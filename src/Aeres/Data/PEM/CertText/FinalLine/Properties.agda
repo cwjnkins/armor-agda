@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
@@ -26,7 +23,7 @@ open  Aeres.Grammar.Parallel    Char
 
 Rep : @0 List Char → Set
 Rep = Σₚ (&ₚ Base64Str EOL)
-         (λ _ → Erased ∘ InRange 1 64 ∘ length ∘ &ₚᵈ.bs₁ )
+         (λ _ x → Erased (InRange 1 64 (length (&ₚᵈ.bs₁ x))))
 
 equiv : Equivalent Rep CertFinalLine
 proj₁ equiv (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) (─ range)) =
@@ -44,7 +41,7 @@ fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen)) eol refl) =
 
 @0 char₁ : ∀ {@0 b bs} → CertFinalLine (b ∷ bs) → b ∈ B64.charset
 char₁{b} (mkCertFinalLine{l}{e} (mk64Str  nil strLen pad refl) (str> , str<) eol bs≡) =
-  Base64.Pad.char₁ (subst₀ Base64Pad (sym $ proj₂ l≡) pad)
+  Base64.Pad.char₁ (subst₀! Base64Pad (sym $ proj₂ l≡) pad)
   where
   @0 l≡ : Σ[ l' ∈ List Char ] (b ∷ l') ≡ l
   l≡ = caseErased (singleton l refl) ret (const _) of λ where
@@ -107,7 +104,7 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
   e₂++xs₁≡e₁ = Lemmas.++-cancel≡ˡ _ _ l₂≡l₁ ws++xs₁≡
 
   @0 x₁≡ : x₁ ≡ '\r' ⊎ x₁ ≡ '\n'
-  x₁≡ = RFC5234.EOL.char∈ (Any.++⁺ʳ e₂ (here refl)) (subst₀ EOL (sym e₂++xs₁≡e₁) eol₁)
+  x₁≡ = RFC5234.EOL.char∈ (Any.++⁺ʳ e₂ (here refl)) (subst₀! EOL (sym e₂++xs₁≡e₁) eol₁)
 
   @0 x₁≢ : x₁ ∉ B64.charset × x₁ ≢ '='
   x₁≢ =
@@ -130,4 +127,4 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
             (‼ trans ++≡ (cong (_++ ys₂) bs≡₃))))
 
     @0 x₁∈ : x₁ ∈ B64.charset ⊎ x₁ ≡ '='
-    x₁∈ = Base64.Str.char∈ (here{xs = proj₁ ∃xs₂'} refl) (subst Base64Str (sym ∘ proj₂ $ ∃xs₂') line₃)
+    x₁∈ = Base64.Str.char∈ (here{xs = proj₁ ∃xs₂'} refl) (subst₀! Base64Str (sym ∘ proj₂ $ ∃xs₂') line₃)

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.Unicode.UTF32.Parser
 import Aeres.Data.Unicode.UTF32.Properties
 import Aeres.Data.Unicode.UTF32.TCB

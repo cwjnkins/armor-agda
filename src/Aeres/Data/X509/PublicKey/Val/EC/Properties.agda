@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.EC.TCB
 open import Aeres.Data.X690-DER.BitString
@@ -19,11 +17,11 @@ open Aeres.Grammar.Seq         UInt8
 @0 unambiguous : Unambiguous ECBitString
 unambiguous =
   TLV.unambiguous
-    (Seq.unambiguous ≡-unique (λ where _ refl refl → refl) OctetString.unambiguousValue)
+    (Seq.unambiguous (erased-unique ≡-unique) (λ where _ (─ refl) (─ refl) → refl) OctetString.unambiguousValue)
 
 @0 nonmalleable : NonMalleable RawECBitString
 nonmalleable =
   TLV.nonmalleable
     (Seq.nonmalleable
-      (subsingleton⇒nonmalleable (λ where (─ _ , refl) (─ _ , refl) → refl))
+      (subsingleton⇒nonmalleable (λ where (─ _ , ─ refl) (─ _ , ─ refl) → refl))
       OctetString.nonmalleableValue)

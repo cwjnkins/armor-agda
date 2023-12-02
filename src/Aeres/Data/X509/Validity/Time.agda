@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Validity.Time.Ordering
 import Aeres.Data.X509.Validity.Time.Parser
 import Aeres.Data.X509.Validity.Time.Properties

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.OID.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -26,14 +24,14 @@ record DefinedByOIDFields (P : AnyDefinedByOID) (@0 bs : List UInt8) : Set where
     param  : P oid p
     @0 bs≡ : bs ≡ o ++ p
 
-DefinedByOIDFieldsRep : @0 AnyDefinedByOID → @0 List UInt8 → Set
+DefinedByOIDFieldsRep : AnyDefinedByOID → @0 List UInt8 → Set
 DefinedByOIDFieldsRep P = &ₚᵈ OID P
 
 equivalent : {@0 P : AnyDefinedByOID} → Equivalent (DefinedByOIDFieldsRep P) (DefinedByOIDFields P)
 proj₁ equivalent (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkOIDDefinedFields fstₚ₁ sndₚ₁ bs≡
 proj₂ equivalent (mkOIDDefinedFields oid param bs≡) = mk&ₚ oid param bs≡
 
-DefinedByOID : (@0 P : AnyDefinedByOID) → @0 List UInt8 → Set
+DefinedByOID : (P : AnyDefinedByOID) → @0 List UInt8 → Set
 DefinedByOID P = TLV Tag.Sequence (DefinedByOIDFields P)
 
 RawDefinedByOIDFields : {P : AnyDefinedByOID} → Raw₁ RawOID P → Raw (DefinedByOIDFields P)

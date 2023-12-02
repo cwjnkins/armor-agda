@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import Aeres.Grammar.Parser.Lit
 import Aeres.Grammar.Parser.Maximal

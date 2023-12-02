@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Prelude
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -49,17 +47,17 @@ GeneralizedTime : @0 List UInt8 → Set
 GeneralizedTime = TLV Tag.GeneralizedTime GeneralizedTimeFields
 
 GeneralizedTimeFieldsRep : @0 List UInt8 → Set
-GeneralizedTimeFieldsRep = &ₚ (&ₚ Year₄ MDHMS) (_≡ [ # 'Z' ])
+GeneralizedTimeFieldsRep = &ₚ (&ₚ Year₄ MDHMS) (λ x → Erased (x ≡ [ # 'Z' ]))
 
 RawGeneralizedTimeFieldsRep : Raw GeneralizedTimeFieldsRep
 RawGeneralizedTimeFieldsRep =
   Raw&ₚ (Raw&ₚ RawYear₄ RawMDHMS) RawSubSingleton
 
 equivalent : Equivalent GeneralizedTimeFieldsRep GeneralizedTimeFields
-proj₁ equivalent (mk&ₚ (mk&ₚ{bs₁ = y}{m} year mdhms refl) refl eq) =
+proj₁ equivalent (mk&ₚ (mk&ₚ{bs₁ = y}{m} year mdhms refl) (─ refl) eq) =
   mkGeneralizedTime year mdhms (trans eq (++-assoc y m _))
 proj₂ equivalent (mkGeneralizedTime{y}{m} year mdhms bs≡) =
-  mk&ₚ (mk&ₚ year mdhms refl) refl (trans bs≡ (sym (++-assoc y m _)))
+  mk&ₚ (mk&ₚ year mdhms refl) (─ refl) (trans bs≡ (sym (++-assoc y m _)))
 
 RawGeneralizedTimeFields : Raw GeneralizedTimeFields
 RawGeneralizedTimeFields = Iso.raw equivalent RawGeneralizedTimeFieldsRep

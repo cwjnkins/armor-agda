@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Int.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -32,10 +30,10 @@ pattern consSequenceOf{bs₁}{bs₂} h t bs≡ = consIList{bs₁}{bs₂} h t bs�
 BoundedSequenceOf  = IListLowerBounded
 NonEmptySequenceOf = IListNonEmpty
 
-Seq : (A : List UInt8 → Set) → @0 List UInt8 → Set
+Seq : (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
 Seq A = TLV Tag.Sequence (SequenceOf A)
 
-NonEmptySeq : (@0 A : List UInt8 → Set) → @0 List UInt8 → Set
+NonEmptySeq : (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
 NonEmptySeq A = TLV Tag.Sequence (NonEmptySequenceOf A)
 
 IntegerSeq = Seq Int

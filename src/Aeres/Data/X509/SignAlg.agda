@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.SignAlg.DSA
 import Aeres.Data.X509.SignAlg.ECDSA
 import Aeres.Data.X509.SignAlg.Eq

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.AKI.Eq
 import Aeres.Data.X509.Extension.AKI.Parser
 import Aeres.Data.X509.Extension.AKI.Properties

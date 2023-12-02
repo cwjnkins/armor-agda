@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 
@@ -7,13 +5,13 @@ module Aeres.Grammar.Definitions.NoOverlap (Σ : Set) where
 
 open ≡-Reasoning
 
-NoOverlap : (A B : List Σ → Set) → Set
+NoOverlap : (A B : @0 List Σ → Set) → Set
 NoOverlap A B =
   ∀ ws xs₁ ys₁ xs₂ ys₂ → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
   → A (ws ++ xs₁) → A ws → (xs₁ ≡ []) ⊎ (¬ B xs₂)
 
 noOverlapBoundary₁
-  : ∀ {@0 A B} → NoOverlap A B
+  : ∀ {A B : @0 List Σ → Set} → NoOverlap A B
     → ∀ {ws xs₁ ys₁ xs₂ ys₂} → ws ++ xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
     → A ws → B xs₁ → A xs₂
     → ws ≡ xs₂ ++ drop (length xs₂) ws
@@ -36,7 +34,7 @@ noOverlapBoundary₁{A} noo₁ {ws}{xs₁}{ys₁}{xs₂}{ys₂} ++≡ a₁ b₁ 
               (ws ++ drop (length ws) xs₂) ++ ys₂ ≡⟨ cong (_++ ys₂) (sym xs₂≡) ⟩
               xs₂ ++ ys₂ ≡⟨ sym ++≡ ⟩
               ws ++ xs₁ ++ ys₁ ∎))
-            (subst₀ A xs₂≡ a₂) a₁)
+            (subst₀! A xs₂≡ a₂) a₁)
           (λ ≡[] →
             contradiction
               (length ws ≡⟨ cong length (sym (++-identityʳ ws)) ⟩
@@ -44,10 +42,10 @@ noOverlapBoundary₁{A} noo₁ {ws}{xs₁}{ys₁}{xs₂}{ys₂} ++≡ a₁ b₁ 
               length (ws ++ drop (length ws) xs₂) ≡⟨ cong length (sym xs₂≡) ⟩
               length xs₂ ∎)
               (Nat.<⇒≢ ws<xs₂))
-          (contradiction b₁)
+          (λ x → contradiction b₁ x)
 
 noOverlapBoundary₂
-  : ∀ {@0 A B C} → NoOverlap A B → NoOverlap A C
+  : ∀ {A B C : @0 List Σ → Set} → NoOverlap A B → NoOverlap A C
     → ∀ {xs₁ ys₁ zs₁ xs₂ ys₂ zs₂} → xs₁ ++ ys₁ ++ zs₁ ≡ xs₂ ++ ys₂ ++ zs₂
     → A xs₁ → B ys₁ → A xs₂ → C ys₂
     → xs₁ ≡ xs₂
@@ -55,7 +53,7 @@ noOverlapBoundary₂{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{
   case Nat.<-cmp (length xs₁) (length xs₂) ret (const _) of λ where
     (tri< xs₁<xs₂ _ _) →
       ‼ contradiction₂
-        (noo₁ _ _ (ys₂ ++ zs₂) ys₁ zs₁ (Len<.++≡' xs₁<xs₂) (subst₀ A (Len<.xs₂≡ xs₁<xs₂) a₂) a₁)
+        (noo₁ _ _ (ys₂ ++ zs₂) ys₁ zs₁ (Len<.++≡' xs₁<xs₂) (subst₀! A (Len<.xs₂≡ xs₁<xs₂) a₂) a₁)
         (λ ≡[] →
           contradiction
             (length xs₁ ≡⟨ cong length (sym (++-identityʳ xs₁)) ⟩
@@ -63,13 +61,13 @@ noOverlapBoundary₂{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{
             length (xs₁ ++ drop (length xs₁) xs₂) ≡⟨ cong length (sym $ Len<.xs₂≡ xs₁<xs₂) ⟩
             length xs₂ ∎)
             (Nat.<⇒≢ xs₁<xs₂))
-        (contradiction b₁)
+        (λ x → contradiction b₁ x)
     (tri≈ _ xs₁≡xs₂ _) → proj₁ (Lemmas.length-++-≡ _ _ _ _ ++≡ xs₁≡xs₂)
     (tri> _ _ xs₁>xs₂) →
       ‼ contradiction₂
         (noo₂ _ (drop (length xs₂) xs₁) (ys₁ ++ zs₁) _ zs₂
           (Len>.++≡' xs₁>xs₂)
-          (subst₀ A (Len>.xs₁≡ xs₁>xs₂) a₁) a₂)
+          (subst₀! A (Len>.xs₁≡ xs₁>xs₂) a₁) a₂)
         (λ ≡[] →
           contradiction
             (length xs₂ ≡⟨ cong length (sym (++-identityʳ xs₂)) ⟩
@@ -77,7 +75,7 @@ noOverlapBoundary₂{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{
             length (xs₂ ++ drop (length xs₂) xs₁) ≡⟨ cong length (sym $ Len>.xs₁≡ xs₁>xs₂) ⟩
             length xs₁ ∎)
             (Nat.<⇒≢ xs₁>xs₂))
-        (contradiction c₂)
+        (λ x → contradiction c₂ x)
   where
   open ≡-Reasoning
   open import Tactic.MonoidSolver using (solve ; solve-macro)

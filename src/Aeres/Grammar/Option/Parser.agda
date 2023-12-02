@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Option.Properties
@@ -88,7 +86,7 @@ open Aeres.Grammar.Parser            Σ
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
 
   parseOption₁ExactLength
-    : {@0 A : List Σ → Set}
+    : {A : @0 List Σ → Set}
       → @0 NoSubstrings A
       → (underflow : M (Level.Lift _ ⊤))
       → Parser (M ∘ Dec) A

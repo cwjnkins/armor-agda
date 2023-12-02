@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 -- open import Aeres.Binary
 -- open import Aeres.Data.X509.HashAlg
 -- import      Aeres.Data.X509.HashAlg.TCB.OIDs        as OIDs

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser.Core
 import      Aeres.Grammar.Parser.Maximal
@@ -16,7 +14,7 @@ open Aeres.Grammar.Parser.Maximal Σ
 open Aeres.Grammar.Sum.TCB        Σ
 
 module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
-  parseSum : ∀ {A B} → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B → Parser (M ∘ Dec) (Sum A B)
+  parseSum : ∀ {A B : @0 List Σ → Set} → Parser (M ∘ Dec) A → Parser (M ∘ Dec) B → Parser (M ∘ Dec) (Sum A B)
   runParser (parseSum p₁ p₂) xs = do
     no ¬parse₁ ← runParser p₁ xs
       where yes x → return (yes (mapSuccess (λ {xs} x → Sum.inj₁ x) x))
@@ -28,7 +26,7 @@ module _ {M : Set → Set} ⦃ _ : Monad M ⦄ where
       (success prefix read read≡ (inj₂ x) suffix ps≡) →
         contradiction (success _ _ read≡ x _ ps≡) ¬parse₂
 
-parseMaxSum : ∀ {@0 A B}
+parseMaxSum : ∀ {A B : @0 List Σ → Set}
               → LogDec.MaximalParser A
               → LogDec.MaximalParser B
               → LogDec.MaximalParser (Sum A B)

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 
 module Aeres.Grammar.Definitions.Iso.Base (Σ : Set) where

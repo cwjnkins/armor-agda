@@ -1,15 +1,13 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude renaming (Σ to Sigma)
 
 module Aeres.Grammar.Definitions.NonMalleable.Base (Σ : Set) where
 
-record Raw (A : List Σ → Set) : Set₁ where
+record Raw (A : @0 List Σ → Set) : Set₁ where
   field
     D : Set
     to : {@0 xs : List Σ} → A xs → D
 
-record Raw₁ {A : List Σ → Set} (R : Raw A) (P : {xs : List Σ} → A xs → List Σ → Set) : Set₁ where
+record Raw₁ {A : @0 List Σ → Set} (R : Raw A) (P : {@0 xs : List Σ} → A xs → @0 List Σ → Set) : Set₁ where
   field
     D : Raw.D R → Set
     to : ∀ {@0 bs₁} → (a : A bs₁) → ∀ {@0 bs₂} → P a bs₂ → D (Raw.to R a)

@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
@@ -19,9 +16,9 @@ open Aeres.Grammar.Parallel    Char
 open Aeres.Grammar.Sum         Char
 
 module EOL where
-  Rep =  Sum (_≡ '\r' ∷ [ '\n' ])
-        (Sum (_≡ [ '\r' ])
-             (_≡ [ '\n' ]))
+  Rep =  Sum (λ x → Erased (x ≡ '\r' ∷ [ '\n' ]))
+        (Sum (λ x → Erased (x ≡ [ '\r' ]))
+             (λ x → Erased (x ≡ [ '\n' ])))
 
   @0 char∈ : ∀ {@0 b bs} → b ∈ bs → EOL bs → b ≡ '\r' ⊎ b ≡ '\n'
   char∈ (here refl) crlf = inj₁ refl
@@ -35,12 +32,12 @@ module EOL where
   char₁ lf = inj₂ refl
 
   equiv : Equivalent Rep EOL
-  proj₁ equiv (Sum.inj₁ refl) = crlf
-  proj₁ equiv (Sum.inj₂ (Sum.inj₁ refl)) = cr
-  proj₁ equiv (Sum.inj₂ (Sum.inj₂ refl)) = lf
-  proj₂ equiv crlf = Sum.inj₁ refl
-  proj₂ equiv cr = Sum.inj₂ (Sum.inj₁ refl)
-  proj₂ equiv lf = Sum.inj₂ (Sum.inj₂ refl)
+  proj₁ equiv (Sum.inj₁ (─ refl)) = crlf
+  proj₁ equiv (Sum.inj₂ (Sum.inj₁ (─ refl))) = cr
+  proj₁ equiv (Sum.inj₂ (Sum.inj₂ (─ refl))) = lf
+  proj₂ equiv crlf = Sum.inj₁ (─ refl)
+  proj₂ equiv cr = Sum.inj₂ (Sum.inj₁ (─ refl))
+  proj₂ equiv lf = Sum.inj₂ (Sum.inj₂ (─ refl))
 
   @0 eolLen : ∀ {@0 bs} → EOL bs → InRange 1 2 (length bs)
   eolLen crlf = toWitness{Q = inRange? 1 2 2} tt
@@ -67,7 +64,7 @@ module EOL where
       xs₂' = proj₂ (proj₁ (xs₂≡ e))
 
       e' : EOL (x₂' ∷ xs₂')
-      e' = subst₀ EOL (sym ∘ proj₂ ∘ xs₂≡ $ e) e
+      e' = subst₀! EOL (sym ∘ proj₂ ∘ xs₂≡ $ e) e
 
       e“ : EOL (x₁' ∷ xs₂')
       e“ = subst₀ (λ x → EOL (x ∷ xs₂'))

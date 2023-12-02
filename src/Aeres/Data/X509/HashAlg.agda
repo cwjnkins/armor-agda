@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.HashAlg.RFC4055
 
 module Aeres.Data.X509.HashAlg where

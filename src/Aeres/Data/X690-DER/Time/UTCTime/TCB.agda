@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Prelude
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -54,7 +52,7 @@ UTCTime : @0 List UInt8 → Set
 UTCTime = TLV Tag.UTCTime UTCTimeFields
 
 UTCTimeFieldsRep : @0 List UInt8 → Set
-UTCTimeFieldsRep = &ₚ Year₂ (&ₚ MDHMS (_≡ [ # 'Z' ]))
+UTCTimeFieldsRep = &ₚ Year₂ (&ₚ MDHMS (λ x → Erased (x ≡ [ # 'Z' ])))
 
 RawUTCTimeFieldsRep : Raw UTCTimeFieldsRep
 RawUTCTimeFieldsRep =
@@ -62,8 +60,8 @@ RawUTCTimeFieldsRep =
   (Raw&ₚ RawMDHMS RawSubSingleton)
 
 equivalent : Equivalent UTCTimeFieldsRep UTCTimeFields
-proj₁ equivalent (mk&ₚ year (mk&ₚ mdhms refl refl) eq) = mkUTCTime year mdhms eq
-proj₂ equivalent (mkUTCTime year mdhms bs≡) = mk&ₚ year (mk&ₚ mdhms refl refl) bs≡
+proj₁ equivalent (mk&ₚ year (mk&ₚ mdhms (─ refl) refl) eq) = mkUTCTime year mdhms eq
+proj₂ equivalent (mkUTCTime year mdhms bs≡) = mk&ₚ year (mk&ₚ mdhms (─ refl) refl) bs≡
 
 RawUTCTimeFields : Raw UTCTimeFields
 RawUTCTimeFields = Iso.raw equivalent RawUTCTimeFieldsRep

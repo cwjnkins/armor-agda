@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.AIA
 import Aeres.Data.X509.Extension.AKI
 import Aeres.Data.X509.Extension.BC

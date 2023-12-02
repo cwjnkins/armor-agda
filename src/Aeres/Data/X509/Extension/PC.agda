@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Extension.PC.Eq
 import Aeres.Data.X509.Extension.PC.Parser
 import Aeres.Data.X509.Extension.PC.Properties

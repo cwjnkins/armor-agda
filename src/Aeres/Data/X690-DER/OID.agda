@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 import      Aeres.Data.X690-DER.OID.TCB as TCB
 open import Aeres.Data.X690-DER.TLV
@@ -26,12 +24,12 @@ mkOIDSubₛ
     → OIDSub (lₚ ∷ʳ lₑ)
 mkOIDSubₛ lₚ lₑ {lₚ≥128}{leastDigs}{lₑ<128} = mkOIDSub lₚ (toWitness lₚ≥128) lₑ (toWitness lₑ<128) (toWitness leastDigs) refl
 
-isOID? : Decidable OID
+isOID? : Decidable (λ xs → OID xs)
 isOID? xs =
   case Logging.val $ runParser parseOID xs of λ where
     (no ¬p) → no (λ o → contradiction (success _ _ refl o [] (++-identityʳ _)) ¬p)
     (yes (success prefix read read≡ value [] ps≡)) →
-      yes (subst₀ OID (trans₀ (sym (++-identityʳ prefix)) ps≡) value)
+      yes (subst₀! OID (trans₀ (sym (++-identityʳ prefix)) ps≡) value)
     (yes (success prefix read read≡ value (c ∷ suffix) ps≡)) →
       no λ where
         o → ‼

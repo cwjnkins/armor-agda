@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping --inversion-max-depth=1000 #-}
-
 open import Aeres.Binary
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
@@ -27,35 +25,4 @@ open import Aeres.Data.X509.Name             public
 open import Aeres.Data.X509.SignAlg         public
 open import Aeres.Data.X509.TBSCert         public
 open import Aeres.Data.X509.Validity        public
-
-------------------------------X.509-----------------------------------------------------------
-
-module X509 where
-
-  -- module SOID where
-  --   -- NOTE: These are proven to be OIDs after the fact (see Aeres.Data.X509.Decidable.OID)
-  --   Md5Rsa : List UInt8
-  --   Md5Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
-
-  --   Sha1Rsa : List UInt8
-  --   Sha1Rsa =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
-
-  --   RsaPss : List UInt8
-  --   RsaPss =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
-
-  --   Sha256Rsa : List UInt8
-  --   Sha256Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
-
-  --   Sha384Rsa : List UInt8
-  --   Sha384Rsa =  Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 12 ]
-
-  --   Sha512Rsa : List UInt8
-  --   Sha512Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
-
-  --   Sha224Rsa : List UInt8
-  --   Sha224Rsa = Tag.ObjectIdentifier ∷ # 9 ∷ # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
-
-  ExpNull : List UInt8
-  ExpNull = # 5 ∷ [ # 0 ]
-
 

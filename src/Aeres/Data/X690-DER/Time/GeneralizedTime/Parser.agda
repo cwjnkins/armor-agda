@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.TLV
 open import Aeres.Data.X690-DER.Time.GeneralizedTime.Properties
@@ -27,7 +25,7 @@ parseFields = parseEquivalent equivalent p
   p : Parser (Logging ∘ Dec) GeneralizedTimeFieldsRep
   p =  parse& (Seq.nosubstrings TimeType.nosubstrings MDHMS.nosubstrings)
       (parse& TimeType.nosubstrings Year.parse₄ MDHMS.parse)
-      (parseLit (tell $ here' String.++ ": underflow (Z)") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ])
+      (parseLitE (tell $ here' String.++ ": underflow (Z)") (tell $ here' String.++ ": mismatch (Z)") [ # 'Z' ])
 
 parse : Parser (Logging ∘ Dec) GeneralizedTime
 parse = parseTLV _ here' _

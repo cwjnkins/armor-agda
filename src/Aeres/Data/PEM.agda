@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.PEM.CertBoundary
 import Aeres.Data.PEM.CertText
 import Aeres.Data.PEM.Parser

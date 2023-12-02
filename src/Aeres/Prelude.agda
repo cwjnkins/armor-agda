@@ -188,6 +188,9 @@ cong f refl = refl
 subst₀ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} (@0 P : A → Set ℓ₂) {@0 x y : A} → (@0 _ : x ≡ y) → P x → P y
 subst₀ P refl x = x
 
+subst₀! : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} (@0 P : @0 A → Set ℓ₂) {@0 x y : A} → (@0 _ : x ≡ y) → P x → P y
+subst₀! P refl x = x
+
 transp : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁} {@0 B : A → Set ℓ₂} (f : (a : A) → B a)
          → {@0 x y : A} (eq : x ≡ y) → subst B eq (f x) ≡ f y
 transp f refl = refl

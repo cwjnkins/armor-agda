@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X509.PublicKey.Val.RSA.Ints.TCB
   hiding (equivalent)
@@ -26,11 +24,11 @@ record RSABitStringFields (@0 bs : List UInt8) : Set where
     @0 bs≡ : bs ≡ (Singleton.x z) ++ neseq
 
 RSABitStringFieldsRep : @0 List UInt8 → Set
-RSABitStringFieldsRep = &ₚ (_≡ [ # 0 ]) RSAPkInts
+RSABitStringFieldsRep = &ₚ (λ x → Erased (x ≡ [ # 0 ])) RSAPkInts
 
 equivalent : Equivalent RSABitStringFieldsRep RSABitStringFields
-proj₁ equivalent (mk&ₚ refl sndₚ₁ bs≡) = mkRSABitStringFields self sndₚ₁ bs≡
-proj₂ equivalent (mkRSABitStringFields self rsane bs≡) = mk&ₚ refl rsane bs≡
+proj₁ equivalent (mk&ₚ (─ refl) sndₚ₁ bs≡) = mkRSABitStringFields self sndₚ₁ bs≡
+proj₂ equivalent (mkRSABitStringFields self rsane bs≡) = mk&ₚ (─ refl) rsane bs≡
 
 RawRSABitStringFieldsRep : Raw RSABitStringFieldsRep
 RawRSABitStringFieldsRep = Raw&ₚ RawSubSingleton RawRSAPkInts

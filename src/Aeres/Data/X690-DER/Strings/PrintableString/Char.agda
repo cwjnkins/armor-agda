@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Strings.PrintableString.Char.Parser
 import Aeres.Data.X690-DER.Strings.PrintableString.Char.Properties
 import Aeres.Data.X690-DER.Strings.PrintableString.Char.TCB

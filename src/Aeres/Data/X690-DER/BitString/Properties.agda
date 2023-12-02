@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.BitString.TCB
 open import Aeres.Data.X690-DER.TLV.TCB
@@ -352,7 +350,7 @@ instance
                      ≡⟨ ‼ subst₂
                           (λ h t →
                              (@0 h<8 : toℕ h < 8) (s : Singleton (toBitRep h t)) (@0 u : UnusedBits h t) (@0 eq₁ : bs₁ ≡ h ∷ t) →
-                               _,e_{A = Erased (List UInt8)}{B = BitStringValue ∘ Erased.x}
+                               _,e_{A = Erased (List UInt8)}{B = λ x → BitStringValue (Erased.x x)}
                                    (─ bs₁)
                                    (mkBitStringValue h t h<8 s u eq₁)
                              ≡ (─ bs₁ ,e mkBitStringValue bₕ₂ bₜ₂ bₕ₂<8 (singleton bits₂ bits₂≡) unusedBits₂ (trans (¡ bs≡₁') bs≡₂)))

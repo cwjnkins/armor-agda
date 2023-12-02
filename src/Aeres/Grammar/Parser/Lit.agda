@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)
@@ -31,3 +29,11 @@ runParser (parseLit underflow mismatch (l ∷ lit)) (x ∷ xs)
           contradiction (success lit _ (cong pred read≡) refl suffix (∷-injectiveʳ ps≡)) ¬parse
   return (yes (success (l ∷ pre₀) _ (cong suc r₀≡) refl suf₀ refl))
 
+parseLitE
+  : {M : Set → Set} ⦃ _ : Monad M ⦄ ⦃ _ : Eq Σ ⦄ → (underflow mismatch : M (Level.Lift _ ⊤))
+    → (lit : List Σ) → Parser (M ∘ Dec) (λ x → Erased (x ≡ lit))
+runParser (parseLitE underflow mismatch lit) xs = do
+  yes s ← runParser (parseLit underflow mismatch lit) xs
+    where no ¬p → return ∘ no $ λ where
+      s → contradiction (mapSuccess (λ x → ¡ x) s) ¬p
+  return (yes (mapSuccess (λ x → ─ x) s))

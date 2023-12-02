@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions.Eq
 import      Aeres.Grammar.Definitions.Iso
 import      Aeres.Grammar.Definitions.NoConfusion

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Time.GeneralizedTime.Foreign
 import Aeres.Data.X690-DER.Time.GeneralizedTime.Ordering
 import Aeres.Data.X690-DER.Time.GeneralizedTime.Parser

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
@@ -49,7 +47,7 @@ fullLineFromLine
     → xs₁ ++ ys₁ ≡ xs₂ ++ ys₂
     → CertFullLine xs₁
 fullLineFromLine{xs₁}{ys₁}{xs₂}{ys₂} (mkCertFinalLine{l}{e} line lineLen eol bs≡) (mkCertFullLine{l₁}{e₁} line₁ eol₁ bs≡₁) ++≡ =
-  mkCertFullLine (subst₀ (ExactLength (IList Base64Char) 64) (sym l≡) line₁) eol bs≡
+  mkCertFullLine (subst₀! (ExactLength (IList Base64Char) 64) (sym l≡) line₁) eol bs≡
   where
   @0 l≡ : l ≡ l₁
   l≡ = noOverlapBoundary₂ RFC5234.EOL.noOverlap RFC5234.EOL.noOverlap

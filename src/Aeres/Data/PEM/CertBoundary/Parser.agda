@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Data.Base64.TCB
 open import Aeres.Data.PEM.CertBoundary.Properties
 open import Aeres.Data.PEM.CertBoundary.TCB
@@ -20,6 +17,6 @@ parseCertBoundary : ∀ ctrl → LogDec.MaximalParser (CertBoundary ctrl)
 parseCertBoundary ctrl =
   LogDec.equivalent (equiv ctrl)
     (Seq.parse&₁
-      (parseLit (tell "parseCertBoundary: EOF") silent _)
-      (λ where _ refl refl → refl)
+      (parseLitE (tell "parseCertBoundary: EOF") silent _)
+      (λ where _ (─ refl) (─ refl) → refl)
       (LogDec.parseErased parseMaxEOL))

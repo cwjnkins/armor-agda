@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.SequenceOf
 open import Aeres.Data.X690-DER.SetOf.Order.TCB
@@ -48,5 +46,5 @@ instance
     case _≋?_ ⦃ SequenceOf.SequenceOfEq≋ ⦄ elems₁ elems₂ of λ where
       (no ¬p) → no λ where ≋-refl → contradiction ≋-refl ¬p
       (yes ≋-refl) →
-        case _,′_{A = elems₁Len ≡ elems₂Len}{B = Erased (order₁ ≡ order₂)} (≤-unique elems₁Len elems₂Len) (─ (T-unique order₁ order₂)) of λ where
+        case _,′_{A = elems₁Len ≡ elems₂Len}{B = Erased (order₁ ≡ order₂)} (erased-unique ≤-unique elems₁Len elems₂Len) (─ (T-unique order₁ order₂)) of λ where
         (refl , ─ refl) → yes ≋-refl

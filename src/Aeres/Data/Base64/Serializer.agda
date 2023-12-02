@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --inversion-max-depth=100 #-}
+{-# OPTIONS --inversion-max-depth=100 #-}
 
 open import Aeres.Binary
 import      Aeres.Data.Base64.TCB as Base64

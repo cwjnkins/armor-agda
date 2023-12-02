@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.Unicode.UTF8
 open import Aeres.Data.X690-DER.Strings.UTF8String.TCB

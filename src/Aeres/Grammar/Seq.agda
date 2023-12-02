@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Seq.MaximalParser
 import      Aeres.Grammar.Seq.Parser
 import      Aeres.Grammar.Seq.Properties

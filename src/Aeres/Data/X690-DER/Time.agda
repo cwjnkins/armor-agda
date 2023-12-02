@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Time.Day
 import Aeres.Data.X690-DER.Time.GeneralizedTime
 import Aeres.Data.X690-DER.Time.Hour

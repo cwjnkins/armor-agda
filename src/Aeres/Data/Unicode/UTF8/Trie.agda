@@ -1,4 +1,4 @@
-{-# OPTIONS --subtyping --sized-types --inversion-max-depth=1000 #-}
+{-# OPTIONS --sized-types --inversion-max-depth=1000 #-}
 
 open import Aeres.Binary
 open import Aeres.Prelude

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList.TCB
 import      Aeres.Grammar.IList.Properties
@@ -28,7 +26,7 @@ open Aeres.Grammar.Parser.WellFounded   Σ
 module parseIList
   {M : Set → Set} ⦃ _ : Monad M ⦄
   (underflow : M (Level.Lift _ ⊤))
-  (A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
+  (A : @0 List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (M ∘ Dec) A) where
 
   open ≡-Reasoning
@@ -132,19 +130,19 @@ module parseIList
 
   parseIListNonEmpty : ∀ n → Parser (M ∘ Dec) (ExactLength (IListNonEmpty A) n)
   parseIListNonEmpty n =
-    parseEquivalent{A = Σₚ (ExactLength (IList A) n) (λ _ xs → lengthIList (fstₚ xs) ≥ 1)}
+    parseEquivalent{A = Σₚ (ExactLength (IList A) n) (λ _ xs → Erased (lengthIList (fstₚ xs) ≥ 1))}
       (Iso.symEquivalent (proj₁ Distribute.×ₚ-Σₚ-iso))
-      (parseSigma' (Parallel.ExactLength.nosubstrings _) (λ _ → _ ≥? 1)
+        (parseSigma' (Parallel.ExactLength.nosubstrings _) (λ x → erased? (_ ≥? 1))
         (λ where
-          (mk×ₚ l₁ sndₚ₁) (mk×ₚ l₂ sndₚ₂) ≥1 →
-            subst₀ (_≥ 1) (lengthIList≡ ne nn l₁ l₂) ≥1)
+          (mk×ₚ l₁ (─ sndₚ₁)) (mk×ₚ l₂ (─ sndₚ₂)) ≥1 →
+            ─ subst (_≥ 1) (lengthIList≡ ne nn l₁ l₂) (Erased.x ≥1))
         (parseIList n))
 
 open parseIList public using (parseIList ; parseIListNonEmpty)
 
 module parseIListMax
   (underflow : Logging ⊤)
-  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
+  (A : @0 List Σ → Set) (@0 ne : NonEmpty A) (@0 nn : NoSubstrings A)
   (p : Parser (Logging ∘ Dec) A) where
 
   open LogDec
@@ -248,7 +246,7 @@ module parseIListMax
             (no  n≰v₁) →
               (mkLogged (log ++ ["parseIListLowerBounded: lower bound violated"])
                  (no λ where
-                   (success prefix read read≡ (mk×ₚ v vLen) suffix ps≡) →
+                   (success prefix read read≡ (mk×ₚ v (─ vLen)) suffix ps≡) →
                      contradiction
                        (≤.begin n ≤.≤⟨ vLen ⟩
                                 lengthIList v
@@ -259,13 +257,13 @@ module parseIListMax
                        n≰v₁))
               , tt
             (yes n≤v₁) →
-              (mkLogged log (yes (success pre₁ _ r₁≡ (mk×ₚ v₁ n≤v₁) suf₁ ps≡₁)))
+              (mkLogged log (yes (success pre₁ _ r₁≡ (mk×ₚ v₁ (─ n≤v₁)) suf₁ ps≡₁)))
               , λ where
                 pre' suf' ps'≡ (mk×ₚ fstₚ₁ _) → max₁ _ _ ps'≡ fstₚ₁
 
 module parseIListMaxNoOverlap
   (underflow : Logging (Level.Lift Level.zero ⊤))
-  (@0 A : List Σ → Set) (@0 ne : NonEmpty A) (@0 noo : NoOverlap A A)
+  (A : @0 List Σ → Set) (@0 ne : NonEmpty A) (@0 noo : NoOverlap A A)
   (p : LogDec.MaximalParser A) where
 
   open import Data.Nat.Induction
@@ -366,7 +364,7 @@ module parseIListMaxNoOverlap
                                     (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ (cong (_++ suf₁) ∘ sym $ ¡ pre₁≡) ⟩
                                     pre₁ ++ suf₁ ≡⟨ (sym $ ¡ xs≡) ⟩
                                     _ ∎)))
-                                  (subst A (¡ pre₁≡) v₁) head₁
+                                  (subst₀! A (¡ pre₁≡) v₁) head₁
                                 ret (const _) of λ where
                         (inj₁ x) → ─ (begin pre₁ ≡⟨ ¡ pre₁≡ ⟩
                                             bs₁ ++ drop (length bs₁) pre₁ ≡⟨ cong (bs₁ ++_) x ⟩

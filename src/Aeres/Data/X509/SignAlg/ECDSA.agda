@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.SignAlg.ECDSA.Eq
 import Aeres.Data.X509.SignAlg.ECDSA.Parser
 import Aeres.Data.X509.SignAlg.ECDSA.Properties

@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X509.Validity.Parser
 import Aeres.Data.X509.Validity.Properties
 import Aeres.Data.X509.Validity.TCB

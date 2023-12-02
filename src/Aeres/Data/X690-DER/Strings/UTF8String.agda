@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 import Aeres.Data.X690-DER.Strings.UTF8String.Parser
 import Aeres.Data.X690-DER.Strings.UTF8String.TCB
 import  Aeres.Data.X690-DER.Strings.UTF8String.Properties

@@ -1,6 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
-
 open import Aeres.Data.Base64.TCB
 open import Aeres.Data.PEM.CertText.FinalLine.TCB
 open import Aeres.Data.PEM.CertText.FullLine.TCB

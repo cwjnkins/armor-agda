@@ -1,5 +1,3 @@
-{-# OPTIONS --subtyping #-}
-
 open import Aeres.Binary
 open import Aeres.Data.X690-DER.Strings.IA5String.TCB
 open import Aeres.Data.X690-DER.OctetString
@@ -46,7 +44,7 @@ instance
         λ a →
           record
             { _≟_ = λ where
-              (─ x) (─ y) → yes (cong ─_ (‼ T-unique x y))
+              (─ x) (─ y) → yes (cong (λ x → ─ x) (‼ T-unique x y))
             })
 
   IA5StringEq≋ : Eq≋ IA5StringValue
