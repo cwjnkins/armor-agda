@@ -125,3 +125,6 @@ char∈List b∈ (consIList{l}{r} line lines refl) =
   caseErased Any.++⁻ l b∈ ret (const _) of λ where
     (inj₁ x) → ─ char∈ x line
     (inj₂ y) → ─ char∈List y lines
+
+postulate
+  @0 unambiguous : Unambiguous CertFullLine

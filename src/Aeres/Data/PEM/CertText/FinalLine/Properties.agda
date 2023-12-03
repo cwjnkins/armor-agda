@@ -31,6 +31,9 @@ proj₁ equiv (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) (─ range)) =
 proj₂ equiv (mkCertFinalLine line lineLen eol refl) =
   mk×ₚ (mk&ₚ line eol refl) (─ lineLen)
 
+postulate
+  @0 nonempty : NonEmpty CertFinalLine
+
 fromCertFullLine : ∀ {@0 bs} → CertFullLine bs → CertFinalLine bs
 fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen)) eol refl) =
   mkCertFinalLine
@@ -128,3 +131,6 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
 
     @0 x₁∈ : x₁ ∈ B64.charset ⊎ x₁ ≡ '='
     x₁∈ = Base64.Str.char∈ (here{xs = proj₁ ∃xs₂'} refl) (subst₀! Base64Str (sym ∘ proj₂ $ ∃xs₂') line₃)
+
+postulate
+  @0 unambiguous : Unambiguous CertFinalLine

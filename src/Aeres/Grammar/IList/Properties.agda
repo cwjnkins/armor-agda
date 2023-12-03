@@ -197,25 +197,6 @@ unambiguousNOWF ua ne noo {bs}(consIList{bs₁₁}{bs₁₂'} hd₁ tl₁@(consI
 unambiguousNO ua ne noo a₁ a₂ = unambiguousNOWF ua ne noo a₁ a₂ (<-wellFounded _)
   where open import Data.Nat.Induction
 
--- @0 unambiguousNOSeqWF : ∀ {A B} → NoOverlap A B → NonEmpty A
---                         → Unambiguous A → Unambiguous B
---                         → ∀ {xs} → (x₁ x₂ : &ₚ (IList A) B xs) → @0 Acc _<_ (lengthIList (fstₚ x₁))
---                         → x₁ ≡ x₂
--- unambiguousNOSeqWF noo nea ua ub (mk&ₚ nil b₁ refl) (mk&ₚ nil b₂ refl) (WellFounded.acc rs) =
---   case ub b₁ b₂ of λ where
---     refl → refl
--- unambiguousNOSeqWF noo nea ua ub (mk&ₚ nil b₁ bs≡₁) (mk&ₚ (consIList a₂ₕ a₂ₜ refl) b₂ bs≡₂) (WellFounded.acc rs) =
---   contradiction₂
---     (noo {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!})
---     {!!} {!!}
--- --  contradiction₂ (noo {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!}) {!!} {!!}
--- unambiguousNOSeqWF noo nea ua ub (mk&ₚ (consIList a₁ₕ a₁ₜ refl) b₁ bs≡₁) (mk&ₚ nil b₂ bs≡₂) (WellFounded.acc rs) = {!!}
--- unambiguousNOSeqWF noo nea ua ub (mk&ₚ (consIList a₁ₕ a₁ₜ refl) b₁ bs≡₁) (mk&ₚ (consIList a₂ₕ a₂ₜ refl) b₂ bs≡₂) (WellFounded.acc rs) = {!!}
-
--- @0 unambiguousNOSeq : ∀ {A B} → NoOverlap A B → NonEmpty A → Unambiguous A → Unambiguous B → Unambiguous (&ₚ (IList A) B)
--- unambiguousNOSeq noo nea ua ub x₁ x₂ = unambiguousNOSeqWF noo nea ua ub x₁ x₂ (<-wellFounded _)
---   where open import Data.Nat.Induction
-
 lengthIList≡
   : ∀ {@0 A} → NonEmpty A → NoSubstrings A
     → ∀ {@0 xs} → (il₁ il₂ : IList A xs)

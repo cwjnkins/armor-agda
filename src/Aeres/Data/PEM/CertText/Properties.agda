@@ -265,5 +265,193 @@ body<{b₁}{f₁}{b₂}{f₂}{suf₁}{suf₂} body₁ fin₁ body₂ fin₂ ++�
 
   lem = foldFinalIntoBody body₁ fin₁ body₂ fin₂ ++≡ b₁<
 
-postulate
-  @0 unambiguous : Unambiguous CertText
+@0 unambiguous : Unambiguous CertText
+unambiguous =
+  Iso.unambiguous iso (λ c₁ c₂ → uaWF c₁ c₂ (<-wellFounded _))
+  where
+  open import Data.Nat.Induction using (<-wellFounded)
+  open ≡-Reasoning
+
+  @0 uaWF : ∀ {xs} → (c₁ c₂ : Rep xs) → @0 Acc _<_ (lengthIList (fstₚ c₁)) → c₁ ≡ c₂
+  uaWF (mk&ₚ nil final₁ refl) (mk&ₚ nil final₂ refl) ac =
+    case FinalLine.unambiguous final₁ final₂ of λ where
+      refl → refl
+  uaWF {xs} (mk&ₚ nil final₁ refl) (mk&ₚ{bs₂ = bs₂₃} (consIList{bs₂₁}{bs₂₂} line₂ lines₂ refl) final₂ bs≡₂) ac =
+    case (singleton lines₂ refl) of λ where
+      (singleton nil refl) →
+        ‼ contradiction₂
+          (noOverlapLines bs₂₁ _ [] _ [] refl (subst₀! CertFullLine xs≡ line₁) line₂)
+          (FinalLine.nonempty final₂)
+          (λ ¬final₂ → ¬final₂ final₂)
+      (singleton (consIList{bs₂₂₁}{bs₂₂₂} line₂' lines₂' refl) refl) →
+        let @0 xs≡' : ((bs₂₂₁ ++ bs₂₂₂) ++ bs₂₃) ++ [] ≡ bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃
+            xs≡' = begin
+              ((bs₂₂₁ ++ bs₂₂₂) ++ bs₂₃) ++ [] ≡⟨ ++-identityʳ _ ⟩
+              (bs₂₂₁ ++ bs₂₂₂) ++ bs₂₃ ≡⟨ ++-assoc bs₂₂₁ _ _ ⟩
+              bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃ ∎
+        in
+        ‼ contradiction₂
+          (FullLine.nooverlap _ _ [] _ (bs₂₂₂ ++ bs₂₃) xs≡' (subst₀! CertFullLine xs≡ line₁) line₂)
+          (λ ≡[] → contradiction (++-conicalʳ _ _ ≡[]) (FinalLine.nonempty final₂))
+          λ ¬line₂' → ¬line₂' line₂'
+    where
+    @0 xs≡ : xs ≡ bs₂₁ ++ bs₂₂ ++ bs₂₃
+    xs≡ = trans bs≡₂ (++-assoc bs₂₁ bs₂₂ bs₂₃)
+
+    line₁ : CertFullLine xs
+    line₁ = fullLineFromLine final₁ line₂ (trans (++-identityʳ xs) xs≡)
+  uaWF {xs} (mk&ₚ{bs₂ = bs₁₃} (consIList{bs₁₁}{bs₁₂} line₁ lines₁ refl) final₁ bs≡₁) (mk&ₚ nil final₂ refl) ac =
+    case (singleton lines₁ refl) of λ where
+      (singleton nil refl) →
+        ‼ contradiction₂
+          (noOverlapLines bs₁₁ _ [] _ [] refl (subst₀! CertFullLine xs≡ line₂) line₁)
+          (FinalLine.nonempty final₁)
+          λ ¬final₁ → ¬final₁ final₁
+      (singleton (consIList{bs₁₂₁}{bs₁₂₂} line₁' lines₁' refl) refl) →
+        let @0 xs≡' : ((bs₁₂₁ ++ bs₁₂₂) ++ bs₁₃) ++ [] ≡ bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃
+            xs≡' = begin
+              (((bs₁₂₁ ++ bs₁₂₂) ++ bs₁₃) ++ [] ≡⟨ ++-identityʳ _ ⟩
+              (bs₁₂₁ ++ bs₁₂₂) ++ bs₁₃ ≡⟨ ++-assoc bs₁₂₁ _ _ ⟩
+              bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃ ∎)
+        in
+        ‼ contradiction₂
+          (FullLine.nooverlap _ _ [] _ (bs₁₂₂ ++ bs₁₃) xs≡' (subst₀! CertFullLine xs≡ line₂) line₁)
+          (λ ≡[] → contradiction (++-conicalʳ _ _ ≡[]) (FinalLine.nonempty final₁))
+          λ ¬line₁' → ¬line₁' line₁'
+    where
+    @0 xs≡ : xs ≡ bs₁₁ ++ bs₁₂ ++ bs₁₃
+    xs≡ = trans bs≡₁ (++-assoc bs₁₁ _ _)
+
+    line₂ : CertFullLine xs
+    line₂ = fullLineFromLine final₂ line₁ (trans (++-identityʳ xs) xs≡)
+  uaWF (mk&ₚ{bs₂ = bs₁₃} (consIList{bs₁₁} line₁ nil refl) final₁ bs≡₁) (mk&ₚ{bs₂ = bs₂₃} (consIList{bs₂₁} line₂ nil refl) final₂ bs≡₂) ac =
+    case (((trans bs≡₁ (cong (_++ bs₁₃) (++-identityʳ bs₁₁)))) ,′ ((trans bs≡₂ (cong (_++ bs₂₃) (++-identityʳ bs₂₁))))) of λ where
+      (bs≡₁' , bs≡₂') → case ‼ Seq.unambiguousNO FullLine.unambiguous FinalLine.unambiguous noOverlapLines (mk&ₚ line₁ final₁ bs≡₁') (mk&ₚ line₂ final₂ bs≡₂') of λ where
+        refl → case ‼ ≡-unique bs≡₁ bs≡₂ ret (const _) of λ where
+          refl → refl
+  uaWF {xs} (mk&ₚ{bs₂ = bs₁₃} (consIList{bs₁₁} line₁ nil refl) final₁ bs≡₁) (mk&ₚ{bs₂ = bs₂₃} (consIList{bs₂₁} line₂ (consIList{bs₂₂₁}{bs₂₂₂} line₂' lines₂ refl) refl) final₂ bs≡₂) ac =
+    case (singleton lines₂ refl) of λ where
+      (singleton nil refl) →
+        ‼ contradiction₂
+          (noOverlapLines _ _ [] _ [] refl (subst₀! CertFullLine (proj₂ xs≡×) line₁') line₂')
+          (FinalLine.nonempty final₂)
+          λ ¬final₂ → ¬final₂ final₂
+      (singleton (consIList{bs₂₂₂₁}{bs₂₂₂₂} line₂“ lines refl) refl) →
+        let @0 xs≡' : ((bs₂₂₂₁ ++ bs₂₂₂₂) ++ bs₂₃) ++ [] ≡ bs₂₂₂₁ ++ bs₂₂₂₂ ++ bs₂₃
+            xs≡' = begin
+              ((bs₂₂₂₁ ++ bs₂₂₂₂) ++ bs₂₃) ++ [] ≡⟨ ++-identityʳ _ ⟩
+              (bs₂₂₂₁ ++ bs₂₂₂₂) ++ bs₂₃ ≡⟨ ++-assoc bs₂₂₂₁ _ _ ⟩
+              bs₂₂₂₁ ++ bs₂₂₂₂ ++ bs₂₃ ∎
+        in
+        ‼ contradiction₂
+          (FullLine.nooverlap _ _ [] _ (bs₂₂₂₂ ++ bs₂₃) xs≡' (subst₀! CertFullLine (proj₂ xs≡×) line₁') line₂')
+          (λ ≡[] → contradiction (++-conicalʳ _ _ ≡[]) (FinalLine.nonempty final₂))
+          (λ ¬line₂“ → ¬line₂“ line₂“)
+    where
+    import Data.Nat.Properties as Nat
+    module ≤ = Nat.≤-Reasoning
+    @0 xs≡ : bs₁₁ ++ bs₁₃ ≡ bs₂₁ ++ bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃
+    xs≡ = begin
+      bs₁₁ ++ bs₁₃ ≡⟨ cong (_++ bs₁₃) (sym (++-identityʳ bs₁₁)) ⟩
+      (bs₁₁ ++ []) ++ bs₁₃ ≡⟨ sym bs≡₁ ⟩
+      xs ≡⟨ bs≡₂ ⟩
+      (bs₂₁ ++ bs₂₂₁ ++ bs₂₂₂) ++ bs₂₃ ≡⟨ sym (Lemmas.++-assoc₄ bs₂₁ bs₂₂₁ _ _) ⟩
+      _ ∎
+
+    @0 xs≡× : bs₁₁ ≡ bs₂₁ × bs₁₃ ≡ bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃
+    xs≡× =
+      Lemmas.length-++-≡ _ _ _ _ xs≡
+        (Nat.≤-antisym
+          (≤.begin
+            length bs₁₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+            length bs₁₁ + length (drop (length bs₁₁) bs₂₁) ≤.≡⟨ sym (length-++ bs₁₁) ⟩
+            length (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ FullLine.nooverlap {ws = bs₂₁} (sym xs≡) line₂ line₂' line₁)) ⟩
+            length bs₂₁ ≤.∎)
+          (≤.begin
+            (length bs₂₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+            length bs₂₁ + length (drop (length bs₂₁) bs₁₁) ≤.≡⟨ sym (length-++ bs₂₁) ⟩
+            length (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ noOverlapLines (trans (cong (bs₁₁ ++_) (++-identityʳ bs₁₃)) xs≡) line₁ final₁ line₂)) ⟩
+            length bs₁₁ ≤.∎)))
+
+    line₁' : CertFullLine bs₁₃
+    line₁' = fullLineFromLine final₁ line₂' (trans (++-identityʳ bs₁₃) (proj₂ xs≡×))
+  uaWF {xs} (mk&ₚ{bs₂ = bs₁₃} (consIList{bs₁₁} line₁ (consIList{bs₁₂₁}{bs₁₂₂} line₁' lines₁ refl) refl) final₁ bs≡₁) (mk&ₚ{bs₂ = bs₂₃} (consIList{bs₂₁} line₂ nil refl) final₂ bs≡₂) ac =
+    case (singleton lines₁ refl) of λ where
+      (singleton nil refl) → 
+        ‼ contradiction₂
+          (noOverlapLines _ _ [] _ [] refl (subst₀! CertFullLine (proj₂ xs≡×) line₂') line₁')
+          (FinalLine.nonempty final₁)
+          λ ¬final₁ → ¬final₁ final₁
+      (singleton (consIList{bs₁₂₂₁}{bs₁₂₂₂} line₁“ lines₁ refl) refl) →
+        let @0 xs≡' : ((bs₁₂₂₁ ++ bs₁₂₂₂) ++ bs₁₃) ++ [] ≡ bs₁₂₂₁ ++ bs₁₂₂₂ ++ bs₁₃
+            xs≡' = begin
+              ((bs₁₂₂₁ ++ bs₁₂₂₂) ++ bs₁₃) ++ [] ≡⟨ ++-identityʳ _ ⟩
+              (bs₁₂₂₁ ++ bs₁₂₂₂) ++ bs₁₃ ≡⟨ ++-assoc bs₁₂₂₁ _ _ ⟩
+              _ ∎
+        in
+        ‼ contradiction₂
+          (FullLine.nooverlap _ _ [] _ (bs₁₂₂₂ ++ bs₁₃) xs≡' (subst₀! CertFullLine (proj₂ xs≡×) line₂') line₁')
+          (λ ≡[] → contradiction (++-conicalʳ _ _ ≡[]) (FinalLine.nonempty final₁))
+          (λ ¬line₁“ → ¬line₁“ line₁“) 
+    where
+    import Data.Nat.Properties as Nat
+    module ≤ = Nat.≤-Reasoning
+    @0 xs≡ : bs₂₁ ++ bs₂₃ ≡ bs₁₁ ++ bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃
+    xs≡ = begin
+      bs₂₁ ++ bs₂₃ ≡⟨ cong (_++ bs₂₃) (sym (++-identityʳ bs₂₁)) ⟩
+      (bs₂₁ ++ []) ++ bs₂₃ ≡⟨ sym bs≡₂ ⟩
+      xs ≡⟨ bs≡₁ ⟩
+      (bs₁₁ ++ bs₁₂₁ ++ bs₁₂₂) ++ bs₁₃ ≡⟨ sym (Lemmas.++-assoc₄ bs₁₁ bs₁₂₁ _ _) ⟩
+      _ ∎
+
+    @0 xs≡× : bs₂₁ ≡ bs₁₁ × bs₂₃ ≡ bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃
+    xs≡× =
+      Lemmas.length-++-≡ _ _ _ _ xs≡
+        (Nat.≤-antisym
+          (≤.begin
+            length bs₂₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+            length bs₂₁ + length (drop (length bs₂₁) bs₁₁) ≤.≡⟨ sym (length-++ bs₂₁) ⟩
+            length (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ FullLine.nooverlap {ws = bs₁₁} (sym xs≡) line₁ line₁' line₂)) ⟩
+            length bs₁₁ ≤.∎)
+          (≤.begin
+            (length bs₁₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+            length bs₁₁ + length (drop (length bs₁₁) bs₂₁) ≤.≡⟨ sym (length-++ bs₁₁) ⟩
+            length (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ noOverlapLines (trans (cong (bs₂₁ ++_) (++-identityʳ bs₂₃)) xs≡) line₂ final₂ line₁)) ⟩
+            length bs₂₁ ≤.∎)))
+
+    line₂' : CertFullLine bs₂₃
+    line₂' = fullLineFromLine final₂ line₁' (trans (++-identityʳ bs₂₃) (proj₂ xs≡×))
+  uaWF {xs} (mk&ₚ{bs₂ = bs₁₃} (consIList{bs₁₁} line₁ (consIList{bs₁₂₁}{bs₁₂₂} line₁' lines₁ refl) refl) final₁ bs≡₁) (mk&ₚ{bs₂ = bs₂₃} (consIList{bs₂₁} line₂ (consIList{bs₂₂₁}{bs₂₂₂} line₂' lines₂ refl) refl) final₂ bs≡₂) (WellFounded.acc rs) =
+    case (‼ proj₁ xs≡×) of λ where
+      refl → case ‼ FullLine.unambiguous line₁ line₂ of λ where
+        refl → case ((─ sym (++-assoc bs₁₂₁ bs₁₂₂ bs₁₃)) ,′ (─ trans (proj₂ xs≡×) (sym (++-assoc bs₂₂₁ bs₂₂₂ bs₂₃)))) of λ where
+          (─ bs≡₁' , ─ bs≡₂') → case ‼ uaWF (mk&ₚ (consIList line₁' lines₁ refl) final₁ bs≡₁') (mk&ₚ (consIList line₂' lines₂ refl) final₂ bs≡₂') (rs _ (s≤s Nat.≤-refl)) of λ where
+            refl → case ‼ ≡-unique bs≡₁ bs≡₂ ret (const _) of λ where
+              refl → refl
+    where
+    import Data.Nat.Properties as Nat
+    module ≤ = Nat.≤-Reasoning
+
+    @0 xs≡ : bs₁₁ ++ bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃ ≡ bs₂₁ ++ bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃
+    xs≡ = begin
+      bs₁₁ ++ bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃ ≡⟨ Lemmas.++-assoc₄ bs₁₁ bs₁₂₁ _ _ ⟩
+      (bs₁₁ ++ bs₁₂₁ ++ bs₁₂₂) ++ bs₁₃ ≡⟨ sym bs≡₁ ⟩
+      xs ≡⟨ bs≡₂ ⟩
+      (bs₂₁ ++ bs₂₂₁ ++ bs₂₂₂) ++ bs₂₃ ≡⟨ sym (Lemmas.++-assoc₄ bs₂₁ bs₂₂₁ _ _) ⟩
+      _ ∎
+
+    @0 xs≡× : bs₁₁ ≡ bs₂₁ × bs₁₂₁ ++ bs₁₂₂ ++ bs₁₃ ≡ bs₂₂₁ ++ bs₂₂₂ ++ bs₂₃
+    xs≡× = Lemmas.length-++-≡ _ _ _ _ xs≡
+             (Nat.≤-antisym
+               (≤.begin
+                 length bs₁₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+                 length bs₁₁ + length (drop (length bs₁₁) bs₂₁) ≤.≡⟨ sym (length-++ bs₁₁) ⟩
+                 length (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ≤.≡⟨ cong length {y = bs₂₁} (sym (noOverlapBoundary₁ FullLine.nooverlap (sym xs≡) line₂ line₂' line₁)) ⟩
+                 length bs₂₁ ≤.∎)
+               (≤.begin
+                 length bs₂₁ ≤.≤⟨ Nat.m≤m+n _ _ ⟩
+                 length bs₂₁ + length (drop (length bs₂₁) bs₁₁) ≤.≡⟨ sym (length-++ bs₂₁) ⟩
+                 length (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ≤.≡⟨ cong length {y = bs₁₁} (sym (noOverlapBoundary₁ FullLine.nooverlap xs≡ line₁ line₁' line₂)) ⟩
+                 length bs₁₁ ≤.∎))
+
+
