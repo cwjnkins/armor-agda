@@ -217,9 +217,12 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡ (mkCert{h₁}{b₁}
     @0 x₁≡ : x₁ ≡ '-'
     x₁≡ = ∷-injectiveˡ (trans ++≡ (cong (_++ ys₂) bs≡))
 
--- @0 unambiguous : Unambiguous Cert
--- unambiguous = Iso.unambiguous iso
---   (Seq.unambiguousNO (CertBoundary.unambiguous _)
---   (Seq.unambiguousNO CertText.unambiguous
---                      (CertBoundary.unambiguous _)
---     noOverlapTextFooter) noOverlapHeaderText)
+@0 unambiguous : Unambiguous Cert
+unambiguous = Iso.unambiguous iso
+  (Seq.unambiguousNO (CertBoundary.unambiguous _)
+  (Seq.unambiguousNO CertText.unambiguous
+                     (CertBoundary.unambiguous _)
+    noOverlapTextFooter) noOverlapHeaderText)
+
+@0 unambiguousCertList : Unambiguous CertList
+unambiguousCertList = IList.unambiguousNO unambiguous nonempty noOverlap 
