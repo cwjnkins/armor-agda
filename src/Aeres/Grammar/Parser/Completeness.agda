@@ -1,7 +1,6 @@
-{-# OPTIONS --subtyping #-}
-
 import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.Parser.Core
+import      Aeres.Grammar.Parser.Maximal as Maximal
 open import Aeres.Prelude
 
 module Aeres.Grammar.Parser.Completeness (Σ : Set) where
@@ -47,6 +46,39 @@ module Proofs (M : Set → Set) (extract : ∀ {G} {@0 bs} → M (Success G bs) 
       case nn (trans (++-identityʳ xs) (‼ sym ps≡)) inG value ret (const _) of λ where
         refl → case ‼ ua inG value ret (const _) of λ where
           refl → refl
+
+  module _
+    (L : (A : Set) (P : A → Set) (xs : List Σ) → M A → Set)
+    (extractL : ∀ {G} {bs} → (p : Maximal.Generic.MaximalParser Σ (λ _ → M) L G) (w : True (extract (runParser (Maximal.Generic.MaximalParser.parser p) bs))) → Maximal.GreatestSuccess Σ (toWitness w))
+    where
+    open Maximal.Generic Σ (λ _ → M) L
+
+    @0 strongCompletenessMax : ∀ {G : @0 List Σ → Set} (p : MaximalParser G) → Unambiguous G → StronglyComplete (MaximalParser.parser p)
+    strongCompletenessMax{G} p ua xs xsInG = w , secure xs xsInG s m
+      where
+      import Data.Nat.Properties as Nat
+      module ≤ = Nat.≤-Reasoning
+
+      w = weakCompleteness (MaximalParser.parser p) xs xsInG
+      s = toWitness w
+      m : Maximal.GreatestSuccess Σ s
+      m = extractL p w
+
+      secure : ∀ xs (xsInG : G xs) (s : Success G xs) (m : Maximal.GreatestSuccess Σ s) → (─ _ , xsInG) ≡ (─ _ , Success.value s)
+      secure xs inG (success prefix read read≡ value suffix ps≡) m =
+        case (xs ≡ prefix
+              ∋ proj₁ (Lemmas.length-++-≡ xs _ prefix _ (trans (++-identityʳ xs) (sym ps≡))
+                        (Nat.≤-antisym
+                          (subst₀! ((length xs) ≤_) read≡ (m xs [] (++-identityʳ xs) inG))
+                          (≤.begin
+                            (length prefix ≤.≤⟨ Nat.m≤m+n (length prefix) (length suffix) ⟩
+                            length prefix + length suffix ≤.≡⟨ sym (length-++ prefix) ⟩
+                            length (prefix ++ suffix) ≤.≡⟨ cong length ps≡ ⟩
+                            length xs ≤.∎)))))
+        of λ where
+          refl → case ua inG value of λ where
+            refl → refl
+--    @0 strongCompleteness' : ∀ {G : @0 List Σ → Set} (p : LogDec.MaximalParser G)
     -- case extract (runParser p xs) ret (λ d → True d And λ s → _≡_{A = Exists─ _ G} (─ _ , xs∈G) (─ Success.prefix s , Success.value s)) of λ where
     --   (no ¬s) → contradiction (success xs _ refl xs∈G [] (++-identityʳ xs)) ¬s
     --   (yes (success prefix _ _ v suffix ps≡)) →
