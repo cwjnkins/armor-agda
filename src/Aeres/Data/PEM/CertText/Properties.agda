@@ -24,6 +24,18 @@ open Aeres.Grammar.Seq                  Char
 
 open ≡-Reasoning
 
+Rep : @0 List Char → Set
+Rep = &ₚ (IList CertFullLine) CertFinalLine
+
+equiv : Equivalent Rep CertText
+proj₁ equiv (mk&ₚ body final bs≡) = mkCertText body final bs≡
+proj₂ equiv (mkCertText body final bs≡) = mk&ₚ body final bs≡
+
+iso : Iso Rep CertText
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (mkCertText body final bs≡) = refl
+
 finalLineFromLines : ∀ {@0 bs} → IList CertFullLine bs → Erased (bs ≡ []) ⊎ &ₚ (IList CertFullLine) (CertFinalLine ×ₚ CertFullLine) bs
 finalLineFromLines nil = inj₁ (─ refl)
 finalLineFromLines (consIList{bs₁}{.[]} head₁ nil bs≡) =
@@ -252,3 +264,6 @@ body<{b₁}{f₁}{b₂}{f₂}{suf₁}{suf₂} body₁ fin₁ body₂ fin₂ ++�
   module ≤ = Nat.≤-Reasoning
 
   lem = foldFinalIntoBody body₁ fin₁ body₂ fin₂ ++≡ b₁<
+
+-- @0 unambiguous : Unambiguous CertText
+-- unambiguous {bs} (mkCertText{bs₁₁}{bs₁₂} body₁ final₁ bs≡₁) (mkCertText{bs₂₁}{bs₂₂} body₂ final₂ bs≡₂) = {!!}

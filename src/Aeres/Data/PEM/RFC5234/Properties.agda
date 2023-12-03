@@ -101,3 +101,8 @@ module EOL where
         (singleton (x ∷ x₁) refl) → here (∷-injectiveˡ ++≡)
   noOverlap' .([ '\r' ]) .[] ys₁ xs₂ ys₂ x cr cr = inj₁ refl
   noOverlap' .([ '\n' ]) .[] ys₁ xs₂ ys₂ x lf lf = inj₁ refl
+
+  @0 unambiguous : Unambiguous EOL
+  unambiguous crlf crlf = refl
+  unambiguous cr cr = refl
+  unambiguous lf lf = refl

@@ -20,9 +20,11 @@ open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
 open Aeres.Grammar.Parallel    Char
 open Aeres.Grammar.Parser      Char
-module Seq = Aeres.Grammar.Seq.Properties Char
 open Aeres.Grammar.Seq.TCB     Char
 open Aeres.Grammar.Seq.MaximalParser Char
+
+private
+  module Seq = Aeres.Grammar.Seq.Properties Char
 
 parseCertFinalLine : LogDec.MaximalParser CertFinalLine
 parseCertFinalLine =
