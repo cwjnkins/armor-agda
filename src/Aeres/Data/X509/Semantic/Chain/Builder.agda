@@ -1,4 +1,4 @@
-{-# OPTIONS  --subtyping --sized-types #-}
+{-# OPTIONS  --sized-types #-}
 
 open import Aeres.Binary
 open import Aeres.Data.X509
@@ -29,6 +29,13 @@ IssuerFor issuee In certs = Σ (Exists─ _ Cert) (λ where (─ _ , issuer) →
 IssuersFor_In_ : {@0 bs : List UInt8} (issuee : Cert bs) (certs : List (Exists─ _ Cert)) → Set
 IssuersFor issuee In certs = List (IssuerFor issuee In certs)
   -- List (Exists─ _ (Σₚ Cert λ _ issuer → issuer IsIssuerFor issuee In certs))
+
+data Chain (trustedRoot candidates : List (Exists─ _ Cert)) : ∀ {@0 bs} → Cert bs → Set where
+  root : ∀ {@0 bs} {c : Cert bs} → IssuerFor c In trustedRoot → Chain trustedRoot candidates c
+  link : ∀ {@0 bs₁ bs₂} (issuer : Cert bs₁) {c₂ : Cert bs₂}
+         → (isIn : issuer IsIssuerFor c₂ In candidates) → Chain trustedRoot (candidates Any.─ proj₂ isIn) issuer
+         → Chain trustedRoot candidates c₂
+
 
 pattern anIssuerForIn{bs} issuer isIssuerFor issuer∈ = _,_ (_,_ (─_ bs) issuer) (_,_ isIssuerFor issuer∈)
 
@@ -85,12 +92,6 @@ buildTrustTree : (trustedRoot candidates : List (Exists─ _ Cert))
 buildTrustTree trustedRoot candidates = buildTrustTreeWF trustedRoot candidates (<-wellFounded _)
   where
   open import Data.Nat.Induction
-
-data Chain (trustedRoot candidates : List (Exists─ _ Cert)) : ∀ {@0 bs} → Cert bs → Set where
-  root : ∀ {@0 bs} {c : Cert bs} → IssuerFor c In trustedRoot → Chain trustedRoot candidates c
-  link : ∀ {@0 bs₁ bs₂} (issuer : Cert bs₁) {c₂ : Cert bs₂}
-         → (isIn : issuer IsIssuerFor c₂ In candidates) → Chain trustedRoot (candidates Any.─ proj₂ isIn) issuer
-         → Chain trustedRoot candidates c₂
 
 toChainsWF : ∀ (trustedRoot candidates : List (Exists─ _ Cert)) {@0 bs} (endEnt : Cert bs)
              → TrustTree trustedRoot candidates endEnt
