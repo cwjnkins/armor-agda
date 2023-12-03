@@ -265,5 +265,5 @@ body<{b₁}{f₁}{b₂}{f₂}{suf₁}{suf₂} body₁ fin₁ body₂ fin₂ ++�
 
   lem = foldFinalIntoBody body₁ fin₁ body₂ fin₂ ++≡ b₁<
 
--- @0 unambiguous : Unambiguous CertText
--- unambiguous {bs} (mkCertText{bs₁₁}{bs₁₂} body₁ final₁ bs≡₁) (mkCertText{bs₂₁}{bs₂₂} body₂ final₂ bs≡₂) = {!!}
+postulate
+  @0 unambiguous : Unambiguous CertText
