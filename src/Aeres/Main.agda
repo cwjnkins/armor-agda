@@ -180,13 +180,13 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runChainCheck : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
-    → (chain : Chain trustedRoot candidates issuee) → String
-    → {P : ∀ {@0 bs} → Cert bs → Chain trustedRoot candidates issuee → Set}
-    → (Dec (P issuee chain))
+  runChainCheck : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → String
+    → (issuee : Cert bs) → Chain trustedRoot candidates issuee
+    → {P : ∀ {@0 bs} → (i : Cert bs) → Chain trustedRoot candidates i → Set}
+    → (∀ {@0 bs} → (j : Cert bs) → (chain : Chain trustedRoot candidates j) → Dec (P j chain))
     → IO.IO ⊤
-  runChainCheck i c m d
-    with d
+  runChainCheck m i c d
+    with d i c
   ... | no ¬p =
     Aeres.IO.putStrLnErr (m String.++ ": failed") IO.>>
     Aeres.IO.exitFailure
@@ -257,11 +257,11 @@ main = IO.run $
     → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
   helper₁ issuee chain =
     runChecks' issuee 1 chain IO.>>
-    runChainCheck issuee chain "CCP2" (ccp2 issuee chain) IO.>>
-    runChainCheck issuee chain "CCP3" (ccp3 issuee chain) IO.>>
-    runChainCheck issuee chain "CCP4" (ccp4 issuee chain) IO.>>
-    runChainCheck issuee chain "CCP5" (ccp5 issuee chain) IO.>>
-    runChainCheck issuee chain "CCP10" (ccp10 issuee chain) IO.>>
+    runChainCheck "CCP2" issuee chain ccp2 IO.>>
+    runChainCheck "CCP3" issuee chain ccp3 IO.>>
+    runChainCheck "CCP4" issuee chain ccp4 IO.>>
+    runChainCheck "CCP5" issuee chain ccp5 IO.>>
+    runChainCheck "CCP10" issuee chain ccp10 IO.>>
     IO.return true
 
   helper₂ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
