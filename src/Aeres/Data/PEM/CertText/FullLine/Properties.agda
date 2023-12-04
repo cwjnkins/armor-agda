@@ -24,6 +24,11 @@ equiv : Equivalent Rep CertFullLine
 proj₁ equiv (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkCertFullLine fstₚ₁ sndₚ₁ bs≡
 proj₂ equiv (mkCertFullLine line eol bs≡) = mk&ₚ line eol bs≡
 
+iso : Iso Rep CertFullLine
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ bs≡) = refl
+proj₂ (proj₂ iso) (mkCertFullLine line eol bs≡) = refl
+
 nonempty : NonEmpty CertFullLine
 nonempty (mkCertFullLine (mk×ₚ (consIList (mk64 c c∈ i refl) t refl) (─ len≡)) eol ()) refl
 
@@ -126,5 +131,13 @@ char∈List b∈ (consIList{l}{r} line lines refl) =
     (inj₁ x) → ─ char∈ x line
     (inj₂ y) → ─ char∈List y lines
 
-postulate
-  @0 unambiguous : Unambiguous CertFullLine
+@0 unambiguous : Unambiguous CertFullLine
+unambiguous = Iso.unambiguous iso ua
+  where
+  @0 ua : Unambiguous Rep
+  ua = Seq.unambiguous
+         (Parallel.ExactLength.unambiguous _
+           (IList.unambiguous Base64.Char.unambiguous Base64.Char.nonempty Base64.Char.nosubstrings))
+         (Parallel.ExactLength.nosubstrings _)
+         RFC5234.EOL.unambiguous
+
