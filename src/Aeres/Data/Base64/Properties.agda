@@ -149,6 +149,9 @@ module Base64Pad where
   c₄∉ (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = toWitnessFalse {Q = _ ∈? _} tt
   c₄∉ (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) = toWitnessFalse{Q = _ ∈? _} tt
 
+  postulate
+   @0 unambiguous : Unambiguous Rep
+
 module Base64Str where
   Rep : @0 List Char → Set
   Rep = &ₚ (IList (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char (&ₚ Base64.Base64Char Base64.Base64Char)))) Base64Pad.Rep
@@ -445,3 +448,24 @@ module Base64Str where
               (consIList (Base64.mk64 c₄ c₄∈ self refl) str₀ refl) refl) refl) refl)
         strLen₀ pad₀
         (cong (λ x → c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ x) bs≡₀)
+
+ 
+    
+
+  -- iso : Iso Rep Base64.Base64Str
+  -- proj₁ iso = equiv
+  -- proj₁ (proj₂ iso) (mk&ₚ nil none refl) = refl
+  -- proj₁ (proj₂ iso) (mk&ₚ nil (some (inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl))) refl) = refl
+  -- proj₁ (proj₂ iso) (mk&ₚ nil (some (inj₂ (Base64.mk64P2 c₁ c₂ pad refl))) refl) = refl
+  -- proj₁ (proj₂ iso) (mk&ₚ (cons (mkIListCons (mk&ₚ (Base64.mk64 c c∈ i refl) sndₚ₂ refl) tail₁ refl)) sndₚ₁ refl) = {!!}
+  -- proj₂ (proj₂ iso) (Base64.mk64Str str strLen pad refl) = {!!}
+
+  postulate
+    @0 unambiguous : Unambiguous Base64.Base64Str
+  -- unambiguous = Iso.unambiguous iso
+  --   (Seq.unambiguousNO ua Base64Pad.unambiguous {!!})
+
+
+  --   where
+  --   ua : Unambiguous Repₛ
+  --   ua = {!!}

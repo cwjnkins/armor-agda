@@ -9,6 +9,7 @@ import      Aeres.Grammar.Definitions
 import      Aeres.Grammar.IList
 import      Aeres.Grammar.Parallel
 import      Aeres.Grammar.Seq
+import      Aeres.Grammar.Sum
 open import Aeres.Prelude
 import      Data.Nat.Properties as Nat
 import      Data.List.Relation.Unary.Any.Properties as Any
@@ -19,6 +20,7 @@ module Aeres.Data.PEM.CertText.FinalLine.Properties where
 open  Aeres.Grammar.Definitions Char
 open  Aeres.Grammar.IList       Char
 open  Aeres.Grammar.Seq         Char
+open  Aeres.Grammar.Sum         UInt8
 open  Aeres.Grammar.Parallel    Char
 
 Rep : @0 List Char → Set
@@ -132,5 +134,13 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
     @0 x₁∈ : x₁ ∈ B64.charset ⊎ x₁ ≡ '='
     x₁∈ = Base64.Str.char∈ (here{xs = proj₁ ∃xs₂'} refl) (subst₀! Base64Str (sym ∘ proj₂ $ ∃xs₂') line₃)
 
-postulate
-  @0 unambiguous : Unambiguous CertFinalLine
+iso   : Iso Rep CertFinalLine
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁) = refl
+proj₂ (proj₂ iso) (mkCertFinalLine line lineLen eol refl) = refl
+
+@0 unambiguous : Unambiguous CertFinalLine
+unambiguous = Iso.unambiguous iso
+  (Parallel.unambiguous
+    (Seq.unambiguousNO Base64.Str.unambiguous RFC5234.EOL.unambiguous RFC5234.EOL.noOverlap)
+    (λ _ → erased-unique (inRange-unique { A = ℕ } { B = ℕ })))
