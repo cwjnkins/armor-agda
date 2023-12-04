@@ -126,5 +126,13 @@ char∈List b∈ (consIList{l}{r} line lines refl) =
     (inj₁ x) → ─ char∈ x line
     (inj₂ y) → ─ char∈List y lines
 
-postulate
-  @0 unambiguous : Unambiguous CertFullLine
+iso : Iso Rep CertFullLine
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ sndₚ₁ refl) = refl
+proj₂ (proj₂ iso) (mkCertFullLine line eol refl) = refl
+
+@0 unambiguous : Unambiguous CertFullLine
+unambiguous = Iso.unambiguous iso
+  (Seq.unambiguous (Parallel.ExactLength.unambiguous _
+      (IList.unambiguous Base64.Char.unambiguous Base64.Char.nonempty Base64.Char.nosubstrings))
+    (Parallel.ExactLength.nosubstrings _) RFC5234.EOL.unambiguous)
