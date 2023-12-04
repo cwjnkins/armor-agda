@@ -1,7 +1,7 @@
 open import Aeres.Binary
   renaming (module Base64 to B64)
 open import Aeres.Data.Base64
-open import Aeres.Data.PEM.CertBoundary.TCB
+open import Aeres.Data.PEM.CertBoundary
 open import Aeres.Data.PEM.CertText
 open import Aeres.Data.PEM.CertText.FinalLine
 open import Aeres.Data.PEM.CertText.FullLine
@@ -28,6 +28,11 @@ proj₁ equiv (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ sndₚ₁ refl) refl) =
   mkCert fstₚ₁ fstₚ₂ sndₚ₁ refl
 proj₂ equiv (mkCert header body footer refl) =
   mk&ₚ header (mk&ₚ body footer refl) refl
+
+iso : Iso Rep Cert
+proj₁ iso = equiv
+proj₁ (proj₂ iso) (mk&ₚ h (mk&ₚ b f refl) refl) = refl
+proj₂ (proj₂ iso) (mkCert h b f refl) = refl
 
 nonempty : NonEmpty Cert
 nonempty (mkCert (mkCertBoundary refl eol refl) body footer ()) refl
@@ -211,3 +216,13 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡ (mkCert{h₁}{b₁}
     where
     @0 x₁≡ : x₁ ≡ '-'
     x₁≡ = ∷-injectiveˡ (trans ++≡ (cong (_++ ys₂) bs≡))
+
+@0 unambiguous : Unambiguous Cert
+unambiguous = Iso.unambiguous iso
+  (Seq.unambiguousNO (CertBoundary.unambiguous _)
+  (Seq.unambiguousNO CertText.unambiguous
+                     (CertBoundary.unambiguous _)
+    noOverlapTextFooter) noOverlapHeaderText)
+
+@0 unambiguousCertList : Unambiguous CertList
+unambiguousCertList = IList.unambiguousNO unambiguous nonempty noOverlap 

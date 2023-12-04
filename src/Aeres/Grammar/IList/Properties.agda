@@ -68,6 +68,135 @@ unambiguous{A} ua ne nn (consIList{bs₁₁}{bs₁₂} h t bs≡) (consIList{bs�
   bs₂≡ : bs₁₂ ≡ bs₂₂
   bs₂≡ = Lemmas.++-cancel≡ˡ _ _ bs₁≡ bs≡'
 
+@0 unambiguousNOWF : ∀ {A} → Unambiguous A → NonEmpty A → NoOverlap A A → ∀ {xs} → (a₁ a₂ : IList A xs) → @0 Acc _<_ (lengthIList a₁) → a₁ ≡ a₂
+  -- Unambiguous (IList A)
+unambiguousNOWF ua ne noo nil nil _ = refl
+unambiguousNOWF ua ne noo nil (consIList hd₂ tl₂ bs₂≡) _ =
+    contradiction (++-conicalˡ _ _ (sym bs₂≡)) (ne hd₂)
+unambiguousNOWF ua ne noo (consIList hd₁ tl₁ bs₁≡) nil _ =
+  contradiction (++-conicalˡ _ _ (sym bs₁≡)) (ne hd₁)
+unambiguousNOWF ua ne noo {bs} (consIList{bs₁₁} hd₁ nil bs₁≡) (consIList{bs₂₁} hd₂ nil bs₂≡) _ =
+  caseErased bs≡ ret (const _) of λ where
+    refl → ─ (caseErased ≡-unique bs₁≡ bs₂≡ ret (const _) of λ where
+      refl → ─ (case ua hd₁ hd₂ ret (const _) of λ where
+        refl → refl))
+  where
+  open ≡-Reasoning
+
+  @0 bs≡ : bs₁₁ ≡ bs₂₁
+  bs≡ = begin
+    bs₁₁ ≡⟨ (sym $ ++-identityʳ bs₁₁) ⟩
+    bs₁₁ ++ [] ≡⟨ sym bs₁≡ ⟩
+    bs ≡⟨ bs₂≡ ⟩
+    bs₂₁ ++ [] ≡⟨ ++-identityʳ bs₂₁ ⟩
+    bs₂₁ ∎
+unambiguousNOWF{A} ua ne noo {bs} (consIList{bs₁₁} hd₁ nil bs₁≡) (consIList{bs₂₁} hd₂ (consIList{bs₂₂}{bs₂₃} hd₂' tl₂ refl) bs₂≡) _ =
+  contradiction bs₂₂≡[] (ne hd₂')
+  where
+  open ≡-Reasoning
+  @0 bs≡ : bs₂₁ ++ bs₂₂ ++ bs₂₃ ≡ bs₁₁ ++ []
+  bs≡ = begin
+    bs₂₁ ++ (bs₂₂ ++ bs₂₃) ≡⟨ sym bs₂≡ ⟩
+    bs ≡⟨ bs₁≡ ⟩
+    bs₁₁ ++ [] ∎
+
+  @0 bs₂₁≡ : bs₂₁ ≡ bs₁₁ ++ drop (length bs₁₁) bs₂₁
+  bs₂₁≡ = noOverlapBoundary₁ noo bs≡ hd₂ hd₂' hd₁
+
+  @0 bs≡' : bs₁₁ ++ drop (length bs₁₁) bs₂₁ ++ bs₂₂ ++ bs₂₃ ≡ bs₁₁ ++ []
+  bs≡' = begin
+    bs₁₁ ++ drop (length bs₁₁) bs₂₁ ++ bs₂₂ ++ bs₂₃ ≡⟨ (sym $ ++-assoc bs₁₁ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃)) ⟩
+    (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ++ bs₂₂ ++ bs₂₃ ≡⟨ cong (λ x → x ++ bs₂₂ ++ bs₂₃) (sym bs₂₁≡) ⟩
+    bs₂₁ ++ bs₂₂ ++ bs₂₃ ≡⟨ bs≡ ⟩
+    bs₁₁ ++ [] ∎
+
+  @0 bs₂₂≡[] : bs₂₂ ≡ []
+  bs₂₂≡[] = ++-conicalˡ bs₂₂ bs₂₃ (++-conicalʳ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃) (++-cancelˡ bs₁₁ bs≡'))
+
+  -- lem₁ = noo bs₁₁ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃) {!!} {!!} {!!} (subst₀ A bs₂₁≡ hd₂) hd₁
+unambiguousNOWF ua ne noo {bs} (consIList{bs₁₁} hd₁ (consIList{bs₁₂}{bs₁₃} hd₁' tl₁ refl) bs₁≡) (consIList{bs₂₁} hd₂ nil bs₂≡) _ =
+  contradiction bs₁₂≡[] (ne hd₁')
+  where
+  open ≡-Reasoning
+  @0 bs≡ : bs₁₁ ++ bs₁₂ ++ bs₁₃ ≡ bs₂₁ ++ []
+  bs≡ = begin
+    bs₁₁ ++ (bs₁₂ ++ bs₁₃) ≡⟨ sym bs₁≡ ⟩
+    bs ≡⟨ bs₂≡ ⟩
+    bs₂₁ ++ [] ∎
+
+  @0 bs₁₁≡ : bs₁₁ ≡ bs₂₁ ++ drop (length bs₂₁) bs₁₁
+  bs₁₁≡ = noOverlapBoundary₁ noo bs≡ hd₁ hd₁' hd₂
+
+  @0 bs≡' : bs₂₁ ++ drop (length bs₂₁) bs₁₁ ++ bs₁₂ ++ bs₁₃ ≡ bs₂₁ ++ []
+  bs≡' = begin
+    bs₂₁ ++ drop (length bs₂₁) bs₁₁ ++ bs₁₂ ++ bs₁₃ ≡⟨ (sym $ ++-assoc bs₂₁ (drop (length bs₂₁) bs₁₁) (bs₁₂ ++ bs₁₃)) ⟩
+    (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ++ bs₁₂ ++ bs₁₃ ≡⟨ cong (λ x → x ++ bs₁₂ ++ bs₁₃) (sym bs₁₁≡) ⟩
+    bs₁₁ ++ bs₁₂ ++ bs₁₃ ≡⟨ bs≡ ⟩
+    bs₂₁ ++ [] ∎
+
+  @0 bs₁₂≡[] : bs₁₂ ≡ []
+  bs₁₂≡[] = ++-conicalˡ bs₁₂ bs₁₃ (++-conicalʳ (drop (length bs₂₁) bs₁₁) (bs₁₂ ++ bs₁₃) (++-cancelˡ bs₂₁ bs≡'))
+
+unambiguousNOWF ua ne noo {bs}(consIList{bs₁₁}{bs₁₂'} hd₁ tl₁@(consIList{bs₁₂}{bs₁₃} hd₁' tl₁' bs₁≡') bs₁≡) (consIList{bs₂₁}{bs₂₂'} hd₂ tl₂@(consIList{bs₂₂}{bs₂₃} hd₂' tl₂' bs₂≡') bs₂≡) (WellFounded.acc rs) =
+  caseErased bs₁₁≡bs₂₁ ret (const _) of λ where
+    (refl , refl) → ─ (caseErased ua hd₁ hd₂ ret (const _) of λ where
+      refl → ─ (caseErased ≡-unique bs₁≡ bs₂≡ ret (const _) of λ where
+        refl → ─ (caseErased unambiguousNOWF ua ne noo tl₁ tl₂ (rs _ (s≤s ≤-refl)) ret (const _) of λ where
+          refl → ─ refl)))
+  where
+  open ≡-Reasoning
+  module ≤ = ≤-Reasoning
+
+  @0 bs≡ : bs₂₁ ++ bs₂₂ ++ bs₂₃ ≡ bs₁₁ ++ bs₁₂ ++ bs₁₃
+  bs≡ = begin
+    bs₂₁ ++ (bs₂₂ ++ bs₂₃) ≡⟨ cong (bs₂₁ ++_) (sym bs₂≡') ⟩
+    bs₂₁ ++ bs₂₂' ≡⟨ sym bs₂≡ ⟩
+    bs ≡⟨ bs₁≡ ⟩
+    bs₁₁ ++ bs₁₂' ≡⟨ cong (bs₁₁ ++_) bs₁≡' ⟩
+    bs₁₁ ++ (bs₁₂ ++ bs₁₃) ∎
+
+  @0 bs₂₁≡ : bs₂₁ ≡ bs₁₁ ++ drop (length bs₁₁) bs₂₁
+  bs₂₁≡ = noOverlapBoundary₁ noo bs≡ hd₂ hd₂' hd₁
+
+  @0 bs₁₁≡ : bs₁₁ ≡ bs₂₁ ++ drop (length bs₂₁) bs₁₁
+  bs₁₁≡ = noOverlapBoundary₁ noo (sym bs≡) hd₁ hd₁' hd₂
+
+  @0 bs₁₁≡' : bs₁₁ ≡ bs₁₁ ++ drop (length bs₁₁) bs₂₁ ++ drop (length bs₂₁) bs₁₁
+  bs₁₁≡' = begin
+    bs₁₁ ≡⟨ bs₁₁≡ ⟩
+    bs₂₁ ++ drop (length bs₂₁) bs₁₁ ≡⟨ cong (_++ (drop (length bs₂₁) bs₁₁)) bs₂₁≡ ⟩
+    (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ++ drop (length bs₂₁) bs₁₁ ≡⟨ ++-assoc bs₁₁ (drop (length bs₁₁) bs₂₁) _ ⟩
+    bs₁₁ ++ drop (length bs₁₁) bs₂₁ ++ drop (length bs₂₁) bs₁₁ ∎
+
+  @0 lem : drop (length bs₁₁) bs₂₁ ++ drop (length bs₂₁) bs₁₁ ≡ []
+  lem = ++-cancelˡ bs₁₁ (trans (sym bs₁₁≡') (sym (++-identityʳ bs₁₁)))
+
+  @0 lem₁ : length bs₁₁ ≤ length bs₂₁
+  lem₁ = ≤.begin
+    (length bs₁₁ ≤.≤⟨ m≤m+n (length bs₁₁) (length (drop (length bs₁₁) bs₂₁)) ⟩
+    length bs₁₁ + length (drop (length bs₁₁) bs₂₁) ≤.≡⟨ sym (length-++ bs₁₁) ⟩
+    length (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ≤.≡⟨ cong length (sym bs₂₁≡) ⟩
+    length bs₂₁ ≤.∎)
+
+  @0 lem₂ : length bs₂₁ ≤ length bs₁₁
+  lem₂ = ≤.begin
+    length bs₂₁ ≤.≤⟨ m≤m+n (length bs₂₁) (length (drop (length bs₂₁) bs₁₁)) ⟩
+    length bs₂₁ + length (drop (length bs₂₁) bs₁₁) ≤.≡⟨ sym (length-++ bs₂₁) ⟩
+    length (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ≤.≡⟨ cong length (sym bs₁₁≡) ⟩
+    length bs₁₁ ≤.∎
+
+  @0 lem' : length bs₁₁ ≡ length bs₂₁
+  lem' = ≤∧≮⇒≡ lem₁ (≤⇒≯ lem₂)
+
+  @0 bs₁₁≡bs₂₁ : bs₁₁ ≡ bs₂₁ × bs₁₂' ≡ bs₂₂'
+  bs₁₁≡bs₂₁ =
+    let (pf₁ , pf₂) = Lemmas.length-++-≡ _ _ _ _ (sym bs≡) lem'
+    in pf₁ , trans bs₁≡' (trans pf₂ (sym bs₂≡'))
+
+@0 unambiguousNO : ∀ {A} → Unambiguous A → NonEmpty A → NoOverlap A A → Unambiguous (IList A)
+unambiguousNO ua ne noo a₁ a₂ = unambiguousNOWF ua ne noo a₁ a₂ (<-wellFounded _)
+  where open import Data.Nat.Induction
+
 lengthIList≡
   : ∀ {@0 A} → NonEmpty A → NoSubstrings A
     → ∀ {@0 xs} → (il₁ il₂ : IList A xs)

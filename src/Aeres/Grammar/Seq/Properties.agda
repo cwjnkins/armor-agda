@@ -107,6 +107,23 @@ nosubstringsOption₁ ns₁ ns₂ nc {ys₁ = ys₁}{ys₂ = ys₂} xs₁++ys₁
 nosubstringsOption₁ ns₁ ns₂ nc xs₁++ys₁≡xs₂++ys₂ (mk&ₚ (some a₁) b₁ bs≡₁) (mk&ₚ (some a₂) b₂ bs≡₂) =
   nosubstrings ns₁ ns₂ xs₁++ys₁≡xs₂++ys₂ (mk&ₚ a₁ b₁ bs≡₁) (mk&ₚ a₂ b₂ bs≡₂)
 
+@0 nooverlapᵣ : ∀ {A B C} → NoOverlap A B → NoOverlap A (&ₚ B C)
+nooverlapᵣ noo ws [] ys₁ xs₂ ys₂ ++≡ a₁ a₂ = inj₁ refl
+nooverlapᵣ{A}{B}{C} noo ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡ a₁ a₂ = inj₂ help
+  where
+  open ≡-Reasoning
+
+  help : ¬ &ₚ B C xs₂
+  help (mk&ₚ{xs₂₁}{xs₂₂} b c xs₂≡) =
+    contradiction₂ (noo _ _ ys₁ xs₂₁ (xs₂₂ ++ ys₂) bs≡ a₁ a₂) (λ ()) λ ¬b → contradiction b ¬b
+    where
+    bs≡ : xs₁ ++ ys₁ ≡ xs₂₁ ++ xs₂₂ ++ ys₂
+    bs≡ = begin
+      xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+      xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) xs₂≡ ⟩
+      (xs₂₁ ++ xs₂₂) ++ ys₂ ≡⟨ ++-assoc xs₂₁ xs₂₂ ys₂ ⟩
+      xs₂₁ ++ xs₂₂ ++ ys₂ ∎
+
 module ExactLength where
   open import Aeres.Grammar.Parallel Σ
 
@@ -188,6 +205,45 @@ nonmalleable nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ snd
 
 @0 unambiguous : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → Unambiguous (&ₚ A B)
 unambiguous ua ns ub = unambiguousᵈ ua ns (λ _ → ub)
+
+@0 unambiguousNO : ∀ {A B} → Unambiguous A → Unambiguous B → NoOverlap A B → Unambiguous (&ₚ A B)
+unambiguousNO ua ub noo {bs} (mk&ₚ{bs₁₁}{bs₁₂} a₁ b₁ bs≡₁) (mk&ₚ{bs₂₁}{bs₂₂} a₂ b₂ bs≡₂) =
+  caseErased ++≡ ret (const _) of λ where
+    (refl , refl) → ─ (caseErased ≡-unique bs≡₁ bs≡₂ ret (const _) of λ where
+      refl → ─ (case (ua a₁ a₂ ,′ ub b₁ b₂) ret (const _) of λ where
+        (refl , refl) → refl))
+  where
+  import Data.Nat.Properties as Nat
+  module ≤ = Nat.≤-Reasoning
+
+  @0 bs≡ : bs₁₁ ++ bs₁₂ ≡ bs₂₁ ++ bs₂₂
+  bs≡ = trans (sym bs≡₁) bs≡₂
+
+  @0 bs≡Lem₁ : bs₂₁ ++ bs₂₂ ++ [] ≡ bs₁₁ ++ bs₁₂
+  bs≡Lem₁ = trans (cong (bs₂₁ ++_) (++-identityʳ bs₂₂)) (sym bs≡)
+
+  @0 bs≡Lem₂ : bs₁₁ ++ bs₁₂ ++ [] ≡ bs₂₁ ++ bs₂₂
+  bs≡Lem₂ = trans (cong (bs₁₁ ++_) (++-identityʳ bs₁₂)) bs≡
+
+  @0 lem₁ : length bs₁₁ ≤ length bs₂₁
+  lem₁ = ≤.begin
+    length bs₁₁ ≤.≤⟨ Nat.m≤m+n (length bs₁₁) (length $ drop (length bs₁₁) bs₂₁) ⟩
+    length bs₁₁ + length (drop (length bs₁₁) bs₂₁) ≤.≡⟨ sym (length-++ bs₁₁) ⟩
+    length (bs₁₁ ++ drop (length bs₁₁) bs₂₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ noo bs≡Lem₁ a₂ b₂ a₁)) ⟩
+    length bs₂₁ ≤.∎
+
+  @0 lem₂ : length bs₂₁ ≤ length bs₁₁
+  lem₂ = ≤.begin
+    length bs₂₁ ≤.≤⟨ Nat.m≤m+n (length bs₂₁) (length $ drop (length bs₂₁) bs₁₁) ⟩
+    length bs₂₁ + length (drop (length bs₂₁) bs₁₁) ≤.≡⟨ sym (length-++ bs₂₁) ⟩
+    length (bs₂₁ ++ drop (length bs₂₁) bs₁₁) ≤.≡⟨ cong length (sym (noOverlapBoundary₁ noo bs≡Lem₂ a₁ b₁ a₂)) ⟩
+    length bs₁₁ ≤.∎
+
+  @0 length≡ : length bs₁₁ ≡ length bs₂₁
+  length≡ = Nat.≤∧≮⇒≡ lem₁ (Nat.≤⇒≯ lem₂)
+
+  @0 ++≡ : bs₁₁ ≡ bs₂₁ × bs₁₂ ≡ bs₂₂
+  ++≡ = Lemmas.length-++-≡ _ _ _ _ bs≡ length≡
 
 @0 unambiguousOption₁
   : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → NoConfusion A B
