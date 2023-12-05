@@ -48,8 +48,10 @@ isLink? : ∀ {trustedRoot candidates : List (Exists─ _ Cert)} {@0 bs} {c : Ce
 isLink? (root _) = false
 isLink? (link _ _ _) = true
 
--- toList : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → List (Exists─ _ Cert)
--- toList chain = {!!}
+-- produces a list of certs corresponding to the chain, plus the trusted issuer certificate
+toList : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → List (Exists─ _ Cert)
+toList{issuee = issuee} (root (issuer , _)) = (-, issuee) ∷ [ issuer ]
+toList{issuee = issuee} (link issuer isIn chain) = (-, issuee) ∷ toList chain
 
 pattern anIssuerForIn{bs} issuer isIssuerFor issuer∈ = _,_ (_,_ (─_ bs) issuer) (_,_ isIssuerFor issuer∈)
 
