@@ -106,6 +106,14 @@ parseCerts fn input =
               IO.>> Aeres.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
+CertListToList : ∀ {@0 bs} → CertList bs  → List (Exists─ (List UInt8) Cert)
+CertListToList nil = []
+CertListToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+  where
+  helper : ∀ {@0 bs} → IList Cert bs → List (Exists─ (List UInt8) Cert)
+  helper nil = []
+  helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+
 main : IO.Main
 main = IO.run $
   Aeres.IO.getArgs IO.>>= λ args →
@@ -119,7 +127,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ trustedRoot suf₂ ps≡₂) = rootS in
-      runCertChecks (chainToList₁ trustedRoot) (chainToList₁ cert)
+      runCertChecks (CertListToList trustedRoot) (CertListToList cert)
     (certName ∷ rootName ∷ []) →
       IO.readFiniteFile certName
       IO.>>= (parseCerts certName ∘ String.toList)
@@ -127,7 +135,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ trustedRoot suf₂ ps≡₂) = rootS in
-      runCertChecks (chainToList₁ trustedRoot) (chainToList₁ cert)
+      runCertChecks (CertListToList trustedRoot) (CertListToList cert)
     _ →
       Aeres.IO.putStrLnErr usage
       IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
@@ -194,64 +202,46 @@ main = IO.run $
     Aeres.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
+  runSingleCertChecks : ∀ {@0 bs} → Cert bs → ℕ → _
+  runSingleCertChecks cert n =
+    Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
+     runCheck cert "SCP1" scp1 IO.>>
+     runCheck cert "SCP2" scp2 IO.>>
+     runCheck cert "SCP4" scp4 IO.>>
+     runCheck cert "SCP5" scp5 IO.>>
+     runCheck cert "SCP6" scp6 IO.>>
+     runCheck cert "SCP7" scp7 IO.>>
+     runCheck cert "SCP8" scp8 IO.>>
+     runCheck cert "SCP9" scp9 IO.>>
+     runCheck cert "SCP10" scp10 IO.>>
+     runCheck cert "SCP11" scp11 IO.>>
+     runCheck cert "SCP12" scp12 IO.>>
+     runCheck cert "SCP13" scp13 IO.>>
+     runCheck cert "SCP14" scp14 IO.>>
+     runCheck cert "SCP15" scp15 IO.>>
+     runCheck cert "SCP16" scp16 IO.>>
+     runCheck cert "SCP17" scp17 IO.>>
+     (if ⌊ n ≟ 1 ⌋ then (runCheck cert "SCP19" scp19) else (IO.return tt)) IO.>>
+     Aeres.IO.getCurrentTime IO.>>= λ now →
+     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     case GeneralizedTime.fromForeignUTC now of λ where
+       (no ¬p) →
+         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Aeres.IO.exitFailure
+       (yes p) →
+         runCheck cert "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl)))
+
   runChecks' :  ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO ⊤
-  runChecks' issuee n (root x) =
-     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
-     runCheck issuee "SCP1" scp1 IO.>>
-     runCheck issuee "SCP2" scp2 IO.>>
-     runCheck issuee "SCP4" scp4 IO.>>
-     runCheck issuee "SCP5" scp5 IO.>>
-     runCheck issuee "SCP6" scp6 IO.>>
-     runCheck issuee "SCP7" scp7 IO.>>
-     runCheck issuee "SCP8" scp8 IO.>>
-     runCheck issuee "SCP9" scp9 IO.>>
-     runCheck issuee "SCP10" scp10 IO.>>
-     runCheck issuee "SCP11" scp11 IO.>>
-     runCheck issuee "SCP12" scp12 IO.>>
-     runCheck issuee "SCP13" scp13 IO.>>
-     runCheck issuee "SCP14" scp14 IO.>>
-     runCheck issuee "SCP15" scp15 IO.>>
-     runCheck issuee "SCP16" scp16 IO.>>
-     runCheck issuee "SCP17" scp17 IO.>>
-     (if ⌊ n ≟ 1 ⌋ then (runCheck issuee "SCP19" scp19) else (IO.return tt)) IO.>>
-     Aeres.IO.getCurrentTime IO.>>= λ now →
-     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
-     case GeneralizedTime.fromForeignUTC now of λ where
-       (no ¬p) →
-         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
-         Aeres.IO.exitFailure
-       (yes p) →
-         runCheck issuee "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl)))
+  runChecks' issuee n (root (trustedCA , snd)) =
+    IO.putStrLn (showOutput (certOutput issuee)) IO.>>
+    runSingleCertChecks issuee n IO.>>
+    IO.putStrLn (showOutput (certOutput (proj₂ trustedCA))) IO.>>
+    runSingleCertChecks (proj₂ trustedCA) (n + 1)
   runChecks' issuee n (link issuer isIn chain) =
-     Aeres.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
-     runCheck issuee "SCP1" scp1 IO.>>
-     runCheck issuee "SCP2" scp2 IO.>>
-     runCheck issuee "SCP4" scp4 IO.>>
-     runCheck issuee "SCP5" scp5 IO.>>
-     runCheck issuee "SCP6" scp6 IO.>>
-     runCheck issuee "SCP7" scp7 IO.>>
-     runCheck issuee "SCP8" scp8 IO.>>
-     runCheck issuee "SCP9" scp9 IO.>>
-     runCheck issuee "SCP10" scp10 IO.>>
-     runCheck issuee "SCP11" scp11 IO.>>
-     runCheck issuee "SCP12" scp12 IO.>>
-     runCheck issuee "SCP13" scp13 IO.>>
-     runCheck issuee "SCP14" scp14 IO.>>
-     runCheck issuee "SCP15" scp15 IO.>>
-     runCheck issuee "SCP16" scp16 IO.>>
-     runCheck issuee "SCP17" scp17 IO.>>
-     (if ⌊ n ≟ 1 ⌋ then (runCheck issuee "SCP19" scp19) else (IO.return tt)) IO.>>
-     Aeres.IO.getCurrentTime IO.>>= λ now →
-     Aeres.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
-     case GeneralizedTime.fromForeignUTC now of λ where
-       (no ¬p) →
-         Aeres.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
-         Aeres.IO.exitFailure
-       (yes p) →
-         runCheck issuee "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>
-         (IO.putStrLn (showOutput (certOutput issuer)) IO.>>
-         runChecks' issuer (n + 1) chain)
+    IO.putStrLn (showOutput (certOutput issuee)) IO.>>
+    runSingleCertChecks issuee n IO.>>
+    runChecks' issuer (n + 1) chain
 
   helper₁ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool

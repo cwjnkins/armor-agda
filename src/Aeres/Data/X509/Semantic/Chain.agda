@@ -27,6 +27,10 @@ open Aeres.Grammar.Parallel    UInt8
 
 
 ------- helper functions ------
+CCP2Seq : List (Exists─ (List UInt8) Cert) → Set
+CCP2Seq [] = ⊤
+CCP2Seq (x ∷ []) = ⊤
+CCP2Seq (x ∷ x₁ ∷ x₂) = Cert.getVersion (proj₂ x) ≡ TBSCert.v3 × CCP2Seq (x₁ ∷ x₂)
 
 CCP10Seq : List (Exists─ (List UInt8) Cert) → Set
 CCP10Seq [] = ⊥
@@ -60,7 +64,6 @@ helperCCP4 (x₁ ∷ x₂ ∷ t) with helperCCP4 (x₂ ∷ t) | isCRLSignPresent
 ... | rec | true =  helperCCP4₂ (Cert.getCRLDIST (proj₂ x₁)) × rec
 ... | rec | false = helperCCP4₁ (Cert.getCRLDIST (proj₂ x₁)) × rec
 
-
 helperCCP4₂-h-dec : ∀ {@0 h t} → (a : Extension.CRLDistPoint.DistPoint h) → (b : IList UInt8 Extension.CRLDistPoint.DistPoint t)  → Dec (helperCCP4₂-h a b)
 helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn none bs≡₁) len≡ bs≡) x₁ = no (λ())
 helperCCP4₂-h-dec (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none crldprsn (some x) bs≡₁) len≡ bs≡) x₁ = no (λ())
@@ -87,6 +90,11 @@ helperCCP4-dec (x₁ ∷ []) = yes tt
 helperCCP4-dec (x₁ ∷ x₂ ∷ t) with helperCCP4-dec (x₂ ∷ t) | isCRLSignPresent (Cert.getKU (proj₂ x₂))
 ... | rec | true = helperCCP4₂-dec (Cert.getCRLDIST (proj₂ x₁)) ×-dec rec
 ... | rec | false = helperCCP4₁-dec (Cert.getCRLDIST (proj₂ x₁)) ×-dec rec
+
+CCP2Seq-dec : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP2Seq c)
+CCP2Seq-dec [] = yes tt
+CCP2Seq-dec (x ∷ []) = yes tt
+CCP2Seq-dec (x ∷ x₁ ∷ x₂) = Cert.getVersion (proj₂ x) ≟ TBSCert.v3 ×-dec CCP2Seq-dec (x₁ ∷ x₂)
 
 ------------------------------------------------------------------------
 
@@ -127,14 +135,12 @@ helperCCP3-dec (fst , snd) x₁
 -- Conforming implementations may choose to reject all Version 1 and Version 2 intermediate CA certificates
 
 CCP2 : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
-  → Chain trustedRoot candidates issuee → Set
-CCP2 issuee (root x) = Cert.getVersion issuee ≡ TBSCert.v3
-CCP2 issuee (link issuer isIn x) = Cert.getVersion issuee ≡ TBSCert.v3 × CCP2 issuer x
+   → Chain trustedRoot candidates issuee → Set
+CCP2 issuee c = CCP2Seq (Chain.toList c)
 
 ccp2 : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
   → (c : Chain trustedRoot candidates issuee) → Dec (CCP2 issuee c)
-ccp2 issuee (root x) = Cert.getVersion issuee ≟ TBSCert.v3
-ccp2 issuee (link issuer isIn x) = Cert.getVersion issuee ≟ TBSCert.v3 ×-dec ccp2 issuer x
+ccp2 issuee c = CCP2Seq-dec (Chain.toList c)
 
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
@@ -178,32 +184,6 @@ CCP5 issuee c = List.Unique _≟_ (Chain.toList c)
 ccp5 : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
   → (c : Chain trustedRoot candidates issuee) → Dec (CCP5 issuee c)
 ccp5 issuee c = List.unique? _≟_ (Chain.toList c)
-
--- -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.4
--- -- Certificate users MUST be prepared to process the Issuer distinguished name
--- -- and Subject distinguished name fields to perform name chaining for certification path validation.
-
--- CCP6 : ∀ {@0 bs} → CertList bs → Set
--- CCP6 c = CCP6Seq (chainToList c)
-
--- ccp6 : ∀ {@0 bs} (c : CertList bs) → Dec (CCP6 c)
--- ccp6 c = helper (chainToList c)
---   where
---   helper : (c : List (Exists─ (List UInt8) Cert)) → Dec (CCP6Seq c)
---   helper [] = no (λ ())
---   helper ((fst , snd) ∷ []) = yes tt
---   helper ((fst , snd) ∷ (fst₁ , snd₁) ∷ x₂) = (MatchRDNSeq-dec (Cert.getIssuer snd) (Cert.getSubject snd₁)) ×-dec helper ((fst₁ , snd₁) ∷ x₂)
-
--- https://datatracker.ietf.org/doc/html/rfc5280#section-6
---- check whether any of the certificate in given chain is trusted by the system's trust anchor
-
--- CCP7 :∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
---   → Chain trustedRoot candidates issuee → Set
--- CCP7 r c = helperCCP7 (chainToList r) (chainToList c)
-
--- ccp7 :∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)
---   → (c : Chain trustedRoot candidates issuee) → Dec (CCP7 issuee c)
--- ccp7 r c = helperCCP7-dec (chainToList r) (chainToList c)
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-6
 --- every issuer certificate in a chain must be CA certificate
