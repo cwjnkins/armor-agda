@@ -14,6 +14,8 @@ record Base64Char (@0 bs : List Char) : Set where
     i : Singleton (Any.index c∈)
     @0 bs≡ : bs ≡ [ c ]
 
+pattern mk64! {c} {c∈} i = mk64 c c∈ i refl
+
 record Base64Pad2 (@0 bs : List Char) : Set where
   constructor mk64P2
   field
@@ -38,6 +40,9 @@ data Base64Pad (@0 bs : List Char) : Set where
   pad1 : Base64Pad1 bs → Base64Pad bs
   pad2 : Base64Pad2 bs → Base64Pad bs
 
+pattern mk64P1! {c₁} {c₂} {c₃} {p} = pad1 (mk64P1 c₁ c₂ c₃ p refl)
+pattern mk64P2! {c₁} {c₂} {p} = pad2 (mk64P2 c₁ c₂ p refl)
+
 record Base64Str (@0 bs : List Char) : Set where
   constructor mk64Str
   field
@@ -46,6 +51,9 @@ record Base64Str (@0 bs : List Char) : Set where
     @0 strLen : length s % 4 ≡ 0
     pad : Base64Pad p
     @0 bs≡ : bs ≡ s ++ p
+
+pattern consBase64Str {c₁} {c₁∈} i₁ {c₂} {c₂∈} i₂ {c₃} {c₃∈} i₃ {c₄} {c₄∈} i₄ s l p bs≡ =
+  mk64Str (consIList (mk64!{c₁}{c₁∈} i₁) (consIList (mk64!{c₂}{c₂∈} i₂) (consIList (mk64!{c₃}{c₃∈} i₃) (consIList (mk64!{c₄}{c₄∈} i₄) s refl) refl) refl) refl) l p bs≡
 
 decodeStr : ∀ {@0 bs} → Base64Str bs → List UInt8
 decodeStr (mk64Str str strLen pad bs≡) =
