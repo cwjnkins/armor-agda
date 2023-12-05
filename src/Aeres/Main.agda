@@ -25,6 +25,7 @@ module Aeres.Main where
 
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
+  renaming (toList to ilistToList)
 open Base256
 
 usage : String
@@ -106,13 +107,13 @@ parseCerts fn input =
               IO.>> Aeres.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
-CertListToList : ∀ {@0 bs} → CertList bs  → List (Exists─ (List UInt8) Cert)
-CertListToList nil = []
-CertListToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
-  where
-  helper : ∀ {@0 bs} → IList Cert bs → List (Exists─ (List UInt8) Cert)
-  helper nil = []
-  helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+-- CertListToList : ∀ {@0 bs} → CertList bs  → List (Exists─ (List UInt8) Cert)
+-- CertListToList nil = []
+-- CertListToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
+--   where
+--   helper : ∀ {@0 bs} → IList Cert bs → List (Exists─ (List UInt8) Cert)
+--   helper nil = []
+--   helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
 
 main : IO.Main
 main = IO.run $
@@ -127,7 +128,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ trustedRoot suf₂ ps≡₂) = rootS in
-      runCertChecks (CertListToList trustedRoot) (CertListToList cert)
+      runCertChecks (ilistToList trustedRoot) (ilistToList cert)
     (certName ∷ rootName ∷ []) →
       IO.readFiniteFile certName
       IO.>>= (parseCerts certName ∘ String.toList)
@@ -135,7 +136,7 @@ main = IO.run $
       IO.readFiniteFile rootName
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ trustedRoot suf₂ ps≡₂) = rootS in
-      runCertChecks (CertListToList trustedRoot) (CertListToList cert)
+      runCertChecks (ilistToList trustedRoot) (ilistToList cert)
     _ →
       Aeres.IO.putStrLnErr usage
       IO.>> Aeres.IO.putStrLnErr "-- wrong number of arguments passed"
