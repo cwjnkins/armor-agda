@@ -40,8 +40,8 @@ open Aeres.Grammar.Definitions Dig
 
    -- The output is the transcoded string.
    
-TranscodeIS : ∀ {@0 bs} → IA5String bs → String ⊎ Exists─ (List UInt8) Unicode
-TranscodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = inj₂ (_ , utf8 (helper (toWitness all<128)))
+transcodeIS : ∀ {@0 bs} → IA5String bs → Exists─ _ Unicode
+transcodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = (-, utf8 (helper (toWitness all<128)))
   where
   helper :  ∀ {bs} → @0 All (Fin._< # 128) bs → UTF8 bs
   helper {[]} x = nil
@@ -62,18 +62,13 @@ TranscodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = inj₂ (_ 
 -- Note: TODO: Check bidi (https://datatracker.ietf.org/doc/html/rfc4518#section-2.5)
 
 ProcessStringIS : ∀ {@0 bs} → IA5String bs → String ⊎ Exists─ (List UInt8) Unicode
-ProcessStringIS str
-  with TranscodeIS str
-... | inj₁ err = inj₁ err
-... | inj₂ ts
-  with InitialMapping (proj₂ ts)
-... | ims
-  with CaseFoldingNFKC (proj₂ ims)
-... | ms
-  with Prohibit (proj₂ ms)
-... | true = inj₁ "error in stringprep : prohibitted unicode character present"
-... | false = inj₂ (InsigCharHandling (proj₂ ms))
-
+ProcessStringIS str = do
+  let (─ _ , transcoded) = transcodeIS str
+  let (─ _ , afterInitMapping) = InitialMapping transcoded
+  let (─ _ , afterCaseFold) = CaseFoldingNFKC afterInitMapping
+  if (Prohibit afterCaseFold)
+    then (inj₁ "StringPrep: ExecIS: prohibited unicode character present")
+    else return (InsigCharHandling afterCaseFold)
 
 CompareIS : ∀ {@0 bs₁ bs₂} → IA5String bs₁ → IA5String bs₂ → Set
 CompareIS x x₁
