@@ -67,7 +67,7 @@ module Base64Char where
   @0 nonempty : NonEmpty Base64.Base64Char
   nonempty () refl
 
-  unambiguous : Unambiguous Base64.Base64Char
+  @0 unambiguous : Unambiguous Base64.Base64Char
   unambiguous = ua
     where
     ua : ∀ {@0 xs} → (a₁ a₂ : Base64.Base64Char xs) → a₁ ≡ a₂
@@ -149,8 +149,24 @@ module Base64Pad where
   c₄∉ (Sum.inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl)) = toWitnessFalse {Q = _ ∈? _} tt
   c₄∉ (Sum.inj₂ (Base64.mk64P2 c₁ c₂ pad refl)) = toWitnessFalse{Q = _ ∈? _} tt
 
-  postulate
-   @0 unambiguous : Unambiguous Rep
+  @0 unambiguous : Unambiguous Base64.Base64Pad
+  unambiguous (Base64.pad0 refl) (Base64.pad0 refl) = refl
+  unambiguous (Base64.pad0 refl) (Base64.pad1 ())
+  unambiguous (Base64.pad0 refl) (Base64.pad2 ())
+  unambiguous (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad ())) (Base64.pad0 refl)
+  unambiguous (Base64.pad1 (Base64.mk64P1 c₁ c₂ c₃ pad refl)) (Base64.pad1 (Base64.mk64P1 c₄ c₅ c₆ pad₁ refl)) =
+    case (Base64Char.unambiguous c₁ c₄ ,′ Base64Char.unambiguous c₂ c₅ ,′ Base64Char.unambiguous c₃ c₆) of λ where
+      (refl , refl , refl) → ‼ (case ≡-unique pad pad₁ of λ where
+        refl → refl)
+  unambiguous (Base64.pad1 (Base64.mk64P1 (Base64.mk64! {c∈ = c₁₁∈} i₁₁) (Base64.mk64! {c∈ = c₁₂∈} i₁₂) (Base64.mk64! {c∈ = c₁₃∈} i₁₃) pad refl)) (Base64.pad2 (Base64.mk64P2 (Base64.mk64! {c∈ = c₂₁∈} i₂₁) (Base64.mk64! {c∈ = c₂₂∈} i₂) pad₁ refl)) =
+    contradiction c₁₃∈ (toWitnessFalse{Q = _ ∈? _} tt)
+  unambiguous (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad ())) (Base64.pad0 refl)
+  unambiguous (Base64.mk64P2!{Base64.mk64! _}{Base64.mk64! _}) (Base64.mk64P1!{Base64.mk64! _}{Base64.mk64! _}{Base64.mk64! {c∈ = c₂₃∈} _}) =
+    contradiction c₂₃∈ (toWitnessFalse{Q = _ ∈? _} tt)
+  unambiguous (Base64.pad2 (Base64.mk64P2 c₁ c₂ pad refl)) (Base64.pad2 (Base64.mk64P2 c₃ c₄ pad₁ refl)) =
+    case (Base64Char.unambiguous c₁ c₃) ,′ (Base64Char.unambiguous c₂ c₄) of λ where
+      (refl , refl) → ‼ (case ≡-unique pad pad₁ of λ where
+        refl → refl)
 
 module Base64Str where
   Rep : @0 List Char → Set
@@ -449,23 +465,41 @@ module Base64Str where
         strLen₀ pad₀
         (cong (λ x → c₁ ∷ c₂ ∷ c₃ ∷ c₄ ∷ x) bs≡₀)
 
- 
-    
+  @0 unambiguous : Unambiguous Base64.Base64Str
+  unambiguous a₁ a₂ = uaWF a₁ a₂ (Nat.<-wellFounded _)
+    where
+    import Data.Nat.Induction as Nat
 
-  -- iso : Iso Rep Base64.Base64Str
-  -- proj₁ iso = equiv
-  -- proj₁ (proj₂ iso) (mk&ₚ nil none refl) = refl
-  -- proj₁ (proj₂ iso) (mk&ₚ nil (some (inj₁ (Base64.mk64P1 c₁ c₂ c₃ pad refl))) refl) = refl
-  -- proj₁ (proj₂ iso) (mk&ₚ nil (some (inj₂ (Base64.mk64P2 c₁ c₂ pad refl))) refl) = refl
-  -- proj₁ (proj₂ iso) (mk&ₚ (cons (mkIListCons (mk&ₚ (Base64.mk64 c c∈ i refl) sndₚ₂ refl) tail₁ refl)) sndₚ₁ refl) = {!!}
-  -- proj₂ (proj₂ iso) (Base64.mk64Str str strLen pad refl) = {!!}
+    @0 uaWF : ∀ {xs} → (a₁ a₂ : Base64.Base64Str xs) → @0 Acc _<_ (lengthIList (Base64.Base64Str.str a₁))
+           → a₁ ≡ a₂
+    uaWF (Base64.mk64Str nil refl pad₁ refl) (Base64.mk64Str nil refl pad₂ refl) ac =
+      case Base64Pad.unambiguous pad₁ pad₂ of λ where
+        refl → refl
+    uaWF (Base64.mk64Str nil strLen₁ (Base64.pad0 ()) refl) (Base64.consBase64Str i₁ i₂ i₃ {c₄∈ = c₄∈}i₄ str₂ strLen₂ pad₂ refl) ac
+    uaWF (Base64.mk64Str nil strLen₁ Base64.mk64P1! refl) (Base64.consBase64Str i₁ i₂ i₃ {c₄∈ = c₄∈}i₄ str₂ strLen₂ pad₂ bs≡₂) ac =
+      contradiction{P = '=' ∈ B64.charset} (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡₂))))) c₄∈) (toWitnessFalse{Q = _ ∈? _} tt)
+    uaWF (Base64.mk64Str nil strLen₁ Base64.mk64P2! refl) (Base64.consBase64Str i₁ i₂ {c₃∈ = c₃∈}i₃ i₄ str₂ strLen₂ pad₂ bs≡₂) ac =
+      contradiction {P = '=' ∈ B64.charset} (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (sym bs≡₂)))) c₃∈) (toWitnessFalse{Q = _ ∈? _} tt)
+    uaWF (Base64.consBase64Str i₁ i₂ i₃ i₄ str₁ strLen₁ pad₁ refl) (Base64.mk64Str nil strLen₂ (Base64.pad0 ()) refl) ac
+    uaWF (Base64.consBase64Str i₁ i₂ i₃ {c₄∈ = c₄∈}i₄ str₁ strLen₁ pad₁ refl) (Base64.mk64Str nil strLen₂ Base64.mk64P1! bs≡₂) ac =
+      contradiction{P = '=' ∈ B64.charset} (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ (∷-injectiveʳ bs≡₂)))) c₄∈) (toWitnessFalse{Q = _ ∈? _} tt)
+    uaWF (Base64.consBase64Str i₁ i₂ {c₃∈ = c₃∈}i₃ i₄ str₁ strLen₁ pad₁ refl) (Base64.mk64Str nil strLen₂ Base64.mk64P2! bs≡₂) ac =
+      contradiction {P = '=' ∈ B64.charset} (subst (_∈ B64.charset) (∷-injectiveˡ (∷-injectiveʳ (∷-injectiveʳ bs≡₂))) c₃∈) (toWitnessFalse{Q = _ ∈? _} tt)
+    uaWF (Base64.consBase64Str {c₁₁} i₁₁ {c₁₂} i₁₂ {c₁₃} i₁₃ {c₁₄} i₁₄ str₁ strLen₁ pad₁ refl) (Base64.consBase64Str {c₂₁} i₂₁ {c₂₂} i₂₂ {c₂₃} i₂₃ {c₂₄} i₂₄ str₂ strLen₂ pad₂ bs≡₂) (WellFounded.acc rs) =
+      case proj₁ bs≡× of λ where
+        refl →
+          (case (─ (  Base64Char.unambiguous (Base64.mk64!{c₁₁} i₁₁) (Base64.mk64!{c₂₁} i₂₁)
+                  ,′ Base64Char.unambiguous (Base64.mk64!{c₁₂} i₁₂) (Base64.mk64!{c₂₂} i₂₂)
+                  ,′ Base64Char.unambiguous (Base64.mk64!{c₁₃} i₁₃) (Base64.mk64!{c₂₃} i₂₃)
+                  ,′ Base64Char.unambiguous (Base64.mk64!{c₁₄} i₁₄) (Base64.mk64!{c₂₄} i₂₄)))
+          ret (const (typeOf (proj₂ bs≡×) → _))
+          of λ where
+            (─ (refl , refl , refl , refl)) eq →
+              case ‼ uaWF (Base64.mk64Str str₁ strLen₁ pad₁ refl) (Base64.mk64Str str₂ strLen₂ pad₂ eq) (rs _ (s≤s (Nat.m≤n+m _ 3))) ret (const _) of λ where
+                refl → ‼ (case ≡-unique refl bs≡₂ of λ where
+                  refl → refl))
+            (‼ proj₂ bs≡×)
 
-  postulate
-    @0 unambiguous : Unambiguous Base64.Base64Str
-  -- unambiguous = Iso.unambiguous iso
-  --   (Seq.unambiguousNO ua Base64Pad.unambiguous {!!})
-
-
-  --   where
-  --   ua : Unambiguous Repₛ
-  --   ua = {!!}
+      where
+      bs≡× : (c₁₁ ∷ c₁₂ ∷ c₁₃ ∷ [ c₁₄ ] ≡ c₂₁ ∷ c₂₂ ∷ c₂₃ ∷ [ c₂₄ ]) × _ ≡ _
+      bs≡× = Lemmas.length-++-≡ _ _ _ _ bs≡₂ refl

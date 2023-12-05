@@ -33,8 +33,18 @@ proj₁ equiv (mk×ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) (─ range)) =
 proj₂ equiv (mkCertFinalLine line lineLen eol refl) =
   mk×ₚ (mk&ₚ line eol refl) (─ lineLen)
 
-postulate
-  @0 nonempty : NonEmpty CertFinalLine
+@0 nonempty : NonEmpty CertFinalLine
+nonempty = Iso.nonempty equiv ne
+  where
+  module ≤ = Nat.≤-Reasoning
+
+  @0 ne : NonEmpty Rep
+  ne {xs} (mk×ₚ (mk&ₚ{bs₁}{bs₂} str eol refl) (─ sndₚ₁)) ≡[] = contradiction (cong length ≡[]) (Nat.>⇒≢
+    (≤.begin
+      1 ≤.≤⟨ proj₁ sndₚ₁ ⟩
+      length bs₁ ≤.≤⟨ Nat.m≤m+n (length bs₁) _ ⟩
+      length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
+      length (bs₁ ++ bs₂) ≤.∎))
 
 fromCertFullLine : ∀ {@0 bs} → CertFullLine bs → CertFinalLine bs
 fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen)) eol refl) =
