@@ -264,5 +264,9 @@ main = IO.run $
 
   runCertChecks : (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecks trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates"
-  runCertChecks trustedRoot (end ∷ restCerts) =
-    helper₂ (proj₂ end) (buildChains trustedRoot restCerts (proj₂ end))
+  runCertChecks trustedRoot ((─ _ , end) ∷ restCerts) =
+    helper₂ end (buildChains trustedRoot (removeCertFromCerts end restCerts) end)
+    where
+    open import Armor.Data.X509.Semantic.Chain.Properties
+    @0 un : (c : Chain trustedRoot (removeCertFromCerts end restCerts) end) → (-, end) ∉ trustedRoot → ChainUnique c
+    un c end∉trust = chainUnique _ _ (∉removeCertFromCerts end restCerts) end∉trust c
