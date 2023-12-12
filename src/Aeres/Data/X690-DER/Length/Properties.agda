@@ -184,12 +184,12 @@ nonmalleable{bs₁}{bs₂} len₁@(long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜL
   @0 bs₁≡bs₂ : bs₁ ≡ bs₂
   bs₁≡bs₂ = case <-cmp (length bs₁) (length bs₂) ret (const _) of λ where
     (tri< (s≤s bs₁<bs₂) _ _) →
-      contradiction (Base256.unsigned-leading-0{bs₁ = lₕ ∷ lₜ}{bs₂ = lₕ₁ ∷ lₜ₁} (s≤s z≤n) bs₁<bs₂ eq) (>⇒≢ lₕ≢1)
+      contradiction (UInt8.unsigned-leading-0{bs₁ = lₕ ∷ lₜ}{bs₂ = lₕ₁ ∷ lₜ₁} (s≤s z≤n) bs₁<bs₂ eq) (>⇒≢ lₕ≢1)
     (tri≈ _ len≡ _) →
       cong₂ _∷_
         (Fin.toℕ-injective
           (‼ ∸-cancelʳ-≡ l>128 l>129
             (trans (sym lₜLen) (trans (+-cancelˡ-≡ 2 len≡) lₜLen₁))))
-        (‼ Base256.unsigned-injective _ _ (suc-injective len≡) eq)
+        (‼ UInt8.unsigned-injective _ _ (suc-injective len≡) eq)
     (tri> _ _ (s≤s bs₂<bs₁)) →
-      contradiction (Base256.unsigned-leading-0 {bs₁ = lₕ₁ ∷ lₜ₁} {bs₂ = lₕ ∷ lₜ} (s≤s z≤n) bs₂<bs₁ (sym eq)) (>⇒≢ lₕ≢0)
+      contradiction (UInt8.unsigned-leading-0 {bs₁ = lₕ₁ ∷ lₜ₁} {bs₂ = lₕ ∷ lₜ} (s≤s z≤n) bs₂<bs₁ (sym eq)) (>⇒≢ lₕ≢0)

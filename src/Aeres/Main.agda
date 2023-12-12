@@ -1,12 +1,12 @@
 {-# OPTIONS --guardedness --sized-types #-}
 
 open import Aeres.Binary
-  hiding (module Base64)
 import      Aeres.Data.Base64 as Base64
 import      Aeres.Data.PEM as PEM
 open import Aeres.Data.X509
 -- open import Aeres.Data.X509.ChainBuilder.Exec
 open import Aeres.Data.X509.Semantic.Chain.Builder
+open import Aeres.Data.X509.Semantic.Chain.TCB
 open import Aeres.Data.X509.Semantic.Cert
 open import Aeres.Data.X509.Semantic.Chain
 import      Aeres.Grammar.Definitions
@@ -26,7 +26,6 @@ module Aeres.Main where
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
   renaming (toList to ilistToList)
-open Base256
 
 usage : String
 usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"

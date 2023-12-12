@@ -20,8 +20,7 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 module Aeres.Data.X509.Semantic.StringPrep.ExecIS where
 
 open Aeres.Binary
-open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
 
 -- https://datatracker.ietf.org/doc/html/rfc4518#section-2.1
    -- Each non-Unicode string value is transcoded to Unicode.

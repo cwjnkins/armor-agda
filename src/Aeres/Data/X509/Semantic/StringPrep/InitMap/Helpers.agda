@@ -12,9 +12,7 @@ import      Aeres.Grammar.IList
 
 module Aeres.Data.X509.Semantic.StringPrep.InitMap.Helpers where
 
-open Base256
 open Aeres.Grammar.IList UInt8
-
 
 lookupInitMap : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupInitMap x 

@@ -34,7 +34,7 @@ runParser (parse size l u) xs = do
               (toWitness charset))
             ¬p
     (yes ir) → do
-      let t = UInt8.asciiNum v₁
+      let t = asciiNum v₁
       case inRange? l u t ret (const _) of λ where
         (no ¬p) → do
           tell $ here' String.++ ": bad time range: " String.++ show t
@@ -45,7 +45,7 @@ runParser (parse size l u) xs = do
                 prefix≡v₁ = ─ proj₁ (Lemmas.length-++-≡ prefix suffix v₁ suf₁ (trans ps≡ (sym ps≡₁)) (trans bsLen (sym v₁Len)))
               in
               contradiction
-                (subst (λ x → l ≤ x × x ≤ u) (trans (Singleton.x≡ time) (cong UInt8.asciiNum (¡ prefix≡v₁))) range)
+                (subst (λ x → l ≤ x × x ≤ u) (trans (Singleton.x≡ time) (cong asciiNum (¡ prefix≡v₁))) range)
                 ¬p
         (yes p) → return (yes
           (success v₁ _ r₁≡ (mkTimeType (fromWitness ir ) self v₁Len p) suf₁ ps≡₁))

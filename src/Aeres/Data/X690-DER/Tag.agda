@@ -4,8 +4,6 @@ import      Data.Nat.Properties as Nat
   
 module Aeres.Data.X690-DER.Tag where
 
-open Base256
-
 Boolean : UInt8
 Boolean = # 1
 

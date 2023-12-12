@@ -10,7 +10,6 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 
 module Aeres.Data.X509.Semantic.StringPrep.ProhibitList.Helpers where
 
-open Base256
 open Aeres.Grammar.IList UInt8
 
 

@@ -23,8 +23,7 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 module Aeres.Data.X509.Semantic.StringPrep.Common where
 
 open Aeres.Binary
-open Base256
-open Aeres.Grammar.Definitions Dig
+open Aeres.Grammar.Definitions UInt8
 
 -- Note: Currently, we only transform unicode strings encoded in UTF8.
 -- For UTF16 and UTF32, we do not perform any transformation yet.

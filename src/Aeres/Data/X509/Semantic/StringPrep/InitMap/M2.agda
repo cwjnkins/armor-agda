@@ -10,9 +10,7 @@ open import Aeres.Data.X509.Semantic.StringPrep.ExcludeRange
 
 module Aeres.Data.X509.Semantic.StringPrep.InitMap.M2 where
 
-open Base256
 open Aeres.Grammar.IList UInt8
-
 
 module DeleteList where
 

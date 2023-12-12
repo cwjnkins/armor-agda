@@ -7,7 +7,6 @@ open import Aeres.Prelude
 
 module Aeres.Data.X509 where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Option      UInt8

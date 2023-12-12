@@ -12,7 +12,6 @@ import      Data.Nat.Properties as Nat
 
 module Aeres.Data.Base64.Parser where
 
-open Base256
 open Aeres.Grammar.Definitions Char
 open Aeres.Grammar.IList       Char
 open Aeres.Grammar.Parallel    Char

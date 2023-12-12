@@ -8,7 +8,6 @@ import      Aeres.Grammar.Parser
 
 module Aeres.Data.Unicode.UTF8.Serializer where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Parser      UInt8

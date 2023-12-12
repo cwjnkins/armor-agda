@@ -3,8 +3,6 @@ open import Aeres.Prelude
 
 module Aeres.Data.X690-DER.Length where
 
-open Base256
-
 module Length where
   open import Aeres.Data.X690-DER.Length.TCB        public
   open import Aeres.Data.X690-DER.Length.Properties public

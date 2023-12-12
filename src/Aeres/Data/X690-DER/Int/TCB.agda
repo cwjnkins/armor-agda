@@ -33,8 +33,8 @@ record IntegerValue (@0 bs : List UInt8) : Set where
   field
     @0 bₕ : UInt8
     @0 bₜ : List UInt8
-    @0 minRep : Base256.TwosComplementMinRep bₕ bₜ
-    val : Singleton (Base256.twosComplement (bₕ ∷ bₜ))
+    @0 minRep : TwosComplementMinRep bₕ bₜ
+    val : Singleton (twosComplement (bₕ ∷ bₜ))
     @0 bs≡ : bs ≡ bₕ ∷ bₜ
 
 [_]Int : UInt8 → @0 List UInt8 → Set

@@ -10,7 +10,6 @@ open import Aeres.Prelude
 
 module Aeres.Data.Unicode.UTF8.Parser where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.IList       UInt8
 open Aeres.Grammar.Parallel    UInt8

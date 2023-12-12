@@ -15,15 +15,15 @@ fromℕ?{size}{l}{u} n =
       (mkTimeType charset (singleton _ refl) bsLen range) →
         contradiction
           (subst₀ (λ x → l ≤ x × x ≤ u)
-            (Base256.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))
+            (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))
             range)
           ¬p
     (yes l≤n'≤u) →
       yes
         (mkTimeType
-          (fromWitness (proj₂ (proj₂ (Base256.showFixed' size n'))))
-          (singleton n' (sym (Base256.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))))
-          (proj₁ (proj₂ (Base256.showFixed' size n')))
+          (fromWitness (proj₂ (proj₂ (showFixed' size n'))))
+          (singleton n' (sym (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))))
+          (proj₁ (proj₂ (showFixed' size n')))
           l≤n'≤u)
   where
   n' = n mod10^n size

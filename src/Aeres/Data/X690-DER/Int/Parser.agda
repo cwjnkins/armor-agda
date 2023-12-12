@@ -14,7 +14,6 @@ open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Aeres.Data.X690-DER.Int.Parser where
 
-open Base256
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Parallel    UInt8
 open Aeres.Grammar.Parser      UInt8
@@ -38,7 +37,7 @@ module _ (loc : String) where
             contradiction
               (success prefix _ read≡ (mk×ₚ self (─ vLen)) suffix ps≡)
               ¬p
-    case twosComplementMinRep? v₁₁ v₁ ret (const _) of λ where
+    case UInt8.twosComplementMinRep? v₁₁ v₁ ret (const _) of λ where
       (no ¬p) → do
         tell $ here' String.++ " (value): bytestring is not minimum representation: " String.++ show (map Fin.toℕ (v₁₁ ∷ v₁))
         return ∘ no $ λ where
@@ -50,7 +49,7 @@ module _ (loc : String) where
                            ps≡ (trans vLen (sym v₁Len)))
             in
             contradiction
-              (subst₂ UInt8.TwosComplementMinRep (∷-injectiveˡ (¡ bₕ∷bₜ≡v₁₁∷v₁)) (∷-injectiveʳ (¡ bₕ∷bₜ≡v₁₁∷v₁)) minRep)
+              (subst₂ TwosComplementMinRep (∷-injectiveˡ (¡ bₕ∷bₜ≡v₁₁∷v₁)) (∷-injectiveʳ (¡ bₕ∷bₜ≡v₁₁∷v₁)) minRep)
               ¬p
       (yes mr) →
         return (yes

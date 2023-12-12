@@ -17,7 +17,6 @@ open import Data.These.Base
 
 module Aeres.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers2 where
 
-open Base256
 open Aeres.Grammar.IList UInt8
 
 abstract

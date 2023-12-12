@@ -14,13 +14,13 @@ import      Aeres.Grammar.Parallel
 open import Aeres.Prelude
 import      Aeres.Data.X509.Semantic.Chain.Builder as Chain
 open import Aeres.Data.X509.Semantic.Chain.NameMatch
+open import Aeres.Data.X509.Semantic.Chain.TCB     as Chain
 
 open import  Aeres.Data.X509.Name.RDN.ATV.OIDs
 
 module Aeres.Data.X509.Semantic.Chain where
 
 open Aeres.Binary
-open Chain hiding (toList)
 open Aeres.Grammar.Definitions UInt8
 open Aeres.Grammar.Option      UInt8
 open Aeres.Grammar.Parallel    UInt8

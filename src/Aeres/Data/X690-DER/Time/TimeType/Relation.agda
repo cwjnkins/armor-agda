@@ -30,13 +30,13 @@ _Time≟_ = liftDec _≡_ _≟_
 Time≡⇒≡ : ∀ {@0 size l u bs₁ bs₂} {t₁ : TimeType size l u bs₁} {t₂ : TimeType size l u bs₂}
           → t₁ Time≡ t₂ → _≋_{A = TimeType size l u} t₁ t₂
 Time≡⇒≡{bs₁ = bs₁}{bs₂}{t₁ = t₁}{t₂} time≡
-  with ‼ Base256.asciiNum-injective bs₁ bs₂
+  with ‼ UInt8.asciiNum-injective bs₁ bs₂
            (toWitness (TimeType.charset t₁)) (toWitness (TimeType.charset t₂))
            (trans (TimeType.bsLen t₁) (sym (TimeType.bsLen t₂)))
-           (Base256.asciiNum bs₁ ≡⟨ sym $ Singleton.x≡ (TimeType.time t₁) ⟩
+           (asciiNum bs₁ ≡⟨ sym $ Singleton.x≡ (TimeType.time t₁) ⟩
            TimeType.getTime t₁ ≡⟨ time≡ ⟩
            TimeType.getTime t₂ ≡⟨ Singleton.x≡ (TimeType.time t₂) ⟩
-           Base256.asciiNum bs₂ ∎)
+           asciiNum bs₂ ∎)
   where
   open ≡-Reasoning
 Time≡⇒≡{l = l}{u}{bs₁}{t₁ = t₁}{t₂} _ | refl

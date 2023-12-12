@@ -16,7 +16,7 @@ nonempty (mkIntVal bₕ bₜ minRep val ()) refl
 unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
   case (trans (sym bs≡) bs≡₁) ret (const _) of λ where
     refl → case (‼ uniqueSingleton val val₁) ret (const _) of λ where
-      refl → case (‼ Base256.uniqueTwosCompletementMinRep _ _ minRep minRep₁) ret (const _) of λ where
+      refl → case (‼ UInt8.uniqueTwosCompletementMinRep _ _ minRep minRep₁) ret (const _) of λ where
         refl → case (‼ ≡-unique bs≡ bs≡₁) ret (const _) of λ where
           refl → refl
 
@@ -44,23 +44,23 @@ nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (
       length bs₂ ∎)
     (tri< bₜ₁<bₜ₂ _ _) →
       contradiction minRep₂
-        (Base256.¬twosComplementMinRep
+        (UInt8.¬twosComplementMinRep
           bₕ₁ bₜ₁ bₕ₂ bₜ₂ bₜ₁<bₜ₂
           (trans (sym v₁≡) (trans eq v₂≡)))
     (tri> _ _ bₜ₂<bₜ₁) →
       contradiction minRep₁
-        (Base256.¬twosComplementMinRep
+        (UInt8.¬twosComplementMinRep
           bₕ₂ bₜ₂ bₕ₁ bₜ₁ bₜ₂<bₜ₁
           (trans (sym v₂≡) (trans (sym eq) v₁≡)))
 
   bs₁≡bs₂ : bs₁ ≡ bs₂
-  bs₁≡bs₂ = Base256.twosComplement-injective bs₁ bs₂ len≡ (begin
-              Base256.twosComplement bs₁ ≡⟨ cong Base256.twosComplement bs≡₁ ⟩
-              Base256.twosComplement (bₕ₁ ∷ bₜ₁) ≡⟨ sym v₁≡ ⟩
+  bs₁≡bs₂ = UInt8.twosComplement-injective bs₁ bs₂ len≡ (begin
+              twosComplement bs₁ ≡⟨ cong twosComplement bs≡₁ ⟩
+              twosComplement (bₕ₁ ∷ bₜ₁) ≡⟨ sym v₁≡ ⟩
               v₁ ≡⟨ eq ⟩
               v₂ ≡⟨ v₂≡ ⟩
-              Base256.twosComplement (bₕ₂ ∷ bₜ₂) ≡⟨ cong Base256.twosComplement (sym bs≡₂) ⟩
-              Base256.twosComplement bs₂ ∎)
+              twosComplement (bₕ₂ ∷ bₜ₂) ≡⟨ cong twosComplement (sym bs≡₂) ⟩
+              twosComplement bs₂ ∎)
 
 @0 [_]nonmalleable : ∀ t → NonMalleable Raw[ t ]Int
 [ t ]nonmalleable = TLV.nonmalleable nonmalleableVal

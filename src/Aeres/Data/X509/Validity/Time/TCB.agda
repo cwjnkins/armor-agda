@@ -100,28 +100,28 @@ window{bs} y = (─ windowByteString y) , help
     mkTimeType
       (fromWitness (((m≤m+n 48 1) , (m≤m+n 49 _ )) ∷ (((m≤m+n 48 _) , ≤-refl) ∷ (toWitness (TimeType.charset y)))))
       (singleton (1900 + TimeType.getTime y)
-        (1900 + TimeType.getTime y ≡ Base256.asciiNum ((# '1') ∷ [ # '9' ] ++ bs) ∋ (begin
+        (1900 + TimeType.getTime y ≡ asciiNum ((# '1') ∷ [ # '9' ] ++ bs) ∋ (begin
            1900 + TimeType.getTime y
          ≡⟨ cong₂ _+_
              (1 * 10 ^ 3 + 9 * 10 ^ 2 ≡ 1 * 10 ^ (1 + length bs) + 9 * 10 ^ length bs ∋
                cong (λ x → 1 * (10 ^ (1 + x)) + 9 * (10 ^ x)) {x = 2}{y = length bs}
                  (sym $ TimeType.bsLen y))
              (Singleton.x≡ (TimeType.time y)) ⟩
-           1 * 10 ^ (1 + length bs) + 9 * 10 ^ length bs + Base256.asciiNum bs ≡⟨ +-assoc (1 * (10 ^ (1 + length bs))) (9 * 10 ^ length bs) _ ⟩
-           Base256.asciiNum (# '1' ∷ [ # '9' ] ++ bs) ∎)))
+           1 * 10 ^ (1 + length bs) + 9 * 10 ^ length bs + asciiNum bs ≡⟨ +-assoc (1 * (10 ^ (1 + length bs))) (9 * 10 ^ length bs) _ ⟩
+           asciiNum (# '1' ∷ [ # '9' ] ++ bs) ∎)))
       (cong (2 +_) (TimeType.bsLen y))
       (z≤n , (+-monoʳ-≤ 1900 (≤-trans (proj₂ (TimeType.range y)) (toWitness{Q = 99 ≤? 8099} tt))))
   ... | no ¬p =
     mkTimeType
       (fromWitness (((m≤m+n 48 _) , (m≤m+n 50 _)) ∷ (((m≤m+n 48 _) , (m≤n+m _ 9)) ∷ (toWitness (TimeType.charset y)))))
       (singleton (2000 + TimeType.getTime y)
-        (2000 + TimeType.getTime y ≡ Base256.asciiNum (# '2' ∷ [ # '0' ] ++ bs) ∋
+        (2000 + TimeType.getTime y ≡ asciiNum (# '2' ∷ [ # '0' ] ++ bs) ∋
           2000 + TimeType.getTime y
             ≡⟨ cong₂ _+_{x = 2 * 10 ^ 3}{y = 2 * 10 ^ (1 + length bs)}
                  (cong (λ x → 2 * (10 ^ (1 + x))) {x = 2} {y = length bs}
                    (sym $ TimeType.bsLen y))
                  (Singleton.x≡ (TimeType.time y)) ⟩
-          2 * 10 ^ (1 + length bs) + Base256.asciiNum bs ∎ ))
+          2 * 10 ^ (1 + length bs) + asciiNum bs ∎ ))
       (cong (2 +_) (TimeType.bsLen y))
       (z≤n , (+-monoʳ-≤ 2000 (≤-trans (proj₂ (TimeType.range y)) (toWitness{Q = 99 ≤? 7999} tt))))
 

@@ -12,15 +12,13 @@ import      Data.Nat.Properties as Nat
 
 module Aeres.Data.Unicode.UTF8.Trie where
 
-open Base256
-
 open        Aeres.Grammar.IList UInt8
 open import Data.Trie (Fin.<-strictTotalOrder 256) as Trie public
 open import Data.Tree.AVL.Value (List.≋-setoid{A = UInt8}) as Value public
   hiding (const)
 
 UTF8TrieValue : Value _
-UTF8TrieValue = Value.const (Exists─ (List Dig) UTF8)
+UTF8TrieValue = Value.const (Exists─ (List UInt8) UTF8)
 
 UTF8Trie : Set
 UTF8Trie = Trie UTF8TrieValue _

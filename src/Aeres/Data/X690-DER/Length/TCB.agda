@@ -57,7 +57,7 @@ data Length : (@0 _ : List UInt8) → Set where
   long  : ∀ {@0 bs} → Long  bs → Length bs
 
 getLengthRaw : List UInt8 → ℕ
-getLengthRaw = Base256.unsigned
+getLengthRaw = unsigned
 
 getLength : ∀ {@0 bs} → Length bs → ℕ
 getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l

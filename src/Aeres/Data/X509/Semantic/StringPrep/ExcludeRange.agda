@@ -10,8 +10,6 @@ import      Data.Vec.Properties         as Vec
 
 module Aeres.Data.X509.Semantic.StringPrep.ExcludeRange where
 
-open Base256
-
 InRangeAndFilterElemSpec : ℕ × ℕ × Σ (ℕ → Set) Decidable → UInt8 → Set
 InRangeAndFilterElemSpec (l , u , (P , _)) c = InRange l u c × P (toℕ c)
 
