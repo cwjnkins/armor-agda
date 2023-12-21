@@ -160,11 +160,8 @@ toChainsCompleteWF
 toChainsBranchCompleteWF trustedRoot candidates {- unique -} issuee (WellFounded.acc rs) ((anIssuerForIn issuer isIssuerFor issuer∈) , tr) isIssuerFor' issuer∈' chain =
   Any.map⁺{xs = chains'}
     (Any.map
-      (λ {chain'} ≡chain → link issuer isIssuerFor' isIssuerFor issuer∈' issuer∈ chain chain' ≡chain)
+      (λ {chain'} ≡chain → cong₂ _∷_ refl ≡chain)
       ih)
-    -- (Any.map
-    --   (λ {chain'} ≡chain → link issuer isIssuerFor' isIssuerFor issuer∈ chain chain' ≡chain)
-    --   ih)
   where
   chains' : List (Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
   chains' = toChainsWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr
@@ -178,7 +175,9 @@ allLookupLemma {x} {xs} (px ∷ all₁) (there x∈) = there (allLookupLemma all
 
 
 toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (rootIssuers , allRootIssuers) otherIssuers otherTrust) (root (anIssuerForIn issuer isIssuerFor issuer∈)) =
-  Any.++⁺ˡ {xs = map root rootIssuers} (Any.map⁺ (List.lose rootIssuer∈root (root _ _ (proj₂ (proj₂ rootIssuerLem)))))
+  Any.++⁺ˡ {xs = map root rootIssuers}
+    (Any.map⁺
+      (List.lose rootIssuer∈root (cong₂ (λ x y → x ∷ [ y ]) refl (proj₂ (proj₂ rootIssuerLem)))))
   where
   rootIssuerLem : ∃ λ x → x ∈ rootIssuers × (-, issuer) ≡ proj₁ x
   rootIssuerLem = List.∈-map⁻ proj₁ (All.lookup allRootIssuers issuer∈ isIssuerFor)
@@ -207,3 +206,19 @@ toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (r
   isIssuer×isInF : (∃ λ x → x ∈ otherIssuers × (-, issuer) ≡ proj₁ x)
                    → Σ (issuer IsIssuerFor endEnt In candidates) λ isIssIn → ((-, issuer) , isIssIn) ∈ otherIssuers
   isIssuer×isInF ((_ , ret) , x∈otherIssuers , refl) = ret , x∈otherIssuers
+
+toChainsComplete
+  : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
+    → ∀ {@0 bs} (issuee : Cert bs)
+    → (tr : TrustTree trustedRoot candidates issuee)
+    → (c : Chain trustedRoot candidates issuee)
+    → Any (c ≡Chain_) (toChains _ _ _ tr)
+toChainsComplete trust candidates issuee =
+  toChainsCompleteWF trust candidates issuee (<-wellFounded _)
+  where
+  open import Data.Nat.Induction
+
+buildChainsComplete : ∀ trust candidates {@0 bs} (issuee : Cert bs) → (c : Chain trust candidates issuee)
+                      → Any (c ≡Chain_) (buildChains trust candidates issuee)
+buildChainsComplete trust candidates issuee =
+  toChainsComplete trust candidates issuee (buildTrustTree trust candidates issuee)

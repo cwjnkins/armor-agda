@@ -21,6 +21,9 @@ record Default (A : @0 List UInt8 → Set) ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UI
     value : Option A bs
     @0 notDefault : NotDefault default value
 
+  getValue : Exists─ _ A
+  getValue = elimOption {X = const (Exists─ _ A)} (-, default) (λ a → (─ _ , a)) value
+
 RawDefault : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → Raw A → ∀ {bs'} → (default : A bs') → Raw (Default A default)
 Raw.D (RawDefault R default) = Raw.D R
 Raw.to (RawDefault R default) (mkDefault none notDefault) = Raw.to R default

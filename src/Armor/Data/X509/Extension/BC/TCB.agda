@@ -33,11 +33,17 @@ record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
     bcpathlen : Option Int pl
     @0 bs≡  : bs ≡ ca ++ pl
 
+  isCA : Bool
+  isCA = BoolValue.v ∘ TLV.val ∘ proj₂ ∘ Default.getValue $ bcca
+
 BCFieldsSeq : @0 List UInt8 → Set
 BCFieldsSeq xs = TLV Tag.Sequence  BCFieldsSeqFields xs
 
 BCFields : @0 List UInt8 → Set
 BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
+
+isCA : ∀ {@0 bs} → BCFields bs → Bool
+isCA bcf = BCFieldsSeqFields.isCA (TLV.val (TLV.val bcf))
 
 BCFieldsSeqFieldsRep = &ₚ (Default Boool falseBoool) (Option Int)
 

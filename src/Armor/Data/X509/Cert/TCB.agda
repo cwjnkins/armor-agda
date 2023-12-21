@@ -1,5 +1,6 @@
 open import Armor.Binary
 open import Armor.Data.X509.Extension.TCB
+import      Armor.Data.X509.Extension.BC.TCB as BC
 open import Armor.Data.X509.Name.TCB
 open import Armor.Data.X509.SignAlg.TCB
 open import Armor.Data.X509.TBSCert.TCB
@@ -116,6 +117,20 @@ record CertFields (@0 bs : List UInt8) : Set where
   getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC = TBSCertFields.getBC (TLV.val tbs)
 
+{- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.4
+--    (k)  If certificate i is a version 3 certificate, verify that the
+--         basicConstraints extension is present and that cA is set to
+--         TRUE.  (If certificate i is a version 1 or version 2
+--         certificate, then the application MUST either verify that
+--         certificate i is a CA certificate through out-of-band means
+--         or reject the certificate.  Conforming implementations may
+--         choose to reject all version 1 and version 2 intermediate
+--         certificates.)
+-}
+
+  isCA : Maybe Bool
+  isCA = elimOption {X = const (Maybe Bool)} nothing (λ bc → just (BC.isCA (ExtensionFields.extension bc))) (proj₂ getBC)
+
   getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU = TBSCertFields.getKU (TLV.val tbs)
 
@@ -218,6 +233,9 @@ module Cert where
 
     getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
     getBC = CertFields.getBC (TLV.val c)
+
+    isCA : Maybe Bool
+    isCA = CertFields.isCA (TLV.val c)
 
     getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
     getKU = CertFields.getKU (TLV.val c)

@@ -92,6 +92,8 @@ open import Agda.Builtin.Nat public
 headSafe : ∀ {ℓ} {@0 A : Set ℓ} → (xs : List A) → @0 length xs ≥ 1 → A
 headSafe (x₁ ∷ xs) x = x₁
 
+tailSafe : ∀ {ℓ} {@0 A : Set ℓ} → (xs : List A) → @0 length xs ≥ 1 → List A
+tailSafe (_ ∷ xs) _ = xs
 
 open import Data.Product public
   hiding (map ; zip)

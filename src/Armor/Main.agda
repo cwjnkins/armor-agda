@@ -205,31 +205,31 @@ main = IO.run $
   runSingleCertChecks : ∀ {@0 bs} → Cert bs → ℕ → _
   runSingleCertChecks cert n =
     Armor.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
-     runCheck cert "SCP1" scp1 IO.>>
-     runCheck cert "SCP2" scp2 IO.>>
-     runCheck cert "SCP4" scp4 IO.>>
-     runCheck cert "SCP5" scp5 IO.>>
-     runCheck cert "SCP6" scp6 IO.>>
-     runCheck cert "SCP7" scp7 IO.>>
-     runCheck cert "SCP8" scp8 IO.>>
-     runCheck cert "SCP9" scp9 IO.>>
-     runCheck cert "SCP10" scp10 IO.>>
-     runCheck cert "SCP11" scp11 IO.>>
-     runCheck cert "SCP12" scp12 IO.>>
-     runCheck cert "SCP13" scp13 IO.>>
-     runCheck cert "SCP14" scp14 IO.>>
-     runCheck cert "SCP15" scp15 IO.>>
-     runCheck cert "SCP16" scp16 IO.>>
-     runCheck cert "SCP17" scp17 IO.>>
-     (if ⌊ n ≟ 1 ⌋ then (runCheck cert "SCP19" scp19) else (IO.return tt)) IO.>>
+     runCheck cert "R1" r1 IO.>>
+     runCheck cert "R2" r2 IO.>>
+     runCheck cert "R3" r3 IO.>>
+     runCheck cert "R4" r4 IO.>>
+     runCheck cert "R5" r5 IO.>>
+     runCheck cert "R6" r6 IO.>>
+     runCheck cert "R7" r7 IO.>>
+     runCheck cert "R8" r8 IO.>>
+     runCheck cert "R9" r9 IO.>>
+     runCheck cert "R10" r10 IO.>>
+     runCheck cert "R11" r11 IO.>>
+     runCheck cert "R12" r12 IO.>>
+     runCheck cert "R13" r13 IO.>>
+     runCheck cert "R14" r14 IO.>>
+     runCheck cert "R15" r15 IO.>>
+     runCheck cert "R16" r16 IO.>>
+     (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" r18) else (IO.return tt)) IO.>>
      Armor.IO.getCurrentTime IO.>>= λ now →
      Armor.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
      case GeneralizedTime.fromForeignUTC now of λ where
        (no ¬p) →
-         Armor.IO.putStrLnErr "SCP18: failed to read time from system" IO.>>
+         Armor.IO.putStrLnErr "R17: failed to read time from system" IO.>>
          Armor.IO.exitFailure
        (yes p) →
-         runCheck cert "SCP18" (λ c₁ → scp18 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl)))
+         runCheck cert "R17" (λ c₁ → r17 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl)))
 
   runChecks' :  ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO ⊤
@@ -247,11 +247,11 @@ main = IO.run $
     → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
   helper₁ issuee chain =
     runChecks' issuee 1 chain IO.>>
-    runChainCheck "CCP2" issuee chain ccp2 IO.>>
-    runChainCheck "CCP3" issuee chain ccp3 IO.>>
-    runChainCheck "CCP4" issuee chain ccp4 IO.>>
-    runChainCheck "CCP5" issuee chain ccp5 IO.>>
-    runChainCheck "CCP10" issuee chain ccp10 IO.>>
+    runChainCheck "R19" issuee chain r19 IO.>>
+    runChainCheck "R20" issuee chain r20 IO.>>
+    runChainCheck "R21" issuee chain r21 IO.>>
+    runChainCheck "R22" issuee chain r22 IO.>>
+    runChainCheck "R23" issuee chain r23 IO.>>
     IO.return true
 
   helper₂ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} (issuee : Cert bs)

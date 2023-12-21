@@ -43,7 +43,7 @@ unique⇒x∉[xs─x∈] {x = x} {.(x ∷ _)} (all≢x ∷ unique) (there {x = .
 unique⇒x∉[xs─x∈] {x = x} {.(y ∷ _)} (all≢y ∷ unique) (there {x = y} x∈) (there x∈') =
   unique⇒x∉[xs─x∈] unique x∈ x∈'
 
-chainUnique : ∀ trustedRoot candidates -- → (uc : List.Unique _≟_ candidates)
+chainUnique : ∀ trustedRoot candidates
               → ∀ {@0 bs} {issuee : Cert bs}
               → (-, issuee) ∉ candidates → (-, issuee) ∉ trustedRoot
               → (c : Chain trustedRoot candidates issuee) → ChainUnique c

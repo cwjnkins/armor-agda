@@ -119,17 +119,37 @@ toList : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trust
 toList{issuee = issuee} (root (issuer , _)) = (-, issuee) ∷ [ issuer ]
 toList{trustedRoot}{issuee = issuee} (link issuer isIn chain) = (-, issuee) ∷ toList chain
 
+getPath : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → List (Exists─ _ Cert)
+getPath c = take (length certs - 1) certs
+  where
+  certs = toList c
+
+getIssuers : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → List (Exists─ _ Cert)
+getIssuers c = drop 1 (toList c)
+
+getIntermediates : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → List (Exists─ _ Cert)
+getIntermediates c = take (length issuers - 1) issuers
+  where
+  issuers = getIssuers c
+
+toListLength≥1 : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → (c : Chain trustedRoot candidates issuee)
+                 → length (toList c) ≥ 1
+toListLength≥1 (root _) = s≤s z≤n
+toListLength≥1 (link _ _ c) = s≤s z≤n
+
 -- certificates in chain are unique
 ChainUnique : ∀ {trustedRoot candidates} {@0 bs} {issuee : Cert bs} → Chain trustedRoot candidates issuee → Set
 ChainUnique c = List.Unique _≟_ (toList c)
 
 -- chain equality (modulo proofs of "IsIssuerFor")
-data _≡Chain_ {trustedRoot candidates : List (Exists─ _ Cert)} : ∀ {@0 bs} {endEnt : Cert bs} → (c₁ c₂ : Chain trustedRoot candidates endEnt) → Set where
-  root : ∀ {@0 bs} {c : Cert bs} → (iss₁ iss₂ : IssuerFor c In trustedRoot)
-         → proj₁ iss₁ ≡ proj₁ iss₂
-         → (root{c = c} iss₁) ≡Chain (root{c = c} iss₂)
-  link : ∀ {@0 bs₁ bs₂} (issuer : Cert bs₁) {c : Cert bs₂}
-         → (isIssuer₁ isIssuer₂ : issuer IsIssuerFor c)
-         → (isIn₁ isIn₂ : (-, issuer) ∈ candidates)
-         → (c₁ c₂ : Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer) → c₁ ≡Chain c₂
-         → (link issuer {c} (isIssuer₁ , isIn₁) c₁) ≡Chain (link issuer {c} (isIssuer₂ , isIn₂) c₂)
+_≡Chain_ : {trustedRoot candidates : List (Exists─ _ Cert)} → ∀ {@0 bs} {endEnt : Cert bs} → (c₁ c₂ : Chain trustedRoot candidates endEnt) → Set
+c₁ ≡Chain c₂ = toList c₁ ≡ toList c₂
+-- data _≡Chain_ {trustedRoot candidates : List (Exists─ _ Cert)} : ∀ {@0 bs} {endEnt : Cert bs} → (c₁ c₂ : Chain trustedRoot candidates endEnt) → Set where
+--   root : ∀ {@0 bs} {c : Cert bs} → (iss₁ iss₂ : IssuerFor c In trustedRoot)
+--          → proj₁ iss₁ ≡ proj₁ iss₂
+--          → (root{c = c} iss₁) ≡Chain (root{c = c} iss₂)
+--   link : ∀ {@0 bs₁ bs₂} (issuer : Cert bs₁) {c : Cert bs₂}
+--          → (isIssuer₁ isIssuer₂ : issuer IsIssuerFor c)
+--          → (isIn₁ isIn₂ : (-, issuer) ∈ candidates)
+--          → (c₁ c₂ : Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer) → c₁ ≡Chain c₂
+--          → (link issuer {c} (isIssuer₁ , isIn₁) c₁) ≡Chain (link issuer {c} (isIssuer₂ , isIn₂) c₂)

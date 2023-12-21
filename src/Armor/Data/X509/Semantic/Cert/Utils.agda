@@ -17,11 +17,15 @@ open Armor.Grammar.Parallel    UInt8
 ------- helper functions -----
 
 -- is it a CA certificate? the Basic Constraints extension is present and the value of CA is TRUE ?
-isCA : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.BCLit) Extension.BCFields)) → Bool
-isCA (─ .[] , none) = false
-isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields (mkDefault none _) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = false
-isCA (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields (mkDefault (some (mkTLV len₂ (mkBoolValue v b vᵣ bs≡₅) len≡₂ bs≡₄)) _) bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = v
+IsConfirmedCA : ∀ {@0 bs} → Cert bs → Set
+IsConfirmedCA c =
+  maybe′
+    T -- if Basic Constraints extension is present, reduces to whether the CA boolean is true
+    ⊥ -- if Basic Constraints extension is absent, it cannot be confirmed as a CA
+    (Cert.isCA c)
 
+isConfirmedCA? : ∀ {@0 bs} (c : Cert bs) → Dec (IsConfirmedCA c)
+isConfirmedCA? c = maybe{B = Dec ∘ maybe′ T ⊥} (λ b → T-dec) (no λ ()) (Cert.isCA c)
 
 -- returns BCPathLen if exists
 getBCPathLen :  Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.BCLit) Extension.BCFields)) → Exists─ (List UInt8) (Option Int)
