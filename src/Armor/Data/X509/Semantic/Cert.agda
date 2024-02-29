@@ -8,7 +8,7 @@ import      Armor.Data.X509.Semantic.Cert.R6 as R6
 import      Armor.Data.X509.Semantic.Cert.R8 as R8
 import      Armor.Data.X509.Semantic.Cert.R9 as R9
 import      Armor.Data.X509.Semantic.Cert.R10 as R10
-import      Armor.Data.X509.Semantic.Cert.R11 as R11
+-- import      Armor.Data.X509.Semantic.Cert.R11 as R11
 import      Armor.Data.X509.Semantic.Cert.R12 as R12
 import      Armor.Data.X509.Semantic.Cert.R13 as R13
 import      Armor.Data.X509.Semantic.Cert.R14 as R14
@@ -62,7 +62,8 @@ open R9 public
 open R10 public
 
 -- If the Subject Alternative Name extension is present, the sequence MUST contain at least one entry.
-open R11 public
+-- 2024 Feb 29: The parser enforces this already, see Armor.Data.X509.GeneralNames.TCB
+-- open R11 public
 
 -- If the KeyCertSign bit is asserted, then the CA bit in the Basic Constraints extension MUST also be asserted.
 open R12 public

@@ -19,6 +19,9 @@ open      Armor.Grammar.Parallel.TCB             UInt8
 open      Armor.Grammar.Sum.TCB                  UInt8
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.6
+-- If the Subject Alternative Name extension is present, the sequence MUST
+-- contain at least one entry.
+-- [...]
 --    GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
 
 GeneralNamesElems = NonEmptySequenceOf GeneralName
