@@ -17,7 +17,7 @@ open Armor.Grammar.Option      UInt8
 -- If the KeyCertSign bit is asserted, then the CA bit in the Basic Constraints extension MUST also be asserted.
 
 R12 : ∀ {@0 bs} → Cert bs → Set
-R12 c = T (isKeyCertSignPresent (Cert.getKU c)) → IsConfirmedCA c
+R12 c = AssertsKUBitField c Extension.KUFields.keyCertSign → IsConfirmedCA c
 
 r12 : ∀ {@0 bs} (c : Cert bs) → Dec (R12 c)
-r12 c = T-dec →-dec (isConfirmedCA? c)
+r12 c = assertsKUBitField? (proj₂ (Cert.getKU c)) Extension.KUFields.keyCertSign →-dec (isConfirmedCA? c)
