@@ -58,13 +58,7 @@ instance
   eq≋ : Eq≋ SelectExtn
   eq≋ =
     Iso.isoEq≋ Select.iso
-             (Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ {@0 xs} a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field (λ a b → ‼ ≡-unique a b) ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b  ⦄
-      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b  ⦄
+             (Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
@@ -72,7 +66,16 @@ instance
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
       ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
-      ⦃ eq₂ = eq≋Field (λ p₁ p₂ → ‼ T-unique p₁ p₂) ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄)
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Sum.sumEq≋ ⦃ eq₁ = eq≋Field λ a b → ‼ ≡-unique a b ⦄
+      ⦃ eq₂ = Parallel.eq≋Σₚ
+                (eq≋Field (λ p₁ p₂ → ‼ T-unique p₁ p₂))
+                (λ _ → record { _≟_ = λ x y → yes (T-unique x y) })
+      ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ⦄)
     where
     instance
       e₁ : Eq≋ (NonEmptySequenceOf OID)

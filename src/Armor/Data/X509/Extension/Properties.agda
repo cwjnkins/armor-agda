@@ -101,7 +101,7 @@ module Select where
   proj₂ (proj₂ iso) (pmextn x) = refl
   proj₂ (proj₂ iso) (inapextn x) = refl
   proj₂ (proj₂ iso) (aiaextn x) = refl
-  proj₂ (proj₂ iso) (other x)   = refl
+  proj₂ (proj₂ iso) (other _ _)   = refl
 
   @0 unambiguous : Unambiguous SelectExtn
   unambiguous =
@@ -134,8 +134,10 @@ module Select where
                                 (Fields.unambiguous ≡-unique INAP.unambiguous (TLV.noconfusion λ ()))
                                 (Sum.unambiguous
                                   (Fields.unambiguous ≡-unique AIA.unambiguous (TLV.noconfusion λ ()))
-                                (Fields.unambiguous ua
-                                  OctetString.unambiguous (TLV.noconfusion λ ()))
+                                  (Parallel.unambiguous
+                                    (Fields.unambiguous T-unique
+                                      OctetString.unambiguous (TLV.noconfusion λ ()))
+                                    (λ _ → T-unique))
                               noconfusion₀)
                             noconfusion₁₃)
                           noconfusion₁₂)
@@ -173,8 +175,11 @@ module Select where
       v≡ = caseErased oidT≡ ret (const _) of λ where
         ≋-refl → ─ refl
 
-    noconfusionOIDN : ∀ {@0 A B oid} → (oid ∈ supportedExtensions) → NoConfusion (ExtensionFields (_≡ oid) A) (ExtensionFields (False ∘ (_∈? supportedExtensions)) B)
-    noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (mkExtensionFields {oex = oex} {cex} {ocex} extnId refl crit extension bs≡) (mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) =
+    noconfusionOIDN
+      : ∀ {@0 A B oid} → (oid ∈ supportedExtensions)
+        → NoConfusion (ExtensionFields (_≡ oid) A)
+                      (Σₚ (ExtensionFields (False ∘ (_∈? supportedExtensions)) B) (λ _ u → T (not (ExtensionFields.getCrit u))))
+    noconfusionOIDN{oid = oid} supported {xs₁} {ys₁} {xs₂} {ys₂} ++≡ (mkExtensionFields {oex = oex} {cex} {ocex} extnId refl crit extension bs≡) (mk×ₚ (mkExtensionFields {oex = oex₁} {cex₁} {ocex₁} extnId₁ extnId≡₁ crit₁ extension₁ bs≡₁) _) =
       contradiction (subst (_∈ supportedExtensions) v≡ supported) (toWitnessFalse extnId≡₁) {- (toWitnessFalse extnId≡₁ )-}
       where
       @0 bs≡' : oex ++ cex ++ ocex ++ ys₁ ≡ oex₁ ++ cex₁ ++ ocex₁ ++ ys₂
@@ -421,16 +426,17 @@ module Select where
       Sum.noconfusion{ExtensionFields (_≡ OIDs.INAPLit) INAPFields}
         (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))
 
-    noconfusion₀ : NoConfusion (ExtensionFields (_≡ OIDs.AIALit) AIAFields) (ExtensionFields _ _)
+    noconfusion₀ : NoConfusion
+                     (ExtensionFields (_≡ OIDs.AIALit) AIAFields)
+                     (Σₚ (ExtensionFields (False ∘ (_∈? supportedExtensions)) _) _)
     noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
-
-    ua : Unambiguous (λ x → False (x ∈? supportedExtensions))
-    ua = T-unique
+      -- noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
 
   @0 nonmalleable : NonMalleable RawSelectExtn
   nonmalleable = Iso.nonmalleable iso RawSelectExtnRep nm
     where
-    RawRep₀ = RawSum (RawExtensionFields RawAIAFields) (RawExtensionFields RawOctetString)
+    RawRep₀ = RawSum (RawExtensionFields RawAIAFields)
+                     (RawΣₚ₁ (RawExtensionFields RawOctetString) (λ _ u → T (not (ExtensionFields.getCrit u))))
     RawRep₁ = RawSum (RawExtensionFields RawINAPFields) RawRep₀
     RawRep₂ = RawSum (RawExtensionFields RawPMFields) RawRep₁
     RawRep₃ = RawSum (RawExtensionFields RawPCFields) RawRep₂
@@ -459,9 +465,11 @@ module Select where
       (Sum.nonmalleable{ra = RawExtensionFields RawPCFields}{rb = RawRep₂} ((Fields.nonmalleable ≡-unique PC.nonmalleable))
       (Sum.nonmalleable{ra = RawExtensionFields RawPMFields}{rb = RawRep₁} ((Fields.nonmalleable ≡-unique PM.nonmalleable))
       (Sum.nonmalleable{ra = RawExtensionFields RawINAPFields}{rb = RawRep₀} ((Fields.nonmalleable ≡-unique INAP.nonmalleable))
-      (Sum.nonmalleable{ra = RawExtensionFields RawAIAFields}{rb = RawExtensionFields RawOctetString}
-                        (Fields.nonmalleable ≡-unique AIA.nonmalleable)
-                         (Fields.nonmalleable T-unique OctetString.nonmalleable))))))))))))))
+      (Sum.nonmalleable{ra = RawExtensionFields RawAIAFields}{rb = (RawΣₚ₁ (RawExtensionFields RawOctetString) (λ _ u → T (not (ExtensionFields.getCrit u))))}
+        (Fields.nonmalleable ≡-unique AIA.nonmalleable)
+        (Parallel.nonmalleable₁ (RawExtensionFields RawOctetString)
+           (Fields.nonmalleable T-unique OctetString.nonmalleable)
+           (λ _ → T-unique)))))))))))))))
 
 @0 unambiguous : Unambiguous Extensions
 unambiguous =

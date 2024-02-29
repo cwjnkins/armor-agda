@@ -201,47 +201,6 @@ getEKUOIDList (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (m
   helper (cons (mkIListCons head₁ tail₁ bs≡)) = (_ , head₁) ∷ helper tail₁
 
 
--- returns true only if the extension is unknown and has critical bit = true
--- only relevant to extensions which are enforced during semantic validation
-isUnkwnCriticalExtension : Exists─ (List UInt8) Extension → Bool
-isUnkwnCriticalExtension (fst , mkTLV len (akiextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (akiextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (skiextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (skiextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (kuextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (ekuextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (bcextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (sanextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (cpextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (crlextn x) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (ianextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (ianextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (ncextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (ncextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (pcextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (pcextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (pmextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (pmextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (inapextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (inapextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (aiaextn (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (aiaextn (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault none notDefault) extension bs≡₁)) len≡ bs≡) = false
-isUnkwnCriticalExtension (fst , mkTLV len (other (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len₁ (mkBoolValue v b vᵣ bs≡₃) len≡₁ bs≡₂)) notDefault) extension bs≡₁)) len≡ bs≡) = v
-
-
--- is any unknown extention critical from the list ?
-isAnyOtherExtnCritical : List (Exists─ (List UInt8) Extension) → Bool
-isAnyOtherExtnCritical x = helper x
-  where
-  -- returns true only if at least one extension in the list is unknown and that extension has critical bit = true
-  helper : List (Exists─ (List UInt8) Extension) → Bool
-  helper [] = false
-  helper (x ∷ x₁) = case (isUnkwnCriticalExtension x) of λ where
-    false → helper x₁
-    true → true
-
-
 getExtensionsOIDList : List (Exists─ (List UInt8) Extension) →  List (Exists─ (List UInt8) OID)
 getExtensionsOIDList = map helper
   where
@@ -260,7 +219,7 @@ getExtensionsOIDList = map helper
   helper (fst , mkTLV len (pmextn x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
   helper (fst , mkTLV len (inapextn x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
   helper (fst , mkTLV len (aiaextn x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
-  helper (fst , mkTLV len (other x) len≡ bs≡) = _ , (ExtensionFields.extnId x)
+  helper (fst , mkTLV len (other x ¬crit) len≡ bs≡) = _ , (ExtensionFields.extnId x)
 
 checkPurposeConsistency : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.KULit) Extension.KUFields)) → List (Exists─ (List UInt8) OID) → Bool
 checkPurposeConsistency x [] = true

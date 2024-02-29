@@ -11,7 +11,7 @@ import      Armor.Data.X509.Semantic.Cert.R10 as R10
 -- import      Armor.Data.X509.Semantic.Cert.R11 as R11
 import      Armor.Data.X509.Semantic.Cert.R12 as R12
 import      Armor.Data.X509.Semantic.Cert.R13 as R13
-import      Armor.Data.X509.Semantic.Cert.R14 as R14
+-- import      Armor.Data.X509.Semantic.Cert.R14 as R14
 import      Armor.Data.X509.Semantic.Cert.R15 as R15
 import      Armor.Data.X509.Semantic.Cert.R16 as R16
 import      Armor.Data.X509.Semantic.Cert.R17 as R17
@@ -73,7 +73,8 @@ open R13 public
 
 -- A certificate-using system MUST reject the certificate if it encounters a critical Extension
 -- it does not recognize or a critical Extension that contains information that it cannot process.
-open R14 public
+-- 2024 Feb 29: This is now enforced by the specification of an unsupported extension.
+-- open R14 public
 
 -- A certificate policy OID MUST NOT appear more than once in a Certificate Policies extension.
 open R15 public

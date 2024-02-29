@@ -99,6 +99,24 @@ private
           (tell $ here' String.++ " (fields): length mismatch")
           (Sequence.parseDefault₁ _ here' Boool.unambiguous TLV.nosubstrings nc Boool.parse p) (n - r))
 
+  parseUnsupportedExtensionField : ∀ n → Parser (Logging ∘ Dec) (ExactLength (Σₚ ExtensionFieldUnsupported (λ _ → T ∘ not ∘ ExtensionFields.getCrit)) n)
+  runParser (parseUnsupportedExtensionField n) xs = do
+    (yes (success pre₁ r₁ r₁≡ (mk×ₚ (mk×ₚ v₁ v₁Len) ¬v₁Crit) suf₁ ps≡₁)) ← runParser
+                 (parseSigma{B = λ _ → T ∘ not ∘ ExtensionFields.getCrit ∘ Σₚ.fstₚ}
+                   (Parallel.ExactLength.nosubstrings _)
+                   (Parallel.ExactLength.unambiguous _
+                     (Fields.unambiguous T-unique OctetString.unambiguous (TLV.noconfusion λ ())))
+                   (parseExtensionFields{P = False ∘ (_∈? supportedExtensions)} (λ bs → T-dec) TLV.nosubstrings (TLV.noconfusion λ ()) T-unique OctetString.parse n)
+                   λ _ → T-dec)
+                 xs
+         where no ¬p → do
+           return ∘ no $ λ where
+             (success prefix read read≡ (mk×ₚ (mk×ₚ v₁ ¬v₁Crit) v₁Len) suffix ps≡) →
+               contradiction
+                 (success prefix read read≡ (mk×ₚ (mk×ₚ v₁ v₁Len) ¬v₁Crit) suffix ps≡)
+                 ¬p
+    return (yes (success pre₁ r₁ r₁≡ (mk×ₚ (mk×ₚ v₁ ¬v₁Crit) v₁Len) suf₁ ps≡₁))
+
 parseSelectExtn : ∀ n → Parser (Logging ∘ Dec) (ExactLength SelectExtn n)
 parseSelectExtn n =
   parseEquivalent
@@ -144,7 +162,7 @@ parseSelectExtn n =
                                                              (parseEquivalent (Iso.symEquivalent (Distribute.exactLength-Sum))
                                                                (parseSum
                                                                  (parseExtensionFields (_≟ _) TLV.nosubstrings (TLV.noconfusion λ ()) (λ where refl refl → refl) parseAIAFields n)
-                                                                 (parseExtensionFields (λ bs → T-dec) TLV.nosubstrings (TLV.noconfusion (λ ())) (λ a₁ a₂ → T-unique a₁ a₂) OctetString.parse n))))))))))))))))))))))))))))
+                                                                 (parseUnsupportedExtensionField n))))))))))))))))))))))))))))
 
 parseExtension : Parser (Logging ∘ Dec) Extension
 parseExtension = parseTLV _ (here' String.++ ": field") _ parseSelectExtn

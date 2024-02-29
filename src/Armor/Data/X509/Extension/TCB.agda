@@ -105,7 +105,10 @@ data SelectExtn : @0 List UInt8 → Set where
   pmextn   : ∀ {@0 bs} → ExtensionFieldPM bs → SelectExtn bs 
   inapextn : ∀ {@0 bs} → ExtensionFieldINAP bs → SelectExtn bs 
   aiaextn  : ∀ {@0 bs} → ExtensionFieldAIA bs → SelectExtn bs
-  other    : ∀ {@0 bs} → ExtensionFieldUnsupported bs → SelectExtn bs
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2
+-- A certificate-using system MUST reject the certificate if it encounters a critical Extension
+-- it does not recognize or a critical Extension that contains information that it cannot process.
+  other    : ∀ {@0 bs} → (u : ExtensionFieldUnsupported bs) → T (not (ExtensionFields.getCrit u)) → SelectExtn bs
 
 Extension : @0 List UInt8 → Set
 Extension xs = TLV Tag.Sequence SelectExtn xs
@@ -147,7 +150,7 @@ SelectExtnRep = (Sum ExtensionFieldAKI
         (Sum ExtensionFieldPM
         (Sum ExtensionFieldINAP
         (Sum ExtensionFieldAIA
-             ExtensionFieldUnsupported))))))))))))))
+             (Σₚ ExtensionFieldUnsupported (λ _ u → T (not (ExtensionFields.getCrit u))))))))))))))))))
 
 equivalent : Equivalent SelectExtnRep SelectExtn
 proj₁ equivalent (Sum.inj₁ x) = akiextn x
@@ -164,7 +167,7 @@ proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (
 proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))) = pmextn x
 proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))) = inapextn x
 proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))) = aiaextn x
-proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))) = other x
+proj₁ equivalent (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))) = other (fstₚ x) (sndₚ x)
 proj₂ equivalent (akiextn x) = Sum.inj₁ x
 proj₂ equivalent (skiextn x) = Sum.inj₂ (Sum.inj₁ x)
 proj₂ equivalent (kuextn x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
@@ -179,7 +182,7 @@ proj₂ equivalent (pcextn x)    = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj�
 proj₂ equivalent (pmextn x)    = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))
 proj₂ equivalent (inapextn x)  = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))))))))))))
 proj₂ equivalent (aiaextn x)   = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x)))))))))))))
-proj₂ equivalent (other x)     = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ x)))))))))))))
+proj₂ equivalent (other u nc)  = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mk×ₚ u nc))))))))))))))
 
 RawSelectExtnRep : Raw SelectExtnRep
 RawSelectExtnRep = RawSum (RawExtensionFields RawAKIFields)
@@ -196,7 +199,8 @@ RawSelectExtnRep = RawSum (RawExtensionFields RawAKIFields)
                    (RawSum (RawExtensionFields RawPMFields)
                    (RawSum (RawExtensionFields RawINAPFields)
                    (RawSum (RawExtensionFields RawAIAFields)
-                           (RawExtensionFields RawOctetString))))))))))))))
+                           (RawΣₚ₁ (RawExtensionFields RawOctetString)
+                                   (λ _ u → T (not (ExtensionFields.getCrit u)))))))))))))))))
 
 RawSelectExtn : Raw SelectExtn
 RawSelectExtn = Iso.raw equivalent RawSelectExtnRep
