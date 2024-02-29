@@ -90,16 +90,16 @@ record CertFields (@0 bs : List UInt8) : Set where
   -- getSecNA :  ℕ
   -- getSecNA = TBSCertFields.getSecNA (TLV.val tbs)
 
-  getIssuerLen :  ℕ
-  getIssuerLen = TBSCertFields.getIssuerLen (TLV.val tbs)
+  -- getIssuerLen :  ℕ
+  -- getIssuerLen = TBSCertFields.getIssuerLen (TLV.val tbs)
 
-  getSubjectLen :  ℕ
-  getSubjectLen = TBSCertFields.getSubjectLen (TLV.val tbs)
+  -- getSubjectLen :  ℕ
+  -- getSubjectLen = TBSCertFields.getSubjectLen (TLV.val tbs)
 
-  getIssuer :  Name _
+  getIssuer :  Name (TBSCertFields.i (TLV.val tbs))
   getIssuer = TBSCertFields.issuer (TLV.val tbs)
 
-  getSubject :  Name _
+  getSubject :  Name (TBSCertFields.u (TLV.val tbs))
   getSubject = TBSCertFields.subject (TLV.val tbs)
 
   getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val tbs))
@@ -108,11 +108,11 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSubUID : Option TBSCert.SubUID (TBSCertFields.u₂ (TLV.val tbs))
   getSubUID = TBSCertFields.subjectUID (TLV.val tbs)
 
-  getTBSCertSignAlg : Exists─ (List UInt8) SignAlg
+  getTBSCertSignAlg : SignAlg (TBSCertFields.sa (TLV.val tbs))
   getTBSCertSignAlg = TBSCertFields.getSignAlg (TLV.val tbs)
 
-  getCertSignAlg : Exists─ (List UInt8) SignAlg
-  getCertSignAlg =  _ , signAlg
+  getCertSignAlg : SignAlg sa
+  getCertSignAlg = signAlg
 
   getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC = TBSCertFields.getBC (TLV.val tbs)
@@ -146,8 +146,8 @@ record CertFields (@0 bs : List UInt8) : Set where
   getCPOL : Exists─ (List UInt8) (Option ExtensionFieldCPOL)
   getCPOL = TBSCertFields.getCPOL (TLV.val tbs)
 
-  getExtensions : Exists─ (List UInt8) (Option Extensions)
-  getExtensions = _ , (TBSCertFields.extensions (TLV.val tbs))
+  getExtensions : Option Extensions (TBSCertFields.e (TLV.val tbs))
+  getExtensions = TBSCertFields.extensions (TLV.val tbs)
   
   getExtensionsList : List (Exists─ (List UInt8) Extension)
   getExtensionsList = TBSCertFields.getExtensionsList (TLV.val tbs)
@@ -160,6 +160,9 @@ module Cert where
   Cert xs = TLV Tag.Sequence  CertFields xs
 
   module _ {@0 bs} (c : Cert bs) where
+    getTBSCert : TBSCert (CertFields.t (TLV.val c))
+    getTBSCert = CertFields.tbs (TLV.val c)
+
     getVersion : DecodedVersion
     getVersion = CertFields.getVersion (TLV.val c)
 
@@ -204,28 +207,22 @@ module Cert where
     -- getSecNA :  ℕ
     -- getSecNA = CertFields.getSecNA (TLV.val c)
 
-    getIssuerLen :  ℕ
-    getIssuerLen = CertFields.getIssuerLen (TLV.val c)
-
-    getSubjectLen :  ℕ
-    getSubjectLen = CertFields.getSubjectLen (TLV.val c)
-
-    getIssuer : Name _
+    getIssuer : Name (TBSCertFields.i (TLV.val getTBSCert))
     getIssuer = CertFields.getIssuer (TLV.val c)
 
-    getSubject :  Name _
+    getSubject :  Name (TBSCertFields.u (TLV.val getTBSCert))
     getSubject = CertFields.getSubject (TLV.val c)
 
-    getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val (CertFields.tbs (TLV.val c))))
+    getIssUID : Option TBSCert.IssUID (TBSCertFields.u₁ (TLV.val getTBSCert))
     getIssUID = CertFields.getIssUID (TLV.val c)
 
-    getSubUID : Option TBSCert.SubUID (TBSCertFields.u₂ (TLV.val (CertFields.tbs (TLV.val c))))
+    getSubUID : Option TBSCert.SubUID (TBSCertFields.u₂ (TLV.val getTBSCert))
     getSubUID = CertFields.getSubUID (TLV.val c)
 
-    getTBSCertSignAlg : Exists─ (List UInt8) SignAlg
+    getTBSCertSignAlg : SignAlg (TBSCertFields.sa (TLV.val getTBSCert))
     getTBSCertSignAlg = CertFields.getTBSCertSignAlg (TLV.val c)
 
-    getCertSignAlg : Exists─ (List UInt8) SignAlg
+    getCertSignAlg : SignAlg (CertFields.sa (TLV.val c))
     getCertSignAlg = CertFields.getCertSignAlg (TLV.val c)
 
     -- getPublicKeyOIDbs : List UInt8
@@ -252,7 +249,7 @@ module Cert where
     getCPOL : Exists─ (List UInt8) (Option ExtensionFieldCPOL)
     getCPOL = CertFields.getCPOL (TLV.val c)
 
-    getExtensions : Exists─ (List UInt8) (Option Extensions)
+    getExtensions : Option Extensions (TBSCertFields.e (TLV.val getTBSCert))
     getExtensions = CertFields.getExtensions (TLV.val c)
 
     getExtensionsList : List (Exists─ (List UInt8) Extension)

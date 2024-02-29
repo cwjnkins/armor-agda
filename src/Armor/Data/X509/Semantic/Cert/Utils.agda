@@ -28,7 +28,7 @@ isConfirmedCA? : ∀ {@0 bs} (c : Cert bs) → Dec (IsConfirmedCA c)
 isConfirmedCA? c = maybe{B = Dec ∘ maybe′ T ⊥} (λ b → T-dec) (no λ ()) (Cert.isCA c)
 
 -- returns BCPathLen if exists
-getBCPathLen :  Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.BCLit) Extension.BCFields)) → Exists─ (List UInt8) (Option Int)
+getBCPathLen :  Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.BCLit) Extension.BCFields)) → Exists─ (List UInt8) (Option NonNegativeInt)
 getBCPathLen (─ .[] , none) = _ , none
 getBCPathLen (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields bcca bcpathlen bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = _ , bcpathlen
 
@@ -136,13 +136,6 @@ isDecryptionPresent (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV 
 getKUBits : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.KULit) Extension.KUFields)) → List Bool
 getKUBits (─ .[] , none) = []
 getKUBits (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mkBitStringValue bₕ bₜ bₕ<8 (singleton x x≡) unusedBits bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x
-
-
--- is SAN extension critical ? 
-isSANCritical : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.SANLit) Extension.SANFields)) → Bool
-isSANCritical (─ .[] , none) = false
-isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (mkDefault none _) extension bs≡)) = false
-isSANCritical (fst , some (mkExtensionFields extnId extnId≡ (mkDefault (some (mkTLV len (mkBoolValue v b vᵣ bs≡₂) len≡ bs≡₁)) _) extension bs≡)) = v
 
 
 -- get SAN length

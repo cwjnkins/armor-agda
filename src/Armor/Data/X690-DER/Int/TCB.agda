@@ -2,12 +2,14 @@ open import Armor.Binary
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Grammar.Definitions.NonMalleable
+import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
 open import Relation.Nullary.Implication
 
 module Armor.Data.X690-DER.Int.TCB where
 
 open Armor.Grammar.Definitions.NonMalleable UInt8
+open Armor.Grammar.Parallel.TCB             UInt8
 
 {- T-REC-X.690-202102-I!!PDF-E.pdf
 8.3 Encoding of an integer value
@@ -46,6 +48,9 @@ Int = [ Tag.Integer ]Int
 getVal : ∀ {@0 bs} → Int bs → ℤ
 getVal = Singleton.x ∘ IntegerValue.val ∘ TLV.val
 
+NonNegativeInt : @0 List UInt8 → Set
+NonNegativeInt = Σₚ Int (λ _ i → ℤ.NonNegative (getVal i))
+
 RawIntegerValue : Raw IntegerValue
 Raw.D RawIntegerValue = ℤ
 Raw.to RawIntegerValue = ↑_ ∘ IntegerValue.val
@@ -55,3 +60,11 @@ Raw[ t ]Int = RawTLV t RawIntegerValue
 
 RawInt : Raw Int
 RawInt = Raw[ _ ]Int
+
+nonNegativeℤ→ℕ : (i : ℤ) → ℤ.NonNegative i → ℕ
+nonNegativeℤ→ℕ (ℤ.+ n) _ = n
+
+RawNonNegativeInt : Raw NonNegativeInt
+Raw.D RawNonNegativeInt = ℕ
+Raw.to RawNonNegativeInt n =
+  nonNegativeℤ→ℕ (getVal (fstₚ n)) (sndₚ n)

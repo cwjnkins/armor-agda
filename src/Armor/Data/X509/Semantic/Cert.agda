@@ -1,14 +1,10 @@
-open import Armor.Binary
-open import Armor.Data.X509
-import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
-open import Armor.Data.X509.Semantic.Cert.Utils
 import      Armor.Data.X509.Semantic.Cert.R1 as R1
 import      Armor.Data.X509.Semantic.Cert.R2 as R2
 import      Armor.Data.X509.Semantic.Cert.R3 as R3
 import      Armor.Data.X509.Semantic.Cert.R4 as R4
 import      Armor.Data.X509.Semantic.Cert.R5 as R5
 import      Armor.Data.X509.Semantic.Cert.R6 as R6
-import      Armor.Data.X509.Semantic.Cert.R7 as R7
+-- import      Armor.Data.X509.Semantic.Cert.R7 as R7
 import      Armor.Data.X509.Semantic.Cert.R8 as R8
 import      Armor.Data.X509.Semantic.Cert.R9 as R9
 import      Armor.Data.X509.Semantic.Cert.R10 as R10
@@ -20,15 +16,8 @@ import      Armor.Data.X509.Semantic.Cert.R15 as R15
 import      Armor.Data.X509.Semantic.Cert.R16 as R16
 import      Armor.Data.X509.Semantic.Cert.R17 as R17
 import      Armor.Data.X509.Semantic.Cert.R18 as R18
-import      Armor.Grammar.Definitions
-import      Armor.Grammar.Option
-open import Armor.Grammar.IList as IList
-open import Armor.Prelude
 
 module Armor.Data.X509.Semantic.Cert where
-
-open Armor.Grammar.Definitions UInt8
-open Armor.Grammar.Option      UInt8
 
 ---------------------- SCP rules -----------------
 
@@ -56,7 +45,8 @@ open R6 public
 
 
 -- -- Where it appears, the PathLenConstraint field MUST be greater than or equal to zero.
-open R7 public
+-- 2024 Feb 28: This is now caught in the specification of BC, see Armor.Data.X509.Extension.BC.TCB
+-- open R7 public
 
 -- if the Subject is a CRL issuer (e.g., the Key Usage extension, is present and the value of CRLSign is TRUE),
 -- then the Subject field MUST be populated with a non-empty distinguished name.

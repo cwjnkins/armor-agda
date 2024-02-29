@@ -1,5 +1,6 @@
 open import Armor.Binary
 open import Armor.Data.X690-DER.SequenceOf.TCB
+  hiding (length)
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.TLV.Properties as TLV
 import      Armor.Grammar.Definitions

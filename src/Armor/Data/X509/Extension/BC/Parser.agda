@@ -25,8 +25,11 @@ parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCField
 parseBCFieldsSeqFields n =
   parseEquivalent (Parallel.equivalent₁ equivalent)
     (Sequence.parseDefaultOption falseBoool here'
-      Boool.unambiguous TLV.nosubstrings TLV.nosubstrings (TLV.noconfusion λ ())
-        Boool.parse (Int.parse (here' String.++ ": CA")) _)
+      Boool.unambiguous TLV.nosubstrings
+      (Parallel.nosubstrings₁ TLV.nosubstrings)
+      (symNoConfusion {A = NonNegativeInt} {B = Boool}
+        (Parallel.noconfusion₁{A₂ = Boool} (TLV.noconfusion λ ())))
+      Boool.parse (Int.parseNonNegative (here' String.++ ": CA")) _)
 
 parseBCFieldsSeq : Parser (Logging ∘ Dec) BCFieldsSeq
 parseBCFieldsSeq = parseTLV _ (here' String.++ ": Seq") _ parseBCFieldsSeqFields

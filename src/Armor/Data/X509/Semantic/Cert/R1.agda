@@ -17,7 +17,7 @@ open Armor.Grammar.Option      UInt8
 -- the Signature field in the sequence TbsCertificate.
 
 R1 : ∀ {@0 bs} → Cert bs → Set
-R1 c = Cert.getTBSCertSignAlg c ≡ Cert.getCertSignAlg c
+R1 c = _≋_{A = SignAlg} (Cert.getTBSCertSignAlg c) (Cert.getCertSignAlg c)
 
 r1 : ∀ {@0 bs} (c : Cert bs) → Dec (R1 c)
-r1 c = Cert.getTBSCertSignAlg c ≟ Cert.getCertSignAlg c
+r1 c = Cert.getTBSCertSignAlg c ≋? Cert.getCertSignAlg c

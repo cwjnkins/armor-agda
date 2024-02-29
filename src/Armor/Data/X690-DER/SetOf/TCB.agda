@@ -1,5 +1,6 @@
 open import Armor.Binary
 open import Armor.Data.X690-DER.SequenceOf.TCB
+  hiding (length)
 open import Armor.Data.X690-DER.SetOf.Order.TCB
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag

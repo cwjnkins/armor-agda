@@ -6,6 +6,7 @@ import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
+  hiding (length)
 
 module Armor.Data.X690-DER.SequenceOf.TCB where
 
@@ -23,6 +24,7 @@ open Armor.Grammar.Parallel.TCB             UInt8
 SequenceOf       = IList
 SequenceOfFields = IListCons
 lengthSequence   = lengthIList
+length           = lengthIList
 
 pattern mkSequenceOf{bs₁}{bs₂} h t bs≡   = mkIListCons{bs₁}{bs₂} h t bs≡
 pattern consSequenceOf{bs₁}{bs₂} h t bs≡ = consIList{bs₁}{bs₂} h t bs≡

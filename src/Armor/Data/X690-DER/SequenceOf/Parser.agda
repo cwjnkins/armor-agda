@@ -2,6 +2,7 @@ open import Armor.Binary
 open import Armor.Data.X690-DER.Int
 open import Armor.Data.X690-DER.Length
 open import Armor.Data.X690-DER.SequenceOf.TCB
+  hiding (length)
 open import Armor.Data.X690-DER.SequenceOf.Properties as SequenceOf
 open import Armor.Data.X690-DER.TLV
 import      Armor.Data.X690-DER.Tag as Tag

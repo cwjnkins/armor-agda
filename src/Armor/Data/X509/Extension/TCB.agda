@@ -2,6 +2,7 @@ open import Armor.Binary
 open import Armor.Data.X509.Extension.AIA.TCB
 open import Armor.Data.X509.Extension.AKI.TCB
 open import Armor.Data.X509.Extension.BC.TCB
+  hiding (equivalent)
 open import Armor.Data.X509.Extension.CRLDistPoint.TCB
 open import Armor.Data.X509.Extension.CertPolicy.TCB
 open import Armor.Data.X509.Extension.EKU.TCB
@@ -14,7 +15,8 @@ open import Armor.Data.X509.Extension.PM.TCB
 open import Armor.Data.X509.Extension.SAN.TCB
 open import Armor.Data.X509.Extension.SKI.TCB
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
-open import Armor.Data.X690-DER.Boool.TCB
+open import Armor.Data.X690-DER.Boool.TCB as Boool
+  hiding (getBool)
 open import Armor.Data.X690-DER.Boool.Eq
 open import Armor.Data.X690-DER.Default.TCB
 open import Armor.Data.X690-DER.OID.TCB
@@ -67,6 +69,9 @@ record ExtensionFields (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) (
     crit : Default Boool falseBoool cex
     extension : A ocex
     @0 bs≡ : bs ≡ oex ++ cex ++ ocex
+
+  getCrit : Bool
+  getCrit = Boool.getBool (proj₂ (Default.getValue crit))
 
 ExtensionFieldAIA     = ExtensionFields (_≡ OIDs.AIALit )    AIAFields
 ExtensionFieldAKI     = ExtensionFields (_≡ OIDs.AKILit )    AKIFields

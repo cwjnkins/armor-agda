@@ -39,6 +39,9 @@ RawBoolValue : Raw BoolValue
 Raw.D RawBoolValue = Bool
 Raw.to RawBoolValue = BoolValue.v
 
+getBool : ∀ {@0 bs} → Boool bs → Bool
+getBool = BoolValue.v ∘ TLV.val
+
 RawBoool : Raw Boool
 RawBoool = RawTLV Tag.Boolean RawBoolValue
 

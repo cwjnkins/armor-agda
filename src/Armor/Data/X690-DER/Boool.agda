@@ -5,9 +5,14 @@ import Armor.Data.X690-DER.Boool.TCB
 
 module Armor.Data.X690-DER.Boool where
 
+open Armor.Data.X690-DER.Boool.TCB public
+  hiding (getBool)
+
 module Boool where
   open Armor.Data.X690-DER.Boool.Eq         public
   open Armor.Data.X690-DER.Boool.Parser public
   open Armor.Data.X690-DER.Boool.Properties public
+  open Armor.Data.X690-DER.Boool.TCB public
+    using (getBool)
 
-open Armor.Data.X690-DER.Boool.TCB    public
+

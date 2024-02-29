@@ -7,8 +7,9 @@ open import Armor.Data.X690-DER.Length.TCB
 open import Armor.Data.X690-DER.TLV.TCB
 open import Armor.Data.X690-DER.TLV.Properties
 import      Armor.Data.X690-DER.Tag as Tag
-import      Armor.Grammar.Option
 import      Armor.Grammar.Definitions
+import      Armor.Grammar.Option
+import      Armor.Grammar.Parallel
 import      Armor.Grammar.Seq.TCB
 open import Armor.Prelude
 
@@ -16,9 +17,12 @@ module Armor.Data.X509.Extension.BC.TCB where
 
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Option UInt8
+open Armor.Grammar.Parallel UInt8
 open Armor.Grammar.Seq.TCB UInt8
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.9
+-- Where it appears, the PathLenConstraint field MUST be greater than or equal
+-- to zero.
 --    id-ce-basicConstraints OBJECT IDENTIFIER ::=  { id-ce 19 }
 
 --    BasicConstraints ::= SEQUENCE {
@@ -30,7 +34,7 @@ record BCFieldsSeqFields (@0 bs : List UInt8) : Set where
   field
     @0 {ca pl} : List UInt8
     bcca : Default Boool falseBoool ca
-    bcpathlen : Option Int pl
+    bcpathlen : Option NonNegativeInt pl
     @0 bs≡  : bs ≡ ca ++ pl
 
   isCA : Bool
@@ -45,17 +49,17 @@ BCFields xs = TLV Tag.OctetString  BCFieldsSeq xs
 isCA : ∀ {@0 bs} → BCFields bs → Bool
 isCA bcf = BCFieldsSeqFields.isCA (TLV.val (TLV.val bcf))
 
-BCFieldsSeqFieldsRep = &ₚ (Default Boool falseBoool) (Option Int)
+BCFieldsSeqFieldsRep = &ₚ (Default Boool falseBoool) (Option NonNegativeInt)
 
-equivalentBCFieldsSeqFields : Equivalent BCFieldsSeqFieldsRep BCFieldsSeqFields
-proj₁ equivalentBCFieldsSeqFields (Armor.Grammar.Seq.TCB.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡
-proj₂ equivalentBCFieldsSeqFields (mkBCFieldsSeqFields bcca bcpathlen bs≡) = Armor.Grammar.Seq.TCB.mk&ₚ bcca bcpathlen bs≡
+equivalent : Equivalent BCFieldsSeqFieldsRep BCFieldsSeqFields
+proj₁ equivalent (Armor.Grammar.Seq.TCB.mk&ₚ fstₚ₁ sndₚ₁ bs≡) = mkBCFieldsSeqFields fstₚ₁ sndₚ₁ bs≡
+proj₂ equivalent (mkBCFieldsSeqFields bcca bcpathlen bs≡) = Armor.Grammar.Seq.TCB.mk&ₚ bcca bcpathlen bs≡
 
 RawBCFieldsSeqFieldsRep : Raw BCFieldsSeqFieldsRep
-RawBCFieldsSeqFieldsRep = Raw&ₚ (RawDefault RawBoool falseBoool) (RawOption RawInt)
+RawBCFieldsSeqFieldsRep = Raw&ₚ (RawDefault RawBoool falseBoool) (RawOption RawNonNegativeInt)
 
 RawBCFieldsSeqFields : Raw BCFieldsSeqFields
-RawBCFieldsSeqFields = Iso.raw equivalentBCFieldsSeqFields RawBCFieldsSeqFieldsRep
+RawBCFieldsSeqFields = Iso.raw equivalent RawBCFieldsSeqFieldsRep
 
 RawBCFields : Raw BCFields
 RawBCFields = RawTLV _ (RawTLV _  RawBCFieldsSeqFields)

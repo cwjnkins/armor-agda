@@ -3,14 +3,23 @@ open import Armor.Data.X690-DER.Int.TCB
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.TLV.Properties as TLV
 import      Armor.Grammar.Definitions
+import      Armor.Grammar.Parallel
 open import Armor.Prelude
 
 module Armor.Data.X690-DER.Int.Properties where
 
-open Armor.Grammar.Definitions              UInt8
+open Armor.Grammar.Definitions UInt8
+open Armor.Grammar.Parallel    UInt8
 
-nonempty : NonEmpty IntegerValue
+nonnegUnique : ∀ {bs} (a : Int bs) → Unique (ℤ.NonNegative (getVal a))
+nonnegUnique a with getVal a
+... | ℤ.+_ _ = ⊤-unique
+
+@0 nonempty : NonEmpty IntegerValue
 nonempty (mkIntVal bₕ bₜ minRep val ()) refl
+
+@0 nonemptyNonNegative : NonEmpty NonNegativeInt
+nonemptyNonNegative = Parallel.nonempty₁ TLV.nonempty
 
 @0 unambiguousValue : Unambiguous IntegerValue
 unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁ minRep₁ val₁ bs≡₁) =
@@ -25,6 +34,9 @@ unambiguousValue (mkIntVal bₕ bₜ minRep val bs≡) (mkIntVal bₕ₁ bₜ₁
 
 @0 unambiguous : Unambiguous Int
 unambiguous = [ _ ]unambiguous
+
+@0 unambiguousNonNegative : Unambiguous NonNegativeInt
+unambiguousNonNegative = Parallel.unambiguous unambiguous nonnegUnique
 
 @0 nonmalleableVal : NonMalleable RawIntegerValue
 nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁) i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂) eq =
@@ -68,6 +80,27 @@ nonmalleableVal{bs₁ = bs₁}{bs₂} i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (
 @0 nonmalleable : NonMalleable RawInt
 nonmalleable = [ _ ]nonmalleable
 
+nonNegativeℤ→ℕ-injective :
+  ∀ i₁ i₂ (nn₁ : ℤ.NonNegative i₁) (nn₂ : ℤ.NonNegative i₂)
+  → nonNegativeℤ→ℕ i₁ nn₁ ≡ nonNegativeℤ→ℕ i₂ nn₂
+  → i₁ ≡ i₂
+nonNegativeℤ→ℕ-injective (ℤ.+ n₁) (ℤ.+ n₂) _ _ refl = refl
+
+private
+  nonnegative-unique : ∀ {i₁} → (nn₁ nn₂ : ℤ.NonNegative i₁) → nn₁ ≡ nn₂
+  nonnegative-unique {ℤ.+ n} tt tt = refl
+
+@0 nonmalleableNonNegative : NonMalleable RawNonNegativeInt
+nonmalleableNonNegative n₁@(mk×ₚ i₁ i₁≥0) n₂@(mk×ₚ i₂ i₂≥0) eq
+  with nm
+  where
+  nm : (─ _ , i₁) ≡ (─ _ , i₂)
+  nm = nonmalleable i₁ i₂
+         (nonNegativeℤ→ℕ-injective (getVal i₁) (getVal i₂) i₁≥0 i₂≥0 eq)
+... | refl
+  with nonnegative-unique i₁≥0 i₂≥0
+... | refl = refl
+
 instance
   IntegerValueEq : Eq (Exists─ (List UInt8) IntegerValue)
   Eq._≟_ IntegerValueEq (─ bs₁ , i₁@(mkIntVal bₕ₁ bₜ₁ minRep₁ (singleton v₁ v₁≡) bs≡₁)) (─ bs₂ , i₂@(mkIntVal bₕ₂ bₜ₂ minRep₂ (singleton v₂ v₂≡) bs≡₂)) =
@@ -79,3 +112,9 @@ instance
 
   eq≋ : Eq≋ IntegerValue
   eq≋ = Eq⇒Eq≋ it
+
+  NonNegativeIntEq : Eq (Exists─ _ NonNegativeInt)
+  NonNegativeIntEq = Parallel.eqΣₚ it (λ a → record { _≟_ = λ x y → yes (nonnegative-unique x y) })
+
+  nneq≋ : Eq≋ NonNegativeInt
+  nneq≋ = Eq⇒Eq≋ it

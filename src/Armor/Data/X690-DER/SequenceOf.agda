@@ -7,7 +7,10 @@ module Armor.Data.X690-DER.SequenceOf where
 
 open Armor.Data.X690-DER.SequenceOf.Serializer public
 open Armor.Data.X690-DER.SequenceOf.TCB        public
+  hiding (length)
 open Armor.Data.X690-DER.SequenceOf.Parser     public
 
 module SequenceOf where
   open Armor.Data.X690-DER.SequenceOf.Properties public
+  open Armor.Data.X690-DER.SequenceOf.TCB        public
+    using (length)

@@ -111,14 +111,8 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getValidityStartTime = Validity.getNBTime validity
   getValidityEndTime   = Validity.getNATime validity
 
-  getIssuerLen : ℕ
-  getIssuerLen = SequenceOf.lengthSequence (TLV.val issuer)
-
-  getSubjectLen :  ℕ
-  getSubjectLen = SequenceOf.lengthSequence (TLV.val subject)
-
-  getSignAlg : Exists─ (List UInt8) SignAlg
-  getSignAlg = _ , signAlg
+  getSignAlg : SignAlg sa
+  getSignAlg = signAlg
 
   getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC = elimOption (_ , none) (λ v → Extensions.getBC v) extensions

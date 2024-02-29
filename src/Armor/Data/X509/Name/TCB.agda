@@ -22,5 +22,8 @@ open Armor.Grammar.Definitions.NonMalleable.Base UInt8
 Name : @0 List UInt8 → Set
 Name = RDNSequence
 
+getRDNs : ∀ {@0 bs} → (n : Name bs) → SequenceOf RDN (TLV.v n)
+getRDNs n = TLV.val n
+
 RawName : Raw Name
 RawName = RawRDNSequence

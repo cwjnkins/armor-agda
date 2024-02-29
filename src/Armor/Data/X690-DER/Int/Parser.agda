@@ -1,6 +1,7 @@
 open import Armor.Prelude
 
 open import Armor.Binary
+open import Armor.Data.X690-DER.Int.Properties
 open import Armor.Data.X690-DER.Int.TCB
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.TLV
@@ -59,3 +60,10 @@ module _ (loc : String) where
   [ t ]parse = parseTLV t here' _ parseValue
   
   parse = [ Tag.Integer ]parse
+
+  parseNonNegative : Parser (Logging ∘ Dec) NonNegativeInt
+  parseNonNegative =
+    parseSigma TLV.nosubstrings unambiguous parse
+      λ x → case getVal x ret (λ scrut → Dec (ℤ.NonNegative scrut)) of λ where
+        (ℤ.+_ _) → yes tt
+        (ℤ.-[1+ _ ]) → no λ ()
