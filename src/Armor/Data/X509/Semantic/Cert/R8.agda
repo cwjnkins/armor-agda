@@ -14,7 +14,7 @@ module Armor.Data.X509.Semantic.Cert.R8 where
 -- then the Subject field MUST be populated with a non-empty distinguished name.
 
 R8 : ∀ {@0 bs} → Cert bs → Set
-R8 c = T (isCRLSignPresent (Cert.getKU c)) → 0 ≢ SequenceOf.length (Name.getRDNs (Cert.getSubject c))
+R8 c = T (certAssertsKUBitField c Extension.KUFields.cRLSign) → 0 ≢ SequenceOf.length (Name.getRDNs (Cert.getSubject c))
 
 r8 : ∀ {@0 bs} (c : Cert bs) → Dec (R8 c)
 r8 c = T-dec →-dec (0 ≠ _)

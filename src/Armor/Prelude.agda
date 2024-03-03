@@ -487,6 +487,10 @@ instance
   Irrel¬ : ∀ {ℓ} {A : Set ℓ} → Irrel (¬ A)
   Irrel.irrel Irrel¬ ¬a a = contradiction a ¬a
 
+-- making this an instance blocks resolution (overlaps with IrrelBot)
+T-irrel : ∀ {b} → @0 T b → T b
+T-irrel{true} _ = tt 
+
 import Category.Monad
 Monad = Category.Monad.RawMonad
 MonadZero = Category.Monad.RawMonadZero

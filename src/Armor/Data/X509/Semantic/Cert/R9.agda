@@ -6,6 +6,8 @@ import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option
 open import Armor.Grammar.IList as IList
 open import Armor.Prelude
+import      Data.List.Membership.Propositional as List
+import      Data.List.Membership.Propositional.Properties as List
 open import Relation.Nullary.Implication
 
 module Armor.Data.X509.Semantic.Cert.R9 where
@@ -16,8 +18,42 @@ open Armor.Grammar.Option      UInt8
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
 -- When the Key Usage extension appears in a certificate, at least one of the bits MUST be set to 1.
 
+R9' : ∀ {@0 bs} → Option ExtensionFieldKU bs → Set
+R9' none = ⊤
+R9' (some ku) = ∃ λ bf → T (assertsKUBitField ku bf)
+
 R9 : ∀ {@0 bs} → Cert bs → Set
-R9 c = T (isKUPresent (Cert.getKU c)) → (true ∈ getKUBits (Cert.getKU c))
+R9 c = R9' (proj₂ (Cert.getKU c))
 
 r9 : ∀ {@0 bs} (c : Cert bs) → Dec (R9 c)
-r9 c = T-dec →-dec true ∈? _
+r9 c =
+  case Cert.getKU c ret (λ ku → Dec (R9' (proj₂ ku))) of λ where
+    (─ _ , none) → yes tt
+    (─ _ , some ku) → case Any.any? (λ bf → T? (assertsKUBitField ku bf)) allFields of λ where
+      (no ¬asserts) → no λ where
+        (bf , asserts) →
+          contradiction
+            (List.lose{xs = allFields} (allFieldsProp bf) asserts)
+            ¬asserts
+      (yes someAsserts) →
+        let (bf , _ , bfAsserted) = List.find{xs = allFields} someAsserts in
+        yes (bf , bfAsserted)
+  where
+  bits : ∀ {@0 bs} → (ku : ExtensionFieldKU bs) → List Bool
+  bits ku = ↑ BitStringValue.bits (TLV.val (TLV.val (ExtensionFields.extension ku)))
+
+  allFields = tabulate{n = 9} id
+
+  @0 allFieldsProp : (bf : Extension.KUFields.BitField) → bf ∈ allFields
+  allFieldsProp bf
+    with lookup-tabulate id bf
+  ... | lookup∈
+    with ‼ cast≡ bf (sym (length-tabulate id))
+    where
+    cast≡ : ∀ {n} (i : Fin n) (eq : n ≡ n) → Fin.cast eq i ≡ i
+    cast≡ Fin.zero _ = refl
+    cast≡ (Fin.suc i) refl = icong{f = Fin.suc} (cast≡ i refl)
+  ... | c≡
+    with (Fin.cast (sym (length-tabulate id)) bf)
+  allFieldsProp bf | lookup∈ | refl | ._ =
+    subst (_∈ allFields) lookup∈ (List.∈-lookup {xs = allFields} bf)

@@ -221,6 +221,10 @@ module Extension where
   getEKU (mkTLV len (ekuextn x) len≡ bs≡) = _ , (some x)
   getEKU (mkTLV len _ len≡ bs≡) = _ , none
 
+  module FieldEKU where
+    getKeyPurposeIDs : ∀ {@0 bs} → (eku : ExtensionFieldEKU bs) → SequenceOf OID (TLV.v (TLV.val (ExtensionFields.extension eku)))
+    getKeyPurposeIDs eku = fstₚ (TLV.val (TLV.val (ExtensionFields.extension eku)))
+
   getSAN : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN (mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
   getSAN (mkTLV len _ len≡ bs≡) = _ , none

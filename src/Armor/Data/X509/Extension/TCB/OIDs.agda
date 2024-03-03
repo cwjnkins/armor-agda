@@ -97,24 +97,51 @@ AIALit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 1 ∷ [ # 1 ]
 AIA : OIDValue AIALit
 AIA = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length AIALit)) AIALit)} tt))
 
-AnyExtendedKeyUsage : List UInt8
-AnyExtendedKeyUsage = ObjectIdentifier ∷ # 4 ∷ # 85 ∷ # 29 ∷ # 37 ∷ [ # 0 ]
+module EKU where
+  AnyExtendedKeyUsageLit : List UInt8
+  AnyExtendedKeyUsageLit = # 85 ∷ # 29 ∷ # 37 ∷ [ # 0 ]
 
-ServerAuthOID : List UInt8
-ServerAuthOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 1 ]
+  AnyExtendedKeyUsage : OIDValue AnyExtendedKeyUsageLit
+  AnyExtendedKeyUsage = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length AnyExtendedKeyUsageLit)) AnyExtendedKeyUsageLit)} tt))
 
-ClientAuthOID : List UInt8
-ClientAuthOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 2 ]
+  KeyPurposePrefix : List UInt8
+  KeyPurposePrefix = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ [ # 3 ]
 
-CodeSignOID : List UInt8
-CodeSignOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 3 ]
+  ServerAuthLit : List UInt8
+  ServerAuthLit = KeyPurposePrefix ++ [ # 1 ]
 
-EmailProtOID : List UInt8
-EmailProtOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 4 ]
+  ServerAuth : OIDValue ServerAuthLit
+  ServerAuth = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length ServerAuthLit)) ServerAuthLit)} tt))
 
-TimeStampOID : List UInt8
-TimeStampOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 8 ]
+  ClientAuthLit : List UInt8
+  ClientAuthLit = KeyPurposePrefix ++ [ # 2 ]
 
-OCSPSignOID : List UInt8
-OCSPSignOID = ObjectIdentifier ∷ # 8 ∷ # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 3 ∷ [ # 9 ]
+  ClientAuth : OIDValue ClientAuthLit
+  ClientAuth = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length ClientAuthLit)) ClientAuthLit)} tt))
 
+  CodeSignLit : List UInt8
+  CodeSignLit = KeyPurposePrefix ++ [ # 3 ]
+
+  CodeSign : OIDValue CodeSignLit 
+  CodeSign = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length CodeSignLit)) CodeSignLit)} tt))
+
+  EmailProtLit : List UInt8
+  EmailProtLit = KeyPurposePrefix ++ [ # 4 ]
+
+  EmailProt : OIDValue EmailProtLit
+  EmailProt = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length EmailProtLit)) EmailProtLit)} tt))
+
+  TimeStampLit : List UInt8
+  TimeStampLit = KeyPurposePrefix ++ [ # 8 ]
+
+  TimeStamp : OIDValue TimeStampLit
+  TimeStamp = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length TimeStampLit)) TimeStampLit)} tt))
+
+  OCSPSignLit : List UInt8
+  OCSPSignLit = KeyPurposePrefix ++ [ # 9 ]
+
+  OCSPSign : OIDValue OCSPSignLit
+  OCSPSign = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length OCSPSignLit)) OCSPSignLit)} tt))
+
+  SupportedKeyUsageIDs : List (Exists─ _ OIDValue)
+  SupportedKeyUsageIDs = (─ _ , AnyExtendedKeyUsage) ∷ (─ _ , ServerAuth) ∷ (─ _ , ClientAuth) ∷ (─ _ , CodeSign) ∷ (─ _ , EmailProt) ∷ (─ _ , TimeStamp) ∷ [ (─ _ , OCSPSign) ] 
