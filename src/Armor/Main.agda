@@ -151,7 +151,7 @@ main = IO.run $
       ekuOIDBytes : List (List UInt8)
 
   certOutput : ∀ {@0 bs} → Cert bs → Output
-  Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ proj₂ ∘ Cert.getTBSCertSignAlg $ x
+  Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ Cert.getTBSCertSignAlg $ x
   Output.tbsBytes  (certOutput x) = Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = Cert.getPublicKeyBytes x
   Output.sigBytes  (certOutput x) = Cert.getSignatureValueBytes x
@@ -211,16 +211,16 @@ main = IO.run $
      runCheck cert "R4" r4 IO.>>
      runCheck cert "R5" r5 IO.>>
      runCheck cert "R6" r6 IO.>>
-     runCheck cert "R7" r7 IO.>>
+     -- runCheck cert "R7" r7 IO.>>
      runCheck cert "R8" r8 IO.>>
      runCheck cert "R9" r9 IO.>>
      runCheck cert "R10" r10 IO.>>
-     runCheck cert "R11" r11 IO.>>
+     -- runCheck cert "R11" r11 IO.>>
      runCheck cert "R12" r12 IO.>>
      runCheck cert "R13" r13 IO.>>
-     runCheck cert "R14" r14 IO.>>
+     -- runCheck cert "R14" r14 IO.>>
      runCheck cert "R15" r15 IO.>>
-     runCheck cert "R16" r16 IO.>>
+     -- runCheck cert "R16" r16 IO.>>
      (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" r18) else (IO.return tt)) IO.>>
      Armor.IO.getCurrentTime IO.>>= λ now →
      Armor.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →

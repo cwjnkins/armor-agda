@@ -64,6 +64,9 @@ RawInt = Raw[ _ ]Int
 nonNegativeℤ→ℕ : (i : ℤ) → ℤ.NonNegative i → ℕ
 nonNegativeℤ→ℕ (ℤ.+ n) _ = n
 
+getValNonNegative : ∀ {@0 bs} → NonNegativeInt bs → ℕ
+getValNonNegative i = nonNegativeℤ→ℕ (getVal (fstₚ i)) (sndₚ i)
+
 RawNonNegativeInt : Raw NonNegativeInt
 Raw.D RawNonNegativeInt = ℕ
 Raw.to RawNonNegativeInt n =
