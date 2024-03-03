@@ -28,17 +28,32 @@ private
 
 parseDistPointFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength DistPointFields n)
 parseDistPointFields n =
-  parseEquivalent
-    (Parallel.equivalent₁ equivalentDistPointFields)
-    (parse₂Option₃ here'
-      TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
-      (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
-      (parseTLV Tag.AA0 (here' String.++ " (name)") DistPointNameChoice
-        (parseExactLength Name.nosubstrings (tell $ here' String.++ ": underflow")
-          parseDistPointNameChoice))
-      (parseTLV Tag.A81 (here' String.++ " (reason flags)") _ parseBitstringValue)
-      (parseTLV Tag.AA2 (here' String.++ " (CRL issuer)") _ parseGeneralNamesElems)
-      n)
+  parseEquivalent (Parallel.equivalent₁ equivalentDistPointFields) $
+    mkParser λ xs → do
+      (yes (success pre r r≡ (mk×ₚ (mk×ₚ v vLen) nor) suf ps≡)) ← runParser
+            (parseSigma{B = λ where _ (mk×ₚ crls _) → T (notOnlyReasons (fstₚ (sndₚ crls)) (fstₚ crls) (sndₚ (sndₚ crls)))}
+              (Parallel.ExactLength.nosubstrings _) (Parallel.ExactLength.unambiguous _ unambiguous')
+              p λ _ → T-dec)
+            xs
+        where no ¬p → return ∘ no $ λ where
+          (success pre r r≡ (mk×ₚ (mk×ₚ v nor) vLen) suf ps≡) →
+            contradiction
+              (success pre r r≡ (mk×ₚ (mk×ₚ v vLen) nor) suf ps≡)
+              ¬p
+      return (yes
+        (success
+          pre r r≡ (mk×ₚ (mk×ₚ v nor) vLen) suf ps≡))
+  where
+  p : Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option DistPointName) (&ₚ (Option ReasonFlags) (Option CrlIssuer))) n)
+  p = parse₂Option₃ here'
+        TLV.nosubstrings TLV.nosubstrings TLV.nosubstrings
+        (TLV.noconfusion λ ()) (TLV.noconfusion λ ()) (TLV.noconfusion λ ())
+        (parseTLV Tag.AA0 (here' String.++ " (name)") DistPointNameChoice
+          (parseExactLength Name.nosubstrings (tell $ here' String.++ ": underflow")
+            parseDistPointNameChoice))
+        (parseTLV Tag.A81 (here' String.++ " (reason flags)") _ parseBitstringValue)
+        (parseTLV Tag.AA2 (here' String.++ " (CRL issuer)") _ parseGeneralNamesElems)
+        n
 
 parseDistPoint : Parser (Logging ∘ Dec) DistPoint
 parseDistPoint =

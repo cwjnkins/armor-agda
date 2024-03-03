@@ -171,21 +171,6 @@ isKUPresent (─ .[] , none) = false
 isKUPresent (fst , some x) = true
 
 
--- helper for SCP17 :  While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
--- either distributionPoint or CRLIssuer MUST be present.
-checkCRLDistStruct : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.CRLDISTLit) Extension.CRLDistFields)) → Bool
-checkCRLDistStruct (─ .[] , none) = true
-checkCRLDistStruct (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = helper fstₚ₁
-  where
-  helper : ∀ {@0 bs} → SequenceOf Extension.CRLDistPoint.DistPoint bs → Bool
-  helper nil = true
-  helper (cons (mkIListCons (mkTLV len (Extension.CRLDistPoint.mkDistPointFields crldp none crlissr bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = false
-  helper (cons (mkIListCons (mkTLV len (Extension.CRLDistPoint.mkDistPointFields none (some x) (some x₁) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x₁) (some x) none bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-  helper (cons (mkIListCons (mkTLV len (Extension.CRLDistPoint.mkDistPointFields (some x₁) (some x) (some x₂) bs≡₂) len≡ bs≡₁) t bs≡)) = true ∧ helper t
-
-
 -- returns all certificate policy OIDs
 getPolicyOIDList : Exists─ (List UInt8) (Option (ExtensionFields (_≡ OIDs.CPOLLit) Extension.CertPolFields)) →  List (Exists─ (List UInt8) OID)
 getPolicyOIDList (─ .[] , none) = []

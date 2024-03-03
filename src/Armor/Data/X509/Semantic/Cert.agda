@@ -13,7 +13,7 @@ import      Armor.Data.X509.Semantic.Cert.R12 as R12
 import      Armor.Data.X509.Semantic.Cert.R13 as R13
 -- import      Armor.Data.X509.Semantic.Cert.R14 as R14
 import      Armor.Data.X509.Semantic.Cert.R15 as R15
-import      Armor.Data.X509.Semantic.Cert.R16 as R16
+-- import      Armor.Data.X509.Semantic.Cert.R16 as R16
 import      Armor.Data.X509.Semantic.Cert.R17 as R17
 import      Armor.Data.X509.Semantic.Cert.R18 as R18
 
@@ -81,7 +81,8 @@ open R15 public
 
 -- While each of these fields is optional, a DistributionPoint MUST NOT consist of only the Reasons field;
 -- either distributionPoint or CRLIssuer MUST be present.
-open R16 public
+-- 2024 Mar 02: This is now caught by the parser (see Armor.Data.X509.Extension.CRLDistPoint.DistPoint.TCB)
+-- open R16 public
 
 -- The certificate Validity period includes the current time
 open R17 public
