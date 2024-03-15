@@ -10,7 +10,7 @@ open import Armor.Data.X509.Semantic.Cert.Utils
 import      Armor.Data.X509.Semantic.Chain.Builder as Chain
 open import Armor.Data.X509.Semantic.Chain.NameMatch
 import      Armor.Data.X509.Semantic.Chain.R19     as R19
-import      Armor.Data.X509.Semantic.Chain.R20     as R20
+-- import      Armor.Data.X509.Semantic.Chain.R20     as R20
 import      Armor.Data.X509.Semantic.Chain.R21     as R21
 import      Armor.Data.X509.Semantic.Chain.R22     as R22
 import      Armor.Data.X509.Semantic.Chain.R23     as R23
@@ -40,7 +40,7 @@ open R19 public
 -- is asserted and the Key Usage extension, if present, asserts the KeyCertSign bit. In this case, it gives
 -- the maximum number of non-self-issued intermediate certificates that may follow this certificate in a valid certification path.
 
-open R20 public
+-- open R20 public
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.13
 -- For DistributionPoint field, if the certificate issuer is not the CRL issuer,

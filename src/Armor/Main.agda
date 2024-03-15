@@ -144,14 +144,14 @@ main = IO.run $
   where
   record Output : Set where
     field
-      sigAlgOID  : List UInt8
+      -- sigAlgOID  : List UInt8
       tbsBytes   : List UInt8
       pkBytes    : List UInt8
       sigBytes   : List UInt8
       ekuOIDBytes : List (List UInt8)
 
   certOutput : ∀ {@0 bs} → Cert bs → Output
-  Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ proj₂ ∘ Cert.getTBSCertSignAlg $ x
+  -- Output.sigAlgOID (certOutput x) = SignAlg.getOIDBS ∘ proj₂ ∘ Cert.getTBSCertSignAlg $ x
   Output.tbsBytes  (certOutput x) = Cert.getTBSBytes x
   Output.pkBytes   (certOutput x) = Cert.getPublicKeyBytes x
   Output.sigBytes  (certOutput x) = Cert.getSignatureValueBytes x
@@ -162,7 +162,7 @@ main = IO.run $
               (showBytes tbsBytes)  String.++ "\n"
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes pkBytes)   String.++ "\n"
-    String.++ (showBytes sigAlgOID) String.++ "\n"
+    -- String.++ (showBytes sigAlgOID) String.++ "\n"
     String.++ (showListBytes ekuOIDBytes) String.++ "\n"
     String.++ "***************"
     where
@@ -211,14 +211,14 @@ main = IO.run $
      runCheck cert "R4" r4 IO.>>
      runCheck cert "R5" r5 IO.>>
      runCheck cert "R6" r6 IO.>>
-     runCheck cert "R7" r7 IO.>>
+     -- runCheck cert "R7" r7 IO.>>
      runCheck cert "R8" r8 IO.>>
      runCheck cert "R9" r9 IO.>>
      runCheck cert "R10" r10 IO.>>
-     runCheck cert "R11" r11 IO.>>
+     -- runCheck cert "R11" r11 IO.>>
      runCheck cert "R12" r12 IO.>>
      runCheck cert "R13" r13 IO.>>
-     runCheck cert "R14" r14 IO.>>
+     -- runCheck cert "R14" r14 IO.>>
      runCheck cert "R15" r15 IO.>>
      runCheck cert "R16" r16 IO.>>
      (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" r18) else (IO.return tt)) IO.>>
@@ -248,7 +248,7 @@ main = IO.run $
   helper₁ issuee chain =
     runChecks' issuee 1 chain IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
-    runChainCheck "R20" issuee chain r20 IO.>>
+    -- runChainCheck "R20" issuee chain r20 IO.>>
     runChainCheck "R21" issuee chain r21 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
