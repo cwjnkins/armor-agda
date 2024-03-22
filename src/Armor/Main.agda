@@ -289,7 +289,7 @@ main = IO.run $
     runChecks' kp issuee 1 chain IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
     runChainCheck "R20" issuee chain r20 IO.>>
-    runChainCheck "R21" issuee chain r21 IO.>>
+    -- runChainCheck "R21" issuee chain r21 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
     IO.return true

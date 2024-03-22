@@ -11,7 +11,7 @@ import      Armor.Data.X509.Semantic.Chain.Builder as Chain
 open import Armor.Data.X509.Semantic.Chain.NameMatch
 import      Armor.Data.X509.Semantic.Chain.R19     as R19
 import      Armor.Data.X509.Semantic.Chain.R20     as R20
-import      Armor.Data.X509.Semantic.Chain.R21     as R21
+-- import      Armor.Data.X509.Semantic.Chain.R21     as R21
 import      Armor.Data.X509.Semantic.Chain.R22     as R22
 import      Armor.Data.X509.Semantic.Chain.R23     as R23
 open import Armor.Data.X509.Semantic.Chain.TCB     as Chain
@@ -47,7 +47,7 @@ open R20 public
 -- then the CRLIssuer field MUST be present and contain the Name of the CRL issuer. If the
 -- certificate issuer is also the CRL issuer, then conforming CAs MUST omit the CRLIssuer
 -- field and MUST include the distributionPoint field.
-open R21 public
+-- open R21 public
 
 -- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1
 -- A certificate MUST NOT appear more than once in a prospective certification path.
