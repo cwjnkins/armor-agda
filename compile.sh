@@ -2,4 +2,4 @@
 set -e
 
 git submodule update --init
-cd src/ && make all && cd ..
+cd src/ && make && cd ..
