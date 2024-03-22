@@ -16,7 +16,7 @@ STACK_GHC_OPTIONS=-O -Werror -fwarn-incomplete-patterns
 
 .PHONY: all
 all: $(ARMOR_MAIN_HS)
-	$(STACK_GHC_EXE) $(STACK_GHC_OPTIONS) -o Main -i . -main-is MAlonzo.Code.Armor.Main $(ARMOR_MAIN_HS) --make
+	$(STACK_GHC_EXE) $(STACK_GHC_OPTIONS) -o Main -i. -main-is MAlonzo.Code.Armor.Main $(ARMOR_MAIN_HS) --make
 
 libraries:
 	echo `pwd`/../$(AGDA_STDLIB) > $(LIBRARIES)
