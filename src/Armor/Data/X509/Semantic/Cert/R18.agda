@@ -14,152 +14,105 @@ open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.IList       UInt8
 open Armor.Grammar.Option      UInt8
 
--- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
--- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12
 --- consistency of certificate purposes based on key usage bits and extended key usage OIDs
 --- only for end-entity certificate
+
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.3
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-4.2.1.12
+
+{- NOTE: This semantic check is only a sanity check: more fine-grained checks
+-- depend upon specifics of the application using X.509 PKI, which are currently
+-- outside the scope of ARMOR
+-}
 
 -- The following key usage purposes are defined:
 --
 -- anyExtendedKeyUsage OBJECT IDENTIFIER ::= { id-ce-extKeyUsage 0 }
 --
 -- id-kp OBJECT IDENTIFIER ::= { id-pkix 3 }
+data KeyPurpose : Set where
+  serverAuth clientAuth codeSigning emailProtection timeStamping ocspSigning : KeyPurpose
 
-data KeyPurpose-ConsistentWith-KeyUsage {@0 bs₁} (ku : ExtensionFieldKU bs₁) : ∀ {@0 bs₂} → OIDValue bs₂ → Set where
--- anyExtendedKeyUsage OBJECT IDENTIFIER ::= { id-ce-extKeyUsage 0 }
-  anyKeyUsage : KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.AnyExtendedKeyUsage
-
+keyPurposeConsistentWithKU : ∀ {@0 bs} → KeyPurpose → ExtensionFieldKU bs → Bool
+keyPurposeConsistentWithKU serverAuth ku =
 -- id-kp-serverAuth             OBJECT IDENTIFIER ::= { id-kp 1 }
 -- -- TLS WWW server authentication
 -- -- Key usage bits that may be consistent: digitalSignature,
 -- -- keyEncipherment or keyAgreement
-  serverAuth : T (  assertsKUBitField ku Extension.KUFields.digitalSignature
-                  ∨ assertsKUBitField ku Extension.KUFields.keyEncipherment
-                  ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-               → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.ServerAuth
-
+  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ Extension.KUFields.keyEncipherment ∷ [ Extension.KUFields.keyAgreement ]))
+keyPurposeConsistentWithKU clientAuth ku =
 -- id-kp-clientAuth             OBJECT IDENTIFIER ::= { id-kp 2 }
 -- -- TLS WWW client authentication
 -- -- Key usage bits that may be consistent: digitalSignature
 -- -- and/or keyAgreement
-  clientAuth : T (  assertsKUBitField ku Extension.KUFields.digitalSignature
-                  ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-               → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.ClientAuth
-               
+  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ [ Extension.KUFields.keyAgreement ]))
+keyPurposeConsistentWithKU codeSigning ku =
 -- id-kp-codeSigning             OBJECT IDENTIFIER ::= { id-kp 3 }
 -- -- Signing of downloadable executable code
 -- -- Key usage bits that may be consistent: digitalSignature
-  codeSign : T (assertsKUBitField ku Extension.KUFields.digitalSignature)
-             → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.CodeSign
-
+  assertsKUBitField ku Extension.KUFields.digitalSignature
+keyPurposeConsistentWithKU emailProtection ku =
 -- id-kp-emailProtection         OBJECT IDENTIFIER ::= { id-kp 4 }
 -- -- Email protection
 -- -- Key usage bits that may be consistent: digitalSignature,
 -- -- nonRepudiation, and/or (keyEncipherment or keyAgreement)
-  emailProtection : T (  assertsKUBitField ku Extension.KUFields.digitalSignature
-                       ∨ assertsKUBitField ku Extension.KUFields.nonRepudation
-                       ∨ assertsKUBitField ku Extension.KUFields.keyEncipherment
-                       ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-                    → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.EmailProt
-  
+
+-- NOTE: This is very coarse grained. For example, OpenSSL distinguishes between
+-- smime signing and smime encrypting, which are consistent with a subset of the
+-- below fields (meaning, more strict)
+  or (map (assertsKUBitField ku)
+    (  Extension.KUFields.digitalSignature ∷ Extension.KUFields.nonRepudation
+     ∷ Extension.KUFields.keyEncipherment ∷ [ Extension.KUFields.keyAgreement ]))
+keyPurposeConsistentWithKU timeStamping ku =
 -- id-kp-timeStamping            OBJECT IDENTIFIER ::= { id-kp 8 }
 -- -- Binding the hash of an object to a time
 -- -- Key usage bits that may be consistent: digitalSignature
 -- -- and/or nonRepudiation
-  timeStamping : T (  assertsKUBitField ku Extension.KUFields.digitalSignature
-                    ∨ assertsKUBitField ku Extension.KUFields.nonRepudation)
-                 → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.TimeStamp
-
+  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ [ Extension.KUFields.nonRepudation ]))
+keyPurposeConsistentWithKU ocspSigning ku =
 -- id-kp-OCSPSigning            OBJECT IDENTIFIER ::= { id-kp 9 }
 -- -- Signing OCSP responses
 -- -- Key usage bits that may be consistent: digitalSignature
 -- -- and/or nonRepudiation
-  ocspSigning : T (  assertsKUBitField ku Extension.KUFields.digitalSignature
-                   ∨ assertsKUBitField ku Extension.KUFields.nonRepudation)
-                → KeyPurpose-ConsistentWith-KeyUsage ku OIDs.EKU.OCSPSign
+  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ [ Extension.KUFields.nonRepudation ]))
 
-  -- TODO
-  unknown : ∀ {@0 bs} → (o : OIDValue bs) → (─ bs , o) ∉ OIDs.EKU.SupportedKeyUsageIDs
-            → KeyPurpose-ConsistentWith-KeyUsage ku o
+keyPurposeToEKUOID : KeyPurpose → Exists─ _ OIDValue
+keyPurposeToEKUOID serverAuth = _ , OIDs.EKU.ServerAuth
+keyPurposeToEKUOID clientAuth = _ , OIDs.EKU.ClientAuth
+keyPurposeToEKUOID codeSigning = _ , OIDs.EKU.CodeSign
+keyPurposeToEKUOID emailProtection = _ , OIDs.EKU.EmailProt
+keyPurposeToEKUOID timeStamping = _ , OIDs.EKU.TimeStamp
+keyPurposeToEKUOID ocspSigning = _ , OIDs.EKU.OCSPSign
 
-KeyPurposes-ConsistentWith-KeyUsage : ∀ {@0 bs₁} → ExtensionFieldKU bs₁ → List (Exists─ _ OID) → Set
-KeyPurposes-ConsistentWith-KeyUsage ku oids =
-  All (λ oid → KeyPurpose-ConsistentWith-KeyUsage ku (TLV.val (proj₂ oid))) oids
+KeyPurposeConsistentWithEKU : ∀ {@0 bs} → KeyPurpose → ExtensionFieldEKU bs → Set
+KeyPurposeConsistentWithEKU kp eku =
+    keyPurposeToEKUOID kp ∈ ekuPurps
+  ⊎ (_ , OIDs.EKU.AnyExtendedKeyUsage) ∈ ekuPurps
+  where
+  ekuPurps = map (λ where (─ _ , x) → _ , TLV.val x) (toList (Extension.FieldEKU.getKeyPurposeIDs eku))
 
-R18' : ∀ {@0 bs₁ bs₂} → Option ExtensionFieldKU bs₁ → Option ExtensionFieldEKU bs₂ → Set
-R18' none _ = ⊤
-R18' (some _) none = ⊤
-R18' (some ku) (some eku) = KeyPurposes-ConsistentWith-KeyUsage ku (toList (Extension.FieldEKU.getKeyPurposeIDs eku))
+R18' : ∀ {@0 bs₁ bs₂} → KeyPurpose → Option ExtensionFieldKU bs₁ → Option ExtensionFieldEKU bs₂ → Set
+R18' kp none none = ⊤
+R18' kp none (some eku) = KeyPurposeConsistentWithEKU kp eku
+R18' kp (some ku) none = T (keyPurposeConsistentWithKU kp ku)
+R18' kp (some ku) (some eku) = T (keyPurposeConsistentWithKU kp ku) × KeyPurposeConsistentWithEKU kp eku
 
-R18 : ∀ {@0 bs} → Cert bs → Set
-R18 c = R18' (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
+R18 : KeyPurpose → ∀ {@0 bs} → Cert bs → Set
+R18 kp c = R18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
 
--- R18 : ∀ {@0 bs} → Cert bs → Set
--- R18 c = T (checkPurposeConsistency (Cert.getKU c) (getEKUOIDList (Cert.getEKU c)))
+r18 : (kp : KeyPurpose) → ∀ {@0 bs} → (c : Cert bs) → Dec (R18 kp c)
+r18 kp c = r18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
+  where
+  keyPurposeConsistentWithEKU?
+    : ∀ {@0 bs} → (kp : KeyPurpose) (eku : ExtensionFieldEKU bs)
+      → Dec (KeyPurposeConsistentWithEKU kp eku)
+  keyPurposeConsistentWithEKU? kp eku =
+    _ ∈? _ ⊎-dec _ ∈? _
 
-isKeyPurposeConsistentWithKeyUsage : ∀ {@0 bs₁ bs₂} → (ku : ExtensionFieldKU bs₁) (o : OIDValue bs₂)
-                                     → Dec (KeyPurpose-ConsistentWith-KeyUsage ku o)
-isKeyPurposeConsistentWithKeyUsage ku o =
-  case (─ _ , o) ∈? OIDs.EKU.SupportedKeyUsageIDs of λ where
-    (no o∉supported) → yes (unknown o o∉supported)
-    (yes (here refl)) → yes anyKeyUsage
-    (yes o∈@(there (here refl))) →
-      case T? (  assertsKUBitField ku Extension.KUFields.digitalSignature
-               ∨ assertsKUBitField ku Extension.KUFields.keyEncipherment
-               ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-      of λ where
-        (no ¬p) → no λ where
-          (serverAuth pf) → contradiction pf ¬p
-          (unknown o o∉) → contradiction o∈ o∉
-        (yes p) → yes (serverAuth p)
-    (yes o∈@(there (there (here refl)))) →
-      case T? (  assertsKUBitField ku Extension.KUFields.digitalSignature
-               ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-      of λ where
-        (no ¬p) → no λ where
-          (clientAuth pf) → contradiction pf ¬p
-          (unknown o o∉) → contradiction o∈ o∉
-        (yes p) → yes (clientAuth p)
-    (yes o∈@(there (there (there (here refl))))) →
-      case T? (assertsKUBitField ku Extension.KUFields.digitalSignature) of λ where
-        (no ¬pf) → no λ where
-          (codeSign pf) → contradiction pf ¬pf
-          (unknown o o∉) → contradiction o∈ o∉
-        (yes pf) → yes (codeSign pf)
-    (yes o∈@(there (there (there (there (here refl)))))) →
-      case T? (  assertsKUBitField ku Extension.KUFields.digitalSignature
-               ∨ assertsKUBitField ku Extension.KUFields.nonRepudation
-               ∨ assertsKUBitField ku Extension.KUFields.keyEncipherment
-               ∨ assertsKUBitField ku Extension.KUFields.keyAgreement)
-      of λ where
-        (no ¬pf) → no λ where
-          (emailProtection pf) → contradiction pf ¬pf
-          (unknown o o∉) → contradiction o∈ (contradiction o∈ o∉)
-        (yes pf) → yes (emailProtection pf)
-    (yes o∈@(there (there (there (there (there (here refl))))))) →
-      case T? (  assertsKUBitField ku Extension.KUFields.digitalSignature
-               ∨ assertsKUBitField ku Extension.KUFields.nonRepudation)
-      of λ where
-        (no ¬pf) → no λ where
-          (timeStamping pf) → contradiction pf ¬pf
-          (unknown o o∉) → contradiction o∈ o∉
-        (yes pf) → yes (timeStamping pf)
-    (yes o∈@(there (there (there (there (there (there (here refl)))))))) →
-      case T? (  assertsKUBitField ku Extension.KUFields.digitalSignature
-               ∨ assertsKUBitField ku Extension.KUFields.nonRepudation)
-      of λ where
-        (no ¬pf) → no λ where
-          (ocspSigning pf) → contradiction pf ¬pf
-          (unknown o o∉) → contradiction o∈ o∉
-        (yes pf) → yes (ocspSigning pf)
-
-r18 : ∀ {@0 bs} (c : Cert bs) → Dec (R18 c)
-r18 c =
-  case (_,′_ (Cert.getKU c) (Cert.getEKU c)) ret (λ where (ku , eku) → Dec (R18' (proj₂ ku) (proj₂ eku))) of λ where
-    ((─ _ , none) , _) → yes tt
-    ((─ _ , some _) , (─ _ , none)) → yes tt
-    ((─ _ , some ku) , (─ _ , some eku)) →
-      All.all?
-        (λ oid → isKeyPurposeConsistentWithKeyUsage ku (TLV.val (proj₂ oid)))
-        (toList (Extension.FieldEKU.getKeyPurposeIDs eku))
+  r18' : ∀ {@0 bs₁ bs₂} → (kp : KeyPurpose) → (ku : Option ExtensionFieldKU bs₁) (eku : Option ExtensionFieldEKU bs₂)
+         → Dec (R18' kp ku eku)
+  r18' kp none none = yes tt
+  r18' kp none (some eku) = keyPurposeConsistentWithEKU? kp eku
+  r18' kp (some ku) none = T-dec
+  r18' kp (some ku) (some eku) = T-dec ×-dec keyPurposeConsistentWithEKU? kp eku
 

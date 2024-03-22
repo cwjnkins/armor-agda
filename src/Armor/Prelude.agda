@@ -437,6 +437,9 @@ instance
   FinEq : ∀ {n} → Eq (Fin n)
   Eq._≟_ FinEq = Fin._≟_
 
+  StringEq : Eq String
+  Eq._≟_ StringEq = String._≟_
+
   ℤEq : Eq ℤ
   Eq._≟_ ℤEq = ℤ._≟_
 
