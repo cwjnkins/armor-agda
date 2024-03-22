@@ -27,8 +27,7 @@ or
     Use the "View raw" option at the top left
     
     -   [PEM](html/Armor.Data.PEM.html), [X.509](html/Armor.Data.X509.html), and [X.690-DER](html/Armor.Data.X690-DER.html) parsers modules
-    -   Generic soundness and completeness results:
-        <html/Armor.Grammar.Parser.Completeness.html>
+    -   [Generic soundness and completeness results](html/Armor.Grammar.Parser.Completeness.html)
     -   [Chain builder](html/Armor.Data.X509.Semantic.Chain.Builder.html)
     -   Semantic checks
         -   [Certificate](html/Armor.Data.X509.Semantic.Cert.html)
