@@ -125,8 +125,11 @@ main = IO.run $
       IO.>> Armor.IO.exitFailure
     (inj₂ cmd) →
       readCert (CmdArg.isDER cmd) (CmdArg.certname cmd)
-      IO.>>= λ cert─ → readPEM (CmdArg.rootname cmd)
-      IO.>>= λ root─ → runCertChecks (CmdArg.purpose cmd) (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
+      IO.>>= λ cert─ → case (CmdArg.rootname cmd) of λ where
+        nothing → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─))
+        (just rootName) →
+          readPEM rootName
+          IO.>>= λ root─ → runCertChecks (CmdArg.purpose cmd) (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
   where
   record CmdArgTmp : Set where
     pattern
@@ -137,7 +140,8 @@ main = IO.run $
 
   record CmdArg : Set where
     field
-      certname rootname : String
+      certname : String
+      rootname : Maybe String
       isDER : Bool
       purpose : KeyPurpose
 
@@ -156,9 +160,10 @@ main = IO.run $
     readPurpose purp = case purp ∈? map proj₁ purpMap of λ where
       (no ¬purp∈) → inj₁ ("Unrecognized purpose: " String.++ purp)
       (yes purp∈) → inj₂ (proj₂ (lookup purpMap (Any.index purp∈)))
-  processCmdArgs (certName ∷ rootName ∷ args) cmd = processCmdArgs args (record cmd { certname = just certName ; rootname = just rootName })
+  processCmdArgs (certName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName })
+  processCmdArgs (certName ∷ rootName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName ; rootname = just rootName })
   processCmdArgs [] record { certname = just certName ; rootname = just rootName ; isDER = isDER ; purpose = purpose } =
-    inj₂ (record { certname = certName ; rootname = rootName ; isDER = isDER ; purpose = purpose })
+    inj₂ (record { certname = certName ; rootname = just rootName ; isDER = isDER ; purpose = purpose })
   processCmdArgs [] cmd = inj₁ "not enough arguments"
   processCmdArgs args _ = inj₁ "unrecognized arguments"
 
@@ -310,3 +315,10 @@ main = IO.run $
     open import Armor.Data.X509.Semantic.Chain.Properties
     @0 un : (c : Chain trustedRoot (removeCertFromCerts end restCerts) end) → (-, end) ∉ trustedRoot → ChainUnique c
     un c end∉trust = chainUnique _ _ (∉removeCertFromCerts end restCerts) end∉trust c
+
+  runCertChecksLeaf : KeyPurpose → (certs : List (Exists─ _ Cert)) → _
+  runCertChecksLeaf kp [] = Armor.IO.putStrLnErr "Error: no parsed leaf certificate"
+  runCertChecksLeaf kp (leaf ∷ rest) =
+    -- IO.putStrLn (showOutput (certOutput (proj₂ leaf))) IO.>>
+    runSingleCertChecks kp (proj₂ leaf) 1 IO.>>
+    Armor.IO.exitSuccess
