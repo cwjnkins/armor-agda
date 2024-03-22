@@ -136,6 +136,11 @@ main = IO.run $
       IO.>>= (parseCerts rootName ∘ String.toList)
       IO.>>= λ rootS → let (_ , success pre₂ r₂ r₂≡ trustedRoot suf₂ ps≡₂) = rootS in
       runCertChecks (ilistToList trustedRoot) (ilistToList cert)
+    (certName ∷ []) →
+      IO.readFiniteFile certName
+      IO.>>= (parseCerts certName ∘ String.toList)
+      IO.>>= λ certS → let (_ , success pre₁ r₁ r₁≡ cert suf₁ ps≡₁) = certS in
+      runCertChecksLeaf (ilistToList cert)
     _ →
       Armor.IO.putStrLnErr usage
       IO.>> Armor.IO.putStrLnErr "-- wrong number of arguments passed"
@@ -270,3 +275,10 @@ main = IO.run $
     open import Armor.Data.X509.Semantic.Chain.Properties
     @0 un : (c : Chain trustedRoot (removeCertFromCerts end restCerts) end) → (-, end) ∉ trustedRoot → ChainUnique c
     un c end∉trust = chainUnique _ _ (∉removeCertFromCerts end restCerts) end∉trust c
+
+  runCertChecksLeaf : (certs : List (Exists─ _ Cert)) → _
+  runCertChecksLeaf [] = Armor.IO.putStrLnErr "Error: no parsed leaf certificate"
+  runCertChecksLeaf (leaf ∷ rest) =
+    -- IO.putStrLn (showOutput (certOutput (proj₂ leaf))) IO.>>
+    runSingleCertChecks (proj₂ leaf) 1 IO.>>
+    Armor.IO.exitSuccess
