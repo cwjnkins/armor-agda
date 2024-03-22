@@ -20,6 +20,9 @@ isNone (some _) = false
 isSome : ∀ {@0 A xs} → Option A xs → Bool
 isSome x = not (isNone x)
 
+fromSome : ∀ {@0 A xs} → (o : Option A xs) {_ : T (isSome o) } → A xs
+fromSome (some x) = x
+
 mapOption : ∀ {@0 A B} → (∀ {@0 xs} → A xs → B xs) → ∀ {@0 xs} → Option A xs → Option B xs
 mapOption f none = none
 mapOption f (some x) = some (f x)
