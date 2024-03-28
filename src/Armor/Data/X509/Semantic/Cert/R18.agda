@@ -31,13 +31,9 @@ open Armor.Grammar.Option      UInt8
 --
 -- id-kp OBJECT IDENTIFIER ::= { id-pkix 3 }
 data KeyPurpose : Set where
-  anyExtendedKeyUsage serverAuth clientAuth codeSigning emailProtection timeStamping ocspSigning : KeyPurpose
+  serverAuth clientAuth codeSigning emailProtection timeStamping ocspSigning : KeyPurpose
 
 keyPurposeConsistentWithKU : ∀ {@0 bs} → KeyPurpose → ExtensionFieldKU bs → Bool
-keyPurposeConsistentWithKU anyExtendedKeyUsage ku =
-  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ Extension.KUFields.nonRepudation ∷ Extension.KUFields.keyEncipherment ∷
-                                  Extension.KUFields.dataEncipherment ∷ Extension.KUFields.keyAgreement ∷ Extension.KUFields.keyCertSign ∷
-                                  Extension.KUFields.cRLSign ∷ Extension.KUFields.encipherOnly ∷ [ Extension.KUFields.decipherOnly ]))
 keyPurposeConsistentWithKU serverAuth ku =
 -- id-kp-serverAuth             OBJECT IDENTIFIER ::= { id-kp 1 }
 -- -- TLS WWW server authentication
@@ -81,7 +77,6 @@ keyPurposeConsistentWithKU ocspSigning ku =
   or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ [ Extension.KUFields.nonRepudation ]))
 
 keyPurposeToEKUOID : KeyPurpose → Exists─ _ OIDValue
-keyPurposeToEKUOID anyExtendedKeyUsage = _ , OIDs.EKU.AnyExtendedKeyUsage
 keyPurposeToEKUOID serverAuth = _ , OIDs.EKU.ServerAuth
 keyPurposeToEKUOID clientAuth = _ , OIDs.EKU.ClientAuth
 keyPurposeToEKUOID codeSigning = _ , OIDs.EKU.CodeSign
@@ -102,11 +97,12 @@ R18' kp none (some eku) = KeyPurposeConsistentWithEKU kp eku
 R18' kp (some ku) none = T (keyPurposeConsistentWithKU kp ku)
 R18' kp (some ku) (some eku) = T (keyPurposeConsistentWithKU kp ku) × KeyPurposeConsistentWithEKU kp eku
 
-R18 : KeyPurpose → ∀ {@0 bs} → Cert bs → Set
-R18 kp c = R18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
+R18 : Maybe KeyPurpose → ∀ {@0 bs} → Cert bs → Set
+R18 (just kp) c = R18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
+R18 nothing c = ⊤
 
-r18 : (kp : KeyPurpose) → ∀ {@0 bs} → (c : Cert bs) → Dec (R18 kp c)
-r18 kp c = r18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
+r18 : (kp : Maybe KeyPurpose) → ∀ {@0 bs} → (c : Cert bs) → Dec (R18 kp c)
+r18 (just kp) c = r18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
   where
   keyPurposeConsistentWithEKU?
     : ∀ {@0 bs} → (kp : KeyPurpose) (eku : ExtensionFieldEKU bs)
@@ -120,4 +116,4 @@ r18 kp c = r18' kp (proj₂ (Cert.getKU c)) (proj₂ (Cert.getEKU c))
   r18' kp none (some eku) = keyPurposeConsistentWithEKU? kp eku
   r18' kp (some ku) none = T-dec
   r18' kp (some ku) (some eku) = T-dec ×-dec keyPurposeConsistentWithEKU? kp eku
-
+r18 nothing c = T-dec
