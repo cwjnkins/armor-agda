@@ -162,8 +162,8 @@ main =  IO.run $
       (yes purp∈) → inj₂ (proj₂ (lookup purpMap (Any.index purp∈)))
   processCmdArgs (certName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName })
   processCmdArgs (certName ∷ rootName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName ; rootname = just rootName })
-  processCmdArgs [] record { certname = just certName ; rootname = just rootName ; isDER = isDER ; purpose = purpose } =
-    inj₂ (record { certname = certName ; rootname = just rootName ; isDER = isDER ; purpose = purpose })
+  processCmdArgs [] record { certname = just certName ; rootname = rootName ; isDER = isDER ; purpose = purpose } =
+    inj₂ (record { certname = certName ; rootname = rootName ; isDER = isDER ; purpose = purpose })
   processCmdArgs [] cmd = inj₁ "not enough arguments"
   processCmdArgs args _ = inj₁ "unrecognized arguments"
 
