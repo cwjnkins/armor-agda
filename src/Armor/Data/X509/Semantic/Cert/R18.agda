@@ -31,9 +31,13 @@ open Armor.Grammar.Option      UInt8
 --
 -- id-kp OBJECT IDENTIFIER ::= { id-pkix 3 }
 data KeyPurpose : Set where
-  serverAuth clientAuth codeSigning emailProtection timeStamping ocspSigning : KeyPurpose
+  anyExtendedKeyUsage serverAuth clientAuth codeSigning emailProtection timeStamping ocspSigning : KeyPurpose
 
 keyPurposeConsistentWithKU : ∀ {@0 bs} → KeyPurpose → ExtensionFieldKU bs → Bool
+keyPurposeConsistentWithKU anyExtendedKeyUsage ku =
+  or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ Extension.KUFields.nonRepudation ∷ Extension.KUFields.keyEncipherment ∷
+                                  Extension.KUFields.dataEncipherment ∷ Extension.KUFields.keyAgreement ∷ Extension.KUFields.keyCertSign ∷
+                                  Extension.KUFields.cRLSign ∷ Extension.KUFields.encipherOnly ∷ [ Extension.KUFields.decipherOnly ]))
 keyPurposeConsistentWithKU serverAuth ku =
 -- id-kp-serverAuth             OBJECT IDENTIFIER ::= { id-kp 1 }
 -- -- TLS WWW server authentication
@@ -77,6 +81,7 @@ keyPurposeConsistentWithKU ocspSigning ku =
   or (map (assertsKUBitField ku) (Extension.KUFields.digitalSignature ∷ [ Extension.KUFields.nonRepudation ]))
 
 keyPurposeToEKUOID : KeyPurpose → Exists─ _ OIDValue
+keyPurposeToEKUOID anyExtendedKeyUsage = _ , OIDs.EKU.AnyExtendedKeyUsage
 keyPurposeToEKUOID serverAuth = _ , OIDs.EKU.ServerAuth
 keyPurposeToEKUOID clientAuth = _ , OIDs.EKU.ClientAuth
 keyPurposeToEKUOID codeSigning = _ , OIDs.EKU.CodeSign

@@ -115,10 +115,10 @@ parseCerts fn input =
 --   helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
 
 main : IO.Main
-main = IO.run $
+main =  IO.run $
   Armor.IO.getArgs IO.>>= λ args →
   case
-    processCmdArgs args (record { certname = nothing ; rootname = nothing ; isDER = false ; purpose = serverAuth })
+    processCmdArgs args (record { certname = nothing ; rootname = nothing ; isDER = false ; purpose = anyExtendedKeyUsage })
   of λ where
     (inj₁ msg) →
       Armor.IO.putStrLnErr ("-- " String.++ msg)
@@ -136,7 +136,7 @@ main = IO.run $
     field
       certname rootname : Maybe String
       isDER : Bool -- default false
-      purpose : KeyPurpose -- default serverAuth
+      purpose : KeyPurpose -- default anyExtendedKeyUsage
 
   record CmdArg : Set where
     field
@@ -153,7 +153,7 @@ main = IO.run $
       (inj₂ kp) → processCmdArgs args (record cmd { purpose = kp })
     where
     purpMap : List (String × KeyPurpose)
-    purpMap = ("serverAuth" , serverAuth) ∷ ("clientAuth" , clientAuth) ∷ ("codeSigning" , codeSigning)
+    purpMap = ("anyExtendedKeyUsage" , anyExtendedKeyUsage) ∷ ("serverAuth" , serverAuth) ∷ ("clientAuth" , clientAuth) ∷ ("codeSigning" , codeSigning)
               ∷ ("emailProtection" , emailProtection) ∷ ("timeStamping" , timeStamping) ∷ [ ("ocspSigning" , ocspSigning) ]
 
     readPurpose : String → String ⊎ KeyPurpose
