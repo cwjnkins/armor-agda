@@ -297,6 +297,7 @@ main = IO.run $
     -- runChainCheck "R21" issuee chain r21 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
+    runChainCheck "R27" issuee chain r27 IO.>>
     IO.return true
 
   helper₂ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose → (issuee : Cert bs)

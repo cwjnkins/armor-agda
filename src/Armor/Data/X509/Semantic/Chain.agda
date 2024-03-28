@@ -14,6 +14,7 @@ import      Armor.Data.X509.Semantic.Chain.R20     as R20
 -- import      Armor.Data.X509.Semantic.Chain.R21     as R21
 import      Armor.Data.X509.Semantic.Chain.R22     as R22
 import      Armor.Data.X509.Semantic.Chain.R23     as R23
+import      Armor.Data.X509.Semantic.Chain.R27     as R27
 open import Armor.Data.X509.Semantic.Chain.TCB     as Chain
 import      Armor.Grammar.Definitions
 open import Armor.Grammar.IList as IList
@@ -60,4 +61,9 @@ open R22 public
 open R23 public
 
 -- R24 and R25 are enforced by the chain builder
--- R26 and R27 are enforced by the unverified Python driver
+-- R26 is enforced by the unverified Python driver
+
+-- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.4
+-- For all non-leaf certificates,
+-- If a key usage extension is present, verify that the keyCertSign bit is set.
+open R27 public
