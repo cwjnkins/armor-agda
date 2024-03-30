@@ -118,7 +118,7 @@ main : IO.Main
 main = IO.run $
   Armor.IO.getArgs IO.>>= λ args →
   case
-    processCmdArgs args (record { certname = nothing ; rootname = nothing ; isDER = false ; purpose = serverAuth })
+    processCmdArgs args (record { certname = nothing ; rootname = nothing ; isDER = false ; purpose = nothing })
   of λ where
     (inj₁ msg) →
       Armor.IO.putStrLnErr ("-- " String.++ msg)
@@ -136,21 +136,21 @@ main = IO.run $
     field
       certname rootname : Maybe String
       isDER : Bool -- default false
-      purpose : KeyPurpose -- default serverAuth
+      purpose : Maybe KeyPurpose
 
   record CmdArg : Set where
     field
       certname : String
       rootname : Maybe String
       isDER : Bool
-      purpose : KeyPurpose
+      purpose : Maybe KeyPurpose
 
   processCmdArgs : List String → CmdArgTmp → String ⊎ CmdArg
   processCmdArgs ("--DER" ∷ args) cmd = processCmdArgs args (record cmd { isDER = true })
   processCmdArgs ("--purpose" ∷ purpose ∷ args) cmd =
     case readPurpose purpose of λ where
       (inj₁ msg) → inj₁ msg
-      (inj₂ kp) → processCmdArgs args (record cmd { purpose = kp })
+      (inj₂ kp) → processCmdArgs args (record cmd { purpose = just kp })
     where
     purpMap : List (String × KeyPurpose)
     purpMap = ("serverAuth" , serverAuth) ∷ ("clientAuth" , clientAuth) ∷ ("codeSigning" , codeSigning)
@@ -247,7 +247,7 @@ main = IO.run $
     Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return tt
 
-  runSingleCertChecks : ∀ {@0 bs} → KeyPurpose → Cert bs → ℕ → _
+  runSingleCertChecks : ∀ {@0 bs} → Maybe KeyPurpose → Cert bs → ℕ → _
   runSingleCertChecks kp cert n =
     Armor.IO.putStrLnErr ("=== Checking " String.++ (showℕ n)) IO.>>
      runCheck cert "R1" r1 IO.>>
@@ -277,7 +277,7 @@ main = IO.run $
          runCheck cert "R17" (λ c₁ → r17 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl)))
 
   runChecks' :  ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
-    → KeyPurpose → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO ⊤
+    → Maybe KeyPurpose → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO ⊤
   runChecks' kp issuee n (root (trustedCA , snd)) =
     IO.putStrLn (showOutput (certOutput issuee)) IO.>>
     runSingleCertChecks kp issuee n IO.>>
@@ -289,7 +289,7 @@ main = IO.run $
     runChecks' kp issuer (n + 1) chain
 
   helper₁ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
-    → KeyPurpose → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
+    → Maybe KeyPurpose → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
   helper₁ kp issuee chain =
     runChecks' kp issuee 1 chain IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
@@ -297,9 +297,10 @@ main = IO.run $
     -- runChainCheck "R21" issuee chain r21 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
+    runChainCheck "R27" issuee chain r27 IO.>>
     IO.return true
 
-  helper₂ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → KeyPurpose → (issuee : Cert bs)
+  helper₂ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose → (issuee : Cert bs)
     → List (Chain trustedRoot candidates issuee) → _
   helper₂ kp issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" 
   helper₂ kp issuee (chain ∷ otherChains) =
@@ -307,7 +308,7 @@ main = IO.run $
       false →  helper₂ kp issuee otherChains
       true → Armor.IO.exitSuccess
 
-  runCertChecks : KeyPurpose → (trustedRoot candidates : List (Exists─ _ Cert)) → _
+  runCertChecks : Maybe KeyPurpose → (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecks kp trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates"
   runCertChecks kp trustedRoot ((─ _ , end) ∷ restCerts) =
     helper₂ kp end (buildChains trustedRoot (removeCertFromCerts end restCerts) end)
@@ -316,7 +317,7 @@ main = IO.run $
     @0 un : (c : Chain trustedRoot (removeCertFromCerts end restCerts) end) → (-, end) ∉ trustedRoot → ChainUnique c
     un c end∉trust = chainUnique _ _ (∉removeCertFromCerts end restCerts) end∉trust c
 
-  runCertChecksLeaf : KeyPurpose → (certs : List (Exists─ _ Cert)) → _
+  runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → _
   runCertChecksLeaf kp [] = Armor.IO.putStrLnErr "Error: no parsed leaf certificate"
   runCertChecksLeaf kp (leaf ∷ rest) =
     -- IO.putStrLn (showOutput (certOutput (proj₂ leaf))) IO.>>
