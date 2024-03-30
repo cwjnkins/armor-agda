@@ -87,6 +87,7 @@ import Armor.Data.X509.Semantic.Chain.R19
 import Armor.Data.X509.Semantic.Chain.R20
 import Armor.Data.X509.Semantic.Chain.R22
 import Armor.Data.X509.Semantic.Chain.R23
+import Armor.Data.X509.Semantic.Chain.R27
 import Armor.Data.X509.Semantic.Chain.TCB
 import Armor.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers
 import Armor.Data.X509.Semantic.StringPrep.CaseFoldNFKC.Helpers1

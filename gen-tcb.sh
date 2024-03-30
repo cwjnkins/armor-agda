@@ -9,7 +9,7 @@ BASE64ENCDEC_TCB_PAT='src/Armor/Binary/(UInt6\.agda|.*TCB\.agda)'
 FOREIGN_TCB_PAT='src/Armor/(Foreign/.*|IO\.agda|Main\.agda)'
 GENERIC_GRAMMAR_TCB_PAT='src/Armor/(Grammar/(.*TCB\.agda|.*Base\.agda|Parser/(Completeness\.agda|Core\.agda|Maximal\.agda)))'
 X509_GRAMMAR_TCB_PAT='^(?!(.*Semantic.*))(src/Armor/Data/(Base64/.*TCB|PEM/.*TCB|Unicode/.*TCB|(X509/.*TCB)|X690-DER/.*TCB))'
-X509_SEMANTIC_TCB_PAT='src/Armor/Data/X509/Semantic/(Cert/R.*\.agda|Cert/Utils\.agda|Chain/(NameMatch|R.*|TCB\.agda))'
+X509_SEMANTIC_TCB_PAT='src/Armor/Data/X509/Semantic/(Cert/((?!R9\.agda|R18\.agda)(R.*\.agda))|Cert/Utils\.agda|Chain/(NameMatch|((?!R20\.agda)(R.*))|TCB\.agda))'
 STRINGPREP_PAT='src/Armor/Data/X509/Semantic/StringPrep'
 
 EXCLUDE_LINE_PAT='^(?!\h*(--|import|open))'
