@@ -3,14 +3,7 @@ open import Armor.Prelude
 
 module Armor.Grammar.Definitions.Eq (Σ : Set) where
 
-infix 4 _≋_
-record _≋_ {A : @0 List Σ → Set} {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) : Set where
-  constructor mk≋
-  field
-    @0 bs≡ : bs₁ ≡ bs₂
-    @0 a≡  : subst₀! A bs≡ a₁ ≡ a₂
-
-pattern ≋-refl = mk≋ refl refl
+open import Armor.Grammar.Definitions.Eq.Base Σ public
 
 trans≋ : ∀ {A : @0 List Σ → Set} {@0 bs₁ bs₂ bs₃} → {a₁ : A bs₁} {a₂ : A bs₂} {a₃ : A bs₃}
          → _≋_{A} a₁ a₂ → _≋_{A} a₂ a₃ → _≋_{A} a₁ a₃
@@ -32,16 +25,6 @@ unique≋ a₁ a₂ ≋-refl ≋-refl = refl
 instance
   Irrel≋ : ∀ {@0 A bs₁ bs₂} {a₁ : A bs₁} {a₂ : A bs₂} → Irrel (_≋_{A} a₁ a₂)
   Irrel.irrel Irrel≋ ≋-refl = ≋-refl
-
-Decidable-≋ : (@0 List Σ → Set) → Set
-Decidable-≋ A = ∀ {@0 bs₁ bs₂} (a₁ : A bs₁) (a₂ : A bs₂) → Dec (_≋_{A} a₁ a₂)
-
-record Eq≋ (@0 A : @0 List Σ → Set) : Set where
-  infix 4 _≋?_
-  field
-    _≋?_ : Decidable-≋ A
-
-open Eq≋ ⦃ ... ⦄ public
 
 Eq≋⇒Eq : ∀ {@0 A : @0 List Σ → Set} → Eq≋ A → Eq (Exists─ (List Σ) A)
 Eq._≟_ (Eq≋⇒Eq eq≋) (─ bs₁ , a₁) (─ bs₂ , a₂) =
