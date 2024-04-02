@@ -69,3 +69,6 @@ or
 
 ## Cleanup ARMOR-agda
 `./cleanup.sh`
+
+## Get the Line of Code (LoC) of Trusted Computing Base (TCB)
+`./gen-tcb.sh`
