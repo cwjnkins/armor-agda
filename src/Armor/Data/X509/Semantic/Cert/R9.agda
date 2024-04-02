@@ -1,7 +1,7 @@
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
-open import Armor.Data.X509.Semantic.Cert.R9.TCB public
+open import Armor.Data.X509.Semantic.Cert.R9.TCB
 open import Armor.Data.X509.Semantic.Cert.Utils
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option
