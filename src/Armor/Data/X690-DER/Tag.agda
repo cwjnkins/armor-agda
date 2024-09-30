@@ -57,6 +57,9 @@ Sequence = # 48
 Sett : UInt8
 Sett = # 49
 
+Enum : UInt8
+Enum = # 10
+
 -- 8x
 AppPrim : (n : ℕ) {wit : True (n <? 16)} → UInt8
 AppPrim n {wit} = Fin.fromℕ< ∘ s≤s $ begin
@@ -68,6 +71,9 @@ AppPrim n {wit} = Fin.fromℕ< ∘ s≤s $ begin
 A80 = AppPrim 0
 A81 = AppPrim 1
 A82 = AppPrim 2
+A83 = AppPrim 3
+A84 = AppPrim 4
+A85 = AppPrim 5
 A86 = AppPrim 6
 A87 = AppPrim 7
 A88 = AppPrim 8

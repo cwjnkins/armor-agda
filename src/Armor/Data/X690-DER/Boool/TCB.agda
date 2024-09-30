@@ -35,6 +35,9 @@ record BoolValue (@0 bs : List UInt8) : Set where
 
 Boool = TLV Tag.Boolean BoolValue
 
+[_]Boool : UInt8 → @0 List UInt8 → Set
+[ t ]Boool = TLV t BoolValue
+
 RawBoolValue : Raw BoolValue
 Raw.D RawBoolValue = Bool
 Raw.to RawBoolValue = BoolValue.v
@@ -50,3 +53,6 @@ falseBoool = mkTLV (short (mkShort (# 1) (s≤s (s≤s z≤n)) refl)) (mkBoolVal
 
 trueBoool : Boool _
 trueBoool = mkTLV (short (mkShort (# 1) (s≤s (s≤s z≤n)) refl)) (mkBoolValue  _ _ trueᵣ refl) refl refl
+
+[_]falseBoool : (t : UInt8) → [ t ]Boool _
+[ t ]falseBoool = mkTLV (short (mkShort (# 1) (s≤s (s≤s z≤n)) refl)) (mkBoolValue _ _ falseᵣ refl) refl refl
