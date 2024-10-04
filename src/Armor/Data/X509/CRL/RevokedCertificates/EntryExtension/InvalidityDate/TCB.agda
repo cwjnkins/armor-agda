@@ -15,3 +15,6 @@ open Armor.Grammar.Definitions.NonMalleable UInt8
 
 InvalidityDateFields : @0 List UInt8 → Set
 InvalidityDateFields xs = TLV Tag.OctetString GeneralizedTime xs
+
+RawInvalidityDateFields : Raw InvalidityDateFields
+RawInvalidityDateFields = RawTLV _ RawGeneralizedTime

@@ -28,6 +28,11 @@ open Armor.Grammar.Parallel.TCB             UInt8
 --        privilegeWithdrawn      (9),
 --        aACompromise           (10) }
 
+data DecodedReason : Set where
+  unspecified keyCompromise cACompromise affiliationChanged
+    superseded cessationOfOperation certificateHold removeFromCRL
+    privilegeWithdrawn aACompromise : DecodedReason
+  
 supportedCodes : List ℤ
 supportedCodes = ℤ.+ 0 ∷ ℤ.+ 1 ∷ ℤ.+ 2 ∷ ℤ.+ 3 ∷ ℤ.+ 4 ∷ ℤ.+ 5 ∷ ℤ.+ 6 ∷ ℤ.+ 8 ∷ ℤ.+ 9 ∷ [ ℤ.+ 10 ]
 
@@ -36,3 +41,23 @@ ReasonCodeFieldsEnum = Σₚ [ Tag.Enum ]Int λ _ i → Erased ((Singleton.x ∘
 
 ReasonCodeFields : @0 List UInt8 → Set
 ReasonCodeFields xs = TLV Tag.OctetString ReasonCodeFieldsEnum xs
+
+
+RawReasonCodeFieldsEnum : Raw ReasonCodeFieldsEnum
+toRawReasonCodeFieldsEnum : ∀ {@0 bs} → (@0 i : [ Tag.Enum ]Int bs) (i∈ : (Singleton.x ∘ IntegerValue.val ∘ TLV.val) i ∈ supportedCodes) → DecodedReason
+Raw.D RawReasonCodeFieldsEnum = DecodedReason
+Raw.to RawReasonCodeFieldsEnum (mk×ₚ i (─ i∈)) = toRawReasonCodeFieldsEnum i (uneraseDec i∈ (_ ∈? _))
+
+toRawReasonCodeFieldsEnum i (here px) = unspecified
+toRawReasonCodeFieldsEnum i (there (here px)) = keyCompromise
+toRawReasonCodeFieldsEnum i (there (there (here px))) = cACompromise
+toRawReasonCodeFieldsEnum i (there (there (there (here px)))) = affiliationChanged
+toRawReasonCodeFieldsEnum i (there (there (there (there (here px))))) = superseded
+toRawReasonCodeFieldsEnum i (there (there (there (there (there (here px)))))) = cessationOfOperation
+toRawReasonCodeFieldsEnum i (there (there (there (there (there (there (here px))))))) = certificateHold
+toRawReasonCodeFieldsEnum i (there (there (there (there (there (there (there (here px)))))))) = removeFromCRL
+toRawReasonCodeFieldsEnum i (there (there (there (there (there (there (there (there (here px))))))))) = privilegeWithdrawn
+toRawReasonCodeFieldsEnum i (there (there (there (there (there (there (there (there (there (here px)))))))))) = aACompromise
+
+RawReasonCodeFields : Raw ReasonCodeFields
+RawReasonCodeFields = RawTLV _ RawReasonCodeFieldsEnum

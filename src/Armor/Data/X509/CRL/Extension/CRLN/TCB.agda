@@ -15,3 +15,6 @@ open Armor.Grammar.Definitions.NonMalleable UInt8
 -- enforce from 0 in semantic check
 CRLNFields : @0 List UInt8 → Set
 CRLNFields xs = TLV Tag.OctetString Int xs
+
+RawCRLNFields : Raw CRLNFields
+RawCRLNFields = RawTLV _ RawInt

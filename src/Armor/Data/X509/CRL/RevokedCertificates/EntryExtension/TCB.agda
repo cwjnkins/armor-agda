@@ -78,3 +78,47 @@ EntryExtension xs = TLV Tag.Sequence SelectEntryExtn xs
 
 EntryExtensions : @0 List UInt8 → Set
 EntryExtensions xs = TLV Tag.Sequence (NonEmptySequenceOf EntryExtension) xs
+
+
+ExtensionFieldsRep : (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
+ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ x → Erased (P (TLV.v x)))) (&ₚ (Default Boool falseBoool) A)
+
+equivalentExtensionFields : ∀ {@0 P : List UInt8 → Set} {A : @0 List UInt8 → Set}
+               → Equivalent (ExtensionFieldsRep P A) (ExtensionFields P A)
+proj₁ equivalentExtensionFields (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
+    mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
+proj₂ equivalentExtensionFields (mkExtensionFields extnId extnId≡ crit extension refl) =
+    mk&ₚ (mk×ₚ extnId (─ extnId≡)) (mk&ₚ crit extension refl) refl
+
+RawExtensionFieldsRep : ∀ {@0 P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFieldsRep P A)
+RawExtensionFieldsRep{P} ra = Raw&ₚ (RawΣₚ₁ RawOID (λ _ x → Erased (P (TLV.v x))))
+                            (Raw&ₚ (RawDefault RawBoool falseBoool) ra)
+
+RawExtensionFields : ∀ {@0 P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFields P A)
+RawExtensionFields ra = Iso.raw equivalentExtensionFields (RawExtensionFieldsRep ra)
+
+SelectEntryExtnRep = Sum ExtensionFieldCRLReason (Sum ExtensionFieldInvalidityDate (Sum ExtensionFieldCertIssuer
+  (Σₚ ExtensionFieldUnsupported (λ _ u → T (not (ExtensionFields.getCrit u))))))
+
+equivalent : Equivalent SelectEntryExtnRep SelectEntryExtn
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₁ x) = crlrsnextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)) = invdateextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))) = certissextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ x))) = other (fstₚ x) (sndₚ x)
+proj₂ equivalent (crlrsnextn x) = Sum.inj₁ x
+proj₂ equivalent (invdateextn x) = Sum.inj₂ (Sum.inj₁ x)
+proj₂ equivalent (certissextn x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₁ x))
+proj₂ equivalent (other u x) = Sum.inj₂ (Sum.inj₂ (Sum.inj₂ (mk×ₚ u x)))
+
+RawSelectEntryExtnRep : Raw SelectEntryExtnRep
+RawSelectEntryExtnRep = RawSum (RawExtensionFields RawReasonCodeFields)
+                        (RawSum (RawExtensionFields RawInvalidityDateFields)
+                        (RawSum (RawExtensionFields RawCertIssuerFields)
+                        (RawΣₚ₁ (RawExtensionFields RawOctetString)
+                                    (λ _ u → T (not (ExtensionFields.getCrit u))))))
+
+RawSelectEntryExtn : Raw SelectEntryExtn
+RawSelectEntryExtn = Iso.raw equivalent RawSelectEntryExtnRep
+
+RawEntryExtensions : Raw EntryExtensions
+RawEntryExtensions = RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawSelectEntryExtn) 1)

@@ -15,3 +15,6 @@ open Armor.Grammar.Definitions.NonMalleable UInt8
 -- enforce from 0..max in semantic check
 DCRLIFields : @0 List UInt8 → Set
 DCRLIFields xs = TLV Tag.OctetString Int xs
+
+RawDCRLIFields : Raw DCRLIFields
+RawDCRLIFields = RawTLV _ RawInt

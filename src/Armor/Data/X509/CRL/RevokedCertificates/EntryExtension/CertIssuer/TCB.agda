@@ -15,3 +15,6 @@ open Armor.Grammar.Definitions.NonMalleable UInt8
 
 CertIssuerFields : @0 List UInt8 → Set
 CertIssuerFields xs = TLV Tag.OctetString GeneralNames xs
+
+RawCertIssuerFields : Raw CertIssuerFields
+RawCertIssuerFields = RawTLV _ RawGeneralNames

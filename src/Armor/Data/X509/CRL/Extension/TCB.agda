@@ -97,3 +97,65 @@ ExtensionsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Extension) xs
 
 Extensions : @0 List UInt8 → Set
 Extensions xs = TLV Tag.AA0  ExtensionsSeq xs
+
+
+ExtensionFieldsRep : (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
+ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ x → Erased (P (TLV.v x)))) (&ₚ (Default Boool falseBoool) A)
+
+equivalentExtensionFields : ∀ {@0 P : List UInt8 → Set} {A : @0 List UInt8 → Set}
+               → Equivalent (ExtensionFieldsRep P A) (ExtensionFields P A)
+proj₁ equivalentExtensionFields (mk&ₚ (mk×ₚ fstₚ₁ (─ sndₚ₁)) (mk&ₚ fstₚ₂ sndₚ₂ refl) refl) =
+    mkExtensionFields fstₚ₁ sndₚ₁ fstₚ₂ sndₚ₂ refl
+proj₂ equivalentExtensionFields (mkExtensionFields extnId extnId≡ crit extension refl) =
+    mk&ₚ (mk×ₚ extnId (─ extnId≡)) (mk&ₚ crit extension refl) refl
+
+RawExtensionFieldsRep : ∀ {@0 P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFieldsRep P A)
+RawExtensionFieldsRep{P} ra = Raw&ₚ (RawΣₚ₁ RawOID (λ _ x → Erased (P (TLV.v x))))
+                            (Raw&ₚ (RawDefault RawBoool falseBoool) ra)
+
+RawExtensionFields : ∀ {@0 P} {A : @0 List UInt8 → Set} (ra : Raw A) → Raw (ExtensionFields P A)
+RawExtensionFields ra = Iso.raw equivalentExtensionFields (RawExtensionFieldsRep ra)
+
+SelectExtnRep = Sum ExtensionFieldAKI
+                (Sum ExtensionFieldIAN
+                (Sum ExtensionFieldCRLN
+                (Sum ExtensionFieldDCRLI
+                (Sum ExtensionFieldIDP
+                (Sum ExtensionFieldFCRL
+                (Sum ExtensionFieldAIA
+                  (Σₚ ExtensionFieldUnsupported (λ _ u → T (not (ExtensionFields.getCrit u))))))))))
+
+equivalent : Equivalent SelectExtnRep SelectExtn
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₁ x) = akiextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)) = ianextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))) = crlnextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)))) = dcrliextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))))) = idpextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)))))) = fcrlextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))))))) = aiaextn x
+proj₁ equivalent (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ x))))))) = other (fstₚ x) (sndₚ x)
+proj₂ equivalent (akiextn x) = Armor.Grammar.Sum.TCB.inj₁ x
+proj₂ equivalent (ianextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)
+proj₂ equivalent (crlnextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))
+proj₂ equivalent (dcrliextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)))
+proj₂ equivalent (idpextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))))
+proj₂ equivalent (fcrlextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x)))))
+proj₂ equivalent (aiaextn x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₁ x))))))
+proj₂ equivalent (other u x) = Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (Armor.Grammar.Sum.TCB.inj₂ (mk×ₚ u x)))))))
+
+RawSelectExtnRep : Raw SelectExtnRep
+RawSelectExtnRep = RawSum (RawExtensionFields RawAKIFields)
+                   (RawSum (RawExtensionFields RawIANFields)
+                   (RawSum (RawExtensionFields RawCRLNFields)
+                   (RawSum (RawExtensionFields RawDCRLIFields)
+                   (RawSum (RawExtensionFields RawIDPFields)
+                   (RawSum (RawExtensionFields RawCRLDistFields)
+                   (RawSum (RawExtensionFields RawAIAFields)
+                     (RawΣₚ₁ (RawExtensionFields RawOctetString)
+                              (λ _ u → T (not (ExtensionFields.getCrit u))))))))))
+
+RawSelectExtn : Raw SelectExtn
+RawSelectExtn = Iso.raw equivalent RawSelectExtnRep
+
+RawExtensions : Raw Extensions
+RawExtensions = RawTLV _ (RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawSelectExtn) 1))
