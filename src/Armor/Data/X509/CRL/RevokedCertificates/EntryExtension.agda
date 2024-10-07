@@ -12,7 +12,7 @@ open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.Parser public
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB    public
 
 
-module CRLEntryExtension where
+module EntryExtension where
   open Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer      public
   open Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate           public
   open Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.ReasonCode

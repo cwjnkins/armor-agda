@@ -7,12 +7,13 @@ open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X509.CRL.Version.TCB
 open import Armor.Data.X509.CRL.Extension.TCB
-open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB
+open import Armor.Data.X509.CRL.RevokedCertificates.TCB
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Seq
 import      Armor.Grammar.Option
 open import Armor.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Armor.Data.X509.CRL.TBSCertList.TCB where
 
@@ -47,9 +48,38 @@ record TBSCertListFields (@0 bs : List UInt8) : Set where
     issuer  : Name i
     thisUpdate : Time tu
     nextUpdate : Option Time nu
-    revokedCertificates : Option EntryExtensions e
+    revokedCertificates : Option RevokedCertificates r
     crlExtensions : Option Extensions e
     @0 bs≡  : bs ≡ ver ++ sa ++ i ++ tu ++ nu ++ r ++ e
 
 TBSCertList : (@0 _ : List UInt8) → Set
 TBSCertList xs = TLV Tag.Sequence TBSCertListFields xs
+
+Rep₁ = &ₚ (Option RevokedCertificates) (Option Extensions)
+Rep₂ = &ₚ (Option Time) Rep₁
+Rep₃ = &ₚ Time Rep₂
+Rep₄ = &ₚ Name Rep₃
+
+TBSCertListFieldsRep : @0 List UInt8 → Set
+TBSCertListFieldsRep = (&ₚ (&ₚ(Option Version) SignAlg) Rep₄)
+
+equivalentTBSCertListFields : Equivalent TBSCertListFieldsRep TBSCertListFields
+proj₁ equivalentTBSCertListFields (mk&ₚ(mk&ₚ version signAlg refl)
+      (mk&ₚ issuer
+        (mk&ₚ thisUpdate
+          (mk&ₚ nextUpdate
+            (mk&ₚ revokedCertificates crlExtensions refl) refl) refl) refl) bs≡) =
+  mkTBSCertListFields version signAlg issuer thisUpdate nextUpdate revokedCertificates crlExtensions (trans₀ bs≡ (solve (++-monoid UInt8)))
+proj₂ equivalentTBSCertListFields (mkTBSCertListFields version signAlg issuer thisUpdate nextUpdate revokedCertificates crlExtensions bs≡) =
+  mk&ₚ(mk&ₚ version signAlg refl)
+      (mk&ₚ issuer
+        (mk&ₚ thisUpdate
+          (mk&ₚ nextUpdate
+            (mk&ₚ revokedCertificates crlExtensions refl) refl) refl) refl) (trans₀ bs≡ (solve (++-monoid UInt8)))
+
+RawTBSCertListFieldsRep : Raw TBSCertListFieldsRep
+RawTBSCertListFieldsRep = Raw&ₚ (Raw&ₚ (RawOption RawVersion) RawSignAlg) (Raw&ₚ RawName (Raw&ₚ RawTime
+                        (Raw&ₚ (RawOption RawTime) (Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)))))
+
+RawTBSCertList : Raw TBSCertList
+RawTBSCertList = RawTLV _ (Iso.raw equivalentTBSCertListFields RawTBSCertListFieldsRep)

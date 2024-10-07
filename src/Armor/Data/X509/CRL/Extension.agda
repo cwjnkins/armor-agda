@@ -12,7 +12,7 @@ open import Armor.Data.X509.CRL.Extension.Parser public
 open import Armor.Data.X509.CRL.Extension.TCB    public
 
 
-module CRLExtension where
+module Extension where
   open Armor.Data.X509.CRL.Extension.CRLN          public
   open Armor.Data.X509.CRL.Extension.DCRLI         public
   open Armor.Data.X509.CRL.Extension.IDP           public

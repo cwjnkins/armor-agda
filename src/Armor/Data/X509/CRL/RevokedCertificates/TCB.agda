@@ -10,6 +10,7 @@ import      Armor.Grammar.Definitions
 import      Armor.Grammar.Seq
 import      Armor.Grammar.Option
 open import Armor.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Armor.Data.X509.CRL.RevokedCertificates.TCB where
 
@@ -41,7 +42,7 @@ record RevokedCertificateFields (@0 bs : List UInt8) : Set where
     @0 {ser ti ex} : List UInt8
     cserial : Int ser
     rdate : Time ti
-    entryextensions : Option {!EntryExtensions!} ex
+    entryextensions : Option EntryExtensions ex
     @0 bs≡  : bs ≡ ser ++ ti ++ ex
 
 
@@ -50,3 +51,19 @@ RevokedCertificate xs = TLV Tag.Sequence RevokedCertificateFields xs
 
 RevokedCertificates : (@0 _ : List UInt8) → Set
 RevokedCertificates xs = TLV Tag.Sequence (NonEmptySequenceOf RevokedCertificate) xs
+
+
+RevokedCertificateFieldsRep : @0 List UInt8 → Set
+RevokedCertificateFieldsRep = (&ₚ (&ₚ Int Time) (Option EntryExtensions))
+
+equivalentRevokedCertificateFields : Equivalent RevokedCertificateFieldsRep RevokedCertificateFields
+proj₁ equivalentRevokedCertificateFields (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) = mkRevokedCertificateFields fstₚ₁ sndₚ₂ sndₚ₁  (trans₀ bs≡ (solve (++-monoid UInt8)))
+proj₂ equivalentRevokedCertificateFields (mkRevokedCertificateFields cserial rdate entryextensions bs≡) = mk&ₚ (mk&ₚ cserial rdate refl) entryextensions (trans₀ bs≡ (solve (++-monoid UInt8)))
+
+
+RawRevokedCertificateFieldsRep : Raw RevokedCertificateFieldsRep
+RawRevokedCertificateFieldsRep = Raw&ₚ (Raw&ₚ RawInt RawTime) (RawOption RawEntryExtensions)
+
+RawRevokedCertificates : Raw RevokedCertificates
+RawRevokedCertificates = RawTLV _ (RawBoundedSequenceOf (RawTLV _
+                                (Iso.raw equivalentRevokedCertificateFields RawRevokedCertificateFieldsRep)) 1)
