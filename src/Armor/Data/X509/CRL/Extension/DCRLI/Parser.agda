@@ -14,7 +14,7 @@ open Armor.Grammar.Parallel    UInt8
 open Armor.Grammar.Parser      UInt8
 
 private
-  here' = "X509: CRL: Extension: DCRLI"
+  here' = "X509: CRL: CertList: TBSCertList: DCRLI"
 
 parseDCRLIFields : Parser (Logging ∘ Dec) DCRLIFields
 parseDCRLIFields =

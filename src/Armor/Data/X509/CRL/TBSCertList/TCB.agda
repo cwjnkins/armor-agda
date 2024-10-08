@@ -59,9 +59,11 @@ Rep₁ = &ₚ (Option RevokedCertificates) (Option Extensions)
 Rep₂ = &ₚ (Option Time) Rep₁
 Rep₃ = &ₚ Time Rep₂
 Rep₄ = &ₚ Name Rep₃
+Rep₅ = &ₚ (Option Version) SignAlg
+Rep₆ = &ₚ Rep₅ Rep₄
 
 TBSCertListFieldsRep : @0 List UInt8 → Set
-TBSCertListFieldsRep = (&ₚ (&ₚ(Option Version) SignAlg) Rep₄)
+TBSCertListFieldsRep = Rep₆
 
 equivalentTBSCertListFields : Equivalent TBSCertListFieldsRep TBSCertListFields
 proj₁ equivalentTBSCertListFields (mk&ₚ(mk&ₚ version signAlg refl)
@@ -81,5 +83,7 @@ RawTBSCertListFieldsRep : Raw TBSCertListFieldsRep
 RawTBSCertListFieldsRep = Raw&ₚ (Raw&ₚ (RawOption RawVersion) RawSignAlg) (Raw&ₚ RawName (Raw&ₚ RawTime
                         (Raw&ₚ (RawOption RawTime) (Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)))))
 
+RawTBSCertListFields = Iso.raw equivalentTBSCertListFields RawTBSCertListFieldsRep
+
 RawTBSCertList : Raw TBSCertList
-RawTBSCertList = RawTLV _ (Iso.raw equivalentTBSCertListFields RawTBSCertListFieldsRep)
+RawTBSCertList = RawTLV _ RawTBSCertListFields

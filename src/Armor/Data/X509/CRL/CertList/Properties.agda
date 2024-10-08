@@ -30,9 +30,6 @@ proj₂ (proj₂ iso) (mkCertListFields tbs signAlg signature bs≡) =
   subst₀ (λ eq → mkCertListFields tbs signAlg signature eq
      ≡ mkCertListFields _ _ _ bs≡) (≡-unique bs≡ _) refl
 
-RawRep₁ = Raw&ₚ RawSignAlg RawBitString
-RawRep = Raw&ₚ RawTBSCertList RawRep₁
-
 @0 unambiguous : Unambiguous CertList
 unambiguous = TLV.unambiguous (Iso.unambiguous iso
   (Seq.unambiguous (Seq.unambiguous TBSCertList.unambiguous TLV.nosubstrings SignAlg.unambiguous)

@@ -15,7 +15,7 @@ open Armor.Grammar.Parallel    UInt8
 open Armor.Grammar.Parser      UInt8
 
 private
-  here' = "X509: CRL: Extension: IDP"
+  here' = "X509: CRL: CertList: TBSCertList: Extension: IDP"
 
 postulate
   parseIDPFields : Parser (Logging ∘ Dec) IDPFields

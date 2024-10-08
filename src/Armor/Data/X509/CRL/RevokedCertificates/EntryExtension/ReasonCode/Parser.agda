@@ -15,7 +15,7 @@ open Armor.Grammar.Parser   UInt8
 open Armor.Grammar.Parallel UInt8
 
 private
-  here' = "X509: CRL : EntryExtension: ReasonCode"
+  here' = "X509: CRL: CertList: TBSCertList: RevokedCertificates: EntryExtension: ReasonCode"
 
 postulate
   parseReasonCodeFields : Parser (Logging ∘ Dec) ReasonCodeFields

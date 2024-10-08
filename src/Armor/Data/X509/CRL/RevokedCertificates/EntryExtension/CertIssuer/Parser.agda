@@ -13,7 +13,7 @@ open Armor.Grammar.Parser   UInt8
 open Armor.Grammar.Parallel UInt8
 
 private
-  here' = "X509: CRL : EntryExtension: CertIssuer"
+  here' = "X509: CRL: CertList: TBSCertList: RevokedCertificates: EntryExtension: CertIssuer"
 
 parseCertIssuerFields : Parser (Logging ∘ Dec) CertIssuerFields
 parseCertIssuerFields =

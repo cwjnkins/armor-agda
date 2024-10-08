@@ -1,3 +1,4 @@
+{-# OPTIONS --allow-unsolved-metas #-}
 open import Armor.Binary
 open import Armor.Data.X509.GeneralNames
 open import Armor.Data.X509.Extension.CRLDistPoint.DistPoint.Name
@@ -25,34 +26,32 @@ open Armor.Grammar.Parallel    UInt8
 open Armor.Grammar.Seq         UInt8
 
 postulate
-  @0 unambiguous' : Unambiguous IDPFieldsSeqFieldsRep
-
+  @0 nonempty : NonEmpty  IDPFieldsSeqFields
+  @0 nosubstrings : NoSubstrings  IDPFieldsSeqFields
 
 iso : Iso IDPFieldsSeqFieldsRep IDPFieldsSeqFields
 proj₁ iso = equivalentIDPFieldsSeqFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ sndₚ₁ refl) refl) refl) refl) refl) = refl
 proj₂ (proj₂ iso) (mkIDPFieldsSeqFields distributionPoint onlyContainsUserCerts onlyContainsCACerts onlySomeReasons indirectCRL onlyContainsAttributeCerts refl) = refl
 
-postulate
-  @0 unambiguous : Unambiguous IDPFields
--- unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
---   (Iso.unambiguous iso
---     (Seq.unambiguous (Option.unambiguous Name.unambiguous TLV.nonempty) {!!}
---     (Seq.unambiguous {!!} {!!}
---     (Seq.unambiguous {!!} {!!}
---     (Seq.unambiguous {!!} {!!}
---     (Seq.unambiguous {!!} {!!}
---                      {!!}))))))
---   {!!} {!!}))
+@0 unambiguous : Unambiguous IDPFields
+unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
+  (Iso.unambiguous iso
+    (Seq.unambiguous (Option.unambiguous Name.unambiguous TLV.nonempty) {!!}
+    (Seq.unambiguous (Default.unambiguous _ (TLV.unambiguous Boool.unambiguousValue) TLV.nonempty) {!!}
+    (Seq.unambiguous {!!} {!!}
+    (Seq.unambiguous {!!} {!!}
+    (Seq.unambiguous {!!} {!!}
+                     {!!}))))))
+  {!!} {!!}))
 
-
-  @0 nonmalleable : NonMalleable RawIDPFields
--- nonmalleable = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable
---    {!!} {!!}
---    (Iso.nonmalleable iso RawIDPFieldsSeqFieldsRep
---      (Seq.nonmalleable (Option.nonmalleable _ Name.nonmalleable)
---      (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
---      (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
---      (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
---      (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
---                        (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))))))))))
+@0 nonmalleable : NonMalleable RawIDPFields
+nonmalleable = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable
+   nonempty nosubstrings
+   (Iso.nonmalleable iso RawIDPFieldsSeqFieldsRep
+     (Seq.nonmalleable (Option.nonmalleable _ Name.nonmalleable)
+     (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
+     (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
+     (Seq.nonmalleable (Option.nonmalleable _ (TLV.nonmalleable BitString.nonmalleableValue))
+     (Seq.nonmalleable (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))
+                       (Default.nonmalleable _ (TLV.nonmalleable Boool.nonmalleableValue))))))))))

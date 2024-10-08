@@ -23,4 +23,3 @@ module Time where
 
 open Armor.Data.X690-DER.Time.GeneralizedTime public
 open Armor.Data.X690-DER.Time.UTCTime         public
-

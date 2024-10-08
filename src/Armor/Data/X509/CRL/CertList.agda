@@ -7,6 +7,6 @@ module Armor.Data.X509.CRL.CertList where
 open import Armor.Data.X509.CRL.CertList.Parser public
 open import Armor.Data.X509.CRL.CertList.TCB    public
 
-module RevokedCertificates where
+module CertList where
   open import Armor.Data.X509.CRL.CertList.Properties public
   open import Armor.Data.X509.CRL.CertList.TCB    public

@@ -13,7 +13,7 @@ open Armor.Grammar.Parser   UInt8
 open Armor.Grammar.Parallel UInt8
 
 private
-  here' = "X509: CRL : EntryExtension: InvalidityDate"
+  here' = "X509: CRL: CertList: TBSCertList: RevokedCertificates: EntryExtension: InvalidityDate"
 
 parseInvalidityDateFields : Parser (Logging ∘ Dec) InvalidityDateFields
 parseInvalidityDateFields =
