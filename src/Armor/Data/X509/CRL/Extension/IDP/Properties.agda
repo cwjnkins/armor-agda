@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 open import Armor.Binary
 open import Armor.Data.X509.GeneralNames
 open import Armor.Data.X509.Extension.CRLDistPoint.DistPoint.Name
@@ -34,16 +33,22 @@ proj₁ iso = equivalentIDPFieldsSeqFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ sndₚ₁ refl) refl) refl) refl) refl) = refl
 proj₂ (proj₂ iso) (mkIDPFieldsSeqFields distributionPoint onlyContainsUserCerts onlyContainsCACerts onlySomeReasons indirectCRL onlyContainsAttributeCerts refl) = refl
 
-@0 unambiguous : Unambiguous IDPFields
-unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
-  (Iso.unambiguous iso
-    (Seq.unambiguous (Option.unambiguous Name.unambiguous TLV.nonempty) {!!}
-    (Seq.unambiguous (Default.unambiguous _ (TLV.unambiguous Boool.unambiguousValue) TLV.nonempty) {!!}
-    (Seq.unambiguous {!!} {!!}
-    (Seq.unambiguous {!!} {!!}
-    (Seq.unambiguous {!!} {!!}
-                     {!!}))))))
-  {!!} {!!}))
+postulate
+ @0 unambiguous : Unambiguous IDPFields
+-- unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
+--   (Iso.unambiguous iso ua)
+--     {!!} {!!}))
+--   where
+--   ua : Unambiguous IDPFieldsSeqFieldsRep
+--   ua = {!!}
+  -- (Iso.unambiguous iso
+  --   (Seq.unambiguous (Option.unambiguous Name.unambiguous TLV.nonempty) {!!}
+  --   (Seq.unambiguous (Default.unambiguous _ (TLV.unambiguous Boool.unambiguousValue) TLV.nonempty) {!!}
+  --   (Seq.unambiguous {!!} {!!}
+  --   (Seq.unambiguous {!!} {!!}
+  --   (Seq.unambiguous {!!} {!!}
+  --                    {!!}))))))
+ 
 
 @0 nonmalleable : NonMalleable RawIDPFields
 nonmalleable = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable

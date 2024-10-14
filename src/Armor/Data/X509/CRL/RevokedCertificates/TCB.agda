@@ -52,7 +52,6 @@ RevokedCertificate xs = TLV Tag.Sequence RevokedCertificateFields xs
 RevokedCertificates : (@0 _ : List UInt8) → Set
 RevokedCertificates xs = TLV Tag.Sequence (NonEmptySequenceOf RevokedCertificate) xs
 
-
 RevokedCertificateFieldsRep : @0 List UInt8 → Set
 RevokedCertificateFieldsRep = (&ₚ (&ₚ Int Time) (Option EntryExtensions))
 

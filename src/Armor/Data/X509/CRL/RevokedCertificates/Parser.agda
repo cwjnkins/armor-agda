@@ -1,8 +1,11 @@
 open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.TCB
+open import Armor.Data.X509.Validity.Time
+open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.TLV
+open import Armor.Data.X690-DER.Int
 open import Armor.Data.X690-DER.SequenceOf
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList
@@ -28,49 +31,24 @@ open Armor.Grammar.Seq          UInt8
 private
   here' = "X509: CRL: TBSCertList: RevokedCertificates"
 
--- parseCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CertFields n)
--- parseCertFields n = ?
-  -- parseEquivalent eq p₁
-  -- where
-  -- A = Length≤ (TBSCert ×ₚ Singleton) n
-  -- B : {@0 bs : List UInt8} (a : A bs) → _
-  -- B {bs} _ = ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - length bs)
-  -- eq : Equivalent
-  --        (&ₚᵈ A B)
-  --        (ExactLength CertFields n)
-  -- eq = Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentCertFields)
-
-  -- @0 nsₐ : NoSubstrings A
-  -- nsₐ = Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings)
-
-  -- @0 uaₐ : Unambiguous A
-  -- uaₐ = Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ TBSCert.unambiguous (λ where self self → refl))
-
-  -- pₐ : Parser (Logging ∘ Dec) A
-  -- pₐ = parse≤ n (parse×Singleton parseTBSCert) (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " (fields): overflow")
-
-  -- @0 ns' : NoSubstrings (&ₚ SignAlg (BitString ×ₚ Singleton))
-  -- ns' = Seq.nosubstrings{A = SignAlg}{B = BitString ×ₚ Singleton} SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
-
-  -- pb : {@0 bs : List UInt8} → Singleton (length bs) → (a : A bs) → Parser (Logging ∘ Dec) (B a)
-  -- pb (singleton r r≡) _ =
-  --   subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n ∸ x)))
-  --     r≡
-  --     (parseExactLength{A = &ₚ SignAlg (BitString ×ₚ Singleton)} ns'
-  --       (tell $ here' String.++ " (fields): length mismatch")
-  --       (parse& {A = SignAlg} {B = BitString ×ₚ Singleton}
-  --         SignAlg.nosubstrings SignAlg.parse
-  --         (parse×Singleton parseBitstring))
-  --       (n - r))
-
-  -- p₁ : Parser (Logging ∘ Dec) (&ₚᵈ A B)
-  -- p₁ =
-  --   parse&ᵈ{A = A} nsₐ uaₐ pₐ pb
-
-postulate
-  parseRevokedCertificateFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RevokedCertificateFields n)
--- parseRevokedCertificateFields n =
---   parseEquivalent {!!} {!!}
+parseRevokedCertificateFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength RevokedCertificateFields n)
+parseRevokedCertificateFields n =
+  parseEquivalent
+    (Iso.transEquivalent
+      (Iso.symEquivalent Distribute.exactLength-&)
+      (Parallel.equivalent₁ equivalentRevokedCertificateFields))
+    (parse&ᵈ{A = Length≤ (&ₚ Int Time) n}
+      (Parallel.nosubstrings₁ (Seq.nosubstrings TLV.nosubstrings Time.nosubstrings))
+      (Parallel.Length≤.unambiguous
+        _
+        (Seq.unambiguous Int.unambiguous TLV.nosubstrings Time.unambiguous))
+      (parse≤
+        n (parse& TLV.nosubstrings  (Int.parse here') Time.parse) (Seq.nosubstrings TLV.nosubstrings Time.nosubstrings)
+          (tell $ here' String.++ " (fields): overflow"))
+       λ where
+        (singleton r₁ r₁≡) _ →
+          subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength  _ (n - x)))
+            r₁≡ (Option.parseOption₁ExactLength TLV.nosubstrings (tell $ here' String.++ " (fields): overflow") parseEntryExtensions (n - r₁)))
 
 parseRevokedCertificatesElems : ∀ n → Parser (Logging ∘ Dec) (ExactLength (NonEmptySequenceOf RevokedCertificate) n)
 parseRevokedCertificatesElems n =
