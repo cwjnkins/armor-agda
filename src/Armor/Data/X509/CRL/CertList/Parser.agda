@@ -1,6 +1,8 @@
 open import Armor.Binary
 open import Armor.Data.X509.CRL.CertList.Properties
 open import Armor.Data.X509.CRL.CertList.TCB
+open import Armor.Data.X509.SignAlg
+open import Armor.Data.X509.CRL.TBSCertList
 open import Armor.Data.X690-DER.BitString
 open import Armor.Data.X690-DER.TLV
 import      Armor.Data.X690-DER.Tag as Tag
@@ -26,45 +28,45 @@ open Armor.Grammar.Seq          UInt8
 private
   here' = "X509: CRL: CertList"
 
-postulate
-  parseCertFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CertListFields n)
--- parseCertFields n =
---   parseEquivalent eq p₁
---   where
---   A = Length≤ (TBSCert ×ₚ Singleton) n
---   B : {@0 bs : List UInt8} (a : A bs) → _
---   B {bs} _ = ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - length bs)
---   eq : Equivalent
---          (&ₚᵈ A B)
---          (ExactLength CertFields n)
---   eq = Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentCertFields)
+parseCertListFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength CertListFields n)
+parseCertListFields n =
+  parseEquivalent eq p₁
+  where
+  A = Length≤ (TBSCertList ×ₚ Singleton) n
+  B : {@0 bs : List UInt8} (a : A bs) → _
+  B {bs} _ = ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n - length bs)
+  eq : Equivalent
+         (&ₚᵈ A B)
+         (ExactLength CertListFields n)
+  eq = Iso.transEquivalent (Iso.symEquivalent Distribute.exactLength-&) (Parallel.equivalent₁ equivalentCertListFields)
 
---   @0 nsₐ : NoSubstrings A
---   nsₐ = Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings)
+  @0 nsₐ : NoSubstrings A
+  nsₐ = Parallel.nosubstrings₁ (Parallel.nosubstrings₁ TLV.nosubstrings)
 
---   @0 uaₐ : Unambiguous A
---   uaₐ = Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ TBSCert.unambiguous (λ where self self → refl))
+  @0 uaₐ : Unambiguous A
+  uaₐ = Parallel.Length≤.unambiguous _ (Parallel.unambiguous×ₚ TBSCertList.unambiguous (λ where self self → refl))
 
---   pₐ : Parser (Logging ∘ Dec) A
---   pₐ = parse≤ n (parse×Singleton parseTBSCert) (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " (fields): overflow")
+  pₐ : Parser (Logging ∘ Dec) A
+  pₐ = parse≤ n (parse×Singleton parseTBSCertList) (Parallel.nosubstrings₁ TLV.nosubstrings) (tell $ here' String.++ " (fields): overflow")
 
---   @0 ns' : NoSubstrings (&ₚ SignAlg (BitString ×ₚ Singleton))
---   ns' = Seq.nosubstrings{A = SignAlg}{B = BitString ×ₚ Singleton} SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
+  @0 ns' : NoSubstrings (&ₚ SignAlg (BitString ×ₚ Singleton))
+  ns' = Seq.nosubstrings{A = SignAlg}{B = BitString ×ₚ Singleton} SignAlg.nosubstrings (Parallel.nosubstrings₁ TLV.nosubstrings)
 
---   pb : {@0 bs : List UInt8} → Singleton (length bs) → (a : A bs) → Parser (Logging ∘ Dec) (B a)
---   pb (singleton r r≡) _ =
---     subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n ∸ x)))
---       r≡
---       (parseExactLength{A = &ₚ SignAlg (BitString ×ₚ Singleton)} ns'
---         (tell $ here' String.++ " (fields): length mismatch")
---         (parse& {A = SignAlg} {B = BitString ×ₚ Singleton}
---           SignAlg.nosubstrings SignAlg.parse
---           (parse×Singleton parseBitstring))
---         (n - r))
+  pb : {@0 bs : List UInt8} → Singleton (length bs) → (a : A bs) → Parser (Logging ∘ Dec) (B a)
+  pb (singleton r r≡) _ =
+    subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ SignAlg (BitString ×ₚ Singleton)) (n ∸ x)))
+      r≡
+      (parseExactLength{A = &ₚ SignAlg (BitString ×ₚ Singleton)} ns'
+        (tell $ here' String.++ " (fields): length mismatch")
+        (parse& {A = SignAlg} {B = BitString ×ₚ Singleton}
+          SignAlg.nosubstrings SignAlg.parse
+          (parse×Singleton parseBitstring))
+        (n - r))
 
---   p₁ : Parser (Logging ∘ Dec) (&ₚᵈ A B)
---   p₁ =
---     parse&ᵈ{A = A} nsₐ uaₐ pₐ pb
+  p₁ : Parser (Logging ∘ Dec) (&ₚᵈ A B)
+  p₁ =
+    parse&ᵈ{A = A} nsₐ uaₐ pₐ pb
 
 parseCertList : Parser (Logging ∘ Dec) CertList
-parseCertList = parseTLV _ here' _ parseCertFields
+parseCertList =
+  parseTLV _ here' _ parseCertListFields

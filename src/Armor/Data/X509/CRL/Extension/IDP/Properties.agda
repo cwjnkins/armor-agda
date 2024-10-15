@@ -15,6 +15,7 @@ import      Armor.Grammar.Properties
 import      Armor.Grammar.Parallel
 import      Armor.Grammar.Seq
 open import Armor.Prelude
+open import Tactic.MonoidSolver using (solve ; solve-macro)
 
 module Armor.Data.X509.CRL.Extension.IDP.Properties where
 
@@ -25,31 +26,17 @@ open Armor.Grammar.Parallel    UInt8
 open Armor.Grammar.Seq         UInt8
 
 postulate
-  @0 nonempty : NonEmpty  IDPFieldsSeqFields
   @0 nosubstrings : NoSubstrings  IDPFieldsSeqFields
+  @0 nonempty : NonEmpty  IDPFieldsSeqFields
 
 iso : Iso IDPFieldsSeqFieldsRep IDPFieldsSeqFields
 proj₁ iso = equivalentIDPFieldsSeqFields
 proj₁ (proj₂ iso) (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ sndₚ₁ refl) refl) refl) refl) refl) = refl
 proj₂ (proj₂ iso) (mkIDPFieldsSeqFields distributionPoint onlyContainsUserCerts onlyContainsCACerts onlySomeReasons indirectCRL onlyContainsAttributeCerts refl) = refl
 
-postulate
- @0 unambiguous : Unambiguous IDPFields
--- unambiguous = TLV.unambiguous (TLV.unambiguous (SequenceOf.Bounded.unambiguous
---   (Iso.unambiguous iso ua)
---     {!!} {!!}))
---   where
---   ua : Unambiguous IDPFieldsSeqFieldsRep
---   ua = {!!}
-  -- (Iso.unambiguous iso
-  --   (Seq.unambiguous (Option.unambiguous Name.unambiguous TLV.nonempty) {!!}
-  --   (Seq.unambiguous (Default.unambiguous _ (TLV.unambiguous Boool.unambiguousValue) TLV.nonempty) {!!}
-  --   (Seq.unambiguous {!!} {!!}
-  --   (Seq.unambiguous {!!} {!!}
-  --   (Seq.unambiguous {!!} {!!}
-  --                    {!!}))))))
+postulate 
+  @0 unambiguous : Unambiguous IDPFields
  
-
 @0 nonmalleable : NonMalleable RawIDPFields
 nonmalleable = TLV.nonmalleable (TLV.nonmalleable (SequenceOf.Bounded.nonmalleable
    nonempty nosubstrings

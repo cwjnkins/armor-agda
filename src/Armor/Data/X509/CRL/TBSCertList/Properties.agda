@@ -40,29 +40,55 @@ proj₂ (proj₂ iso) (mkTBSCertListFields version signAlg issuer thisUpdate nex
    = subst₀ (λ eq → mkTBSCertListFields version signAlg issuer thisUpdate nextUpdate revokedCertificates crlExtensions eq
      ≡ mkTBSCertListFields _ _ _ _ _ _ _ bs≡) (≡-unique bs≡ _) refl
 
-@0 unambiguous : Unambiguous TBSCertList
-unambiguous = TLV.unambiguous (Iso.unambiguous iso ua₆)
-  where
-  ua₁ : Unambiguous Rep₁
-  ua₁ = Seq.unambiguousOption₂ RevokedCertificates.unambiguous TLV.nosubstrings TLV.nonempty Extension.unambiguous TLV.nonempty
-    (TLV.noconfusion λ ())
+postulate
+  @0 unambiguous : Unambiguous TBSCertList
+  -- unambiguous = TLV.unambiguous (Iso.unambiguous iso ua₆)
+  -- where
 
-  ua₂ : Unambiguous Rep₂
-  ua₂ = Seq.unambiguousOption₁ Time.unambiguous Time.nosubstrings ua₁ {!!}
+-- postulate
+--   nc₁ : NoConfusion Time Rep₁
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized a@(mkTLV len val len≡ bs≡₁)) b@(mk&ₚ none none refl) = 
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) {!!})) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ none (some (mkTLV len₁ val₁ len≡₁ bs≡₂)) bs≡) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) (trans bs≡ bs≡₂))))) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) none refl) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) refl)))) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) (some (mkTLV len₂ val₂ len≡₂ refl)) bs≡) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡)))) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ none none refl) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) {!!})) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ none (some (mkTLV len₁ val₁ len≡₁ bs≡₂)) bs≡) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) (trans bs≡ bs≡₂))))) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) none refl) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) refl)))) λ ()
+  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) (some (mkTLV len₂ val₂ len≡₂ refl)) bs≡) =
+  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡)))) λ ()
 
-  ua₃ : Unambiguous Rep₃
-  ua₃ = Seq.unambiguous Time.unambiguous Time.nosubstrings ua₂
+  --   nc₂ : NoConfusion Version SignAlg
+  -- -- nc₂ xs₁++ys₁≡xs₂++ys₂ (mk×ₚ v@(mkTLV len₁ val₁ len≡₁ bs≡) sndₚ₁) s@(mkTLV len val len≡ bs≡₁) =
+  -- --   TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ v s
 
-  ua₄ : Unambiguous Rep₄
-  ua₄ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₃
+  -- ns₁ : NoSubstrings Rep₅
+  -- ns₁ = Seq.nosubstringsOption₁ Version.nosubstrings SignAlg.nosubstrings nc₂
 
-  ua₅ : Unambiguous Rep₅
-  ua₅ = Seq.unambiguousOption₁ Version.unambiguous Version.nosubstrings SignAlg.unambiguous {!!}
+  -- ua₁ : Unambiguous Rep₁
+  -- ua₁ = Seq.unambiguousOption₂ RevokedCertificates.unambiguous TLV.nosubstrings TLV.nonempty Extension.unambiguous TLV.nonempty
+  --   (TLV.noconfusion λ ())
 
-  ua₆ : Unambiguous Rep₆
-  ua₆ = Seq.unambiguous ua₅ {!!} ua₄
+  -- ua₂ : Unambiguous Rep₂
+  -- ua₂ = Seq.unambiguousOption₁ Time.unambiguous Time.nosubstrings ua₁ nc₁
 
--- (Seq.nosubstringsOption₁ Version.nosubstrings SignAlg.nosubstrings {!!}
+  -- ua₃ : Unambiguous Rep₃
+  -- ua₃ = Seq.unambiguous Time.unambiguous Time.nosubstrings ua₂
+
+  -- ua₄ : Unambiguous Rep₄
+  -- ua₄ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₃
+
+  -- ua₅ : Unambiguous Rep₅
+  -- ua₅ = ? -- Seq.unambiguousOption₁ Version.unambiguous Version.nosubstrings SignAlg.unambiguous nc₂
+
+  -- ua₆ : Unambiguous Rep₆
+  -- ua₆ = Seq.unambiguous ua₅ ns₁ ua₄
 
 R₁ = Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)
 R₂ = Raw&ₚ (RawOption RawTime) R₁
@@ -75,7 +101,8 @@ R₆ = Raw&ₚ R₅ R₄
 nonmalleableFields = Iso.nonmalleable iso RawTBSCertListFieldsRep nm₆
   where
   nm₁ : NonMalleable R₁
-  nm₁ = Seq.nonmalleable{ra = RawOption RawRevokedCertificates}{rb = RawOption RawExtensions} (Option.nonmalleable _ RevokedCertificates.nonmalleable) (Option.nonmalleable _ Extension.nonmalleable)
+  nm₁ = Seq.nonmalleable{ra = RawOption RawRevokedCertificates}{rb = RawOption RawExtensions}
+          (Option.nonmalleable _ RevokedCertificates.nonmalleable) (Option.nonmalleable _ Extension.nonmalleable)
 
   nm₂ : NonMalleable R₂
   nm₂ = Seq.nonmalleable{ra = RawOption RawTime}{rb = R₁} (Option.nonmalleable _ Time.nonmalleable) nm₁

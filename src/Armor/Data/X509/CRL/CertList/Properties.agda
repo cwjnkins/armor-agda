@@ -22,28 +22,45 @@ open Armor.Grammar.Option       UInt8
 open Armor.Grammar.Parallel     UInt8
 open Armor.Grammar.Seq          UInt8
 
-
 iso   : Iso CertListFieldsRep CertListFields
 proj₁ iso = equivalentCertListFields
-proj₁ (proj₂ iso) (mk&ₚ (mk&ₚ fstₚ₁ sndₚ₂ refl) sndₚ₁ bs≡) =  subst₀ (λ eq → mk&ₚ _ _ eq ≡ mk&ₚ _ _ bs≡) (≡-unique bs≡ (trans₀ (trans₀ bs≡ _) _)) refl
-proj₂ (proj₂ iso) (mkCertListFields tbs signAlg signature bs≡) =
-  subst₀ (λ eq → mkCertListFields tbs signAlg signature eq
-     ≡ mkCertListFields _ _ _ bs≡) (≡-unique bs≡ _) refl
+proj₁ (proj₂ iso) (mk&ₚ (mk×ₚ fstₚ₁ s) (mk&ₚ fstₚ₂ (mk×ₚ sndₚ₁ _) refl) refl) = refl
+proj₂ (proj₂ iso) (mkCertListFields tbs tbsBytes signAlg signature sbytes refl) = refl
+
+RawRep₁ = Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue)
+RawRep = Raw&ₚ (Raw×ₚ RawTBSCertList RawOctetStringValue) RawRep₁
 
 @0 unambiguous : Unambiguous CertList
-unambiguous = TLV.unambiguous (Iso.unambiguous iso
-  (Seq.unambiguous (Seq.unambiguous TBSCertList.unambiguous TLV.nosubstrings SignAlg.unambiguous)
-    (Seq.nosubstrings TLV.nosubstrings TLV.nosubstrings) BitString.unambiguous))
+unambiguous =
+  TLV.unambiguous (Iso.unambiguous iso
+    (Seq.unambiguous
+      (Parallel.unambiguous (TBSCertList.unambiguous) (λ where _ self self → refl))
+      (Parallel.nosubstrings₁ TLV.nosubstrings)
+      (Seq.unambiguous SignAlg.unambiguous SignAlg.nosubstrings
+        (Parallel.unambiguous BitString.unambiguous (λ where _ self self → refl)))))
 
 @0 nonmalleableFields : NonMalleable RawCertListFields
-nonmalleableFields = Iso.nonmalleable iso RawCertListFieldsRep nm₁
+nonmalleableFields =
+  Iso.nonmalleable iso RawCertListFieldsRep
+    nm₁
   where
-  nm₂ : NonMalleable (Raw&ₚ RawTBSCertList RawSignAlg)
-  nm₂ = Seq.nonmalleable{ra = RawTBSCertList}{rb = RawSignAlg} TBSCertList.nonmalleable SignAlg.nonmalleable
+  nm₂ : NonMalleable (Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue))
+  nm₂ =
+    Seq.nonmalleable
+      {ra = RawSignAlg}
+      {rb = Raw×ₚ RawBitString RawOctetStringValue}
+      SignAlg.nonmalleable
+      (Parallel.nonmalleable×ₚ{ra = RawBitString}{rb = RawOctetStringValue}
+        BitString.nonmalleable
+        OctetString.nonmalleableValue)
 
   nm₁ : NonMalleable RawCertListFieldsRep
-  nm₁ = Seq.nonmalleable{ra = Raw&ₚ RawTBSCertList RawSignAlg}{rb = RawBitString}
-        nm₂ BitString.nonmalleable
+  nm₁ =
+    Seq.nonmalleable
+      {ra = Raw×ₚ RawTBSCertList RawOctetStringValue}
+      {rb = Raw&ₚ RawSignAlg (Raw×ₚ RawBitString RawOctetStringValue)}
+      (Parallel.nonmalleable×ₚ TBSCertList.nonmalleable λ where self self refl → refl)
+      nm₂
 
 @0 nonmalleable : NonMalleable RawCertList
-nonmalleable = TLV.nonmalleable nonmalleableFields
+nonmalleable = TLV.nonmalleable{R = RawCertListFields} nonmalleableFields
