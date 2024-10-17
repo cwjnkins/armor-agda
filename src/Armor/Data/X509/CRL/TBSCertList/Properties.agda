@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.TLV
 open import Armor.Data.X509.CRL.TBSCertList.TCB
@@ -40,84 +39,66 @@ proj₂ (proj₂ iso) (mkTBSCertListFields version signAlg issuer thisUpdate nex
    = subst₀ (λ eq → mkTBSCertListFields version signAlg issuer thisUpdate nextUpdate revokedCertificates crlExtensions eq
      ≡ mkTBSCertListFields _ _ _ _ _ _ _ bs≡) (≡-unique bs≡ _) refl
 
-postulate
-  @0 unambiguous : Unambiguous TBSCertList
-  -- unambiguous = TLV.unambiguous (Iso.unambiguous iso ua₆)
-  -- where
+@0 ncVersionSignAlg : NoConfusion Version SignAlg
+ncVersionSignAlg xs₁++ys₁≡xs₂++ys₂ (mk×ₚ v@(mkTLV len₁ val₁ len≡₁ bs≡) sndₚ₁) s@(mkTLV len val len≡ bs≡₁) =
+    TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ v s
 
--- postulate
---   nc₁ : NoConfusion Time Rep₁
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized a@(mkTLV len val len≡ bs≡₁)) b@(mk&ₚ none none refl) = 
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) {!!})) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ none (some (mkTLV len₁ val₁ len≡₁ bs≡₂)) bs≡) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) (trans bs≡ bs≡₂))))) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) none refl) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) refl)))) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (generalized (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) (some (mkTLV len₂ val₂ len≡₂ refl)) bs≡) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡)))) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ none none refl) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) {!!})) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ none (some (mkTLV len₁ val₁ len≡₁ bs≡₂)) bs≡) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) (trans bs≡ bs≡₂))))) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) none refl) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) refl)))) λ ()
-  -- nc₁ {xs₁} {ys₁} {xs₂} {ys₂} xs₁++ys₁≡xs₂++ys₂ (utc (mkTLV len val len≡ bs≡₁)) (mk&ₚ (some (mkTLV len₁ val₁ len≡₁ refl)) (some (mkTLV len₂ val₂ len≡₂ refl)) bs≡) =
-  --   contradiction (∷-injectiveˡ (trans (cong (_++ ys₁) (sym bs≡₁)) (trans xs₁++ys₁≡xs₂++ys₂ (cong (_++ ys₂) bs≡)))) λ ()
+@0 ncTimeRevokedCertificates : NoConfusion Time RevokedCertificates
+ncTimeRevokedCertificates xs₁++ys₁≡xs₂++ys₂ (generalized x₁) x = TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ x₁ x
+ncTimeRevokedCertificates xs₁++ys₁≡xs₂++ys₂ (utc x₁) x = TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ x₁ x
 
-  --   nc₂ : NoConfusion Version SignAlg
-  -- -- nc₂ xs₁++ys₁≡xs₂++ys₂ (mk×ₚ v@(mkTLV len₁ val₁ len≡₁ bs≡) sndₚ₁) s@(mkTLV len val len≡ bs≡₁) =
-  -- --   TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ v s
+@0 ncTimeExtensions : NoConfusion Time Extensions
+ncTimeExtensions xs₁++ys₁≡xs₂++ys₂ (generalized x₁) x = TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ x₁ x
+ncTimeExtensions xs₁++ys₁≡xs₂++ys₂ (utc x₁) x = TLV.noconfusion (λ ()) xs₁++ys₁≡xs₂++ys₂ x₁ x
 
-  -- ns₁ : NoSubstrings Rep₅
-  -- ns₁ = Seq.nosubstringsOption₁ Version.nosubstrings SignAlg.nosubstrings nc₂
+@0 nsRep₅ : NoSubstrings Rep₅
+nsRep₅ = Seq.nosubstringsOption₁{A = Version}{B = SignAlg} Version.nosubstrings SignAlg.nosubstrings ncVersionSignAlg
 
-  -- ua₁ : Unambiguous Rep₁
-  -- ua₁ = Seq.unambiguousOption₂ RevokedCertificates.unambiguous TLV.nosubstrings TLV.nonempty Extension.unambiguous TLV.nonempty
-  --   (TLV.noconfusion λ ())
-
-  -- ua₂ : Unambiguous Rep₂
-  -- ua₂ = Seq.unambiguousOption₁ Time.unambiguous Time.nosubstrings ua₁ nc₁
-
-  -- ua₃ : Unambiguous Rep₃
-  -- ua₃ = Seq.unambiguous Time.unambiguous Time.nosubstrings ua₂
-
-  -- ua₄ : Unambiguous Rep₄
-  -- ua₄ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₃
-
-  -- ua₅ : Unambiguous Rep₅
-  -- ua₅ = ? -- Seq.unambiguousOption₁ Version.unambiguous Version.nosubstrings SignAlg.unambiguous nc₂
-
-  -- ua₆ : Unambiguous Rep₆
-  -- ua₆ = Seq.unambiguous ua₅ ns₁ ua₄
-
-R₁ = Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)
-R₂ = Raw&ₚ (RawOption RawTime) R₁
-R₃ = Raw&ₚ RawTime R₂
-R₄ = Raw&ₚ RawName R₃
-R₅ = Raw&ₚ (RawOption RawVersion) RawSignAlg
-R₆ = Raw&ₚ R₅ R₄
-
-@0 nonmalleableFields : NonMalleable RawTBSCertListFields
-nonmalleableFields = Iso.nonmalleable iso RawTBSCertListFieldsRep nm₆
+@0 unambiguous : Unambiguous TBSCertList
+unambiguous = TLV.unambiguous (Iso.unambiguous iso ua₆)
   where
-  nm₁ : NonMalleable R₁
+  ua₂ : Unambiguous Rep₂
+  ua₂ = Seq.unambiguous₂Option₃ Time.unambiguous Time.nosubstrings Time.nonempty
+    RevokedCertificates.unambiguous TLV.nosubstrings TLV.nonempty Extension.unambiguous
+    TLV.nonempty ncTimeRevokedCertificates ncTimeExtensions (TLV.noconfusion (λ ()))
+
+  ua₃ : Unambiguous Rep₃
+  ua₃ = Seq.unambiguous Time.unambiguous Time.nosubstrings ua₂ 
+
+  ua₄ : Unambiguous Rep₄
+  ua₄ = Seq.unambiguous Name.unambiguous TLV.nosubstrings ua₃
+
+  ua₅ : Unambiguous Rep₅
+  ua₅ = Seq.unambiguousOption₁ Version.unambiguous Version.nosubstrings SignAlg.unambiguous ncVersionSignAlg
+
+  ua₆ : Unambiguous Rep₆
+  ua₆ = Seq.unambiguous ua₅ nsRep₅ ua₄
+
+@0 nonmalleable : NonMalleable RawTBSCertList
+nonmalleable = TLV.nonmalleable (Iso.nonmalleable iso RawTBSCertListFieldsRep nm₆)
+  where
+  R = Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)
+  R₁ = Raw&ₚ (RawOption RawTime) R
+  R₂ = Raw&ₚ RawTime R₁
+  R₃ = Raw&ₚ RawName R₂
+  R₄ = Raw&ₚ (RawOption RawVersion) RawSignAlg
+  R₅ = Raw&ₚ R₄ R₃
+
+  nm₁ : NonMalleable R
   nm₁ = Seq.nonmalleable{ra = RawOption RawRevokedCertificates}{rb = RawOption RawExtensions}
           (Option.nonmalleable _ RevokedCertificates.nonmalleable) (Option.nonmalleable _ Extension.nonmalleable)
 
-  nm₂ : NonMalleable R₂
-  nm₂ = Seq.nonmalleable{ra = RawOption RawTime}{rb = R₁} (Option.nonmalleable _ Time.nonmalleable) nm₁
+  nm₂ : NonMalleable R₁
+  nm₂ = Seq.nonmalleable{ra = RawOption RawTime}{rb = R} (Option.nonmalleable _ Time.nonmalleable) nm₁
 
-  nm₃ : NonMalleable R₃
-  nm₃ = Seq.nonmalleable{ra = RawTime}{rb = R₂} Time.nonmalleable nm₂
+  nm₃ : NonMalleable R₂
+  nm₃ = Seq.nonmalleable{ra = RawTime}{rb = R₁} Time.nonmalleable nm₂
 
-  nm₄ : NonMalleable R₄
-  nm₄ = Seq.nonmalleable{ra = RawName}{rb = R₃} Name.nonmalleable nm₃
+  nm₄ : NonMalleable R₃
+  nm₄ = Seq.nonmalleable{ra = RawName}{rb = R₂} Name.nonmalleable nm₃
 
-  nm₅ : NonMalleable R₅
+  nm₅ : NonMalleable R₄
   nm₅ = Seq.nonmalleable{ra = RawOption RawVersion}{rb = RawSignAlg} (Option.nonmalleable _ Version.nonmalleable) SignAlg.nonmalleable
 
-  nm₆ : NonMalleable R₆
-  nm₆ = Seq.nonmalleable{ra = R₅}{rb = R₄} nm₅ nm₄
-
-@0 nonmalleable : NonMalleable RawTBSCertList
-nonmalleable = TLV.nonmalleable nonmalleableFields
+  nm₆ : NonMalleable R₅
+  nm₆ = Seq.nonmalleable{ra = R₄}{rb = R₃} nm₅ nm₄

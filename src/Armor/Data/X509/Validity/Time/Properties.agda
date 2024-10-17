@@ -19,6 +19,10 @@ proj₁ (proj₂ iso) (Sum.inj₂ x) = refl
 proj₂ (proj₂ iso) (generalized x) = refl
 proj₂ (proj₂ iso) (utc x) = refl
 
+@0 nonempty : NonEmpty Time
+nonempty (generalized x) x₁ = TLV.nonempty x x₁
+nonempty (utc x) x₁ = TLV.nonempty x x₁
+
 @0 nosubstrings : NoSubstrings Time
 nosubstrings =
   Iso.nosubstrings equivalent

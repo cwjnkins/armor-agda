@@ -16,7 +16,7 @@ open Armor.Grammar.Parallel    UInt8
 open Armor.Grammar.Parser      UInt8
 open Armor.Grammar.Seq         UInt8
 
-module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (default : A bs') (loc : String) where
+module _ {A C : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ ⦃ _ : Eq≋ C ⦄ {@0 bs' bs'' : List UInt8} (default : A bs') (default₁ : C bs'') (loc : String) where
   parseDefault₁
     : ∀ {B} → @0 Unambiguous A → @0 NoSubstrings A → @0 NoConfusion A B
       → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B
@@ -128,3 +128,25 @@ module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (
           (success pre₁ _ r₁≡ (mk×ₚ (mk&ₚ (mkDefault oa p) ob refl) abLen) suf₁ ps≡₁))
     where
     open ≡-Reasoning
+
+
+  -- parseOptionDefaultDefault
+  --   : ∀ {B}
+  --     → @0 Unambiguous A → @0 Unambiguous B
+  --     → @0 NoSubstrings A
+  --     → @0 NoSubstrings B
+  --     → @0 NoSubstrings C
+  --     → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion B C
+  --     → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B → Parser (Logging ∘ Dec) C
+  --     → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option B) (&ₚ (Default A default) (Default C default₁))) n)
+
+  -- runParser (parseOptionDefaultDefault x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ zero) xs =
+  --   return (yes (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ (mkDefault none tt) (mkDefault none tt) refl) refl) (─ refl)) xs refl))
+  -- runParser (parseOptionDefaultDefault x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ n@(suc _)) xs = do
+  --   -- (yes (success ? ? ? ? ? ?)) ← runParser ? ?
+  --   (yes (success pre₁ r₁ r₁≡ (mk×ₚ (mk&ₚ? ? ?) ?) ? ?)) ← runParser ? ?
+  --   case {!!} ret (const _) of λ where
+  --     (no ¬p) → {!!}
+  --     (yes p) → {!!}
+  --   where
+  --   open ≡-Reasoning

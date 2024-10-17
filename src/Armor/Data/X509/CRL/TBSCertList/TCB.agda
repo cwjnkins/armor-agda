@@ -80,8 +80,12 @@ proj₂ equivalentTBSCertListFields (mkTBSCertListFields version signAlg issuer 
             (mk&ₚ revokedCertificates crlExtensions refl) refl) refl) refl) (trans₀ bs≡ (solve (++-monoid UInt8)))
 
 RawTBSCertListFieldsRep : Raw TBSCertListFieldsRep
-RawTBSCertListFieldsRep = Raw&ₚ (Raw&ₚ (RawOption RawVersion) RawSignAlg) (Raw&ₚ RawName (Raw&ₚ RawTime
-                        (Raw&ₚ (RawOption RawTime) (Raw&ₚ (RawOption RawRevokedCertificates) (RawOption RawExtensions)))))
+RawTBSCertListFieldsRep = Raw&ₚ (Raw&ₚ (RawOption RawVersion) RawSignAlg)
+                         (Raw&ₚ RawName
+                         (Raw&ₚ RawTime
+                         (Raw&ₚ (RawOption RawTime)
+                         (Raw&ₚ (RawOption RawRevokedCertificates)
+                                 (RawOption RawExtensions)))))
 
 RawTBSCertListFields = Iso.raw equivalentTBSCertListFields RawTBSCertListFieldsRep
 
