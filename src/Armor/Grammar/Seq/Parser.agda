@@ -345,3 +345,407 @@ module _ where
               pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
               pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
               xs ∎)))
+
+  parse₂Option₄ : ∀ {A B C D : @0 List Σ → Set} → String
+      → @0 NoSubstrings A
+      → @0 NoSubstrings B
+      → @0 NoSubstrings C
+      → @0 NoSubstrings D
+      → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion A D 
+      → @0 NoConfusion B C → @0 NoConfusion B D → @0 NoConfusion C D
+      → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B → Parser (Logging ∘ Dec) C → Parser (Logging ∘ Dec) D
+      → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ(Option A) (&ₚ (Option B) (&ₚ (Option C) (Option D)))) n)
+  runParser (parse₂Option₄ loc ns₁ ns₂ ns₃ ns₄ nc₁₂ nc₁₃ nc₁₄ nc₂₃ nc₂₄ nc₃₄ p₁ p₂ p₃ p₄ 0) xs =
+    return (yes
+      (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none none refl) refl) refl) (─ refl)) xs refl))
+  parse₂Option₄{A}{B}{C}{D} loc ns₁ ns₂ ns₃ ns₄ nc₁₂ nc₁₃ nc₁₄ nc₂₃ nc₂₄ nc₃₄ p₁ p₂ p₃ p₄ n@(suc _) =
+    parseEquivalent (ExactLength.equivalent{A = Option A}{B = &ₚ (Option B) (&ₚ (Option C) (Option D))}) p
+    where
+    open ≡-Reasoning
+
+    p₁' : Parser (Logging ∘ Dec) (Length≤ A n)
+    p₁' = parse≤ n p₁ ns₁ (tell $ loc String.++ ": overlfow (1st)")
+
+    DD : {@0 bs₁ : List Σ} → @0 List Σ → Set
+    DD {bs'} = ExactLength (&ₚ (Option B) (&ₚ (Option C) (Option D))) (n - length bs')
+
+    p₂₃₄' : ∀ {@0 bs₁ : List Σ} → Singleton (length bs₁) → Parser (Logging ∘ Dec) (DD{bs₁})
+    p₂₃₄' {bs₁} (singleton r r≡) =
+      subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option B) (&ₚ (Option C) (Option D))) (n - x)))
+        {r}{length bs₁}
+        r≡
+        (parse₂Option₃ (loc String.++ " (2nd,3rd,4th)") ns₂ ns₃ ns₄ nc₂₃ nc₂₄ nc₃₄ p₂ p₃ p₄ (n - r))
+
+    p : Parser (Logging ∘ Dec) (&ₚᵈ (Length≤ (Option A) n) λ {bs₁} _ → DD{bs₁})
+    runParser p xs = do
+      (yes (success pre₁ r₁ r₁≡ v₁@(mk×ₚ a₁ aLen) suf₁ ps≡₁)) ← runParser p₁' xs
+        where no ¬p₁ → do
+          (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) ← runParser (parse₂Option₃ (loc String.++ " (2nd,3rd,4th)") ns₂ ns₃ ns₄ nc₂₃ nc₂₄ nc₃₄ p₂ p₃ p₄ n) xs
+            where no ¬op₂₃₄ → do
+              tell $ loc String.++ ": failed to parse"
+              return ∘ no $ λ where
+                (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a) aLen) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success bs₁ _ refl (mk×ₚ a aLen) (bs₂ ++ suffix)
+                      (begin
+                        bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                        (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                        xs ∎))
+                    ¬p₁
+                (success prefix read read≡ (mk&ₚ{bs₂ = bs₂} (mk×ₚ none _) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success prefix _ read≡ oaob suffix ps≡)
+                    ¬op₂₃₄
+          return (yes
+            (success _ _ r₁≡ (mk&ₚ (mk×ₚ none (─ z≤n)) v₁ refl) suf₁ ps≡₁))
+      (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) ← runParser (p₂₃₄'{pre₁} (singleton r₁ r₁≡)) suf₁
+        where no ¬op₂₃₄ → do
+          tell $ loc String.++ ": failed to parse"
+          return ∘ no $ λ where
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ {bs₁}{bs₂} (some b') _ refl) obocodLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                b'
+                (nc₁₂ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some c') _ refl) refl) obocodLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                c'
+                (nc₁₃ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (some d') refl) refl) obocodLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ prefix ++ suffix
+                ++≡ = trans ps≡₁ (sym ps≡)
+              in
+              contradiction
+                d'
+                (nc₁₄ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none none refl) refl) (─ ())) refl) .xs refl)
+            (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a') oaLen) oaob' bs≡) suffix ps≡) →
+              let
+                @0 ++≡ : bs₁ ++ bs₂ ++ suffix ≡ pre₁ ++ suf₁
+                ++≡ = begin
+                  bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
+                  prefix ++ suffix ≡⟨ ps≡ ⟩
+                  xs ≡⟨ sym ps≡₁ ⟩
+                  pre₁ ++ suf₁ ∎
+
+                @0 pre₁≡ : bs₁ ≡ pre₁
+                pre₁≡ = ns₁ ++≡ a' a₁
+              in
+              contradiction
+                (success bs₂ _ refl (DD {pre₁} bs₂ ∋ subst₀ (λ x → DD {x} bs₂) pre₁≡ oaob')
+                  suffix
+                  (Lemmas.++-cancel≡ˡ _ _ pre₁≡ ++≡))
+                ¬op₂₃₄
+      return (yes
+        (success (pre₁ ++ pre₂) (r₁ + r₂)
+          (begin
+            (r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+            length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+            length (pre₁ ++ pre₂) ∎))
+          (mk&ₚ (mk×ₚ (some a₁) aLen) v₂ refl) suf₂
+            (begin
+              (pre₁ ++ pre₂) ++ suf₂ ≡⟨ ++-assoc pre₁ pre₂ suf₂ ⟩
+              pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+              pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+              xs ∎)))
+
+  parse₂Option₅ : ∀ {A B C D E : @0 List Σ → Set} → String
+      → @0 NoSubstrings A
+      → @0 NoSubstrings B
+      → @0 NoSubstrings C
+      → @0 NoSubstrings D
+      → @0 NoSubstrings E
+      → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion A D → @0 NoConfusion A E
+      → @0 NoConfusion B C → @0 NoConfusion B D → @0 NoConfusion B E
+      → @0 NoConfusion C D → @0 NoConfusion C E
+      → @0 NoConfusion D E
+      → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B → Parser (Logging ∘ Dec) C → Parser (Logging ∘ Dec) D → Parser (Logging ∘ Dec) E
+      → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E))))) n)
+  runParser (parse₂Option₅ loc ns₁ ns₂ ns₃ ns₄ ns₅ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₂₃ nc₂₄ nc₂₅ nc₃₄ nc₃₅ nc₄₅ p₁ p₂ p₃ p₄ p₅ 0) xs =
+    return (yes
+      (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ none none refl) refl) refl) refl) (─ refl)) xs refl))
+  parse₂Option₅{A}{B}{C}{D}{E} loc ns₁ ns₂ ns₃ ns₄ ns₅ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₂₃ nc₂₄ nc₂₅ nc₃₄ nc₃₅ nc₄₅ p₁ p₂ p₃ p₄ p₅ n@(suc _) =
+    parseEquivalent (ExactLength.equivalent{A = Option A}{B = (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E))))}) p
+    where
+    open ≡-Reasoning
+
+    p₁' : Parser (Logging ∘ Dec) (Length≤ A n)
+    p₁' = parse≤ n p₁ ns₁ (tell $ loc String.++ ": overlfow (1st)")
+
+    DD : {@0 bs₁ : List Σ} → @0 List Σ → Set
+    DD {bs'} = ExactLength (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))) (n - length bs')
+
+    p₂₃₄₅' : ∀ {@0 bs₁ : List Σ} → Singleton (length bs₁) → Parser (Logging ∘ Dec) (DD{bs₁})
+    p₂₃₄₅' {bs₁} (singleton r r≡) =
+      subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))) (n - x)))
+        {r}{length bs₁}
+        r≡
+        (parse₂Option₄ (loc String.++ " (2nd,3rd,4th,5th)") ns₂ ns₃ ns₄ ns₅ nc₂₃ nc₂₄ nc₂₅ nc₃₄ nc₃₅ nc₄₅ p₂ p₃ p₄ p₅ (n - r))
+
+    p : Parser (Logging ∘ Dec) (&ₚᵈ (Length≤ (Option A) n) λ {bs₁} _ → DD{bs₁})
+    runParser p xs = do
+      (yes (success pre₁ r₁ r₁≡ v₁@(mk×ₚ a₁ aLen) suf₁ ps≡₁)) ← runParser p₁' xs
+        where no ¬p₁ → do
+          (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) ← runParser (parse₂Option₄ (loc String.++ " (2nd,3rd,4th,5th)") ns₂ ns₃ ns₄ ns₅ nc₂₃ nc₂₄ nc₂₅ nc₃₄ nc₃₅ nc₄₅ p₂ p₃ p₄ p₅ n) xs
+            where no ¬op₂₃₄₅ → do
+              tell $ loc String.++ ": failed to parse"
+              return ∘ no $ λ where
+                (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a) aLen) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success bs₁ _ refl (mk×ₚ a aLen) (bs₂ ++ suffix)
+                      (begin
+                        bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                        (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                        xs ∎))
+                    ¬p₁
+                (success prefix read read≡ (mk&ₚ{bs₂ = bs₂} (mk×ₚ none _) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success prefix _ read≡ oaob suffix ps≡)
+                    ¬op₂₃₄₅
+          return (yes
+            (success _ _ r₁≡ (mk&ₚ (mk×ₚ none (─ z≤n)) v₁ refl) suf₁ ps≡₁))
+      (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) ← runParser (p₂₃₄₅'{pre₁} (singleton r₁ r₁≡)) suf₁
+        where no ¬op₂₃₄₅ → do
+          tell $ loc String.++ ": failed to parse"
+          return ∘ no $ λ where
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ {bs₁}{bs₂} (some b') _ refl) obocodoeLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                b'
+                (nc₁₂ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some c') _ refl) refl) obocodoeLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                c'
+                (nc₁₃ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some d') _ refl) refl) refl) obocodoeLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                d'
+                (nc₁₄ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none  (mk&ₚ {bs₁}{bs₂} none (some e') refl) refl) refl) obocodoeLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ prefix ++ suffix
+                ++≡ = trans ps≡₁ (sym ps≡)
+              in
+              contradiction
+                e'
+                (nc₁₅ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none none refl) refl) refl) (─ ())) refl) .xs refl)
+            (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a') oaLen) oaob' bs≡) suffix ps≡) →
+              let
+                @0 ++≡ : bs₁ ++ bs₂ ++ suffix ≡ pre₁ ++ suf₁
+                ++≡ = begin
+                  bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
+                  prefix ++ suffix ≡⟨ ps≡ ⟩
+                  xs ≡⟨ sym ps≡₁ ⟩
+                  pre₁ ++ suf₁ ∎
+
+                @0 pre₁≡ : bs₁ ≡ pre₁
+                pre₁≡ = ns₁ ++≡ a' a₁
+              in
+              contradiction
+                (success bs₂ _ refl (DD {pre₁} bs₂ ∋ subst₀ (λ x → DD {x} bs₂) pre₁≡ oaob')
+                  suffix
+                  (Lemmas.++-cancel≡ˡ _ _ pre₁≡ ++≡))
+                ¬op₂₃₄₅
+      return (yes
+        (success (pre₁ ++ pre₂) (r₁ + r₂)
+          (begin
+            (r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+            length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+            length (pre₁ ++ pre₂) ∎))
+          (mk&ₚ (mk×ₚ (some a₁) aLen) v₂ refl) suf₂
+            (begin
+              (pre₁ ++ pre₂) ++ suf₂ ≡⟨ ++-assoc pre₁ pre₂ suf₂ ⟩
+              pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+              pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+              xs ∎)))
+
+  parse₂Option₆ : ∀ {A B C D E F : @0 List Σ → Set} → String
+      → @0 NoSubstrings A
+      → @0 NoSubstrings B
+      → @0 NoSubstrings C
+      → @0 NoSubstrings D
+      → @0 NoSubstrings E
+      → @0 NoSubstrings F
+      → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion A D → @0 NoConfusion A E → @0 NoConfusion A F
+      → @0 NoConfusion B C → @0 NoConfusion B D → @0 NoConfusion B E → @0 NoConfusion B F
+      → @0 NoConfusion C D → @0 NoConfusion C E → @0 NoConfusion C F
+      → @0 NoConfusion D E → @0 NoConfusion D F
+      → @0 NoConfusion E F
+      → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B → Parser (Logging ∘ Dec) C → Parser (Logging ∘ Dec) D → Parser (Logging ∘ Dec) E → Parser (Logging ∘ Dec) F
+      → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ(Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F)))))) n)
+  runParser (parse₂Option₆ loc ns₁ ns₂ ns₃ ns₄ ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ p₁ p₂ p₃ p₄ p₅ p₆ 0) xs =
+    return (yes
+      (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ none none refl) refl) refl) refl) refl) (─ refl)) xs refl))
+  parse₂Option₆{A}{B}{C}{D}{E}{F} loc ns₁ ns₂ ns₃ ns₄ ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ p₁ p₂ p₃ p₄ p₅ p₆ n@(suc _) =
+    parseEquivalent (ExactLength.equivalent{A = Option A}{B = (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F)))))}) p
+    where
+    open ≡-Reasoning
+
+    p₁' : Parser (Logging ∘ Dec) (Length≤ A n)
+    p₁' = parse≤ n p₁ ns₁ (tell $ loc String.++ ": overlfow (1st)")
+
+    DD : {@0 bs₁ : List Σ} → @0 List Σ → Set
+    DD {bs'} = ExactLength (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))) (n - length bs')
+
+    p₂₃₄₅' : ∀ {@0 bs₁ : List Σ} → Singleton (length bs₁) → Parser (Logging ∘ Dec) (DD{bs₁})
+    p₂₃₄₅' {bs₁} (singleton r r≡) =
+      subst₀ (λ x → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))) (n - x)))
+        {r}{length bs₁}
+        r≡
+        (parse₂Option₅ (loc String.++ " (2nd,3rd,4th,5th,6th)") ns₂ ns₃ ns₄ ns₅ ns₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ p₂ p₃ p₄ p₅ p₆ (n - r))
+
+    p : Parser (Logging ∘ Dec) (&ₚᵈ (Length≤ (Option A) n) λ {bs₁} _ → DD{bs₁})
+    runParser p xs = do
+      (yes (success pre₁ r₁ r₁≡ v₁@(mk×ₚ a₁ aLen) suf₁ ps≡₁)) ← runParser p₁' xs
+        where no ¬p₁ → do
+          (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) ← runParser (parse₂Option₅ (loc String.++ " (2nd,3rd,4th,5th,6th)") ns₂ ns₃ ns₄ ns₅ ns₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ p₂ p₃ p₄ p₅ p₆ n) xs
+            where no ¬op₂₃₄₅₆ → do
+              tell $ loc String.++ ": failed to parse"
+              return ∘ no $ λ where
+                (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a) aLen) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success bs₁ _ refl (mk×ₚ a aLen) (bs₂ ++ suffix)
+                      (begin
+                        bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                        (bs₁ ++ bs₂) ++ suffix ≡⟨ ps≡ ⟩
+                        xs ∎))
+                    ¬p₁
+                (success prefix read read≡ (mk&ₚ{bs₂ = bs₂} (mk×ₚ none _) oaob refl) suffix ps≡) →
+                  contradiction
+                    (success prefix _ read≡ oaob suffix ps≡)
+                    ¬op₂₃₄₅₆
+          return (yes
+            (success _ _ r₁≡ (mk&ₚ (mk×ₚ none (─ z≤n)) v₁ refl) suf₁ ps≡₁))
+      (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) ← runParser (p₂₃₄₅'{pre₁} (singleton r₁ r₁≡)) suf₁
+        where no ¬op₂₃₄₅₆ → do
+          tell $ loc String.++ ": failed to parse"
+          return ∘ no $ λ where
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ {bs₁}{bs₂} (some b') _ refl) obocodoeofLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                b'
+                (nc₁₂ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some c') _ refl) refl) obocodoeofLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                c'
+                (nc₁₃ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some d') _ refl) refl) refl) obocodoeofLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                d'
+                (nc₁₄ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ {bs₁}{bs₂} (some e') _ refl) refl) refl) refl) obocodoeofLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ bs₁ ++ bs₂ ++ suffix
+                ++≡ = begin
+                  pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+                  xs ≡⟨ sym ps≡ ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ ++-assoc bs₁ bs₂ suffix ⟩
+                  bs₁ ++ bs₂ ++ suffix ∎
+              in
+              contradiction
+                e'
+                (nc₁₅ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ {bs₁}{bs₂} none (some f') refl) refl) refl) refl) obocodoeofLen) refl) suffix ps≡) →
+              let
+                @0 ++≡ : pre₁ ++ suf₁ ≡ prefix ++ suffix
+                ++≡ = trans ps≡₁ (sym ps≡)
+              in
+              contradiction
+                f'
+                (nc₁₆ ++≡ a₁)
+            (success prefix read read≡ (mk&ₚ (mk×ₚ none oaLen) (mk×ₚ (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ none none refl) refl) refl) refl) (─ ())) refl) .xs refl)
+            (success prefix read read≡ (mk&ₚ{bs₁}{bs₂} (mk×ₚ (some a') oaLen) oaob' bs≡) suffix ps≡) →
+              let
+                @0 ++≡ : bs₁ ++ bs₂ ++ suffix ≡ pre₁ ++ suf₁
+                ++≡ = begin
+                  bs₁ ++ bs₂ ++ suffix ≡⟨ sym (++-assoc bs₁ bs₂ suffix) ⟩
+                  (bs₁ ++ bs₂) ++ suffix ≡⟨ cong (_++ suffix) (sym bs≡) ⟩
+                  prefix ++ suffix ≡⟨ ps≡ ⟩
+                  xs ≡⟨ sym ps≡₁ ⟩
+                  pre₁ ++ suf₁ ∎
+
+                @0 pre₁≡ : bs₁ ≡ pre₁
+                pre₁≡ = ns₁ ++≡ a' a₁
+              in
+              contradiction
+                (success bs₂ _ refl (DD {pre₁} bs₂ ∋ subst₀ (λ x → DD {x} bs₂) pre₁≡ oaob')
+                  suffix
+                  (Lemmas.++-cancel≡ˡ _ _ pre₁≡ ++≡))
+                ¬op₂₃₄₅₆
+      return (yes
+        (success (pre₁ ++ pre₂) (r₁ + r₂)
+          (begin
+            (r₁ + r₂ ≡⟨ cong₂ _+_ r₁≡ r₂≡ ⟩
+            length pre₁ + length pre₂ ≡⟨ sym (length-++ pre₁) ⟩
+            length (pre₁ ++ pre₂) ∎))
+          (mk&ₚ (mk×ₚ (some a₁) aLen) v₂ refl) suf₂
+            (begin
+              (pre₁ ++ pre₂) ++ suf₂ ≡⟨ ++-assoc pre₁ pre₂ suf₂ ⟩
+              pre₁ ++ pre₂ ++ suf₂ ≡⟨ cong (pre₁ ++_) ps≡₂ ⟩
+              pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
+              xs ∎)))

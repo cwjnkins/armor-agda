@@ -132,12 +132,81 @@ module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (
 
 module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C ⦄ ⦃ _ : Eq≋ E ⦄ ⦃ _ : Eq≋ F ⦄ {@0 bs' bs'' bs''' bs'''' : List UInt8} (default₂ : B bs') (default₃ : C bs'') (default₅ : E bs''') (default₆ : F bs'''') (loc : String) where
 
-  postulate
-    parseOption₂Default₄
+  parseOption₂Default₄
       : ∀ {A D : @0 List UInt8 → Set}
-      → @0 Unambiguous  (&ₚ (Option A) (&ₚ (Default B default₂) (&ₚ(Default C default₃)
-                            (&ₚ (Option D) (&ₚ (Default E default₅) (Default F default₆))))))
+      → @0 Unambiguous A → @0 NoSubstrings A
+      → @0 Unambiguous B → @0 NoSubstrings B
+      → @0 Unambiguous C → @0 NoSubstrings C
+      → @0 Unambiguous D → @0 NoSubstrings D
+      → @0 Unambiguous E → @0 NoSubstrings E
+      → @0 NoSubstrings F
+      → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion A D → @0 NoConfusion A E → @0 NoConfusion A F
+      → @0 NoConfusion B C → @0 NoConfusion B D → @0 NoConfusion B E → @0 NoConfusion B F
+      → @0 NoConfusion C D → @0 NoConfusion C E → @0 NoConfusion C F
+      → @0 NoConfusion D E → @0 NoConfusion D F
+      → @0 NoConfusion E F
       → Parser (Logging ∘ Dec) A → Parser (Logging ∘ Dec) B → Parser (Logging ∘ Dec) C
       → Parser (Logging ∘ Dec) D → Parser (Logging ∘ Dec) E → Parser (Logging ∘ Dec) F
-      → Parser (Logging ∘ Dec) (&ₚ (Option A) (&ₚ (Default B default₂) (&ₚ(Default C default₃)
-                                   (&ₚ (Option D) (&ₚ (Default E default₅) (Default F default₆))))))
+      → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option A) (&ₚ (Default B default₂) (&ₚ(Default C default₃)
+                                   (&ₚ (Option D) (&ₚ (Default E default₅) (Default F default₆)))))) n)
+  runParser (parseOption₂Default₄ ua ns₁ ub ns₂ uc ns₃ ud ns₄ ue ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf zero) xs =
+    return (yes (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ (mkDefault none tt) (mk&ₚ (mkDefault none tt) (mk&ₚ none (mk&ₚ (mkDefault none tt) (mkDefault none tt)
+                refl) refl) refl) refl) refl) (─ refl)) xs refl))
+  runParser (parseOption₂Default₄ ua ns₁ ub ns₂ uc ns₃ ud ns₄ ue ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf n@(suc _)) xs = do
+    (yes (success pre₁ r₁ r₁≡ (mk×ₚ  (mk&ₚ {bs₁}{bs₂'} oa (mk&ₚ {bs₂}{bs₃'} ob (mk&ₚ {bs₃}{bs₄'} oc (mk&ₚ {bs₄}{bs₅'} od (mk&ₚ {bs₅}{bs₆} oe of refl) refl) refl) refl) refl) abcdefLen) suf₁ ps≡₁)) ←
+      runParser (parse₂Option₆ loc ns₁ ns₂ ns₃ ns₄ ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf n) xs
+      where no ¬p₁₂' → do
+        tell $ loc String.++ ": failed to parse"
+        return ∘ no $ λ where
+          (success prefix read read≡ (mk×ₚ  (mk&ₚ oa (mk&ₚ (mkDefault ob _) (mk&ₚ (mkDefault oc _) (mk&ₚ od (mk&ₚ (mkDefault oe _) (mkDefault of _) refl) refl) refl) refl) refl) abcdefLen) suffix ps≡) →
+            contradiction
+              (success prefix _ read≡ (mk×ₚ  (mk&ₚ oa (mk&ₚ ob (mk&ₚ oc (mk&ₚ od (mk&ₚ oe of refl) refl) refl) refl) refl) abcdefLen) suffix ps≡)
+              ¬p₁₂'
+    case Default.notDefault? default₂ ob ret (const _) of λ where
+      (no ¬pb) →
+        case Default.notDefault? default₃ oc ret (const _) of λ where
+          (no ¬pc) →
+            case Default.notDefault? default₅ oe ret (const _) of λ where
+              (no ¬pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+              (yes pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+          (yes pc) →
+            case Default.notDefault? default₅ oe ret (const _) of λ where
+              (no ¬pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+              (yes pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+      (yes pb) →
+        case Default.notDefault? default₃ oc ret (const _) of λ where
+          (no ¬pc) →
+            case Default.notDefault? default₅ oe ret (const _) of λ where
+              (no ¬pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+              (yes pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+          (yes pc) →
+            case Default.notDefault? default₅ oe ret (const _) of λ where
+              (no ¬pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+              (yes pe) →
+                case Default.notDefault? default₆ of ret (const _) of λ where
+                  (no ¬pf) → {!!}
+                  (yes pf) → {!!}
+
+    where
+    open ≡-Reasoning
