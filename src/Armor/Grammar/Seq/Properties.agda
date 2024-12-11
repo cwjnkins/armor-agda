@@ -202,7 +202,6 @@ nonmalleable nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ snd
   where
   import Data.Product.Properties as Product
 
-
 @0 unambiguous : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → Unambiguous (&ₚ A B)
 unambiguous ua ns ub = unambiguousᵈ ua ns (λ _ → ub)
 
@@ -309,6 +308,48 @@ private
   nooverlap₂ ne₁ nc₁₂ nc₁₃ {bs₁}{bs₂} a (mk&ₚ{bs₂₁}{bs₂₂} none none bs≡) =
     contradiction (++-conicalˡ _ _ bs≡) (ne₁ a)
 
+  @0 nooverlap₃
+    : ∀ {A B C D} → NonEmpty A → NoConfusion A B → NoConfusion A C → NoConfusion A D
+      → ∀ {bs₁ bs₂} → A bs₁ → ¬ (&ₚ (Option B) (&ₚ (Option C) (Option D))) (bs₁ ++ bs₂)
+  nooverlap₃ ne₁ nc₁₂ nc₁₃ nc₁₄ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none none refl) bs≡) =
+    contradiction (++-conicalˡ _ _ bs≡) (ne₁ a)
+  nooverlap₃ ne₁ nc₁₂ nc₁₃ nc₁₄ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ (some c) _ bs≡₁) bs≡) =
+    contradiction c (nc₁₃ (trans bs≡ bs≡₁) a)
+  nooverlap₃ ne₁ nc₁₂ nc₁₃ nc₁₄ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (some d) refl) bs≡) =
+    contradiction d (nc₁₄ (trans bs≡ (sym (++-identityʳ _))) a)
+  nooverlap₃ ne₁ nc₁₂ nc₁₃ nc₁₄ {bs₁} {bs₂} a (mk&ₚ (some b) _ bs≡) =
+    contradiction b (nc₁₂ bs≡ a)
+
+  @0 nooverlap₄
+      : ∀ {A B C D E} → NonEmpty A → NoConfusion A B → NoConfusion A C → NoConfusion A D →  NoConfusion A E
+        → ∀ {bs₁ bs₂} → A bs₁ → ¬ (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))) (bs₁ ++ bs₂)
+  nooverlap₄ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ {bs₁} {bs₂} a (mk&ₚ none  (mk&ₚ none  (mk&ₚ none none refl) refl) bs≡) =
+    contradiction (++-conicalˡ _ _ bs≡) (ne₁ a)
+  nooverlap₄ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ (some c) _ bs≡₁) bs≡) =
+     contradiction c (nc₁₃ (trans bs≡ bs≡₁) a)
+  nooverlap₄ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (mk&ₚ (some d) _ bs≡₂) bs≡₁) bs≡) =
+    contradiction d (nc₁₄ (trans bs≡ (trans bs≡₁ bs≡₂)) a)
+  nooverlap₄ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (mk&ₚ none (some e) bs≡₂) bs≡₁) bs≡) =
+    contradiction e (nc₁₅ (trans bs≡ (trans bs≡₁ (trans bs≡₂ (sym (++-identityʳ _))))) a)
+  nooverlap₄ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ {bs₁} {bs₂} a (mk&ₚ (some b) _ bs≡) =
+    contradiction b (nc₁₂ bs≡ a)
+
+  @0 nooverlap₅
+      : ∀ {A B C D E F} → NonEmpty A → NoConfusion A B → NoConfusion A C → NoConfusion A D →  NoConfusion A E →  NoConfusion A F
+        → ∀ {bs₁ bs₂} → A bs₁ → ¬  (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))) (bs₁ ++ bs₂)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ none  (mk&ₚ none  (mk&ₚ none (mk&ₚ none none refl) refl) refl) bs≡) =
+    contradiction (++-conicalˡ _ _ bs≡) (ne₁ a)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ (some c) _ bs≡₁) bs≡) =
+    contradiction c (nc₁₃ (trans bs≡ bs≡₁) a)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (mk&ₚ (some d) _ bs≡₂) bs≡₁) bs≡) =
+    contradiction d (nc₁₄ (trans bs≡ (trans bs≡₁ bs≡₂)) a)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ (some e) _ bs≡₃) bs≡₂) bs≡₁) bs≡) =
+    contradiction e (nc₁₅ (trans bs≡ (trans bs≡₁ (trans bs≡₂ bs≡₃))) a)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ none (mk&ₚ none (mk&ₚ none (mk&ₚ none (some f) bs≡₃) bs≡₂) bs≡₁) bs≡) =
+    contradiction f (nc₁₆ (trans bs≡ (trans bs≡₁ (trans bs≡₂ (trans bs≡₃ (sym (++-identityʳ _)))))) a)
+  nooverlap₅ ne₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ {bs₁} {bs₂} a (mk&ₚ (some b) _ bs≡) =
+    contradiction b (nc₁₂ bs≡ a)
+
 @0 unambiguousOption₂
   : ∀ {A B} → Unambiguous A → NoSubstrings A → NonEmpty A
     → Unambiguous B → NonEmpty B
@@ -354,7 +395,9 @@ unambiguous₂Option₃{A}{B}{C} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ne₃
       (subst₀! (&ₚ (Option B) (Option C)) bs≡₂ bc₁)
       (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₂₂'} a₂)
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) (mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ refl) bs≡₁) (mk&ₚ{bs₂₁} none bc₂@(mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ refl) refl) =
-    contradiction (subst₀! (&ₚ (Option B) (Option C)) bs≡₁ bc₂) (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₁₂'} a₁)
+    contradiction
+      (subst₀! (&ₚ (Option B) (Option C)) bs≡₁ bc₂)
+      (nooverlap₂{A}{B}{C} ne₁ nc₁₂ nc₁₃ {bs₂ = bs₁₂'} a₁)
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bc₁@(mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ bs≡₁') bs≡₁) (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bc₂@(mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ bs≡₂') bs≡₂) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
@@ -371,6 +414,163 @@ unambiguous₂Option₃{A}{B}{C} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ne₃
                 bs₁₁ ++ bs₁₂' ≡⟨ ++≡' ⟩
                 bs₂₁ ++ bs₂₂' ≡⟨ cong (bs₂₁ ++_) bs≡₂' ⟩
                 bs₂₁ ++ bs₂₂ ++ bs₂₃ ∎
+
+@0 unambiguous₂Option₄
+  : ∀ {A B C D} → Unambiguous A → NoSubstrings A → NonEmpty A
+    → Unambiguous B → NoSubstrings B → NonEmpty B
+    → Unambiguous C → NoSubstrings C → NonEmpty C
+    → Unambiguous D → NonEmpty D
+    → NoConfusion A B → NoConfusion A C → NoConfusion A D 
+    → NoConfusion B C → NoConfusion B D → NoConfusion C D
+    → Unambiguous (&ₚ(Option A) (&ₚ (Option B) (&ₚ (Option C) (Option D))))
+unambiguous₂Option₄{A}{B}{C}{D} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ne₄ nc₁ nc₂ nc₃ nc₄ nc₅ nc₆ = help
+  where
+  open ≡-Reasoning
+
+  help : Unambiguous (&ₚ(Option A) (&ₚ (Option B) (&ₚ (Option C) (Option D))))
+  help (mk&ₚ none sndₚ₁ refl) (mk&ₚ none sndₚ₂ refl) =
+    case ‼ unambiguous₂Option₃ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ne₄ nc₄ nc₅ nc₆ sndₚ₁ sndₚ₂
+      ret (const _) of λ where
+        refl → refl
+  help (mk&ₚ{bs₁₁}{bs₁₂'} none bcd₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cd₁@(mk&ₚ {bs₁₃}{bs₁₄} oc₁ od₁ refl) refl) refl) (mk&ₚ {bs₂₁}{bs₂₂'} (some a₂) bcd₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cd₂@(mk&ₚ {bs₂₃}{bs₂₄} oc₂ od₂ refl) refl) bs≡₆) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ (Option C) (Option D))) bs≡₆ bcd₁)
+      (nooverlap₃{A}{B}{C}{D} ne₁ nc₁ nc₂ nc₃ {bs₂ = bs₂₂'} a₂)
+  help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcd₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cd₁@(mk&ₚ {bs₁₃}{bs₁₄} oc₁ od₁ refl) refl) bs≡₃) (mk&ₚ {bs₂₁}{bs₂₂'} none bcd₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cd₂@(mk&ₚ {bs₂₃}{bs₂₄} oc₂ od₂ refl) refl) refl) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ (Option C) (Option D))) bs≡₃ bcd₂)
+      (nooverlap₃{A}{B}{C}{D} ne₁ nc₁ nc₂ nc₃ {bs₂ = bs₁₂'} a₁)
+  help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcd₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cd₁@(mk&ₚ {bs₁₃}{bs₁₄} oc₁ od₁ bs≡₁) bs≡₂) bs≡₃) (mk&ₚ {bs₂₁}{bs₂₂'} (some a₂) bcd₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cd₂@(mk&ₚ {bs₂₃}{bs₂₄} oc₂ od₂ bs≡₄) bs≡₅) bs≡₆) =
+    case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
+      refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+          refl → case ‼ unambiguous₂Option₃ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ne₄ nc₄ nc₅ nc₆ bcd₁ bcd₂ ret (const _) of λ where
+            refl → case ‼ ≡-unique bs≡₃ bs≡₆ ret (const _) of λ where
+              refl → refl
+    where
+    ++≡' : bs₁₁ ++ bs₁₂' ≡ bs₂₁ ++ bs₂₂'
+    ++≡' = trans (sym bs≡₃) bs≡₆
+    
+    ++≡ : bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ≡ bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄
+    ++≡ = begin bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (sym bs≡₁)) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃' ≡⟨ cong (bs₁₁ ++_) (sym bs≡₂) ⟩
+                bs₁₁ ++ bs₁₂' ≡⟨ ++≡' ⟩
+                bs₂₁ ++ bs₂₂' ≡⟨ cong (bs₂₁ ++_) bs≡₅ ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) bs≡₄) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ∎
+
+@0 unambiguous₂Option₅
+    : ∀ {A B C D E}
+    → Unambiguous A → NoSubstrings A → NonEmpty A
+    → Unambiguous B → NoSubstrings B → NonEmpty B
+    → Unambiguous C → NoSubstrings C → NonEmpty C
+    → Unambiguous D → NoSubstrings D → NonEmpty D
+    → Unambiguous E → NonEmpty E
+    → NoConfusion A B → NoConfusion A C → NoConfusion A D → NoConfusion A E
+    → NoConfusion B C → NoConfusion B D → NoConfusion B E
+    → NoConfusion C D → NoConfusion C E
+    → NoConfusion D E
+    → Unambiguous (&ₚ (Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))))
+unambiguous₂Option₅{A}{B}{C}{D}{E} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ne₅ nc₁ nc₂ nc₃ nc₄ nc₅ nc₆ nc₇ nc₈ nc₉ nc₁₀ = help
+  where
+  open ≡-Reasoning
+
+  help : Unambiguous (&ₚ (Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))))
+  help (mk&ₚ none sndₚ₁ refl) (mk&ₚ none sndₚ₂ refl) =
+    case ‼ unambiguous₂Option₄ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ne₅ nc₅ nc₆ nc₇ nc₈ nc₉ nc₁₀ sndₚ₁ sndₚ₂
+      ret (const _) of λ where
+        refl → refl
+  help (mk&ₚ{bs₁₁}{bs₁₂'} none bcde₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cde₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ de₁@(mk&ₚ {bs₁₄}{bs₁₅} od₁ oe₁ refl) refl) refl) refl)
+         (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcde₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cde₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ de₂@(mk&ₚ {bs₂₄}{bs₂₅} od₂ oe₂ refl) refl) refl) bs≡₈) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))) bs≡₈ bcde₁)
+      (nooverlap₄{A}{B}{C}{D}{E} ne₁ nc₁ nc₂ nc₃ nc₄ {bs₂ = bs₂₂'} a₂)
+  help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcde₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cde₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ de₁@(mk&ₚ {bs₁₄}{bs₁₅} od₁ oe₁ refl) refl) refl) bs≡₄)
+         (mk&ₚ{bs₂₁}{bs₂₂'} none bcde₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cde₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ de₂@(mk&ₚ {bs₂₄}{bs₂₅} od₂ oe₂ refl) refl) refl) refl) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (Option E)))) bs≡₄ bcde₂)
+      (nooverlap₄{A}{B}{C}{D}{E} ne₁ nc₁ nc₂ nc₃ nc₄ {bs₂ = bs₁₂'} a₁)
+  help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcde₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cde₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ de₁@(mk&ₚ {bs₁₄}{bs₁₅} od₁ oe₁ bs≡₁) bs≡₂) bs≡₃) bs≡₄)
+         (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcde₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cde₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ de₂@(mk&ₚ {bs₂₄}{bs₂₅} od₂ oe₂ bs≡₅) bs≡₆) bs≡₇) bs≡₈) =
+    case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
+      refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+          refl → case ‼ unambiguous₂Option₄ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ne₅ nc₅ nc₆ nc₇ nc₈ nc₉ nc₁₀ bcde₁ bcde₂ ret (const _) of λ where
+            refl → case ‼ ≡-unique bs≡₄ bs≡₈ ret (const _) of λ where
+              refl → refl
+    where
+    ++≡' : bs₁₁ ++ bs₁₂' ≡ bs₂₁ ++ bs₂₂'
+    ++≡' = trans (sym bs≡₄) bs≡₈
+    
+    ++≡ : bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ++ bs₁₅ ≡ bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ++ bs₂₅
+    ++≡ = begin bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ++ bs₁₅ ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (cong (bs₁₃ ++_) (sym bs≡₁))) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄' ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (sym bs≡₂)) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃' ≡⟨ cong (bs₁₁ ++_) (sym bs≡₃) ⟩
+                bs₁₁ ++ bs₁₂' ≡⟨ ++≡' ⟩
+                bs₂₁ ++ bs₂₂' ≡⟨ cong (bs₂₁ ++_) bs≡₇ ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) bs≡₆) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) (cong (bs₂₃ ++_) bs≡₅)) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ++ bs₂₅ ∎
+
+@0 unambiguous₂Option₆
+    : ∀ {A B C D E F}
+    → Unambiguous A → NoSubstrings A → NonEmpty A
+    → Unambiguous B → NoSubstrings B → NonEmpty B
+    → Unambiguous C → NoSubstrings C → NonEmpty C
+    → Unambiguous D → NoSubstrings D → NonEmpty D
+    → Unambiguous E → NoSubstrings E → NonEmpty E
+    → Unambiguous F → NonEmpty F
+    → NoConfusion A B → NoConfusion A C → NoConfusion A D → NoConfusion A E → NoConfusion A F
+    → NoConfusion B C → NoConfusion B D → NoConfusion B E → NoConfusion B F
+    → NoConfusion C D → NoConfusion C E → NoConfusion C F
+    → NoConfusion D E → NoConfusion D F
+    → NoConfusion E F
+    → Unambiguous (&ₚ (Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))))
+unambiguous₂Option₆{A}{B}{C}{D}{E}{F}
+  ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ns₅ ne₅ ua₆ ne₆ nc₁ nc₂ nc₃ nc₄ nc₅ nc₆ nc₇ nc₈ nc₉ nc₁₀ nc₁₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ = help
+  where
+  open ≡-Reasoning
+
+  help : Unambiguous (&ₚ (Option A) (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))))
+  help (mk&ₚ none sndₚ₁ refl) (mk&ₚ none sndₚ₂ refl) =
+    case ‼ unambiguous₂Option₅ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ns₅ ne₅ ua₆ ne₆ nc₆ nc₇ nc₈ nc₉ nc₁₀ nc₁₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ sndₚ₁ sndₚ₂
+      ret (const _) of λ where
+        refl → refl
+  help (mk&ₚ{bs₁₁}{bs₁₂'} none bcdef₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cdef₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ def₁@(mk&ₚ {bs₁₄}{bs₁₅'} od₁ (mk&ₚ {bs₁₅}{bs₁₆} oe₁ of₁ refl) refl) refl) refl) refl)
+         (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcdef₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cdef₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ def₂@(mk&ₚ {bs₂₄}{bs₂₅'} od₂ (mk&ₚ{bs₂₅}{bs₂₆} oe₂ of₂ refl) refl) refl) refl) bs≡₁₀) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))) bs≡₁₀ bcdef₁)
+      (nooverlap₅{A}{B}{C}{D}{E}{F} ne₁ nc₁ nc₂ nc₃ nc₄ nc₅ {bs₂ = bs₂₂'} a₂)
+  help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcdef₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cdef₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ def₁@(mk&ₚ {bs₁₄}{bs₁₅'} od₁ (mk&ₚ {bs₁₅}{bs₁₆} oe₁ of₁ refl) refl) refl) refl) bs≡₅)
+         (mk&ₚ{bs₂₁}{bs₂₂'} none bcdef₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cdef₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ def₂@(mk&ₚ {bs₂₄}{bs₂₅'} od₂ (mk&ₚ{bs₂₅}{bs₂₆} oe₂ of₂ refl) refl) refl) refl) refl) =
+    contradiction
+      (subst₀! (&ₚ (Option B) (&ₚ(Option C) (&ₚ (Option D) (&ₚ (Option E) (Option F))))) bs≡₅ bcdef₂)
+      (nooverlap₅{A}{B}{C}{D}{E}{F} ne₁ nc₁ nc₂ nc₃ nc₄ nc₅ {bs₂ = bs₁₂'} a₁)
+  help  (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcdef₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cdef₁@(mk&ₚ {bs₁₃}{bs₁₄'} oc₁ def₁@(mk&ₚ {bs₁₄}{bs₁₅'} od₁ (mk&ₚ {bs₁₅}{bs₁₆} oe₁ of₁ bs≡₁) bs≡₂) bs≡₃) bs≡₄) bs≡₅)
+         (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcdef₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cdef₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ def₂@(mk&ₚ {bs₂₄}{bs₂₅'} od₂ (mk&ₚ{bs₂₅}{bs₂₆} oe₂ of₂ bs≡₆) bs≡₇) bs≡₈) bs≡₉) bs≡₁₀) =
+    case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
+      refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+          refl → case ‼ unambiguous₂Option₅ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ns₅ ne₅ ua₆ ne₆ nc₆ nc₇ nc₈ nc₉ nc₁₀ nc₁₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ bcdef₁ bcdef₂ ret (const _) of λ where
+            refl → case ‼ ≡-unique bs≡₅ bs≡₁₀ ret (const _) of λ where
+              refl → refl
+    where
+    ++≡' : bs₁₁ ++ bs₁₂' ≡ bs₂₁ ++ bs₂₂'
+    ++≡' = trans (sym bs≡₅) bs≡₁₀
+    
+    ++≡ : bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ++ bs₁₅ ++ bs₁₆ ≡ bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ++ bs₂₅ ++ bs₂₆
+    ++≡ = begin bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ++ bs₁₅ ++ bs₁₆ ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (cong (bs₁₃ ++_) (cong (bs₁₄ ++_) (sym bs≡₁)))) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄ ++ bs₁₅' ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (cong (bs₁₃ ++_) (sym bs≡₂))) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃ ++ bs₁₄' ≡⟨ cong (bs₁₁ ++_) (cong (bs₁₂ ++_) (sym bs≡₃)) ⟩
+                bs₁₁ ++ bs₁₂ ++ bs₁₃' ≡⟨ cong (bs₁₁ ++_) (sym bs≡₄) ⟩
+                bs₁₁ ++ bs₁₂' ≡⟨ ++≡' ⟩
+                bs₂₁ ++ bs₂₂' ≡⟨ cong (bs₂₁ ++_) bs≡₉ ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) bs≡₈) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) (cong (bs₂₃ ++_) bs≡₇)) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ++ bs₂₅' ≡⟨ cong (bs₂₁ ++_) (cong (bs₂₂ ++_) (cong (bs₂₃ ++_) (cong (bs₂₄ ++_) bs≡₆))) ⟩
+                bs₂₁ ++ bs₂₂ ++ bs₂₃ ++ bs₂₄ ++ bs₂₅ ++ bs₂₆ ∎
+
+
 eq&ₚᵈ : ∀ {A : @0 List Σ → Set} {B : {@0 bs₁ : List Σ} → A bs₁ → @0 List Σ → Set}
         → Eq (Exists─ (List Σ) A)
         → (∀ {@0 bs₁} → (a : A bs₁) → Eq (Exists─ (List Σ) (B a)))

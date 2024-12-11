@@ -72,45 +72,40 @@ IDPFieldsSeq xs = TLV Tag.Sequence IDPFieldsSeqFields xs
 IDPFields : @0 List UInt8 → Set
 IDPFields xs = TLV Tag.OctetString IDPFieldsSeq xs
 
-Rep₁ = &ₚ (Option DistPointName)
-                        (&ₚ (Default [ Tag.A81 ]Boool [ Tag.A81 ]falseBoool)
-                             (Default [ Tag.A82 ]Boool [ Tag.A82 ]falseBoool))
-
-Rep₂ = &ₚ (Option ReasonFlags)
+RepIDPField = &ₚ (Option DistPointName)
+          (&ₚ (Default [ Tag.A81 ]Boool [ Tag.A81 ]falseBoool)
+               (&ₚ(Default [ Tag.A82 ]Boool [ Tag.A82 ]falseBoool)
+                  (&ₚ (Option ReasonFlags)
                         (&ₚ (Default [ Tag.A84 ]Boool [ Tag.A84 ]falseBoool)
-                             (Default [ Tag.A85 ]Boool [ Tag.A85 ]falseBoool))
-
-Rep₃ = &ₚ Rep₁ Rep₂
+                             (Default [ Tag.A85 ]Boool [ Tag.A85 ]falseBoool)))))
 
 IDPFieldsSeqFieldsRep =
-  Σₚ Rep₃
-     (λ _ idp → T (notEmpty (fstₚ (fstₚ idp)) (fstₚ (sndₚ(fstₚ idp))) (sndₚ (sndₚ(fstₚ idp)))
-                            (fstₚ (sndₚ idp)) (fstₚ (sndₚ(sndₚ idp))) (sndₚ (sndₚ(sndₚ idp)))))
+  Σₚ RepIDPField
+     (λ _ idp → T (notEmpty (fstₚ idp) (fstₚ(sndₚ idp)) (fstₚ (sndₚ(sndₚ idp)))
+                            (fstₚ(sndₚ (sndₚ(sndₚ idp)))) (fstₚ(sndₚ(sndₚ (sndₚ(sndₚ idp)))))
+                            (sndₚ(sndₚ(sndₚ (sndₚ(sndₚ idp)))))))
 
 equivalentIDPFieldsSeqFields : Equivalent IDPFieldsSeqFieldsRep IDPFieldsSeqFields
-proj₁ equivalentIDPFieldsSeqFields (mk×ₚ(mk&ₚ (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₃ sndₚ₁ refl) refl) (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₄ sndₚ₂ refl) refl) bs≡) prop) =
-  mkIDPFieldsSeqFields fstₚ₁ fstₚ₃ sndₚ₁ fstₚ₂ fstₚ₄ sndₚ₂ prop (trans₀ bs≡ (solve (++-monoid UInt8)))
-proj₂ equivalentIDPFieldsSeqFields (mkIDPFieldsSeqFields distributionPoint onlyContainsUserCerts onlyContainsCACerts onlySomeReasons indirectCRL onlyContainsAttributeCerts prop bs≡) =
-  mk×ₚ(mk&ₚ (mk&ₚ distributionPoint (mk&ₚ onlyContainsUserCerts onlyContainsCACerts refl) refl) (mk&ₚ onlySomeReasons (mk&ₚ indirectCRL onlyContainsAttributeCerts refl) refl)
-  (trans₀ bs≡ (solve (++-monoid UInt8)))) (T-irrel prop)
+proj₁ equivalentIDPFieldsSeqFields (mk×ₚ (mk&ₚ fstₚ₁ (mk&ₚ fstₚ₂ (mk&ₚ fstₚ₃ (mk&ₚ fstₚ₄ (mk&ₚ fstₚ₅ sndₚ₂ refl) refl) refl) refl) bs≡) prop)
+  = mkIDPFieldsSeqFields fstₚ₁ fstₚ₂ fstₚ₃ fstₚ₄ fstₚ₅ sndₚ₂ prop (trans₀ bs≡ (solve (++-monoid UInt8)))
+proj₂ equivalentIDPFieldsSeqFields (mkIDPFieldsSeqFields distributionPoint onlyContainsUserCerts onlyContainsCACerts onlySomeReasons indirectCRL onlyContainsAttributeCerts prop bs≡)
+  = mk×ₚ (mk&ₚ distributionPoint (mk&ₚ onlyContainsUserCerts (mk&ₚ onlyContainsCACerts (mk&ₚ onlySomeReasons (mk&ₚ indirectCRL onlyContainsAttributeCerts refl) refl) refl) refl) bs≡)
+    (T-irrel prop) 
 
-RawRep₁ : Raw Rep₁
-RawRep₁ = Raw&ₚ (RawOption RawDistPointName)
-                        (Raw&ₚ (RawDefault (RawTLV _ RawBoolValue) [ Tag.A81 ]falseBoool)
-                             (RawDefault (RawTLV _ RawBoolValue) [ Tag.A82 ]falseBoool))
-
-RawRep₂ : Raw Rep₂
-RawRep₂ = Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
+RawRepIDPField : Raw RepIDPField
+RawRepIDPField = Raw&ₚ (RawOption RawDistPointName)
+          (Raw&ₚ (RawDefault (RawTLV _ RawBoolValue) [ Tag.A81 ]falseBoool)
+               (Raw&ₚ(RawDefault (RawTLV _ RawBoolValue) [ Tag.A82 ]falseBoool)
+                  (Raw&ₚ (RawOption (RawTLV _ RawBitStringValue))
                         (Raw&ₚ (RawDefault (RawTLV _ RawBoolValue) [ Tag.A84 ]falseBoool)
-                             (RawDefault (RawTLV _ RawBoolValue) [ Tag.A85 ]falseBoool))
-
-RawRep₃ : Raw Rep₃
-RawRep₃ = Raw&ₚ RawRep₁ RawRep₂
+                             (RawDefault (RawTLV _ RawBoolValue) [ Tag.A85 ]falseBoool)))))
 
 RawIDPFieldsSeqFieldsRep : Raw IDPFieldsSeqFieldsRep
-RawIDPFieldsSeqFieldsRep = RawΣₚ₁ RawRep₃
-                           (λ _ idp → T (notEmpty (fstₚ (fstₚ idp)) (fstₚ (sndₚ(fstₚ idp))) (sndₚ (sndₚ(fstₚ idp)))
-                            (fstₚ (sndₚ idp)) (fstₚ (sndₚ(sndₚ idp))) (sndₚ (sndₚ(sndₚ idp)))))
+RawIDPFieldsSeqFieldsRep = RawΣₚ₁ RawRepIDPField
+                         (λ _ idp → T (notEmpty (fstₚ idp) (fstₚ(sndₚ idp)) (fstₚ (sndₚ(sndₚ idp)))
+                            (fstₚ(sndₚ (sndₚ(sndₚ idp)))) (fstₚ(sndₚ(sndₚ (sndₚ(sndₚ idp)))))
+                            (sndₚ(sndₚ(sndₚ (sndₚ(sndₚ idp)))))))
+
 
 RawIDPFieldsSeqFields : Raw IDPFieldsSeqFields
 RawIDPFieldsSeqFields = Iso.raw equivalentIDPFieldsSeqFields RawIDPFieldsSeqFieldsRep

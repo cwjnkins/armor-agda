@@ -11,22 +11,13 @@ open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Option      UInt8
 open Armor.Grammar.Seq         UInt8
 
-module _ {A C : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄  ⦃ _ : Eq≋ C ⦄ {@0 bs' bs'' : List UInt8} (default : A bs') (default₁ : C bs'') where
+module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄  {@0 bs' : List UInt8} (default : A bs') where
 
   @0 nosubstringsDefault₁
     : ∀ {B} → NoSubstrings A → NoSubstrings B → NoConfusion A B
       → NoSubstrings (&ₚ (Default A default) B)
   nosubstringsDefault₁ ns₁ ns₂ nc xs₁++ys₁≡xs₂++ys₂ (mk&ₚ (mkDefault oa₁ nd₁) b₁ bs≡₁) (mk&ₚ (mkDefault oa₂ nd₂) b₂ bs≡₂) =
     Seq.nosubstringsOption₁ ns₁ ns₂ nc xs₁++ys₁≡xs₂++ys₂ (mk&ₚ oa₁ b₁ bs≡₁) (mk&ₚ oa₂ b₂ bs≡₂)
-
-  -- postulate
-  --   @0 nosubstringsDefault₂
-  --     : NoSubstrings A → NoSubstrings C → NoConfusion A C → NoSubstrings (&ₚ (Default A default) (Default C default₁))
-  -- -- nosubstringsDefault₂ nsa nsc ncac eq
-  --   -- (mk&ₚ (mkDefault value notDefault) (mkDefault value₁ notDefault₁) bs≡₁)
-  --   -- (mk&ₚ (mkDefault value₂ notDefault₂) (mkDefault value₃ notDefault₃) bs≡₃)
-  --   -- = {!!}
-  --   --   -- Seq.nosubstringsOption₁ nsa nsb ncab eq (mk&ₚ {!!} {!ₚ!} {!!}) (mk&ₚ value₂ {!!} {!!})
 
   @0 unambiguousDefault₁
     : ∀ {B} → Unambiguous A → NoSubstrings A → Unambiguous B → NoConfusion A B
@@ -48,17 +39,33 @@ module _ {A C : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄  ⦃ _ : Eq≋ C ⦄ 
       refl → case ‼ Default.uniqueNotDefault default a₁ nd₁ nd₂ ret (const _) of λ where
         refl → refl
 
-  @0 unambiguousOptionDefaultDefault
-    : ∀ {B} → Unambiguous B → NoSubstrings B → NonEmpty B
+module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C ⦄ ⦃ _ : Eq≋ E ⦄ ⦃ _ : Eq≋ F ⦄ {@0 bs' bs'' bs''' bs'''' : List UInt8} (default₂ : B bs') (default₃ : C bs'') (default₅ : E bs''') (default₆ : F bs'''') where
+
+  @0 unambiguous₂Option₂Default₄
+    : ∀ {A D : @0 List UInt8 → Set}
     → Unambiguous A → NoSubstrings A → NonEmpty A
-    → Unambiguous C → NonEmpty C
-    → NoConfusion B A → NoConfusion B C → NoConfusion A C
-    → Unambiguous (&ₚ (Option B) (&ₚ (Default A default) (Default C default₁)))
-  unambiguousOptionDefaultDefault x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ (mk&ₚ fstₚ₁ (mk&ₚ (mkDefault value notDefault) (mkDefault value₁ notDefault₁) bs≡₂) bs≡)
-    (mk&ₚ fstₚ₂ (mk&ₚ (mkDefault value₂ notDefault₂) (mkDefault value₃ notDefault₃) bs≡₃) bs≡₁) =
-      case  Seq.unambiguous₂Option₃
-        x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ (mk&ₚ fstₚ₁ (mk&ₚ value value₁ bs≡₂) bs≡) (mk&ₚ fstₚ₂ (mk&ₚ value₂ value₃ bs≡₃) bs≡₁)
+    → Unambiguous B → NoSubstrings B → NonEmpty B
+    → Unambiguous C → NoSubstrings C → NonEmpty C
+    → Unambiguous D → NoSubstrings D → NonEmpty D
+    → Unambiguous E → NoSubstrings E → NonEmpty E
+    → Unambiguous F → NonEmpty F
+    → NoConfusion A B → NoConfusion A C → NoConfusion A D → NoConfusion A E → NoConfusion A F
+    → NoConfusion B C → NoConfusion B D → NoConfusion B E → NoConfusion B F
+    → NoConfusion C D → NoConfusion C E → NoConfusion C F
+    → NoConfusion D E → NoConfusion D F
+    → NoConfusion E F
+    → Unambiguous (&ₚ (Option A) (&ₚ (Default B default₂) (&ₚ(Default C default₃)
+                      (&ₚ (Option D) (&ₚ (Default E default₅) (Default F default₆))))))
+  unambiguous₂Option₂Default₄ x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ x₁₁ x₁₂ x₁₃ x₁₄ x₁₅ x₁₆ x₁₇ x₁₈ x₁₉ x₂₀ x₂₁ x₂₂ x₂₃ x₂₄ x₂₅ x₂₆ x₂₇ x₂₈ x₂₉ x₃₀ x₃₁
+    (mk&ₚ fstₚ₁ (mk&ₚ (mkDefault value₀ notDefault₀) (mk&ₚ (mkDefault value notDefault) (mk&ₚ fstₚ₇ (mk&ₚ (mkDefault value₁ notDefault₁) (mkDefault value₂ notDefault₂) bs≡₈) bs≡₆) bs≡₄) bs≡₂) bs≡)
+    (mk&ₚ fstₚ₂ (mk&ₚ (mkDefault value₃ notDefault₃) (mk&ₚ (mkDefault value₄ notDefault₄) (mk&ₚ fstₚ₈ (mk&ₚ (mkDefault value₅ notDefault₅) (mkDefault value₆ notDefault₆) bs≡₉) bs≡₇) bs≡₅) bs≡₃) bs≡₁) =
+    case Seq.unambiguous₂Option₆
+           x x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ x₁₀ x₁₁ x₁₂ x₁₃ x₁₄ x₁₅ x₁₆ x₁₇ x₁₈ x₁₉ x₂₀ x₂₁ x₂₂ x₂₃ x₂₄ x₂₅ x₂₆ x₂₇ x₂₈ x₂₉ x₃₀ x₃₁
+           (mk&ₚ fstₚ₁ (mk&ₚ value₀ (mk&ₚ value (mk&ₚ fstₚ₇ (mk&ₚ value₁ value₂ bs≡₈) bs≡₆) bs≡₄) bs≡₂) bs≡)
+           (mk&ₚ fstₚ₂ (mk&ₚ value₃ (mk&ₚ value₄ (mk&ₚ fstₚ₈ (mk&ₚ value₅ value₆ bs≡₉) bs≡₇) bs≡₅) bs≡₃) bs≡₁)
       ret (const _) of λ where
-        refl → case ‼ Default.uniqueNotDefault default value notDefault notDefault₂ ret (const _) of λ where
-          refl → case ‼ Default.uniqueNotDefault default₁ value₁ notDefault₁ notDefault₃ ret (const _) of λ where
-            refl → refl
+        refl → case ‼ Default.uniqueNotDefault default₂ value₀ notDefault₀ notDefault₃ ret (const _) of λ where
+          refl → case ‼ Default.uniqueNotDefault default₃ value notDefault notDefault₄ ret (const _) of λ where
+            refl → case ‼ Default.uniqueNotDefault default₅ value₁ notDefault₁ notDefault₅ ret (const _) of λ where
+              refl → case ‼ Default.uniqueNotDefault default₆ value₂ notDefault₂ notDefault₆ ret (const _) of λ where
+               refl → refl
