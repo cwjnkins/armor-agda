@@ -2,17 +2,17 @@
 
 open import Armor.Binary
 open import Armor.Data.X509
-open import Armor.Data.X509.Semantic.Chain.NameMatch
+open import Armor.Data.X509.Semantic.Chain.KIMatch
 open import Armor.Prelude
 
 module Armor.Data.X509.Semantic.Chain.TCB where
 
 -- IssuerFor c₁ c₂ := "a cert for the issuer of c₁ is c₂"
 _IsIssuerFor_ : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Cert bs₂ → Set
-_IsIssuerFor_ issuer issuee = NameMatch (Cert.getIssuer issuee) (Cert.getSubject issuer)
+_IsIssuerFor_ issuer issuee = KIMatch (Cert.getAKI issuee) (Cert.getSKI issuer)
 
 _isIssuerFor?_ :  ∀ {@0 bs₁ bs₂} → (issuer : Cert bs₁) → (issuee : Cert bs₂) → Dec (issuer IsIssuerFor issuee)
-issuer isIssuerFor? issuee = nameMatch? (Cert.getIssuer issuee) (Cert.getSubject issuer)
+issuer isIssuerFor? issuee = kiMatch? (Cert.getAKI issuee) (Cert.getSKI issuer)
 
 _IsIssuerFor_In_ : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Cert bs₂ → (certs : List (Exists─ _ Cert)) → Set
 issuer IsIssuerFor issuee In certs = issuer IsIssuerFor issuee × (─ _ , issuer) ∈ certs

@@ -2,7 +2,6 @@
 
 open import Armor.Binary
 open import Armor.Data.X509
-open import Armor.Data.X509.Semantic.Chain.NameMatch
 open import Armor.Data.X509.Semantic.Chain.Properties
 open import Armor.Data.X509.Semantic.Chain.TCB
 open import Armor.Prelude
@@ -136,89 +135,89 @@ buildChains : (trustedRoot candidates : List (Exists─ _ Cert))
 buildChains trustedRoot candidates issuee =
   toChains _ _ _ (buildTrustTree trustedRoot candidates issuee)
 
--- completeness
+-- -- completeness
 
-toChainsBranchCompleteWF
-  : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
-    → ∀ {@0 bs} (issuee : Cert bs)
-    → (@0 ac : Acc _<_ (length candidates))
-    → (tb : ∃ (TrustTreeBranchF trustedRoot candidates issuee))
-    → let (anIssuerForIn issuer _ issuer∈) = proj₁ tb in
-      ∀ (isIssuerFor : issuer IsIssuerFor issuee) (issuer∈' : (-, issuer) ∈ candidates)
-      → (chain : Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
-      → Any{A = Chain trustedRoot candidates issuee} (λ c → link issuer (isIssuerFor , issuer∈') chain ≡Chain c) (toChainsBranchWF _ _ _ ac tb)
-
-
-toChainsCompleteWF
-  : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
-    → ∀ {@0 bs} (issuee : Cert bs)
-    → (@0 ac : Acc _<_ (length candidates))
-    → (tr : TrustTree trustedRoot candidates issuee)
-    → (c : Chain trustedRoot candidates issuee)
-    → Any (c ≡Chain_) (toChainsWF _ _ _ ac tr)
-
-toChainsBranchCompleteWF trustedRoot candidates {- unique -} issuee (WellFounded.acc rs) ((anIssuerForIn issuer isIssuerFor issuer∈) , tr) isIssuerFor' issuer∈' chain =
-  Any.map⁺{xs = chains'}
-    (Any.map
-      (λ {chain'} ≡chain → cong₂ _∷_ refl ≡chain)
-      ih)
-  where
-  chains' : List (Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
-  chains' = toChainsWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr
-
-  ih : Any (chain ≡Chain_) chains'
-  ih = toChainsCompleteWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr chain
-
-allLookupLemma : {A : Set} {P : (a : A) → Set} → ∀ {x xs} → (all : All P xs) → (x∈ : x ∈ xs) → ((x , All.lookup all x∈)) ∈ All.toList all
-allLookupLemma {x} {xs} (px₁ ∷ all₁) (here refl) = here refl
-allLookupLemma {x} {xs} (px ∷ all₁) (there x∈) = there (allLookupLemma all₁ x∈)
+-- toChainsBranchCompleteWF
+--   : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
+--     → ∀ {@0 bs} (issuee : Cert bs)
+--     → (@0 ac : Acc _<_ (length candidates))
+--     → (tb : ∃ (TrustTreeBranchF trustedRoot candidates issuee))
+--     → let (anIssuerForIn issuer _ issuer∈) = proj₁ tb in
+--       ∀ (isIssuerFor : issuer IsIssuerFor issuee) (issuer∈' : (-, issuer) ∈ candidates)
+--       → (chain : Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
+--       → Any{A = Chain trustedRoot candidates issuee} (λ c → link issuer (isIssuerFor , issuer∈') chain ≡Chain c) (toChainsBranchWF _ _ _ ac tb)
 
 
-toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (rootIssuers , allRootIssuers) otherIssuers otherTrust) (root (anIssuerForIn issuer isIssuerFor issuer∈)) =
-  Any.++⁺ˡ {xs = map root rootIssuers}
-    (Any.map⁺
-      (List.lose rootIssuer∈root (cong₂ (λ x y → x ∷ [ y ]) refl (proj₂ (proj₂ rootIssuerLem)))))
-  where
-  rootIssuerLem : ∃ λ x → x ∈ rootIssuers × (-, issuer) ≡ proj₁ x
-  rootIssuerLem = List.∈-map⁻ proj₁ (All.lookup allRootIssuers issuer∈ isIssuerFor)
+-- toChainsCompleteWF
+--   : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
+--     → ∀ {@0 bs} (issuee : Cert bs)
+--     → (@0 ac : Acc _<_ (length candidates))
+--     → (tr : TrustTree trustedRoot candidates issuee)
+--     → (c : Chain trustedRoot candidates issuee)
+--     → Any (c ≡Chain_) (toChainsWF _ _ _ ac tr)
 
-  rootIssuer = proj₁ rootIssuerLem
-  rootIssuer∈root = proj₁ (proj₂ rootIssuerLem)
-toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (rootIssuers , _) (otherIssuers , allOtherIssuers) otherTrust) chain@(link issuer (isIssuer , issuer∈) c) =
-  Any.++⁺ʳ (map root rootIssuers)
-    (Any.concat⁺{xss = map (toChainsBranchWF trustedRoot candidates endEnt ac) (All.toList otherTrust)}
-      (Any.map⁺{xs = All.toList otherTrust}
-        (List.lose
-          (allLookupLemma otherTrust (proj₂ (isIssuer×isInF issuerFromOtherIssuers)))
-          (toChainsBranchCompleteWF trustedRoot candidates endEnt ac
-            (  (  (-, issuer)
-                , proj₁ (proj₁ (isIssuer×isInF issuerFromOtherIssuers))
-                , proj₂ (proj₁ (isIssuer×isInF issuerFromOtherIssuers)))
-             , All.lookup otherTrust _)
-            isIssuer issuer∈
-            c))))
-  where
-  xs = concatMap (toChainsBranchWF trustedRoot candidates endEnt ac) (All.toList otherTrust)
+-- toChainsBranchCompleteWF trustedRoot candidates {- unique -} issuee (WellFounded.acc rs) ((anIssuerForIn issuer isIssuerFor issuer∈) , tr) isIssuerFor' issuer∈' chain =
+--   Any.map⁺{xs = chains'}
+--     (Any.map
+--       (λ {chain'} ≡chain → cong₂ _∷_ refl ≡chain)
+--       ih)
+--   where
+--   chains' : List (Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
+--   chains' = toChainsWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr
 
-  issuerFromOtherIssuers : ∃ λ x → x ∈ otherIssuers × (-, issuer) ≡ proj₁ x
-  issuerFromOtherIssuers = List.∈-map⁻ proj₁ (All.lookup allOtherIssuers issuer∈ isIssuer)
+--   ih : Any (chain ≡Chain_) chains'
+--   ih = toChainsCompleteWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr chain
 
-  isIssuer×isInF : (∃ λ x → x ∈ otherIssuers × (-, issuer) ≡ proj₁ x)
-                   → Σ (issuer IsIssuerFor endEnt In candidates) λ isIssIn → ((-, issuer) , isIssIn) ∈ otherIssuers
-  isIssuer×isInF ((_ , ret) , x∈otherIssuers , refl) = ret , x∈otherIssuers
+-- allLookupLemma : {A : Set} {P : (a : A) → Set} → ∀ {x xs} → (all : All P xs) → (x∈ : x ∈ xs) → ((x , All.lookup all x∈)) ∈ All.toList all
+-- allLookupLemma {x} {xs} (px₁ ∷ all₁) (here refl) = here refl
+-- allLookupLemma {x} {xs} (px ∷ all₁) (there x∈) = there (allLookupLemma all₁ x∈)
 
-toChainsComplete
-  : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
-    → ∀ {@0 bs} (issuee : Cert bs)
-    → (tr : TrustTree trustedRoot candidates issuee)
-    → (c : Chain trustedRoot candidates issuee)
-    → Any (c ≡Chain_) (toChains _ _ _ tr)
-toChainsComplete trust candidates issuee =
-  toChainsCompleteWF trust candidates issuee (<-wellFounded _)
-  where
-  open import Data.Nat.Induction
 
-buildChainsComplete : ∀ trust candidates {@0 bs} (issuee : Cert bs) → (c : Chain trust candidates issuee)
-                      → Any (c ≡Chain_) (buildChains trust candidates issuee)
-buildChainsComplete trust candidates issuee =
-  toChainsComplete trust candidates issuee (buildTrustTree trust candidates issuee)
+-- toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (rootIssuers , allRootIssuers) otherIssuers otherTrust) (root (anIssuerForIn issuer isIssuerFor issuer∈)) =
+--   Any.++⁺ˡ {xs = map root rootIssuers}
+--     (Any.map⁺
+--       (List.lose rootIssuer∈root (cong₂ (λ x y → x ∷ [ y ]) refl (proj₂ (proj₂ rootIssuerLem)))))
+--   where
+--   rootIssuerLem : ∃ λ x → x ∈ rootIssuers × (-, issuer) ≡ proj₁ x
+--   rootIssuerLem = List.∈-map⁻ proj₁ (All.lookup allRootIssuers issuer∈ isIssuerFor)
+
+--   rootIssuer = proj₁ rootIssuerLem
+--   rootIssuer∈root = proj₁ (proj₂ rootIssuerLem)
+-- toChainsCompleteWF trustedRoot candidates {- unique -} endEnt ac (mkTrustTree (rootIssuers , _) (otherIssuers , allOtherIssuers) otherTrust) chain@(link issuer (isIssuer , issuer∈) c) =
+--   Any.++⁺ʳ (map root rootIssuers)
+--     (Any.concat⁺{xss = map (toChainsBranchWF trustedRoot candidates endEnt ac) (All.toList otherTrust)}
+--       (Any.map⁺{xs = All.toList otherTrust}
+--         (List.lose
+--           (allLookupLemma otherTrust (proj₂ (isIssuer×isInF issuerFromOtherIssuers)))
+--           (toChainsBranchCompleteWF trustedRoot candidates endEnt ac
+--             (  (  (-, issuer)
+--                 , proj₁ (proj₁ (isIssuer×isInF issuerFromOtherIssuers))
+--                 , proj₂ (proj₁ (isIssuer×isInF issuerFromOtherIssuers)))
+--              , All.lookup otherTrust _)
+--             isIssuer issuer∈
+--             c))))
+--   where
+--   xs = concatMap (toChainsBranchWF trustedRoot candidates endEnt ac) (All.toList otherTrust)
+
+--   issuerFromOtherIssuers : ∃ λ x → x ∈ otherIssuers × (-, issuer) ≡ proj₁ x
+--   issuerFromOtherIssuers = List.∈-map⁻ proj₁ (All.lookup allOtherIssuers issuer∈ isIssuer)
+
+--   isIssuer×isInF : (∃ λ x → x ∈ otherIssuers × (-, issuer) ≡ proj₁ x)
+--                    → Σ (issuer IsIssuerFor endEnt In candidates) λ isIssIn → ((-, issuer) , isIssIn) ∈ otherIssuers
+--   isIssuer×isInF ((_ , ret) , x∈otherIssuers , refl) = ret , x∈otherIssuers
+
+-- toChainsComplete
+--   : ∀ (trustedRoot candidates : List (Exists─ _ Cert))
+--     → ∀ {@0 bs} (issuee : Cert bs)
+--     → (tr : TrustTree trustedRoot candidates issuee)
+--     → (c : Chain trustedRoot candidates issuee)
+--     → Any (c ≡Chain_) (toChains _ _ _ tr)
+-- toChainsComplete trust candidates issuee =
+--   toChainsCompleteWF trust candidates issuee (<-wellFounded _)
+--   where
+--   open import Data.Nat.Induction
+
+-- buildChainsComplete : ∀ trust candidates {@0 bs} (issuee : Cert bs) → (c : Chain trust candidates issuee)
+--                       → Any (c ≡Chain_) (buildChains trust candidates issuee)
+-- buildChainsComplete trust candidates issuee =
+--   toChainsComplete trust candidates issuee (buildTrustTree trust candidates issuee)

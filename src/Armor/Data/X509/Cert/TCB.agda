@@ -117,6 +117,12 @@ record CertFields (@0 bs : List UInt8) : Set where
   getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC = TBSCertFields.getBC (TLV.val tbs)
 
+  getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI = TBSCertFields.getAKI (TLV.val tbs)
+
+  getSKI : Exists─ (List UInt8) (Option ExtensionFieldSKI)
+  getSKI = TBSCertFields.getSKI (TLV.val tbs)
+
 {- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.4
 --    (k)  If certificate i is a version 3 certificate, verify that the
 --         basicConstraints extension is present and that cA is set to
@@ -230,6 +236,12 @@ module Cert where
 
     getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
     getBC = CertFields.getBC (TLV.val c)
+
+    getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+    getAKI = CertFields.getAKI (TLV.val c)
+
+    getSKI : Exists─ (List UInt8) (Option ExtensionFieldSKI)
+    getSKI = CertFields.getSKI (TLV.val c)
 
     isCA : Maybe Bool
     isCA = CertFields.isCA (TLV.val c)
