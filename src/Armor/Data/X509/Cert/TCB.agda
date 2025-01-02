@@ -1,6 +1,7 @@
 open import Armor.Binary
 open import Armor.Data.X509.Extension.TCB
 import      Armor.Data.X509.Extension.BC.TCB as BC
+import      Armor.Data.X509.Extension.AKI.TCB as AKI
 open import Armor.Data.X509.Name.TCB
 open import Armor.Data.X509.SignAlg.TCB
 open import Armor.Data.X509.TBSCert.TCB
@@ -116,6 +117,12 @@ record CertFields (@0 bs : List UInt8) : Set where
 
   getBC : Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC = TBSCertFields.getBC (TLV.val tbs)
+
+  getSKI : Exists─ (List UInt8) (Option ExtensionFieldSKI)
+  getSKI = TBSCertFields.getSKI (TLV.val tbs)
+
+  getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI = TBSCertFields.getAKI (TLV.val tbs)
 
 {- https://datatracker.ietf.org/doc/html/rfc5280#section-6.1.4
 --    (k)  If certificate i is a version 3 certificate, verify that the
@@ -234,6 +241,12 @@ module Cert where
     isCA : Maybe Bool
     isCA = CertFields.isCA (TLV.val c)
 
+    getSKI : Exists─ (List UInt8) (Option ExtensionFieldSKI)
+    getSKI = CertFields.getSKI (TLV.val c)
+
+    getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+    getAKI = CertFields.getAKI (TLV.val c)
+
     getKU : Exists─ (List UInt8) (Option ExtensionFieldKU)
     getKU = CertFields.getKU (TLV.val c)
 
@@ -272,6 +285,18 @@ module Cert where
       helper : ∀ {@0 bs} → SequenceOf OID bs → List (List UInt8)
       helper nil = []
       helper (cons (mkIListCons head₁ tail₁ bs≡)) = (↑ (OID.serialize head₁)) ∷ (helper tail₁)
+
+    getSKIBytes : Exists─ (List UInt8) (Option ExtensionFieldSKI) → List UInt8
+    getSKIBytes (─ .[] , none) = []
+    getSKIBytes (─ x , some (mkExtensionFields extnId extnId≡ crit
+      (mkTLV len (mkTLV len₁ (singleton x₁ x≡) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₁
+
+    getAKIBytes : Exists─ (List UInt8) (Option ExtensionFieldAKI) → List UInt8
+    getAKIBytes (─ .[] , none) = []
+    getAKIBytes (─ x , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (AKI.mkAKIFieldsSeqFields none authcertiss authcertsn bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = []
+    getAKIBytes (─ x , some (mkExtensionFields extnId extnId≡ crit (mkTLV len
+      (mkTLV len₁ (AKI.mkAKIFieldsSeqFields (some (mkTLV len₅ (singleton x₁ x≡) len≡₅ bs≡₅)) authcertiss authcertsn bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) = x₁
+
 open Cert public using (Cert)
 
 module CertList where

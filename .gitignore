@@ -9,6 +9,7 @@
 /doc/summary.synctex.gz
 /doc/latex/
 /src/Main
+/src/ChainBuildHelper
 /src/libraries
 **/.DS_Store
 **/_build

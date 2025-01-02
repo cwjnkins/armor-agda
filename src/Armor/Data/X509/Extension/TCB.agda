@@ -213,6 +213,14 @@ module Extension where
   getBC (mkTLV len (bcextn x) len≡ bs≡) = _ , (some x)
   getBC (mkTLV len _ len≡ bs≡) = _ , none
 
+  getSKI : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldSKI)
+  getSKI (mkTLV len (skiextn x) len≡ bs≡) = _ , (some x)
+  getSKI (mkTLV len _ len≡ bs≡) = _ , none
+
+  getAKI : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len (akiextn x) len≡ bs≡) = _ , (some x)
+  getAKI (mkTLV len _ len≡ bs≡) = _ , none
+
   getKU : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU (mkTLV len (kuextn x) len≡ bs≡) = _ , (some x)
   getKU (mkTLV len _ len≡ bs≡) = _ , none
@@ -244,6 +252,24 @@ module ExtensionsSeq where
     helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldBC)
     helper nil = _ , none
     helper (consIList h t bs≡) = case (Extension.getBC h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+  getSKI : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldSKI)
+  getSKI (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldSKI)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getSKI h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+  getAKI : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getAKI h) of λ where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
@@ -302,6 +328,12 @@ module ExtensionsSeq where
 module Extensions where
   getBC : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldBC)
   getBC (mkTLV len val len≡ bs≡) = ExtensionsSeq.getBC val
+
+  getSKI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldSKI)
+  getSKI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getSKI val
+
+  getAKI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getAKI val
 
   getKU : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldKU)
   getKU (mkTLV len val len≡ bs≡) = ExtensionsSeq.getKU val

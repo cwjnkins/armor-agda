@@ -4,7 +4,6 @@ open import Armor.Binary
 import      Armor.Data.Base64 as Base64
 import      Armor.Data.PEM as PEM
 open import Armor.Data.X509
--- open import Armor.Data.X509.ChainBuilder.Exec
 open import Armor.Data.X509.Semantic.Chain.Builder
 open import Armor.Data.X509.Semantic.Chain.TCB
 open import Armor.Data.X509.Semantic.Cert.R18.TCB
@@ -29,12 +28,7 @@ open IList                     UInt8
   hiding (toList)
 
 usage : String
-usage = "usage: 'aeres CERTCHAIN TRUSTEDSTORE"
-
--- str2dig : String → Maybe (List Dig)
--- str2dig xs = do
---   bs ← decToMaybe ∘ All.all? (_<? 256) ∘ map toℕ ∘ String.toList $ xs
---   return (map (λ where (n , n<256) → Fin.fromℕ< n<256) (All.toList bs))
+usage = "usage: 'Main CERTCHAIN TRUSTEDSTORE ..."
 
 -- TODO: bindings for returning error codes?
 parseDERCerts : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CertList))
@@ -107,13 +101,6 @@ parseCerts fn input =
               IO.>> Armor.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
 
--- CertListToList : ∀ {@0 bs} → CertList bs  → List (Exists─ (List UInt8) Cert)
--- CertListToList nil = []
--- CertListToList (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
---   where
---   helper : ∀ {@0 bs} → IList Cert bs → List (Exists─ (List UInt8) Cert)
---   helper nil = []
---   helper (cons (mkIListCons h t bs≡)) = (_ , h) ∷ helper t
 
 main : IO.Main
 main = IO.run $
@@ -257,14 +244,11 @@ main = IO.run $
      runCheck cert "R4" r4 IO.>>
      runCheck cert "R5" r5 IO.>>
      runCheck cert "R6" r6 IO.>>
-     -- runCheck cert "R7" r7 IO.>>
      runCheck cert "R8" r8 IO.>>
      runCheck cert "R9" r9 IO.>>
      runCheck cert "R10" r10 IO.>>
-     -- runCheck cert "R11" r11 IO.>>
      runCheck cert "R12" r12 IO.>>
      runCheck cert "R13" r13 IO.>>
-     -- runCheck cert "R14" r14 IO.>>
      runCheck cert "R15" r15 IO.>>
      -- runCheck cert "R16" r16 IO.>>
      (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" (r18 kp)) else (IO.return tt)) IO.>>
@@ -295,7 +279,6 @@ main = IO.run $
     runChecks' kp issuee 1 chain IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
     runChainCheck "R20" issuee chain r20 IO.>>
-    -- runChainCheck "R21" issuee chain r21 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
     runChainCheck "R27" issuee chain r27 IO.>>
@@ -321,6 +304,5 @@ main = IO.run $
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → _
   runCertChecksLeaf kp [] = Armor.IO.putStrLnErr "Error: no parsed leaf certificate"
   runCertChecksLeaf kp (leaf ∷ rest) =
-    -- IO.putStrLn (showOutput (certOutput (proj₂ leaf))) IO.>>
     runSingleCertChecks kp (proj₂ leaf) 1 IO.>>
     Armor.IO.exitSuccess
