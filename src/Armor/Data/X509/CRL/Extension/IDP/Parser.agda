@@ -30,10 +30,10 @@ open Armor.Grammar.Seq         UInt8
 private
   here' = "X509: CRL: CertList: TBSCertList: Extension: IDP"
 
-postulate
-  parseIDPFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength IDPFieldsSeqFields n)
--- parseIDPFieldsSeqFields n =
---   parseEquivalent (Parallel.equivalent₁ equivalentIDPFieldsSeqFields) {!!}
+
+parseIDPFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength IDPFieldsSeqFields n)
+parseIDPFieldsSeqFields n =
+  parseEquivalent (Parallel.equivalent₁ equivalentIDPFieldsSeqFields) {!Sequence.parseOption₂Default₄!}
 
 
 --   where
