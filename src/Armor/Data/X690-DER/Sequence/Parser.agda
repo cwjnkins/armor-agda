@@ -1,5 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
-
 open import Armor.Binary
 open import Armor.Data.X690-DER.Default
 open import Armor.Data.X690-DER.Sequence.Properties
@@ -136,7 +134,6 @@ module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (
 module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C ⦄ ⦃ _ : Eq≋ E ⦄ ⦃ _ : Eq≋ F ⦄ {@0 bs' bs'' bs''' bs'''' : List UInt8}
   (default₂ : B bs') (default₃ : C bs'') (default₅ : E bs''') (default₆ : F bs'''') (loc : String) where
 
-
   parseOption₂Default₄
       : ∀ {A D : @0 List UInt8 → Set}
       → @0 Unambiguous A → @0 NoSubstrings A
@@ -240,7 +237,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
                         contradiction f' (nc₂₆ (sym xs≡₁) (proj₁ b))
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                      contradiction (¡ abcdefLen) λ ()
               ((singleton none refl) , (singleton (some a') refl)) → helperNoBexplicit mine theirs isSomeB (tt , tt)
               ((singleton (some a) refl) , (singleton none refl)) → helperNoBexplicit mine theirs isSomeB (tt , tt)
               ((singleton (some a) refl) , (singleton (some a') refl)) →
@@ -347,7 +344,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                         in
                         contradiction f' (nc₂₆ bs≡ (proj₁ b))
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      {!!}
+                      contradiction (¡ abcdefLen) (λ ())
         (yes pb , no ¬pc , e , f) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -389,8 +386,52 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   ret (const _) of λ where
                     (singleton (some b') refl , singleton oc' refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                       case (singleton ob refl) of λ where
-                          (singleton none refl) → {!!}
-                          (singleton (some b) refl) → {!!}
+                          (singleton none refl) → contradiction (proj₁ c) (nc₂₃ xs≡₁ b')
+                          (singleton (some b) refl) →
+                            let
+                              @0 bs₂≡ : bs₂' ≡ bs₂
+                              bs₂≡ = ns₂ xs≡₁ b' b
+
+                              @0 xs≡₂ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                              xs≡₂ = ++-cancelˡ bs₂'
+                               (begin
+                               bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                               ≡⟨ xs≡₁ ⟩
+                               bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                               ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                               bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                               ∎ )
+                            in
+                            case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                              ret (const _) of λ where
+                                (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                  let
+                                    @0 bs₃≡ : bs₃' ≡ bs₃
+                                    bs₃≡ =
+                                      ns₃
+                                      (begin
+                                      bs₃' ++ (bs₄₅₆' ++ suffix)
+                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                      bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                      ≡⟨ xs≡₂ ⟩
+                                      bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                      bs₃ ++ ((bs₄ ++ bs₅ ++ bs₆) ++ suf₁)
+                                      ∎ )
+                                      c' (proj₁  c)
+                                  in
+                                  case (‼ bs₃≡) ret (const _) of λ where
+                                    refl →
+                                      let @0 c≡ : proj₁ c ≡ c'
+                                          c≡ = uc (proj₁ c) c'
+                                      in
+                                      contradiction
+                                        (subst₀ (λ x → Default.NotDefault default₃ x) (cong some (sym (‼ c≡))) ocnd)
+                                        (proj₂ c)
+                                (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) → contradiction d' (nc₃₄ (sym xs≡₂) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) → contradiction e' (nc₃₅ (sym xs≡₂) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) → contradiction f' (nc₃₆ (sym xs≡₂) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -464,8 +505,52 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   ret (const _) of λ where
                     (singleton (some b') refl , singleton oc' refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                       case (singleton ob refl) of λ where
-                          (singleton none refl) → {!!}
-                          (singleton (some b) refl) → {!!}
+                          (singleton none refl) → contradiction (proj₁ c) (nc₂₃ xs≡₂ b')
+                          (singleton (some b) refl) →
+                            let
+                              @0 bs₂≡ : bs₂' ≡ bs₂
+                              bs₂≡ = ns₂ xs≡₂ b' b
+
+                              @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                              xs≡₃ = ++-cancelˡ bs₂'
+                               (begin
+                               bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                               ≡⟨ xs≡₂ ⟩
+                               bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                               ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                               bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                               ∎ )
+                            in
+                            case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                              ret (const _) of λ where
+                                (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                  let
+                                    @0 bs₃≡ : bs₃' ≡ bs₃
+                                    bs₃≡ =
+                                      ns₃
+                                      (begin
+                                      bs₃' ++ (bs₄₅₆' ++ suffix)
+                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                      bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                      ≡⟨ xs≡₃ ⟩
+                                      bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                      bs₃ ++ ((bs₄ ++ bs₅ ++ bs₆) ++ suf₁)
+                                      ∎ )
+                                      c' (proj₁  c)
+                                  in
+                                  case (‼ bs₃≡) ret (const _) of λ where
+                                    refl →
+                                      let @0 c≡ : proj₁ c ≡ c'
+                                          c≡ = uc (proj₁ c) c'
+                                      in
+                                      contradiction
+                                        (subst₀ (λ x → Default.NotDefault default₃ x) (cong some (sym (‼ c≡))) ocnd)
+                                        (proj₂ c)
+                                (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) → contradiction d' (nc₃₄ (sym xs≡₃) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) → contradiction e' (nc₃₅ (sym xs≡₃) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) → contradiction f' (nc₃₆ (sym xs≡₃) (proj₁ c))
+                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                       case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -503,7 +588,8 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                       case (singleton ob refl) of λ where
                           (singleton none refl) →  contradiction f' (nc₃₆ (sym xs≡₂) (proj₁ c))
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
-                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) → {!!}              
+                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                      contradiction (¡ abcdefLen) (λ ())
         (yes pb , yes pc , no ¬pe , f) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -552,7 +638,208 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton none refl) → contradiction (proj₁ e) (nc₂₅ xs≡₁ b')
                                   (singleton (some d) refl) →  contradiction d (nc₂₄ xs≡₁ b')
                               (singleton (some c) refl) →  contradiction c (nc₂₃ xs≡₁ b')
-                          (singleton (some b) refl) →  {!!}
+                          (singleton (some b) refl) →
+                                let
+                                  @0 bs₂≡ : bs₂' ≡ bs₂
+                                  bs₂≡ = ns₂ xs≡₁ b' b
+
+                                  @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₂'
+                                           (begin
+                                           bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₁ ⟩
+                                           bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                                           bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction (proj₁ e) (nc₃₅ xs≡₃ c')
+                                          (singleton (some d) refl) → contradiction d (nc₃₄ xs≡₃ c')
+                                      (singleton (some c) refl) →
+                                        let
+                                          @0 bs₃≡ : bs₃' ≡ bs₃
+                                          bs₃≡ = ns₃ xs≡₃ c' c
+
+                                          @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₃'
+                                            (begin
+                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                            bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₄ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₄ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₄ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₅ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                                  (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                 let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₄ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                              (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₃ d')
+                                          (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₅ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                                  (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                      (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            let
+                                              @0 bs₅≡ : bs₅' ≡ bs₅
+                                              bs₅≡ =
+                                                ns₅
+                                                (begin
+                                                bs₅' ++ (bs₆' ++ suffix)
+                                                ≡⟨ solve (++-monoid UInt8) ⟩
+                                                bs₅' ++ bs₆' ++ suffix
+                                                ≡⟨ xs≡₃ ⟩
+                                                bs₅ ++ bs₆ ++ suf₁
+                                                ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                bs₅ ++ (bs₆ ++ suf₁)
+                                                ∎ )
+                                                e' (proj₁  e)
+                                            in
+                                            case (‼ bs₅≡) ret (const _) of λ where
+                                            refl →
+                                              let @0 e≡ : proj₁ e ≡ e'
+                                                  e≡ = ue (proj₁ e) e'
+                                              in
+                                              contradiction
+                                              (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                              (proj₂ e)
+                                          (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                      (singleton (some c) refl) → contradiction e' (nc₃₅ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
+                                          (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -561,8 +848,101 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                 case (singleton od refl) of λ where
                                   (singleton none refl) → contradiction (proj₁ e) (nc₃₅ xs≡₁ c')
                                   (singleton (some d) refl) →  contradiction d (nc₃₄ xs≡₁ c')
-                              (singleton (some c) refl) → {!!}
-                          (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₁) b)
+                              (singleton (some c) refl) →
+                                let
+                                  @0 bs₃≡ : bs₃' ≡ bs₃
+                                  bs₃≡ = ns₃ xs≡₁ c' c
+
+                                  @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₃'
+                                           (begin
+                                           bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₁ ⟩
+                                           bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                           bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₃ d')
+                                      (singleton (some d) refl) →
+                                        let
+                                          @0 bs₄≡ : bs₄' ≡ bs₄
+                                          bs₄≡ = ns₄ xs≡₃ d' d
+
+                                          @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₄'
+                                            (begin
+                                            bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                            bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some e') refl , singleton of' refl) →
+                                            let
+                                            @0 bs₅≡ : bs₅' ≡ bs₅
+                                            bs₅≡ =
+                                              ns₅
+                                              (begin
+                                              bs₅' ++ (bs₆' ++ suffix)
+                                              ≡⟨ solve (++-monoid UInt8) ⟩
+                                              bs₅' ++ bs₆' ++ suffix
+                                              ≡⟨ xs≡₄ ⟩
+                                              bs₅ ++ bs₆ ++ suf₁
+                                              ≡⟨ solve (++-monoid UInt8)  ⟩
+                                              bs₅ ++ (bs₆ ++ suf₁)
+                                              ∎ )
+                                              e' (proj₁  e)
+                                            in
+                                            case (‼ bs₅≡) ret (const _) of λ where
+                                              refl →
+                                                let @0 e≡ : proj₁ e ≡ e'
+                                                    e≡ = ue (proj₁ e) e'
+                                                in
+                                                contradiction
+                                                (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                (proj₂ e)
+                                          (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
+                                          (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) →
+                                        let
+                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                          bs₅≡ =
+                                            ns₅
+                                            (begin
+                                            bs₅' ++ (bs₆' ++ suffix)
+                                            ≡⟨ solve (++-monoid UInt8) ⟩
+                                            bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ solve (++-monoid UInt8)  ⟩
+                                            bs₅ ++ (bs₆ ++ suf₁)
+                                            ∎ )
+                                            e' (proj₁  e)
+                                        in
+                                        case (‼ bs₅≡) ret (const _) of λ where
+                                          refl →
+                                            let @0 e≡ : proj₁ e ≡ e'
+                                                e≡ = ue (proj₁ e) e'
+                                            in
+                                            contradiction
+                                            (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                            (proj₂ e)
+                                      (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                  (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
+                                      (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                  (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                          (singleton (some b) refl) → contradiction c' (nc₂₃ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -570,7 +950,49 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               (singleton none refl) →
                                 case (singleton od refl) of λ where
                                   (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₁ d')
-                                  (singleton (some d) refl) →  {!!}
+                                  (singleton (some d) refl) →
+                                    let
+                                    @0 bs₄≡ : bs₄' ≡ bs₄
+                                    bs₄≡ = ns₄ xs≡₁ d' d
+
+                                    @0 xs≡₂ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                    xs≡₂ = ++-cancelˡ bs₄'
+                                      (begin
+                                      bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                      ≡⟨ xs≡₁ ⟩
+                                      bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                      ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                      bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                      ∎ )
+                                    in
+                                    case ((singleton oe' refl) ,′e (singleton of' refl)) 
+                                    ret (const _) of λ where
+                                      (singleton (some e') refl , singleton of' refl) →
+                                        let
+                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                          bs₅≡ =
+                                            ns₅
+                                            (begin
+                                            bs₅' ++ (bs₆' ++ suffix)
+                                            ≡⟨ solve (++-monoid UInt8) ⟩
+                                            bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₂ ⟩
+                                            bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ solve (++-monoid UInt8)  ⟩
+                                            bs₅ ++ (bs₆ ++ suf₁)
+                                            ∎ )
+                                            e' (proj₁  e)
+                                        in
+                                        case (‼ bs₅≡) ret (const _) of λ where
+                                          refl →
+                                            let @0 e≡ : proj₁ e ≡ e'
+                                                e≡ = ue (proj₁ e) e'
+                                            in
+                                            contradiction
+                                            (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                            (proj₂ e)
+                                      (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₂) (proj₁ e))
+                                      (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of refl) →
@@ -657,7 +1079,208 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton none refl) → contradiction (proj₁ e) (nc₂₅ xs≡₂ b')
                                   (singleton (some d) refl) →  contradiction d (nc₂₄ xs≡₂ b')
                               (singleton (some c) refl) →  contradiction c (nc₂₃ xs≡₂ b')
-                          (singleton (some b) refl) →  {!!}
+                          (singleton (some b) refl) →
+                                let
+                                  @0 bs₂≡ : bs₂' ≡ bs₂
+                                  bs₂≡ = ns₂ xs≡₂ b' b
+
+                                  @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₂'
+                                           (begin
+                                           bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₂ ⟩
+                                           bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                                           bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction (proj₁ e) (nc₃₅ xs≡₃ c')
+                                          (singleton (some d) refl) → contradiction d (nc₃₄ xs≡₃ c')
+                                      (singleton (some c) refl) →
+                                        let
+                                          @0 bs₃≡ : bs₃' ≡ bs₃
+                                          bs₃≡ = ns₃ xs≡₃ c' c
+
+                                          @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₃'
+                                            (begin
+                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                            bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₄ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₄ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₄ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₅ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                                  (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                 let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₄ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                              (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₃ d')
+                                          (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    let
+                                                    @0 bs₅≡ : bs₅' ≡ bs₅
+                                                    bs₅≡ =
+                                                      ns₅
+                                                      (begin
+                                                      bs₅' ++ (bs₆' ++ suffix)
+                                                      ≡⟨ solve (++-monoid UInt8) ⟩
+                                                      bs₅' ++ bs₆' ++ suffix
+                                                      ≡⟨ xs≡₅ ⟩
+                                                      bs₅ ++ bs₆ ++ suf₁
+                                                      ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                      bs₅ ++ (bs₆ ++ suf₁)
+                                                      ∎ )
+                                                      e' (proj₁  e)
+                                                    in
+                                                    case (‼ bs₅≡) ret (const _) of λ where
+                                                      refl →
+                                                        let @0 e≡ : proj₁ e ≡ e'
+                                                            e≡ = ue (proj₁ e) e'
+                                                        in
+                                                        contradiction
+                                                        (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                        (proj₂ e)
+                                                  (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                      (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            let
+                                              @0 bs₅≡ : bs₅' ≡ bs₅
+                                              bs₅≡ =
+                                                ns₅
+                                                (begin
+                                                bs₅' ++ (bs₆' ++ suffix)
+                                                ≡⟨ solve (++-monoid UInt8) ⟩
+                                                bs₅' ++ bs₆' ++ suffix
+                                                ≡⟨ xs≡₃ ⟩
+                                                bs₅ ++ bs₆ ++ suf₁
+                                                ≡⟨ solve (++-monoid UInt8)  ⟩
+                                                bs₅ ++ (bs₆ ++ suf₁)
+                                                ∎ )
+                                                e' (proj₁  e)
+                                            in
+                                            case (‼ bs₅≡) ret (const _) of λ where
+                                            refl →
+                                              let @0 e≡ : proj₁ e ≡ e'
+                                                  e≡ = ue (proj₁ e) e'
+                                              in
+                                              contradiction
+                                              (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                              (proj₂ e)
+                                          (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                      (singleton (some c) refl) → contradiction e' (nc₃₅ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
+                                          (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -666,7 +1289,100 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                 case (singleton od refl) of λ where
                                   (singleton none refl) → contradiction (proj₁ e) (nc₃₅ xs≡₂ c')
                                   (singleton (some d) refl) →  contradiction d (nc₃₄ xs≡₂ c')
-                              (singleton (some c) refl) → {!!}
+                              (singleton (some c) refl) →
+                                let
+                                  @0 bs₃≡ : bs₃' ≡ bs₃
+                                  bs₃≡ = ns₃ xs≡₂ c' c
+
+                                  @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₃'
+                                           (begin
+                                           bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₂ ⟩
+                                           bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                           bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₃ d')
+                                      (singleton (some d) refl) →
+                                        let
+                                          @0 bs₄≡ : bs₄' ≡ bs₄
+                                          bs₄≡ = ns₄ xs≡₃ d' d
+
+                                          @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₄'
+                                            (begin
+                                            bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                            bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some e') refl , singleton of' refl) →
+                                            let
+                                            @0 bs₅≡ : bs₅' ≡ bs₅
+                                            bs₅≡ =
+                                              ns₅
+                                              (begin
+                                              bs₅' ++ (bs₆' ++ suffix)
+                                              ≡⟨ solve (++-monoid UInt8) ⟩
+                                              bs₅' ++ bs₆' ++ suffix
+                                              ≡⟨ xs≡₄ ⟩
+                                              bs₅ ++ bs₆ ++ suf₁
+                                              ≡⟨ solve (++-monoid UInt8)  ⟩
+                                              bs₅ ++ (bs₆ ++ suf₁)
+                                              ∎ )
+                                              e' (proj₁  e)
+                                            in
+                                            case (‼ bs₅≡) ret (const _) of λ where
+                                              refl →
+                                                let @0 e≡ : proj₁ e ≡ e'
+                                                    e≡ = ue (proj₁ e) e'
+                                                in
+                                                contradiction
+                                                (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                                (proj₂ e)
+                                          (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
+                                          (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) →
+                                        let
+                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                          bs₅≡ =
+                                            ns₅
+                                            (begin
+                                            bs₅' ++ (bs₆' ++ suffix)
+                                            ≡⟨ solve (++-monoid UInt8) ⟩
+                                            bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ solve (++-monoid UInt8)  ⟩
+                                            bs₅ ++ (bs₆ ++ suf₁)
+                                            ∎ )
+                                            e' (proj₁  e)
+                                        in
+                                        case (‼ bs₅≡) ret (const _) of λ where
+                                          refl →
+                                            let @0 e≡ : proj₁ e ≡ e'
+                                                e≡ = ue (proj₁ e) e'
+                                            in
+                                            contradiction
+                                            (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                            (proj₂ e)
+                                      (singleton (some d) refl) → contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                  (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton od refl) of λ where
+                                      (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
+                                      (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                  (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₂) b)                          
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -675,7 +1391,49 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               (singleton none refl) →
                                 case (singleton od refl) of λ where
                                   (singleton none refl) → contradiction (proj₁ e) (nc₄₅ xs≡₂ d')
-                                  (singleton (some d) refl) →  {!!}
+                                  (singleton (some d) refl) →
+                                    let
+                                    @0 bs₄≡ : bs₄' ≡ bs₄
+                                    bs₄≡ = ns₄ xs≡₂ d' d
+
+                                    @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                    xs≡₄ = ++-cancelˡ bs₄'
+                                      (begin
+                                      bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                      ≡⟨ xs≡₂ ⟩
+                                      bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                      ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                      bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                      ∎ )
+                                    in
+                                    case ((singleton oe' refl) ,′e (singleton of' refl)) 
+                                    ret (const _) of λ where
+                                      (singleton (some e') refl , singleton of' refl) →
+                                        let
+                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                          bs₅≡ =
+                                            ns₅
+                                            (begin
+                                            bs₅' ++ (bs₆' ++ suffix)
+                                            ≡⟨ solve (++-monoid UInt8) ⟩
+                                            bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₄ ⟩
+                                            bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ solve (++-monoid UInt8)  ⟩
+                                            bs₅ ++ (bs₆ ++ suf₁)
+                                            ∎ )
+                                            e' (proj₁  e)
+                                        in
+                                        case (‼ bs₅≡) ret (const _) of λ where
+                                          refl →
+                                            let @0 e≡ : proj₁ e ≡ e'
+                                                e≡ = ue (proj₁ e) e'
+                                            in
+                                            contradiction
+                                            (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
+                                            (proj₂ e)
+                                      (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
+                                      (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
@@ -719,7 +1477,8 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₂) d)
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
-                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) → {!!} 
+                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                      contradiction (¡ abcdefLen) (λ ())
         (yes pb , yes pc , yes pe , no ¬pf) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -771,7 +1530,369 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                       (singleton (some e) refl) →  contradiction e (nc₂₅ xs≡₁ b')
                                   (singleton (some d) refl) →  contradiction d (nc₂₄ xs≡₁ b')
                               (singleton (some c) refl) →  contradiction c (nc₂₃ xs≡₁ b')
-                          (singleton (some b) refl) →  {!!}
+                          (singleton (some b) refl) →
+                                let
+                                  @0 bs₂≡ : bs₂' ≡ bs₂
+                                  bs₂≡ = ns₂ xs≡₁ b' b
+
+                                  @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₂'
+                                           (begin
+                                           bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₁ ⟩
+                                           bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                                           bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₃₆ xs≡₃ c')
+                                              (singleton (some e) refl) → contradiction e (nc₃₅ xs≡₃ c')
+                                          (singleton (some d) refl) → contradiction d (nc₃₄ xs≡₃ c')
+                                      (singleton (some c) refl) →
+                                        let
+                                          @0 bs₃≡ : bs₃' ≡ bs₃
+                                          bs₃≡ = ns₃ xs≡₃ c' c
+
+                                          @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₃'
+                                            (begin
+                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                            bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → 
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₄ d')
+                                                  (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₄ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₄ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₄ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                                case (singleton od refl) of λ where
+                                                  (singleton none refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₄ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₄ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₄ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₄ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₄) e)
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₃ d')
+                                              (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₃ d')
+                                          (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                            case (singleton oe refl) of λ where
+                                                              (singleton none refl) →
+                                                                let
+                                                                  @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                  bs₆≡ =
+                                                                    ns₆
+                                                                    (begin
+                                                                    bs₆' ++ suffix
+                                                                    ≡⟨ xs≡₅ ⟩
+                                                                    bs₆ ++ suf₁
+                                                                    ∎ )
+                                                                    f' (proj₁  f)
+                                                                in
+                                                                case (‼ bs₆≡) ret (const _) of λ where
+                                                                  refl →
+                                                                    let @0 f≡ : proj₁ f ≡ f'
+                                                                        f≡ = uf (proj₁ f) f'
+                                                                    in
+                                                                    contradiction
+                                                                      (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                      (proj₂ f)
+                                                              (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) →  contradiction (¡ abcdefLen) (λ ())
+                                      (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₃ e')
+                                              (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₃ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₃ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                          (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction e' (nc₃₅ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) →
+                                                let
+                                                  @0 bs₆≡ : bs₆' ≡ bs₆
+                                                  bs₆≡ =
+                                                    ns₆
+                                                    (begin
+                                                    bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₆ ++ suf₁
+                                                    ∎ )
+                                                    f' (proj₁  f)
+                                                in
+                                                case (‼ bs₆≡) ret (const _) of λ where
+                                                  refl →
+                                                    let @0 f≡ : proj₁ f ≡ f'
+                                                        f≡ = uf (proj₁ f) f'
+                                                    in
+                                                    contradiction
+                                                      (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                      (proj₂ f)
+                                              (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
+                                          (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -783,7 +1904,179 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                       (singleton none refl) → contradiction (proj₁ f) (nc₃₆ xs≡₁ c')
                                       (singleton (some e) refl) →  contradiction e (nc₃₅ xs≡₁ c')
                                   (singleton (some d) refl) →  contradiction d (nc₃₄ xs≡₁ c')
-                              (singleton (some c) refl) → {!!}
+                              (singleton (some c) refl) →
+                                let
+                                  @0 bs₃≡ : bs₃' ≡ bs₃
+                                  bs₃≡ = ns₃ xs≡₁ c' c
+
+                                  @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₃'
+                                           (begin
+                                           bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₁ ⟩
+                                           bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                           bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                   case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                     ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → 
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₃ d')
+                                                  (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₃ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                                case (singleton od refl) of λ where
+                                                  (singleton none refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₃ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₃ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₃ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₃ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -795,7 +2088,86 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     case (singleton oe refl) of λ where
                                       (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₁ d')
                                       (singleton (some e) refl) →  contradiction e (nc₄₅ xs≡₁ d')
-                                  (singleton (some d) refl) →  {!!}
+                                  (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₁ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₁  ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of refl) →
@@ -807,7 +2179,43 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton none refl) →
                                     case (singleton oe refl) of λ where
                                       (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₁ e')
-                                      (singleton (some e) refl) →  {!!}
+                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₁ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₁ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
                                   (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₁) d)
                               (singleton (some c) refl) →  contradiction e' (nc₃₅ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction e' (nc₂₅ (sym xs≡₁) b)
@@ -887,7 +2295,369 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                       (singleton (some e) refl) →  contradiction e (nc₂₅ xs≡₂ b')
                                   (singleton (some d) refl) →  contradiction d (nc₂₄ xs≡₂ b')
                               (singleton (some c) refl) →  contradiction c (nc₂₃ xs≡₂ b')
-                          (singleton (some b) refl) →  {!!}
+                          (singleton (some b) refl) →
+                                let
+                                  @0 bs₂≡ : bs₂' ≡ bs₂
+                                  bs₂≡ = ns₂ xs≡₂ b' b
+
+                                  @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₂'
+                                           (begin
+                                           bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₂ ⟩
+                                           bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₂≡) ⟩
+                                           bs₂' ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                case ((singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) of λ where
+                                  (singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₃₆ xs≡₃ c')
+                                              (singleton (some e) refl) → contradiction e (nc₃₅ xs≡₃ c')
+                                          (singleton (some d) refl) → contradiction d (nc₃₄ xs≡₃ c')
+                                      (singleton (some c) refl) →
+                                        let
+                                          @0 bs₃≡ : bs₃' ≡ bs₃
+                                          bs₃≡ = ns₃ xs≡₃ c' c
+
+                                          @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                          xs≡₄ = ++-cancelˡ bs₃'
+                                            (begin
+                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                            ≡⟨ xs≡₃ ⟩
+                                            bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                            bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                            ∎ )
+                                        in
+                                        case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                        ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → 
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₄ d')
+                                                  (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₄ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₄ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₄ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                                case (singleton od refl) of λ where
+                                                  (singleton none refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₄ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₄ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₄ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₄ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₄) e)
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₃ d')
+                                              (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₃ d')
+                                          (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                            case (singleton oe refl) of λ where
+                                                              (singleton none refl) →
+                                                                let
+                                                                  @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                  bs₆≡ =
+                                                                    ns₆
+                                                                    (begin
+                                                                    bs₆' ++ suffix
+                                                                    ≡⟨ xs≡₅ ⟩
+                                                                    bs₆ ++ suf₁
+                                                                    ∎ )
+                                                                    f' (proj₁  f)
+                                                                in
+                                                                case (‼ bs₆≡) ret (const _) of λ where
+                                                                  refl →
+                                                                    let @0 f≡ : proj₁ f ≡ f'
+                                                                        f≡ = uf (proj₁ f) f'
+                                                                    in
+                                                                    contradiction
+                                                                      (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                      (proj₂ f)
+                                                              (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) →  contradiction (¡ abcdefLen) (λ ())
+                                      (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₃ e')
+                                              (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₃ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₃ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                          (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction e' (nc₃₅ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
+                                    case (singleton oc refl) of λ where
+                                      (singleton none refl) →
+                                        case (singleton od refl) of λ where
+                                          (singleton none refl) →
+                                            case (singleton oe refl) of λ where
+                                              (singleton none refl) →
+                                                let
+                                                  @0 bs₆≡ : bs₆' ≡ bs₆
+                                                  bs₆≡ =
+                                                    ns₆
+                                                    (begin
+                                                    bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₆ ++ suf₁
+                                                    ∎ )
+                                                    f' (proj₁  f)
+                                                in
+                                                case (‼ bs₆≡) ret (const _) of λ where
+                                                  refl →
+                                                    let @0 f≡ : proj₁ f ≡ f'
+                                                        f≡ = uf (proj₁ f) f'
+                                                    in
+                                                    contradiction
+                                                      (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                      (proj₂ f)
+                                              (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
+                                          (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                      (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -899,7 +2669,179 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                       (singleton none refl) → contradiction (proj₁ f) (nc₃₆ xs≡₂ c')
                                       (singleton (some e) refl) →  contradiction e (nc₃₅ xs≡₂ c')
                                   (singleton (some d) refl) →  contradiction d (nc₃₄ xs≡₂ c')
-                              (singleton (some c) refl) → {!!}
+                              (singleton (some c) refl) →
+                                let
+                                  @0 bs₃≡ : bs₃' ≡ bs₃
+                                  bs₃≡ = ns₃ xs≡₂ c' c
+
+                                  @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                  xs≡₃ = ++-cancelˡ bs₃'
+                                           (begin
+                                           bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                           ≡⟨ xs≡₂ ⟩
+                                           bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ≡⟨ cong (_++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁) (sym bs₃≡) ⟩
+                                           bs₃' ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                           ∎ )
+                                in
+                                   case ((singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
+                                     ret (const _) of λ where
+                                          (singleton (some d') refl , singleton oe' refl , singleton of' refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) → 
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₃ d')
+                                                  (singleton (some e) refl) → contradiction e (nc₄₅ xs≡₃ d')
+                                              (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₃ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₃ ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton (some e') refl , singleton of' refl) →
+                                                case (singleton od refl) of λ where
+                                                  (singleton none refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₃ e')
+                                                      (singleton (some e) refl) → 
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₃ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₃ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₃) d)
+                                          (singleton none refl , singleton none refl , singleton (some f') refl) →
+                                            case (singleton od refl) of λ where
+                                              (singleton none refl) →
+                                                case (singleton oe refl) of λ where
+                                                  (singleton none refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₃ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
+                                              (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
+                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₂) b)                          
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -911,7 +2853,86 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     case (singleton oe refl) of λ where
                                       (singleton none refl) → contradiction (proj₁ f) (nc₄₆ xs≡₂ d')
                                       (singleton (some e) refl) →  contradiction e (nc₄₅ xs≡₂ d')
-                                  (singleton (some d) refl) →  {!!}
+                                  (singleton (some d) refl) →
+                                                let
+                                                  @0 bs₄≡ : bs₄' ≡ bs₄
+                                                  bs₄≡ = ns₄ xs≡₂ d' d
+
+                                                  @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
+                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                    (begin
+                                                    bs₄' ++ bs₅' ++ bs₆' ++ suffix
+                                                    ≡⟨ xs≡₂  ⟩
+                                                    bs₄ ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ≡⟨ cong (_++ bs₅ ++ bs₆ ++ suf₁) (sym bs₄≡) ⟩
+                                                    bs₄' ++ bs₅ ++ bs₆ ++ suf₁
+                                                    ∎ )
+                                                in
+                                                case ((singleton oe' refl) ,′e (singleton of' refl)) ret (const _) of λ where
+                                                  (singleton (some e') refl , singleton of' refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₅ e')
+                                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₅ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₅ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
+                                                  (singleton none refl , singleton (some f') refl) →
+                                                    case (singleton oe refl) of λ where
+                                                      (singleton none refl) →
+                                                        let
+                                                          @0 bs₆≡ : bs₆' ≡ bs₆
+                                                          bs₆≡ =
+                                                            ns₆
+                                                              (begin
+                                                              bs₆' ++ suffix
+                                                              ≡⟨ xs≡₅ ⟩
+                                                              bs₆ ++ suf₁
+                                                              ∎ )
+                                                              f' (proj₁  f)
+                                                        in
+                                                        case (‼ bs₆≡) ret (const _) of λ where
+                                                          refl →
+                                                            let @0 f≡ : proj₁ f ≡ f'
+                                                                f≡ = uf (proj₁ f) f'
+                                                            in
+                                                            contradiction
+                                                              (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                              (proj₂ f)
+                                                      (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
+                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
@@ -923,7 +2944,43 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton none refl) →
                                     case (singleton oe refl) of λ where
                                       (singleton none refl) → contradiction (proj₁ f) (nc₅₆ xs≡₂ e')
-                                      (singleton (some e) refl) →  {!!}
+                                      (singleton (some e) refl) →
+                                                        let
+                                                          @0 bs₅≡ : bs₅' ≡ bs₅
+                                                          bs₅≡ = ns₅ xs≡₂ e' e
+
+                                                          @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
+                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                               (begin
+                                                               bs₅' ++ bs₆' ++ suffix
+                                                               ≡⟨ xs≡₂ ⟩
+                                                               bs₅ ++ bs₆ ++ suf₁
+                                                               ≡⟨ cong (_++ bs₆ ++ suf₁) (sym bs₅≡) ⟩
+                                                               bs₅' ++ bs₆ ++ suf₁
+                                                               ∎ )
+                                                        in
+                                                        case (singleton of' refl) ret (const _) of λ where
+                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton (some f') refl) →
+                                                              let
+                                                                @0 bs₆≡ : bs₆' ≡ bs₆
+                                                                bs₆≡ =
+                                                                  ns₆
+                                                                  (begin
+                                                                  bs₆' ++ suffix
+                                                                  ≡⟨ xs≡₆ ⟩
+                                                                  bs₆ ++ suf₁
+                                                                  ∎ )
+                                                                  f' (proj₁  f)
+                                                              in
+                                                              case (‼ bs₆≡) ret (const _) of λ where
+                                                                refl →
+                                                                  let @0 f≡ : proj₁ f ≡ f'
+                                                                      f≡ = uf (proj₁ f) f'
+                                                                  in
+                                                                  contradiction
+                                                                    (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
+                                                                    (proj₂ f)
                                   (singleton (some d) refl) →  contradiction e' (nc₄₅ (sym xs≡₂) d)
                               (singleton (some c) refl) →  contradiction e' (nc₃₅ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction e' (nc₂₅ (sym xs≡₂) b)
@@ -959,14 +3016,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₂) d)
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
-                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) → {!!} 
+                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                      contradiction (¡ abcdefLen) (λ ())
         (yes pb , yes pc , yes pe , yes pf) →
           return (yes (success pre₁ _ r₁≡
                    (mk×ₚ (mk&ₚ oa (mk&ₚ (mkDefault ob pb) (mk&ₚ (mkDefault oc pc)
                           (mk&ₚ od (mk&ₚ (mkDefault oe pe) (mkDefault of pf)
                           refl) refl) refl) refl) refl) abcdefLen) suf₁ ps≡₁))
 
-                                     
     where
     open ≡-Reasoning
 
