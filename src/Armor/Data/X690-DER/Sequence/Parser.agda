@@ -136,12 +136,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
 
   parseOption₂Default₄
       : ∀ {A D : @0 List UInt8 → Set}
-      → @0 Unambiguous A → @0 NoSubstrings A
-      → @0 Unambiguous B → @0 NoSubstrings B
-      → @0 Unambiguous C → @0 NoSubstrings C
-      → @0 Unambiguous D → @0 NoSubstrings D
-      → @0 Unambiguous E → @0 NoSubstrings E
-      → @0 Unambiguous F → @0 NoSubstrings F
+      → @0 Unambiguous A → @0 NoSubstrings A → @0 NonEmpty A
+      → @0 Unambiguous B → @0 NoSubstrings B → @0 NonEmpty B
+      → @0 Unambiguous C → @0 NoSubstrings C → @0 NonEmpty C
+      → @0 Unambiguous D → @0 NoSubstrings D → @0 NonEmpty D
+      → @0 Unambiguous E → @0 NoSubstrings E → @0 NonEmpty E
+      → @0 Unambiguous F → @0 NoSubstrings F → @0 NonEmpty F
       → @0 NoConfusion A B → @0 NoConfusion A C → @0 NoConfusion A D → @0 NoConfusion A E → @0 NoConfusion A F
       → @0 NoConfusion B C → @0 NoConfusion B D → @0 NoConfusion B E → @0 NoConfusion B F
       → @0 NoConfusion C D → @0 NoConfusion C E → @0 NoConfusion C F
@@ -151,10 +151,10 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
       → Parser (Logging ∘ Dec) D → Parser (Logging ∘ Dec) E → Parser (Logging ∘ Dec) F
       → ∀ n → Parser (Logging ∘ Dec) (ExactLength (&ₚ (Option A) (&ₚ (Default B default₂) (&ₚ(Default C default₃)
                                    (&ₚ (Option D) (&ₚ (Default E default₅) (Default F default₆)))))) n)
-  runParser (parseOption₂Default₄ ua ns₁ ub ns₂ uc ns₃ ud ns₄ ue ns₅ uf ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf zero) xs =
+  runParser (parseOption₂Default₄ ua ns₁ _ ub ns₂ _ uc ns₃ _ ud ns₄ _ ue ns₅ _ uf ns₆ _ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf zero) xs =
     return (yes (success [] _ refl (mk×ₚ (mk&ₚ none (mk&ₚ (mkDefault none tt) (mk&ₚ (mkDefault none tt) (mk&ₚ none (mk&ₚ (mkDefault none tt) (mkDefault none tt)
                 refl) refl) refl) refl) refl) (─ refl)) xs refl))
-  runParser (parseOption₂Default₄{A}{D} ua ns₁ ub ns₂ uc ns₃ ud ns₄ ue ns₅ uf ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf n@(suc _)) xs = do
+  runParser (parseOption₂Default₄{A}{D} ua ns₁ ne₁ ub ns₂ ne₂ uc ns₃ ne₃ ud ns₄ ne₄ ue ns₅ ne₅ uf ns₆ ne₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf n@(suc _)) xs = do
     (yes mine@(success pre₁ r₁ r₁≡ (mk×ₚ  (mk&ₚ {bs₁}{bs₂'} oa (mk&ₚ {bs₂}{bs₃'} ob (mk&ₚ {bs₃}{bs₄'} oc (mk&ₚ {bs₄}{bs₅'} od (mk&ₚ {bs₅}{bs₆} oe of refl) refl) refl) refl) refl) abcdefLen) suf₁ ps≡₁)) ←
       runParser (parse₂Option₆ loc ns₁ ns₂ ns₃ ns₄ ns₅ ns₆ nc₁₂ nc₁₃ nc₁₄ nc₁₅ nc₁₆ nc₂₃ nc₂₄ nc₂₅ nc₂₆ nc₃₄ nc₃₅ nc₃₆ nc₄₅ nc₄₆ nc₅₆ pa pb pc pd pe pf n) xs
       where no ¬p₁₂' → do
@@ -174,7 +174,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
               (mk&ₚ {bs₁ = bs₃'} {bs₂ = bs₄₅₆'} (mkDefault oc' ocnd)
               (mk&ₚ {bs₁ = bs₄'} {bs₂ = bs₅₆'} od'
               (mk&ₚ {bs₁ = bs₅'} {bs₂ = bs₆'} (mkDefault oe' oend)
-                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen)
+                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen')
             suffix ps≡) →
             let b : Σ (B bs₂) (λ b → ¬ Default.NotDefault default₂ (some b))
                 b = case (Singleton ob ∋ singleton ob refl) ret (const _) of λ where
@@ -185,6 +185,9 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 isSomeB = case (Singleton ob ∋ singleton ob refl) ret (const _) of λ where
                   (singleton none refl) → contradiction tt ¬pb
                   (singleton (some x) refl) → tt
+
+                @0 prefix≡pre₁ : prefix ≡ pre₁
+                prefix≡pre₁ = proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₁)) (trans (¡ abcdefLen') (sym (¡ abcdefLen))))
             in
             case ((singleton oa refl) ,′e (singleton oa' refl)) ret (const _) of λ where
               ((singleton none refl) , (singleton none refl)) →
@@ -237,7 +240,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) →
                         contradiction f' (nc₂₆ (sym xs≡₁) (proj₁ b))
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) λ ()
+                        contradiction (++-conicalˡ _ _ (sym prefix≡pre₁)) (ne₂ (proj₁ b))
               ((singleton none refl) , (singleton (some a') refl)) → helperNoBexplicit mine theirs isSomeB (tt , tt)
               ((singleton (some a) refl) , (singleton none refl)) → helperNoBexplicit mine theirs isSomeB (tt , tt)
               ((singleton (some a) refl) , (singleton (some a') refl)) →
@@ -268,7 +271,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 in
                 case ((singleton ob' refl) ,′e (singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
                   ret (const _) of λ where
-                    (singleton (some b') refl , singleton ob' refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
+                    (singleton (some b') refl , singleton oc' refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                       let                                           
                         @0 bs₂≡ : bs₂' ≡ bs₂
                         bs₂≡ = ns₂ xs≡₂ b' (proj₁  b)
@@ -305,8 +308,6 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                             ≡⟨ solve (++-monoid UInt8) ⟩
                             bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                             ≡⟨ ++-identityˡ (bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix)  ⟩
-                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
-                            ≡⟨ ++-identityˡ (bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix)  ⟩
                             bs₄' ++ bs₅' ++ bs₆' ++ suffix
                             ∎ )
                         in
@@ -321,8 +322,6 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                             ≡⟨ solve (++-monoid UInt8) ⟩
                             bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                             ≡⟨ ++-identityˡ (bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix)  ⟩
-                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
-                            ≡⟨ ++-identityˡ (bs₄' ++ bs₅' ++ bs₆' ++ suffix)  ⟩
                             bs₅' ++ bs₆' ++ suffix
                             ∎ )
                         in
@@ -337,14 +336,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                             ≡⟨ solve (++-monoid UInt8) ⟩
                             bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                             ≡⟨ ++-identityˡ (bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix)  ⟩
-                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
-                            ≡⟨ ++-identityˡ (bs₆' ++ suffix)  ⟩
                             bs₆' ++ suffix
                             ∎ )
                         in
                         contradiction f' (nc₂₆ bs≡ (proj₁ b))
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                        contradiction ( ++-conicalˡ _ _ (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))) (ne₂ (proj₁ b))
         (yes pb , no ¬pc , e , f) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -353,7 +350,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
               (mk&ₚ {bs₁ = bs₃'} {bs₂ = bs₄₅₆'} (mkDefault oc' ocnd)
               (mk&ₚ {bs₁ = bs₄'} {bs₂ = bs₅₆'} od'
               (mk&ₚ {bs₁ = bs₅'} {bs₂ = bs₆'} (mkDefault oe' oend)
-                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen)
+                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen')
             suffix ps≡) →
             let
                 c : Σ (C bs₃) (λ c → ¬ Default.NotDefault default₃ (some c))
@@ -365,6 +362,9 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 isSomeC = case (Singleton oc ∋ singleton oc refl) ret (const _) of λ where
                   (singleton none refl) → contradiction tt ¬pc
                   (singleton (some x) refl) → tt
+
+                @0 prefix≡pre₁ : prefix ≡ pre₁
+                prefix≡pre₁ = proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₁)) (trans (¡ abcdefLen') (sym (¡ abcdefLen))))
             in
             case ((singleton oa refl) ,′e (singleton oa' refl)) ret (const _) of λ where
               ((singleton none refl) , (singleton none refl)) →
@@ -431,7 +431,8 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                 (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) → contradiction d' (nc₃₄ (sym xs≡₂) (proj₁ c))
                                 (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) → contradiction e' (nc₃₅ (sym xs≡₂) (proj₁ c))
                                 (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) → contradiction f' (nc₃₆ (sym xs≡₂) (proj₁ c))
-                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                  contradiction (++-conicalˡ _ _ (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁))) (ne₃ (proj₁ c))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -472,7 +473,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                           (singleton none refl) →  contradiction f' (nc₃₆ (sym xs≡₁) (proj₁ c))
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                      contradiction (++-conicalˡ _ _ (++-conicalʳ bs₂ _ (sym prefix≡pre₁))) (ne₃ (proj₁ c))
               ((singleton none refl) , (singleton (some a') refl)) → helperNoCexplicit mine theirs isSomeC (tt , tt)
               ((singleton (some a) refl) , (singleton none refl)) → helperNoCexplicit mine theirs isSomeC (tt , tt)
               ((singleton (some a) refl) , (singleton (some a') refl)) →
@@ -550,7 +551,8 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                 (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) → contradiction d' (nc₃₄ (sym xs≡₃) (proj₁ c))
                                 (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) → contradiction e' (nc₃₅ (sym xs≡₃) (proj₁ c))
                                 (singleton none refl , singleton none refl , singleton none refl , singleton (some f') refl) → contradiction f' (nc₃₆ (sym xs≡₃) (proj₁ c))
-                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                  contradiction (++-conicalˡ _ _ (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))) (ne₃ (proj₁ c))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                       case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -589,7 +591,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                           (singleton none refl) →  contradiction f' (nc₃₆ (sym xs≡₂) (proj₁ c))
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                      contradiction (++-conicalˡ bs₃ _ (++-conicalʳ bs₂ _ (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))) (ne₃ (proj₁ c))
         (yes pb , yes pc , no ¬pe , f) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -598,7 +600,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
               (mk&ₚ {bs₁ = bs₃'} {bs₂ = bs₄₅₆'} (mkDefault oc' ocnd)
               (mk&ₚ {bs₁ = bs₄'} {bs₂ = bs₅₆'} od'
               (mk&ₚ {bs₁ = bs₅'} {bs₂ = bs₆'} (mkDefault oe' oend)
-                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen)
+                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen')
             suffix ps≡) →
             let
                 e : Σ (E bs₅) (λ e → ¬ Default.NotDefault default₅ (some e))
@@ -610,6 +612,9 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 isSomeE = case (Singleton oe ∋ singleton oe refl) ret (const _) of λ where
                   (singleton none refl) → contradiction tt ¬pe
                   (singleton (some x) refl) → tt
+
+                @0 prefix≡pre₁ : prefix ≡ pre₁
+                prefix≡pre₁ = proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₁)) (trans (¡ abcdefLen') (sym (¡ abcdefLen))))
             in
             case ((singleton oa refl) ,′e (singleton oa' refl)) ret (const _) of λ where
               ((singleton none refl) , (singleton none refl)) →
@@ -721,7 +726,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                         (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                         (proj₂ e)
                                                   (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡) 
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) 
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                      (ne₅ (proj₁ e))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                             case (singleton od refl) of λ where
                                               (singleton none refl) →
@@ -753,7 +764,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                             case (singleton od refl) of λ where
                                               (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                            contradiction
+                                              (++-conicalˡ bs₅ _
+                                                (++-conicalʳ bs₄ _
+                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                              (ne₅ (proj₁ e))
                                   (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
                                       (singleton none refl) →
@@ -800,7 +817,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                         (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                         (proj₂ e)
                                                   (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁))))
+                                                      (ne₅ (proj₁ e))
                                       (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
                                   (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
@@ -839,7 +861,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
                                           (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
                                       (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
-                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                                  contradiction
+                                                    (++-conicalˡ bs₅ _
+                                                      (++-conicalʳ bs₄ _ 
+                                                        (++-conicalʳ bs₃ _ 
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                    (ne₅ (proj₁ e))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -909,7 +937,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                 (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                 (proj₂ e)
                                           (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
-                                          (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl) →
+                                                     contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁))))
+                                                      (ne₅ (proj₁ e))
                                   (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton od refl) of λ where
                                       (singleton none refl) →
@@ -941,7 +974,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     case (singleton od refl) of λ where
                                       (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
                                       (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
-                                  (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl) →
+                                                  contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (++-conicalʳ bs₄ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁))))
+                                                      (ne₅ (proj₁ e))
                           (singleton (some b) refl) → contradiction c' (nc₂₃ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -992,7 +1030,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                             (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                             (proj₂ e)
                                       (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₂) (proj₁ e))
-                                      (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                      (singleton none refl , singleton none refl) →
+                                                 contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡) (sym prefix≡pre₁)))
+                                                      (ne₅ (proj₁ e))
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of refl) →
@@ -1039,10 +1081,15 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                       (++-conicalʳ bs₄ _
+                                                        (++-conicalʳ bs₃ _
+                                                          (++-conicalʳ bs₂ _ (sym prefix≡pre₁)))))
+                                                      (ne₅ (proj₁ e))
               ((singleton none refl) , (singleton (some a') refl)) → helperNoEexplicit mine theirs isSomeE (tt , tt)
               ((singleton (some a) refl) , (singleton none refl)) → helperNoEexplicit mine theirs isSomeE (tt , tt)
-              ((singleton (some a) refl) , (singleton (some a') refl)) →
+              ((singleton (some a) refl) , (singleton (some a') refl)) → 
                 let
                   @0 xs≡₁ : bs₁' ++ bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₁ ++ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
                   xs≡₁ = (begin
@@ -1162,7 +1209,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                         (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                         (proj₂ e)
                                                   (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                       (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                      (ne₅ (proj₁ e))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                             case (singleton od refl) of λ where
                                               (singleton none refl) →
@@ -1194,7 +1248,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                             case (singleton od refl) of λ where
                                               (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                                   contradiction
+                                                       (++-conicalˡ bs₅ _
+                                                         (++-conicalʳ bs₄ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                              (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                      (ne₅ (proj₁ e))
                                   (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
                                       (singleton none refl) →
@@ -1241,7 +1302,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                         (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                         (proj₂ e)
                                                   (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₅) (proj₁ e))
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                      (ne₅ (proj₁ e))
                                       (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
                                   (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
@@ -1280,7 +1347,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
                                           (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
                                       (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
-                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (++-conicalʳ bs₄ _
+                                                          (++-conicalʳ bs₃ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                      (ne₅ (proj₁ e))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -1350,7 +1424,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                 (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                                 (proj₂ e)
                                           (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
-                                          (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                      (ne₅ (proj₁ e))
                                   (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton od refl) of λ where
                                       (singleton none refl) →
@@ -1382,7 +1462,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     case (singleton od refl) of λ where
                                       (singleton none refl) → contradiction f' (nc₅₆ (sym xs≡₃) (proj₁ e))
                                       (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
-                                  (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl) →
+                                                  contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (++-conicalʳ bs₄ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                      (ne₅ (proj₁ e))
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₂) b)                          
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -1433,7 +1519,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                             (subst₀ (λ x → Default.NotDefault default₅ x) (cong some (sym (‼ e≡))) oend)
                                             (proj₂ e)
                                       (singleton none refl , singleton (some f') refl) → contradiction f' (nc₅₆ (sym xs≡₄) (proj₁ e))
-                                      (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                      (singleton none refl , singleton none refl) →
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))
+                                                      (ne₅ (proj₁ e))
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
@@ -1478,7 +1569,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                                                    contradiction
+                                                      (++-conicalˡ bs₅ _
+                                                        (++-conicalʳ bs₄ _
+                                                          (++-conicalʳ bs₃ _
+                                                          (++-conicalʳ bs₂ _
+                                                            (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                      (ne₅ (proj₁ e))
         (yes pb , yes pc , yes pe , no ¬pf) → return ∘ no $ λ where
           theirs@(success prefix read read≡
             (mk×ₚ
@@ -1487,7 +1584,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
               (mk&ₚ {bs₁ = bs₃'} {bs₂ = bs₄₅₆'} (mkDefault oc' ocnd)
               (mk&ₚ {bs₁ = bs₄'} {bs₂ = bs₅₆'} od'
               (mk&ₚ {bs₁ = bs₅'} {bs₂ = bs₆'} (mkDefault oe' oend)
-                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen)
+                     (mkDefault of' ofnd) refl) refl) refl) refl) refl) abcdefLen')
             suffix ps≡) →
             let
                 f : Σ (F bs₆) (λ f → ¬ Default.NotDefault default₆ (some f))
@@ -1499,6 +1596,9 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 isSomeF = case (Singleton of ∋ singleton of refl) ret (const _) of λ where
                   (singleton none refl) → contradiction tt ¬pf
                   (singleton (some x) refl) → tt
+
+                @0 prefix≡pre₁ : prefix ≡ pre₁
+                prefix≡pre₁ = proj₁ (Lemmas.length-++-≡ _ _ _ _ (trans ps≡ (sym ps≡₁)) (trans (¡ abcdefLen') (sym (¡ abcdefLen))))
             in
             case ((singleton oa refl) ,′e (singleton oa' refl)) ret (const _) of λ where
               ((singleton none refl) , (singleton none refl)) →
@@ -1613,7 +1713,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                                (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -1657,7 +1763,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                                contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                                 case (singleton od refl) of λ where
                                                   (singleton none refl) →
@@ -1679,7 +1791,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁))))
+                                                                    (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -1727,7 +1844,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                     (proj₂ f)
                                                   (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₄) e)
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ  bs₅ _
+                                                                    (++-conicalʳ  bs₄ _
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                   (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
                                       (singleton none refl) →
@@ -1771,7 +1894,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁))))
+                                                                    (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -1815,7 +1943,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                       (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                                       (proj₂ f)
                                                               (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) →  contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                             contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                                       (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
                                   (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
@@ -1840,7 +1973,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))
+                                                                      (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -1892,7 +2029,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                               (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
                                           (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
                                       (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
-                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                  (++-conicalʳ bs₄ _
+                                                                  (++-conicalʳ bs₃ _
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -1962,7 +2105,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁))))
+                                                                    (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2006,7 +2154,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                             contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                                 case (singleton od refl) of λ where
                                                   (singleton none refl) →
@@ -2028,7 +2181,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁)))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2076,7 +2233,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                     (proj₂ f)
                                                   (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                  (++-conicalʳ bs₄ _
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -2123,7 +2285,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡) (sym prefix≡pre₁)))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2167,7 +2333,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                             contradiction
+                                                                  (++-conicalʳ _ bs₆
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡) (sym prefix≡pre₁)))
+                                                                  (ne₆ (proj₁ f))
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of refl) →
@@ -2195,7 +2365,10 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡) (sym prefix≡pre₁))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2252,7 +2425,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₁) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₁) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                                                               contradiction
+                                                                  (++-conicalʳ bs₅ _
+                                                                    (++-conicalʳ bs₄ _
+                                                                     (++-conicalʳ bs₃ _
+                                                                       (++-conicalʳ bs₂ _(sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
               ((singleton none refl) , (singleton (some a') refl)) → helperNoFexplicit mine theirs isSomeF (tt , tt)
               ((singleton (some a) refl) , (singleton none refl)) → helperNoFexplicit mine theirs isSomeF (tt , tt)
               ((singleton (some a) refl) , (singleton (some a') refl)) →
@@ -2378,7 +2556,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2422,7 +2607,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                             contradiction
+                                                                  (++-conicalʳ _ _
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                                  (ne₆ (proj₁ f))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                                 case (singleton od refl) of λ where
                                                   (singleton none refl) →
@@ -2444,7 +2636,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2492,7 +2690,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                     (proj₂ f)
                                                   (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₄) e)
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₄) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ _ _
+                                                                    (++-conicalʳ bs₄ _
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                                  (ne₆ (proj₁ f))
                                   (singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
                                       (singleton none refl) →
@@ -2536,7 +2741,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2580,7 +2791,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                       (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                                       (proj₂ f)
                                                               (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) →  contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) → 
+                                                             contradiction
+                                                                  (++-conicalʳ _ _
+                                                                    (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                       (singleton (some c) refl) → contradiction d' (nc₃₄ (sym xs≡₃) c)
                                   (singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
                                     case (singleton oc refl) of λ where
@@ -2605,7 +2822,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2657,7 +2879,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                               (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
                                           (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₃) d)
                                       (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₃) c)
-                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                  (singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ _ _
+                                                                    (++-conicalʳ bs₄ _
+                                                                      (++-conicalʳ bs₃ _
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₂≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                                  (ne₆ (proj₁ f))
                     (singleton none refl , singleton (some c') refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
                           (singleton none refl) →
@@ -2727,7 +2956,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2771,7 +3006,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) → 
+                                                             contradiction
+                                                                  (++-conicalʳ  _ _
+                                                                      (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                                           (singleton none refl , singleton (some e') refl , singleton of' refl) →
                                                 case (singleton od refl) of λ where
                                                   (singleton none refl) →
@@ -2793,7 +3034,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction 
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2841,7 +3087,13 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                     (proj₂ f)
                                                   (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₃) e)
                                               (singleton (some d) refl) → contradiction f' (nc₄₆ (sym xs≡₃) d)
-                                          (singleton none refl , singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                          (singleton none refl , singleton none refl , singleton none refl) →
+                                                               contradiction
+                                                                  (++-conicalʳ _ _
+                                                                      (++-conicalʳ bs₄ _
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₃≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))))
+                                                                  (ne₆ (proj₁ f))
                           (singleton (some b) refl) →  contradiction c' (nc₂₃ (sym xs≡₂) b)                          
                     (singleton none refl , singleton none refl , singleton (some d') refl , singleton oe' refl , singleton of' refl) →
                         case (singleton ob refl) of λ where
@@ -2888,7 +3140,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -2932,7 +3189,12 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                               (subst₀ (λ x → Default.NotDefault default₆ x) (cong some (sym (‼ f≡))) ofnd)
                                                               (proj₂ f)
                                                       (singleton (some e) refl) → contradiction f' (nc₅₆ (sym xs≡₅) e)
-                                                  (singleton none refl , singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                  (singleton none refl , singleton none refl) →
+                                                             contradiction
+                                                                  (++-conicalʳ _ _ 
+                                                                        (Lemmas.++-cancel≡ˡ _ _ (sym bs₄≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))
+                                                                  (ne₆ (proj₁ f))
                               (singleton (some c) refl) →  contradiction d' (nc₃₄ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction d' (nc₂₄ (sym xs≡₂) b)
                     (singleton none refl , singleton none refl , singleton none refl , singleton (some e') refl , singleton of' refl) →
@@ -2960,7 +3222,11 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                                ∎ )
                                                         in
                                                         case (singleton of' refl) ret (const _) of λ where
-                                                            (singleton none refl) → contradiction (¡ abcdefLen) (λ ())
+                                                            (singleton none refl) →
+                                                              contradiction
+                                                                  (Lemmas.++-cancel≡ˡ _ _ (sym bs₅≡)
+                                                                          (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁)))
+                                                                  (ne₆ (proj₁ f))
                                                             (singleton (some f') refl) →
                                                               let
                                                                 @0 bs₆≡ : bs₆' ≡ bs₆
@@ -3016,8 +3282,14 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   (singleton (some d) refl) →  contradiction f' (nc₄₆ (sym xs≡₂) d)
                               (singleton (some c) refl) →  contradiction f' (nc₃₆ (sym xs≡₂) c)
                           (singleton (some b) refl) →  contradiction f' (nc₂₆ (sym xs≡₂) b)
-                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) →
-                      contradiction (¡ abcdefLen) (λ ())
+                    (singleton none refl , singleton none refl , singleton none refl , singleton none refl , singleton none refl) → 
+                                                          contradiction
+                                                                  (++-conicalʳ _ _ 
+                                                                    (++-conicalʳ bs₄ _
+                                                                     (++-conicalʳ bs₃ _
+                                                                      (++-conicalʳ bs₂ _
+                                                                       (Lemmas.++-cancel≡ˡ _ _ (sym bs₁≡) (sym prefix≡pre₁))))))
+                                                                  (ne₆ (proj₁ f))
         (yes pb , yes pc , yes pe , yes pf) →
           return (yes (success pre₁ _ r₁≡
                    (mk×ₚ (mk&ₚ oa (mk&ₚ (mkDefault ob pb) (mk&ₚ (mkDefault oc pc)
