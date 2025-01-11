@@ -52,12 +52,12 @@ parseIDPFieldsSeqFields n =
   where
   p : Parser (Logging ∘ Dec) (ExactLength RepIDPField n)
   p = Sequence.parseOption₂Default₄ _ _ _ _ here'
-        Name.unambiguous TLV.nosubstrings
-        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings
-        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings
-        (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings
-        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings
-        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings
+        Name.unambiguous TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous BitString.unambiguousValue) TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings TLV.nonempty
+        (TLV.unambiguous Boool.unambiguousValue) TLV.nosubstrings TLV.nonempty
         (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ()))
         (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ()))
         (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ())) (TLV.noconfusion (λ ()))
