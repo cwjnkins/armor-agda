@@ -2,7 +2,7 @@ open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.ReasonCode
-import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDs as OIDs
+import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDS as OIDS
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB
 open import Armor.Data.X509.GeneralNames
 open import Armor.Data.X690-DER.BitString
@@ -134,20 +134,20 @@ module Select where
       v≡ = caseErased oidT≡ ret (const _) of λ where
         ≋-refl → ─ refl
 
-    noconfusion₁ : NoConfusion (ExtensionFields (_≡ OIDs.REASONLit) ReasonCodeFields) (Sum _ _)
+    noconfusion₁ : NoConfusion (ExtensionFields (_≡ OIDS.REASONLit) ReasonCodeFields) (Sum _ _)
     noconfusion₁ = 
-      Sum.noconfusion{ExtensionFields (_≡ OIDs.REASONLit) ReasonCodeFields}
+      Sum.noconfusion{ExtensionFields (_≡ OIDS.REASONLit) ReasonCodeFields}
         (noconfusionOIDS λ ())
-            (Sum.noconfusion{ExtensionFields (_≡ OIDs.REASONLit) ReasonCodeFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDS.REASONLit) ReasonCodeFields}
               (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
 
-    noconfusion₂ : NoConfusion (ExtensionFields (_≡ OIDs.INVALIDITYLit) InvalidityDateFields) (Sum _ _)
+    noconfusion₂ : NoConfusion (ExtensionFields (_≡ OIDS.INVALIDITYLit) InvalidityDateFields) (Sum _ _)
     noconfusion₂ = 
-            (Sum.noconfusion{ExtensionFields (_≡ OIDs.INVALIDITYLit) InvalidityDateFields}
+            (Sum.noconfusion{ExtensionFields (_≡ OIDS.INVALIDITYLit) InvalidityDateFields}
               (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
 
     noconfusion₀ : NoConfusion
-                     (ExtensionFields (_≡ OIDs.CERTISSUERLit) CertIssuerFields)
+                     (ExtensionFields (_≡ OIDS.CERTISSUERLit) CertIssuerFields)
                      (Σₚ (ExtensionFields (False ∘ (_∈? supportedExtensions)) _) _)
     noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
 
@@ -157,7 +157,7 @@ module Select where
     RawRep₀ = RawSum (RawExtensionFields RawCertIssuerFields)
                      (RawΣₚ₁ (RawExtensionFields RawOctetString) (λ _ u → T (not (ExtensionFields.getCrit u))))
     RawRep₁ = RawSum (RawExtensionFields RawInvalidityDateFields) RawRep₀
-    RawRep = RawSum (RawExtensionFields{P = (_≡ OIDs.CERTISSUERLit)} RawReasonCodeFields) RawRep₁
+    RawRep = RawSum (RawExtensionFields{P = (_≡ OIDS.CERTISSUERLit)} RawReasonCodeFields) RawRep₁
                            
     nm : NonMalleable RawSelectEntryExtnRep
     nm = Sum.nonmalleable{ra = RawExtensionFields RawReasonCodeFields}{rb = RawRep₁} ((Fields.nonmalleable ≡-unique ReasonCode.nonmalleable))

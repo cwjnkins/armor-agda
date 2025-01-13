@@ -7,7 +7,7 @@ import      Armor.Grammar.Parallel.TCB
 import      Armor.Grammar.Parser
 open import Armor.Prelude
 
-module Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDs where
+module Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDS where
 
 open Armor.Grammar.Definitions  UInt8
 open Armor.Grammar.Parallel.TCB UInt8

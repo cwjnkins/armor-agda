@@ -9,6 +9,7 @@
 /doc/summary.synctex.gz
 /doc/latex/
 /src/Main
+/src/CRLCheck
 /src/libraries
 **/.DS_Store
 **/_build

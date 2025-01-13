@@ -19,7 +19,6 @@ open Armor.Grammar.IList.TCB    UInt8
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Parallel.TCB UInt8
 
-
 -- CertificateList  ::=  SEQUENCE  {
 --         tbsCertList          TBSCertList,
 --         signatureAlgorithm   AlgorithmIdentifier,
@@ -36,8 +35,14 @@ record CertListFields (@0 bs : List UInt8) : Set where
     signatureBytes : Singleton sig
     @0 bs≡  : bs ≡ t ++ sa ++ sig
 
+  getCertListSignAlg : SignAlg sa
+  getCertListSignAlg = signAlg
+
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
+
+getCertListSignAlg : ∀{@0 bs} → (crlist : CertList bs) → SignAlg (CertListFields.sa (TLV.val crlist))
+getCertListSignAlg crlist = CertListFields.getCertListSignAlg (TLV.val crlist)
 
 CertListFieldsRep : @0 List UInt8 → Set
 CertListFieldsRep = &ₚ (TBSCertList ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))

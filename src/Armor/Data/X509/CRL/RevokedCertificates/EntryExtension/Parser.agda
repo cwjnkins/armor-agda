@@ -2,7 +2,7 @@ open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.ReasonCode
-import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDs as OIDs
+import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDS as OIDS
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.Properties
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB
 open import Armor.Data.X509.GeneralNames

@@ -24,4 +24,4 @@ open import Armor.Data.X509.Name             public
 open import Armor.Data.X509.SignAlg         public
 open import Armor.Data.X509.TBSCert         public
 open import Armor.Data.X509.Validity        public
-
+open import Armor.Data.X509.CRL.CertList  as CRLCertList

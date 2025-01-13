@@ -2,7 +2,7 @@ open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate.TCB
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer.TCB
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.ReasonCode.TCB
-import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDs as OIDs
+import      Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB.OIDS as OIDS
 open import Armor.Data.X690-DER.Boool.TCB as Boool
   hiding (getBool)
 open import Armor.Data.X690-DER.Boool.Eq
@@ -44,7 +44,7 @@ open Armor.Grammar.Seq         UInt8
 --         }
 
 supportedExtensions : List (List UInt8)
-supportedExtensions = OIDs.REASONLit ∷ OIDs.INVALIDITYLit ∷ [ OIDs.CERTISSUERLit ]
+supportedExtensions = OIDS.REASONLit ∷ OIDS.INVALIDITYLit ∷ [ OIDS.CERTISSUERLit ]
 
 record ExtensionFields (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) (@0 bs : List UInt8) : Set where
   constructor mkExtensionFields
@@ -59,9 +59,9 @@ record ExtensionFields (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) (
   getCrit : Bool
   getCrit = Boool.getBool (proj₂ (Default.getValue crit))
 
-ExtensionFieldCRLReason       = ExtensionFields (_≡ OIDs.REASONLit)  ReasonCodeFields
-ExtensionFieldInvalidityDate  = ExtensionFields (_≡ OIDs.INVALIDITYLit) InvalidityDateFields
-ExtensionFieldCertIssuer      = ExtensionFields (_≡ OIDs.CERTISSUERLit)  CertIssuerFields
+ExtensionFieldCRLReason       = ExtensionFields (_≡ OIDS.REASONLit)  ReasonCodeFields
+ExtensionFieldInvalidityDate  = ExtensionFields (_≡ OIDS.INVALIDITYLit) InvalidityDateFields
+ExtensionFieldCertIssuer      = ExtensionFields (_≡ OIDS.CERTISSUERLit)  CertIssuerFields
 ExtensionFieldUnsupported     = ExtensionFields (False ∘ (_∈? supportedExtensions)) OctetString
 
 data SelectEntryExtn : @0 List UInt8 → Set where
