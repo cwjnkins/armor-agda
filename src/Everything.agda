@@ -282,12 +282,12 @@ open import Armor.Data.X509.PublicKey.Val.TCB
 open import Armor.Data.X509.Semantic.Cert
 open import Armor.Data.X509.Semantic.Cert.R1
 open import Armor.Data.X509.Semantic.Cert.R10
-open import Armor.Data.X509.Semantic.Cert.R11
+-- open import Armor.Data.X509.Semantic.Cert.R11
 open import Armor.Data.X509.Semantic.Cert.R12
 open import Armor.Data.X509.Semantic.Cert.R13
-open import Armor.Data.X509.Semantic.Cert.R14
+-- open import Armor.Data.X509.Semantic.Cert.R14
 open import Armor.Data.X509.Semantic.Cert.R15
-open import Armor.Data.X509.Semantic.Cert.R16
+-- open import Armor.Data.X509.Semantic.Cert.R16
 open import Armor.Data.X509.Semantic.Cert.R17
 open import Armor.Data.X509.Semantic.Cert.R18
 open import Armor.Data.X509.Semantic.Cert.R2
@@ -295,7 +295,7 @@ open import Armor.Data.X509.Semantic.Cert.R3
 open import Armor.Data.X509.Semantic.Cert.R4
 open import Armor.Data.X509.Semantic.Cert.R5
 open import Armor.Data.X509.Semantic.Cert.R6
-open import Armor.Data.X509.Semantic.Cert.R7
+-- open import Armor.Data.X509.Semantic.Cert.R7
 open import Armor.Data.X509.Semantic.Cert.R8
 open import Armor.Data.X509.Semantic.Cert.R9
 open import Armor.Data.X509.Semantic.Cert.Utils
@@ -305,7 +305,7 @@ open import Armor.Data.X509.Semantic.Chain.NameMatch
 open import Armor.Data.X509.Semantic.Chain.Properties
 open import Armor.Data.X509.Semantic.Chain.R19
 open import Armor.Data.X509.Semantic.Chain.R20
-open import Armor.Data.X509.Semantic.Chain.R21
+-- open import Armor.Data.X509.Semantic.Chain.R21
 open import Armor.Data.X509.Semantic.Chain.R22
 open import Armor.Data.X509.Semantic.Chain.R23
 open import Armor.Data.X509.Semantic.Chain.TCB
@@ -388,6 +388,8 @@ open import Armor.Data.X509.Validity.Time.Ordering
 open import Armor.Data.X509.Validity.Time.Parser
 open import Armor.Data.X509.Validity.Time.Properties
 open import Armor.Data.X509.Validity.Time.TCB
+open import Armor.Data.X509.CRL.CertList
+open import Armor.Data.X509.CRL.Completeness
 open import Armor.Data.X690-DER
 open import Armor.Data.X690-DER.BitString
 open import Armor.Data.X690-DER.BitString.Parser
