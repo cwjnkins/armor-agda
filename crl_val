@@ -1,0 +1,203 @@
+
+
+A full and complete CRL lists all unexpired
+   certificates issued by a CA that have been revoked for any reason.
+
+   This field MUST contain the same algorithm identifier as the
+   signature field in the sequence tbsCertList 
+
+
+   CAs that are also CRL issuers MAY use one private key to digitally
+   sign certificates and CRLs, or MAY use separate private keys to
+   digitally sign certificates and CRLs.  When separate private keys are
+   employed, each of the public keys associated with these private keys
+   is placed in a separate certificate, one with the keyCertSign bit set
+   in the key usage extension, and one with the cRLSign bit set in the
+   key usage extension (Section 4.2.1.3).  When separate private keys
+   are employed, certificates issued by the CA contain one authority key
+   identifier, and the corresponding CRLs contain a different authority
+   key identifier.  The use of separate CA certificates for validation
+   of certificate signatures and CRL signatures can offer improved
+   security characteristics; however, it imposes a burden on
+   applications, and it might limit interoperability. 
+
+
+   CRL checking in turn requires a separate
+   certification path to be constructed and validated for the CA's CRL
+   signature validation certificate.  Applications that perform CRL
+   checking MUST support certification path validation when certificates
+   and CRLs are digitally signed with the same CA private key.  These
+   applications SHOULD support certification path validation when
+   certificates and CRLs are digitally signed with different CA private
+   keys.
+
+
+
+   version
+   When
+   extensions are used, as required by this profile, this field MUST be
+   present and MUST specify version 2 (the integer value is 1). If
+   present, this field is a sequence of one or more CRL extensions.
+
+   The issuer field MUST contain a non-empty X.500
+   distinguished name (DN).
+
+   This update
+   CRL issuers conforming to this profile MUST encode thisUpdate as
+   UTCTime for dates through the year 2049.  CRL issuers conforming to
+   this profile MUST encode thisUpdate as GeneralizedTime for dates in
+   the year 2050 or later. 
+
+   CRL issuers SHOULD
+   issue CRLs with a nextUpdate time equal to or later than all previous
+   CRLs.
+
+   When there are no revoked certificates, the revoked certificates list
+   MUST be absent.
+
+   Certificates revoked by the CA are uniquely
+   identified by the certificate serial number.
+
+   If a CRL contains a critical extension
+   that the application cannot process, then the application MUST NOT
+   use that CRL to determine the status of certificates. 
+
+   However,
+   applications may ignore unrecognized non-critical extensions.  
+
+   CRL verifiers MUST be able to handle CRLNumber values
+   up to 20 octets.
+
+
+
+     Conforming CRLs issuers MUST NOT issue CRLs where the DER encoding of
+   the issuing distribution point extension is an empty sequence.  That
+   is, if onlyContainsUserCerts, onlyContainsCACerts, indirectCRL, and
+   onlyContainsAttributeCerts are all FALSE, then either the
+   distributionPoint field or the onlySomeReasons field MUST be present.
+
+   Freshest CRL : This extension MUST NOT appear in delta
+   CRLs. The same syntax is used for this extension as the
+   cRLDistributionPoints certificate extension, and is described in
+   Section 4.2.1.13.  However, only the distribution point field is
+   meaningful in this context.  The reasons and cRLIssuer fields MUST be
+   omitted from this CRL extension.
+
+   f a CRL
+   contains a critical CRL entry extension that the application cannot
+   process, then the application MUST NOT use that CRL to determine the
+   status of any certificates.  However, applications may ignore
+   unrecognized non-critical CRL entry extensions.
+
+   Certificate issuer extension: This specification RECOMMENDS
+   that implementations recognize this extension.
+
+
+
+
+   ----------------------------------
+   This algorithm assumes that all of the needed CRLs are available in a
+   local cache.  Further, if the next update time of a CRL has passed,
+   the algorithm assumes a mechanism to fetch a current CRL and place it
+   in the local CRL cache.
+
+   crl SIGNATURE VERIFICATION
+
+
+   rules
+
+   given cert (serial, issuer name, if bc (ca / end), use CRL dist and freshest CRL)
+
+   use-deltas---boolean
+
+   this algorithm
+   checks all reason codes.
+
+
+   Verify the issuer and scope of the complete CRL as follows:
+
+   (1)  If the DP includes cRLIssuer, then verify that the issuer
+              field in the complete CRL matches cRLIssuer in the DP and
+              that the complete CRL contains an issuing distribution
+              point extension with the indirectCRL boolean asserted.
+              Otherwise, verify that the CRL issuer matches the
+              certificate issuer.
+
+    (2)  If the complete CRL includes an issuing distribution point
+              (IDP) CRL extension, check the following:
+
+            (i)   If the distribution point name is present in the IDP
+                  CRL extension and the distribution field is present in
+                  the DP, then verify that one of the names in the IDP
+                  matches one of the names in the DP.  If the
+                  distribution point name is present in the IDP CRL
+                  extension and the distribution field is omitted from
+                  the DP, then verify that one of the names in the IDP
+                  matches one of the names in the cRLIssuer field of the
+                  DP.
+
+            (ii)  If the onlyContainsUserCerts boolean is asserted in
+                  the IDP CRL extension, verify that the certificate
+                  does not include the basic constraints extension with
+                  the cA boolean asserted.
+
+            (iii) If the onlyContainsCACerts boolean is asserted in the
+                  IDP CRL extension, verify that the certificate
+                  includes the basic constraints extension with the cA
+                  boolean asserted.
+
+            (iv)  Verify that the onlyContainsAttributeCerts boolean is
+                  not asserted.
+
+
+  (d)  Compute the interim_reasons_mask for this CRL as follows:
+
+         (1)  If the issuing distribution point (IDP) CRL extension is
+              present and includes onlySomeReasons and the DP includes
+              reasons, then set interim_reasons_mask to the intersection
+              of reasons in the DP and onlySomeReasons in the IDP CRL
+              extension.
+
+         (2)  If the IDP CRL extension includes onlySomeReasons but the
+              DP omits reasons, then set interim_reasons_mask to the
+              value of onlySomeReasons in the IDP CRL extension.
+
+         (3)  If the IDP CRL extension is not present or omits
+              onlySomeReasons but the DP includes reasons, then set
+              interim_reasons_mask to the value of DP reasons.
+
+         (4)  If the IDP CRL extension is not present or omits
+              onlySomeReasons and the DP omits reasons, then set
+              interim_reasons_mask to the special value all-reasons.
+
+      (e)  Verify that interim_reasons_mask includes one or more reasons
+           that are not included in the reasons_mask.
+
+
+
+           If a key usage extension is present
+           in the CRL issuer's certificate, verify that the cRLSign bit
+           is set.
+
+
+		Validate the signature on the complete CRL using the public
+           key validated in step
+
+
+      If (cert_status is UNREVOKED), then search for the
+           certificate on the complete CRL.  If an entry is found that
+           matches the certificate issuer and serial number as described
+           in Section 5.3.3, then set the cert_status variable to the
+           indicated reason as described in step (i)
+
+
+           (1) f the reason code CRL entry extension is present, set the
+              cert_status variable to the value of the reason code CRL
+              entry extension.
+
+         (2)  If the reason code CRL entry extension is not present, set
+              the cert_status variable to the value unspecified.
+
+
+       If (cert_status is removeFromCRL), then set cert_status to
+           UNREVOKED.
