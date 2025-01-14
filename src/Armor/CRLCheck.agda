@@ -94,7 +94,7 @@ main = IO.run $
       ID : List UInt8
 
   crlOutput : ∀ {@0 bs} → CRL.CertList bs → Output
-  Output.ID (crlOutput x) = SignAlg.getOIDBS ∘ CRL.CertList.getCertListSignAlg $ x
+  Output.ID (crlOutput x) = []
 
   showOutput : Output → String
   showOutput o = (showBytes ID) String.++ "\n"

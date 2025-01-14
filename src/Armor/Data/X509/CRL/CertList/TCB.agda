@@ -1,5 +1,6 @@
 open import Armor.Binary
 open import Armor.Data.X509.SignAlg.TCB
+open import Armor.Data.X509.Name.TCB
 open import Armor.Data.X509.CRL.TBSCertList.TCB
 open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X690-DER.TLV.TCB
@@ -35,14 +36,13 @@ record CertListFields (@0 bs : List UInt8) : Set where
     signatureBytes : Singleton sig
     @0 bs≡  : bs ≡ t ++ sa ++ sig
 
-  getCertListSignAlg : SignAlg sa
-  getCertListSignAlg = signAlg
+  getIssuer : Name ?
+  getIssuer = {!!}
 
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
 
-getCertListSignAlg : ∀{@0 bs} → (crlist : CertList bs) → SignAlg (CertListFields.sa (TLV.val crlist))
-getCertListSignAlg crlist = CertListFields.getCertListSignAlg (TLV.val crlist)
+
 
 CertListFieldsRep : @0 List UInt8 → Set
 CertListFieldsRep = &ₚ (TBSCertList ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
