@@ -98,7 +98,6 @@ ExtensionsSeq xs = TLV Tag.Sequence (NonEmptySequenceOf Extension) xs
 Extensions : @0 List UInt8 → Set
 Extensions xs = TLV Tag.AA0  ExtensionsSeq xs
 
-
 ExtensionFieldsRep : (@0 P : List UInt8 → Set) (A : @0 List UInt8 → Set) → @0 List UInt8 → Set
 ExtensionFieldsRep P A = &ₚ (Σₚ OID (λ _ x → Erased (P (TLV.v x)))) (&ₚ (Default Boool falseBoool) A)
 
@@ -159,3 +158,23 @@ RawSelectExtn = Iso.raw equivalent RawSelectExtnRep
 
 RawExtensions : Raw Extensions
 RawExtensions = RawTLV _ (RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawSelectExtn) 1))
+
+
+module Extension where
+  getIDP : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
+  getIDP (mkTLV len (idpextn x) len≡ bs≡) = _ , (some x)
+  getIDP (mkTLV len _ len≡ bs≡) = _ , none
+
+module ExtensionsSeq where
+  getIDP : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
+  getIDP (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getIDP h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+module Extensions where
+  getIDP : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
+  getIDP (mkTLV len val len≡ bs≡) = ExtensionsSeq.getIDP val

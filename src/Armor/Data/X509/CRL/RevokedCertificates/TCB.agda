@@ -9,6 +9,7 @@ import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Seq
 import      Armor.Grammar.Option
+import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
 open import Tactic.MonoidSolver using (solve ; solve-macro)
 
@@ -18,6 +19,7 @@ open Armor.Grammar.Seq    UInt8
 open Armor.Grammar.IList.TCB    UInt8
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Option      UInt8
+open Armor.Grammar.Parallel.TCB UInt8
 
 -- TBSCertList  ::=  SEQUENCE  {
 --      version                 Version OPTIONAL,
@@ -45,7 +47,6 @@ record RevokedCertificateFields (@0 bs : List UInt8) : Set where
     entryextensions : Option EntryExtensions ex
     @0 bs≡  : bs ≡ ser ++ ti ++ ex
 
-
 RevokedCertificate : (@0 _ : List UInt8) → Set
 RevokedCertificate xs = TLV Tag.Sequence RevokedCertificateFields xs
 
@@ -66,3 +67,11 @@ RawRevokedCertificateFieldsRep = Raw&ₚ (Raw&ₚ RawInt RawTime) (RawOption Raw
 RawRevokedCertificates : Raw RevokedCertificates
 RawRevokedCertificates = RawTLV _ (RawBoundedSequenceOf (RawTLV _
                                 (Iso.raw equivalentRevokedCertificateFields RawRevokedCertificateFieldsRep)) 1)
+
+module RevokedCertificates where
+  getRevokedCertificates : ∀{@0 bs} → (rl : RevokedCertificates bs) → List (Exists─ (List UInt8) RevokedCertificate)
+  getRevokedCertificates (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁) len≡ bs≡) = helper fstₚ₁
+    where
+    helper : ∀ {@0 bs} → SequenceOf RevokedCertificate bs →  List (Exists─ (List UInt8) RevokedCertificate)
+    helper nil = []
+    helper (consIList h t bs≡) = (_ , h) ∷ helper t

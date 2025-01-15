@@ -10,6 +10,7 @@ module Armor.Data.X509.CRL.Extension where
 
 open import Armor.Data.X509.CRL.Extension.Parser public
 open import Armor.Data.X509.CRL.Extension.TCB    public
+ hiding (module Extension)
 
 
 module Extension where
