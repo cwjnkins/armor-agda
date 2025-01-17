@@ -10,7 +10,7 @@ module Armor.Data.X509.CRL.RevokedCertificates.EntryExtension where
 
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.Parser public
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.TCB    public
-
+  hiding (module EntryExtension)
 
 module EntryExtension where
   open Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer      public

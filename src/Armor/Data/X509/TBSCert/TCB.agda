@@ -105,6 +105,9 @@ record TBSCertFields (@0 bs : List UInt8) : Set where
   getSerial : ℤ
   getSerial = Int.getVal serial
 
+  getSerialInt : Int ser
+  getSerialInt = serial
+
   getValidityStartTime : Time _
   getValidityEndTime : Time _
 

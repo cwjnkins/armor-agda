@@ -105,6 +105,14 @@ RDNMatch rdn₁ rdn₂ =
 rdnMatch? : ∀ {@0 bs₁ bs₂} → (n₁ : Name.RDN bs₁) (n₂ : Name.RDN bs₂) → Dec (RDNMatch n₁ n₂)
 rdnMatch? n₁ n₂ = _ ≟ _ ×-dec _ ContainsAllATV? _
 
+[]RDNMatch : ∀ {@0 bs₁ bs₂} → SetOfFields Name.RDN.ATV bs₁ → SetOfFields Name.RDN.ATV bs₂ → Set
+[]RDNMatch val₁ val₂ =
+    SetOfFields.length val₁ ≡ SetOfFields.length val₂
+  × SetOfFields.toSequenceOf val₁ ContainsAllATV SetOfFields.toSequenceOf val₂
+
+[]rdnMatch? : ∀ {@0 bs₁ bs₂} → (n₁ : SetOfFields Name.RDN.ATV bs₁) (n₂ : SetOfFields Name.RDN.ATV bs₂) → Dec ([]RDNMatch n₁ n₂)
+[]rdnMatch? n₁ n₂ = _ ≟ _ ×-dec _ ContainsAllATV? _
+
 {-
 --       A distinguished name DN1 is within the subtree defined by the
 -- distinguished name DN2 if DN1 contains at least as many RDNs as DN2,

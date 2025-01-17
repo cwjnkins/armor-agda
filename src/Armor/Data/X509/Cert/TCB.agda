@@ -55,6 +55,9 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSerial : ℤ
   getSerial = TBSCertFields.getSerial (TLV.val tbs)
 
+  getSerialInt : Int (TBSCertFields.ser (TLV.val tbs))
+  getSerialInt = TBSCertFields.getSerialInt (TLV.val tbs)
+
   getValidity : Validity _
   getValidity = TBSCertFields.validity (TLV.val tbs)
 
@@ -168,6 +171,9 @@ module Cert where
 
     getSerial : ℤ
     getSerial = CertFields.getSerial (TLV.val c)
+
+    getSerialInt : Int (TBSCertFields.ser (TLV.val getTBSCert))
+    getSerialInt = CertFields.getSerialInt (TLV.val c)
 
     getTBSBytes : List UInt8
     getTBSBytes = ↑ (CertFields.tbsBytes (TLV.val c))

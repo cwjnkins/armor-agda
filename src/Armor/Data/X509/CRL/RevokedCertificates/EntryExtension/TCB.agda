@@ -122,3 +122,32 @@ RawSelectEntryExtn = Iso.raw equivalent RawSelectEntryExtnRep
 
 RawEntryExtensions : Raw EntryExtensions
 RawEntryExtensions = RawTLV _ (RawBoundedSequenceOf (RawTLV _ RawSelectEntryExtn) 1)
+
+
+module EntryExtension where
+  getCertIssuer : ∀ {@0 bs} → EntryExtension bs → Exists─ (List UInt8) (Option ExtensionFieldCertIssuer)
+  getCertIssuer (mkTLV len (certissextn x) len≡ bs≡) = _ , (some x)
+  getCertIssuer (mkTLV len _ len≡ bs≡) = _ , none
+
+  getReasonCode : ∀ {@0 bs} → EntryExtension bs → Exists─ (List UInt8) (Option ExtensionFieldCRLReason)
+  getReasonCode (mkTLV len (crlrsnextn x) len≡ bs≡) = _ , (some x)
+  getReasonCode (mkTLV len _ len≡ bs≡) = _ , none
+  
+module EntryExtensions where
+  getCertIssuer : ∀ {@0 bs} → EntryExtensions bs → Exists─ (List UInt8) (Option ExtensionFieldCertIssuer)
+  getCertIssuer (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf EntryExtension bs → Exists─ (List UInt8) (Option ExtensionFieldCertIssuer)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (EntryExtension.getCertIssuer h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+  getReasonCode : ∀ {@0 bs} → EntryExtensions bs → Exists─ (List UInt8) (Option ExtensionFieldCRLReason)
+  getReasonCode (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf EntryExtension bs → Exists─ (List UInt8) (Option ExtensionFieldCRLReason)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (EntryExtension.getReasonCode h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
