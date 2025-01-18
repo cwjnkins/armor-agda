@@ -181,15 +181,21 @@ notFindInList' (x ∷ x₂) x₁ =
     then true
   else notFindInList' x₂ x₁
 
-atLeastOneCmnGN : ∀{@0 bs₁ bs₂} → SequenceOf GeneralName bs₁ → SequenceOf GeneralName bs₂ → Set
-atLeastOneCmnGN nil nil = ⊥
-atLeastOneCmnGN nil (cons x) = ⊥
-atLeastOneCmnGN (cons x) nil = ⊥
-atLeastOneCmnGN (cons (mkIListCons head₁ tail₁ bs≡)) (cons x₁) = helper head₁ (cons x₁) ⊎ (atLeastOneCmnGN tail₁ (cons x₁))
+atLeastOneCmnGN : ∀{@0 bs₁ bs₂} → SequenceOf GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
+atLeastOneCmnGN nil nil = false
+atLeastOneCmnGN nil (cons x) = false
+atLeastOneCmnGN (cons x) nil = false
+atLeastOneCmnGN (cons (mkIListCons head₁ tail₁ bs≡)) (cons x₁) =
+  case helper head₁ (cons x₁) of λ where
+    true → true
+    false → atLeastOneCmnGN tail₁ (cons x₁)
   where
-  helper : ∀{@0 bs₁ bs₂} → GeneralName bs₁ → SequenceOf GeneralName bs₂ → Set
-  helper x nil = ⊥
-  helper x (cons (mkIListCons head₂ tail₂ bs≡)) = (_≋_ {A = GeneralName} x head₂) ⊎ (helper x tail₂)
+  helper : ∀{@0 bs₁ bs₂} → GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
+  helper x nil = false
+  helper x (cons (mkIListCons head₂ tail₂ bs≡)) =
+    case (_≋?_ {A = GeneralName} x head₂) of λ where
+      (no _) → helper x tail₂
+      (yes _) → true
 
 -- Find common RevocationReason between two lists
 commRevocationReason : List RevocationReason → List RevocationReason → List RevocationReason
@@ -225,9 +231,9 @@ dpHasDPname : ∀{@0 bs} → DistPoint bs → Bool
 dpHasDPname (mkTLV len (mkDistPointFields none rsn issr notOnlyReasonT bs≡₁) len≡ bs≡) = false
 dpHasDPname (mkTLV len (mkDistPointFields (some _) rsn issr notOnlyReasonT bs≡₁) len≡ bs≡) = true
 
--- dpHasRsn : ∀{@0 bs} → DistPoint bs → Bool
--- dpHasRsn (mkTLV len (mkDistPointFields dpname none issr notOnlyReasonT bs≡₁) len≡ bs≡) = false
--- dpHasRsn (mkTLV len (mkDistPointFields dpname (some _) issr notOnlyReasonT bs≡₁) len≡ bs≡) = true
+dpHasRsn : ∀{@0 bs} → DistPoint bs → Bool
+dpHasRsn (mkTLV len (mkDistPointFields dpname none issr notOnlyReasonT bs≡₁) len≡ bs≡) = false
+dpHasRsn (mkTLV len (mkDistPointFields dpname (some _) issr notOnlyReasonT bs≡₁) len≡ bs≡) = true
 
 idpPresent : ∀{@0 bs} → CRL.CertList bs → Bool
 idpPresent crl = case CRL.CertList.getIDP crl of λ where
@@ -240,20 +246,20 @@ idpHasDPname crl = case CRL.CertList.getIDP crl of λ where
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields none _ _ _ _ _ _ _) _ _) _ _) _)) → false
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields (some _) _ _ _ _ _ _ _) _ _) _ _) _)) → true
 
--- idpHasOnlySmRsn : ∀{@0 bs} → CRL.CertList bs → Bool
--- idpHasOnlySmRsn crl = case CRL.CertList.getIDP crl of λ where
---       (_ , none) → false
---       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ none _ _ _ _) _ _) _ _) _)) → false
---       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ (some _) _ _ _ _) _ _) _ _) _)) → true
+idpHasOnlySmRsn : ∀{@0 bs} → CRL.CertList bs → Bool
+idpHasOnlySmRsn crl = case CRL.CertList.getIDP crl of λ where
+      (_ , none) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ none _ _ _ _) _ _) _ _) _)) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ (some _) _ _ _ _) _ _) _ _) _)) → true
 
-indirectCRLtrue : ∀ {@0 bs} → CRL.CertList bs → Set
+indirectCRLtrue : ∀ {@0 bs} → CRL.CertList bs → Bool
 indirectCRLtrue crl = case CRL.CertList.getIDP crl of λ where
-      (_ , none) → ⊥
-      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ (mkDefault none notDefault) _ _ _) _ _) _ _) _)) → ⊥
+      (_ , none) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ (mkDefault none notDefault) _ _ _) _ _) _ _) _)) → false
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _
-        (mkDefault (some (mkTLV _ (mkBoolValue false _ _ _) _ _)) notDefault) _ _ _) _ _) _ _) _)) → ⊥
+        (mkDefault (some (mkTLV _ (mkBoolValue false _ _ _) _ _)) notDefault) _ _ _) _ _) _ _) _)) → false
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _
-        (mkDefault (some (mkTLV _ (mkBoolValue true _ _ _) _ _)) notDefault) _ _ _) _ _) _ _) _)) → ⊤
+        (mkDefault (some (mkTLV _ (mkBoolValue true _ _ _) _ _)) notDefault) _ _ _) _ _) _ _) _)) → true
 
 onlyUserCertstrue : ∀ {@0 bs} → CRL.CertList bs → Bool
 onlyUserCertstrue crl = case CRL.CertList.getIDP crl of λ where
@@ -273,80 +279,89 @@ onlyCACertstrue crl = case CRL.CertList.getIDP crl of λ where
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _
         (mkDefault (some (mkTLV _ (mkBoolValue true _ _ _) _ _)) notDefault) _ _ _ _ _) _ _) _ _) _)) → true
 
-onlyAttCertsfalse : ∀ {@0 bs} → CRL.CertList bs → Set
+onlyAttCertsfalse : ∀ {@0 bs} → CRL.CertList bs → Bool
 onlyAttCertsfalse crl = case CRL.CertList.getIDP crl of λ where
-      (_ , none) → ⊤
-      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ _ (mkDefault none notDefault) _ _) _ _) _ _) _)) → ⊤
+      (_ , none) → true
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ _ (mkDefault none notDefault) _ _) _ _) _ _) _)) → true
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ _
-        (mkDefault (some (mkTLV _ (mkBoolValue false _ _ _) _ _)) notDefault) _ _) _ _) _ _) _)) → ⊤
+        (mkDefault (some (mkTLV _ (mkBoolValue false _ _ _) _ _)) notDefault) _ _) _ _) _ _) _)) → true
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ _
-        (mkDefault (some (mkTLV _ (mkBoolValue true _ _ _) _ _)) notDefault) _ _) _ _) _ _) _)) → ⊥
+        (mkDefault (some (mkTLV _ (mkBoolValue true _ _ _) _ _)) notDefault) _ _) _ _) _ _) _)) → false
 
-crlIssuerMatchesDPcrlissuer : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Set
-crlIssuerMatchesDPcrlissuer (mkTLV len (mkDistPointFields dpname rsn none notOnlyReasonT bs≡₁) len≡ bs≡) crl = ⊥
+crlIssuerMatchesDPcrlissuer : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Bool
+crlIssuerMatchesDPcrlissuer (mkTLV len (mkDistPointFields dpname rsn none notOnlyReasonT bs≡₁) len≡ bs≡) crl = false
 crlIssuerMatchesDPcrlissuer (mkTLV len (mkDistPointFields dpname rsn
   (some (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁) len≡₁ bs≡₂)) notOnlyReasonT bs≡₁) len≡ bs≡) crl = helper₁ fstₚ₁
   where
-    helper₁ : ∀ {@0 bs} → SequenceOf GeneralName bs → Set
-    helper₁ nil = ⊥
-    helper₁ (cons (mkIListCons (dirname (mkTLV len issr len≡ bs≡₁)) tail₁ bs≡)) = NameMatch issr (CRL.CertList.getIssuer crl) ⊎ helper₁ tail₁
+    helper₁ : ∀ {@0 bs} → SequenceOf GeneralName bs → Bool
+    helper₁ nil = false
+    helper₁ (cons (mkIListCons (dirname (mkTLV len issr len≡ bs≡₁)) tail₁ bs≡)) =
+      case nameMatch? issr (CRL.CertList.getIssuer crl) of λ where
+        (no _) → helper₁ tail₁
+        (yes _) → true
     helper₁ (cons (mkIListCons _ tail₁ bs≡)) = helper₁ tail₁
  
-crlIssuerMatchesCertIssuer : ∀ {@0 bs₁ bs₂} → Cert bs₁ → CRL.CertList bs₂ → Set
-crlIssuerMatchesCertIssuer cert crl = NameMatch (Cert.getIssuer cert) (CRL.CertList.getIssuer crl)
+crlIssuerMatchesCertIssuer : ∀ {@0 bs₁ bs₂} → Cert bs₁ → CRL.CertList bs₂ → Bool
+crlIssuerMatchesCertIssuer cert crl =
+  case nameMatch? (Cert.getIssuer cert) (CRL.CertList.getIssuer crl) of λ where
+    (no _) → false
+    (yes _) → true
 
-idpDpnameMatchesDPdpname : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Set
-idpDpnameMatchesDPdpname (mkTLV len (mkDistPointFields none crldprsn crlissr notOnlyReasonT bs≡₁) len≡ bs≡) crl = ⊥
+idpDpnameMatchesDPdpname : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Bool
+idpDpnameMatchesDPdpname (mkTLV len (mkDistPointFields none crldprsn crlissr notOnlyReasonT bs≡₁) len≡ bs≡) crl = false
 idpDpnameMatchesDPdpname (mkTLV len (mkDistPointFields (some (mkTLV len₁ valdp len≡₁ bs≡₂)) crldprsn crlissr notOnlyReasonT bs≡₁) len≡ bs≡) crl =
   case CRL.CertList.getIDP crl of λ where
-      (_ , none) → ⊥
-      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields none _ _ _ _ _ _ _) _ _) _ _) _)) → ⊥
+      (_ , none) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields none _ _ _ _ _ _ _) _ _) _ _) _)) → false
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields (some (mkTLV len validp len≡ bs≡)) _ _ _ _ _ _ _) _ _) _ _) _)) →
           helper valdp validp
         where
-        helper : ∀{@0 bs₁ bs₂} → DistPointNameChoice bs₁ → DistPointNameChoice bs₂ → Set
+        helper : ∀{@0 bs₁ bs₂} → DistPointNameChoice bs₁ → DistPointNameChoice bs₂ → Bool
         helper (fullname (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁) len≡ bs≡)) (fullname (mkTLV len₁ (mk×ₚ fstₚ₂ sndₚ₂) len≡₁ bs≡₁)) =
           atLeastOneCmnGN fstₚ₁ fstₚ₂
-        helper (fullname _) (nameRTCrlissr _) = ⊥
-        helper (nameRTCrlissr _) (fullname _) = ⊥
-        helper (nameRTCrlissr (mkTLV len val len≡ bs≡)) (nameRTCrlissr (mkTLV len₁ val₁ len≡₁ bs≡₁)) = []RDNMatch val val₁
+        helper (fullname _) (nameRTCrlissr _) = false
+        helper (nameRTCrlissr _) (fullname _) = false
+        helper (nameRTCrlissr (mkTLV len val len≡ bs≡)) (nameRTCrlissr (mkTLV len₁ val₁ len≡₁ bs≡₁)) =
+          case []rdnMatch? val val₁ of λ where
+            (no _) → false
+            (yes _) → true
 
-idpDpnameMatchesDPcrlissuer : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Set
-idpDpnameMatchesDPcrlissuer (mkTLV len (mkDistPointFields crldp crldprsn none notOnlyReasonT bs≡₁) len≡ bs≡) crl = ⊥
+idpDpnameMatchesDPcrlissuer : ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → Bool
+idpDpnameMatchesDPcrlissuer (mkTLV len (mkDistPointFields crldp crldprsn none notOnlyReasonT bs≡₁) len≡ bs≡) crl = false
 idpDpnameMatchesDPcrlissuer (mkTLV len (mkDistPointFields crldp crldprsn (some valissr) notOnlyReasonT bs≡₁) len≡ bs≡) crl =
   case CRL.CertList.getIDP crl of λ where
-      (_ , none) → ⊥
-      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields none _ _ _ _ _ _ _) _ _) _ _) _)) → ⊥
+      (_ , none) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields none _ _ _ _ _ _ _) _ _) _ _) _)) → false
       (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields (some (mkTLV len validp len≡ bs≡)) _ _ _ _ _ _ _) _ _) _ _) _)) →
         helper validp valissr
         where
-        helper : ∀{@0 bs₁ bs₂} → DistPointNameChoice bs₁ → CrlIssuer bs₂ → Set
+        helper : ∀{@0 bs₁ bs₂} → DistPointNameChoice bs₁ → CrlIssuer bs₂ → Bool
         helper (fullname (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁) len≡₁ bs≡₁)) (mkTLV len (mk×ₚ fstₚ₂ sndₚ₂) len≡ bs≡) = atLeastOneCmnGN fstₚ₁ fstₚ₂
-        helper (nameRTCrlissr x) (mkTLV len val len≡ bs≡) = ⊥
+        helper (nameRTCrlissr x) (mkTLV len val len≡ bs≡) = false
 
-certIsCA : ∀ {@0 bs} → Cert bs → Set
+certIsCA : ∀ {@0 bs} → Cert bs → Bool
 certIsCA cert = case Cert.isCA cert of λ where
-  (just false) → ⊥
-  (just true) → ⊤
-  nothing → ⊥
+  (just false) → false
+  (just true) → true
+  nothing → false
 
-certIsNotCA : ∀ {@0 bs} → Cert bs → Set
+certIsNotCA : ∀ {@0 bs} → Cert bs → Bool
 certIsNotCA cert = case Cert.isCA cert of λ where
-  (just false) → ⊤
-  (just true) → ⊥
-  nothing → ⊤
+  (just false) → true
+  (just true) → false
+  nothing → true
 
-BscopeCompleteCRL : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → DistPoint bs₂ → CRL.CertList bs₃ → Set
+BscopeCompleteCRL : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → DistPoint bs₂ → CRL.CertList bs₃ → Bool
 BscopeCompleteCRL cert dp crl =
   let
-          b1 : ∀{@0 bs} → DistPoint bs → Set
+          b1 : ∀{@0 bs} → DistPoint bs → Bool
           b1 dp =
             if (dpHasCrlissr dp) then
-              (crlIssuerMatchesDPcrlissuer dp crl) × (indirectCRLtrue crl)
+              (crlIssuerMatchesDPcrlissuer dp crl) ∧ (indirectCRLtrue crl)
             else
               (crlIssuerMatchesCertIssuer cert crl)
 
-          b21 :  ∀{@0 bs} → DistPoint bs → Set
+          b21 :  ∀{@0 bs} → DistPoint bs → Bool
           b21 dp =
               if idpPresent crl then
                  if (idpHasDPname crl)  then
@@ -354,31 +369,31 @@ BscopeCompleteCRL cert dp crl =
                      idpDpnameMatchesDPdpname dp crl
                    else
                      idpDpnameMatchesDPcrlissuer dp crl
-                 else ⊤
-              else ⊤
+                 else true
+              else true
 
-          b22 :  Set
+          b22 :  Bool
           b22 =
               if idpPresent crl ∧ onlyUserCertstrue crl then
                 certIsNotCA cert
-              else ⊤
+              else true
 
-          b23 : Set
+          b23 : Bool
           b23 =
               if idpPresent crl ∧ onlyCACertstrue crl then
                 certIsCA cert
-              else ⊤
+              else true
 
-          b24 : Set
+          b24 : Bool
           b24 =
               if idpPresent crl then
                 onlyAttCertsfalse crl
-              else ⊤
+              else true
 
-          b2 :  ∀{@0 bs} → DistPoint bs → Set
-          b2 dp = b21 dp × b22 × b23 × b24
+          b2 :  ∀{@0 bs} → DistPoint bs → Bool
+          b2 dp = b21 dp ∧ b22 ∧ b23 ∧ b24
   in
-  (b1 dp × b2 dp)
+  (b1 dp ∧ b2 dp)
 
 
 DcomputeIntReasonMask :  ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → List RevocationReason
@@ -396,8 +411,8 @@ DcomputeIntReasonMask (mkTLV len (mkDistPointFields crldp (some x) crlissr notOn
 
 -- Verify that interim_reasons_mask includes one or more reasons
 --            that are not included in the reasons_mask.
-EverifiyMask : List RevocationReason → List RevocationReason → Set
-EverifiyMask reasonsMask interimReasonsMask = T (notFindInList' interimReasonsMask reasonsMask)
+EverifiyMask : List RevocationReason → List RevocationReason → Bool
+EverifiyMask reasonsMask interimReasonsMask = notFindInList' interimReasonsMask reasonsMask
 
 -- If (cert_status is UNREVOKED), then search for the
            -- certificate on the complete CRL.  If an entry is found that
@@ -444,13 +459,16 @@ findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some 
 
 -- Function to process revocation state
 processRevocation : ∀{@0 bs} → RevInputs → DistPoint bs → State → State
-processRevocation (mkRevInputs cert crl useDeltas) dp state@(mkState reasonsMask certstatus interimReasonsMask) = {!!}
-      where
-      scopeChecks : Set
-      scopeChecks = (BscopeCompleteCRL cert dp crl) × (EverifiyMask reasonsMask (DcomputeIntReasonMask dp crl))
+processRevocation (mkRevInputs cert crl useDeltas) dp state@(mkState reasonsMask certstatus interimReasonsMask) =
+  case scopeChecks of λ where
+    true → revocationChecks state
+    false → (mkState reasonsMask UNDETERMINED interimReasonsMask)
+  where
+  scopeChecks : Bool
+  scopeChecks = (BscopeCompleteCRL cert dp crl) ∧ (EverifiyMask reasonsMask (DcomputeIntReasonMask dp crl))
 
-      revocationChecks : State → State
-      revocationChecks ist@(mkState reasonsMask UNREVOKED interimReasonsMask) =
+  revocationChecks : State → State
+  revocationChecks ist@(mkState reasonsMask UNREVOKED interimReasonsMask) =
         case JfindSerialIssuerMatch cert crl of λ where
           (just rv) →
             let
@@ -461,7 +479,7 @@ processRevocation (mkRevInputs cert crl useDeltas) dp state@(mkState reasonsMask
             else
               (mkState (unonRevocationReason reasonsMask interimReasonsMask) cert_status interimReasonsMask)
           nothing → ist
-      revocationChecks (mkState reasonsMask sts interimReasonsMask) =
+  revocationChecks (mkState reasonsMask sts interimReasonsMask) =
         (mkState (unonRevocationReason reasonsMask interimReasonsMask) sts interimReasonsMask)
 
 callProcessRevocation : RevInputs → CertStatus
@@ -493,41 +511,3 @@ callProcessRevocation ri@(mkRevInputs cert crl useDeltas) =
                              case not (certStatusEq certStatus UNREVOKED) of λ where
                                true → certStatus
                                false → helper₂ rest₂ st₂
-
-
-
-
--- case processRevocation ri initState of λ where
-  --   (mkState _ certStatus _) → certStatus
-
-
-
--- If ((reasons_mask is all-reasons) OR (cert_status is not UNREVOKED)),
---    then the revocation status has been determined, so return
---    cert_status.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
