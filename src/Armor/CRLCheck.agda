@@ -91,13 +91,7 @@ main = IO.run $
            IO.>>= λ certs─ →
            case (CmdArg.crls cmd) of λ where
              (just crl) → readDER crl
-               IO.>>= λ crls─ →
-                 case certs─ of λ where
-                   (─ .[] , nil) → Armor.IO.putStrLnErr ("-- ")
-                                   IO.>> Armor.IO.exitFailure
-                   (fst , cons (mkIListCons cert- rest bs≡)) → 
-                     case callProcessRevocation (mkRevInputs cert- (proj₂ crls─) false) of λ where
-                       v → IO.putStrLn (printer v)
+               IO.>>= λ crls─ → helper (proj₂ certs─) (proj₂ crls─)
              nothing → Armor.IO.putStrLnErr ("-- ")
                       IO.>> Armor.IO.exitFailure
         nothing → Armor.IO.putStrLnErr ("-- ")
@@ -147,3 +141,11 @@ main = IO.run $
   printer aACompromise = ("aACompromise")
   printer UNREVOKED = ("UNREVOKED")
   printer UNDETERMINED = ("UNDETERMINED")
+
+  helper : ∀{@0 bs₁ bs₂} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → _
+  helper nil crl = Armor.IO.putStrLnErr ("-- ")
+                   IO.>> Armor.IO.exitFailure
+  helper (cons (mkIListCons cert rest bs≡)) crl =
+    case callProcessRevocation (mkRevInputs cert crl false) of λ where
+      v → IO.putStrLn (printer v)
+          IO.>> helper rest crl
