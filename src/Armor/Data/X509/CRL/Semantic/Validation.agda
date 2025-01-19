@@ -19,7 +19,7 @@ open import Armor.Grammar.IList as IList
 import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
 
-module Armor.Data.X509.CRL.Semantic.IssuerMatch where
+module Armor.Data.X509.CRL.Semantic.Validation where
 
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Option      UInt8
@@ -437,7 +437,7 @@ JfindSerialIssuerMatch cert crl =
             case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
               (no ¬p) → helper rest
               (yes p) → just rv
-          (fst , some x) → {!!}
+          (fst , some x) → just rv --- expand it later
 
 findCertStatus : Exists─ (List UInt8) RevokedCertificate → CertStatus
 findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) = unspecified
@@ -445,7 +445,7 @@ findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some 
   case EntryExtensions.getReasonCode extn of λ where
           (_ , none) → unspecified
           (_ , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mk×ₚ (mkTLV len₁ val len≡₁ bs≡) sndₚ₁) len≡ refl) refl)) →
-            case (Singleton.x ∘ IntegerValue.val) val of λ where -- ℤ.+ 0 ℤ.<?
+            case (Singleton.x ∘ IntegerValue.val) val of λ where
               (ℤ.+ 1) → keyCompromise
               (ℤ.+ 2) → cACompromise
               (ℤ.+ 3) → affiliationChanged
@@ -459,28 +459,30 @@ findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some 
 
 -- Function to process revocation state
 processRevocation : ∀{@0 bs} → RevInputs → DistPoint bs → State → State
-processRevocation (mkRevInputs cert crl useDeltas) dp state@(mkState reasonsMask certstatus interimReasonsMask) =
+processRevocation (mkRevInputs cert crl useDeltas) dp (mkState reasonsMask certstatus interimReasonsMask) =
   case scopeChecks of λ where
-    true → revocationChecks state
+    true → revocationChecks (mkState reasonsMask certstatus computed_int_reason_mask)
     false → (mkState reasonsMask UNDETERMINED interimReasonsMask)
   where
+  computed_int_reason_mask = DcomputeIntReasonMask dp crl
+  
   scopeChecks : Bool
-  scopeChecks = (BscopeCompleteCRL cert dp crl) ∧ (EverifiyMask reasonsMask (DcomputeIntReasonMask dp crl))
+  scopeChecks = (BscopeCompleteCRL cert dp crl) ∧ (EverifiyMask reasonsMask computed_int_reason_mask)
 
   revocationChecks : State → State
-  revocationChecks ist@(mkState reasonsMask UNREVOKED interimReasonsMask) =
+  revocationChecks (mkState rm UNREVOKED irm) =
         case JfindSerialIssuerMatch cert crl of λ where
           (just rv) →
             let
               cert_status = findCertStatus rv
             in
             if certStatusEq cert_status removeFromCRL then
-              (mkState (unonRevocationReason reasonsMask interimReasonsMask) UNREVOKED interimReasonsMask)
+              (mkState (unonRevocationReason rm irm) UNREVOKED irm)
             else
-              (mkState (unonRevocationReason reasonsMask interimReasonsMask) cert_status interimReasonsMask)
-          nothing → ist
-  revocationChecks (mkState reasonsMask sts interimReasonsMask) =
-        (mkState (unonRevocationReason reasonsMask interimReasonsMask) sts interimReasonsMask)
+              (mkState (unonRevocationReason rm irm) cert_status irm)
+          nothing → (mkState (unonRevocationReason rm irm) UNREVOKED irm)
+  revocationChecks (mkState rm other_sts irm) =
+        (mkState (unonRevocationReason rm irm) other_sts irm)
 
 callProcessRevocation : RevInputs → CertStatus
 callProcessRevocation ri@(mkRevInputs cert crl useDeltas) =
@@ -492,22 +494,22 @@ callProcessRevocation ri@(mkRevInputs cert crl useDeltas) =
       helper nil = UNDETERMINED
       helper (cons (mkIListCons dp rest bs≡)) =
         case processRevocation ri dp initState of λ where
-          st@(mkState reasonsMask certStatus interimReasonsMask) →
-           case (findInList allReasons reasonsMask) of λ where
-             true → certStatus
+          st@(mkState reasonsMask₁ certStatus₁ interimReasonsMask₁) →
+           case (findInList allReasons reasonsMask₁) of λ where
+             true → certStatus₁
              false →
-               case not (certStatusEq certStatus UNREVOKED) of λ where
-                 true → certStatus
+               case not (certStatusEq certStatus₁ UNREVOKED) of λ where
+                 true → certStatus₁
                  false → helper₂ rest st
                    where
                    helper₂ : ∀{@0 bs} → SequenceOf DistPoint bs → State → CertStatus
-                   helper₂ nil x₁ = UNDETERMINED
-                   helper₂ (cons (mkIListCons dp₂ rest₂ bs≡)) x₁ =
-                     case processRevocation ri dp₂ x₁ of λ where
-                       st₂@(mkState reasonsMask certStatus interimReasonsMask) →
-                         case (findInList allReasons reasonsMask) of λ where
-                           true → certStatus
+                   helper₂ nil (mkState _ certStatus₂ _) = certStatus₂
+                   helper₂ (cons (mkIListCons dp₂ rest₂ bs≡)) st₂@(mkState reasonsMask₂ certStatus₂ interimReasonsMask₂) =
+                     case processRevocation ri dp₂ st₂ of λ where
+                       st₃@(mkState reasonsMask₃ certStatus₃ interimReasonsMask₃) →
+                         case (findInList allReasons reasonsMask₃) of λ where
+                           true → certStatus₃
                            false →
-                             case not (certStatusEq certStatus UNREVOKED) of λ where
-                               true → certStatus
-                               false → helper₂ rest₂ st₂
+                             case not (certStatusEq certStatus₃ UNREVOKED) of λ where
+                               true → certStatus₃
+                               false → helper₂ rest₂ st₃
