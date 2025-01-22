@@ -229,6 +229,10 @@ module Extension where
   getSAN (mkTLV len (sanextn x) len≡ bs≡) = _ , (some x)
   getSAN (mkTLV len _ len≡ bs≡) = _ , none
 
+  getIAN : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldIAN)
+  getIAN (mkTLV len (ianextn x) len≡ bs≡) = _ , (some x)
+  getIAN (mkTLV len _ len≡ bs≡) = _ , none
+
   getCRLDIST : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
   getCRLDIST (mkTLV len (crlextn x) len≡ bs≡) = _ , (some x)
   getCRLDIST (mkTLV len _ len≡ bs≡) = _ , none
@@ -274,6 +278,15 @@ module ExtensionsSeq where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
+  getIAN : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldIAN)
+  getIAN (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option _)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getIAN h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
   getCRLDIST : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
   getCRLDIST (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
     where
@@ -312,6 +325,9 @@ module Extensions where
   getSAN : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN (mkTLV len val len≡ bs≡) = ExtensionsSeq.getSAN val
 
+  getIAN : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldIAN)
+  getIAN (mkTLV len val len≡ bs≡) = ExtensionsSeq.getIAN val
+  
   getCRLDIST : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
   getCRLDIST (mkTLV len val len≡ bs≡) = ExtensionsSeq.getCRLDIST val
 

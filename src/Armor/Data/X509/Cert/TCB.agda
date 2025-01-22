@@ -143,6 +143,9 @@ record CertFields (@0 bs : List UInt8) : Set where
   getSAN : Exists─ (List UInt8) (Option ExtensionFieldSAN)
   getSAN = TBSCertFields.getSAN (TLV.val tbs)
 
+  getIAN : Exists─ (List UInt8) (Option ExtensionFieldIAN)
+  getIAN = TBSCertFields.getIAN (TLV.val tbs)
+
   getCRLDIST : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
   getCRLDIST = TBSCertFields.getCRLDIST (TLV.val tbs)
 
@@ -248,6 +251,9 @@ module Cert where
 
     getSAN : Exists─ (List UInt8) (Option ExtensionFieldSAN)
     getSAN = CertFields.getSAN (TLV.val c)
+
+    getIAN : Exists─ (List UInt8) (Option ExtensionFieldIAN)
+    getIAN = CertFields.getIAN (TLV.val c)
 
     getCRLDIST : Exists─ (List UInt8) (Option ExtensionFieldCRLDist)
     getCRLDIST = CertFields.getCRLDIST (TLV.val c)

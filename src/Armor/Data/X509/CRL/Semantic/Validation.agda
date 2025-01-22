@@ -423,21 +423,65 @@ EverifiyMask reasonsMask interimReasonsMask = notFindInList' interimReasonsMask 
 JfindSerialIssuerMatch : ∀{@0 bs₁ bs₂} → Cert bs₁ → CRL.CertList bs₂ → Maybe (Exists─ (List UInt8) RevokedCertificate)
 JfindSerialIssuerMatch cert crl =
   case CRL.CertList.getRevokedCertificateList crl of λ where
-    v → helper v
+    v → helper v nothing
       where
-      helper : List (Exists─ (List UInt8) RevokedCertificate) → Maybe (Exists─ (List UInt8) RevokedCertificate)
-      helper [] = nothing
-      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) ∷ rest) =
+      matchCertIssExtnWithCertIssuer : ∀{@0 bs} → ExtensionFieldCertIssuer bs → Bool
+      matchCertIssExtnWithCertIssuer (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡) = helper fstₚ₁
+        where
+        helper : ∀{@0 bs} → SequenceOf GeneralName bs → Bool
+        helper nil = false
+        helper (cons (mkIListCons (oname x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (rfcname x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (dnsname x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (x400add x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (dirname (mkTLV len val len≡ bs≡₁)) tail₁ bs≡)) =
+          case (_≋?_{A = Name} (Cert.getIssuer cert) val) of λ where
+            (no _) → helper tail₁
+            (yes _) → true
+        helper (cons (mkIListCons (ediname x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (uri x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (ipadd x) tail₁ bs≡)) = helper tail₁
+        helper (cons (mkIListCons (rid x) tail₁ bs≡)) = helper tail₁
+
+
+      matchCertIssExtnWithIAN : ∀{@0 bs} → ExtensionFieldCertIssuer bs → Bool
+      matchCertIssExtnWithIAN (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ val₁ sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡) =
+        case Cert.getIAN cert of λ where
+          (─ .[] , none) → false
+          (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ val₂ sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) → helper val₁ val₂
+            where
+            helper : ∀{@0 bs₁ bs₂} → SequenceOf GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
+            helper nil v₁ = false
+            helper (cons (mkIListCons h₁ t₁ bs₀≡)) v₁ =
+              case helper₂ h₁ v₁ of λ where
+                true → true
+                false → helper t₁ v₁
+              where
+              helper₂ : ∀{@0 bs₁ bs₂} → GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
+              helper₂ x nil = false
+              helper₂ x (cons (mkIListCons head₁ tail₁ bs≡)) =
+                case _≋?_{A = GeneralName} x head₁ of λ where
+                  (no _) → helper₂ x tail₁
+                  (yes _) → true
+
+      helper : ∀{@0 bs} → List (Exists─ (List UInt8) RevokedCertificate) → Maybe (ExtensionFieldCertIssuer bs) → Maybe (Exists─ (List UInt8) RevokedCertificate)
+      helper [] le = nothing
+      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) ∷ rest) le =
         case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
-          (no ¬p) → helper rest
+          (no ¬p) → helper rest le
           (yes p) → just rv
-      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡) ∷ rest) =
+      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡) ∷ rest) le =
         case EntryExtensions.getCertIssuer extn of λ where
           (─ .[] , none) →
             case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
-              (no ¬p) → helper rest
+              (no ¬p) → helper rest le
               (yes p) → just rv
-          (fst , some x) → just rv --- expand it later
+          (fst , some x) →
+            case (matchCertIssExtnWithCertIssuer x) ∨ (matchCertIssExtnWithIAN x) of λ where
+              true → case (_≋?_{A = Int} (Cert.getSerialInt cert) cserial) of λ where
+                (no _) → helper rest (just x)
+                (yes _) → just rv
+              false → helper rest (just x)
 
 findCertStatus : Exists─ (List UInt8) RevokedCertificate → CertStatus
 findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) = unspecified
