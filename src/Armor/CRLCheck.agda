@@ -7,6 +7,7 @@ open import Armor.Data.X509
 open import Armor.Data.X509.Cert as Cert
 open import Armor.Data.X509.CRL.CertList as CRL
 open import Armor.Data.X509.CRL.Semantic.Validation
+open import Armor.Data.X509.CRL.Semantic.Utils
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList as IList
 open import Armor.Grammar.Parser
