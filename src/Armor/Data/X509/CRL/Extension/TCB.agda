@@ -165,6 +165,14 @@ module Extension where
   getIDP (mkTLV len (idpextn x) len≡ bs≡) = _ , (some x)
   getIDP (mkTLV len _ len≡ bs≡) = _ , none
 
+  getDCRLI : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI (mkTLV len (dcrliextn x) len≡ bs≡) = _ , (some x)
+  getDCRLI (mkTLV len _ len≡ bs≡) = _ , none
+
+  getAKI : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len (akiextn x) len≡ bs≡) = _ , (some x)
+  getAKI (mkTLV len _ len≡ bs≡) = _ , none
+
 module ExtensionsSeq where
   getIDP : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
@@ -175,6 +183,30 @@ module ExtensionsSeq where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
+  getDCRLI : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getDCRLI h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
+  getAKI : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getAKI h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+
 module Extensions where
   getIDP : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP (mkTLV len val len≡ bs≡) = ExtensionsSeq.getIDP val
+
+  getDCRLI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getDCRLI val
+
+  getAKI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getAKI val

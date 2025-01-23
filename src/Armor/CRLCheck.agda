@@ -80,7 +80,7 @@ main : IO.Main
 main = IO.run $
   Armor.IO.getArgs IO.>>= λ args →
   case
-    processCmdArgs args (record { certs = nothing ; crls = nothing })
+    processCmdArgs args (record { certs = nothing ; crls = nothing ; deltas = nothing})
   of λ where
     (inj₁ msg) →
       Armor.IO.putStrLnErr ("-- " String.++ msg)
@@ -91,9 +91,13 @@ main = IO.run $
            IO.>>= λ certs─ →
            case (CmdArg.crls cmd) of λ where
              (just crl) → readDER crl
-               IO.>>= λ crls─ → helper (proj₂ certs─) (proj₂ crls─)
+               IO.>>= λ crls─ →
+                 case (CmdArg.deltas cmd) of λ where
+                   (just delta) → readDER delta
+                     IO.>>= λ deltas─ → helper₁ (proj₂ certs─) (proj₂ crls─) (proj₂ deltas─) 
+                   nothing → helper₂ (proj₂ certs─) (proj₂ crls─)
              nothing → Armor.IO.putStrLnErr ("-- ")
-                      IO.>> Armor.IO.exitFailure
+                       IO.>> Armor.IO.exitFailure
         nothing → Armor.IO.putStrLnErr ("-- ")
                   IO.>> Armor.IO.exitFailure
   where
@@ -102,14 +106,17 @@ main = IO.run $
     field
       certs : Maybe String
       crls : Maybe String
+      deltas : Maybe String
 
   record CmdArg : Set where
     field
       certs : Maybe String
       crls : Maybe String
+      deltas : Maybe String
 
   processCmdArgs : List String → CmdArgTmp → String ⊎ CmdArg
-  processCmdArgs (certs ∷ crls ∷ []) cmd = inj₂ (record { certs = just certs ; crls = just crls })
+  processCmdArgs (certs ∷ crls ∷ deltas ∷ []) cmd = inj₂ (record { certs = just certs ; crls = just crls ; deltas = just deltas})
+  processCmdArgs (certs ∷ crls ∷ []) cmd = inj₂ (record { certs = just certs ; crls = just crls ; deltas = nothing})
   processCmdArgs _ cmd = inj₁ "unrecognized arguments"
 
   readPEM : (filename : String) → IO.IO (Exists─ _ Cert.CertList)
@@ -142,10 +149,18 @@ main = IO.run $
   printer UNREVOKED = ("UNREVOKED")
   printer UNDETERMINED = ("UNDETERMINED")
 
-  helper : ∀{@0 bs₁ bs₂} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → _
-  helper nil crl = Armor.IO.putStrLnErr ("-- ")
-                   IO.>> Armor.IO.exitFailure
-  helper (cons (mkIListCons cert rest bs≡)) crl =
-    case callProcessRevocation (mkRevInputs cert crl false) of λ where
+  helper₁ : ∀{@0 bs₁ bs₂ bs₃} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → CRL.CertList bs₃ → _
+  helper₁ nil crl delta = Armor.IO.putStrLnErr ("-- ")
+                            IO.>> Armor.IO.exitFailure
+  helper₁ (cons (mkIListCons cert rest bs≡)) crl delta =
+    case callProcessRevocation (mkRevInputs cert crl (just delta) true) of λ where
       v → IO.putStrLn (printer v)
-          IO.>> helper rest crl
+          IO.>> helper₁ rest crl delta
+
+  helper₂ : ∀{@0 bs₁ bs₂} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → _
+  helper₂ nil crl = Armor.IO.putStrLnErr ("-- ")
+                      IO.>> Armor.IO.exitFailure
+  helper₂ (cons (mkIListCons cert rest bs≡)) crl =
+    case callProcessRevocation (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
+      v → IO.putStrLn (printer v)
+          IO.>> helper₂ rest crl

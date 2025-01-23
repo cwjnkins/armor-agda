@@ -49,6 +49,12 @@ record CertListFields (@0 bs : List UInt8) : Set where
   getIDP : Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP = TBSCertListFields.getIDP (TLV.val tbs)
 
+  getDCRLI : Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI = TBSCertListFields.getDCRLI (TLV.val tbs)
+
+  getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI = TBSCertListFields.getAKI (TLV.val tbs)
+
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
 
@@ -84,3 +90,21 @@ module CertList where
 
   getIDP :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP c = CertListFields.getIDP (TLV.val c)
+
+  getDCRLI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI c = CertListFields.getDCRLI (TLV.val c)
+
+  getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI c = CertListFields.getAKI (TLV.val c)
+
+  isDeltaCRL : ∀{@0 bs} → (c : CertList bs) → Set
+  isDeltaCRL c =
+    case getDCRLI c of λ where
+      (─ .[] , none) → ⊥
+      (fst , some x) → ⊤
+
+  isNotDeltaCRL : ∀{@0 bs} → (c : CertList bs) → Set
+  isNotDeltaCRL c =
+    case getDCRLI c of λ where
+      (─ .[] , none) → ⊤
+      (fst , some x) → ⊥

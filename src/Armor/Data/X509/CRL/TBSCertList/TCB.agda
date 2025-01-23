@@ -58,6 +58,12 @@ record TBSCertListFields (@0 bs : List UInt8) : Set where
   getIDP : Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP = elimOption (_ , none) (λ v → Extensions.getIDP v) crlExtensions
 
+  getDCRLI : Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI = elimOption (_ , none) (λ v → Extensions.getDCRLI v) crlExtensions
+
+  getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI = elimOption (_ , none) (λ v → Extensions.getAKI v) crlExtensions
+
 TBSCertList : (@0 _ : List UInt8) → Set
 TBSCertList xs = TLV Tag.Sequence TBSCertListFields xs
 

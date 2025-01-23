@@ -123,13 +123,19 @@ record State : Set where
 initState : State
 initState = mkState [] UNREVOKED []
 
+-- inputCheck : ∀{@0 bs₁ bs₂} → CRL.CertList bs₁ → Maybe (CRL.CertList bs₂) → Set
+-- inputCheck crl (just delta) = CRL.CertList.isNotDeltaCRL crl × CRL.CertList.isDeltaCRL delta
+-- inputCheck crl nothing = CRL.CertList.isNotDeltaCRL crl
+
 record RevInputs : Set where
   constructor mkRevInputs
   field
-    @0 {c cr} : List UInt8
+    @0 {c cr de} : List UInt8
     cert : Cert c
     crl : CRL.CertList cr
+    delta : Maybe (CRL.CertList de)
     useDeltas   : Bool
+    -- @0 check : inputCheck crl delta
 
 -- Helper function to check equality of RevocationReason
 revocationReasonEq : RevocationReason → RevocationReason → Bool
@@ -351,6 +357,14 @@ certIsNotCA cert = case Cert.isCA cert of λ where
   (just true) → false
   nothing → true
 
+isIndirectCRL : ∀{@0 bs} → (c : CRL.CertList bs) → Bool
+isIndirectCRL c =
+    case CRL.CertList.getIDP c of λ where
+      (─ .[] , none) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _ (mkDefault none notDefault) _ _ _) _ _) _ _) _)) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ (mkIDPFieldsSeqFields _ _ _ _
+        (mkDefault (some (mkTLV len (mkBoolValue v b vᵣ bs≡₁) len≡ bs≡)) notDefault) _ _ _) _ _) _ _) _)) → v
+      
 BscopeCompleteCRL : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → DistPoint bs₂ → CRL.CertList bs₃ → Bool
 BscopeCompleteCRL cert dp crl =
   let
@@ -395,6 +409,37 @@ BscopeCompleteCRL cert dp crl =
   in
   (b1 dp ∧ b2 dp)
 
+CscopeDeltaCRL : ∀{@0 bs₁ bs₂} → Bool → CRL.CertList bs₁ → Maybe (CRL.CertList bs₂) → Bool
+CscopeDeltaCRL false crl _ = true
+CscopeDeltaCRL true crl nothing = false
+CscopeDeltaCRL true crl (just delta) =
+  case nameMatch? (CRL.CertList.getIssuer crl) (CRL.CertList.getIssuer delta) of λ where
+    (no _) → false
+    (yes _) →
+      case CRL.CertList.getIDP crl of λ where
+        (_ , none) →
+          case CRL.CertList.getIDP delta of λ where
+            (_ , none) → akiMatch
+            (_ , some y) → false
+        (_ , some x) →
+          case CRL.CertList.getIDP delta of λ where
+            (_ , none) → false
+            (_ , some y) → akiMatch
+  where
+  akiMatch : Bool
+  akiMatch =
+    case CRL.CertList.getAKI crl of λ where
+      (_ , none) →
+        case CRL.CertList.getAKI delta of λ where
+          (_ , none) → true
+          (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ val₁ _ _) _ _) _)) → false
+      (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ val₁ _ _) _ _) _)) →
+        case CRL.CertList.getAKI delta of λ where
+          (_ , none) → false
+          (_ , some (mkExtensionFields _ _ _ (mkTLV _ (mkTLV _ val₂ _ _) _ _) _)) →
+            case _≋?_ val₁ val₂ of λ where
+              (no _) → false
+              (yes _) → true
 
 DcomputeIntReasonMask :  ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → List RevocationReason
 DcomputeIntReasonMask (mkTLV len (mkDistPointFields crldp none crlissr notOnlyReasonT bs≡₁) len≡ bs≡) crl =
@@ -423,7 +468,7 @@ EverifiyMask reasonsMask interimReasonsMask = notFindInList' interimReasonsMask 
 JfindSerialIssuerMatch : ∀{@0 bs₁ bs₂} → Cert bs₁ → CRL.CertList bs₂ → Maybe (Exists─ (List UInt8) RevokedCertificate)
 JfindSerialIssuerMatch cert crl =
   case CRL.CertList.getRevokedCertificateList crl of λ where
-    v → helper v nothing
+    v → {!!} --helper v {!!}
       where
       matchCertIssExtnWithCertIssuer : ∀{@0 bs} → ExtensionFieldCertIssuer bs → Bool
       matchCertIssExtnWithCertIssuer (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ fstₚ₁ sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡) = helper fstₚ₁
@@ -464,24 +509,24 @@ JfindSerialIssuerMatch cert crl =
                   (no _) → helper₂ x tail₁
                   (yes _) → true
 
-      helper : ∀{@0 bs} → List (Exists─ (List UInt8) RevokedCertificate) → Maybe (ExtensionFieldCertIssuer bs) → Maybe (Exists─ (List UInt8) RevokedCertificate)
-      helper [] le = nothing
-      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) ∷ rest) le =
-        case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
-          (no ¬p) → helper rest le
-          (yes p) → just rv
-      helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡) ∷ rest) le =
-        case EntryExtensions.getCertIssuer extn of λ where
-          (─ .[] , none) →
-            case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
-              (no ¬p) → helper rest le
-              (yes p) → just rv
-          (fst , some x) →
-            case (matchCertIssExtnWithCertIssuer x) ∨ (matchCertIssExtnWithIAN x) of λ where
-              true → case (_≋?_{A = Int} (Cert.getSerialInt cert) cserial) of λ where
-                (no _) → helper rest (just x)
-                (yes _) → just rv
-              false → helper rest (just x)
+      -- helper : ∀{@0 bs} → List (Exists─ (List UInt8) RevokedCertificate) → Maybe (ExtensionFieldCertIssuer bs) → Maybe (Exists─ (List UInt8) RevokedCertificate)
+      -- helper [] le = nothing
+      -- helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) ∷ rest) le =
+      --   case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
+      --     (no ¬p) → helper rest le
+      --     (yes p) → just rv
+      -- helper (rv@(fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡) ∷ rest) le =
+      --   case EntryExtensions.getCertIssuer extn of λ where
+      --     (─ .[] , none) →
+      --       case ((_≋?_{A = Int} (Cert.getSerialInt cert) cserial) ×-dec (_≋?_{A = Name} (Cert.getIssuer cert) (CertList.getIssuer crl))) of λ where
+      --         (no ¬p) → helper rest {!!}
+      --         (yes p) → just rv
+      --     (fst , some x) →
+      --       case (matchCertIssExtnWithCertIssuer x) ∨ (matchCertIssExtnWithIAN x) of λ where
+      --         true → case (_≋?_{A = Int} (Cert.getSerialInt cert) cserial) of λ where
+      --           (no _) → helper rest {!!}
+      --           (yes _) → just rv
+      --         false → helper rest {!!}
 
 findCertStatus : Exists─ (List UInt8) RevokedCertificate → CertStatus
 findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡) = unspecified
@@ -503,33 +548,53 @@ findCertStatus (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some 
 
 -- Function to process revocation state
 processRevocation : ∀{@0 bs} → RevInputs → DistPoint bs → State → State
-processRevocation (mkRevInputs cert crl useDeltas) dp (mkState reasonsMask certstatus interimReasonsMask) =
+processRevocation (mkRevInputs cert crl delta useDeltas) dp (mkState reasonsMask certstatus interimReasonsMask) =
   case scopeChecks of λ where
-    true → revocationChecks (mkState reasonsMask certstatus computed_int_reason_mask)
+    true → stepK (revocationChecksCRL (revocationChecksDelta useDeltas delta (mkState reasonsMask certstatus computed_int_reason_mask)))
     false → (mkState reasonsMask UNDETERMINED interimReasonsMask)
   where
   computed_int_reason_mask = DcomputeIntReasonMask dp crl
   
   scopeChecks : Bool
-  scopeChecks = (BscopeCompleteCRL cert dp crl) ∧ (EverifiyMask reasonsMask computed_int_reason_mask)
+  scopeChecks = (BscopeCompleteCRL cert dp crl) ∧
+                (CscopeDeltaCRL useDeltas crl delta) ∧
+                (EverifiyMask reasonsMask computed_int_reason_mask)
 
-  revocationChecks : State → State
-  revocationChecks (mkState rm UNREVOKED irm) =
+  revocationChecksDelta : ∀{@0 bs} → Bool → Maybe (CRL.CertList bs) → State → State
+  revocationChecksDelta false _ st = st
+  revocationChecksDelta true nothing st = st
+  revocationChecksDelta true (just del) (mkState rm UNREVOKED irm) =
+      case JfindSerialIssuerMatch cert del of λ where
+          (just rv) →
+            let
+              cert_status = findCertStatus rv
+            in
+            (mkState (unonRevocationReason rm irm) cert_status irm)
+          nothing → (mkState (unonRevocationReason rm irm) UNREVOKED irm)
+  revocationChecksDelta true (just del) (mkState rm other_sts irm) =
+      (mkState (unonRevocationReason rm irm) other_sts irm)
+  
+  revocationChecksCRL : State → State
+  revocationChecksCRL (mkState rm UNREVOKED irm) =
         case JfindSerialIssuerMatch cert crl of λ where
           (just rv) →
             let
               cert_status = findCertStatus rv
             in
-            if certStatusEq cert_status removeFromCRL then
-              (mkState (unonRevocationReason rm irm) UNREVOKED irm)
-            else
-              (mkState (unonRevocationReason rm irm) cert_status irm)
+            (mkState (unonRevocationReason rm irm) cert_status irm)
           nothing → (mkState (unonRevocationReason rm irm) UNREVOKED irm)
-  revocationChecks (mkState rm other_sts irm) =
+  revocationChecksCRL (mkState rm other_sts irm) =
         (mkState (unonRevocationReason rm irm) other_sts irm)
 
+  stepK : State → State
+  stepK (mkState reasonsMask certStatus interimReasonsMask) =
+    if certStatusEq certStatus removeFromCRL then
+      (mkState reasonsMask UNREVOKED interimReasonsMask)
+    else
+      (mkState reasonsMask certStatus interimReasonsMask)
+
 callProcessRevocation : RevInputs → CertStatus
-callProcessRevocation ri@(mkRevInputs cert crl useDeltas) =
+callProcessRevocation ri@(mkRevInputs cert crl delta useDeltas) =
   case Cert.getCRLDIST cert of λ where
     (─ .[] , none) → UNDETERMINED
     (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ (cons x) sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) → helper (cons x)
