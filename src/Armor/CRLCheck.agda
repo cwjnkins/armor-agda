@@ -6,8 +6,8 @@ import      Armor.Data.PEM as PEM
 open import Armor.Data.X509
 open import Armor.Data.X509.Cert as Cert
 open import Armor.Data.X509.CRL.CertList as CRL
-open import Armor.Data.X509.CRL.Semantic.Validation
-open import Armor.Data.X509.CRL.Semantic.Utils
+open import Armor.Data.X509.CRL.Semantic.Validation2
+open import Armor.Data.X509.CRL.Semantic.Utils2
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList as IList
 open import Armor.Grammar.Parser
@@ -136,32 +136,37 @@ main = IO.run $
     IO.>>= λ crls → let (_ , success pre r r≡ crls suf ps≡) = crls in
     IO.return (_ , crls)
 
-  printer : CertStatus → String
-  printer unspecified = ("unspecified")
-  printer keyCompromise = ("keyCompromise")
-  printer cACompromise = ("cACompromise")
-  printer affiliationChanged = ("affiliationChanged")
-  printer superseded = ("superseded")
-  printer cessationOfOperation = ("cessationOfOperation")
-  printer certificateHold = ("certificateHold")
-  printer removeFromCRL = ("removeFromCRL")
-  printer privilegeWithdrawn = ("privilegeWithdrawn")
-  printer aACompromise = ("aACompromise")
-  printer UNREVOKED = ("UNREVOKED")
-  printer UNDETERMINED = ("UNDETERMINED")
+  printer : Status → String
+  printer record { sts = REVOKED ; rsn = (just allReasons) } = "REVOKED -- allReasons"
+  printer record { sts = REVOKED ; rsn = (just unspecified) } = "REVOKED -- unspecified"
+  printer record { sts = REVOKED ; rsn = (just keyCompromise) } = "REVOKED -- keyCompromise"
+  printer record { sts = REVOKED ; rsn = (just cACompromise) } = "REVOKED -- cACompromise"
+  printer record { sts = REVOKED ; rsn = (just affiliationChanged) } = "REVOKED -- affiliationChanged"
+  printer record { sts = REVOKED ; rsn = (just superseded) } = "REVOKED -- superseded"
+  printer record { sts = REVOKED ; rsn = (just cessationOfOperation) } = "REVOKED -- cessationOfOperation"
+  printer record { sts = REVOKED ; rsn = (just certificateHold) } = "REVOKED -- certificateHold"
+  printer record { sts = REVOKED ; rsn = (just removeFromCRL) } = "REVOKED -- removeFromCRL"
+  printer record { sts = REVOKED ; rsn = (just privilegeWithdrawn) } = "REVOKED -- privilegeWithdrawn"
+  printer record { sts = REVOKED ; rsn = (just aACompromise) } = "REVOKED -- aACompromise"
+  printer record { sts = REVOKED ; rsn = nothing } = "REVOKED"
+  printer record { sts = UNREVOKED ; rsn = rsn } = "UNREVOKED"
 
   helper₁ : ∀{@0 bs₁ bs₂ bs₃} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → CRL.CertList bs₃ → _
   helper₁ nil crl delta = Armor.IO.putStrLnErr ("-- ")
-                            IO.>> Armor.IO.exitFailure
+                          IO.>> Armor.IO.exitFailure
   helper₁ (cons (mkIListCons cert rest bs≡)) crl delta =
-    case callProcessRevocation (mkRevInputs cert crl (just delta) true) of λ where
-      v → IO.putStrLn (printer v)
-          IO.>> helper₁ rest crl delta
+    case Main (mkRevInputs cert crl (just delta) true) of λ where
+      (inj₁ x) → Armor.IO.putStrLnErr (x)
+                 IO.>> Armor.IO.exitFailure
+      (inj₂ y) → IO.putStrLn (printer y)
+                 IO.>> helper₁ rest crl delta
 
   helper₂ : ∀{@0 bs₁ bs₂} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → _
   helper₂ nil crl = Armor.IO.putStrLnErr ("-- ")
-                      IO.>> Armor.IO.exitFailure
+                    IO.>> Armor.IO.exitFailure
   helper₂ (cons (mkIListCons cert rest bs≡)) crl =
-    case callProcessRevocation (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
-      v → IO.putStrLn (printer v)
-          IO.>> helper₂ rest crl
+    case Main (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
+      (inj₁ x) → Armor.IO.putStrLnErr (x)
+                 IO.>> Armor.IO.exitFailure
+      (inj₂ y) → IO.putStrLn (printer y)
+                 IO.>> helper₂ rest crl

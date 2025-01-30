@@ -96,15 +96,3 @@ module CertList where
 
   getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI c = CertListFields.getAKI (TLV.val c)
-
-  isDeltaCRL : ∀{@0 bs} → (c : CertList bs) → Set
-  isDeltaCRL c =
-    case getDCRLI c of λ where
-      (─ .[] , none) → ⊥
-      (fst , some x) → ⊤
-
-  isNotDeltaCRL : ∀{@0 bs} → (c : CertList bs) → Set
-  isNotDeltaCRL c =
-    case getDCRLI c of λ where
-      (─ .[] , none) → ⊤
-      (fst , some x) → ⊥

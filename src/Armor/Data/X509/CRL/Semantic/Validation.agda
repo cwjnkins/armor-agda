@@ -49,7 +49,7 @@ BscopeCompleteCRL cert dp crl =
           b22 :  Bool
           b22 =
               if idpPresent crl ∧ onlyUserCertstrue crl then
-                certIsNotCA cert
+                not (certIsCA cert)
               else true
 
           b23 : Bool
@@ -61,7 +61,7 @@ BscopeCompleteCRL cert dp crl =
           b24 : Bool
           b24 =
               if idpPresent crl then
-                onlyAttCertsfalse crl
+                not (onlyAttCertstrue crl)
               else true
 
           b2 :  ∀{@0 bs} → DistPoint bs → Bool
@@ -80,12 +80,12 @@ CscopeDeltaCRL true crl (just delta) =
       case CRL.CertList.getIDP crl of λ where
         (_ , none) →
           case CRL.CertList.getIDP delta of λ where
-            (_ , none) → akiMatch crl delta
+            (_ , none) → AkiMatch crl delta
             (_ , some y) → false
         (_ , some crlidp) →
           case CRL.CertList.getIDP delta of λ where
             (_ , none) → false
-            (_ , some deltaidp) → idpMatch crlidp deltaidp ∧ akiMatch crl delta 
+            (_ , some deltaidp) → IdpMatch crlidp deltaidp ∧ AkiMatch crl delta 
 
 
 DcomputeIntReasonMask :  ∀{@0 bs₁ bs₂} → DistPoint bs₁ → CRL.CertList bs₂ → List RevocationReason
@@ -138,7 +138,7 @@ JfindSerialIssuerMatch cert crl =
 processRevocation : ∀{@0 bs} → RevInputs → DistPoint bs → State → State
 processRevocation (mkRevInputs cert crl delta useDeltas) dp (mkState reasonsMask certstatus interimReasonsMask) =
   case scopeChecks of λ where
-    true → stepK (revocationChecksCRL (revocationChecksDelta useDeltas delta (mkState reasonsMask certstatus computed_int_reason_mask)))
+    true → stepK (revocationChecksCRL (revocationChecksDelta useDeltas delta (mkState reasonsMask certstatus interimReasonsMask)))
     false → (mkState reasonsMask UNDETERMINED interimReasonsMask)
   where
   computed_int_reason_mask = DcomputeIntReasonMask dp crl
@@ -155,7 +155,7 @@ processRevocation (mkRevInputs cert crl delta useDeltas) dp (mkState reasonsMask
       case JfindSerialIssuerMatch cert del of λ where
           (just rv) →
             let
-              cert_status = findCertStatus rv
+              cert_status = findCertStatus (just rv)
             in
             (mkState (unonRevocationReason rm irm) cert_status irm)
           nothing → (mkState (unonRevocationReason rm irm) UNREVOKED irm)
@@ -167,7 +167,7 @@ processRevocation (mkRevInputs cert crl delta useDeltas) dp (mkState reasonsMask
         case JfindSerialIssuerMatch cert crl of λ where
           (just rv) →
             let
-              cert_status = findCertStatus rv
+              cert_status = findCertStatus (just rv)
             in
             (mkState (unonRevocationReason rm irm) cert_status irm)
           nothing → (mkState (unonRevocationReason rm irm) UNREVOKED irm)
