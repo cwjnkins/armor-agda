@@ -148,8 +148,9 @@ main = IO.run $
   printer record { sts = REVOKED ; rsn = (just removeFromCRL) } = "REVOKED -- removeFromCRL"
   printer record { sts = REVOKED ; rsn = (just privilegeWithdrawn) } = "REVOKED -- privilegeWithdrawn"
   printer record { sts = REVOKED ; rsn = (just aACompromise) } = "REVOKED -- aACompromise"
-  printer record { sts = REVOKED ; rsn = nothing } = "REVOKED"
-  printer record { sts = UNREVOKED ; rsn = rsn } = "UNREVOKED"
+  printer record { sts = REVOKED ; rsn = nothing } = "REVOKED -- Error"
+  printer record { sts = UNREVOKED ; rsn = (just x) } = "UNREVOKED -- Error"
+  printer record { sts = UNREVOKED ; rsn = nothing } = "UNREVOKED"
 
   helper₁ : ∀{@0 bs₁ bs₂ bs₃} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → CRL.CertList bs₃ → _
   helper₁ nil crl delta = Armor.IO.putStrLnErr ("-- ")

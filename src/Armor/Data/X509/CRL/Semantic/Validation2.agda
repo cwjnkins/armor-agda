@@ -589,8 +589,12 @@ Main ri@(mkRevInputs cert crl delta useDeltas) =
   case Cert.getCRLDIST cert of λ where
     (─ .[] , none) → inj₁ "UNDETERMINED"
     (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (mk×ₚ dps sndₚ₁) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) →
-      let
-        pr : Σ[ s ∈ State ] ProcessRevocation ri (toList _ dps) initState s 
-        pr = helper ri (toList _ dps) initState
-      in
-      inj₂ (State.certStatus (proj₁ pr))
+      case proj₁ (pr dps) of λ where
+        (mkState reasonsMask record { sts = REVOKED ; rsn = rsn }) → inj₂ (State.certStatus (proj₁ (pr dps)))
+        (mkState reasonsMask record { sts = UNREVOKED ; rsn = rsn }) →
+          case findInList allReasons reasonsMask of λ where
+            true → inj₂ (State.certStatus (proj₁ (pr dps)))
+            false → inj₁ "UNDETERMINED"
+      where
+        pr : ∀ {@0 bs} → (dps : SequenceOf DistPoint bs) → Σ[ s ∈ State ] ProcessRevocation ri (toList _ dps) initState s 
+        pr dps = helper ri (toList _ dps) initState
