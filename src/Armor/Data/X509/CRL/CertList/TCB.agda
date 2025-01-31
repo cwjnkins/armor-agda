@@ -4,6 +4,7 @@ open import Armor.Data.X509.Name.TCB
 open import Armor.Data.X509.CRL.TBSCertList.TCB
 open import Armor.Data.X509.CRL.RevokedCertificates.TCB
 open import Armor.Data.X509.CRL.Extension.TCB
+import      Armor.Data.X690-DER.BitString.Serializer as BitString
 open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
@@ -58,6 +59,40 @@ record CertListFields (@0 bs : List UInt8) : Set where
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
 
+module CertList where
+  getTBSCertList : ∀{@0 bs} → (c : CertList bs) → TBSCertList (CertListFields.t (TLV.val c))
+  getTBSCertList c = CertListFields.tbs (TLV.val c)
+
+  getIssuer : ∀{@0 bs} → (c : CertList bs) → Name (TBSCertListFields.i (TLV.val (getTBSCertList c)))
+  getIssuer c = CertListFields.getIssuer (TLV.val c)
+
+  getRevokedCertificateList :  ∀{@0 bs} → (c : CertList bs) → List (Exists─ (List UInt8) RevokedCertificate)
+  getRevokedCertificateList c = CertListFields.getRevokedCertificateList (TLV.val c)
+
+  getIDP :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldIDP)
+  getIDP c = CertListFields.getIDP (TLV.val c)
+
+  getDCRLI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
+  getDCRLI c = CertListFields.getDCRLI (TLV.val c)
+
+  getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
+  getAKI c = CertListFields.getAKI (TLV.val c)
+
+  getCertSignAlg : ∀{@0 bs} → (c : CertList bs) → SignAlg (CertListFields.sa (TLV.val c))
+  getCertSignAlg c = CertListFields.signAlg (TLV.val c)
+
+  getTBSBytes :  ∀{@0 bs} → (c : CertList bs) → List UInt8
+  getTBSBytes c = ↑ CertListFields.tbsBytes (TLV.val c)
+    
+  getSignatureValueBytes :  ∀{@0 bs} → (c : CertList bs) → List UInt8
+  getSignatureValueBytes c = ↑ (BitString.serializeValue (TLV.val (CertListFields.signature (TLV.val c))))
+
+module CRLList where
+  CRLList : (@0 _ : List UInt8) → Set
+  CRLList = IList CertList
+open CRLList public using (CRLList)
+
+
 CertListFieldsRep : @0 List UInt8 → Set
 CertListFieldsRep = &ₚ (TBSCertList ×ₚ Singleton) (&ₚ SignAlg (BitString ×ₚ Singleton))
 
@@ -77,22 +112,5 @@ RawCertListFields = Iso.raw equivalentCertListFields RawCertListFieldsRep
 RawCertList : Raw CertList
 RawCertList = RawTLV _ RawCertListFields
 
-
-module CertList where
-  getTBSCertList : ∀{@0 bs} → (c : CertList bs) → TBSCertList (CertListFields.t (TLV.val c))
-  getTBSCertList c = CertListFields.tbs (TLV.val c)
-
-  getIssuer : ∀{@0 bs} → (c : CertList bs) → Name (TBSCertListFields.i (TLV.val (getTBSCertList c)))
-  getIssuer c = CertListFields.getIssuer (TLV.val c)
-
-  getRevokedCertificateList :  ∀{@0 bs} → (c : CertList bs) → List (Exists─ (List UInt8) RevokedCertificate)
-  getRevokedCertificateList c = CertListFields.getRevokedCertificateList (TLV.val c)
-
-  getIDP :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldIDP)
-  getIDP c = CertListFields.getIDP (TLV.val c)
-
-  getDCRLI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldDCRLI)
-  getDCRLI c = CertListFields.getDCRLI (TLV.val c)
-
-  getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
-  getAKI c = CertListFields.getAKI (TLV.val c)
+RawCRLList : Raw CRLList
+RawCRLList = RawIList RawCertList

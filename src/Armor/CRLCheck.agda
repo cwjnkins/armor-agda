@@ -148,9 +148,8 @@ main = IO.run $
   printer record { sts = REVOKED ; rsn = (just removeFromCRL) } = "REVOKED -- removeFromCRL"
   printer record { sts = REVOKED ; rsn = (just privilegeWithdrawn) } = "REVOKED -- privilegeWithdrawn"
   printer record { sts = REVOKED ; rsn = (just aACompromise) } = "REVOKED -- aACompromise"
-  printer record { sts = REVOKED ; rsn = nothing } = "REVOKED -- Error"
-  printer record { sts = UNREVOKED ; rsn = (just x) } = "UNREVOKED -- Error"
-  printer record { sts = UNREVOKED ; rsn = nothing } = "UNREVOKED"
+  printer record { sts = REVOKED ; rsn = nothing } = "REVOKED"
+  printer record { sts = UNREVOKED ; rsn = _ } = "UNREVOKED"
 
   helper₁ : ∀{@0 bs₁ bs₂ bs₃} → SequenceOf Cert bs₁ → CRL.CertList bs₂ → CRL.CertList bs₃ → _
   helper₁ nil crl delta = Armor.IO.putStrLnErr ("-- ")
@@ -158,7 +157,7 @@ main = IO.run $
   helper₁ (cons (mkIListCons cert rest bs≡)) crl delta =
     case Main (mkRevInputs cert crl (just delta) true) of λ where
       (inj₁ x) → Armor.IO.putStrLnErr (x)
-                 IO.>> Armor.IO.exitFailure
+                 IO.>> helper₁ rest crl delta
       (inj₂ y) → IO.putStrLn (printer y)
                  IO.>> helper₁ rest crl delta
 
@@ -168,6 +167,6 @@ main = IO.run $
   helper₂ (cons (mkIListCons cert rest bs≡)) crl =
     case Main (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
       (inj₁ x) → Armor.IO.putStrLnErr (x)
-                 IO.>> Armor.IO.exitFailure
+                 IO.>> helper₂ rest crl
       (inj₂ y) → IO.putStrLn (printer y)
                  IO.>> helper₂ rest crl

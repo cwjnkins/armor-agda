@@ -77,4 +77,3 @@ parseCert =
 
 parseCertList : Parser (Logging ∘ Dec) CertList
 parseCertList = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseCertList: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCert)
-

@@ -70,3 +70,6 @@ parseCertListFields n =
 parseCertList : Parser (Logging ∘ Dec) CertList
 parseCertList =
   parseTLV _ here' _ parseCertListFields
+
+parseCRLList : Parser (Logging ∘ Dec) CRLList
+parseCRLList = LogDec.MaximalParser.parser (parseIListMax (mkLogged ["parseCRLList: underflow"] tt) _ TLV.nonempty TLV.nosubstrings  parseCertList)

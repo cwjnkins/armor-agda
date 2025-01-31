@@ -64,3 +64,6 @@ nonmalleableFields =
 
 @0 nonmalleable : NonMalleable RawCertList
 nonmalleable = TLV.nonmalleable{R = RawCertListFields} nonmalleableFields
+
+@0 nonmalleableCRLList : NonMalleable RawCRLList
+nonmalleableCRLList = SequenceOf.nonmalleable{R = RawCertList} TLV.nonempty TLV.nosubstrings nonmalleable

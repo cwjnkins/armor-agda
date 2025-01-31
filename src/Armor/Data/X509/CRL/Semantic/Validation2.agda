@@ -28,11 +28,11 @@ open Armor.Grammar.Parallel.TCB UInt8
 
 b1 : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → DistPoint bs₂ → CRL.CertList bs₃ → Set
 b1 cert dp crl = (T (dpHasCrlissr dp) → T (crlIssuerMatchesDPcrlissuer dp crl ∧ indirectCRLtrue crl))
-              ⊎ (T (not (dpHasCrlissr dp)) → T (crlIssuerMatchesCertIssuer cert crl))
+              × (T (not (dpHasCrlissr dp)) → T (crlIssuerMatchesCertIssuer cert crl))
 
 b21 : ∀{@0 bs₂ bs₃} → DistPoint bs₂ → CRL.CertList bs₃ → Set                                    
 b21 dp crl = (T (idpHasDPname crl ∧ dpHasDPname dp) → T (idpDpnameMatchesDPdpname dp crl))
-                ⊎ (T (idpHasDPname crl ∧ not (dpHasDPname dp)) → T (idpDpnameMatchesDPcrlissuer dp crl))
+                × (T (idpHasDPname crl ∧ not (dpHasDPname dp)) → T (idpDpnameMatchesDPcrlissuer dp crl))
 
 b22 : ∀{@0 bs₁ bs₃} → Cert bs₁ → CRL.CertList bs₃ → Set
 b22 cert crl = T (onlyUserCertstrue crl) → T (not (certIsCA cert))
@@ -56,11 +56,11 @@ BscopeCompleteCRL cert dp crl = b1 cert dp crl × b2 cert dp crl
 
 ---------
 b1? : ∀{@0 bs₁ bs₂ bs₃} → (cert : Cert bs₁) → (dp : DistPoint bs₂) → (crl : CRL.CertList bs₃) → Dec (b1 cert dp crl)
-b1? cert dp crl = (T-dec →-dec T-dec) ⊎-dec (T-dec →-dec T-dec)
+b1? cert dp crl = (T-dec →-dec T-dec) ×-dec (T-dec →-dec T-dec)
 
 
 b21? : ∀{@0 bs₂ bs₃} → (dp : DistPoint bs₂) → (crl : CRL.CertList bs₃) → Dec (b21 dp crl)                                    
-b21? dp crl = (T-dec →-dec T-dec) ⊎-dec (T-dec →-dec T-dec)
+b21? dp crl = (T-dec →-dec T-dec) ×-dec (T-dec →-dec T-dec)
 
 
 b22? : ∀{@0 bs₁ bs₃} → (cert : Cert bs₁) → (crl : CRL.CertList bs₃) → Dec (b22 cert crl)
