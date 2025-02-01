@@ -6,6 +6,13 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Optional
 
+from cryptography.hazmat.primitives.asymmetric import dsa, rsa, ec
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+from hashlib import *
+from cryptography.hazmat.primitives.serialization import load_der_public_key
+
 @dataclass
 class Certificate:
     tbs: str
@@ -23,6 +30,96 @@ class CRL:
 def convert_to_hex(value: str) -> str:
     """Converts a space-separated string of integers to uppercase two-digit hexadecimal format."""
     return " ".join(f"{int(num):02X}" for num in value.split())
+
+
+# Mapping of OID to signature algorithms
+SIGNATURE_ALGOS = {
+    "sha256WithRSAEncryption": sha256,
+    "sha384WithRSAEncryption": sha384,
+    "sha512WithRSAEncryption": sha512,
+    "sha224WithRSAEncryption": sha224,
+    "sha1WithRSAEncryption": sha1
+}
+
+sign_oid_map = {
+    "6 9 42 134 72 134 247 13 1 1 11": "sha256WithRSAEncryption",
+    "6 9 42 134 72 134 247 13 1 1 12": "sha384WithRSAEncryption",
+    "6 9 42 134 72 134 247 13 1 1 13": "sha512WithRSAEncryption",
+    "6 9 42 134 72 134 247 13 1 1 14": "sha224WithRSAEncryption",
+    "6 9 42 134 72 134 247 13 1 1 5": "sha1WithRSAEncryption",
+    '6 8 42 134 72 206 61 4 3 1': 'ecdsa-with-SHA224',
+    '6 8 42 134 72 206 61 4 3 2': 'ecdsa-with-SHA256',
+    '6 8 42 134 72 206 61 4 3 3': 'ecdsa-with-SHA384',
+    '6 8 42 134 72 206 61 4 3 4': 'ecdsa-with-SHA512',
+    '6 9 42 134 72 134 247 13 1 1 2': "md2WithRSAEncryption",
+    '6 9 42 134 72 134 247 13 1 1 3': "md4WithRSAEncryption",
+    '6 9 42 134 72 134 247 13 1 1 4': "md5WithRSAEncryption"
+}
+
+# Insecure algorithms list (sample, extend as needed)
+INSECURE_ALGORITHMS = {
+    # Add insecure algorithms here, e.g., 
+    # "sha1WithRSAEncryption": "SHA-1"
+}
+
+def verify_signature_with_algorithm(signature, sign_algo, tbs_bytes, public_key, i):
+    """Helper function to handle common signature verification logic."""
+    try:
+        signature_mod = pow(int.from_bytes(signature, byteorder='big'),
+                            public_key.public_numbers().e,
+                            public_key.public_numbers().n)
+        signature_mod_hex = '00' + signature_mod.to_bytes(
+            (signature_mod.bit_length() + 7) // 8, byteorder='big').hex()
+        
+        # Get the corresponding hash function for the signature algorithm
+        if sign_algo in SIGNATURE_ALGOS:
+            hash_func = SIGNATURE_ALGOS[sign_algo]
+            tbs_hash = hash_func(tbs_bytes).hexdigest()
+            n_length = public_key.public_numbers().n.bit_length() // 8
+            hash_size = hash_func().digest_size * 8  # Size in bits
+            # Build the command for morpheous
+            cmd = ['./morpheous-bin', signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
+            morpheous_res = subprocess.getoutput(' '.join(cmd))
+            print(' '.join(cmd), morpheous_res)
+            return morpheous_res
+        else:
+            print(f"Signature algorithm {sign_algo} is not supported - verification skipped for certificate {i}.")
+            return "true"
+    except Exception as e:
+        print(f"Error during signature verification for certificate {i}: {e}")
+        return "false"
+
+def verifySign(signature, sign_algo, tbs_bytes, public_key, i):
+    """Verifies the signature of a certificate using the provided public key and signature algorithm."""
+    # Check if the signature algorithm is insecure
+    if sign_algo in INSECURE_ALGORITHMS:
+        print(f"Signature algorithm {INSECURE_ALGORITHMS[sign_algo]} is insecure in certificate {i}.")
+        return "false"
+    
+    # Handle signature verification based on the algorithm
+    return verify_signature_with_algorithm(signature, sign_algo, tbs_bytes, public_key, i)
+
+def verifySignatures(certificates):
+    res = "true"
+
+    for i in range(1, len(certificates)):
+        cert = certificates[i - 1]
+        signature = bytes.fromhex(cert.signature[3:]) if cert.signature.startswith("00 ") else bytes.fromhex(cert.signature)
+        sign_algo = cert.signoid
+        tbs_bytes = bytes.fromhex(cert.tbs)
+        public_key = load_der_public_key(bytes.fromhex(certificates[i].public_key), backend=default_backend())
+                
+        # Verify signature using the provided function
+        verification_result = verifySign(signature, sign_algo, tbs_bytes, public_key, i)
+        
+        if verification_result == "false":
+            print(f"Failed to verify signature of certificate {i}")
+            res = "false"
+            break
+
+        print(res)
+    
+    return res
 
 def run_external_program(executable, purpose, certs, trusted_certs, crls=None):
     try:
@@ -66,7 +163,8 @@ def parse_output(output):
     if cert_blocks:
         for block in cert_blocks:
             lines = [line.strip() for line in block.strip().split("\n")]
-            tbs, signature, public_key, signoid = map(convert_to_hex, lines[:4])
+            tbs, signature, public_key = map(convert_to_hex, lines[:3])
+            signoid = sign_oid_map[lines[3]] if lines[3] in sign_oid_map else None
             eku_purposes = lines[4].rstrip(" @@").split(" @@ ") if len(lines) > 4 and lines[4] else []
             certificates.append(Certificate(
                 tbs=tbs,
@@ -81,9 +179,8 @@ def parse_output(output):
         lines = [line.strip() for line in crl_match.group(1).strip().split("\n")]
         if len(lines) == 3:
             crl_data = CRL(
-                tbs=convert_to_hex(lines[0]),
-                signature=convert_to_hex(lines[1]),
-                signoid=convert_to_hex(lines[2])
+                tbs, signature = map(convert_to_hex, lines[:2]),
+                signoid=sign_oid_map[lines[2]] if lines[2] in sign_oid_map else None
             )
     
     return certificates, crl_data
@@ -130,3 +227,5 @@ if __name__ == "__main__":
             print("Parsed Certificates:", certificates)
         if crl_data:
             print("Parsed CRL:", crl_data)
+
+        verifySignatures(certificates)
