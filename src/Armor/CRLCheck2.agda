@@ -152,7 +152,7 @@ main = IO.run $
 
     readPurpose : String → String ⊎ KeyPurpose
     readPurpose purp = case purp ∈? map proj₁ purpMap of λ where
-      (no ¬purp∈) → inj₁ ("Unrecognized purpose: " String.++ purp)
+      (no ¬purp∈) → inj₁ ("unrecognized purpose: " String.++ purp)
       (yes purp∈) → inj₂ (proj₂ (lookup purpMap (Any.index purp∈)))
   processCmdArgs (certName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName })
   processCmdArgs (certName ∷ rootName ∷ []) cmd = processCmdArgs [] (record cmd { certname = just certName ; rootname = just rootName })
@@ -220,7 +220,7 @@ main = IO.run $
 
     showListBytes : List (List UInt8) → String
     showListBytes [] = ""
-    showListBytes (x ∷ x₁) = (showBytes x) String.++ "@@ " String.++ (showListBytes x₁)
+    showListBytes (x ∷ x₁) = (showBytes x) String.++ " @@ " String.++ (showListBytes x₁)
 
   showOutputCRL : CRLOutput → String
   showOutputCRL o =
@@ -235,13 +235,12 @@ main = IO.run $
     showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
 
   chainPrinter : List (Exists─ _ Cert) → _
-  chainPrinter [] = Armor.IO.putStrLnErr ("")
+  chainPrinter [] = IO.putStrLn ""
   chainPrinter (c ∷ rest) = IO.putStrLn (showOutputCert (certOutput (proj₂ c))) IO.>>
                             chainPrinter rest
 
   crlPrinter : Exists─ _ CRL.CertList → _
-  crlPrinter crl = IO.putStrLn (showOutputCRL (crlOutput (proj₂ crl))) IO.>>
-                   Armor.IO.putStrLnErr ("")
+  crlPrinter crl = IO.putStrLn (showOutputCRL (crlOutput (proj₂ crl)))
 
 
   runCheck : ∀ {@0 bs} → Cert bs → String
@@ -288,7 +287,7 @@ main = IO.run $
      runCheck cert "R15" r15 IO.>>
      (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" (r18 kp)) else (IO.return tt)) IO.>>
      Armor.IO.getCurrentTime IO.>>= λ now →
-     -- Armor.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
+     --Armor.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
      case GeneralizedTime.fromForeignUTC now of λ where
        (no ¬p) →
          Armor.IO.putStrLnErr "R17: failed to read time from system" IO.>>
@@ -326,15 +325,16 @@ main = IO.run $
   runCRLCheck : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → Cert bs₃ → CRL.CertList bs₂ → IO.IO Bool
   runCRLCheck cert issuer crl =
     case Main (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
-      (inj₁ x) → Armor.IO.putStrLnErr (x) IO.>>
+      (inj₁ x) → Armor.IO.putStrLnErr ("Could not determine CRL revocation status") IO.>>
                  IO.return false -- undetermined
-      (inj₂ y) → IO.putStrLn (crlStsPrinter y) IO.>>
+      (inj₂ y) → Armor.IO.putStrLnErr ("CRL Revocation Status: " String.++ (crlStsPrinter y)) IO.>>
                  IO.return true  -- determined
 
   helper₃ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → Maybe KeyPurpose → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
   helper₃ kp issuee chain =
     runChecks' kp issuee 1 chain IO.>>
+    Armor.IO.putStrLnErr ("=== Now Checking Chain ") IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
     runChainCheck "R20" issuee chain r20 IO.>>
     runChainCheck "R22" issuee chain r22 IO.>>
