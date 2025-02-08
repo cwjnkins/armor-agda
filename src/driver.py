@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from cryptography.hazmat.primitives.asymmetric import dsa, rsa, ec
+from cryptography.hazmat.primitives.asymmetric.rsa import *
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
@@ -32,8 +32,8 @@ def convert_to_hex(value: str) -> str:
     return " ".join(f"{int(num):02X}" for num in value.split())
 
 
-# Mapping of OID to signature algorithms
-SIGNATURE_ALGOS = {
+# Mapping of OID to RSA signature algorithms
+RSA_SIGNATURE_ALGOS = {
     "sha256WithRSAEncryption": sha256,
     "sha384WithRSAEncryption": sha384,
     "sha512WithRSAEncryption": sha512,
@@ -56,34 +56,32 @@ sign_oid_map = {
     '6 9 42 134 72 134 247 13 1 1 4': "md5WithRSAEncryption"
 }
 
-# Insecure algorithms list (sample, extend as needed)
+# Insecure algorithms list
 INSECURE_ALGORITHMS = {
-    # Add insecure algorithms here, e.g., 
-    # "sha1WithRSAEncryption": "SHA-1"
+
 }
 
-def verify_signature_with_algorithm(signature, sign_algo, tbs_bytes, public_key, i):
+### specific to RSA public key, signature algorithm
+def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, public_key, i):
     """Helper function to handle common signature verification logic."""
     try:
-        signature_mod = pow(int.from_bytes(signature, byteorder='big'),
-                            public_key.public_numbers().e,
-                            public_key.public_numbers().n)
-        signature_mod_hex = '00' + signature_mod.to_bytes(
-            (signature_mod.bit_length() + 7) // 8, byteorder='big').hex()
-        
-        # Get the corresponding hash function for the signature algorithm
-        if sign_algo in SIGNATURE_ALGOS:
-            hash_func = SIGNATURE_ALGOS[sign_algo]
+        # Get the corresponding hash function for the RSA signature algorithm
+        if sign_algo in RSA_SIGNATURE_ALGOS and isinstance (public_key, RSAPublicKey):
+            signature_mod = pow(int.from_bytes(signature, byteorder='big'),
+                    public_key.public_numbers().e,
+                    public_key.public_numbers().n)
+            signature_mod_hex = '00' + signature_mod.to_bytes((signature_mod.bit_length() + 7) // 8, byteorder='big').hex()
+            hash_func = RSA_SIGNATURE_ALGOS[sign_algo]
             tbs_hash = hash_func(tbs_bytes).hexdigest()
             n_length = public_key.public_numbers().n.bit_length() // 8
             hash_size = hash_func().digest_size * 8  # Size in bits
-            # Build the command for morpheous
+            # Build the command for morpheous RSA signature verirification
             cmd = ['./morpheous-bin', signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
             morpheous_res = subprocess.getoutput(' '.join(cmd))
-            print(' '.join(cmd), morpheous_res)
+            print(morpheous_res)
             return morpheous_res
         else:
-            print(f"Signature algorithm {sign_algo} is not supported - verification skipped for certificate {i}.")
+            print(f"Signature algorithm {sign_algo} is not supported - signature verification skipped for certificate {i}.")
             return "true"
     except Exception as e:
         print(f"Error during signature verification for certificate {i}: {e}")
@@ -97,7 +95,7 @@ def verifySign(signature, sign_algo, tbs_bytes, public_key, i):
         return "false"
     
     # Handle signature verification based on the algorithm
-    return verify_signature_with_algorithm(signature, sign_algo, tbs_bytes, public_key, i)
+    return verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, public_key, i)
 
 def verifySignatures(certificates):
     res = "true"
@@ -115,10 +113,7 @@ def verifySignatures(certificates):
         if verification_result == "false":
             print(f"Failed to verify signature of certificate {i}")
             res = "false"
-            break
-
-        print(res)
-    
+            break    
     return res
 
 def run_external_program(executable, purpose, certs, trusted_certs, crls=None):
@@ -157,7 +152,7 @@ def run_external_program(executable, purpose, certs, trusted_certs, crls=None):
 
 def parse_output(output):
     certificates = []
-    crl_data = None
+    crls = []
     
     cert_blocks = re.findall(r"\*{7}Output Certificate Start\*{7}\n(.*?)\n\*{7}Output Certificate End\*{7}", output, re.DOTALL)
     if cert_blocks:
@@ -174,16 +169,16 @@ def parse_output(output):
                 eku_purposes=eku_purposes
             ))
     
-    crl_match = re.search(r"\*{7}Output CRL Start\*{7}\n(.*?)\n\*{7}Output CRL End\*{7}", output, re.DOTALL)
-    if crl_match:
-        lines = [line.strip() for line in crl_match.group(1).strip().split("\n")]
-        if len(lines) == 3:
-            crl_data = CRL(
+    crl_blocks = re.findall(r"\*{7}Output CRL Start\*{7}\n(.*?)\n\*{7}Output CRL End\*{7}", output, re.DOTALL)
+    if crl_blocks:
+        for block in crl_blocks:
+            lines = [line.strip() for line in block.strip().split("\n")]
+            crls.append(CRL(
                 tbs, signature = map(convert_to_hex, lines[:2]),
                 signoid=sign_oid_map[lines[2]] if lines[2] in sign_oid_map else None
-            )
+            ))
     
-    return certificates, crl_data
+    return certificates, crls
 
 def check_file_exists(file_path: str, file_type: str) -> bool:
     """Check if a file exists and is a valid file."""
@@ -221,11 +216,12 @@ if __name__ == "__main__":
     output = run_external_program(args.executable, args.purpose, args.chain, args.trust_store, args.crl)
     
     if output:
-        certificates, crl_data = parse_output(output)
+        certificates, crls = parse_output(output)
 
         if len(certificates) > 0:
             print("Parsed Certificates:", certificates)
-        if crl_data:
-            print("Parsed CRL:", crl_data)
+        if len(crls) > 0:
+            print("Parsed CRL:", crls)
 
-        verifySignatures(certificates)
+        sig_verify_chain = verifySignatures(certificates)
+        print("Certificate Chain Signature Verification:", sig_verify_chain)

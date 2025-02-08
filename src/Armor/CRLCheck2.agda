@@ -234,14 +234,39 @@ main = IO.run $
     showBytes : List UInt8 → String
     showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
 
+
+  crlStsPrinter : Status → String
+  crlStsPrinter record { sts = REVOKED ; rsn = (just allReasons) } = "REVOKED -- allReasons"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just unspecified) } = "REVOKED -- unspecified"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just keyCompromise) } = "REVOKED -- keyCompromise"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just cACompromise) } = "REVOKED -- cACompromise"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just affiliationChanged) } = "REVOKED -- affiliationChanged"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just superseded) } = "REVOKED -- superseded"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just cessationOfOperation) } = "REVOKED -- cessationOfOperation"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just certificateHold) } = "REVOKED -- certificateHold"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just removeFromCRL) } = "REVOKED -- removeFromCRL"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just privilegeWithdrawn) } = "REVOKED -- privilegeWithdrawn"
+  crlStsPrinter record { sts = REVOKED ; rsn = (just aACompromise) } = "REVOKED -- aACompromise"
+  crlStsPrinter record { sts = REVOKED ; rsn = nothing } = "REVOKED"
+  crlStsPrinter record { sts = UNREVOKED ; rsn = _ } = "UNREVOKED"
+
   chainPrinter : List (Exists─ _ Cert) → _
   chainPrinter [] = IO.putStrLn ""
   chainPrinter (c ∷ rest) = IO.putStrLn (showOutputCert (certOutput (proj₂ c))) IO.>>
                             chainPrinter rest
 
-  crlPrinter : Exists─ _ CRL.CertList → _
-  crlPrinter crl = IO.putStrLn (showOutputCRL (crlOutput (proj₂ crl)))
-
+  checkResult : List CRLStatus → IO.IO Bool
+  checkResult [] = IO.return true
+  checkResult (mkCRLStatus crl s@(record { sts = REVOKED ; rsn = rsn }) ∷ rest) =
+    Armor.IO.putStrLnErr ("CRL Revocation Status: " String.++ (crlStsPrinter s)) IO.>>
+    IO.return false
+  checkResult (mkCRLStatus crl record { sts = UNREVOKED ; rsn = rsn } ∷ rest) = checkResult rest
+   
+  crlPrinter : List CRLStatus → _
+  crlPrinter [] = IO.putStrLn ""
+  crlPrinter (mkCRLStatus crl record { sts = sts ; rsn = rsn } ∷ rest) =
+                         IO.putStrLn (showOutputCRL (crlOutput (crl))) IO.>>
+                         crlPrinter rest
 
   runCheck : ∀ {@0 bs} → Cert bs → String
              → {P : ∀ {@0 bs} → Cert bs → Set}
@@ -287,7 +312,6 @@ main = IO.run $
      runCheck cert "R15" r15 IO.>>
      (if ⌊ n ≟ 1 ⌋ then (runCheck cert "R18" (r18 kp)) else (IO.return tt)) IO.>>
      Armor.IO.getCurrentTime IO.>>= λ now →
-     --Armor.IO.putStrLnErr (FFI.showTime now) IO.>>= λ _ →
      case GeneralizedTime.fromForeignUTC now of λ where
        (no ¬p) →
          Armor.IO.putStrLnErr "R17: failed to read time from system" IO.>>
@@ -298,41 +322,44 @@ main = IO.run $
   runChecks' :  ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → Maybe KeyPurpose → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO ⊤
   runChecks' kp issuee n (root (trustedCA , snd)) =
-    -- IO.putStrLn (showOutput (certOutput issuee)) IO.>>
     runSingleCertChecks kp issuee n IO.>>
-    -- IO.putStrLn (showOutput (certOutput (proj₂ trustedCA))) IO.>>
     runSingleCertChecks kp (proj₂ trustedCA) (n + 1)
   runChecks' kp issuee n (link issuer isIn chain) =
-    -- IO.putStrLn (showOutput (certOutput issuee)) IO.>>
     runSingleCertChecks kp issuee n IO.>>
     runChecks' kp issuer (n + 1) chain
 
-  crlStsPrinter : Status → String
-  crlStsPrinter record { sts = REVOKED ; rsn = (just allReasons) } = "REVOKED -- allReasons"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just unspecified) } = "REVOKED -- unspecified"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just keyCompromise) } = "REVOKED -- keyCompromise"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just cACompromise) } = "REVOKED -- cACompromise"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just affiliationChanged) } = "REVOKED -- affiliationChanged"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just superseded) } = "REVOKED -- superseded"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just cessationOfOperation) } = "REVOKED -- cessationOfOperation"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just certificateHold) } = "REVOKED -- certificateHold"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just removeFromCRL) } = "REVOKED -- removeFromCRL"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just privilegeWithdrawn) } = "REVOKED -- privilegeWithdrawn"
-  crlStsPrinter record { sts = REVOKED ; rsn = (just aACompromise) } = "REVOKED -- aACompromise"
-  crlStsPrinter record { sts = REVOKED ; rsn = nothing } = "REVOKED"
-  crlStsPrinter record { sts = UNREVOKED ; rsn = _ } = "UNREVOKED"
+  -- runCRLCheck : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → String
+  --   → (issuee : Cert bs) → Chain trustedRoot candidates issuee → List (Exists─ _ CRL.CertList)
+  --   → {P : ∀ {@0 bs} → (i : Cert bs) → Chain trustedRoot candidates i → List (Exists─ _ CRL.CertList) → Set}
+  --   → (∀ {@0 bs} → (j : Cert bs) → (chain : Chain trustedRoot candidates j) → (crl : List (Exists─ _ CRL.CertList)) → Dec (P j chain crl))
+  --   → IO.IO ⊤
+  -- runCRLCheck m issuee chain crl d
+  --   with d issuee chain crl
+  -- ... | no ¬p =
+  --   Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+  --   Armor.IO.exitFailure
+  -- ... | yes p =
+  --   Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
+  --   IO.return tt
 
-  runCRLCheck : ∀{@0 bs₁ bs₂ bs₃} → Cert bs₁ → Cert bs₃ → CRL.CertList bs₂ → IO.IO Bool
-  runCRLCheck cert issuer crl =
-    case Main (mkRevInputs{_}{_}{[]} cert crl nothing false) of λ where
-      (inj₁ x) → Armor.IO.putStrLnErr ("Could not determine CRL revocation status") IO.>>
-                 IO.return false -- undetermined
-      (inj₂ y) → Armor.IO.putStrLnErr ("CRL Revocation Status: " String.++ (crlStsPrinter y)) IO.>>
-                 IO.return true  -- determined
+  runCRLCheck : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → String
+    → (issuee : Cert bs) → Chain trustedRoot candidates issuee → List (Exists─ _ CRL.CertList)
+    → IO.IO ⊤
+  runCRLCheck m issuee chain crl =
+    case CRLCheckChain issuee chain crl of λ where
+      (just res) →
+        checkResult res IO.>>= λ where
+          false → IO.return tt
+          true → crlPrinter res IO.>>
+                 IO.return tt
+      nothing → Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+                Armor.IO.exitFailure
 
-  helper₃ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
-    → Maybe KeyPurpose → (issuee : Cert bs) → Chain trustedRoot candidates issuee → IO.IO Bool
-  helper₃ kp issuee chain =
+
+  semChecks : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
+    → Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
+    → Chain trustedRoot candidates issuee → IO.IO Bool
+  semChecks kp nothing issuee chain =
     runChecks' kp issuee 1 chain IO.>>
     Armor.IO.putStrLnErr ("=== Now Checking Chain ") IO.>>
     runChainCheck "R19" issuee chain r19 IO.>>
@@ -340,43 +367,34 @@ main = IO.run $
     runChainCheck "R22" issuee chain r22 IO.>>
     runChainCheck "R23" issuee chain r23 IO.>>
     runChainCheck "R27" issuee chain r27 IO.>>
+    chainPrinter (toList chain) IO.>>
+    IO.return true
+  semChecks kp (just crl) issuee chain =
+    runChecks' kp issuee 1 chain IO.>>
+    Armor.IO.putStrLnErr ("=== Now Checking Chain ") IO.>>
+    runChainCheck "R19" issuee chain r19 IO.>>
+    runChainCheck "R20" issuee chain r20 IO.>>
+    runChainCheck "R22" issuee chain r22 IO.>>
+    runChainCheck "R23" issuee chain r23 IO.>>
+    runChainCheck "R27" issuee chain r27 IO.>>
+    runCRLCheck "CRL Validation" issuee chain crl IO.>>
+    chainPrinter (toList chain) IO.>>
     IO.return true
 
-  helper₄ : ∀{@0 bs₁ bs₂} → Cert bs₁ → Cert bs₂ → List (Exists─ (List UInt8) CRL.CertList) → IO.IO Bool
-  helper₄ cert issuer [] = IO.return false
-  helper₄ cert issuer (crl ∷ rest) =
-    runCRLCheck cert issuer (proj₂ crl) IO.>>= λ where
-      true → crlPrinter crl IO.>>
-             IO.return true
-      false → helper₄ cert issuer rest
-
-  helper₅ : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
-    → List (Chain trustedRoot candidates issuee) → _
-  helper₅ kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" 
-  helper₅ kp crl issuee (chain ∷ otherChains) =
-    helper₃ kp issuee chain IO.>>= λ where
-      false →  helper₅ kp crl issuee otherChains
-      true →
-        case crl of λ where
-          nothing → chainPrinter (toList chain) IO.>>
-                    Armor.IO.exitSuccess
-          (just cr) →
-            case getIssuers chain of λ where
-              [] →
-                helper₄ issuee issuee cr IO.>>= λ where
-                  true → chainPrinter (toList chain) IO.>>
-                         Armor.IO.exitSuccess
-                  false → helper₅ kp crl issuee otherChains
-              (issuer ∷ _) →
-                helper₄ issuee (proj₂ issuer) cr IO.>>= λ where
-                  true → chainPrinter (toList chain) IO.>>
-                         Armor.IO.exitSuccess
-                  false → helper₅ kp crl issuee otherChains
 
   runCertChecks : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecks kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates"
   runCertChecks kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
-    helper₅ kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end)
+    helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end)
+    where
+    helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
+                                    → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
+                                    → List (Chain trustedRoot candidates issuee) → _
+    helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" 
+    helper kp crl issuee (chain ∷ otherChains) =
+      semChecks kp crl issuee chain IO.>>= λ where
+        false →  helper kp crl issuee otherChains
+        true → Armor.IO.exitSuccess
 
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → _
   runCertChecksLeaf kp [] = Armor.IO.putStrLnErr "Error: no parsed leaf certificate"

@@ -66,14 +66,9 @@ data RevocationReason : Set where
 
 -- Certificate status
 data CertStatus : Set where
-  REVOKED              : CertStatus
+  REVOKED              : RevocationReason → CertStatus
   UNREVOKED            : CertStatus
-
-
-record Status : Set where
-  field
-    sts : CertStatus
-    rsn : Maybe RevocationReason
+  UNDETERMINED         : CertStatus
 
 
 -- State Variables
@@ -81,12 +76,12 @@ record State : Set where
   constructor mkState
   field
     reasonsMask          : List RevocationReason
-    certStatus           : Status
+    certStatus           : CertStatus
 
 
 -- Initial State
 initState : State
-initState = mkState [] (record { sts = UNREVOKED ; rsn = nothing })
+initState = mkState [] UNREVOKED
 
 
 -- Function to map a boolean list to revocation reasons
@@ -162,30 +157,34 @@ revocationReasonEq _ _ = false
 
 
 certStatusEq : CertStatus → CertStatus → Bool
-certStatusEq REVOKED REVOKED = true
+certStatusEq (REVOKED x) (REVOKED x₁)
+  with revocationReasonEq x x₁
+... | true = true
+... | false = false
 certStatusEq UNREVOKED UNREVOKED = true
+certStatusEq UNDETERMINED UNDETERMINED = true
 certStatusEq _ _ = false
 
 
-findStatus : Maybe (Exists─ (List UInt8) RevokedCertificate) → Status
-findStatus nothing = record { sts = UNREVOKED ; rsn = nothing }
-findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡)) = record { sts = REVOKED ; rsn = just unspecified }
-findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡)) =
-  case EntryExtensions.getReasonCode extn of λ where
-          (_ , none) → record { sts = REVOKED ; rsn = just unspecified }
-          (_ , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mk×ₚ (mkTLV len₁ val len≡₁ bs≡) sndₚ₁) len≡ refl) refl)) →
-            case (Singleton.x ∘ IntegerValue.val) val of λ where
-              (ℤ.+ 0) → record { sts = REVOKED ; rsn = just unspecified }
-              (ℤ.+ 1) → record { sts = REVOKED ; rsn = just keyCompromise }
-              (ℤ.+ 2) → record { sts = REVOKED ; rsn = just cACompromise }
-              (ℤ.+ 3) → record { sts = REVOKED ; rsn = just affiliationChanged }
-              (ℤ.+ 4) → record { sts = REVOKED ; rsn = just superseded }
-              (ℤ.+ 5) → record { sts = REVOKED ; rsn = just cessationOfOperation }
-              (ℤ.+ 6) → record { sts = REVOKED ; rsn = just certificateHold }
-              (ℤ.+ 8) → record { sts = REVOKED ; rsn = just removeFromCRL }
-              (ℤ.+ 9) → record { sts = REVOKED ; rsn = just privilegeWithdrawn }
-              (ℤ.+ 10) → record { sts = REVOKED ; rsn = just aACompromise }
-              _ → record { sts = REVOKED ; rsn = just unspecified }
+findStatus : Maybe (Exists─ (List UInt8) RevokedCertificate) → CertStatus
+findStatus nothing = UNREVOKED
+findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡)) = REVOKED unspecified
+findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡))
+  with EntryExtensions.getReasonCode extn
+... | (_ , none) = REVOKED unspecified
+... | (_ , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mk×ₚ (mkTLV len₁ val len≡₁ bs≡) sndₚ₁) len≡ refl) refl))
+  with (Singleton.x ∘ IntegerValue.val) val
+... | (ℤ.+ 0) = REVOKED unspecified
+... | (ℤ.+ 1) = REVOKED keyCompromise
+... | (ℤ.+ 2) = REVOKED cACompromise
+... | (ℤ.+ 3) = REVOKED affiliationChanged
+... | (ℤ.+ 4) = REVOKED superseded
+... | (ℤ.+ 5) = REVOKED cessationOfOperation
+... | (ℤ.+ 6) = REVOKED certificateHold
+... | (ℤ.+ 8) = REVOKED removeFromCRL
+... | (ℤ.+ 9) = REVOKED privilegeWithdrawn
+... | (ℤ.+ 10) = REVOKED aACompromise
+... | _ = UNDETERMINED
 
 
 findInList : RevocationReason → List RevocationReason → Bool
@@ -194,6 +193,13 @@ findInList x (x₁ ∷ x₂) =
   if revocationReasonEq x x₁
     then true
   else findInList x x₂
+
+findInListDec : RevocationReason → List RevocationReason → Set
+findInListDec x [] = ⊥
+findInListDec x (x₁ ∷ x₂) =
+  if revocationReasonEq x x₁
+    then ⊤
+  else findInListDec x x₂
 
 
 findInList' : List RevocationReason → List RevocationReason → Bool
@@ -448,3 +454,13 @@ matchSerial cserial cert =
         case _≋?_{A = Int} (Cert.getSerialInt cert) cserial of λ where
           (no ¬p) → false
           (yes p) → true
+
+
+record CRLStatus : Set where
+  constructor mkCRLStatus
+  field
+    @0 {c i cr} : List UInt8
+    issuee : Cert c
+    issuer : Cert i
+    crl : CRL.CertList cr
+    certsts : CertStatus
