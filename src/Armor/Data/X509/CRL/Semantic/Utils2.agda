@@ -27,15 +27,10 @@ open Armor.Grammar.Parallel.TCB UInt8
 
 
 isDeltaCRL : ∀{@0 bs} → (c : CRL.CertList bs) → Bool
-isDeltaCRL c =
-    case CRL.CertList.getDCRLI c of λ where
-      (─ .[] , none) → false
-      (fst , some x) → true
-
-
--- inputCheck : ∀{@0 bs₁ bs₂} → CRL.CertList bs₁ → Maybe (CRL.CertList bs₂) → Bool
--- inputCheck crl (just delta) = isDeltaCRL delta ∧ not (isDeltaCRL crl)
--- inputCheck crl nothing = not (isDeltaCRL crl)
+isDeltaCRL c
+  with CRL.CertList.getDCRLI c
+... | (─ .[] , none) = false
+... | (fst , some x) = true
 
 
 record RevInputs : Set where
@@ -45,8 +40,6 @@ record RevInputs : Set where
     cert : Cert c
     crl : CRL.CertList cr
     delta : Maybe (CRL.CertList de)
-    useDeltas   : Bool
-    -- @0 inputConsistent? : T (inputCheck crl delta)
 
 
 -- Revocation reason enumeration
@@ -64,24 +57,30 @@ data RevocationReason : Set where
   aACompromise         : RevocationReason
 
 
--- Certificate status
-data CertStatus : Set where
-  REVOKED              : RevocationReason → CertStatus
-  UNREVOKED            : CertStatus
-  UNDETERMINED         : CertStatus
+data ValidRevocationState : Set where
+  REVOKED   : (reasonMask : List RevocationReason) → (reason : RevocationReason) → ValidRevocationState
+  UNREVOKED : (reasonMask : List RevocationReason) → ValidRevocationState
 
 
--- State Variables
-record State : Set where
-  constructor mkState
-  field
-    reasonsMask          : List RevocationReason
-    certStatus           : CertStatus
+isRevoked : ValidRevocationState → Bool
+isRevoked (REVOKED reasonMask reason) = true
+isRevoked (UNREVOKED reasonMask) = false
 
+isUnrevoked : ValidRevocationState → Bool
+isUnrevoked (REVOKED reasonMask reason) = false
+isUnrevoked (UNREVOKED reasonMask) = true
+
+-- Initial ValidRevocationState
+initValidRevocationState : ValidRevocationState
+initValidRevocationState = UNREVOKED []
+
+data State : Set where
+  validState        : ValidRevocationState → State
+  undeterminedState : State
 
 -- Initial State
 initState : State
-initState = mkState [] UNREVOKED
+initState = validState initValidRevocationState
 
 
 -- Function to map a boolean list to revocation reasons
@@ -156,36 +155,40 @@ revocationReasonEq aACompromise aACompromise = true
 revocationReasonEq _ _ = false
 
 
-certStatusEq : CertStatus → CertStatus → Bool
-certStatusEq (REVOKED x) (REVOKED x₁)
+certStatusEq : ValidRevocationState → ValidRevocationState → Bool
+certStatusEq (REVOKED _ x) (REVOKED _ x₁)
   with revocationReasonEq x x₁
 ... | true = true
 ... | false = false
-certStatusEq UNREVOKED UNREVOKED = true
-certStatusEq UNDETERMINED UNDETERMINED = true
+certStatusEq (UNREVOKED _) (UNREVOKED _) = true
 certStatusEq _ _ = false
 
+certStatusEq? : (a : ValidRevocationState) → (b : ValidRevocationState) → Dec (T (certStatusEq a b))
+certStatusEq? a b
+  with certStatusEq a b
+... | #0 = no λ ()
+... | #1 = yes tt
 
-findStatus : Maybe (Exists─ (List UInt8) RevokedCertificate) → CertStatus
-findStatus nothing = UNREVOKED
-findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡)) = REVOKED unspecified
+
+findStatus : Maybe (Exists─ (List UInt8) RevokedCertificate) → ValidRevocationState
+findStatus nothing = UNREVOKED []
+findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate none bs≡₁) len≡ bs≡)) = REVOKED [] unspecified
 findStatus (just (fst , mkTLV len (mkRevokedCertificateFields cserial rdate (some extn) bs≡₁) len≡ bs≡))
   with EntryExtensions.getReasonCode extn
-... | (_ , none) = REVOKED unspecified
+... | (_ , none) = REVOKED [] unspecified
 ... | (_ , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mk×ₚ (mkTLV len₁ val len≡₁ bs≡) sndₚ₁) len≡ refl) refl))
   with (Singleton.x ∘ IntegerValue.val) val
-... | (ℤ.+ 0) = REVOKED unspecified
-... | (ℤ.+ 1) = REVOKED keyCompromise
-... | (ℤ.+ 2) = REVOKED cACompromise
-... | (ℤ.+ 3) = REVOKED affiliationChanged
-... | (ℤ.+ 4) = REVOKED superseded
-... | (ℤ.+ 5) = REVOKED cessationOfOperation
-... | (ℤ.+ 6) = REVOKED certificateHold
-... | (ℤ.+ 8) = REVOKED removeFromCRL
-... | (ℤ.+ 9) = REVOKED privilegeWithdrawn
-... | (ℤ.+ 10) = REVOKED aACompromise
-... | _ = UNDETERMINED
-
+... | (ℤ.+ 0) = REVOKED [] unspecified
+... | (ℤ.+ 1) = REVOKED [] keyCompromise
+... | (ℤ.+ 2) = REVOKED [] cACompromise
+... | (ℤ.+ 3) = REVOKED [] affiliationChanged
+... | (ℤ.+ 4) = REVOKED [] superseded
+... | (ℤ.+ 5) = REVOKED [] cessationOfOperation
+... | (ℤ.+ 6) = REVOKED [] certificateHold
+... | (ℤ.+ 8) = REVOKED [] removeFromCRL
+... | (ℤ.+ 9) = REVOKED [] privilegeWithdrawn
+... | (ℤ.+ 10) = REVOKED [] aACompromise
+... | _ = REVOKED [] allReasons
 
 findInList : RevocationReason → List RevocationReason → Bool
 findInList x [] = false
@@ -217,6 +220,9 @@ notFindInList' (x ∷ x₂) x₁ =
     then true
   else notFindInList' x₂ x₁
 
+findInState : RevocationReason → ValidRevocationState → Bool
+findInState rsn (REVOKED reasonMask reason) = findInList rsn reasonMask
+findInState rsn (UNREVOKED reasonMask) = findInList rsn reasonMask
 
 atLeastOneCmnGN : ∀{@0 bs₁ bs₂} → SequenceOf GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
 atLeastOneCmnGN nil nil = false
@@ -456,11 +462,11 @@ matchSerial cserial cert =
           (yes p) → true
 
 
-record CRLStatus : Set where
-  constructor mkCRLStatus
-  field
-    @0 {c i cr} : List UInt8
-    issuee : Cert c
-    issuer : Cert i
-    crl : CRL.CertList cr
-    certsts : CertStatus
+-- record CRLStatus : Set where
+--   constructor mkCRLStatus
+--   field
+--     @0 {c i cr} : List UInt8
+--     issuee : Cert c
+--     issuer : Cert i
+--     crl : CRL.CertList cr
+--     certsts : State
