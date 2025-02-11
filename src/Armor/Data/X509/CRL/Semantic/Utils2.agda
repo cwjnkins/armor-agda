@@ -66,10 +66,6 @@ isRevoked : ValidRevocationState → Bool
 isRevoked (REVOKED reasonMask reason) = true
 isRevoked (UNREVOKED reasonMask) = false
 
-isUnrevoked : ValidRevocationState → Bool
-isUnrevoked (REVOKED reasonMask reason) = false
-isUnrevoked (UNREVOKED reasonMask) = true
-
 -- Initial ValidRevocationState
 initValidRevocationState : ValidRevocationState
 initValidRevocationState = UNREVOKED []
@@ -82,6 +78,9 @@ data State : Set where
 initState : State
 initState = validState initValidRevocationState
 
+isValidState : State → Bool
+isValidState (validState x) = true
+isValidState undeterminedState = false
 
 -- Function to map a boolean list to revocation reasons
 boolListToReasons : List Bool → List RevocationReason
@@ -220,9 +219,9 @@ notFindInList' (x ∷ x₂) x₁ =
     then true
   else notFindInList' x₂ x₁
 
-findInState : RevocationReason → ValidRevocationState → Bool
-findInState rsn (REVOKED reasonMask reason) = findInList rsn reasonMask
-findInState rsn (UNREVOKED reasonMask) = findInList rsn reasonMask
+findInStateRm : RevocationReason → ValidRevocationState → Bool
+findInStateRm rsn (REVOKED reasonMask reason) = findInList rsn reasonMask
+findInStateRm rsn (UNREVOKED reasonMask) = findInList rsn reasonMask
 
 atLeastOneCmnGN : ∀{@0 bs₁ bs₂} → SequenceOf GeneralName bs₁ → SequenceOf GeneralName bs₂ → Bool
 atLeastOneCmnGN nil nil = false
