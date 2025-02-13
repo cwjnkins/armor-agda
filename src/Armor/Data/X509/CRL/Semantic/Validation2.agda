@@ -317,23 +317,23 @@ data ValidStateTransition {@0 bs} (ri : RevInputs) (dp : DistPoint bs): ValidRev
        s₂ ≡ UNREVOKED (unonRevocationReason rm intmask))
     → ValidStateTransition ri dp s₁ s₂
     
-  fromUnrevokedToUnrevoked₂ : ∀ {s₂ rm₁ rm₂}
+  fromUnrevokedToUnrevoked₂ : ∀ {s₂ rm}
     → (s₁ : ValidRevocationState)
-    → s₁ ≡ UNREVOKED rm₁
+    → s₁ ≡ UNREVOKED rm
     → (pf₁ : Dp∈Cert (RevInputs.cert ri) dp ≡ true)
     → (pf₂ : isDeltaCRL (RevInputs.crl ri) ≡ false)
     → ¬ BscopeCompleteCRL (RevInputs.cert ri) dp pf₁ (RevInputs.crl ri) pf₂
-    → s₂ ≡ UNREVOKED rm₂
+    → s₂ ≡ UNREVOKED rm
     → ValidStateTransition ri dp s₁ s₂
   
-  fromUnrevokedToUnrevoked₃ : ∀ {s₂ delta rm₁ rm₂}
+  fromUnrevokedToUnrevoked₃ : ∀ {s₂ delta rm}
     → (s₁ : ValidRevocationState)
-    → s₁ ≡ UNREVOKED rm₁
+    → s₁ ≡ UNREVOKED rm
     → (just delta) ≡ (RevInputs.delta ri)
     → (pf₂ : isDeltaCRL (RevInputs.crl ri) ≡ false)
     → (pf₃ : isDeltaCRL delta ≡ true)
     → ¬ CscopeDeltaCRL (RevInputs.crl ri) delta pf₂ pf₃
-    → s₂ ≡ UNREVOKED rm₂
+    → s₂ ≡ UNREVOKED rm
     → ValidStateTransition ri dp s₁ s₂
 
   fromUnrevokedToUnrevoked₄₁ : ∀ {s₂ rm}
@@ -597,9 +597,9 @@ validStateTransition (mkRevInputs cert crl (just delta)) dp s₁@(UNREVOKED reas
                                                                      fromUnrevokedToUnrevoked₄₃ s₁ refl refl p₁ p₅ ¬p₃ refl
                                                       (no ¬k₁ , no ¬k₂) → UNREVOKED (unonRevocationReason reasonsMask temp) ,
                                                                           fromUnrevokedToUnrevoked₅ s₁ refl refl ¬k₁ ¬k₂ refl
-          (yes p₂ , no ¬p₄) → UNREVOKED (unonRevocationReason reasonsMask temp) ,
+          (yes p₂ , no ¬p₄) → UNREVOKED reasonsMask ,
                               fromUnrevokedToUnrevoked₃ s₁ refl refl p₁ p₅ ¬p₄ refl
-          (no ¬p₂ , _) → UNREVOKED (unonRevocationReason reasonsMask temp) ,
+          (no ¬p₂ , _) → UNREVOKED reasonsMask ,
                          fromUnrevokedToUnrevoked₂ s₁ refl p p₁ ¬p₂ refl
     (yes p , yes p₁ , no ¬p₅) → UNREVOKED reasonsMask ,
                                 fromUnrevokedToUnrevoked₉ s₁ refl refl ¬p₅ refl
@@ -662,13 +662,12 @@ validStateTransition (mkRevInputs cert crl nothing) dp s₁@(UNREVOKED reasonsMa
                                                               fromUnrevokedToUnrevoked₆ s₁ refl ¬k refl
           (yes p₂ , no ¬p₃) → UNREVOKED (unonRevocationReason reasonsMask temp) ,
                               fromUnrevokedToUnrevoked₄₁ s₁ refl p₁ ¬p₃ refl
-          (no ¬p₂ , _) → UNREVOKED (unonRevocationReason reasonsMask temp) ,
+          (no ¬p₂ , _) → UNREVOKED reasonsMask ,
                          fromUnrevokedToUnrevoked₂ s₁ refl p p₁ ¬p₂ refl 
     (yes p , no ¬p₁) → UNREVOKED reasonsMask ,
                        fromUnrevokedToUnrevoked₈ s₁ refl ¬p₁ refl
     (no ¬p , _) → UNREVOKED reasonsMask ,
                   fromUnrevokedToUnrevoked₇ s₁ refl ¬p refl
-    
 
 data CoreRevocationCheck (ri : RevInputs) : List (Exists─ _ DistPoint) → ValidRevocationState → ValidRevocationState → Set where
   zeroStep : ∀{s} → CoreRevocationCheck ri [] s s
@@ -716,15 +715,17 @@ data VerifiedCertStateCRL (ri : RevInputs) : State → State → Set where
                     → ¬ (findInStateRm allReasons (proj₁ pf) ≡ true)
                     → VerifiedCertStateCRL ri initState undeterminedState
 
-  r₅ : ∀{s rm rsn} → (s ≡ validState (REVOKED rm rsn)) → VerifiedCertStateCRL ri s s
+  r₅ : ∀{s rm rsn} → (s ≡ validState (REVOKED rm rsn)) → VerifiedCertStateCRL ri s undeterminedState
 
-  r₆ : ∀{s} → (s ≡ undeterminedState) → VerifiedCertStateCRL ri s s
+  r₆ : ∀{s} → (s ≡ undeterminedState) → VerifiedCertStateCRL ri s undeterminedState
 
-  r₇ : ∀{s rm rest} → (s ≡ validState (UNREVOKED (rm ∷ rest))) → VerifiedCertStateCRL ri s s
+  r₇ : ∀{s rm rest} → (s ≡ validState (UNREVOKED (rm ∷ rest))) → VerifiedCertStateCRL ri s undeterminedState
+
+--- how to get relevant crl out?
 
 -- cert, crl, delta --> REVOKED / UNREVOKED / UNDETERMINED
 verifiedCertStateCRL : (ri : RevInputs) → (s₁ : State) → Σ[ s₂ ∈ State ] VerifiedCertStateCRL ri s₁ s₂
-verifiedCertStateCRL (mkRevInputs cert crl delta) s@(validState (REVOKED reasonMask reason)) = s , r₅ refl
+verifiedCertStateCRL (mkRevInputs cert crl delta) s@(validState (REVOKED reasonMask reason)) = undeterminedState , r₅ refl
 verifiedCertStateCRL ri@(mkRevInputs cert crl delta) s₁@(validState (UNREVOKED [])) =
   case Cert.getCRLDIST cert of λ where
     (─ .[] , none) → undeterminedState , r₁₂
@@ -740,79 +741,184 @@ verifiedCertStateCRL ri@(mkRevInputs cert crl delta) s₁@(validState (UNREVOKED
                     (yes p₂) → (validState (proj₁ v)) , (r₃ dps v p ¬p₁ p₂)
                     (no ¬p₂) → undeterminedState , (r₄ dps v p ¬p₁ ¬p₂)
         (no ¬p) → undeterminedState , r₁₁ dps ¬p
-verifiedCertStateCRL (mkRevInputs cert crl delta) s@(validState (UNREVOKED (rm ∷ rest))) = s , r₇ refl
+verifiedCertStateCRL (mkRevInputs cert crl delta) s@(validState (UNREVOKED (rm ∷ rest))) = undeterminedState , r₇ refl
 verifiedCertStateCRL (mkRevInputs cert crl delta) undeterminedState = undeterminedState , r₆ refl
 
 
-data VerifiedCertStateCRLs {@0 bs} (cert : Cert bs) : List (Exists─ _ CRL.CertList) → State → State → Set where
-  zeroStep : ∀ {s} → VerifiedCertStateCRLs cert [] s s
+
+data VerifiedCertStateCRLs {@0 bs} (cert : Cert bs) : List (Exists─ _ CRL.CertList) → State → (Exists─ _ CRL.CertList) → State → Set where
+  -- zeroStep : ∀ {s} → VerifiedCertStateCRLs cert [] s s
+
+  -- oneStep  : ∀ {@0 bs} (crl : CRL.CertList bs) (s₁ s₂ : State)
+  --           → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂ 
+  --           → VerifiedCertStateCRLs cert [ (_ , crl) ] s₁ s₂
+            
+  -- oneStep₁  : ∀ {@0 bs} (crl : CRL.CertList bs) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
+  --           → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
+  --           → isValidState s₂ ≡ true
+  --           → VerifiedCertStateCRLs cert crls s₂ s₃ 
+  --           → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ s₃
+
+  -- oneStep₂  : ∀ {@0 bs} (crl : CRL.CertList bs) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
+  --           → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
+  --           → ¬ (isValidState s₂ ≡ true)
+  --           → VerifiedCertStateCRLs cert crls initState s₃ 
+  --           → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ s₃
+            
+  r₁  : ∀ {@0 bs} (crl : CRL.CertList bs) (s₁ s₂ : State)
+            → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂ 
+            → VerifiedCertStateCRLs cert [ (-, crl) ] s₁ (-, crl) s₂
   
-  oneStep₁  : ∀ {@0 bs} (crl : CRL.CertList bs) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
+  r₂  : ∀ {@0 bs} (crl : CRL.CertList bs) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ : State)
             → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
             → isValidState s₂ ≡ true
-            → VerifiedCertStateCRLs cert crls s₂ s₃ 
-            → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ s₃
+            → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ (-, crl) s₂
 
-  oneStep₂  : ∀ {@0 bs} (crl : CRL.CertList bs) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
+  r₃  : ∀ {@0 bs₁ bs₂} (crl : CRL.CertList bs₁) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
             → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
             → ¬ (isValidState s₂ ≡ true)
-            → VerifiedCertStateCRLs cert crls initState s₃ 
-            → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ s₃
+            → (crl₂ : CRL.CertList bs₂)
+            → VerifiedCertStateCRLs cert crls s₁ (-, crl₂) s₃
+            → isValidState s₃ ≡ true
+            → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ (-, crl₂) s₃
 
-
--- cert, crls --> REVOKED / UNREVOKED / UNDETERMINED
-verifiedCertStateCRLs : ∀ {@0 bs} → (cert : Cert bs) → (crls : List (Exists─ _ CRL.CertList)) → (s₁ : State) → Σ[ s₂ ∈ State ] VerifiedCertStateCRLs cert crls s₁ s₂
-verifiedCertStateCRLs cert [] s₁ = s₁ , zeroStep
-verifiedCertStateCRLs cert ((fst , crl) ∷ rest) s₁ =
-  case _≟_ (isValidState (proj₁ s₂,pf)) true of λ where
-    (yes p) → (proj₁ rest,pf₁) , (oneStep₁ crl rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₁) (proj₂ s₂,pf) p (proj₂ rest,pf₁))
-    (no ¬p) → (proj₁ rest,pf₂) , (oneStep₂ crl rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₂) (proj₂ s₂,pf) ¬p (proj₂ rest,pf₂))
-  where
-  s₂,pf : Σ[ s₂ ∈ State ] VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
-  s₂,pf = verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁
-
-  rest,pf₁ : Σ[ s₃ ∈ State ] VerifiedCertStateCRLs cert rest (proj₁ s₂,pf) s₃
-  rest,pf₁ = verifiedCertStateCRLs cert rest (proj₁ s₂,pf)
-
-  rest,pf₂ : Σ[ s₃ ∈ State ] VerifiedCertStateCRLs cert rest initState s₃
-  rest,pf₂ = verifiedCertStateCRLs cert rest initState
-
-
-data VerifiedChainStateCRLs (crls : List (Exists─ _ CRL.CertList)) : List (Exists─ _ Cert) → State → State → Set where
-  zeroStep : ∀ {s} → VerifiedChainStateCRLs crls [] s s
-  oneStep₁  : ∀ {@0 bs} (cert : Cert bs) (certs : List (Exists─ _ Cert)) (s₁ s₂ s₃ : State)
-            → VerifiedCertStateCRLs cert crls s₁ s₂
-            → isValidState s₂ ≡ true
-            → VerifiedChainStateCRLs crls certs s₂ s₃ 
-            → VerifiedChainStateCRLs crls ((-, cert) ∷ certs) s₁ s₃
-
-  oneStep₂  : ∀ {@0 bs} (cert : Cert bs) (certs : List (Exists─ _ Cert)) (s₁ s₂ s₃ : State)
-            → VerifiedCertStateCRLs cert crls s₁ s₂
+  r₄  : ∀ {@0 bs₁ bs₂} (crl : CRL.CertList bs₁) (crls : List (Exists─ _ CRL.CertList)) (s₁ s₂ s₃ : State)
+            → VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
             → ¬ (isValidState s₂ ≡ true)
-            → VerifiedChainStateCRLs crls certs initState s₃ 
-            → VerifiedChainStateCRLs crls ((-, cert) ∷ certs) s₁ s₃
+            → (crl₂ : CRL.CertList bs₂)
+            → VerifiedCertStateCRLs cert crls s₁ (-, crl₂) s₃
+            → ¬ (isValidState s₃ ≡ true)
+            → VerifiedCertStateCRLs cert ((-, crl) ∷ crls) s₁ (-, crl₂) s₃
 
--- certs, crls --> REVOKED / UNREVOKED / UNDETERMINED
-verifiedChainStateCRLs : (crls : List (Exists─ _ CRL.CertList)) → (certs : List (Exists─ _ Cert)) → (s₁ : State) → Σ[ s₂ ∈ State ] VerifiedChainStateCRLs crls certs s₁ s₂
-verifiedChainStateCRLs crls [] s₁ = s₁ , zeroStep
-verifiedChainStateCRLs crls ((fst , cert) ∷ rest) s₁ =
-  case _≟_ (isValidState (proj₁ s₂,pf)) true of λ where
-    (yes p) → (proj₁ rest,pf₁) , (oneStep₁ cert rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₁) (proj₂ s₂,pf) p (proj₂ rest,pf₁))
-    (no ¬p) → (proj₁ rest,pf₂) , (oneStep₂ cert rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₂) (proj₂ s₂,pf) ¬p (proj₂ rest,pf₂))
+
+-- -- cert, crls --> REVOKED / UNREVOKED / UNDETERMINED
+verifiedCertStateCRLs : ∀ {@0 bs} → (cert : Cert bs) → (x : Exists─ _ CRL.CertList) → (x₁ : List (Exists─ _ CRL.CertList))
+                                  → (s₁ : State) → Σ[ crl ∈ (Exists─ _ CRL.CertList) ] (Σ[ s₂ ∈ State ] VerifiedCertStateCRLs cert (x ∷ x₁) s₁ crl s₂)
+verifiedCertStateCRLs cert (fst , crl) [] s₁ =
+  case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+     v → (-, crl) , ((proj₁ v) , r₁ crl s₁ (proj₁ v) (proj₂ v))
+verifiedCertStateCRLs cert (fst , crl) rest@(x ∷ x₁) s₁ =
+   case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+     v →
+       case _≟_ (isValidState (proj₁ v)) true of λ where
+          (yes p) → (-, crl) , ((proj₁ v) , (r₂ crl rest s₁ (proj₁ v) (proj₂ v) p))
+          (no ¬p) →
+            case verifiedCertStateCRLs cert x x₁ s₁ of λ where
+              (crl₂ , vv) →
+                case _≟_ (isValidState (proj₁ vv)) true of λ where
+                  (yes pp) → crl₂ , ((proj₁ vv) , r₃ crl rest s₁ (proj₁ v) (proj₁ vv) (proj₂ v) ¬p (proj₂ crl₂) (proj₂ vv) pp)
+                  (no ¬pp) → crl₂ , ((proj₁ vv) , r₄ crl rest s₁ (proj₁ v) (proj₁ vv) (proj₂ v) ¬p (proj₂ crl₂) (proj₂ vv) ¬pp)
+
+
+-- verifiedCertStateCRLs cert [] s₁ crl = {!!}
+-- verifiedCertStateCRLs cert (crl ∷ crls) s₁ crld = {!!}
+
+
+
+
+-- verifiedCertStateCRLs cert ((fst , crl) ∷ []) s₁ =
+--    case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+--      (validState x , snd) → {!!}
+--      (undeterminedState , snd) → {!!}
+
+
+
+
+
+
+  -- case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+  --   v → (proj₁ v) , oneStep crl s₁ (proj₁ v) (proj₂ v)
+-- verifiedCertStateCRLs cert ((fst , crl) ∷ rest) s₁ = {!!}
+  -- case _≟_ (isValidState (proj₁ s₂,pf)) true of λ where
+  --   (yes p) → (proj₁ rest,pf₁) , (oneStep₁ crl rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₁) (proj₂ s₂,pf) p (proj₂ rest,pf₁))
+  --   (no ¬p) → (proj₁ rest,pf₂) , (oneStep₂ crl rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₂) (proj₂ s₂,pf) ¬p (proj₂ rest,pf₂))
+  -- where
+  -- s₂,pf : Σ[ s₂ ∈ State ] VerifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ s₂
+  -- s₂,pf = verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁
+
+  -- rest,pf₁ : Σ[ s₃ ∈ State ] VerifiedCertStateCRLs cert rest (proj₁ s₂,pf) s₃
+  -- rest,pf₁ = verifiedCertStateCRLs cert rest (proj₁ s₂,pf)
+
+  -- rest,pf₂ : Σ[ s₃ ∈ State ] VerifiedCertStateCRLs cert rest initState s₃
+  -- rest,pf₂ = verifiedCertStateCRLs cert rest initState
+
+
+data VerifiedChainStateCRLs (crls : List (Exists─ _ CRL.CertList)) : List (Exists─ _ Cert) → State → List (Exists─ _ CRL.CertList) → List State → Set where
+  -- zeroStep : ∀ {s} → VerifiedChainStateCRLs crls [] s s
+  -- oneStep₁  : ∀ {@0 bs} (cert : Cert bs) (certs : List (Exists─ _ Cert)) (s₁ s₂ s₃ : State)
+  --           → VerifiedCertStateCRLs cert crls s₁ s₂
+  --           → isValidState s₂ ≡ true
+  --           → VerifiedChainStateCRLs crls certs s₂ s₃ 
+  --           → VerifiedChainStateCRLs crls ((-, cert) ∷ certs) s₁ s₃
+
+  -- oneStep₂  : ∀ {@0 bs} (cert : Cert bs) (certs : List (Exists─ _ Cert)) (s₁ s₂ s₃ : State)
+  --           → VerifiedCertStateCRLs cert crls s₁ s₂
+  --           → ¬ (isValidState s₂ ≡ true)
+  --           → VerifiedChainStateCRLs crls certs initState s₃ 
+  --           → VerifiedChainStateCRLs crls ((-, cert) ∷ certs) s₁ s₃
+
+  r₁  : (cert : Exists─ _ Cert) (crl : Exists─ _ CRL.CertList) (s₁ s₂ : State)
+            → VerifiedCertStateCRLs (proj₂ cert) crls s₁ crl s₂
+            → VerifiedChainStateCRLs crls [ cert ] s₁ [ crl ] [ s₂ ]
+  
+  r₂  : (cert : Exists─ _ Cert) (certs : List (Exists─ _ Cert)) (crl : Exists─ _ CRL.CertList) (s₁ s₂ : State) (s₃ : List State)
+            → VerifiedCertStateCRLs (proj₂ cert) crls s₁ crl s₂
+            → (restCrls : List (Exists─ _ CRL.CertList))
+            → VerifiedChainStateCRLs crls certs s₂ restCrls s₃
+            → VerifiedChainStateCRLs crls (cert ∷ certs) s₁ (crl ∷ restCrls) (s₂ ∷ s₃)
+
+
+-- -- certs, crls --> REVOKED / UNREVOKED / UNDETERMINED
+-- verifiedChainStateCRLs : (crls : List (Exists─ _ CRL.CertList)) → (certs : List (Exists─ _ Cert)) → (s₁ : State) → Σ[ s₂ ∈ State ] VerifiedChainStateCRLs crls certs s₁ s₂
+-- verifiedChainStateCRLs crls [] s₁ = s₁ , zeroStep
+-- verifiedChainStateCRLs crls ((fst , cert) ∷ rest) s₁ =
+--   case _≟_ (isValidState (proj₁ s₂,pf)) true of λ where
+--     (yes p) → (proj₁ rest,pf₁) , (oneStep₁ cert rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₁) (proj₂ s₂,pf) p (proj₂ rest,pf₁))
+--     (no ¬p) → (proj₁ rest,pf₂) , (oneStep₂ cert rest s₁ (proj₁ s₂,pf) (proj₁ rest,pf₂) (proj₂ s₂,pf) ¬p (proj₂ rest,pf₂))
+--   where
+--   s₂,pf : Σ[ s₂ ∈ State ] VerifiedCertStateCRLs cert crls s₁ s₂
+--   s₂,pf = verifiedCertStateCRLs cert crls s₁
+
+--   rest,pf₁ : Σ[ s₃ ∈ State ] VerifiedChainStateCRLs crls rest (proj₁ s₂,pf) s₃
+--   rest,pf₁ = verifiedChainStateCRLs crls rest (proj₁ s₂,pf)
+
+--   rest,pf₂ :  Σ[ s₃ ∈ State ] VerifiedChainStateCRLs crls rest initState s₃
+--   rest,pf₂ =  verifiedChainStateCRLs crls rest initState
+
+verifiedChainStateCRLs : (crl : Exists─ _ CRL.CertList) → (crls : List (Exists─ _ CRL.CertList)) → (cert : Exists─ _ Cert) → (certs : List (Exists─ _ Cert)) → (s₁ : State)
+                               → Σ[ crlFiltered ∈ List (Exists─ _ CRL.CertList) ] (Σ[ s₂ ∈ List State ] VerifiedChainStateCRLs (crl ∷ crls) (cert ∷ certs) s₁ crlFiltered s₂)
+verifiedChainStateCRLs crl crls (fst , cert) [] s₁ =
+  case verifiedCertStateCRLs cert crl crls s₁ of λ where
+    (crll , s₂ , pf) → [ crll ] , ([ s₂ ] , r₁ (-, cert) crll s₁ s₂ pf)
+verifiedChainStateCRLs crl crls (fst , cert) rest@(x ∷ x₁) s₁ =
+  ((proj₁ s₂,pf) ∷ (proj₁ rest,pf)) ,
+    ((proj₁ (proj₂ s₂,pf)) ∷ (proj₁ (proj₂ rest,pf))) ,
+      r₂ (-, cert) rest (proj₁ s₂,pf) s₁ (proj₁ (proj₂ s₂,pf)) (proj₁ (proj₂ rest,pf)) (proj₂ (proj₂ s₂,pf)) (proj₁ rest,pf) (proj₂ (proj₂ rest,pf))
+      --(r₂ (-, cert) rest (proj₁ s₂,pf) s₁ (proj₁ (proj₂ s₂,pf)) (proj₁ (proj₂ rest,pf)) (proj₂ (proj₂ s₂,pf)) (proj₁ rest,pf) (proj₂ (proj₂ rest,pf))))
   where
-  s₂,pf : Σ[ s₂ ∈ State ] VerifiedCertStateCRLs cert crls s₁ s₂
-  s₂,pf = verifiedCertStateCRLs cert crls s₁
+  s₂,pf : Σ[ crll ∈ Exists─ _ CRL.CertList ] (Σ[ s₂ ∈ State ] VerifiedCertStateCRLs cert (crl ∷ crls) s₁ crll s₂)
+  s₂,pf = verifiedCertStateCRLs cert crl crls s₁
 
-  rest,pf₁ : Σ[ s₃ ∈ State ] VerifiedChainStateCRLs crls rest (proj₁ s₂,pf) s₃
-  rest,pf₁ = verifiedChainStateCRLs crls rest (proj₁ s₂,pf)
-
-  rest,pf₂ :  Σ[ s₃ ∈ State ] VerifiedChainStateCRLs crls rest initState s₃
-  rest,pf₂ =  verifiedChainStateCRLs crls rest initState
+  rest,pf : Σ[ crll ∈ List (Exists─ _ CRL.CertList) ] (Σ[ s₃ ∈ List State ] VerifiedChainStateCRLs (crl ∷ crls) rest (proj₁ (proj₂ s₂,pf)) crll s₃)
+  rest,pf = verifiedChainStateCRLs crl crls x x₁ (proj₁ (proj₂ s₂,pf))
 
 
 
+-- verifiedCertStateCRLs cert (fst , crl) [] s₁ =
+--   case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+--      v → (-, crl) , ((proj₁ v) , r₁ crl s₁ (proj₁ v) (proj₂ v))
+-- verifiedCertStateCRLs cert (fst , crl) rest@(x ∷ x₁) s₁ =
+--    case verifiedCertStateCRL (mkRevInputs{_}{_}{[]} cert crl nothing) s₁ of λ where
+--      v →
+--        case _≟_ (isValidState (proj₁ v)) true of λ where
+--           (yes p) → (-, crl) , ((proj₁ v) , (r₂ crl rest s₁ (proj₁ v) (proj₂ v) p))
+--           (no ¬p) →
+--             case verifiedCertStateCRLs cert x x₁ s₁ of λ where
+--               (crl₂ , vv) →
+--                 case _≟_ (isValidState (proj₁ vv)) true of λ where
+--                   (yes pp) → crl₂ , ((proj₁ vv) , r₃ crl rest s₁ (proj₁ v) (proj₁ vv) (proj₂ v) ¬p (proj₂ crl₂) (proj₂ vv) pp)
+--                   (no ¬pp) → crl₂ , ((proj₁ vv) , r₄ crl rest s₁ (proj₁ v) (proj₁ vv) (proj₂ v) ¬p (proj₂ crl₂) (proj₂ vv) ¬pp)
 
-
--- -- verifiedSingleCertStatusForCRL : (ri : RevInputs) → Σ[ s ∈ CertStatus ] VerifiedSingleCertStatus ri s
--- -- - this one will at some point need a constructor referencing the "ProcessRevocation" proof. That is how you will
--- -- - be able to retrieve the CRL responsibl for revoking a certificate, because the RevInputs have the CRL
+-- -- -- verifiedSingleCertStatusForCRL : (ri : RevInputs) → Σ[ s ∈ CertStatus ] VerifiedSingleCertStatus ri s
+-- -- -- - this one will at some point need a constructor referencing the "ProcessRevocation" proof. That is how you will
+-- -- -- - be able to retrieve the CRL responsibl for revoking a certificate, because the RevInputs have the CRL

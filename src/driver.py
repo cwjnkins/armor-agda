@@ -116,20 +116,22 @@ def verifySignatures(certificates):
             break    
     return res
 
-def run_external_program(executable, purpose, certs, trusted_certs, crls=None):
+def run_external_program(executable, purpose, certs, trusted_certs=None, crls=None):
     try:
         command = f"{executable}"
         
         # Add the purpose if provided
         if purpose:
             command += f" --purpose {purpose}"
+
+        command += f" {certs}"
         
-        # Add the pem files
-        command += f" {certs} {trusted_certs}"
+        if trusted_certs:
+            command += f" --trust_store {trusted_certs}"
         
         # Add the CRL file if provided
         if crls:
-            command += f" {crls}"
+            command += f" --crl {crls}"
 
         print("Command Executed:", command)
         
@@ -192,7 +194,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='ARMOR command-line arguments')
     parser.add_argument('--executable', type=str, required=True, help='Path to the external executable')
     parser.add_argument('--chain', type=str, required=True, help='Input certificate chain location')
-    parser.add_argument('--trust_store', type=str, default='/etc/ssl/certs/ca-certificates.crt', help='Trust anchor location; default=/etc/ssl/certs/ca-certificates.crt')
+    # parser.add_argument('--trust_store', type=str, default='/etc/ssl/certs/ca-certificates.crt', help='Trust anchor location; default=/etc/ssl/certs/ca-certificates.crt')
+    parser.add_argument('--trust_store', type=str, help='Trust anchor location')
     parser.add_argument('--purpose', type=str, help='Optional Expected purpose for end-user certificate: serverAuth, clientAuth, codeSigning, emailProtection, timeStamping, or OCSPSigning')
     parser.add_argument('--crl', type=str, help='Optional CRL file location')
 
@@ -206,7 +209,7 @@ if __name__ == "__main__":
     if not check_file_exists(args.chain, "Certificate chain"):
         sys.exit(1)
     
-    if not check_file_exists(args.trust_store, "Trust store"):
+    if args.trust_store and not check_file_exists(args.trust_store, "Trust store"):
         sys.exit(1)
     
     if args.crl and not check_file_exists(args.crl, "CRL"):
