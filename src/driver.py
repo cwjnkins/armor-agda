@@ -247,17 +247,14 @@ if __name__ == "__main__":
     if output:
         certificates, crls = parse_output(output)
 
-        if len(certificates) > 0:
+        if len(certificates) >= 2:
             # print("Parsed Certificates:", certificates)
 
             sig_verify_chain = verifySignaturesChain(certificates)
             print("Certificate Chain Signature Verification:", sig_verify_chain)
-        if len(crls) > 0:
-            # print("Parsed CRL:", crls)
 
-            sig_verify_crl = verifySignaturesCRL(certificates, crls)
-            print("CRL Signature Verification:", sig_verify_crl)
+            if len(crls) >= 1:
+              # print("Parsed CRL:", crls)
 
-        
-
-        
+              sig_verify_crl = verifySignaturesCRL(certificates, crls)
+              print("CRL Signature Verification:", sig_verify_crl)

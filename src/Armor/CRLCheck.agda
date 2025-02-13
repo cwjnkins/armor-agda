@@ -336,11 +336,9 @@ main = IO.run $
     case verifiedCertStateCRLs cert crl rest initState  of λ where
       (crll , st@(validState (REVOKED reasonMask reason)) , pf) → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                                                                   Armor.IO.putStrLnErr (m String.++ ": REVOKED") IO.>>
-                                                                  crllPrinter [ crll ] IO.>>
                                                                   IO.return true
       (crll , st@(validState (UNREVOKED reasonMask)) , pf) → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                                                              Armor.IO.putStrLnErr (m String.++ ": UNREVOKED") IO.>>
-                                                             crllPrinter [ crll ] IO.>>
                                                              IO.return true
       (crll , st@(undeterminedState) , pf) → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                                              Armor.IO.putStrLnErr (m String.++ ": UNDETERMINED") IO.>>
