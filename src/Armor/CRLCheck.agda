@@ -231,7 +231,7 @@ main = IO.run $
   showOutputCRL : CRLOutput → String
   showOutputCRL o =
     "*******Output CRL Start*******" String.++ "\n"
-    -- String.++ (showBytes tbsBytes)  String.++ "\n"
+    String.++ (showBytes tbsBytes)  String.++ "\n"
     String.++ (showBytes sigBytes)  String.++ "\n"
     String.++ (showBytes sigAlgOID) String.++ "\n"
     String.++ "*******Output CRL End*******"

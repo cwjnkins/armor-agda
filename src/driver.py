@@ -97,7 +97,7 @@ def verifySign(signature, sign_algo, tbs_bytes, public_key, i):
     # Handle signature verification based on the algorithm
     return verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, public_key, i)
 
-def verifySignatures(certificates):
+def verifySignaturesChain(certificates):
     res = "true"
 
     for i in range(1, len(certificates)):
@@ -114,6 +114,29 @@ def verifySignatures(certificates):
             print(f"Failed to verify signature of certificate {i}")
             res = "false"
             break    
+    return res
+
+def verifySignaturesCRL(certificates, crls):
+    res = "true"
+
+    if len(certificates) == len(crls) + 1:
+        for i in range(0, len(crls)):
+            crl = crls[i]
+            signature = bytes.fromhex(crl.signature[3:]) if crl.signature.startswith("00 ") else bytes.fromhex(crl.signature)
+            sign_algo = crl.signoid
+            tbs_bytes = bytes.fromhex(crl.tbs)
+            public_key = load_der_public_key(bytes.fromhex(certificates[i+1].public_key), backend=default_backend())
+                    
+            # Verify signature using the provided function
+            verification_result = verifySign(signature, sign_algo, tbs_bytes, public_key, i)
+            
+            if verification_result == "false":
+                print(f"Failed to verify signature of CRL {i}")
+                res = "false"
+                break
+    else:
+      res = "false"
+
     return res
 
 def run_external_program(executable, purpose, certs, trusted_certs=None, crls=None):
@@ -175,9 +198,12 @@ def parse_output(output):
     if crl_blocks:
         for block in crl_blocks:
             lines = [line.strip() for line in block.strip().split("\n")]
+            tbs, signature = map(convert_to_hex, lines[:2])
+            signoid=sign_oid_map[lines[2]] if lines[2] in sign_oid_map else None
             crls.append(CRL(
-                tbs, signature = map(convert_to_hex, lines[:2]),
-                signoid=sign_oid_map[lines[2]] if lines[2] in sign_oid_map else None
+                tbs=tbs,
+                signature=signature,
+                signoid=signoid
             ))
     
     return certificates, crls
@@ -222,9 +248,16 @@ if __name__ == "__main__":
         certificates, crls = parse_output(output)
 
         if len(certificates) > 0:
-            print("Parsed Certificates:", certificates)
-        if len(crls) > 0:
-            print("Parsed CRL:", crls)
+            # print("Parsed Certificates:", certificates)
 
-        sig_verify_chain = verifySignatures(certificates)
-        print("Certificate Chain Signature Verification:", sig_verify_chain)
+            sig_verify_chain = verifySignaturesChain(certificates)
+            print("Certificate Chain Signature Verification:", sig_verify_chain)
+        if len(crls) > 0:
+            # print("Parsed CRL:", crls)
+
+            sig_verify_crl = verifySignaturesCRL(certificates, crls)
+            print("CRL Signature Verification:", sig_verify_crl)
+
+        
+
+        
