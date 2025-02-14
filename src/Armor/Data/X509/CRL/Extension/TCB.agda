@@ -201,6 +201,13 @@ module ExtensionsSeq where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
+  getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List UInt8) Extension)
+  getExtensionsList (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁) len≡ bs≡) = helper fstₚ₁
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → List (Exists─ (List UInt8) Extension)
+    helper nil = []
+    helper (consIList h t bs≡) = (_ , h) ∷ helper t
+
 module Extensions where
   getIDP : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP (mkTLV len val len≡ bs≡) = ExtensionsSeq.getIDP val
@@ -210,3 +217,6 @@ module Extensions where
 
   getAKI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getAKI val
+
+  getExtensionsList : ∀ {@0 bs} → Extensions bs → List (Exists─ (List UInt8) Extension)
+  getExtensionsList (mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val

@@ -25,3 +25,6 @@ Raw.to RawVersion (mk×ₚ i (─ i∈)) = toRawVersion i (uneraseDec i∈ (_ �
 
 toRawVersion i (here px) = v1
 toRawVersion i (there (here px)) = v2
+
+getDecodedVersion : ∀ {@0 bs} → Version bs → DecodedVersion
+getDecodedVersion v = Raw.to RawVersion v

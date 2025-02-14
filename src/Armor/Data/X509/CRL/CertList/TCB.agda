@@ -4,6 +4,7 @@ open import Armor.Data.X509.Name.TCB
 open import Armor.Data.X509.CRL.TBSCertList.TCB
 open import Armor.Data.X509.CRL.RevokedCertificates.TCB
 open import Armor.Data.X509.CRL.Extension.TCB
+open import Armor.Data.X509.CRL.Version.TCB
 import      Armor.Data.X690-DER.BitString.Serializer as BitString
 open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X690-DER.TLV.TCB
@@ -44,8 +45,20 @@ record CertListFields (@0 bs : List UInt8) : Set where
   getIssuer :  Name (TBSCertListFields.i (TLV.val tbs))
   getIssuer = TBSCertListFields.issuer (TLV.val tbs)
 
+  getVersion : Option Version (TBSCertListFields.ver (TLV.val tbs))
+  getVersion = TBSCertListFields.version (TLV.val tbs)
+
+  getRevokedCertificates : Option RevokedCertificates (TBSCertListFields.r (TLV.val tbs))
+  getRevokedCertificates = TBSCertListFields.revokedCertificates (TLV.val tbs)
+
+  getCRLExtensions : Option Extensions (TBSCertListFields.e (TLV.val tbs))
+  getCRLExtensions = TBSCertListFields.crlExtensions (TLV.val tbs)
+
   getRevokedCertificateList : List (Exists─ (List UInt8) RevokedCertificate)
   getRevokedCertificateList = TBSCertListFields.getRevokedCertificateList (TLV.val tbs)
+
+  getCRLExtensionsList : List (Exists─ (List UInt8) Extension)
+  getCRLExtensionsList = TBSCertListFields.getCRLExtensionsList (TLV.val tbs)
 
   getIDP : Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP = TBSCertListFields.getIDP (TLV.val tbs)
@@ -56,18 +69,34 @@ record CertListFields (@0 bs : List UInt8) : Set where
   getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI = TBSCertListFields.getAKI (TLV.val tbs)
 
+  getTBSCertListSignAlg : SignAlg (TBSCertListFields.sa (TLV.val tbs))
+  getTBSCertListSignAlg = TBSCertListFields.getSignAlg (TLV.val tbs)
+
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
 
 module CertList where
+
   getTBSCertList : ∀{@0 bs} → (c : CertList bs) → TBSCertList (CertListFields.t (TLV.val c))
   getTBSCertList c = CertListFields.tbs (TLV.val c)
+
+  getVersion : ∀{@0 bs} → (c : CertList bs) → Option Version (TBSCertListFields.ver (TLV.val (getTBSCertList c)))
+  getVersion c = CertListFields.getVersion (TLV.val c)
+
+  getRevokedCertificates : ∀{@0 bs} → (c : CertList bs) → Option RevokedCertificates (TBSCertListFields.r (TLV.val (getTBSCertList c)))
+  getRevokedCertificates c = CertListFields.getRevokedCertificates (TLV.val c)
+
+  getCRLExtensions : ∀{@0 bs} → (c : CertList bs) → Option Extensions (TBSCertListFields.e (TLV.val (getTBSCertList c)))
+  getCRLExtensions c = CertListFields.getCRLExtensions (TLV.val c)
 
   getIssuer : ∀{@0 bs} → (c : CertList bs) → Name (TBSCertListFields.i (TLV.val (getTBSCertList c)))
   getIssuer c = CertListFields.getIssuer (TLV.val c)
 
   getRevokedCertificateList :  ∀{@0 bs} → (c : CertList bs) → List (Exists─ (List UInt8) RevokedCertificate)
   getRevokedCertificateList c = CertListFields.getRevokedCertificateList (TLV.val c)
+
+  getCRLExtensionsList : ∀{@0 bs} → (c : CertList bs) → List (Exists─ (List UInt8) Extension)
+  getCRLExtensionsList c = CertListFields.getCRLExtensionsList (TLV.val c)
 
   getIDP :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP c = CertListFields.getIDP (TLV.val c)
@@ -78,8 +107,11 @@ module CertList where
   getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI c = CertListFields.getAKI (TLV.val c)
 
-  getCertSignAlg : ∀{@0 bs} → (c : CertList bs) → SignAlg (CertListFields.sa (TLV.val c))
-  getCertSignAlg c = CertListFields.signAlg (TLV.val c)
+  getTBSCertListSignAlg : ∀{@0 bs} → (c : CertList bs) → SignAlg (TBSCertListFields.sa (TLV.val (getTBSCertList c)))
+  getTBSCertListSignAlg c = CertListFields.getTBSCertListSignAlg (TLV.val c)
+    
+  getCertListSignAlg : ∀{@0 bs} → (c : CertList bs) → SignAlg (CertListFields.sa (TLV.val c))
+  getCertListSignAlg c = CertListFields.signAlg (TLV.val c)
 
   getTBSBytes :  ∀{@0 bs} → (c : CertList bs) → List UInt8
   getTBSBytes c = ↑ CertListFields.tbsBytes (TLV.val c)

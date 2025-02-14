@@ -52,8 +52,8 @@ record TBSCertListFields (@0 bs : List UInt8) : Set where
     crlExtensions : Option Extensions e
     @0 bs≡  : bs ≡ ver ++ sa ++ i ++ tu ++ nu ++ r ++ e
 
-  getRevokedCertificateList : List (Exists─ (List UInt8) RevokedCertificate)
-  getRevokedCertificateList = elimOption [] (λ v → RevokedCertificates.getRevokedCertificates v) revokedCertificates
+  getSignAlg : SignAlg sa
+  getSignAlg = signAlg
 
   getIDP : Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP = elimOption (_ , none) (λ v → Extensions.getIDP v) crlExtensions
@@ -63,6 +63,12 @@ record TBSCertListFields (@0 bs : List UInt8) : Set where
 
   getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI = elimOption (_ , none) (λ v → Extensions.getAKI v) crlExtensions
+
+  getRevokedCertificateList : List (Exists─ (List UInt8) RevokedCertificate)
+  getRevokedCertificateList = elimOption [] (λ v → RevokedCertificates.getRevokedCertificates v) revokedCertificates
+
+  getCRLExtensionsList : List (Exists─ (List UInt8) Extension)
+  getCRLExtensionsList = elimOption [] (λ v → Extensions.getExtensionsList v) crlExtensions
 
 TBSCertList : (@0 _ : List UInt8) → Set
 TBSCertList xs = TLV Tag.Sequence TBSCertListFields xs

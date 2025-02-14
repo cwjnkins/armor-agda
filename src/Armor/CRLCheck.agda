@@ -206,7 +206,7 @@ main = IO.run $
   CertOutput.ekuOIDBytes (certOutput x) = Cert.getEKUOIDList x (Cert.getEKU x)
 
   crlOutput : ∀ {@0 bs} → CRL.CertList bs → CRLOutput
-  CRLOutput.sigAlgOID (crlOutput x) = SignAlg.getOIDBS ∘ CRL.CertList.CertList.getCertSignAlg $ x
+  CRLOutput.sigAlgOID (crlOutput x) = SignAlg.getOIDBS ∘ CRL.CertList.CertList.getCertListSignAlg $ x
   CRLOutput.tbsBytes  (crlOutput x) =  CRL.CertList.CertList.getTBSBytes x
   CRLOutput.sigBytes  (crlOutput x) = CRL.CertList.CertList.getSignatureValueBytes x
 
