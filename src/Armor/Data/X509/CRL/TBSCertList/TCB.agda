@@ -7,6 +7,7 @@ open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X509.CRL.Version.TCB
 open import Armor.Data.X509.CRL.Extension.TCB
+import      Armor.Data.X509.Validity.TCB as Validity
 open import Armor.Data.X509.CRL.RevokedCertificates.TCB
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Definitions
@@ -21,6 +22,7 @@ open Armor.Grammar.Seq    UInt8
 open Armor.Grammar.IList.TCB    UInt8
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Option      UInt8
+open Validity using (Validity)
 
 -- TBSCertList  ::=  SEQUENCE  {
 --      version                 Version OPTIONAL,
@@ -64,11 +66,20 @@ record TBSCertListFields (@0 bs : List UInt8) : Set where
   getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI = elimOption (_ , none) (λ v → Extensions.getAKI v) crlExtensions
 
+  getFCRL : Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL = elimOption (_ , none) (λ v → Extensions.getFCRL v) crlExtensions
+
   getRevokedCertificateList : List (Exists─ (List UInt8) RevokedCertificate)
   getRevokedCertificateList = elimOption [] (λ v → RevokedCertificates.getRevokedCertificates v) revokedCertificates
 
   getCRLExtensionsList : List (Exists─ (List UInt8) Extension)
   getCRLExtensionsList = elimOption [] (λ v → Extensions.getExtensionsList v) crlExtensions
+
+  getThisUpdate : Time tu
+  getThisUpdate = thisUpdate
+
+  getNextUpdate : Option Time nu
+  getNextUpdate = nextUpdate
 
 TBSCertList : (@0 _ : List UInt8) → Set
 TBSCertList xs = TLV Tag.Sequence TBSCertListFields xs

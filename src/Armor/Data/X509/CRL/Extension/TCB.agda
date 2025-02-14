@@ -173,6 +173,10 @@ module Extension where
   getAKI (mkTLV len (akiextn x) len≡ bs≡) = _ , (some x)
   getAKI (mkTLV len _ len≡ bs≡) = _ , none
 
+  getFCRL : ∀ {@0 bs} → Extension bs → Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL (mkTLV len (fcrlextn x) len≡ bs≡) = _ , (some x)
+  getFCRL (mkTLV len _ len≡ bs≡) = _ , none
+
 module ExtensionsSeq where
   getIDP : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldIDP)
   getIDP (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
@@ -201,6 +205,15 @@ module ExtensionsSeq where
       (─ .[] , none) → helper t
       y@(fst , some x) → y
 
+  getFCRL : ∀ {@0 bs} → ExtensionsSeq bs → Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL (mkTLV len (mk×ₚ x sndₚ₁) len≡ bs≡) = helper x
+    where
+    helper : ∀ {@0 bs} → SequenceOf Extension bs → Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+    helper nil = _ , none
+    helper (consIList h t bs≡) = case (Extension.getFCRL h) of λ where
+      (─ .[] , none) → helper t
+      y@(fst , some x) → y
+      
   getExtensionsList : ∀ {@0 bs} → ExtensionsSeq bs → List (Exists─ (List UInt8) Extension)
   getExtensionsList (mkTLV len (mk×ₚ fstₚ₁ sndₚ₁) len≡ bs≡) = helper fstₚ₁
     where
@@ -217,6 +230,9 @@ module Extensions where
 
   getAKI : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI (mkTLV len val len≡ bs≡) = ExtensionsSeq.getAKI val
+
+  getFCRL : ∀ {@0 bs} → Extensions bs → Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL (mkTLV len val len≡ bs≡) = ExtensionsSeq.getFCRL val
 
   getExtensionsList : ∀ {@0 bs} → Extensions bs → List (Exists─ (List UInt8) Extension)
   getExtensionsList (mkTLV len val len≡ bs≡) = ExtensionsSeq.getExtensionsList val

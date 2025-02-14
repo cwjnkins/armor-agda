@@ -7,6 +7,7 @@ open import Armor.Data.X509.CRL.Extension.TCB
 open import Armor.Data.X509.CRL.Version.TCB
 import      Armor.Data.X690-DER.BitString.Serializer as BitString
 open import Armor.Data.X690-DER.BitString.TCB
+open import Armor.Data.X509.Validity.Time.TCB
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.OctetString.TCB
@@ -69,8 +70,17 @@ record CertListFields (@0 bs : List UInt8) : Set where
   getAKI : Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI = TBSCertListFields.getAKI (TLV.val tbs)
 
+  getFCRL : Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL = TBSCertListFields.getFCRL (TLV.val tbs)
+
   getTBSCertListSignAlg : SignAlg (TBSCertListFields.sa (TLV.val tbs))
   getTBSCertListSignAlg = TBSCertListFields.getSignAlg (TLV.val tbs)
+
+  getThisUpdate : Time (TBSCertListFields.tu (TLV.val tbs))
+  getThisUpdate = TBSCertListFields.getThisUpdate (TLV.val tbs)
+
+  getNextUpdate : Option Time (TBSCertListFields.nu (TLV.val tbs))
+  getNextUpdate = TBSCertListFields.getNextUpdate (TLV.val tbs)
 
 CertList : (@0 _ : List UInt8) → Set
 CertList xs = TLV Tag.Sequence  CertListFields xs
@@ -107,6 +117,9 @@ module CertList where
   getAKI :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldAKI)
   getAKI c = CertListFields.getAKI (TLV.val c)
 
+  getFCRL :  ∀{@0 bs} → (c : CertList bs)  → Exists─ (List UInt8) (Option ExtensionFieldFCRL)
+  getFCRL c = CertListFields.getFCRL (TLV.val c)
+
   getTBSCertListSignAlg : ∀{@0 bs} → (c : CertList bs) → SignAlg (TBSCertListFields.sa (TLV.val (getTBSCertList c)))
   getTBSCertListSignAlg c = CertListFields.getTBSCertListSignAlg (TLV.val c)
     
@@ -118,6 +131,12 @@ module CertList where
     
   getSignatureValueBytes :  ∀{@0 bs} → (c : CertList bs) → List UInt8
   getSignatureValueBytes c = ↑ (BitString.serializeValue (TLV.val (CertListFields.signature (TLV.val c))))
+
+  getThisUpdate :  ∀{@0 bs} → (c : CertList bs) → Time (TBSCertListFields.tu (TLV.val (getTBSCertList c)))
+  getThisUpdate c = CertListFields.getThisUpdate (TLV.val c)
+
+  getNextUpdate : ∀{@0 bs} → (c : CertList bs) → Option Time (TBSCertListFields.nu (TLV.val (getTBSCertList c)))
+  getNextUpdate c = CertListFields.getNextUpdate (TLV.val c)
 
 module CRLList where
   CRLList : (@0 _ : List UInt8) → Set
