@@ -1,0 +1,61 @@
+
+
+This Update
+
+   This field indicates the issue date of this CRL
+
+Next update field indicates the date by which the next CRL will be issued.
+
+
+**A delta CRL is considered to be the current one
+   if the current time is between the times contained in the thisUpdate
+   and nextUpdate fields. 
+
+
+The freshest CRL extension identifies how delta CRL information for
+   this complete CRL is obtained.  Conforming CRL issuers MUST mark this
+   extension as non-critical.  This extension MUST NOT appear in delta
+   CRLs.
+
+
+
+
+If a key usage extension is present
+           in the CRL issuer's certificate, verify that the cRLSign bit
+           is set.
+
+date check??
+
+ecdsa try
+chain builder fix
+
+refine code
+
+
+later
+
+   A complete CRL and a delta CRL MAY be combined if the following four
+   conditions are satisfied:
+
+      (a)  The complete CRL and delta CRL have the same issuer.
+
+      (b)  The complete CRL and delta CRL have the same scope.  The two
+           CRLs have the same scope if either of the following
+           conditions are met:
+
+         (1)  The issuingDistributionPoint extension is omitted from
+              both the complete CRL and the delta CRL.
+
+         (2)  The issuingDistributionPoint extension is present in both
+              the complete CRL and the delta CRL, and the values for
+              each of the fields in the extensions are the same in both
+              CRLs.
+
+      (c)  The CRL number of the complete CRL is equal to or greater
+           than the BaseCRLNumber specified in the delta CRL.  That is,
+           the complete CRL contains (at a minimum) all the revocation
+           information held by the referenced base CRL.
+
+      (d)  The CRL number of the complete CRL is less than the CRL
+           number of the delta CRL.  That is, the delta CRL follows the
+           complete CRL in the numbering sequence.
