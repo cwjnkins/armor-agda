@@ -374,12 +374,12 @@ main = IO.run $
 
   runChainCheckWithCRLs : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → {issuee : Cert bs} → String
     → Chain trustedRoot candidates issuee
-    → (crls : List (Exists─ _ CRL.CertList))
-    → {P : ∀ {@0 bs} {i : Cert bs} → Chain trustedRoot candidates i → Set}
-    → (∀ {@0 bs} {j : Cert bs} → (chain : Chain trustedRoot candidates j) → Dec (P chain crls))
+    → List (Exists─ _ CRL.CertList)
+    → {P : ∀ {@0 bs} {i : Cert bs} → Chain trustedRoot candidates i → List (Exists─ _ CRL.CertList) → Set}
+    → (∀ {@0 bs} {j : Cert bs} → (chain : Chain trustedRoot candidates j) → (crls : List (Exists─ _ CRL.CertList)) → Dec (P chain crls))
     → IO.IO Bool
-  runChainCheckWithCRLs m i c d
-    with d i c
+  runChainCheckWithCRLs m chain crls d
+    with d chain crls
   ... | no ¬p =
     Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
     IO.return false
@@ -488,17 +488,27 @@ main = IO.run $
             case findRevocationState states UNREVOKED of λ where
               REVOKED →
                 runCheck₄ crll 1 IO.>>= λ where
-                  true → IO.putStrLn (m String.++ ": REVOKED") IO.>>
-                         statePrinter states IO.>>
-                         crllPrinter crll IO.>>
-                         IO.return true
+                  true →
+                    Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
+                    runChainCheckWithCRLs "CRLR8" chain crll CRLr8 IO.>>= λ where
+                      true →
+                        IO.putStrLn (m String.++ ": REVOKED") IO.>>
+                        statePrinter states IO.>>
+                        crllPrinter crll IO.>>
+                        IO.return true
+                      false → IO.return false
                   false → IO.return false
               UNREVOKED →
                 runCheck₄ crll 1 IO.>>= λ where
-                  true → IO.putStrLn (m String.++ ": UNREVOKED") IO.>>
-                         statePrinter states IO.>>
-                         crllPrinter crll IO.>>
-                         IO.return true
+                  true →
+                    Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
+                    runChainCheckWithCRLs "CRLR8" chain crll CRLr8 IO.>>= λ where
+                      true →
+                        IO.putStrLn (m String.++ ": UNREVOKED") IO.>>
+                        statePrinter states IO.>>
+                        crllPrinter crll IO.>>
+                        IO.return true
+                      false → IO.return false
                   false → IO.return false
               UNDETERMINED → IO.putStrLn (m String.++ ": UNDETERMINED") IO.>>
                              statePrinter states IO.>>

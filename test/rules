@@ -1,6 +1,5 @@
 ecdsa try
 chain builder fix
 interface for delta
-beautify code
-
+beautify code (interface and semantic checks)
 run in server and test
