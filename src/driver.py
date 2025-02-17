@@ -126,17 +126,17 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
         elif sign_algo in ECDSA_SIGNATURE_ALGOS and isinstance(public_key, EllipticCurvePublicKey):
             hash_name, hash_size = ECDSA_SIGNATURE_ALGOS[sign_algo]
 
-            # Decode the ECDSA signature to get r and s values
-            r, s = decode_dss_signature(signature)
-            signature_r = r.to_bytes((r.bit_length() + 7) // 8, byteorder='big')
-            signature_s = s.to_bytes((s.bit_length() + 7) // 8, byteorder='big')
-
-            tbs_bytes_hex = tbs_bytes.hex()
-            public_key_hex = convert_ec_public_key_to_raw(public_key)
-            signature_r_hex = signature_r.hex()
-            signature_s_hex = signature_s.hex()
-
             if isinstance(public_key.curve, SECP256R1):
+                # Decode the ECDSA signature to get r and s values
+                r, s = decode_dss_signature(signature)
+                signature_r = r.to_bytes((r.bit_length() + 7) // 8, byteorder='big')
+                signature_s = s.to_bytes((s.bit_length() + 7) // 8, byteorder='big')
+
+                tbs_bytes_hex = tbs_bytes.hex()
+                public_key_hex = convert_ec_public_key_to_raw(public_key)
+                signature_r_hex = signature_r.hex()
+                signature_s_hex = signature_s.hex()
+                
                 process = subprocess.Popen(
                     ["./hacl-star/ecdsa_P256_verify.exe", hash_name, tbs_bytes_hex, public_key_hex, signature_r_hex, signature_s_hex],
                     stdout=subprocess.PIPE,
