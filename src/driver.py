@@ -7,9 +7,13 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 from cryptography.hazmat.primitives.asymmetric.rsa import *
+from cryptography.hazmat.primitives.asymmetric.ec import *
+from cryptography.hazmat.primitives.serialization import *
+from cryptography.hazmat.primitives.asymmetric.utils import *
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import *
 from hashlib import *
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 
@@ -34,11 +38,18 @@ def convert_to_hex(value: str) -> str:
 
 # Mapping of OID to RSA signature algorithms
 RSA_SIGNATURE_ALGOS = {
-    "sha256WithRSAEncryption": sha256,
-    "sha384WithRSAEncryption": sha384,
-    "sha512WithRSAEncryption": sha512,
-    "sha224WithRSAEncryption": sha224,
-    "sha1WithRSAEncryption": sha1
+    "sha256WithRSAEncryption": ("sha256", 256),
+    "sha384WithRSAEncryption": ("sha384", 384),
+    "sha512WithRSAEncryption": ("sha512", 512),
+    "sha224WithRSAEncryption": ("sha224", 224),
+    "sha1WithRSAEncryption": ("sha1", 160),
+    "md5WithRSAEncryption": ("md5", 128)
+}
+
+ECDSA_SIGNATURE_ALGOS = {
+    "ecdsa-with-SHA256": ("sha256", 256),
+    "ecdsa-with-SHA384": ("sha384", 384),
+    "ecdsa-with-SHA512": ("sha512", 512)
 }
 
 sign_oid_map = {
@@ -47,45 +58,113 @@ sign_oid_map = {
     "6 9 42 134 72 134 247 13 1 1 13": "sha512WithRSAEncryption",
     "6 9 42 134 72 134 247 13 1 1 14": "sha224WithRSAEncryption",
     "6 9 42 134 72 134 247 13 1 1 5": "sha1WithRSAEncryption",
-    '6 8 42 134 72 206 61 4 3 1': 'ecdsa-with-SHA224',
-    '6 8 42 134 72 206 61 4 3 2': 'ecdsa-with-SHA256',
-    '6 8 42 134 72 206 61 4 3 3': 'ecdsa-with-SHA384',
-    '6 8 42 134 72 206 61 4 3 4': 'ecdsa-with-SHA512',
-    '6 9 42 134 72 134 247 13 1 1 2': "md2WithRSAEncryption",
-    '6 9 42 134 72 134 247 13 1 1 3': "md4WithRSAEncryption",
-    '6 9 42 134 72 134 247 13 1 1 4': "md5WithRSAEncryption"
+    "6 9 42 134 72 134 247 13 1 1 4": "md5WithRSAEncryption",
+    "6 8 42 134 72 206 61 4 3 1": "ecdsa-with-SHA224",
+    "6 8 42 134 72 206 61 4 3 2": "ecdsa-with-SHA256",
+    "6 8 42 134 72 206 61 4 3 3": "ecdsa-with-SHA384",
+    "6 8 42 134 72 206 61 4 3 4": "ecdsa-with-SHA512"
 }
 
 # Insecure algorithms list
 INSECURE_ALGORITHMS = {
-
+    '6 9 42 134 72 134 247 13 1 1 2': "md2WithRSAEncryption",
+    '6 9 42 134 72 134 247 13 1 1 3': "md4WithRSAEncryption"
 }
+
+def convert_ec_public_key_to_raw(public_key) -> str:
+    """
+    Converts an ECDSA public key to its raw hex format by merging X and Y coordinates.
+    :param public_key: An ECDSA public key object.
+    :return: Hex string representing raw public key.
+    """
+    public_numbers = public_key.public_numbers()
+    
+    # Convert X and Y coordinates to hex (padded to 32 bytes each)
+    x_hex = f"{public_numbers.x:064x}"  # 32 bytes
+    y_hex = f"{public_numbers.y:064x}"  # 32 bytes
+    
+    # Concatenate X || Y
+    raw_public_key_hex = x_hex + y_hex
+    return raw_public_key_hex
 
 ### specific to RSA public key, signature algorithm
 def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, public_key, i):
     """Helper function to handle common signature verification logic."""
     try:
-        # Get the corresponding hash function for the RSA signature algorithm
-        if sign_algo in RSA_SIGNATURE_ALGOS and isinstance (public_key, RSAPublicKey):
-            signature_mod = pow(int.from_bytes(signature, byteorder='big'),
-                    public_key.public_numbers().e,
-                    public_key.public_numbers().n)
-            signature_mod_hex = '00' + signature_mod.to_bytes((signature_mod.bit_length() + 7) // 8, byteorder='big').hex()
-            hash_func = RSA_SIGNATURE_ALGOS[sign_algo]
-            tbs_hash = hash_func(tbs_bytes).hexdigest()
+        # Verify if the algorithm is supported and public_key is an RSA key
+        if sign_algo in RSA_SIGNATURE_ALGOS and isinstance(public_key, RSAPublicKey):
+            print(sign_algo, " signature checked by Hacl-Star hash and Morpheous verify")
+            hash_name, hash_size = RSA_SIGNATURE_ALGOS[sign_algo]
+            signature_mod = pow(
+                int.from_bytes(signature, byteorder='big'),
+                public_key.public_numbers().e,
+                public_key.public_numbers().n
+            )
+            signature_mod_hex = ('00' + signature_mod.to_bytes(
+                (signature_mod.bit_length() + 7) // 8, byteorder='big'
+            ).hex())
+
+            # Compute hash using external hacl-star library
+            process = subprocess.Popen(
+                ["./hacl-star/hash.exe", hash_name, tbs_bytes.hex()],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            hashval, error = process.communicate()
+
+            if process.returncode != 0:
+                raise Exception("Hash computation failed")
+            
+            tbs_hash = hashval.hex()
             n_length = public_key.public_numbers().n.bit_length() // 8
-            hash_size = hash_func().digest_size * 8  # Size in bits
-            # Build the command for morpheous RSA signature verirification
-            cmd = ['./morpheous-bin', signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
+
+            # Verify signature using external Morpheous library
+            cmd = ["./morpheous-bin", signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
             morpheous_res = subprocess.getoutput(' '.join(cmd))
             print(morpheous_res)
             return morpheous_res
+        elif sign_algo in ECDSA_SIGNATURE_ALGOS and isinstance(public_key, EllipticCurvePublicKey):
+            hash_name, hash_size = ECDSA_SIGNATURE_ALGOS[sign_algo]
+
+            # Decode the ECDSA signature to get r and s values
+            r, s = decode_dss_signature(signature)
+            signature_r = r.to_bytes((r.bit_length() + 7) // 8, byteorder='big')
+            signature_s = s.to_bytes((s.bit_length() + 7) // 8, byteorder='big')
+
+            tbs_bytes_hex = tbs_bytes.hex()
+            public_key_hex = convert_ec_public_key_to_raw(public_key)
+            signature_r_hex = signature_r.hex()
+            signature_s_hex = signature_s.hex()
+
+            if isinstance(public_key.curve, SECP256R1):
+                process = subprocess.Popen(
+                    ["./hacl-star/ecdsa_P256_verify.exe", hash_name, tbs_bytes_hex, public_key_hex, signature_r_hex, signature_s_hex],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                
+                print("ECDSA ", public_key.curve, " signature checked by Hacl-Star hash and verify")
+                output, error = process.communicate()        
+                if process.returncode == 1:
+                    return "true"
+                else:
+                    return "false"
+            else:
+                print("ECDSA ", public_key.curve, " signature checked by Cryptography Library of Python")
+                if hash_name == "sha256":
+                    public_key.verify(signature, tbs_bytes, ECDSA(hashes.SHA256()))
+                if hash_name == "sha384":
+                    public_key.verify(signature, tbs_bytes, ECDSA(hashes.SHA384()))
+                if hash_name == "sha512":
+                    public_key.verify(signature, tbs_bytes, ECDSA(hashes.SHA512()))
         else:
             print(f"Signature algorithm {sign_algo} is not supported - signature verification skipped for certificate {i}.")
             return "true"
-    except Exception as e:
-        print(f"Error during signature verification for certificate {i}: {e}")
+    except Exception:
+        print(f"Error during signature verification for certificate {i}")
         return "false"
+
 
 def verifySign(signature, sign_algo, tbs_bytes, public_key, i):
     """Verifies the signature of a certificate using the provided public key and signature algorithm."""
@@ -104,6 +183,7 @@ def verifySignaturesChain(certificates):
         cert = certificates[i - 1]
         signature = bytes.fromhex(cert.signature[3:]) if cert.signature.startswith("00 ") else bytes.fromhex(cert.signature)
         sign_algo = cert.signoid
+        print(sign_algo)
         tbs_bytes = bytes.fromhex(cert.tbs)
         public_key = load_der_public_key(bytes.fromhex(certificates[i].public_key), backend=default_backend())
                 
