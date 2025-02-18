@@ -17,7 +17,6 @@ from cryptography.exceptions import *
 from hashlib import *
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 
-import os
 home_dir = os.path.expanduser("~")
 
 @dataclass
