@@ -8,15 +8,15 @@ AGDA_STDLIB=agda-stdlib/standard-library.agda-lib
 LIBRARIES=libraries
 
 ARMOR_BUILD=MAlonzo
-ARMOR_MAIN=Armor/CRLCheck.agda
-ARMOR_MAIN_HS=$(ARMOR_BUILD)/Code/Armor/CRLCheck.hs
+ARMOR_MAIN=Armor/Main.agda
+ARMOR_MAIN_HS=$(ARMOR_BUILD)/Code/Armor/Main.hs
 
 STACK_GHC_EXE=stack --compiler ghc-8.8.4 exec ghc --
 STACK_GHC_OPTIONS=-O -Werror -fwarn-incomplete-patterns
 
 .PHONY: all
 all: $(ARMOR_MAIN_HS)
-	$(STACK_GHC_EXE) $(STACK_GHC_OPTIONS) -o CRLCheck -i. -main-is MAlonzo.Code.Armor.CRLCheck $(ARMOR_MAIN_HS) --make
+	$(STACK_GHC_EXE) $(STACK_GHC_OPTIONS) -o Main -i. -main-is MAlonzo.Code.Armor.Main $(ARMOR_MAIN_HS) --make
 
 libraries:
 	echo `pwd`/../$(AGDA_STDLIB) > $(LIBRARIES)
@@ -33,4 +33,4 @@ default: libraries
 clean:
 	find . -type f -name '*.agdai' -delete
 	rm -rf $(ARMOR_BUILD)
-	rm CRLCheck libraries
+	rm Main libraries
