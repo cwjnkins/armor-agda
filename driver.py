@@ -107,47 +107,63 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
             ).hex())
 
             # Compute hash using external hacl-star library
+            cmd = ["/{}/.armor/hash.exe".format(home_dir), hash_name, "-"]
             process = subprocess.Popen(
-                ["/{}/.armor/hash.exe".format(home_dir), hash_name, tbs_bytes.hex()],
+                cmd,
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                text=True
             )
-            hashval, error = process.communicate()
+
+            tbs_hash, error = process.communicate(input=tbs_bytes.hex())
 
             if process.returncode != 0:
                 raise Exception("Hash computation failed")
-            
-            tbs_hash = hashval.hex()
+
             n_length = public_key.public_numbers().n.bit_length() // 8
 
             # Verify signature using external Morpheous library
-            cmd = ["/{}/.armor/oracle".format(home_dir), signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
-            morpheous_res = subprocess.getoutput(' '.join(cmd))
+            cmd2 = ["/{}/.armor/oracle".format(home_dir), signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
+            morpheous_res = subprocess.getoutput(' '.join(cmd2))
             print(morpheous_res)
             return morpheous_res
         elif sign_algo in ECDSA_SIGNATURE_ALGOS and isinstance(public_key, EllipticCurvePublicKey):
             hash_name, hash_size = ECDSA_SIGNATURE_ALGOS[sign_algo]
 
             if isinstance(public_key.curve, SECP256R1):
+                cmd = ["/{}/.armor/hash.exe".format(home_dir), hash_name, "-"]
+                process = subprocess.Popen(
+                    cmd,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+
+                tbs_hash, error = process.communicate(input=tbs_bytes.hex())
+
+                if process.returncode != 0:
+                    raise Exception("Hash computation failed")
+
                 # Decode the ECDSA signature to get r and s values
                 r, s = decode_dss_signature(signature)
                 signature_r = r.to_bytes((r.bit_length() + 7) // 8, byteorder='big')
                 signature_s = s.to_bytes((s.bit_length() + 7) // 8, byteorder='big')
 
-                tbs_bytes_hex = tbs_bytes.hex()
                 public_key_hex = convert_ec_public_key_to_raw(public_key)
                 signature_r_hex = signature_r.hex()
                 signature_s_hex = signature_s.hex()
-                
+
                 process = subprocess.Popen(
-                    ["/{}/.armor/ecdsa_P256_verify.exe".format(home_dir), hash_name, tbs_bytes_hex, public_key_hex, signature_r_hex, signature_s_hex],
+                    ["/{}/.armor/ecdsa_P256_verify.exe".format(home_dir), tbs_hash, public_key_hex, signature_r_hex, signature_s_hex],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True
                 )
                 
                 print("ECDSA ", public_key.curve, " signature checked by Hacl-Star hash and verify")
-                output, error = process.communicate()        
+                output, error = process.communicate()      
                 if process.returncode == 1:
                     return "true"
                 else:

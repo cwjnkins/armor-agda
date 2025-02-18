@@ -349,12 +349,12 @@ main = IO.run $
                           (no ¬p) →
                             Armor.IO.putStrLnErr "CRLR6: failed to read time from system" IO.>>
                               IO.return false
-                          (yes p) → IO.return true
-                            -- runCheck₂ crl "CRLR6" (λ c₁ → CRLr6 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
-                            --   true → runCheck₂ crl "CRLR7" CRLr7 IO.>>= λ where
-                            --     true → IO.return true
-                            --     false → IO.return false
-                            --   false → IO.return false
+                          (yes p) →
+                            runCheck₂ crl "CRLR6" (λ c₁ → CRLr6 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
+                              true → runCheck₂ crl "CRLR7" CRLr7 IO.>>= λ where
+                                true → IO.return true
+                                false → IO.return false
+                              false → IO.return false
                false → IO.return false
              false → IO.return false
            false → IO.return false

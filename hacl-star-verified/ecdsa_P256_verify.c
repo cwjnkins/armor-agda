@@ -6,24 +6,30 @@
 #include "Hacl_Hash_SHA2.h"
 
 // Function to convert hex string to raw bytes
+uint8_t hex_char_to_byte(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    return 0; // Handle invalid characters safely
+}
+
 void hex_to_bytes(const char *hex, uint8_t *bytes, size_t hex_len) {
     for (size_t i = 0; i < hex_len / 2; i++) {
-        sscanf(hex + (i * 2), "%2hhx", &bytes[i]);
+        bytes[i] = (hex_char_to_byte(hex[i * 2]) << 4) | hex_char_to_byte(hex[i * 2 + 1]);
     }
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 6) {
-        fprintf(stderr, "Usage: %s <hash_algo> <hashed_msg_hex> <public_key_hex> <signature_r_hex> <signature_s_hex>\n", argv[0]);
+    if (argc != 5) {
+        fprintf(stderr, "Usage: %s <hashed_msg_hex> <public_key_hex> <signature_r_hex> <signature_s_hex>\n", argv[0]);
         return -1;
     }
 
     // Read command-line arguments
-    char *hash_algo = argv[1];
-    char *hashed_msg_hex = argv[2];
-    char *public_key_hex = argv[3];
-    char *signature_r_hex = argv[4];
-    char *signature_s_hex = argv[5];
+    char *hashed_msg_hex = argv[1];
+    char *public_key_hex = argv[2];
+    char *signature_r_hex = argv[3];
+    char *signature_s_hex = argv[4];
 
     // Convert hex input to raw bytes
     size_t msg_len = strlen(hashed_msg_hex) / 2;
@@ -52,18 +58,7 @@ int main(int argc, char *argv[]) {
     hex_to_bytes(signature_s_hex, signature_s, strlen(signature_s_hex));
 
     // Perform ECDSA verification using HACL*
-    bool result = false;
-    
-    if (strcmp(hash_algo, "sha256") == 0) {
-        result = Hacl_P256_ecdsa_verif_p256_sha2((uint32_t)msg_len, hashed_msg, public_key, signature_r, signature_s);
-    } else if (strcmp(hash_algo, "sha384") == 0) {
-        result = Hacl_P256_ecdsa_verif_p256_sha384((uint32_t)msg_len, hashed_msg, public_key, signature_r, signature_s);
-    } else if (strcmp(hash_algo, "sha512") == 0) {
-        result = Hacl_P256_ecdsa_verif_p256_sha512((uint32_t)msg_len, hashed_msg, public_key, signature_r, signature_s);
-    } else {
-        fprintf(stderr, "Unsupported hash algorithm\n");
-        return -1;
-    }
+    bool result = Hacl_P256_ecdsa_verif_without_hash((uint32_t)msg_len, hashed_msg, public_key, signature_r, signature_s);
 
     // Cleanup
     free(hashed_msg);
