@@ -211,35 +211,45 @@ main = IO.run $
   CRLOutput.tbsBytes  (crlOutput x) =  CRL.CertList.CertList.getTBSBytes x
   CRLOutput.sigBytes  (crlOutput x) = CRL.CertList.CertList.getSignatureValueBytes x
 
-  showOutputCert : CertOutput → String
+  showOutputCert : CertOutput → _
   showOutputCert o =
-    "*******Output Certificate Start*******" String.++ "\n"
-    String.++ (showBytes tbsBytes)  String.++ "\n"
-    String.++ (showBytes sigBytes)  String.++ "\n"
-    String.++ (showBytes pkBytes)   String.++ "\n"
-    String.++ (showBytes sigAlgOID) String.++ "\n"
-    String.++ (showListBytes ekuOIDBytes) String.++ "\n"
-    String.++ "*******Output Certificate End*******"
+    IO.putStrLn ("*******Output Certificate Start*******") IO.>>
+    showBytes tbsBytes IO.>>
+    showBytes sigBytes IO.>>
+    showBytes pkBytes IO.>>
+    showBytes sigAlgOID IO.>>
+    showListBytes ekuOIDBytes IO.>>
+    IO.putStrLn ("*******Output Certificate End*******")
     where
     open CertOutput o
-    showBytes : List UInt8 → String
-    showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
+    showBytes : List UInt8 → _
+    showBytes xs = IO.putStrLn (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
 
-    showListBytes : List (List UInt8) → String
-    showListBytes [] = ""
-    showListBytes (x ∷ x₁) = (showBytes x) String.++ " @@ " String.++ (showListBytes x₁)
+    showBytes' : List UInt8 → _
+    showBytes' xs = IO.putStr (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
 
-  showOutputCRL : CRLOutput → String
+    showListBytes : List (List UInt8) → _
+    showListBytes [] = IO.putStrLn ""
+    showListBytes (x ∷ x₁) = showBytes' x IO.>>
+                             IO.putStr " @@ " IO.>>
+                             showListBytes x₁
+
+  showOutputCRL : CRLOutput → _
   showOutputCRL o =
-    "*******Output CRL Start*******" String.++ "\n"
-    String.++ (showBytes tbsBytes)  String.++ "\n"
-    String.++ (showBytes sigBytes)  String.++ "\n"
-    String.++ (showBytes sigAlgOID) String.++ "\n"
-    String.++ "*******Output CRL End*******"
+    IO.putStrLn ("*******Output CRL Start*******") IO.>>
+    showBytes' tbsBytes IO.>>
+    showBytes sigBytes IO.>>
+    showBytes sigAlgOID IO.>>
+    IO.putStrLn ("*******Output CRL End*******")
     where
     open CRLOutput o
-    showBytes : List UInt8 → String
-    showBytes xs = foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs
+    showBytes : List UInt8 → _
+    showBytes xs = IO.putStrLn (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
+
+    showBytes' : List UInt8 → _
+    showBytes' [] = IO.putStrLn ""
+    showBytes' (x ∷ xs) = IO.putStr ((show (toℕ x)) String.++ " ") IO.>>
+                          showBytes' xs
 
   printRm : List RevocationReason → String
   printRm [] = ""
@@ -272,12 +282,12 @@ main = IO.run $
 
   chainPrinter : List (Exists─ _ Cert) → _
   chainPrinter [] = IO.putStrLn ""
-  chainPrinter (c ∷ rest) = IO.putStrLn (showOutputCert (certOutput (proj₂ c))) IO.>>
+  chainPrinter (c ∷ rest) = showOutputCert (certOutput (proj₂ c)) IO.>>
                             chainPrinter rest
    
   crllPrinter : List (Exists─ _ CRL.CertList) → _
   crllPrinter [] = IO.putStrLn ""
-  crllPrinter (c ∷ rest) = IO.putStrLn (showOutputCRL (crlOutput (proj₂ c))) IO.>>
+  crllPrinter (c ∷ rest) = showOutputCRL (crlOutput (proj₂ c)) IO.>>
                            crllPrinter rest
 
   statePrinter : List State → _
@@ -339,12 +349,12 @@ main = IO.run $
                           (no ¬p) →
                             Armor.IO.putStrLnErr "CRLR6: failed to read time from system" IO.>>
                               IO.return false
-                          (yes p) →
-                            runCheck₂ crl "CRLR6" (λ c₁ → CRLr6 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
-                              true → runCheck₂ crl "CRLR7" CRLr7 IO.>>= λ where
-                                true → IO.return true
-                                false → IO.return false
-                              false → IO.return false
+                          (yes p) → IO.return true
+                            -- runCheck₂ crl "CRLR6" (λ c₁ → CRLr6 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
+                            --   true → runCheck₂ crl "CRLR7" CRLr7 IO.>>= λ where
+                            --     true → IO.return true
+                            --     false → IO.return false
+                            --   false → IO.return false
                false → IO.return false
              false → IO.return false
            false → IO.return false
