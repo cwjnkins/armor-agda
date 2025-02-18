@@ -17,6 +17,9 @@ from cryptography.exceptions import *
 from hashlib import *
 from cryptography.hazmat.primitives.serialization import load_der_public_key
 
+import os
+home_dir = os.path.expanduser("~")
+
 @dataclass
 class Certificate:
     tbs: str
@@ -106,7 +109,7 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
 
             # Compute hash using external hacl-star library
             process = subprocess.Popen(
-                ["./hacl-star/hash.exe", hash_name, tbs_bytes.hex()],
+                ["/{}/.armor/hash.exe".format(home_dir), hash_name, tbs_bytes.hex()],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
@@ -119,7 +122,7 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
             n_length = public_key.public_numbers().n.bit_length() // 8
 
             # Verify signature using external Morpheous library
-            cmd = ["./morpheous-bin", signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
+            cmd = ["/{}/.armor/oracle".format(home_dir), signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
             morpheous_res = subprocess.getoutput(' '.join(cmd))
             print(morpheous_res)
             return morpheous_res
@@ -138,7 +141,7 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
                 signature_s_hex = signature_s.hex()
                 
                 process = subprocess.Popen(
-                    ["./hacl-star/ecdsa_P256_verify.exe", hash_name, tbs_bytes_hex, public_key_hex, signature_r_hex, signature_s_hex],
+                    ["/{}/.armor/ecdsa_P256_verify.exe".format(home_dir), hash_name, tbs_bytes_hex, public_key_hex, signature_r_hex, signature_s_hex],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     text=True
@@ -161,8 +164,8 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
         else:
             print(f"Signature algorithm {sign_algo} is not supported - signature verification skipped for certificate {i}.")
             return "true"
-    except Exception:
-        print(f"Error during signature verification for certificate {i}")
+    except Exception as e:
+        print(f"Error during signature verification for certificate {i} : {e}")
         return "false"
 
 
@@ -183,7 +186,6 @@ def verifySignaturesChain(certificates):
         cert = certificates[i - 1]
         signature = bytes.fromhex(cert.signature[3:]) if cert.signature.startswith("00 ") else bytes.fromhex(cert.signature)
         sign_algo = cert.signoid
-        print(sign_algo)
         tbs_bytes = bytes.fromhex(cert.tbs)
         public_key = load_der_public_key(bytes.fromhex(certificates[i].public_key), backend=default_backend())
                 
