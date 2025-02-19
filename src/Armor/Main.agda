@@ -568,7 +568,9 @@ main = IO.run $
     helper kp crl issuee (chain ∷ otherChains) =
       runChainChecks kp crl issuee chain IO.>>= λ where
         false →  helper kp crl issuee otherChains
-        true → IO.return true
+        true →
+          IO.putStrLn (showℕ (length (chain ∷ otherChains))) IO.>>
+          IO.return true
 
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
   runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>
