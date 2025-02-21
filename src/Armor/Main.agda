@@ -8,15 +8,23 @@ open import Armor.Data.X509.Cert as Cert
 open import Armor.Data.X509.Semantic.Chain.Builder
 open import Armor.Data.X509.Semantic.Chain.TCB
 open import Armor.Data.X509.Semantic.Cert.R18.TCB
+open import Armor.Data.X690-DER.BitString
+open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X509.Semantic.Cert
 open import Armor.Data.X509.Semantic.Chain
+open import Armor.Grammar.Option
+open import Armor.Grammar.Option.Properties
 open import Armor.Data.X509.CRL.CertList as CRL
 open import Armor.Data.X509.CRL.Semantic.Validation
 open import Armor.Data.X509.CRL.Semantic.Utils
 open import Armor.Data.X509.CRL.Semantic.R1
+open import Armor.Data.X509.Extension
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList as IList
 open import Armor.Grammar.Parser
+open import Armor.Data.X690-DER.Int
+open import Armor.Data.X690-DER.Boool
+open import Armor.Data.X690-DER.Int.Properties
 import      Armor.IO
 open import Armor.Foreign.ByteString
   hiding (foldl)
@@ -211,28 +219,28 @@ main = IO.run $
   CRLOutput.tbsBytes  (crlOutput x) =  CRL.CertList.CertList.getTBSBytes x
   CRLOutput.sigBytes  (crlOutput x) = CRL.CertList.CertList.getSignatureValueBytes x
 
-  showOutputCert : CertOutput → _
+  showOutputCert : CertOutput → IO.IO (Level.Lift Level.zero ⊤)
   showOutputCert o =
     IO.putStrLn ("*******Output Certificate Start*******") IO.>>
-    showBytes tbsBytes IO.>>
-    showBytes sigBytes IO.>>
+    -- showBytes tbsBytes IO.>>
+    -- showBytes sigBytes IO.>>
     showBytes pkBytes IO.>>
-    showBytes sigAlgOID IO.>>
-    showListBytes ekuOIDBytes IO.>>
+    -- showBytes sigAlgOID IO.>>
+    -- showListBytes ekuOIDBytes IO.>>
     IO.putStrLn ("*******Output Certificate End*******")
     where
     open CertOutput o
     showBytes : List UInt8 → _
     showBytes xs = IO.putStrLn (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
 
-    showBytes' : List UInt8 → _
-    showBytes' xs = IO.putStr (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
+    -- showBytes' : List UInt8 → _
+    -- showBytes' xs = IO.putStr (foldr (λ b s → show (toℕ b) String.++ " " String.++ s) "" xs)
 
-    showListBytes : List (List UInt8) → _
-    showListBytes [] = IO.putStrLn ""
-    showListBytes (x ∷ x₁) = showBytes' x IO.>>
-                             IO.putStr " @@ " IO.>>
-                             showListBytes x₁
+    -- showListBytes : List (List UInt8) → _
+    -- showListBytes [] = IO.putStrLn ""
+    -- showListBytes (x ∷ x₁) = showBytes' x IO.>>
+    --                          IO.putStr " @@ " IO.>>
+    --                          showListBytes x₁
 
   showOutputCRL : CRLOutput → _
   showOutputCRL o =
@@ -317,10 +325,10 @@ main = IO.run $
   runCheck c m d
     with d c
   ... | no ¬p =
-    Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
     IO.return false
   ... | yes p =
-    Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return true
 
   runCheck₂ : ∀ {@0 bs} → CRL.CertList bs → String
@@ -330,15 +338,15 @@ main = IO.run $
   runCheck₂ c m d
     with d c
   ... | no ¬p =
-    Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
     IO.return false
   ... | yes p =
-    Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return true
 
   runCheck₃ : ∀ {@0 bs} →  CRL.CertList bs → ℕ → IO.IO Bool
   runCheck₃ crl n =
-    Armor.IO.putStrLnErr ("=== Now Checking CRL " String.++ (showℕ n)) IO.>>
+    -- Armor.IO.putStrLnErr ("=== Now Checking CRL " String.++ (showℕ n)) IO.>>
       runCheck₂ crl "CRLR1" CRLr1 IO.>>= λ where
        true → runCheck₂ crl "CRLR2" CRLr2 IO.>>= λ where
          true → runCheck₂ crl "CRLR3" CRLr3 IO.>>= λ where
@@ -376,10 +384,10 @@ main = IO.run $
   runChainCheck m i c d
     with d i c
   ... | no ¬p =
-    Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
     IO.return false
   ... | yes p =
-    Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return true
 
   runChainCheckWithCRLs : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → {issuee : Cert bs} → String
@@ -391,10 +399,10 @@ main = IO.run $
   runChainCheckWithCRLs m chain crls d
     with d chain crls
   ... | no ¬p =
-    Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
     IO.return false
   ... | yes p =
-    Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
+    -- Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
     IO.return true
 
   runCRLCheckSingle :  ∀ {@0 bs} → String
@@ -422,7 +430,7 @@ main = IO.run $
 
   runSingleCertChecks : ∀ {@0 bs} → Maybe KeyPurpose → Cert bs → Maybe (List (Exists─ _ CRL.CertList)) → ℕ → IO.IO Bool
   runSingleCertChecks kp cert crl n =
-    Armor.IO.putStrLnErr ("=== Now Checking Certificate " String.++ (showℕ n)) IO.>>
+    -- Armor.IO.putStrLnErr ("=== Now Checking Certificate " String.++ (showℕ n)) IO.>>
       runCheck cert "R1" r1 IO.>>= λ where
        true → runCheck cert "R2" r2 IO.>>= λ where
          true → runCheck cert "R3" r3 IO.>>= λ where
@@ -499,7 +507,7 @@ main = IO.run $
               REVOKED →
                 runCheck₄ crll 1 IO.>>= λ where
                   true →
-                    Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
+                    -- Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
                     runChainCheckWithCRLs "CRLR8" chain crll CRLr8 IO.>>= λ where
                       true →
                         IO.putStrLn (m String.++ ": REVOKED") IO.>>
@@ -511,7 +519,7 @@ main = IO.run $
               UNREVOKED →
                 runCheck₄ crll 1 IO.>>= λ where
                   true →
-                    Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
+                    -- Armor.IO.putStrLnErr ("=== Now Checking CRL Chain ") IO.>>
                     runChainCheckWithCRLs "CRLR8" chain crll CRLr8 IO.>>= λ where
                       true →
                         IO.putStrLn (m String.++ ": UNREVOKED") IO.>>
@@ -530,7 +538,7 @@ main = IO.run $
   runChainChecks kp crl issuee chain =
       runChainChecks' kp issuee 1 chain IO.>>= λ where
         true →
-          Armor.IO.putStrLnErr ("=== Now Checking Chain ") IO.>>
+          -- Armor.IO.putStrLnErr ("=== Now Checking Chain ") IO.>>
           runChainCheck "R19" issuee chain r19 IO.>>= λ where
           true → runChainCheck "R20" issuee chain r20 IO.>>= λ where
             true → runChainCheck "R22" issuee chain r22 IO.>>= λ where
@@ -538,10 +546,10 @@ main = IO.run $
                 true → runChainCheck "R27" issuee chain r27 IO.>>= λ where
                   true → case crl of λ where
                            (just x) → runCRLCheckChain "CRL Validation" issuee chain x IO.>>= λ where
-                             true → chainPrinter (toList chain) IO.>>
+                             true → --chainPrinter (toList chain) IO.>>
                                     IO.return true
                              false → IO.return false
-                           nothing → chainPrinter (toList chain) IO.>>
+                           nothing → --chainPrinter (toList chain) IO.>>
                                      IO.return true
                   false → IO.return false
                 false → IO.return false
@@ -553,24 +561,68 @@ main = IO.run $
   runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
                                         Armor.IO.exitFailure
-  runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
-    helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
-      true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
-             Armor.IO.exitSuccess
-      false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
-              Armor.IO.exitFailure
-    where
-    helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
-                                    → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
-                                    → List (Chain trustedRoot candidates issuee) → IO.IO Bool
-    helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
-                              IO.return false
-    helper kp crl issuee (chain ∷ otherChains) =
-      runChainChecks kp crl issuee chain IO.>>= λ where
-        false →  helper kp crl issuee otherChains
-        true →
-          IO.putStrLn (showℕ (length (chain ∷ otherChains))) IO.>>
-          IO.return true
+  runCertChecksChain kp crl trustedRoot candidate@(cert@(─ _ , mkTLV len (mkCertFields (mkTLV l (mkTBSCertFields version serial signAlg issuer validity subject pk pkBytes issuerUID subjectUID extensions bs≡₂) l≡ b≡) tbsBytes signalg signature signatureBytes bs≡₁) len≡ bs≡) ∷ restCerts) = 
+    let
+      -- (─ _ , c) = end
+      --res₁ = _≠_ ⦃ TLV.eqTLV ⦃ Cert.eq ⦄ ⦄ end (-, c)
+      -- res₂ = _≠_ ⦃ TLV.eqTLV ⦃ Cert.eq ⦄ ⦄ end end
+      -- res₃ = _≟_ ⦃ Option.OptionEq UInt8 ⦃ TLV.eqTLV ⦃ TLV.eqTLV ⦃ SequenceOf.BoundedSequenceOfEq ⦃ TLV.eqTLV ⦃ Extension.eq ⦄ ⦄ ⦄ ⦄ ⦄ ⦄ ((-, extensions)) (-, extensions) --
+      -- res₃ = _≟_ ⦃ SequenceOf.BoundedSequenceOfEq ⦃ TLV.eqTLV ⦃ Extension.eq ⦄ ⦄ ⦄  ((-, val₂)) (-, val₂)
+      bb = Cert.getBC (proj₂ cert)
+    in
+    (case bb of λ where
+      (─ .[] , none) → IO.putStrLn "none @@@@ expected"
+      (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields bcca none bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) → IO.putStrLn "none #### expected"
+      (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields bcca@(mkDefault none notDefault) xx@(some x) bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) → IO.putStrLn "none !!!! expected"
+      (fst , some (mkExtensionFields extnId extnId≡ crit (mkTLV len (mkTLV len₁ (Extension.mkBCFieldsSeqFields bcca@(mkDefault (some value) notDefault) xx@(some x) bs≡₃) len≡₁ bs≡₂) len≡ bs≡₁) bs≡)) → 
+        let
+          -- res = _≟_ ⦃ Default.eq _ ⦄  (_ , bcca) (_ , bcca)
+          -- res = _≟_ ⦃ Option.OptionEq UInt8 ⦃ NonNegativeIntEq ⦄ ⦄ (_ , xx) (_ , xx)
+          -- res = _≟_ ⦃ Option.OptionEq UInt8 ⦃ {!!} ⦄ ⦄ (_ , value) (_ , value)
+          resIO =  eqq≋ { [ # 255 ] }{ [ # 255 ]} (TLV.val trueBoool) (TLV.val trueBoool)
+        in
+        resIO IO.>>= λ res →
+        case res of λ where
+          (no p) → IO.putStrLn "not expected"
+          (yes _) → IO.putStrLn "as expected")
+    -- -- IO.putStrLn (showℕ (length candidate)) IO.>>
+    -- -- IO.putStrLn (showℕ (length (removeCertFromCerts{bs} end candidate))) IO.>>
+    IO.>> Armor.IO.exitSuccess
+
+
+    -- helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
+    --   true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
+    --          Armor.IO.exitSuccess
+    --   false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
+    --           Armor.IO.exitFailure
+    -- where
+    -- helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
+    --                                 → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
+    --                                 → List (Chain trustedRoot candidates issuee) → IO.IO Bool
+    -- helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
+    --                           IO.return false
+    -- helper kp crl issuee (chain ∷ otherChains) =
+    --   runChainChecks kp crl issuee chain IO.>>= λ where
+    --     false →
+    --       IO.putStrLn (showℕ (length (toList chain))) IO.>>
+    --       chainPrinter (toList chain) IO.>>
+    --       helper kp crl issuee otherChains
+    --     true →
+    --       -- IO.putStrLn (showℕ (length (chain ∷ otherChains))) IO.>>
+    --       IO.putStrLn (showℕ (length (toList chain))) IO.>>
+    --       chainPrinter (toList chain) IO.>>
+    --       IO.return true
+
+   where
+   eqq≋ : ∀ {@0 bs₁ bs₂} (a₁ : BoolValue bs₁) (a₂ : BoolValue bs₂) → IO.IO (Dec (_≋_{BoolValue} a₁ a₂))
+   eqq≋ (mkBoolValue true b trueᵣ refl) (mkBoolValue true b' trueᵣ refl) =
+      IO.putStrLn "Line 1" IO.>> IO.return (yes ≋-refl)
+   eqq≋ (mkBoolValue true b vᵣ refl) (mkBoolValue false b' vᵣ' refl) =
+      IO.putStrLn "Line 2" IO.>> IO.return (no λ where (mk≋ refl ()))
+   eqq≋ (mkBoolValue false b vᵣ refl) (mkBoolValue true b' vᵣ' refl) =
+      IO.putStrLn "Line 3" IO.>> IO.return (no λ where (mk≋ refl ())) 
+   eqq≋ (mkBoolValue false b falseᵣ refl) (mkBoolValue false b' falseᵣ refl) =
+      IO.putStrLn "Line 4" IO.>> IO.return (yes ≋-refl)
 
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
   runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>

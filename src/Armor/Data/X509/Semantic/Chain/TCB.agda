@@ -14,12 +14,10 @@ open Armor.Grammar.Definitions UInt8
 _IsIssuerFor_ : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Cert bs₂ → Set
 _IsIssuerFor_ issuer@(mkTLV len val len≡ bs≡) issuee@(mkTLV len₁ val₁ len≡₁ bs≡₁) =
   NameMatch (Cert.getIssuer issuee) (Cert.getSubject issuer)
-  × ¬ (NameMatch (Cert.getIssuer issuee) (Cert.getSubject issuee))
 
 _isIssuerFor?_ :  ∀ {@0 bs₁ bs₂} → (issuer : Cert bs₁) → (issuee : Cert bs₂) → Dec (issuer IsIssuerFor issuee)
 issuer@(mkTLV len val len≡ bs≡) isIssuerFor? issuee@(mkTLV len₁ val₁ len≡₁ bs≡₁) =
   nameMatch? (Cert.getIssuer issuee) (Cert.getSubject issuer)
-  ×-dec ¬? (nameMatch? (Cert.getIssuer issuee) (Cert.getSubject issuee))
 
 _IsIssuerFor_In_ : ∀ {@0 bs₁ bs₂} → Cert bs₁ → Cert bs₂ → (certs : List (Exists─ _ Cert)) → Set
 issuer IsIssuerFor issuee In certs = issuer IsIssuerFor issuee × (─ _ , issuer) ∈ certs
@@ -87,28 +85,28 @@ AllIssuersFor issuee In certs = Σ (IssuersFor issuee In certs) λ issuers → (
 -- (Section 6.1.1).
 -}
 
-
-removeCertFromCerts : ∀ {@0 bs} → Cert bs → List (Exists─ _ Cert) → List (Exists─ _ Cert)
-removeCertFromCerts issuer certs =
+abstract 
+  removeCertFromCerts : ∀ {@0 bs} → Cert bs → List (Exists─ _ Cert) → List (Exists─ _ Cert)
+  removeCertFromCerts issuer certs =
     filter (λ c → _≠_ ⦃ TLV.eqTLV ⦃ Cert.eq ⦄ ⦄ c (-, issuer)) certs
 
 
-∈removeCertFromCerts⇒
+  ∈removeCertFromCerts⇒
     : ∀ {@0 bs₁ bs₂} {c₁ : Cert bs₁} {c₂ : Cert bs₂} (certs : List (Exists─ _ Cert))
       → (-, c₁) ∈ removeCertFromCerts c₂ certs → (-, c₁) ∈ certs
-∈removeCertFromCerts⇒{c₁ = c₁}{c₂} certs c₁∈ = proj₁ (∈.∈-filter⁻ (_≠ (-, c₂)) c₁∈)
+  ∈removeCertFromCerts⇒{c₁ = c₁}{c₂} certs c₁∈ = proj₁ (∈.∈-filter⁻ (_≠ (-, c₂)) c₁∈)
     where
     import Data.List.Membership.Propositional.Properties as ∈
 
-∉removeCertFromCerts : ∀ {@0 bs} (c : Cert bs) (certs : List (Exists─ _ Cert)) → (-, c) ∉ removeCertFromCerts c certs
-∉removeCertFromCerts c certs c∈removed =
+  ∉removeCertFromCerts : ∀ {@0 bs} (c : Cert bs) (certs : List (Exists─ _ Cert)) → (-, c) ∉ removeCertFromCerts c certs
+  ∉removeCertFromCerts c certs c∈removed =
     contradiction refl (proj₂ (∈.∈-filter⁻ (_≠ (-, c)) {xs = certs} c∈removed))
     where
     import Data.List.Membership.Propositional.Properties as ∈
 
 
-removeCertFromCerts< : ∀ {@0 bs} (c : Cert bs) (certs : List (Exists─ _ Cert)) → (-, c) ∈ certs → length (removeCertFromCerts c certs) < length certs
-removeCertFromCerts< c certs c∈ = filter-notAll (_≠ (-, c)) certs (Any.map (λ where ≡c ≢c → ≢c (sym ≡c)) c∈)
+  removeCertFromCerts< : ∀ {@0 bs} (c : Cert bs) (certs : List (Exists─ _ Cert)) → (-, c) ∈ certs → length (removeCertFromCerts c certs) < length certs
+  removeCertFromCerts< c certs c∈ = filter-notAll (_≠ (-, c)) certs (Any.map (λ where ≡c ≢c → ≢c (sym ≡c)) c∈)
 
 data Chain (trustedRoot candidates : List (Exists─ _ Cert)) : ∀ {@0 bs} → Cert bs → Set where
   root : ∀ {@0 bs} {c : Cert bs} → IssuerFor c In trustedRoot → Chain trustedRoot candidates c

@@ -92,3 +92,6 @@ instance
 
       e₅ : Eq≋ (NonEmptySequenceOf AIA.AccessDesc)
       e₅ = SequenceOf.BoundedSequenceOfEq≋
+
+  eq : Eq (Exists─ _ SelectExtn)
+  eq = Eq≋⇒Eq it

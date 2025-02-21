@@ -58,3 +58,6 @@ module _ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ {@0 bs' : List UInt8} (
           refl → ≋-refl
         (singleton (some x) refl) → case ‼ T-unique nd₁ nd₂ ret (const _) of λ where
           refl → ≋-refl )
+
+  eq : Eq (Exists─ _(Default A default))
+  eq = Eq≋⇒Eq eq≋

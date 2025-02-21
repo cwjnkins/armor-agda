@@ -172,3 +172,7 @@ instance
 
 BoundedSequenceOfEq≋ : ∀ {A : @0 List UInt8 → Set} ⦃ _ : Eq≋ A ⦄ → ∀ {n} → Eq≋ (BoundedSequenceOf A n)
 BoundedSequenceOfEq≋ = Parallel.eq≋Σₚ it (λ a → record { _≟_ = λ x y → yes (erased-unique ≤-irrelevant x y) }) -- (‼ ≤-irrelevant x y)})
+
+BoundedSequenceOfEq : {A : @0 List UInt8 → Set} ⦃ _ : Eq (Exists─ _ A) ⦄ → ∀ {n}
+                   → Eq (Exists─ _ (BoundedSequenceOf A n))
+BoundedSequenceOfEq = Eq≋⇒Eq (BoundedSequenceOfEq≋ ⦃ Eq⇒Eq≋ it ⦄)
