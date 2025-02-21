@@ -3,7 +3,7 @@ set -e
 
 home=~/
 
-git submodule update --init --remote
+git submodule update --init --remote --progress
 cd agda-stdlib
 git checkout v1.7.1
 cd ..

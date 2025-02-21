@@ -552,8 +552,9 @@ main = IO.run $
 
   runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
-                                        Armor.IO.exitFailure
+                                             Armor.IO.exitFailure
   runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
+    IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
     helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
       true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
              Armor.IO.exitSuccess
@@ -568,9 +569,7 @@ main = IO.run $
     helper kp crl issuee (chain ∷ otherChains) =
       runChainChecks kp crl issuee chain IO.>>= λ where
         false →  helper kp crl issuee otherChains
-        true →
-          IO.putStrLn (showℕ (length (chain ∷ otherChains))) IO.>>
-          IO.return true
+        true → IO.return true
 
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
   runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>

@@ -10,11 +10,7 @@ open Armor.Grammar.Definitions UInt8
 
 instance
   eq≋ : Eq≋ BoolValue
-  Eq≋._≋?_ eq≋ (mkBoolValue true b trueᵣ refl) (mkBoolValue true b' trueᵣ refl) =
-    yes ≋-refl
-  Eq≋._≋?_ eq≋ (mkBoolValue true b vᵣ refl) (mkBoolValue false b' vᵣ' refl) =
-    no λ where (mk≋ refl ())
-  Eq≋._≋?_ eq≋ (mkBoolValue false b vᵣ refl) (mkBoolValue true b' vᵣ' refl) =
-    no λ where (mk≋ refl ()) 
-  Eq≋._≋?_ eq≋ (mkBoolValue false b falseᵣ refl) (mkBoolValue false b' falseᵣ refl) =
-    yes ≋-refl
+  Eq≋._≋?_ eq≋ (mkBoolValue true .(# 255) trueᵣ refl) (mkBoolValue true .(# 255) trueᵣ refl) = yes ≋-refl
+  Eq≋._≋?_ eq≋ (mkBoolValue true .(# 255) trueᵣ refl) (mkBoolValue false .(# 0) falseᵣ refl) = no (λ ())
+  Eq≋._≋?_ eq≋ (mkBoolValue false .(# 0) falseᵣ refl) (mkBoolValue true .(# 255) trueᵣ refl) = no (λ ())
+  Eq≋._≋?_ eq≋ (mkBoolValue false .(# 0) falseᵣ refl) (mkBoolValue false .(# 0) falseᵣ refl) = yes ≋-refl
