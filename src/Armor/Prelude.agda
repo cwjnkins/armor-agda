@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 module Armor.Prelude where
 
 module Level where
@@ -72,19 +73,19 @@ open import Data.List.Membership.Propositional public
 
 import Data.List.Membership.DecPropositional
 
--- import Data.Maybe
--- module Maybe = Data.Maybe
--- open Data.Maybe public
---   hiding (align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
-
 import Data.Maybe
 module Maybe where
   open Data.Maybe public
 open Maybe public
-  hiding (module Maybe ; align ; alignWith ; fromMaybe ; map ; zip ; zipWith ; _>>=_)
+  hiding
+  ( module Maybe
+  ; align ; alignWith ; fromMaybe
+  ; map ; zip ; zipWith
+  ; ap ; _>>=_ ; when)
 
 open import Data.Nat     public
   hiding (_≟_)
+
 open import Data.Nat.DivMod public
 open import Agda.Builtin.Nat public
   using (_-_)
@@ -96,7 +97,7 @@ tailSafe : ∀ {ℓ} {@0 A : Set ℓ} → (xs : List A) → @0 length xs ≥ 1 �
 tailSafe (_ ∷ xs) _ = xs
 
 open import Data.Product public
-  hiding (map ; zip)
+  hiding (map ; zip ; zipWith ; _<*>_)
 
 infixr 4 _,e_
 _,e_ : ∀ {ℓ₁ ℓ₂} {@0 A : Set ℓ₁}{@0 B : A → Set ℓ₂} → (a : A) (b : B a) → Σ A B
@@ -209,6 +210,10 @@ open import Relation.Binary.Definitions public
 
 open import Relation.Nullary public
   renaming (Irrelevant to Unique)
+  hiding   (contradiction ; contraposition)
+
+nonZero-compat : ∀ {n} → False (n Data.Nat.≟ 0) → NonZero n
+nonZero-compat ≢0 = ≢-nonZero (λ where refl → ≢0)
 
 yes₀ : ∀ {ℓ} {@0 P : Set ℓ} → P → Dec P
 yes₀ p = true because (ofʸ p)
@@ -254,11 +259,11 @@ True_And_ : ∀ {ℓ₁ ℓ₂} {P : Set ℓ₁} → Dec P → (P → Set ℓ₂
 True_And_ (yes pf) Q = Q pf
 True_And_{ℓ₂ = ℓ₂} (no ¬pf) Q = Level.Lift ℓ₂ ⊥
 
-open import Relation.Nullary.Product public
-  using (_×-dec_)
+-- open import Relation.Nullary.Product public
+--   using (_×-dec_)
 
-open import Relation.Nullary.Sum public
-  using (_⊎-dec_)
+-- open import Relation.Nullary.Sum public
+--   using (_⊎-dec_)
 
 open import Relation.Unary public
   using (Decidable)
@@ -267,7 +272,9 @@ open import Relation.Unary public
 -- Definitions
 infixl 7 _%2^_
 _%2^_ : (m n : ℕ) → ℕ
-m %2^ n = _%_ m (2 ^ n) {fromWitnessFalse {Q = 2 ^ n Data.Nat.≟ 0} (λ eq → case 2 ≡ 0 ∋ m^n≡0⇒m≡0 2 n eq of λ ())}
+m %2^ n =
+  _%_ m (2 ^ n)
+    ⦃ ≢-nonZero λ 2^n≡0 → contradiction (m^n≡0⇒m≡0 2 n 2^n≡0) (λ ()) ⦄
   where open import Data.Nat.Properties
 
 
@@ -492,14 +499,14 @@ instance
 
 -- making this an instance blocks resolution (overlaps with IrrelBot)
 T-irrel : ∀ {b} → @0 T b → T b
-T-irrel{true} _ = tt 
+T-irrel{true} _ = tt
 
-import Category.Monad
-Monad = Category.Monad.RawMonad
-MonadZero = Category.Monad.RawMonadZero
+import Effect.Monad
+Monad = Effect.Monad.RawMonad
+MonadZero = Effect.Monad.RawMonadZero
 
 module Monad {ℓ} {M : Set ℓ → Set ℓ} (m : Monad M) where
-  open Category.Monad.RawMonad m public
+  open Effect.Monad.RawMonad m public
     hiding (zip ; zipWith)
 
 open Monad ⦃ ... ⦄ public
@@ -507,23 +514,23 @@ open Monad ⦃ ... ⦄ public
 instance
   MonadMaybe : ∀ {ℓ} → Monad{ℓ} Maybe
   MonadMaybe = monad
-    where open import Data.Maybe.Categorical
+    where open import Data.Maybe.Effectful
 
   MonadError : ∀ {ℓ₁ ℓ₂} {E : Set ℓ₁} → Monad{ℓ₁ Level.⊔ ℓ₂} (E ⊎_)
-  MonadError{ℓ₂ = ℓ₂}{E = E} = monad
-    where open import Data.Sum.Categorical.Left E ℓ₂
+  MonadError{ℓ₂ = ℓ₂}{E = E} = monad _ ℓ₂
+    where open import Data.Sum.Effectful.Left
 
 module MonadZero {ℓ} {M : Set ℓ → Set ℓ} (m : MonadZero M) where
-  import Category.Monad
+  import Effect.Monad
 
-  ∅ = Category.Monad.RawMonadZero.∅ m
+  ∅ = Effect.Monad.RawMonadZero.∅ m
 
 open MonadZero ⦃ ... ⦄ public
 
 instance
   MonadZeroMaybe : ∀ {ℓ} → MonadZero{ℓ} Maybe
   MonadZeroMaybe = monadZero
-    where open import Data.Maybe.Categorical
+    where open import Data.Maybe.Effectful
 
 record Writer {ℓ} (M : Set ℓ → Set ℓ) (W : Set ℓ) : Set ℓ where
   field
@@ -539,10 +546,22 @@ record Logging {ℓ} (A : Set ℓ) : Set ℓ where
 
 instance
   MonadLogging : ∀ {ℓ} → Monad{ℓ} Logging
-  Monad.return MonadLogging x = mkLogged [] x
-  Monad._>>=_  MonadLogging (mkLogged log₁ val₁) f
-    with f val₁
-  ... | mkLogged log₂ val₂ = mkLogged (log₁ ++ log₂) val₂
+  MonadLogging .Effect.Monad.RawMonad.rawApplicative = ApLogging
+    where
+    open import Effect.Applicative
+    open import Effect.Functor
+
+    FunLogging : RawFunctor Logging
+    FunLogging .RawFunctor._<$>_ f (mkLogged log val) = mkLogged log (f val)
+
+    ApLogging : RawApplicative Logging
+    ApLogging .RawApplicative.rawFunctor = FunLogging
+    ApLogging .RawApplicative.pure = mkLogged []
+    ApLogging .RawApplicative._<*>_ (mkLogged log₁ f) (mkLogged log₂ val) =
+      mkLogged (log₁ ++ log₂) (f val)
+  MonadLogging .Effect.Monad.RawMonad._>>=_ (mkLogged log₁ x) cont =
+    let mkLogged log₂ y = cont x in
+    mkLogged (log₁ ++ log₂) y
 
   WriterLogging : Writer Logging String.String
   Writer.tell   WriterLogging w = mkLogged [ w String.++ "\n" ] (Level.lift tt)
@@ -554,7 +573,7 @@ silent = return (Level.lift tt)
 module Lemmas where
 
   open import Tactic.MonoidSolver using (solve ; solve-macro)
-  open import Data.Nat.Properties
+  open import Data.Nat.Properties hiding (^-monoʳ-≤)
   import      Data.Integer.Properties as ℤ
   open import Data.List.Properties
   import      Data.Sign as Sign
@@ -596,7 +615,7 @@ module Lemmas where
   m^n≥1 m (suc n) x =
     ≤.begin
       1 ≤.≤⟨ x ⟩
-      m ≤.≤⟨ m≤m*n m (m^n≥1 m n x) ⟩
+      m ≤.≤⟨ m≤m*n m (m ^ n) ⦃ >-nonZero (m^n≥1 m n x) ⦄ ⟩
       m * (m ^ n) ≤.∎
     where
     module ≤ = ≤-Reasoning
@@ -612,40 +631,41 @@ module Lemmas where
   ... | (o , o+m≡n) = o , trans (+-suc o _) (cong suc o+m≡n)
 
   -- DivMod properties in terms of _div_, _mod_, and _divMod_
-  m%n<n' : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m % n) {≢0} < n
-  m%n<n' m (suc n) = m%n<n m n
+  m%n<n' : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m % n) ⦃ nonZero-compat ≢0 ⦄ < n
+  m%n<n' m n@(suc _) = m%n<n m n
 
-  m*n%n≡0-mod : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m * n % n){≢0} ≡ 0
-  m*n%n≡0-mod m (suc n) = m*n%n≡0 m n
+  m*n%n≡0-mod : ∀ m n {≢0 : False (n Data.Nat.≟ 0)} → (m * n % n)⦃ nonZero-compat ≢0 ⦄ ≡ 0
+  m*n%n≡0-mod m n@(suc _) = m*n%n≡0 m n
 
-  m≤n⇒m%n≡m-mod : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → toℕ ((m mod n){≢0}) ≡ m
+  m≤n⇒m%n≡m-mod : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → toℕ ((m mod n)⦃ nonZero-compat ≢0 ⦄ ) ≡ m
   m≤n⇒m%n≡m-mod {m} {suc n} {≢0} (s≤s m<n) = begin
-    Fin.toℕ (Fin.fromℕ< (m%n<n m n)) ≡⟨ Fin.toℕ-fromℕ< (m%n<n m n) ⟩
+    Fin.toℕ (Fin.fromℕ< (m%n<n m (suc n))) ≡⟨ Fin.toℕ-fromℕ< (m%n<n m (suc n)) ⟩
     m % (suc n) ≡⟨ m≤n⇒m%n≡m m<n ⟩
     m ∎
     where
     open ≡-Reasoning
 
-  m≤n⇒m%n≡m-mod' : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → (m % n){≢0} ≡ m
+  m≤n⇒m%n≡m-mod' : ∀ {m n} {≢0 : False (n Data.Nat.≟ 0)} → m < n → (m % n)⦃ nonZero-compat ≢0 ⦄ ≡ m
   m≤n⇒m%n≡m-mod' {m} {suc n} {≢0} (s≤s m<n) = m≤n⇒m%n≡m m<n
 
   [m+kn]%n≡m%n-divMod : ∀ m k n {≢0 : False (n Data.Nat.≟ 0)}
-                        → let (result q r _) = ((m + k * n) divMod n){≢0} in
-                          r ≡ (m mod n){≢0}
+                        → let (result q r _) = ((m + k * n) divMod n)⦃ nonZero-compat ≢0 ⦄ in
+                          r ≡ (m mod n)⦃ nonZero-compat ≢0 ⦄
   [m+kn]%n≡m%n-divMod m k (suc n) =
     Fin.toℕ-injective (begin
-      toℕ (Fin.fromℕ< (m%n<n (m + k * (suc n)) n)) ≡⟨ Fin.toℕ-fromℕ< (m%n<n (m + k * (suc n)) n) ⟩
-      (m + k * (suc n)) % (suc n) ≡⟨ [m+kn]%n≡m%n m k n ⟩
-      m % (suc n) ≡⟨ sym (Fin.toℕ-fromℕ< (m%n<n m n)) ⟩
+      toℕ (Fin.fromℕ< (m%n<n (m + k * (suc n)) (suc n)))
+    ≡⟨ Fin.toℕ-fromℕ< (m%n<n (m + k * (suc n)) (suc n)) ⟩
+      (m + k * (suc n)) % (suc n) ≡⟨ [m+kn]%n≡m%n m k (suc n) ⟩
+      m % (suc n) ≡⟨ sym (Fin.toℕ-fromℕ< (m%n<n m (suc n))) ⟩
       toℕ (m mod (suc n)) ∎)
     where
     open ≡-Reasoning
 
   +-distrib-/-divMod
     : ∀ m n {d} {≢0} →
-      let (result q r _) = ((m + n) divMod d){≢0} in
-      (m % d){≢0} + (n % d){≢0} < d
-      → q ≡ (m / d){≢0} + (n / d){≢0}
+      let (result q r _) = ((m + n) divMod d)⦃ nonZero-compat ≢0 ⦄ in
+      (m % d)⦃ nonZero-compat ≢0 ⦄ + (n % d)⦃ nonZero-compat ≢0 ⦄ < d
+      → q ≡ (m / d)⦃ nonZero-compat ≢0 ⦄ + (n / d)⦃ nonZero-compat ≢0 ⦄
   +-distrib-/-divMod m n {d'@(suc d)} <-pf =
     +-distrib-/ m n{d'} <-pf
 
@@ -655,7 +675,7 @@ module Lemmas where
 
   import Data.List as List
 
-  length-─-< : ∀ {ℓ} {A : Set ℓ} (xs : List A) i → length (xs List.─ i) < length xs
+  length-─-< : ∀ {ℓ} {A : Set ℓ} (xs : List A) i → length (List.removeAt xs i) < length xs
   length-─-< (x ∷ xs) Fin.zero = s≤s ≤-refl
   length-─-< (x ∷ xs) (Fin.suc i) = s≤s (length-─-< xs i)
 
@@ -731,8 +751,8 @@ module Lemmas where
     xs₂≡ = drop-length-≤ xs₁ ys₁ xs₂ ys₂ ++≡ xs₁≤xs₂
 
     ys₁≡ : ys₁ ≡ drop (length xs₁) xs₂ ++ ys₂
-    ys₁≡ = ++-cancelˡ xs₁
-      (xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
+    ys₁≡ = ++-cancelˡ xs₁ ys₁ (drop (length xs₁) xs₂ ++ ys₂) (begin
+      xs₁ ++ ys₁ ≡⟨ ++≡ ⟩
       xs₂ ++ ys₂ ≡⟨ cong (_++ ys₂) xs₂≡ ⟩
       (xs₁ ++ drop (length xs₁) xs₂) ++ ys₂ ≡⟨ ++-assoc xs₁ _ _ ⟩
       xs₁ ++ drop (length xs₁) xs₂ ++ ys₂ ∎)
@@ -753,7 +773,7 @@ module Lemmas where
 
   ++-cancel≡ˡ : ∀ {ℓ} {@0 A : Set ℓ} (@0 ws xs : List A) {@0 ys zs : List A} → ws ≡ xs
                 → ws ++ ys ≡ xs ++ zs → ys ≡ zs
-  ++-cancel≡ˡ .xs xs refl eq = ‼ ++-cancelˡ xs eq
+  ++-cancel≡ˡ .xs xs refl eq = ‼ ++-cancelˡ xs _ _ eq
 
   ≡⇒≤ : ∀ {m n} → m ≡ n → m ≤ n
   ≡⇒≤ refl = ≤-refl
