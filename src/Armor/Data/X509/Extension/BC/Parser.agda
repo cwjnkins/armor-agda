@@ -25,7 +25,7 @@ private
 parseBCFieldsSeqFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength BCFieldsSeqFields n)
 parseBCFieldsSeqFields n =
   parseEquivalent (Parallel.equivalent₁ equivalent)
-    (Sequence.parseDefaultOption falseBoool here'
+    (Sequence.parseDefaultOption{B = NonNegativeInt} falseBoool here'
       Boool.unambiguous TLV.nosubstrings
       (Parallel.nosubstrings₁ TLV.nosubstrings)
       (symNoConfusion {A = NonNegativeInt} {B = Boool}
