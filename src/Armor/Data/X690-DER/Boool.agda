@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Boool.Eq
 import Armor.Data.X690-DER.Boool.Parser
 import Armor.Data.X690-DER.Boool.Properties

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.HashAlg.RFC4055.Properties
 open import Armor.Data.X509.HashAlg.RFC4055.TCB

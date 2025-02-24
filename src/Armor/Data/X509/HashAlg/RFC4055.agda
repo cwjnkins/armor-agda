@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.HashAlg.RFC4055.Parser
 import Armor.Data.X509.HashAlg.RFC4055.Properties
 import Armor.Data.X509.HashAlg.RFC4055.TCB

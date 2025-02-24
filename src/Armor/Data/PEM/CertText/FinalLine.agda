@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.PEM.CertText.FinalLine.Parser
 import Armor.Data.PEM.CertText.FinalLine.Properties
 import Armor.Data.PEM.CertText.FinalLine.TCB

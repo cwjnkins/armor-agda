@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 module Armor.Grammar.Definitions.Unambiguous.Base (Σ : Set) where

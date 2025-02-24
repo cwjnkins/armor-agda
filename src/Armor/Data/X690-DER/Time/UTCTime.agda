@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.UTCTime.Parser
 import Armor.Data.X690-DER.Time.UTCTime.Properties
 import Armor.Data.X690-DER.Time.UTCTime.TCB

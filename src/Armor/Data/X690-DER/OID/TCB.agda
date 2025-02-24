@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
@@ -29,11 +30,11 @@ open Armor.Grammar.Definitions.NonMalleable UInt8
 -- 8.19.5 The numerical value of the ith subidentifier, (2  i  N) is that of the (i + 1)th object identifier component.
 
 LeastBytes : List UInt8 → Set
-LeastBytes = maybe (Fin._> # 128) ⊤ ∘ head
+LeastBytes = maybe (λ x → Fin._>_{i₁ = 2 ^ 8 }{i₂ = 2 ^ 8} x (# 128)) ⊤ ∘ head
 
 leastBytes? : Decidable LeastBytes
 leastBytes? [] = yes tt
-leastBytes? (b ∷ bs) = (# 128) Fin.<? b
+leastBytes? (b ∷ bs) = 128 <? (toℕ b)
 
 leastBytesUnique : ∀ {bs} → Unique (LeastBytes bs)
 leastBytesUnique{[]} tt tt = refl

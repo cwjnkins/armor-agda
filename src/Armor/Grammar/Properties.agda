@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option
@@ -211,7 +212,7 @@ module Unambiguous where
       fstₚ₂ bs≡₁
     where
     @0 bs≡' : bs₁ ≡ bs₂
-    bs≡' = ++-cancelʳ _ _ (trans₀ (sym bs≡) bs≡₁)
+    bs≡' = ++-cancelʳ _ _ _ (trans₀ (sym bs≡) bs≡₁)
   unambiguous-&₁option₁ ua₁ nn₁ ua₂ nc (mk&ₚ{bs₁ = bs₁} fstₚ₁  none bs≡)    (mk&ₚ{bs₁ = bs₂}{bs₃} fstₚ₂ (some x) bs≡₁) =
     ⊥-elim (contradiction (Lemmas.++-cancel≡ˡ _ _ (nn₁ (sym bs≡') fstₚ₂ fstₚ₁) (sym bs≡')) (nc x))
     where

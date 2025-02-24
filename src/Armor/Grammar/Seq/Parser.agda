@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Seq.Properties
 import      Armor.Grammar.Seq.TCB
@@ -52,7 +53,7 @@ runParser (parse& nn p₁ p₂) xs = do
           in
           contradiction
             (success bs₂ _ refl sndₚ suffix
-              (++-cancelˡ pre₀ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))
+              (++-cancelˡ pre₀ _ _ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))
             ¬parse
   return (yes
     (success (pre₀ ++ pre₁) (r₀ + r₁)
@@ -107,7 +108,7 @@ runParser (parse&ᵈ{A = A}{B} nn ua p₁ p₂) xs = do
                 (≡-elim (λ {pre₀} eq → B (subst₀! A eq fstₚ) bs₂)
                   sndₚ bs₁≡))
               suffix
-              (++-cancelˡ pre₀ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))
+              (++-cancelˡ pre₀ _ _ (trans (cong (_++ bs₂ ++ suffix) (sym bs₁≡)) xs≡)))
             ¬parse
   return (yes
     (success (pre₀ ++ pre₁) (r₀ + r₁)

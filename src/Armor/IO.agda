@@ -1,4 +1,4 @@
-{-# OPTIONS --guardedness #-}
+{-# OPTIONS --erasure --guardedness #-}
 
 import      Armor.Foreign.ByteString as ByteString
 open import Armor.Foreign.Time
@@ -15,7 +15,7 @@ module Armor.IO where
 {-# FOREIGN GHC import           Data.Time.Clock #-}
 
 module Primitive where
-  open import IO.Primitive
+  open import IO.Primitive.Core
   postulate
     Handle IOMode  : Set
 

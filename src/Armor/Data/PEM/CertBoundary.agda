@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.PEM.CertBoundary.Parser
 import Armor.Data.PEM.CertBoundary.Properties
 import Armor.Data.PEM.CertBoundary.TCB

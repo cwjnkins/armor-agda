@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.ReasonCode.TCB
 import      Armor.Data.X690-DER.Int.Properties as Int
@@ -20,7 +21,7 @@ nosubstrings = Parallel.nosubstrings₁ TLV.nosubstrings
 
 @0 unambiguous' : Unambiguous ReasonCodeFieldsEnum
 unambiguous' = Parallel.unambiguous (TLV.unambiguous Int.unambiguousValue)
-    λ v → erased-unique (∈-unique (toWitness{Q = List.unique? _≟_ supportedCodes} tt))
+    λ v → erased-unique (∈-unique (toWitness{a? = List.unique? _≟_ supportedCodes} tt))
 
 @0 unambiguous : Unambiguous ReasonCodeFields
 unambiguous = TLV.unambiguous unambiguous'

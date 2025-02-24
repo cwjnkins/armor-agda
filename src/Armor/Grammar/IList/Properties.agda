@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Option
@@ -109,7 +110,7 @@ unambiguousNOWF{A} ua ne noo {bs} (consIList{bs₁₁} hd₁ nil bs₁≡) (cons
     bs₁₁ ++ [] ∎
 
   @0 bs₂₂≡[] : bs₂₂ ≡ []
-  bs₂₂≡[] = ++-conicalˡ bs₂₂ bs₂₃ (++-conicalʳ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃) (++-cancelˡ bs₁₁ bs≡'))
+  bs₂₂≡[] = ++-conicalˡ bs₂₂ bs₂₃ (++-conicalʳ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃) (++-cancelˡ bs₁₁ _ _ bs≡'))
 
   -- lem₁ = noo bs₁₁ (drop (length bs₁₁) bs₂₁) (bs₂₂ ++ bs₂₃) {!!} {!!} {!!} (subst₀ A bs₂₁≡ hd₂) hd₁
 unambiguousNOWF ua ne noo {bs} (consIList{bs₁₁} hd₁ (consIList{bs₁₂}{bs₁₃} hd₁' tl₁ refl) bs₁≡) (consIList{bs₂₁} hd₂ nil bs₂≡) _ =
@@ -133,13 +134,13 @@ unambiguousNOWF ua ne noo {bs} (consIList{bs₁₁} hd₁ (consIList{bs₁₂}{b
     bs₂₁ ++ [] ∎
 
   @0 bs₁₂≡[] : bs₁₂ ≡ []
-  bs₁₂≡[] = ++-conicalˡ bs₁₂ bs₁₃ (++-conicalʳ (drop (length bs₂₁) bs₁₁) (bs₁₂ ++ bs₁₃) (++-cancelˡ bs₂₁ bs≡'))
+  bs₁₂≡[] = ++-conicalˡ bs₁₂ bs₁₃ (++-conicalʳ (drop (length bs₂₁) bs₁₁) (bs₁₂ ++ bs₁₃) (++-cancelˡ bs₂₁ _ _ bs≡'))
 
 unambiguousNOWF ua ne noo {bs}(consIList{bs₁₁}{bs₁₂'} hd₁ tl₁@(consIList{bs₁₂}{bs₁₃} hd₁' tl₁' bs₁≡') bs₁≡) (consIList{bs₂₁}{bs₂₂'} hd₂ tl₂@(consIList{bs₂₂}{bs₂₃} hd₂' tl₂' bs₂≡') bs₂≡) (WellFounded.acc rs) =
   caseErased bs₁₁≡bs₂₁ ret (const _) of λ where
     (refl , refl) → ─ (caseErased ua hd₁ hd₂ ret (const _) of λ where
       refl → ─ (caseErased ≡-unique bs₁≡ bs₂≡ ret (const _) of λ where
-        refl → ─ (caseErased unambiguousNOWF ua ne noo tl₁ tl₂ (rs _ (s≤s ≤-refl)) ret (const _) of λ where
+        refl → ─ (caseErased unambiguousNOWF ua ne noo tl₁ tl₂ (rs (s≤s ≤-refl)) ret (const _) of λ where
           refl → ─ refl)))
   where
   open ≡-Reasoning
@@ -167,7 +168,7 @@ unambiguousNOWF ua ne noo {bs}(consIList{bs₁₁}{bs₁₂'} hd₁ tl₁@(consI
     bs₁₁ ++ drop (length bs₁₁) bs₂₁ ++ drop (length bs₂₁) bs₁₁ ∎
 
   @0 lem : drop (length bs₁₁) bs₂₁ ++ drop (length bs₂₁) bs₁₁ ≡ []
-  lem = ++-cancelˡ bs₁₁ (trans (sym bs₁₁≡') (sym (++-identityʳ bs₁₁)))
+  lem = ++-cancelˡ bs₁₁ _ _ (trans (sym bs₁₁≡') (sym (++-identityʳ bs₁₁)))
 
   @0 lem₁ : length bs₁₁ ≤ length bs₂₁
   lem₁ = ≤.begin
@@ -260,7 +261,7 @@ lengthIList≤ ne nn .(bs₁ ++ bs₂) xs₂{ys₁ = ys₁}{ys₂} ++≡ xs₁�
   bs₁≡ = nn ++≡' head₁ head₂
 
   @0 bs₂≤ : length bs₂ ≤ length bs₂'
-  bs₂≤ = +-cancelˡ-≤ (length bs₁)
+  bs₂≤ = +-cancelˡ-≤ (length bs₁) _ _
            (≤.begin (length bs₁ + length bs₂ ≤.≡⟨ sym (length-++ bs₁) ⟩
                     length (bs₁ ++ bs₂) ≤.≤⟨ xs₁≤ ⟩
                     length (bs₁' ++ bs₂') ≤.≡⟨ length-++ bs₁' ⟩
@@ -280,7 +281,7 @@ private
     = case (─ _ ,e h) ≟ (─ _ ,e h₁) ret (const _) of λ where
         (no ¬p) → no λ where refl → contradiction refl ¬p
         (yes refl) →
-          case eqIListWF t t₁ (rs _ ≤-refl) ret (const _) of λ where
+          case eqIListWF t t₁ (rs ≤-refl) ret (const _) of λ where
             (no ¬p) → no λ where refl → contradiction refl ¬p
             (yes refl) → yes refl
     where
@@ -306,5 +307,5 @@ nonmalleable {A} {R} ne nn N a₁ a₂ eq = noma a₁ a₂ eq (Nat.<-wellFounded
   noma nil nil eq (Nat.acc rs) = refl
   noma (consIList head₁ tail₁ refl) (consIList head₂ tail₂ refl) eq (Nat.acc rs) =
     case N head₁ head₂ (∷-injectiveˡ eq) ret (const _) of λ where
-      refl → case ‼ noma tail₁ tail₂ (∷-injectiveʳ eq) (rs _ ≤-refl) ret (const _) of λ where
+      refl → case ‼ noma tail₁ tail₂ (∷-injectiveʳ eq) (rs ≤-refl) ret (const _) of λ where
         refl → refl

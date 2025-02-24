@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Int.TCB
 open import Armor.Data.X690-DER.TLV.TCB
@@ -13,7 +14,8 @@ open Armor.Grammar.Parallel    UInt8
 
 nonnegUnique : ∀ {bs} (a : Int bs) → Unique (ℤ.NonNegative (getVal a))
 nonnegUnique a with getVal a
-... | ℤ.+_ _ = ⊤-unique
+... | ℤ.+_ _ = λ where
+  record { nonNeg = tt } record { nonNeg = tt } → refl
 
 @0 nonempty : NonEmpty IntegerValue
 nonempty (mkIntVal bₕ bₜ minRep val ()) refl
@@ -88,7 +90,7 @@ nonNegativeℤ→ℕ-injective (ℤ.+ n₁) (ℤ.+ n₂) _ _ refl = refl
 
 private
   nonnegative-unique : ∀ {i₁} → (nn₁ nn₂ : ℤ.NonNegative i₁) → nn₁ ≡ nn₂
-  nonnegative-unique {ℤ.+ n} tt tt = refl
+  nonnegative-unique {ℤ.+ n} (record { nonNeg = tt }) (record { nonNeg = tt }) = refl
 
 @0 nonmalleableNonNegative : NonMalleable RawNonNegativeInt
 nonmalleableNonNegative n₁@(mk×ₚ i₁ i₁≥0) n₂@(mk×ₚ i₂ i₂≥0) eq

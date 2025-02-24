@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 -- TODO: make this depend on Armor.Grammar.Definitions once dependencies have
 -- been sorted out
 import      Armor.Grammar.Definitions.Eq

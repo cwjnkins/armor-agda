@@ -1,4 +1,4 @@
-{-# OPTIONS  --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Data.X509
@@ -93,7 +93,7 @@ buildTrustTreeWF trustedRoot candidates (WellFounded.acc rs) {bs} issuee =
        → TrustTreeBranchF trustedRoot candidates issuee iss
   ih{anIssuerForIn issuer isIssuerFor issuer∈candidates} ∈otherIssuers =
     buildTrustTreeWF (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates)
-      (rs _ (removeCertFromCerts< issuer candidates issuer∈candidates))
+      (rs (removeCertFromCerts< issuer candidates issuer∈candidates))
       issuer
 
 buildTrustTree : (trustedRoot candidates : List (Exists─ _ Cert))
@@ -116,7 +116,7 @@ toChainsBranchWF trustedRoot candidates endEnt (WellFounded.acc rs) (anIssuerFor
   map (link issuer (isIssuerFor , issuer∈))
     (toChainsWF (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates)
       issuer
-      (rs _ (removeCertFromCerts< issuer candidates issuer∈))
+      (rs (removeCertFromCerts< issuer candidates issuer∈))
       tr)
 
 toChainsWF trustedRoot candidates endEnt ac (mkTrustTree rootIssuers otherIssuers otherTrust) =
@@ -164,10 +164,10 @@ toChainsBranchCompleteWF trustedRoot candidates {- unique -} issuee (WellFounded
       ih)
   where
   chains' : List (Chain (removeCertFromCerts issuer trustedRoot) (removeCertFromCerts issuer candidates) issuer)
-  chains' = toChainsWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr
+  chains' = toChainsWF _ _ issuer (rs (removeCertFromCerts< _ candidates issuer∈)) tr
 
   ih : Any (chain ≡Chain_) chains'
-  ih = toChainsCompleteWF _ _ issuer (rs _ (removeCertFromCerts< _ candidates issuer∈)) tr chain
+  ih = toChainsCompleteWF _ _ issuer (rs (removeCertFromCerts< _ candidates issuer∈)) tr chain
 
 allLookupLemma : {A : Set} {P : (a : A) → Set} → ∀ {x xs} → (all : All P xs) → (x∈ : x ∈ xs) → ((x , All.lookup all x∈)) ∈ All.toList all
 allLookupLemma {x} {xs} (px₁ ∷ all₁) (here refl) = here refl

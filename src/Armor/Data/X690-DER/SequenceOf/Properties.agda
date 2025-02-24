@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.SequenceOf.TCB
   hiding (length)
@@ -115,7 +116,7 @@ module SequenceOf where
     inj nil nil _ eq = refl
     inj (consIList h₁ t₁ refl) (consIList h₂ t₂ refl) (WellFounded.acc rs) eq =
       case N h₁ h₂ (∷-injectiveˡ eq) ret (const _) of λ where
-        refl → case (‼ inj t₁ t₂ (rs _ ≤-refl) (∷-injectiveʳ eq)) ret (const _) of λ where
+        refl → case (‼ inj t₁ t₂ (rs ≤-refl) (∷-injectiveʳ eq)) ret (const _) of λ where
           refl → refl
 
 module Bounded where

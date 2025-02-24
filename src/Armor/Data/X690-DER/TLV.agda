@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.TLV.Parser
 import Armor.Data.X690-DER.TLV.Properties
 import Armor.Data.X690-DER.TLV.TCB

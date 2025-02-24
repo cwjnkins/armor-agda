@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Serializer
 import      Armor.Grammar.Option.Parser
 import      Armor.Grammar.Option.Properties

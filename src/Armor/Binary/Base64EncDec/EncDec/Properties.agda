@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Binary.Base64EncDec.Base64           as Base64
 import      Armor.Binary.Base64EncDec.EncDec.Bytes.TCB as Bytes
 open import Armor.Binary.Base64EncDec.EncDec.TCB
@@ -85,7 +86,7 @@ base64To256∘base256To64 (x ∷ x₁ ∷ []) = begin
     fromBinary {8} ((toBinary {6} (fromBinary {6} (Vec.take 6 {2} xb)))
       Vec.++ (Vec.take 2 {4} (toBinary {6} (fromBinary {6} ((Vec.drop 6 {2} xb) Vec.++ (Vec.take 4 {4} x₁b))))))
     ∷ [ fromBinary {8} ((Vec.drop 2 {4} (toBinary {6} (fromBinary {6} ((Vec.drop 6 {2} xb) Vec.++ (Vec.take 4 {4} x₁b)))))
-        Vec.++ (Vec.take 4 {2} (toBinary {6} (fromBinary {6} ((Vec.drop 4 {4} x₁b) Vec.++ (Vec.replicate #0)))))) ]
+        Vec.++ (Vec.take 4 {2} (toBinary {6} (fromBinary {6} ((Vec.drop 4 {4} x₁b) Vec.++ (Vec.replicate _ #0)))))) ]
           ≡⟨ cong₂ _∷_
                (cong (fromBinary {8})
                  (cong₂ (Vec._++_ {m = 6} {2})
@@ -97,10 +98,10 @@ base64To256∘base256To64 (x ∷ x₁ ∷ []) = begin
                    (cong (Vec.drop 2 {4})
                      (toBinary∘fromBinary ((Vec.drop 6 {2} xb) Vec.++ (Vec.take 4 {4} x₁b))))
                    (cong (Vec.take 4 {2})
-                     (toBinary∘fromBinary {6} ((Vec.drop 4 {4} x₁b) Vec.++ (Vec.replicate #0))))))) ⟩
+                     (toBinary∘fromBinary {6} ((Vec.drop 4 {4} x₁b) Vec.++ (Vec.replicate _ #0))))))) ⟩
     fromBinary {8} (Vec.take 6 {2} xb Vec.++ Vec.take 2 {4} ((Vec.drop 6 {2} xb) Vec.++ (Vec.take 4 {4} x₁b)))
     ∷ [ fromBinary {8} ((Vec.drop 2 {4} (Vec.drop 6 {2} xb Vec.++ (Vec.take 4 {4} x₁b)))
-        Vec.++ Vec.take 4 {2} (Vec.drop 4 {4} x₁b Vec.++ Vec.replicate #0)) ] ≡⟨⟩
+        Vec.++ Vec.take 4 {2} (Vec.drop 4 {4} x₁b Vec.++ Vec.replicate _ #0)) ] ≡⟨⟩
     fromBinary{8} (toBinary{8} x) ∷ [ fromBinary{8} (toBinary{8} x₁)]
       ≡⟨ cong₂ (λ x y₁ → x ∷ [ y₁ ])
            (fromBinary∘toBinary{8} x)
@@ -109,8 +110,9 @@ base64To256∘base256To64 (x ∷ x₁ ∷ []) = begin
 
 base64To256∘base256To64 (x ∷ x₁ ∷ x₂ ∷ bs) = begin
   base64To256 ((y‼ (# 0) ∷ y‼ (# 1) ∷ y‼ (# 2) ∷ [ y‼ (# 3) ]) ++ base256To64 bs) ≡⟨⟩
-  maybe (λ ds → just (map fromBinary (Vec.toList z) ++ ds)) nothing (base64To256 (base256To64 bs))
-    ≡⟨ cong (maybe (λ ds → just (map fromBinary (Vec.toList z) ++ ds)) nothing)
+  ((base64To256 (base256To64 bs)) Maybe.>>= λ ds → just (map fromBinary (Vec.toList z) ++ ds))
+    ≡⟨ cong
+         (λ x → Maybe._>>=_ x λ ds → just (map fromBinary (Vec.toList z) ++ ds))
          (base64To256∘base256To64 bs) ⟩
   just (map fromBinary (Vec.toList z) ++ bs) ≡⟨⟩
   just w ≡⟨ cong just w≡ ⟩
@@ -195,7 +197,7 @@ base256To64Valid (x ∷ []) = begin
   Vec.drop 2 {4} (toBinary{6} (fromBinary{6} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1))))
     ≡⟨ cong (Vec.drop 2 {4}) (toBinary∘fromBinary{6} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1))) ⟩
   Vec.drop 2 {4} (lookup (Vec.toList (Bytes.pad256To64₁ (toBinary x))) (# 1)) ≡⟨⟩
-  (Vec.replicate #0 ∎)
+  (Vec.replicate _ #0 ∎)
   where
   open ≡-Reasoning
 
@@ -206,7 +208,7 @@ base256To64Valid (x ∷ x₁ ∷ []) = begin
   Vec.drop 4 {2} (toBinary {6} (fromBinary{6} (lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2))))
     ≡⟨ cong (Vec.drop 4 {2}) (toBinary∘fromBinary {6} ((lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2)))) ⟩
   Vec.drop 4 {2} ((lookup (Vec.toList ((Bytes.pad256To64₂ (toBinary x , toBinary x₁)))) (# 2))) ≡⟨⟩
-  Vec.replicate #0 ∎)
+  Vec.replicate _ #0 ∎)
   where
   open ≡-Reasoning
 
@@ -246,24 +248,24 @@ base256To64∘base64To256 bs@(x ∷ x₁ ∷ []) v = begin
     (fromBinary {6} (z‼ (# 0)) ∷ [ fromBinary {6} (z‼ (# 1)) ]
       ≡⟨⟩
     (fromBinary {6} (Vec.take 6 {2} (toBinary y₁))
-    ∷ [ fromBinary {6} ((Vec.drop 6 {2} (toBinary y₁)) Vec.++ (Vec.replicate #0)) ]
+    ∷ [ fromBinary {6} ((Vec.drop 6 {2} (toBinary y₁)) Vec.++ (Vec.replicate _ #0)) ]
       ≡⟨⟩
     fromBinary {6} (Vec.take 6 {2} (toBinary{8} (fromBinary{8} (lookup y (# 0)))))
-    ∷ [ fromBinary{6} ((Vec.drop 6 {2} (toBinary{8} (fromBinary{8} (lookup y (# 0))))) Vec.++ (Vec.replicate #0)) ]
+    ∷ [ fromBinary{6} ((Vec.drop 6 {2} (toBinary{8} (fromBinary{8} (lookup y (# 0))))) Vec.++ (Vec.replicate _ #0)) ]
       ≡⟨ cong₂ (λ x y₂ → x ∷ [ y₂ ])
            (cong (λ x → fromBinary {6} (Vec.take 6 {2} x))
              (toBinary∘fromBinary{8} (lookup y (# 0))))
-           (cong (λ x → fromBinary{6} ((Vec.drop 6 {2} x) Vec.++ (Vec.replicate #0)))
+           (cong (λ x → fromBinary{6} ((Vec.drop 6 {2} x) Vec.++ (Vec.replicate _ #0)))
              (toBinary∘fromBinary{8} (lookup y (# 0)))) ⟩
     fromBinary {6} (Vec.take 6 {2} (lookup y (# 0)))
-    ∷ [ fromBinary {6} ((Vec.drop 6 {2} (lookup y (# 0))) Vec.++ (Vec.replicate #0)) ]
+    ∷ [ fromBinary {6} ((Vec.drop 6 {2} (lookup y (# 0))) Vec.++ (Vec.replicate _ #0)) ]
       ≡⟨⟩
     fromBinary {6} (toBinary{6} x)
-    ∷ [ fromBinary{6} (Vec.take 2 {4} (toBinary{6} x₁) Vec.++ Vec.replicate #0) ]
+    ∷ [ fromBinary{6} (Vec.take 2 {4} (toBinary{6} x₁) Vec.++ Vec.replicate _ #0) ]
       ≡⟨ cong₂ (λ x y₂ → x ∷ [ y₂ ])
         (fromBinary∘toBinary{6} x)
         (begin
-          (fromBinary{6} (Vec.take 2 {4} (toBinary{6} x₁) Vec.++ Vec.replicate #0)
+          (fromBinary{6} (Vec.take 2 {4} (toBinary{6} x₁) Vec.++ Vec.replicate _ #0)
             ≡⟨ cong (λ x → fromBinary{6} (Vec.take 2 {4} (toBinary{6} x₁) Vec.++ x))
                  (sym v) ⟩
           fromBinary{6} (toBinary{6} x₁) ≡⟨ fromBinary∘toBinary{6} x₁ ⟩
@@ -305,12 +307,12 @@ base256To64∘base64To256 bs@(x ∷ x₁ ∷ x₂ ∷ []) v = begin
      ∷ [ fromBinary{6} (lookup z' (# 2)) ] ≡⟨⟩
     (fromBinary {6} (Vec.take 6 {2} (toBinary y₁))
      ∷ fromBinary{6} ((Vec.drop 6 {2} (toBinary y₁)) Vec.++ (Vec.take 4 {4} (toBinary y₂)))
-     ∷ [ fromBinary {6} ((Vec.drop 4 {4} (toBinary y₂)) Vec.++ (Vec.replicate #0)) ] ≡⟨⟩
+     ∷ [ fromBinary {6} ((Vec.drop 4 {4} (toBinary y₂)) Vec.++ (Vec.replicate _ #0)) ] ≡⟨⟩
     fromBinary{6} (Vec.take 6 {2} (toBinary{8} (fromBinary{8} (lookup ys' (# 0)))))
     ∷ fromBinary{6} (Vec.drop 6 {2} (toBinary{8} (fromBinary{8} (lookup ys' (# 0))))
       Vec.++ Vec.take 4 {4} (toBinary{8} (fromBinary{8} (lookup ys' (# 1)))))
     ∷ [ fromBinary{6} (Vec.drop 4 {4} (toBinary{8} (fromBinary{8} (lookup ys' (# 1))))
-        Vec.++ Vec.replicate #0) ]
+        Vec.++ Vec.replicate _ #0) ]
     ≡⟨ cong₂ _∷_
          (cong (λ x → fromBinary{6} (Vec.take 6 {2} x))
            (toBinary∘fromBinary{8} (lookup ys' (# 0))))
@@ -319,7 +321,7 @@ base256To64∘base64To256 bs@(x ∷ x₁ ∷ x₂ ∷ []) v = begin
              (toBinary∘fromBinary {8} (lookup ys' (# 0)))
              (toBinary∘fromBinary {8} (lookup ys' (# 1))))
            (cong
-             (λ x → fromBinary{6} ((Vec.drop 4 {4} x) Vec.++ Vec.replicate #0))
+             (λ x → fromBinary{6} ((Vec.drop 4 {4} x) Vec.++ Vec.replicate _ #0))
              (toBinary∘fromBinary{8} (lookup ys' (# 1))))) ⟩
     fromBinary {6} (Vec.take 6 {2} (lookup ys' (# 0)))
     ∷ fromBinary {6}
@@ -327,37 +329,31 @@ base256To64∘base64To256 bs@(x ∷ x₁ ∷ x₂ ∷ []) v = begin
          Vec.++ Vec.take 4 {4} (lookup ys' (# 1)))
     ∷ [ fromBinary {6}
           (Vec.drop 4 {4} (lookup ys' (# 1))
-           Vec.++ Vec.replicate #0) ] ≡⟨⟩
+           Vec.++ Vec.replicate _ #0) ] ≡⟨⟩
     (fromBinary {6} (toBinary{6} x)
     ∷ fromBinary{6} (toBinary{6} x₁)
     ∷ [ fromBinary{6}
-          (Vec.take 4 {2} (toBinary{6} x₂) Vec.++ Vec.replicate #0) ]
+          (Vec.take 4 {2} (toBinary{6} x₂) Vec.++ Vec.replicate _ #0) ]
     ≡⟨ cong₂ _∷_ (fromBinary∘toBinary{6} x)
        (cong₂ (λ x y → x ∷ [ y ])
          (fromBinary∘toBinary{6} x₁)
          (begin
-           (fromBinary{6} (Vec.take 4 {2} (toBinary{6} x₂) Vec.++ Vec.replicate #0)
+           (fromBinary{6} (Vec.take 4 {2} (toBinary{6} x₂) Vec.++ Vec.replicate _ #0)
            ≡⟨ cong (λ x → fromBinary{6} (Vec.take 4 {2} (toBinary{6} x₂) Vec.++ x))
                 (sym v) ⟩
            fromBinary{6} (toBinary{6} x₂) ≡⟨ fromBinary∘toBinary{6} x₂ ⟩
            x₂ ∎))) ⟩
     bs ∎)))
 base256To64∘base64To256 xs@(x ∷ x₁ ∷ x₂ ∷ x₃ ∷ bs) v = begin
-  (maybe {A = List UInt8}{B = const (Maybe (List UInt6))}
-    (just ∘ base256To64) nothing
-    (base64To256 (Vec.toList bs' ++ bs)) ≡⟨⟩
-  (maybe {A = List UInt8}{B = const (Maybe (List UInt6))}
-    (just ∘ base256To64) nothing
-    (maybe{A = List UInt8}{B = const (Maybe (List UInt8))}
-      (λ ds → just (Vec.toList ys' ++ ds)) nothing
-      (base64To256 bs))
+  maybe (just ∘ base256To64) nothing (base64To256 (Vec.toList bs' ++ bs)) ≡⟨⟩
+  maybe (just ∘ base256To64) nothing
+    (Maybe._>>=_ (base64To256 bs) λ ds →
+       just (Vec.toList ys' ++ ds))
   ≡⟨ cong
-       (λ x →
-         maybe {A = List UInt8}{B = const (Maybe (List UInt6))}
-           (just ∘ base256To64) nothing
-           (maybe{A = List UInt8}{B = const (Maybe (List UInt8))}
-             (λ ds → just (Vec.toList ys' ++ ds)) nothing x))
-             (proj₂ lem) ⟩
+       (λ x → maybe (just ∘ base256To64) nothing
+         (Maybe._>>=_ x λ ds → just (Vec.toList ys' ++ ds)))
+       (proj₂ lem)
+   ⟩
   just (base256To64 (Vec.toList ys' ++ ys“)) ≡⟨⟩
   just (zs' ++ base256To64 ys“) ≡⟨⟩
   Maybe.map (zs' ++_)
@@ -369,7 +365,7 @@ base256To64∘base64To256 xs@(x ∷ x₁ ∷ x₂ ∷ x₃ ∷ bs) v = begin
       ≡⟨ cong (Maybe.map (zs' ++_))
            (base256To64∘base64To256 bs v) ⟩
   just (zs' ++ bs) ≡⟨ cong (λ x → just (x ++ bs)) zs'≡ ⟩
-  just xs ∎))
+  just xs ∎
   where
   open ≡-Reasoning
 

@@ -1,9 +1,9 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509
 open import Armor.Data.X509.Semantic.Cert.Utils
 open import Armor.Data.X690-DER.SequenceOf
 open import Armor.Prelude
-open import Relation.Nullary.Implication
 
 module Armor.Data.X509.Semantic.Cert.R5 where
 

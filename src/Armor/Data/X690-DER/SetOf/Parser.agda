@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.SequenceOf
 open import Armor.Data.X690-DER.SetOf.Order.TCB
@@ -78,7 +79,7 @@ module _ (caller : String) {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 
         (success pre₁ r₁ r₁≡
           (mk×ₚ
             (mkSetOfFields (mk×ₚ elems' elemsLen)
-              (subst₀ (λ x → True (sorted? _≲?_ x)) (sym ol₁≡ol₂) (fromWitness{Q = sorted? _≲?_ _} sorted)))
+              (subst₀ (λ x → True (sorted? _≲?_ x)) (sym ol₁≡ol₂) (fromWitness{a? = sorted? _≲?_ _} sorted)))
             (─ v₁BSLen))
           suf₁ ps≡₁))
     where
@@ -103,7 +104,7 @@ module _ (caller : String) {A : @0 List UInt8 → Set} (@0 ne : NonEmpty A) (@0 
       contradiction (++-conicalˡ _ _ (sym bs≡₁)) (ne h₁)
     orderingList≡' (consIList{bs₁ = bs₁₁} (mk×ₚ h₁ self) t₁ refl) (consIList{bs₁ = bs₁₂} h₂ t₂ bs≡₂) =
       caseErased ns (sym bs≡₂) h₂ h₁ ret (const _) of λ where
-        refl → ─ (caseErased ++-cancelˡ bs₁₁ (‼ bs≡₂) ret (const _) of λ where
+        refl → ─ (caseErased ++-cancelˡ bs₁₁ _ _ (‼ bs≡₂) ret (const _) of λ where
           refl → ─ (cong₂ _∷_ refl (orderingList≡' t₁ t₂)))
 
   parse : Parser (Logging ∘ Dec) (SetOf A)

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 open import Armor.Binary

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.GeneralNames.GeneralName.TCB
 open import Armor.Data.X690-DER.Default.TCB
@@ -38,7 +39,7 @@ MaxBaseDistance : @0 List UInt8 → Set
 MaxBaseDistance = [ Tag.A81 ]Int
 
 defaultMinBaseDistance : MinBaseDistance _
-defaultMinBaseDistance = mkTLV (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
+defaultMinBaseDistance = mkTLV (short (mkShort (# 1) (toWitness{a? = _ <? _} tt) refl))
   (mkIntVal (# 0) [] tt self refl) refl refl
 
 record GeneralSubtreeFields (@0 bs : List UInt8) : Set where

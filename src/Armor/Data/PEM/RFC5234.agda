@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.PEM.RFC5234.Parser
 import Armor.Data.PEM.RFC5234.Properties
 import Armor.Data.PEM.RFC5234.TCB

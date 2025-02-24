@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.Extension.AIA
 open import Armor.Data.X509.Extension.AKI
@@ -227,7 +228,7 @@ module Select where
                             (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
                               (noconfusionOIDS λ ())
                               (Sum.noconfusion{ExtensionFields (_≡ OIDs.AKILit) AKIFields}
-                                (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))))
+                                (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))))))))))))
 
     noconfusion₂ : NoConfusion (ExtensionFields (_≡ OIDs.SKILit) SKIFields) (Sum _ _)
     noconfusion₂ =
@@ -254,7 +255,7 @@ module Select where
                           (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
                             (noconfusionOIDS λ ())
                             (Sum.noconfusion{ExtensionFields (_≡ OIDs.SKILit) SKIFields}
-                              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))))
+                              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))))))))))))
 
 
     noconfusion₃ : NoConfusion (ExtensionFields (_≡ OIDs.KULit)  KUFields)  (Sum _ _)
@@ -280,7 +281,7 @@ module Select where
                         (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
                           (noconfusionOIDS λ ())
                           (Sum.noconfusion{ExtensionFields (_≡ OIDs.KULit) KUFields}
-                            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))))
+                            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))))))))))
 
 
     noconfusion₄ : NoConfusion (ExtensionFields (_≡ OIDs.EKULit) EKUFields) (Sum _ _)
@@ -304,7 +305,7 @@ module Select where
                       (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
                         (noconfusionOIDS λ ())
                         (Sum.noconfusion{ExtensionFields (_≡ OIDs.EKULit) EKUFields}
-                          (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))))
+                          (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))))))))))
 
 
     noconfusion₅ : NoConfusion (ExtensionFields (_≡ OIDs.BCLit)  BCFields)  (Sum _ _)
@@ -326,7 +327,7 @@ module Select where
                     (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
                       (noconfusionOIDS λ ())
                       (Sum.noconfusion{ExtensionFields (_≡ OIDs.BCLit) BCFields}
-                        (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))))
+                        (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))))))))
 
 
     noconfusion₆ : NoConfusion (ExtensionFields (_≡ OIDs.IANLit) IANFields) (Sum _ _)
@@ -346,7 +347,7 @@ module Select where
                   (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
                     (noconfusionOIDS λ ())
                     (Sum.noconfusion{ExtensionFields (_≡ OIDs.IANLit) IANFields}
-                      (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))))
+                      (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))))))))
 
 
     noconfusion₇ : NoConfusion (ExtensionFields (_≡ OIDs.SANLit) SANFields) (Sum _ _)
@@ -364,7 +365,7 @@ module Select where
                 (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
                   (noconfusionOIDS λ ())
                   (Sum.noconfusion{ExtensionFields (_≡ OIDs.SANLit) SANFields}
-                    (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))))
+                    (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))))))
 
     noconfusion₈ : NoConfusion (ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields) (Sum _ _)
     noconfusion₈ =
@@ -379,7 +380,7 @@ module Select where
               (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
                 (noconfusionOIDS λ ())
                 (Sum.noconfusion{ExtensionFields (_≡ OIDs.CPOLLit) CertPolFields}
-                  (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))))
+                  (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))))))
 
     noconfusion₉ : NoConfusion (ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields) (Sum _ _)
     noconfusion₉ =
@@ -392,7 +393,7 @@ module Select where
               (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
                 (noconfusionOIDS λ ())
                 (Sum.noconfusion{ExtensionFields (_≡ OIDs.CRLDISTLit) CRLDistFields}
-                  (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))))
+                  (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))))
 
     noconfusion₁₀ : NoConfusion (ExtensionFields (_≡ OIDs.NCLit) NCFields) (Sum _ _)
     noconfusion₁₀ =
@@ -403,7 +404,7 @@ module Select where
           (Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
             (noconfusionOIDS λ ())
             (Sum.noconfusion{ExtensionFields (_≡ OIDs.NCLit) NCFields}
-              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))))
+              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))))
 
     noconfusion₁₁ : NoConfusion (ExtensionFields (_≡ OIDs.PCLit) PCFields) (Sum _ _)
     noconfusion₁₁ =
@@ -412,25 +413,25 @@ module Select where
         (Sum.noconfusion{ExtensionFields (_≡ OIDs.PCLit) PCFields}
           (noconfusionOIDS λ ())
           (Sum.noconfusion{ExtensionFields (_≡ OIDs.PCLit) PCFields}
-            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))))
+            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))))
 
     noconfusion₁₂ : NoConfusion (ExtensionFields (_≡ OIDs.PMLit) PMFields) (Sum _ _)
     noconfusion₁₂ =
       Sum.noconfusion{ExtensionFields (_≡ OIDs.PMLit) PMFields}
         (noconfusionOIDS λ ())
           (Sum.noconfusion{ExtensionFields (_≡ OIDs.PMLit) PMFields}
-            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
+            (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))
 
     noconfusion₁₃ : NoConfusion (ExtensionFields (_≡ OIDs.INAPLit) INAPFields) (Sum _ _)
     noconfusion₁₃ =
       Sum.noconfusion{ExtensionFields (_≡ OIDs.INAPLit) INAPFields}
-        (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt))
+        (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt))
 
     noconfusion₀ : NoConfusion
                      (ExtensionFields (_≡ OIDs.AIALit) AIAFields)
                      (Σₚ (ExtensionFields (False ∘ (_∈? supportedExtensions)) _) _)
-    noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
-      -- noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
+    noconfusion₀ = noconfusionOIDN (toWitness{a? = _ ∈? _} tt)
+      -- noconfusionOIDN (toWitness{a? = _ ∈? _} tt)
 
   @0 nonmalleable : NonMalleable RawSelectExtn
   nonmalleable = Iso.nonmalleable iso RawSelectExtnRep nm

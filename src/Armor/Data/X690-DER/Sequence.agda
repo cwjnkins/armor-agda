@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Sequence.DefinedByOID
 import Armor.Data.X690-DER.Sequence.Parser
 import Armor.Data.X690-DER.Sequence.Properties

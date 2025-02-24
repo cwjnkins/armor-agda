@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Binary
 import      Armor.Grammar.Definitions.NonMalleable

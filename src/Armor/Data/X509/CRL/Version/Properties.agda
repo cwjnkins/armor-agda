@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.CRL.Version.TCB
 import      Armor.Data.X690-DER.Int.Properties as Int
@@ -27,7 +28,7 @@ nosubstrings = Parallel.nosubstrings₁ TLV.nosubstrings
 
 @0 unambiguous : Unambiguous Version
 unambiguous = Parallel.unambiguous Int.unambiguous
-  λ v → erased-unique (∈-unique (toWitness{Q = List.unique? _≟_ supportedVersions} tt))
+  λ v → erased-unique (∈-unique (toWitness{a? = List.unique? _≟_ supportedVersions} tt))
 
 @0 nonmalleable : NonMalleable RawVersion
 nonmalleable a₁@(mk×ₚ v₁ (─ v₁∈)) a₂@(mk×ₚ v₂ (─ v₂∈)) =

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Prelude
 open import Data.Nat.Properties as Nat
@@ -28,9 +29,13 @@ module FromBinary where
   aux : ∀ {n} → Vec Bool n → Fin (2 ^ n)
   aux {.0} [] = Fin.zero
   aux {n@.(suc _)} (#0 ∷ bits) =
-    subst Fin (suc[pred[n]]≡n {2 ^ n} (2^n≢0 n)) (Fin.inject₁ (Fin.2* (aux bits)))
+    subst Fin
+      (suc-pred (2 ^ n) ⦃ ≢-nonZero (2^n≢0 n) ⦄)
+      (Fin.inject₁ (Fin.2* (aux bits)))
   aux {n@.(suc _)} (#1 ∷ bits) =
-    subst Fin (suc[pred[n]]≡n{2 ^ n} (2^n≢0 n)) (Fin.fromℕ 1 Fin.+ (Fin.2* (aux bits)))
+    subst Fin
+      (suc-pred (2 ^ n) ⦃ ≢-nonZero (2^n≢0 n) ⦄)
+      (Fin.fromℕ 1 Fin.+ (Fin.2* (aux bits)))
 
   fromBinary : ∀ {n} → Binary n → Fin (2 ^ n)
   fromBinary bits = aux (Vec.reverse bits)

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID.Parser
 open import Armor.Data.X690-DER.OID.TCB
@@ -47,19 +48,19 @@ the ASN.1 type NULL.
   MD2Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 2 ]
 
   MD2 : OIDValue MD2Lit
-  MD2 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length MD2Lit)) MD2Lit)} tt))
+  MD2 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length MD2Lit)) MD2Lit)} tt))
 
   MD5Lit : List UInt8
   MD5Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 4 ]
 
   MD5 : OIDValue MD5Lit
-  MD5 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length MD5Lit)) MD5Lit)} tt))
+  MD5 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length MD5Lit)) MD5Lit)} tt))
 
   SHA1Lit : List UInt8
   SHA1Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 5 ]
 
   SHA1 : OIDValue SHA1Lit
-  SHA1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
+  SHA1 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
 
 {-
 https://datatracker.ietf.org/doc/html/rfc4055#section-5
@@ -94,25 +95,25 @@ The object identifier used to identify the PKCS #1 version 1.5
   SHA224Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 14 ]
 
   SHA224 : OIDValue SHA224Lit
-  SHA224 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
+  SHA224 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
 
   SHA256Lit : List UInt8
   SHA256Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 11 ]
 
   SHA256 : OIDValue SHA256Lit
-  SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+  SHA256 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
 
   SHA384Lit : List UInt8
   SHA384Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 12 ]
 
   SHA384 : OIDValue SHA384Lit
-  SHA384 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
+  SHA384 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
 
   SHA512Lit : List UInt8
   SHA512Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 13 ]
 
   SHA512 : OIDValue SHA512Lit
-  SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+  SHA512 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
 
 {-
 https://datatracker.ietf.org/doc/html/rfc4055#section-3.1
@@ -134,7 +135,7 @@ pair.
   PSSLit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 10 ]
 
   PSS : OIDValue PSSLit
-  PSS = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PSSLit)) PSSLit)} tt))
+  PSS = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length PSSLit)) PSSLit)} tt))
 
   ExplicitNullParam : List (Exists─ _ OIDValue)
   ExplicitNullParam = (-, MD2) ∷ (-, MD5) ∷ (-, SHA1) ∷ []
@@ -167,7 +168,7 @@ The ASN.1 OID used to identify
   SHA1Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 56 ∷ # 4 ∷ [ # 3 ]
 
   SHA1 : OIDValue SHA1Lit
-  SHA1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
+  SHA1 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
 
 {-
 https://www.ietf.org/rfc/rfc5758.txt
@@ -195,13 +196,13 @@ dsa-with-sha224 or id-dsa-with-sha256.
   SHA224Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 3 ∷ [ # 1 ]
 
   SHA224 : OIDValue SHA224Lit
-  SHA224 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
+  SHA224 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
 
   SHA256Lit : List UInt8
   SHA256Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 3 ∷ [ # 2 ]
 
   SHA256 : OIDValue SHA256Lit
-  SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+  SHA256 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
 
   Supported : List (Exists─ _ OIDValue)
   Supported = (-, SHA1) ∷ (-, SHA224) ∷ [ -, SHA256 ]
@@ -236,7 +237,7 @@ SEQUENCE of one component: the OBJECT IDENTIFIER ecdsa-with-SHA1.
   SHA1Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 4 ∷ [ # 1 ]
 
   SHA1 : OIDValue SHA1Lit
-  SHA1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
+  SHA1 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
 
 {-
 The ASN.1 OIDs used to specify that an ECDSA signature was generated
@@ -266,25 +267,25 @@ SHA384, or ecdsa-with-SHA512.
   SHA224Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 4 ∷ # 3 ∷ [ # 1 ]
 
   SHA224 : OIDValue SHA224Lit
-  SHA224 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
+  SHA224 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
 
   SHA256Lit : List UInt8
   SHA256Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 4 ∷ # 3 ∷ [ # 2 ]
 
   SHA256 : OIDValue SHA256Lit
-  SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+  SHA256 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
 
   SHA384Lit : List UInt8
   SHA384Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 4 ∷ # 3 ∷ [ # 3 ]
 
   SHA384 : OIDValue SHA384Lit
-  SHA384 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
+  SHA384 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
 
   SHA512Lit : List UInt8
   SHA512Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 4 ∷ # 3 ∷ [ # 4 ]
 
   SHA512 : OIDValue SHA512Lit
-  SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+  SHA512 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
 
   Supported : List (Exists─ _ OIDValue)
   Supported = (-, SHA1) ∷ (-, SHA224) ∷ (-, SHA256) ∷ (-, SHA384) ∷ [ -, SHA512 ]

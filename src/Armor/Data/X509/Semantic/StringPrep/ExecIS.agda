@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Data.Nat.DivMod
 import      Armor.Binary
@@ -40,9 +40,9 @@ open Armor.Grammar.Definitions UInt8
    -- The output is the transcoded string.
    
 transcodeIS : ∀ {@0 bs} → IA5String bs → Exists─ _ Unicode
-transcodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = (-, utf8 (helper (toWitness all<128)))
+transcodeIS (mkTLV len (mkIA5StringValue str all<128) len≡ bs≡) = (-, utf8 (helper (toWitness{a? = _} all<128)))
   where
-  helper :  ∀ {bs} → @0 All (Fin._< # 128) bs → UTF8 bs
+  helper :  ∀ {bs} → @0 All (λ x → Fin._<_{256}{256} x (# 128)) bs → UTF8 bs
   helper {[]} x = nil
   helper {x₁ ∷ bs} (px ∷ x) = cons (mkIListCons (utf81 (mkUTF8Char1 x₁ px refl)) (helper x) refl)
 

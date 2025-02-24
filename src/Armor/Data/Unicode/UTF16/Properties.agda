@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.Unicode.UTF16.TCB
 import      Armor.Grammar.Definitions
@@ -30,14 +31,14 @@ module BMP where
           224 ≤⟨ c₁≥224 ⟩
           toℕ c ≤⟨ c₁≤215 ⟩
           215 ∎)
-        (toWitnessFalse{Q = 224 ≤? 215} tt)
+        (toWitnessFalse{a? = 224 ≤? 215} tt)
     range≡{c} (inj₂ (c₁≥224 , _)) (inj₁ (_ , c₁≤215)) =
       contradiction{P = 224 ≤ 215}
         (begin
           224 ≤⟨ c₁≥224 ⟩
           toℕ c ≤⟨ c₁≤215 ⟩
           215 ∎)
-        (toWitnessFalse{Q = 224 ≤? 215} tt)
+        (toWitnessFalse{a? = 224 ≤? 215} tt)
     range≡ (inj₂ y) (inj₂ y₁) = cong inj₂ (inRange-unique{A = ℕ}{B = UInt8} y y₁)
   
   @0 unambiguous : Unambiguous BMPChar

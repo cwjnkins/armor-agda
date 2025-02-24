@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Grammar.Definitions.Iso.Base
 import Armor.Grammar.Definitions.Iso.Properties
 

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 import      Armor.Grammar.Sum.Parser
 import      Armor.Grammar.Sum.Properties

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.PublicKey.Val.EC.TCB
 open import Armor.Data.X690-DER.BitString

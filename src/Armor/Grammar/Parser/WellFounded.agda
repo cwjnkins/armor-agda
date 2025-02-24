@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 open import Data.Nat.Properties
   hiding (_≟_)

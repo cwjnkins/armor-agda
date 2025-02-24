@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Time.Day.TCB
 open import Armor.Data.X690-DER.Time.Hour.TCB

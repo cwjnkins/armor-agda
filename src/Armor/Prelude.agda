@@ -215,6 +215,9 @@ open import Relation.Nullary public
 nonZero-compat : ∀ {n} → False (n Data.Nat.≟ 0) → NonZero n
 nonZero-compat ≢0 = ≢-nonZero (λ where refl → ≢0)
 
+nonZero-compat⁻¹ : ∀ {n} → ⦃ _ :  NonZero n ⦄ → False (n Data.Nat.≟ 0)
+nonZero-compat⁻¹ {suc n} = tt
+
 yes₀ : ∀ {ℓ} {@0 P : Set ℓ} → P → Dec P
 yes₀ p = true because (ofʸ p)
 

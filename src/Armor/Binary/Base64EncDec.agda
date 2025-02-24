@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Binary.Base64EncDec.Base64
 import Armor.Binary.Base64EncDec.EncDec
 

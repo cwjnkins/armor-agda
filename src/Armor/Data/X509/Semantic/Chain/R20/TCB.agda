@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Data.X509
@@ -8,8 +8,6 @@ import      Armor.Data.X509.Semantic.Chain.TCB as Chain
 import      Armor.Grammar.Option
 import      Armor.Grammar.Parallel
 open import Armor.Prelude
-open import Relation.Nullary.Implication using (_→-dec_)
-open import Relation.Nullary.Negation using (¬?)
 
 module Armor.Data.X509.Semantic.Chain.R20.TCB where
 

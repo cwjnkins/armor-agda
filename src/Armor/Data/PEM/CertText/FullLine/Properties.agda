@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -58,8 +59,8 @@ nooverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys�
 
   @0 x₁∉ : x₁ ∉ B64.charset
   x₁∉ = case x₁≡ ret (const _) of λ where
-    (inj₁ refl) → toWitnessFalse{Q = _ ∈? _} tt
-    (inj₂ refl) → toWitnessFalse{Q = _ ∈? _} tt
+    (inj₁ refl) → toWitnessFalse{a? = _ ∈? _} tt
+    (inj₂ refl) → toWitnessFalse{a? = _ ∈? _} tt
 
   noway : ¬ CertFullLine xs₂
   noway (mkCertFullLine{l'}{e'} (mk×ₚ line' (─ lineLen')) eol' bs≡“) =
@@ -121,8 +122,8 @@ char∈ b∈ (mkCertFullLine{l}{e} line eol refl) =
         (inj₂ refl) → ─ (Any.++⁺ʳ B64.charset (here refl)))
     (inj₂ y) → ─
       (caseErased RFC5234.EOL.char∈ y eol ret (const _) of λ where
-        (inj₁ refl) → ─ toWitness{Q = _ ∈? _} tt
-        (inj₂ refl) → ─ toWitness{Q = _ ∈? _} tt)
+        (inj₁ refl) → ─ toWitness{a? = _ ∈? _} tt
+        (inj₂ refl) → ─ toWitness{a? = _ ∈? _} tt)
 
 @0 char∈List : ∀ {@0 b bs} → b ∈ bs → IList CertFullLine bs → b ∈ B64.charset ++ (String.toList $ "=\r\n")
 char∈List () nil

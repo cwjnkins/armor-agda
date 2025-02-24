@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.SignAlg.RSA.Eq
 import Armor.Data.X509.SignAlg.RSA.PSS
 import Armor.Data.X509.SignAlg.RSA.Parser

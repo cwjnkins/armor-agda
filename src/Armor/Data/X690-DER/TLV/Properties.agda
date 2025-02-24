@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 open import Armor.Binary
 open import Armor.Data.X690-DER.Length
@@ -38,7 +39,7 @@ nosubstrings{t}{xs₁ = xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ 
 
   @0 v≡ : v ≡ v₁
   v≡ = proj₁ $ Lemmas.length-++-≡ _ _ _ _
-                 (++-cancelˡ l (trans l++≡ (cong (_++ v₁ ++ ys₂) (sym l≡))))
+                 (++-cancelˡ l _ _ (trans l++≡ (cong (_++ v₁ ++ ys₂) (sym l≡))))
                  (begin length v       ≡⟨ sym len≡ ⟩
                         getLength len  ≡⟨ Length.unambiguous-getLength l≡ len len₁ ⟩
                         getLength len₁ ≡⟨ len≡₁ ⟩

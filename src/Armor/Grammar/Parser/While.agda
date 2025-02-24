@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Parser.Core
 open import Armor.Prelude
@@ -45,7 +46,7 @@ module Properties where
     nosubstringsWF (WellFounded.acc rs) xs₁++ys₁≡xs₂++ys₂ (mkParseWhile (x ∷ prefix) term allPrefix ¬term refl) (mkParseWhile (x₁ ∷ prefix₁) term₁ allPrefix₁ ¬term₁ refl)
       = cong₂ _∷_
           (∷-injectiveˡ xs₁++ys₁≡xs₂++ys₂)
-          (nosubstringsWF (rs _ ≤-refl) (∷-injectiveʳ xs₁++ys₁≡xs₂++ys₂)
+          (nosubstringsWF (rs ≤-refl) (∷-injectiveʳ xs₁++ys₁≡xs₂++ys₂)
             (mkParseWhile prefix term (All.tail allPrefix) ¬term refl)
             (mkParseWhile prefix₁ term₁ (All.tail allPrefix₁) ¬term₁ refl))
 

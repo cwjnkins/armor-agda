@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Binary.UInt8.Properties
 import Armor.Binary.UInt8.TCB
 

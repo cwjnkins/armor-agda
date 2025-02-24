@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Data.Base64.TCB
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Sum

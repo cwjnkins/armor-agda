@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.NC.Eq
 import Armor.Data.X509.Extension.NC.GeneralSubtree
 import Armor.Data.X509.Extension.NC.Parser

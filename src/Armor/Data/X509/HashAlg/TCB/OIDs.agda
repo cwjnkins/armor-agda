@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID.Parser
 open import Armor.Data.X690-DER.OID.TCB
@@ -63,27 +64,27 @@ SHA1Lit SHA224Lit SHA256Lit SHA384Lit SHA512Lit : List UInt8
 SHA1Lit = # 43 ∷ # 14 ∷ # 3 ∷ # 2 ∷ [ # 26 ]
 
 SHA1 : OIDValue SHA1Lit
-SHA1 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
+SHA1 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA1Lit)) SHA1Lit)} tt))
 
 SHA224Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 4 ] 
 
 SHA224 : OIDValue SHA224Lit
-SHA224 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
+SHA224 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA224Lit)) SHA224Lit)} tt))
 
 SHA256Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 1 ] 
 
 SHA256 : OIDValue SHA256Lit
-SHA256 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
+SHA256 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA256Lit)) SHA256Lit)} tt))
 
 SHA384Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 2 ]
 
 SHA384 : OIDValue SHA384Lit
-SHA384 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
+SHA384 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA384Lit)) SHA384Lit)} tt))
 
 SHA512Lit = # 96 ∷ # 134 ∷ # 72 ∷ # 1 ∷ # 101 ∷ # 3 ∷ # 4 ∷ # 2 ∷ [ # 3 ]
 
 SHA512 : OIDValue SHA512Lit
-SHA512 = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
+SHA512 = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length SHA512Lit)) SHA512Lit)} tt))
 
 RFC4055 : List (Exists─ _ OIDValue)
 RFC4055 = (-, SHA1) ∷ (-, SHA224) ∷ (-, SHA256) ∷ (-, SHA384) ∷ (-, SHA512) ∷ []

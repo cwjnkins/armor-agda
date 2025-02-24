@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.X690-DER.Length.Properties as Length
 open import Armor.Data.X690-DER.Length.TCB

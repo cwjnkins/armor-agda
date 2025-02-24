@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.IList.Properties
@@ -72,7 +73,7 @@ module parseIList
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
         yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁)) suf₁ ps≡₁)
-          ← runParser (parseIListWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
+          ← runParser (parseIListWF (n ∸ r₀)) suf₀ (rs suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix read read≡ (mk×ₚ nil (─ ())) suffix ps≡)
@@ -89,7 +90,7 @@ module parseIList
                 contradiction
                   (success bs₂ _ refl
                     (mk×ₚ t
-                      (─ +-cancelˡ-≡ r₀
+                      (─ +-cancelˡ-≡ r₀ _ _
                          (begin (r₀ + length bs₂         ≡⟨ cong (_+ length bs₂) r₀≡ ⟩
                                 length pre₀ + length bs₂ ≡⟨ cong (λ x → length x + length bs₂) pre₀≡bs₁ ⟩
                                 length bs₁ + length bs₂  ≡⟨ sym (length-++ bs₁) ⟩
@@ -101,7 +102,7 @@ module parseIList
                                 (r₀ + n) - r₀            ≡⟨ +-∸-assoc r₀ {n} (<⇒≤ r₀<n) ⟩
                                 r₀ + (n - r₀)            ∎))))
                     suffix
-                    (++-cancelˡ bs₁ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
+                    (++-cancelˡ bs₁ _ _ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
                   ¬parse
         return (yes
           (success (pre₀ ++ pre₁) (r₀ + r₁)
@@ -178,7 +179,7 @@ module parseIListMax
                 ¬p
         (mkLogged log (yes (success prefix read read≡ value suffix ps≡))) →
           let s = help suffix
-                    (rs (length suffix)
+                    (rs
                       (≤-Reasoning.begin
                         suc (length suffix)
                           ≤-Reasoning.≤⟨
@@ -296,7 +297,7 @@ module parseIListMaxNoOverlap
                 ¬p
         (mkLogged log (yes (success pre₁ r₁ r₁≡ v₁ suf₁ ps≡₁)) , max₁) →
           let @0 a' : Acc _<_ (length suf₁)
-              a' = rs _ $ ≤-Reasoning.begin
+              a' = rs $ ≤-Reasoning.begin
                      1 + length suf₁
                        ≤-Reasoning.≤⟨
                          subst (length suf₁ <_) (length-++ pre₁)
@@ -359,7 +360,7 @@ module parseIListMaxNoOverlap
 
                       bs₁≡ : Erased (pre₁ ≡ bs₁)
                       bs₁≡ = ─ (caseErased noo bs₁ (drop (length bs₁) pre₁) suf₁ bs₂ (bs₃ ++ suf')
-                                  (++-cancelˡ bs₁ (begin
+                                  (++-cancelˡ bs₁ _ _ (begin
                                     (bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ≡⟨ solve (++-monoid Σ) ⟩
                                     (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ (cong (_++ suf₁) ∘ sym $ ¡ pre₁≡) ⟩
                                     pre₁ ++ suf₁ ≡⟨ (sym $ ¡ xs≡) ⟩
@@ -374,7 +375,7 @@ module parseIListMaxNoOverlap
 
                       bs₂++bs₃≤ : Erased (length (bs₂ ++ bs₃) ≤ r₂)
                       bs₂++bs₃≤ = ─ max₂ (bs₂ ++ bs₃) suf'
-                                      (++-cancelˡ bs₁ (begin
+                                      (++-cancelˡ bs₁ _ _ (begin
                                         (bs₁ ++ (bs₂ ++ bs₃) ++ suf' ≡⟨ solve (++-monoid Σ) ⟩
                                         bs₁ ++ bs₂ ++ bs₃ ++ suf' ≡⟨ ¡ xs≡ ⟩
                                         pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (¡ bs₁≡) ⟩

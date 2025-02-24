@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID.Parser
 open import Armor.Data.X690-DER.OID.TCB
@@ -16,10 +17,10 @@ CPSURILit : List UInt8
 CPSURILit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 1 ]
 
 CPSURI : OIDValue CPSURILit
-CPSURI = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length CPSURILit)) CPSURILit)} tt))
+CPSURI = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length CPSURILit)) CPSURILit)} tt))
 
 UserNoticeLit : List UInt8
 UserNoticeLit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 2 ∷ [ # 2 ]
 
 UserNotice : OIDValue UserNoticeLit
-UserNotice = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length UserNoticeLit)) UserNoticeLit)} tt))
+UserNotice = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length UserNoticeLit)) UserNoticeLit)} tt))

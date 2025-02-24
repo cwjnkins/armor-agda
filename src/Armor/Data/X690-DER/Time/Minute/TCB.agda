@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Time.TimeType.TCB
 import      Armor.Grammar.Definitions.NonMalleable

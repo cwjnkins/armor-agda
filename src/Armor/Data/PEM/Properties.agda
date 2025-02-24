@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -49,7 +50,7 @@ noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
   b≡ = trans begin (sym begin₁)
 
   @0 ++≡w : e₁ ++ xs₁ ≡ e
-  ++≡w = ++-cancelˡ b
+  ++≡w = ++-cancelˡ b _ _
     (b ++ e₁ ++ xs₁ ≡⟨ cong (_++ e₁ ++ xs₁) b≡ ⟩
     b₁ ++ e₁ ++ xs₁ ≡⟨ sym (++-assoc b₁ e₁ xs₁) ⟩
     (b₁ ++ e₁) ++ xs₁ ≡⟨ cong (_++ xs₁) (sym bs≡₁) ⟩
@@ -70,7 +71,7 @@ noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
 
   noway : ¬ &ₚ CertText CertFooter xs₂
   noway (mk&ₚ (mkCertText{f = f} nil final refl) sndₚ₁ bs≡) =
-    contradiction x₁∈ (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt))
+    contradiction x₁∈ (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{a? = _ ∈? _} tt))
     where
     @0 bs₂≡ : ∃ λ xs₂' → x₁ ∷ xs₂' ≡ f
     bs₂≡ = caseErased (singleton f refl) ret (const _) of λ where
@@ -90,7 +91,7 @@ noOverlapHeaderText ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
     x₁∈ = FinalLine.char₁ (subst₀! CertFinalLine (sym $ proj₂ bs₂≡) final)
   noway (mk&ₚ (mkCertText (consIList{f₁}{b₁} full₁ body refl) final refl) sndₚ₁ bs≡) =
     contradiction x₁∈
-      (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt))
+      (subst₀ (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{a? = _ ∈? _} tt))
     where
     @0 f₁≡ : ∃ λ f₁' → x₁ ∷ f₁' ≡ f₁
     f₁≡ = caseErased (singleton f₁ refl) ret (const _) of λ where
@@ -130,7 +131,7 @@ noOverlapTextFooter ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
   noway (mkCertBoundary{e = e'} refl eol bs≡) =
     contradiction{P = '-' ∈ B64.charset ++ String.toList "=\r\n"}
       (subst₀ (_∈ B64.charset ++ String.toList "=\r\n") x₁≡' x₁∈)
-      (toWitnessFalse{Q = _ ∈? _} tt)
+      (toWitnessFalse{a? = _ ∈? _} tt)
     where
     @0 x₁≡' : x₁ ≡ '-'
     x₁≡' = ∷-injectiveˡ
@@ -194,7 +195,7 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡ (mkCert{h₁}{b₁}
   x₁≡n = caseErased footer₁ ,′ footer₂ ret (const _) of λ where
     (mkCertBoundary{e = e₁} refl eol₁ refl , mkCertBoundary{e = e₂} refl eol₂ refl) → ─
       let e₂≡ : e₂ ++ xs₁ ≡ e₁
-          e₂≡ = ++-cancelˡ _ ++xs₁≡
+          e₂≡ = ++-cancelˡ _ _ _ ++xs₁≡
       in
       caseErased eol₁ ,′ eol₂ ret (const _) of λ where
         (crlf , crlf) → contradiction e₂≡ λ ()

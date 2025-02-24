@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
@@ -6,7 +7,6 @@ import      Armor.Grammar.IList
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option
 open import Armor.Prelude
-open import Relation.Nullary.Implication
 
 module Armor.Data.X509.Semantic.Cert.R18.TCB where
 

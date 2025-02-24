@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.PublicKey.Alg
 import Armor.Data.X509.PublicKey.Eq
 import Armor.Data.X509.PublicKey.Parser

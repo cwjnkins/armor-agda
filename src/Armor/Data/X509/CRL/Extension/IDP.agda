@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.CRL.Extension.IDP.Eq
 import Armor.Data.X509.CRL.Extension.IDP.Parser
 import Armor.Data.X509.CRL.Extension.IDP.TCB

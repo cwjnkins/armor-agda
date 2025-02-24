@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Data.X509.Semantic.Cert.R1 as R1
 import      Armor.Data.X509.Semantic.Cert.R2 as R2
 import      Armor.Data.X509.Semantic.Cert.R3 as R3

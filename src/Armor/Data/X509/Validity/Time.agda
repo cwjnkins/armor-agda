@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Validity.Time.Ordering
 import Armor.Data.X509.Validity.Time.Parser
 import Armor.Data.X509.Validity.Time.Properties

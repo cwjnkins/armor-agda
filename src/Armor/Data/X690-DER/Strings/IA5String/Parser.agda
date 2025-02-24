@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OctetString
 open import Armor.Data.X690-DER.Strings.IA5String.TCB
@@ -23,7 +24,7 @@ runParser (parseIA5StringValue n) xs = do
             (success prefix _ read≡
               (mk×ₚ str strLen) _ ps≡)
             ¬parse
-  case All.all? (Fin._<? (# 128)) os₀ of λ where
+  case All.all? (λ x → Fin._<?_ {256} {256} x (# 128)) os₀ of λ where
     (no  all≮128) → do
       tell $ here' String.++ ": value violation"
       return ∘ no $ λ where

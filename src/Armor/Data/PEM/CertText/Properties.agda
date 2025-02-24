@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -164,15 +165,15 @@ foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b
     length u₂ + length (u₂' ++ b₂') ≤.≡⟨ cong (_+ length (u₂' ++ b₂')) (cong length (sym u₁≡)) ⟩
     length u₁ + length (u₂' ++ b₂') ≤.∎)
 
-  ih = foldFinalIntoBodyWF nil fin₁ (consIList fu₂' body₂ refl) fin₂ (rs _ Nat.≤-refl)
+  ih = foldFinalIntoBodyWF nil fin₁ (consIList fu₂' body₂ refl) fin₂ (rs Nat.≤-refl)
          (f₁ ++ suf₁ ≡⟨ ++≡ᵤ ⟩
          u₂' ++ b₂' ++ f₂ ++ suf₂ ≡⟨ solve (++-monoid Char) ⟩
          (u₂' ++ b₂') ++ f₂ ++ suf₂ ∎)
-         (Nat.+-cancelˡ-< (length u₁) b₁<')
+         (Nat.+-cancelˡ-< (length u₁) _ _ b₁<')
 
 foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b₁} fu₁ (consIList{u₁'}{b₁'} fu₁' body₁ refl) refl) fin₁ (consIList{u₂}{b₂} fu₂ nil refl) fin₂ ac ++≡ b₁< =
   contradiction{P = length (u₁' ++ b₁') < 0}
-    (Nat.+-cancelˡ-< (length u₁) (≤.begin
+    (Nat.+-cancelˡ-< (length u₁) _ _ (≤.begin
       (1 + length u₁ + length (u₁' ++ b₁') ≤.≡⟨ cong suc (sym (length-++ u₁)) ⟩
       1 + length (u₁ ++ u₁' ++ b₁') ≤.≤⟨ b₁< ⟩
       length (u₂ ++ []) ≤.≡⟨ length-++ u₂ ⟩
@@ -226,14 +227,14 @@ foldFinalIntoBodyWF{f₁ = f₁}{f₂ = f₂}{suf₁}{suf₂} (consIList{u₁}{b
   ++≡ᵤ = trans (++-assoc u₁' b₁' _) (trans (Lemmas.++-cancel≡ˡ _ _ u₁≡ ++≡') (sym (++-assoc u₂' b₂' _)))
 
   b₁<' : length (u₁' ++ b₁') < length (u₂' ++ b₂')
-  b₁<' = Nat.+-cancelˡ-< (length u₁) (≤.begin
+  b₁<' = Nat.+-cancelˡ-< (length u₁) _ _ (≤.begin
     (1 + length u₁ + length (u₁' ++ b₁') ≤.≡⟨ sym (cong suc (length-++ u₁)) ⟩
     1 + length (u₁ ++ u₁' ++ b₁') ≤.≤⟨ b₁< ⟩
     length (u₂ ++ u₂' ++ b₂') ≤.≡⟨ length-++ u₂ ⟩
     length u₂ + length (u₂' ++ b₂') ≤.≡⟨ cong (λ x → length x + length (u₂' ++ b₂')) (sym u₁≡) ⟩
     length u₁ + length (u₂' ++ b₂') ≤.∎))
 
-  ih = foldFinalIntoBodyWF (consIList fu₁' body₁ refl) fin₁ (consIList fu₂' body₂ refl) fin₂ (rs _ Nat.≤-refl) ++≡ᵤ b₁<'
+  ih = foldFinalIntoBodyWF (consIList fu₁' body₁ refl) fin₁ (consIList fu₂' body₂ refl) fin₂ (rs Nat.≤-refl) ++≡ᵤ b₁<'
 
 @0 foldFinalIntoBody
   : ∀ {@0 b₁ f₁ b₂ f₂ suf₁ suf₂}
@@ -425,7 +426,7 @@ unambiguous =
     case (‼ proj₁ xs≡×) of λ where
       refl → case ‼ FullLine.unambiguous line₁ line₂ of λ where
         refl → case ((─ sym (++-assoc bs₁₂₁ bs₁₂₂ bs₁₃)) ,′ (─ trans (proj₂ xs≡×) (sym (++-assoc bs₂₂₁ bs₂₂₂ bs₂₃)))) of λ where
-          (─ bs≡₁' , ─ bs≡₂') → case ‼ uaWF (mk&ₚ (consIList line₁' lines₁ refl) final₁ bs≡₁') (mk&ₚ (consIList line₂' lines₂ refl) final₂ bs≡₂') (rs _ (s≤s Nat.≤-refl)) of λ where
+          (─ bs≡₁' , ─ bs≡₂') → case ‼ uaWF (mk&ₚ (consIList line₁' lines₁ refl) final₁ bs≡₁') (mk&ₚ (consIList line₂' lines₂ refl) final₂ bs≡₂') (rs (s≤s Nat.≤-refl)) of λ where
             refl → case ‼ ≡-unique bs≡₁ bs≡₂ ret (const _) of λ where
               refl → refl
     where

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary.Base64EncDec.EncDec.Properties
 open import Armor.Binary.Base64EncDec.EncDec.TCB
 open import Armor.Prelude

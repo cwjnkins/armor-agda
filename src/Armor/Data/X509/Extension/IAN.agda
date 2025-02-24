@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.IAN.Parser
 import Armor.Data.X509.Extension.IAN.TCB
 import Armor.Data.X509.Extension.IAN.Properties

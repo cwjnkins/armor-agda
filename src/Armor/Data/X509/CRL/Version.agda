@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.CRL.Version.Eq
 import Armor.Data.X509.CRL.Version.Parser
 import Armor.Data.X509.CRL.Version.Properties

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.EKU.Parser
 import Armor.Data.X509.Extension.EKU.TCB
 import Armor.Data.X509.Extension.EKU.Properties

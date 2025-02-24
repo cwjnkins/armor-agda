@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions.NonMalleable.Base
 open import Armor.Prelude renaming (Σ to Sigma)
 

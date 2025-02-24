@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Eq
 import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Parser
 import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.Properties

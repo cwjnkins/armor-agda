@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Data.Nat.DivMod
 import      Armor.Binary

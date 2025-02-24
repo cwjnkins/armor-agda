@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Strings.IA5String.Parser
 import Armor.Data.X690-DER.Strings.IA5String.Properties
 import Armor.Data.X690-DER.Strings.IA5String.TCB

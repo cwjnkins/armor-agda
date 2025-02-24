@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Data.Nat.DivMod
 open import Armor.Binary
@@ -22,7 +22,7 @@ open Armor.Grammar.Parallel UInt8
 
 
 spaceUTF8 : Exists─ (List UInt8) UTF8
-spaceUTF8 = _ , cons (mkIListCons (utf81 (mkUTF8Char1 (# 32) (toWitness {Q = 32 <? 128 } tt) refl)) nil refl)
+spaceUTF8 = _ , cons (mkIListCons (utf81 (mkUTF8Char1 (# 32) (toWitness {a? = 32 <? 128 } tt) refl)) nil refl)
 
 checkOnlySpaces : ∀ {@0 bs} → UTF8 bs → Bool
 checkOnlySpaces nil = true
@@ -41,7 +41,7 @@ lstripUTF8 a@(cons (mkIListCons (utf81 (mkUTF8Char1 b₁ b₁range bs≡₁)) ta
 ... | no ¬p = _ , (mk×ₚ a (s≤s Nat.≤-refl))
 ... | yes p
   with lstripUTF8 tail₁
-... | fst , mk×ₚ fstₚ₁ sndₚ₁ = fst , (mk×ₚ fstₚ₁ (Nat.≤-step sndₚ₁))
+... | fst , mk×ₚ fstₚ₁ sndₚ₁ = fst , (mk×ₚ fstₚ₁ (Nat.m≤n⇒m≤1+n sndₚ₁))
 lstripUTF8 a@(cons (mkIListCons (utf82 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
 lstripUTF8 a@(cons (mkIListCons (utf83 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
 lstripUTF8 a@(cons (mkIListCons (utf84 x) tail₁ bs≡)) = _ , (mk×ₚ a (s≤s Nat.≤-refl))
@@ -64,16 +64,16 @@ innerSeqSpaceHelperWF : ∀ {@0 bs ss} → (bsname : UTF8 bs) → Acc _<_ (lengt
 innerSeqSpaceHelperWF IList.nil ac x₁ = _ , x₁
 innerSeqSpaceHelperWF (cons (mkIListCons (utf81 x@(mkUTF8Char1 b₁ b₁range bs≡₁)) tail₁ bs≡)) (WellFounded.acc rs) x₁
   with toℕ b₁ ≟ 32
-... | no ¬p = innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf81 x) nil refl)))
+... | no ¬p = innerSeqSpaceHelperWF tail₁ (rs Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf81 x) nil refl)))
 ... | yes p
   with lstripUTF8 tail₁
-... | fst , mk×ₚ fstₚ₁ sndₚ₁ = innerSeqSpaceHelperWF fstₚ₁ (rs (lengthIList _ fstₚ₁) (s≤s sndₚ₁)) (((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)))))
+... | fst , mk×ₚ fstₚ₁ sndₚ₁ = innerSeqSpaceHelperWF fstₚ₁ (rs (s≤s sndₚ₁)) (((appendIList _ x₁ (appendIList _ (proj₂ spaceUTF8) (proj₂ spaceUTF8)))))
 innerSeqSpaceHelperWF (cons (mkIListCons (utf82 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
-  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf82 x) nil refl)))
+  innerSeqSpaceHelperWF tail₁ (rs Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf82 x) nil refl)))
 innerSeqSpaceHelperWF (cons (mkIListCons (utf83 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
-  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf83 x) nil refl)))
+  innerSeqSpaceHelperWF tail₁ (rs Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf83 x) nil refl)))
 innerSeqSpaceHelperWF (cons (mkIListCons (utf84 x) tail₁ bs≡)) (WellFounded.acc rs) x₁ =
-  innerSeqSpaceHelperWF tail₁ (rs (lengthIList _ tail₁) Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf84 x) nil refl)))
+  innerSeqSpaceHelperWF tail₁ (rs Nat.≤-refl) (appendIList _ x₁ (cons (mkIListCons (utf84 x) nil refl)))
 
 innerSeqSpaceHelper : ∀ {@0 bs ss} → (bsname : UTF8 bs) → UTF8 ss → Exists─ (List UInt8) UTF8
 innerSeqSpaceHelper bsname = innerSeqSpaceHelperWF bsname (<-wellFounded _)

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Parallel
 import      Armor.Grammar.Option.Properties

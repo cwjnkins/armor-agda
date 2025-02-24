@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID
 import      Armor.Grammar.Parallel
@@ -32,10 +33,10 @@ PrimeFieldLit   = FieldTypeArc ++ [ # 1 ]
 CharTwoFieldLit = FieldTypeArc ++ [ # 2 ]
 
 PrimeField : OIDValue PrimeFieldLit
-PrimeField = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PrimeFieldLit)) PrimeFieldLit)} tt))
+PrimeField = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length PrimeFieldLit)) PrimeFieldLit)} tt))
 
 CharTwoField : OIDValue CharTwoFieldLit
-CharTwoField = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length CharTwoFieldLit)) CharTwoFieldLit)} tt))
+CharTwoField = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length CharTwoFieldLit)) CharTwoFieldLit)} tt))
 
 Supported : List (Exists─ _ OIDValue)
 Supported = (-, PrimeField) ∷ [ -, CharTwoField ]

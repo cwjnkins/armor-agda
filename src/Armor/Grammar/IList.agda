@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Grammar.IList.All
 import Armor.Grammar.IList.Parser
 import Armor.Grammar.IList.Properties

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions.NonMalleable.Base
 open import Armor.Prelude
 open import Data.Nat.Properties

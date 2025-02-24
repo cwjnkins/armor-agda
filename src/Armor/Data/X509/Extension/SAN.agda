@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.SAN.Parser
 import Armor.Data.X509.Extension.SAN.TCB
 import Armor.Data.X509.Extension.SAN.Properties

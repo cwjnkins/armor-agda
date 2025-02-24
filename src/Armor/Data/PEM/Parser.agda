@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64

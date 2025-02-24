@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Data.Base64.Parser
 import      Armor.Data.Base64.Properties
 import      Armor.Data.Base64.Serializer

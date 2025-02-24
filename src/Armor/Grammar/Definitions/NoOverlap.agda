@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 import      Data.Nat.Properties as Nat
 
@@ -26,7 +27,7 @@ noOverlapBoundary₁{A} noo₁ {ws}{xs₁}{ys₁}{xs₂}{ys₂} ++≡ a₁ b₁ 
       noway = ‼
         contradiction₂
           (noo₁ ws _ ys₂ xs₁ ys₁
-            (++-cancelˡ ws
+            (++-cancelˡ ws _ _
               (ws ++ drop (length ws) xs₂ ++ ys₂ ≡⟨ sym (++-assoc ws _ ys₂) ⟩
               (ws ++ drop (length ws) xs₂) ++ ys₂ ≡⟨ cong (_++ ys₂) (sym xs₂≡) ⟩
               xs₂ ++ ys₂ ≡⟨ sym ++≡ ⟩
@@ -83,21 +84,21 @@ noOverlapBoundary₂{A}{B}{C} noo₁ noo₂ {xs₁}{ys₁}{zs₁}{xs₂}{ys₂}{
     xs₂≡ = Lemmas.drop-length-≤ xs₁ _ xs₂ _ ++≡ (Nat.<⇒≤ xs₁<xs₂)
 
     @0 ++≡' : drop (length xs₁) xs₂ ++ ys₂ ++ zs₂ ≡ ys₁ ++ zs₁
-    ++≡' = ++-cancelˡ xs₁
+    ++≡' = ++-cancelˡ xs₁ _ _
       (xs₁ ++ drop (length xs₁) xs₂ ++ ys₂ ++ zs₂ ≡⟨ solve (++-monoid Σ) ⟩
       (xs₁ ++ drop (length xs₁) xs₂) ++ ys₂ ++ zs₂ ≡⟨ cong (_++ ys₂ ++ zs₂) (sym xs₂≡) ⟩
       xs₂ ++ ys₂ ++ zs₂ ≡⟨ sym ++≡ ⟩
       xs₁ ++ ys₁ ++ zs₁ ∎)
-    
+
   module Len> (xs₁>xs₂ : length xs₁ > length xs₂) where
 
     @0 xs₁≡ : xs₁ ≡ xs₂ ++ drop (length xs₂) xs₁
     xs₁≡ = Lemmas.drop-length-≤ xs₂ _ xs₁ _ (sym ++≡) (Nat.<⇒≤ xs₁>xs₂)
 
     @0 ++≡' : drop (length xs₂) xs₁ ++ ys₁ ++ zs₁ ≡ ys₂ ++ zs₂
-    ++≡' = ++-cancelˡ xs₂
+    ++≡' = ++-cancelˡ xs₂ _ _
       (xs₂ ++ drop (length xs₂) xs₁ ++ ys₁ ++ zs₁ ≡⟨ solve (++-monoid Σ) ⟩
       (xs₂ ++ drop (length xs₂) xs₁) ++ ys₁ ++ zs₁ ≡⟨ cong (_++ ys₁ ++ zs₁) (sym xs₁≡) ⟩
       xs₁ ++ ys₁ ++ zs₁ ≡⟨ ++≡ ⟩
       xs₂ ++ ys₂ ++ zs₂ ∎)
-    
+

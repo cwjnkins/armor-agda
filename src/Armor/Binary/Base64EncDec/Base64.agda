@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary.Bits.TCB
 open import Armor.Binary.UInt6
 open import Armor.Binary.UInt8.TCB
@@ -9,7 +10,7 @@ charset : List Char
 charset = String.toList "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 ∈charsetUnique : ∀ {c} → (c∈₁ c∈₂ : c ∈ charset) → c∈₁ ≡ c∈₂
-∈charsetUnique = ∈-unique (toWitness{Q = List.unique? _≟_ charset} tt)
+∈charsetUnique = ∈-unique (toWitness{a? = List.unique? _≟_ charset} tt)
 
 isByteRep : ∀ c → Dec (c ∈ charset)
 isByteRep c = Any.any? (c ≟_) charset

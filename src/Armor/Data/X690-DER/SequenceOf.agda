@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.SequenceOf.Serializer
 import Armor.Data.X690-DER.SequenceOf.TCB
 import Armor.Data.X690-DER.SequenceOf.Parser

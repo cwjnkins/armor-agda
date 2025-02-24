@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.OID
@@ -27,7 +28,7 @@ RSALit : List UInt8
 RSALit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13 ∷ # 1 ∷ # 1 ∷ [ # 1 ]
 
 RSA : OIDValue RSALit
-RSA = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length RSALit)) RSALit)} tt))
+RSA = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length RSALit)) RSALit)} tt))
 
 {- https://datatracker.ietf.org/doc/html/rfc3279#section-2.3.5
 -- ECDH is the elliptic curve mathematical analog of the Diffie-Hellman
@@ -58,7 +59,7 @@ ECLit : List UInt8
 ECLit = # 42 ∷ # 134 ∷ # 72 ∷ # 206 ∷ # 61 ∷ # 2 ∷ [ # 1 ]
 
 EC : OIDValue ECLit
-EC = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length ECLit)) ECLit)} tt))
+EC = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length ECLit)) ECLit)} tt))
 
 Supported : List (Exists─ _ OIDValue)
 Supported = (-, RSA) ∷ [ -, EC ]

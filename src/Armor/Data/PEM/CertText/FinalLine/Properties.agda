@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -50,7 +51,7 @@ fromCertFullLine : ∀ {@0 bs} → CertFullLine bs → CertFinalLine bs
 fromCertFullLine (mkCertFullLine (mk×ₚ line (─ lineLen)) eol refl) =
   mkCertFinalLine
     (Base64.Str.fromExactLength (mk×ₚ line (─ lineLen)))
-      (Nat.≤-trans (toWitness{Q = 1 ≤? 64} tt) (Lemmas.≡⇒≤ (sym lineLen))
+      (Nat.≤-trans (toWitness{a? = 1 ≤? 64} tt) (Lemmas.≡⇒≤ (sym lineLen))
     , Lemmas.≡⇒≤ lineLen)
     eol refl
 
@@ -73,10 +74,10 @@ char∈ b∈ (mkCertFinalLine{l}{e} line lineLen eol refl) =
     (inj₁ x) → ─
       (caseErased Base64.Str.char∈ x line ret (const _) of λ where
         (inj₁ x) → ─ Any.++⁺ˡ x
-        (inj₂ refl) → ─ toWitness{Q = _ ∈? _} tt)
+        (inj₂ refl) → ─ toWitness{a? = _ ∈? _} tt)
     (inj₂ y) → ─ (caseErased RFC5234.EOL.char∈ y eol ret (const _) of λ where
-      (inj₁ refl) → ─ toWitness{Q = _ ∈? _} tt
-      (inj₂ refl) → ─ (toWitness{Q = _ ∈? _} tt))
+      (inj₁ refl) → ─ toWitness{a? = _ ∈? _} tt
+      (inj₂ refl) → ─ (toWitness{a? = _ ∈? _} tt))
 
 @0 lengthRange : ∀ {@0 bs} → CertFinalLine bs → InRange 2 66 (length bs)
 lengthRange{bs} (mkCertFinalLine{l}{e} line lineLen eol bs≡) =
@@ -124,8 +125,8 @@ noOverlap ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ ++≡
   @0 x₁≢ : x₁ ∉ B64.charset × x₁ ≢ '='
   x₁≢ =
     [_,_]
-      (λ where refl → toWitnessFalse{Q = _ ∈? _} tt , λ ())
-      (λ where refl → toWitnessFalse{Q = _ ∈? _} tt , λ ())
+      (λ where refl → toWitnessFalse{a? = _ ∈? _} tt , λ ())
+      (λ where refl → toWitnessFalse{a? = _ ∈? _} tt , λ ())
       x₁≡
 
   noway : ¬ CertFinalLine xs₂

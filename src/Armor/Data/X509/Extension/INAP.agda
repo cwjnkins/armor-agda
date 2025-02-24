@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.INAP.Parser
 import Armor.Data.X509.Extension.INAP.TCB
 import Armor.Data.X509.Extension.INAP.Properties

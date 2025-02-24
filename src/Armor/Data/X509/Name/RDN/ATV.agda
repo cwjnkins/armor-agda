@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Name.RDN.ATV.OIDs
 import Armor.Data.X509.Name.RDN.ATV.Parser
 import Armor.Data.X509.Name.RDN.ATV.Properties

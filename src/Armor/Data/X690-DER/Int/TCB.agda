@@ -1,10 +1,11 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.X690-DER.Tag as Tag
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Grammar.Definitions.NonMalleable
 import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
-open import Relation.Nullary.Implication
+open import Relation.Nullary
 
 module Armor.Data.X690-DER.Int.TCB where
 

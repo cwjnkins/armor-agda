@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 open import Armor.Binary
@@ -65,5 +66,5 @@ module _ (loc : String) where
   parseNonNegative =
     parseSigma TLV.nosubstrings unambiguous parse
       λ x → case getVal x ret (λ scrut → Dec (ℤ.NonNegative scrut)) of λ where
-        (ℤ.+_ _) → yes tt
+        (ℤ.+_ _) → yes (record { nonNeg = tt })
         (ℤ.-[1+ _ ]) → no λ ()

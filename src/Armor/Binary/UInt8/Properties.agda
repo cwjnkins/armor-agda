@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Binary.UInt8.TCB
 open import Armor.Prelude
@@ -106,15 +107,17 @@ unsigned-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ eq =
   ... | tri≈ _ x₁≡x₂ _ = Fin.toℕ-injective x₁≡x₂
 
   bs₁≡bs₂ : bs₁ ≡ bs₂
-  bs₁≡bs₂ = unsigned-injective bs₁ bs₂ (Nat.suc-injective len≡)
-         (Nat.+-cancelˡ-≡ (toℕ x₁ * 256 ^ length bs₁) (begin
-           toℕ x₁ * 256 ^ length bs₁ + unsigned bs₁ ≡⟨ eq ⟩
-           toℕ x₂ * 256 ^ length bs₂ + unsigned bs₂
-             ≡⟨ cong (_+ unsigned bs₂)
-                  (cong₂ _*_
-                    (cong Fin.toℕ (sym x₁≡x₂))
-                    (cong (256 ^_) (sym $ Nat.suc-injective len≡))) ⟩
-           toℕ x₁ * 256 ^ length bs₁ + unsigned bs₂ ∎))
+  bs₁≡bs₂ =
+    unsigned-injective bs₁ bs₂ (Nat.suc-injective len≡)
+      (+-cancelˡ-≡ (toℕ x₁ * 256 ^ length bs₁) _ _ (begin
+        toℕ x₁ * 256 ^ length bs₁ + unsigned bs₁ ≡⟨ eq ⟩
+        toℕ x₂ * 256 ^ length bs₂ + unsigned bs₂
+          ≡⟨ cong (_+ unsigned bs₂)
+               (cong₂ _*_
+                  (cong Fin.toℕ (sym x₁≡x₂))
+                  (cong (256 ^_) (sym $ Nat.suc-injective len≡)))
+           ⟩
+        toℕ x₁ * 256 ^ length bs₁ + unsigned bs₂ ∎))
 
 -- twosComplement
 --------------------------------------------------
@@ -137,7 +140,9 @@ twosComplementMinRep? bₕ (b ∷ bₜ) =
           (no ¬b≤127) → no λ where
             (_ , inj₁ bₕ<255) → contradiction bₕ≡255 (Nat.<⇒≢ bₕ<255)
             (_ , inj₂ (_ , b≤127)) → contradiction b≤127 ¬b≤127
-        (no ¬bₕ≡255) → yes ((inj₁ bₕ>0) , (inj₁ (Nat.≤∧≢⇒< (Nat.+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ)) ¬bₕ≡255)))
+        (no ¬bₕ≡255) →
+            yes ((inj₁ bₕ>0)
+          , inj₁ (Nat.≤∧≢⇒< (+-cancelˡ-≤ 1 _ _ (Fin.toℕ<n bₕ)) ¬bₕ≡255))
 
 uniqueTwosCompletementMinRep : ∀ bₕ bₜ → Unique (TwosComplementMinRep bₕ bₜ)
 uniqueTwosCompletementMinRep bₕ [] tt tt = refl
@@ -185,7 +190,7 @@ twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
   b'≤127 = ≤.begin
     toℕ b' ≤.≡⟨⟩
     toℕ (Fin.fromℕ< b-128<256) ≤.≡⟨ toℕ-fromℕ< b-128<256 ⟩
-    toℕ b - 128 ≤.≤⟨ ∸-monoˡ-≤ {m = toℕ b} {n = 255} 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n b)) ⟩
+    toℕ b - 128 ≤.≤⟨ ∸-monoˡ-≤ {m = toℕ b} {n = 255} 128 (+-cancelˡ-≤ 1 _ _ (Fin.toℕ<n b)) ⟩
     127 ≤.∎
 
   diff : ∃ λ n → 128 - toℕ b' ≡ suc n
@@ -227,7 +232,8 @@ twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
           suc (toℕ bₕ₁) * 256 ^ length bₜ₂
             ≤.≤⟨ *-monoˡ-≤ (256 ^ length bₜ₂) (Fin.toℕ<n bₕ₁) ⟩
           256 ^ (1 + length bₜ₂)
-            ≤.≤⟨ Nat.m≤n*m (256 ^ (1 + length bₜ₂)) {toℕ bₕ₂} (n≢0⇒n>0 (λ eq → case trans (‼ n≡) eq of λ ())) ⟩
+            ≤.≤⟨ Nat.m≤n*m (256 ^ (1 + length bₜ₂)) (toℕ bₕ₂)
+                   ⦃ ≢-nonZero (λ eq → case trans (‼ n≡) eq of λ ()) ⦄ ⟩
           toℕ bₕ₂ * 256 ^ (1 + length bₜ₂)
             ≤.≤⟨ m≤m+n _ _ ⟩
           toℕ bₕ₂ * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)
@@ -277,10 +283,15 @@ twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
              {toℕ bₕ₂' * 256 ^ (1 + length bₜ₂) + (toℕ b * 256 ^ length bₜ₂ + unsigned bₜ₂)}
              (case toℕ bₕ₂ ≟ 255 ret (const _) of λ where
                (yes bₕ₂≡255) → lem₂ bₕ₂≡255
-               (no  bₕ₂≢255) → lem₁ (+-cancelˡ-≤ 1 (Nat.≤∧≢⇒< (+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ₂)) bₕ₂≢255)))
+               (no  bₕ₂≢255) →
+                 lem₁ (+-cancelˡ-≤ 1 _ _
+                   (Nat.≤∧≢⇒<
+                      (+-cancelˡ-≤ 1 _ _
+                         (Fin.toℕ<n bₕ₂))
+                      bₕ₂≢255)))
              (≤.begin
                127 * 256 ^ (1 + length bₜ₂) + 128 * (256 ^ length bₜ₂)
-                 ≤.≤⟨ +-monoʳ-≤ (127 * 256 ^ (1 + length bₜ₂)) (*-monoˡ-≤ (256 ^ length bₜ₂) (toWitness{Q = 128 Nat.≤? 256} tt)) ⟩
+                 ≤.≤⟨ +-monoʳ-≤ (127 * 256 ^ (1 + length bₜ₂)) (*-monoˡ-≤ (256 ^ length bₜ₂) (toWitness{a? = 128 Nat.≤? 256} tt)) ⟩
                127 * 256 ^ (1 + length bₜ₂) + 256 ^ (1 + length bₜ₂)
                  ≤.≡⟨ +-comm (127 * 256 ^ (1 + length bₜ₂)) (256 ^ (1 + length bₜ₂)) ⟩
                128 * 256 ^ (1 + length bₜ₂) ≤.∎) ⟩
@@ -298,7 +309,7 @@ twosComplement<0 b bs = _ , cong (λ x → Sign.- ℤ.◃ x) (begin
   bₕ₂'≤127 = ≤.begin
     toℕ bₕ₂' ≤.≡⟨⟩
     toℕ (Fin.fromℕ<{m = toℕ bₕ₂ - 128}{n = 256} bₕ₂∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< bₕ₂∸128<256 ⟩
-    toℕ bₕ₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n bₕ₂)) ⟩
+    toℕ bₕ₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 _ _ (Fin.toℕ<n bₕ₂)) ⟩
     127 ≤.∎
 
   lem₀ :   128 * 256 ^ length bₜ₁ - unsigned (bₕ₁' ∷ bₜ₁)
@@ -360,14 +371,14 @@ twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | no �
   x₁'≤127 = ≤.begin
     toℕ x₁' ≤.≡⟨⟩
     toℕ (Fin.fromℕ<{m = toℕ x₁ - 128}{n = 256} x₁∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< x₁∸128<256 ⟩
-    toℕ x₁ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n x₁)) ⟩
+    toℕ x₁ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 _ _ (Fin.toℕ<n x₁)) ⟩
     127 ≤.∎
 
   x₂'≤127 : toℕ x₂' ≤ 127
   x₂'≤127 = ≤.begin
     toℕ x₂' ≤.≡⟨⟩
     toℕ (Fin.fromℕ<{m = toℕ x₂ - 128}{n = 256} x₂∸128<256) ≤.≡⟨ Fin.toℕ-fromℕ< x₂∸128<256 ⟩
-    toℕ x₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 (Fin.toℕ<n x₂)) ⟩
+    toℕ x₂ - 128 ≤.≤⟨ ∸-monoˡ-≤ 128 (+-cancelˡ-≤ 1 _ _ (Fin.toℕ<n x₂)) ⟩
     127 ≤.∎
 
   lem₀ = Lemmas.neg◃-injective twos≡
@@ -376,11 +387,14 @@ twosComplement-injective (x₁ ∷ bs₁) (x₂ ∷ bs₂) len≡ twos≡ | no �
          ≡ 128 * 256 ^ length bs₁ - unsigned (x₂' ∷ bs₂)
   lem₁ = subst₀ (λ x → 128 * 256 ^ length bs₁ - unsigned (x₁' ∷ bs₁) ≡ 128 * 256 ^ x - unsigned (x₂' ∷ bs₂)){x = length bs₂}{y = length bs₁} (sym (Nat.suc-injective len≡)) lem₀
 
-  lem₂ = ∸-cancelˡ-≡{m = 128 * 256 ^ length bs₁}{n = unsigned (x₁' ∷ bs₁)}{o = unsigned (x₂' ∷ bs₂)}
-           (<⇒≤ (unsigned-head< x₁' bs₁{128} (s≤s x₁'≤127)))
-           (subst₀ (λ x → unsigned (x₂' ∷ bs₂) ≤ 128 * (256 ^ x)) (sym $ Nat.suc-injective len≡)
-             (<⇒≤ (unsigned-head< x₂' bs₂{128} (s≤s x₂'≤127))))
-           lem₁
+  lem₂ =
+    ∸-cancelˡ-≡
+      {m = 128 * 256 ^ length bs₁}
+      (<⇒≤ (unsigned-head< x₁' bs₁ {128} (s≤s x₁'≤127)))
+      (subst₀ (λ x → unsigned (x₂' ∷ bs₂) ≤ 128 * (256 ^ x))
+         (sym $ Nat.suc-injective len≡)
+         (<⇒≤ (unsigned-head< x₂' bs₂{128} (s≤s x₂'≤127))))
+      lem₁
 
   lem₃ = unsigned-injective (x₁' ∷ bs₁) (x₂' ∷ bs₂) len≡ lem₂
 
@@ -448,22 +462,22 @@ asciiNum₁∘showFixed₁≗id n (s≤s n≤9) =
   begin
     asciiNum₁ b ≡⟨⟩
     toℕ b - toℕ '0' ≡⟨⟩
-    toℕ (Fin.inject≤ (Fin.raise (toℕ '0') (n mod 10)) pf) - toℕ '0'
+    toℕ (Fin.inject≤ (Fin._↑ʳ_ (toℕ '0') (n mod 10)) pf) - toℕ '0'
       ≡⟨ cong (_∸ toℕ '0')
            (begin
-             toℕ (Fin.inject≤ (Fin.raise (toℕ '0') (n mod 10)) pf) ≡⟨ toℕ-inject≤ _ pf ⟩
-             toℕ (Fin.raise (toℕ '0') (n mod 10)) ≡⟨ toℕ-raise (toℕ '0') (n mod 10) ⟩
+             toℕ (Fin.inject≤ (Fin._↑ʳ_ (toℕ '0') (n mod 10)) pf) ≡⟨ toℕ-inject≤ _ pf ⟩
+             toℕ (Fin._↑ʳ_ (toℕ '0') (n mod 10)) ≡⟨ toℕ-↑ʳ (toℕ '0') (n mod 10) ⟩
              toℕ '0' + toℕ (n mod 10) ∎) ⟩
     toℕ '0' + toℕ (n mod 10) - toℕ '0' ≡⟨ m+n∸m≡n (toℕ '0') (toℕ (n mod 10)) ⟩
     toℕ (n mod 10) ≡⟨⟩
-    toℕ (Fin.fromℕ< (m%n<n n 9) ) ≡⟨ toℕ-fromℕ< (m%n<n n 9) ⟩
+    toℕ (Fin.fromℕ< (m%n<n n 10) ) ≡⟨ toℕ-fromℕ< (m%n<n n 10) ⟩
     n % 10 ≡⟨ m≤n⇒m%n≡m n≤9 ⟩
     n ∎
   where
   open ≡-Reasoning
 
   pf : 58 ≤ 256
-  pf = toWitness{Q = _ Nat.≤? _} tt
+  pf = toWitness{a? = _ Nat.≤? _} tt
 
 showFixed₁∘asciiNum₁≗id : ∀ b → InRange '0' '9' b → proj₁ (showFixed₁ (asciiNum₁ b)) ≡ b
 showFixed₁∘asciiNum₁≗id b ir = Fin.toℕ-injective
@@ -471,24 +485,26 @@ showFixed₁∘asciiNum₁≗id b ir = Fin.toℕ-injective
     toℕ (proj₁ (showFixed₁ (asciiNum₁ b))) ≡⟨⟩
     toℕ (proj₁ (showFixed₁ (toℕ b - toℕ '0'))) ≡⟨⟩
     toℕ c‴ ≡⟨ Fin.toℕ-inject≤ c“ pf ⟩
-    toℕ c“ ≡⟨ Fin.toℕ-raise (toℕ '0') c' ⟩
+    toℕ c“ ≡⟨ Fin.toℕ-↑ʳ (toℕ '0') c' ⟩
     toℕ '0' + toℕ c'
       ≡⟨ cong (toℕ '0' +_)
            (begin
-             (toℕ (Fin.fromℕ< (m%n<n (toℕ b - toℕ '0') 9)) ≡⟨ Fin.toℕ-fromℕ< ((m%n<n (toℕ b - toℕ '0') 9)) ⟩
+             (toℕ (Fin.fromℕ< (m%n<n (toℕ b - toℕ '0') _))
+               ≡⟨ toℕ-fromℕ< (m%n<n (toℕ b ∸ toℕ '0') _) ⟩
              (toℕ b - toℕ '0') % 10 ≡⟨ m≤n⇒m%n≡m b-0<10 ⟩
-             toℕ b - toℕ '0' ∎)) ⟩
+             toℕ b - toℕ '0' ∎))
+       ⟩
     toℕ '0' + (toℕ b - toℕ '0') ≡⟨ m+[n∸m]≡n (proj₁ ir) ⟩
     toℕ b ∎)
   where
   module ≤ = ≤-Reasoning
   open ≡-Reasoning
   pf : 57 < 256
-  pf = toWitness{Q = _ Nat.≤? _} tt
+  pf = toWitness{a? = _ Nat.≤? _} tt
 
   c = toℕ b - toℕ '0'
   c' = c mod 10
-  c“ = Fin.raise (toℕ '0') c'
+  c“ = Fin._↑ʳ_ (toℕ '0') c'
   c‴ = Fin.inject≤ c“ pf
 
   ir' : InRange '0' '9' c‴
@@ -527,16 +543,17 @@ asciiNum∘showFixed≗id (suc w) n n<10^w =
   pf = fromWitnessFalse (>⇒≢ (1≤10^n w))
 
   dm : DivMod n (10 ^ w)
-  dm = (n divMod (10 ^ w)){pf}
+  dm = (n divMod (10 ^ w)) ⦃ nonZero-compat pf ⦄
 
   open DivMod dm
 
   q<10 : quotient < 10
-  q<10 = *-cancelʳ-<{10 ^ w} quotient 10 (≤.begin-strict
-    quotient * 10 ^ w ≤.≤⟨ m≤n+m _ _ ⟩
-    toℕ remainder + quotient * 10 ^ w ≤.≡⟨ sym property ⟩
-    n ≤.<⟨ n<10^w ⟩
-    10 ^ (suc w) ≤.∎)
+  q<10 =
+    *-cancelʳ-< (10 ^ w) quotient 10 (≤.begin-strict
+      quotient * 10 ^ w ≤.≤⟨ m≤n+m _ _ ⟩
+      toℕ remainder + quotient * 10 ^ w ≤.≡⟨ sym property ⟩
+      n ≤.<⟨ n<10^w ⟩
+      10 ^ (suc w) ≤.∎)
 
 showFixed∘asciiNum≗id : ∀ bs → All (InRange '0' '9') bs → showFixed (length bs) (asciiNum bs) ≡ bs
 showFixed∘asciiNum≗id [] irs = refl
@@ -554,36 +571,55 @@ showFixed∘asciiNum≗id (b ∷ bs) (ir ∷ irs) =
   pf = fromWitnessFalse (>⇒≢ (1≤10^n (length bs)))
   n = asciiNum bs + asciiNum₁ b * 10 ^ length bs
 
-  open DivMod ((n divMod (10 ^ length bs)){pf})
+  open DivMod ((n divMod (10 ^ length bs)) ⦃ nonZero-compat pf ⦄)
+
+  instance
+    nz : NonZero (10 ^ length bs)
+    nz = ≢-nonZero (Nat.>⇒≢ (1≤10^n (length bs)))
 
   q≡ : quotient ≡ asciiNum₁ b
-  q≡ = begin
+  q≡ =
+    begin
     quotient
-      ≡⟨ Lemmas.+-distrib-/-divMod (asciiNum bs) (asciiNum₁ b * 10 ^ length bs){10 ^ length bs}
+      ≡⟨ Lemmas.+-distrib-/-divMod
+           (asciiNum bs)
+           (asciiNum₁ b * 10 ^ length bs)
+           {10 ^ length bs}
+           {≢0 = nonZero-compat⁻¹}
            (≤.begin-strict
-             (asciiNum bs % 10 ^ length bs + asciiNum₁ b * 10 ^ length bs % 10 ^ length bs
+               _%_ (asciiNum bs) (10 ^ length bs)
+             + _%_ (asciiNum₁ b * 10 ^ length bs) (10 ^ length bs)
                ≤.≡⟨ cong₂ _+_{u = asciiNum₁ b * 10 ^ length bs % 10 ^ length bs}
-                      (Lemmas.m≤n⇒m%n≡m-mod' (asciiNum< bs irs))
-                      (Lemmas.m*n%n≡0-mod (asciiNum₁ b) (10 ^ length bs){pf}) ⟩
+                      (Lemmas.m≤n⇒m%n≡m-mod' {≢0 = nonZero-compat⁻¹} (asciiNum< bs irs))
+                      (Lemmas.m*n%n≡0-mod (asciiNum₁ b) (10 ^ length bs) {nonZero-compat⁻¹}) ⟩
              asciiNum bs + 0 ≤.≡⟨ +-identityʳ (asciiNum bs) ⟩
              asciiNum bs ≤.<⟨ asciiNum< bs irs ⟩
-             _ ≤.∎)) ⟩
+             _ ≤.∎)   ⟩
     asciiNum bs / 10 ^ length bs + asciiNum₁ b * 10 ^ length bs / 10 ^ length bs
       ≡⟨ cong₂ _+_ {x = asciiNum bs / 10 ^ length bs}
-           (m<n⇒m/n≡0 (asciiNum< bs irs))
-           (m*n/n≡m (asciiNum₁ b) (10 ^ length bs)) ⟩
+           (m<n⇒m/n≡0 ⦃ nz ⦄ (asciiNum< bs irs))
+           (m*n/n≡m (asciiNum₁ b) (10 ^ length bs) ⦃ nz ⦄) ⟩
     asciiNum₁ b ∎
 
   b≡ : proj₁ (showFixed₁ quotient) ≡ b
   b≡ = begin
-    proj₁ (showFixed₁ quotient) ≡⟨ cong (λ x → proj₁ (showFixed₁ x)) q≡ ⟩
+    proj₁ (showFixed₁ quotient)
+      ≡⟨ cong
+           (λ x → proj₁ (showFixed₁ x))
+           {x = quotient} {y = asciiNum₁ b}
+           q≡ ⟩
     proj₁ (showFixed₁ (asciiNum₁ b)) ≡⟨ showFixed₁∘asciiNum₁≗id b ir ⟩
     b ∎
 
   ≡asciiNum : toℕ remainder ≡ asciiNum bs
   ≡asciiNum = begin
-    toℕ remainder ≡⟨ cong Fin.toℕ (Lemmas.[m+kn]%n≡m%n-divMod (asciiNum bs) (asciiNum₁ b) (10 ^ length bs)) ⟩
-    toℕ ((asciiNum bs mod 10 ^ length bs){pf}) ≡⟨ Lemmas.m≤n⇒m%n≡m-mod (asciiNum< bs irs) ⟩
+    toℕ remainder
+      ≡⟨ cong Fin.toℕ
+           (Lemmas.[m+kn]%n≡m%n-divMod
+              (asciiNum bs) (asciiNum₁ b) (10 ^ length bs)
+              {≢0 = nonZero-compat⁻¹}) ⟩
+    toℕ (_mod_ (asciiNum bs) (10 ^ length bs) ⦃ nonZero-compat pf ⦄)
+      ≡⟨ Lemmas.m≤n⇒m%n≡m-mod {≢0 = nonZero-compat⁻¹} (asciiNum< bs irs) ⟩
     asciiNum bs ∎
 
   ih : showFixed (length bs) (toℕ remainder) ≡ bs

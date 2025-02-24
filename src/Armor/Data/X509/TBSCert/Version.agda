@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.TBSCert.Version.Eq
 import Armor.Data.X509.TBSCert.Version.Parser
 import Armor.Data.X509.TBSCert.Version.Properties

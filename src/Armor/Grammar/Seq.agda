@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Seq.MaximalParser
 import      Armor.Grammar.Seq.Parser
 import      Armor.Grammar.Seq.Properties

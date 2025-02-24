@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Prelude
@@ -16,7 +16,7 @@ open Armor.Grammar.IList UInt8
 
 lookupInitMap : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupInitMap x 
-  with lookupUTF8Trie (serializeUTF8Char' x) IMap
+  with lookupUTF8Trie IMap (serializeUTF8Char' x)
 ... | nothing = _ , (cons (mkIListCons x nil refl))
 ... | just x₁
   with x₁

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.SignAlg
 open import Armor.Data.X509.CRL.TBSCertList.TCB

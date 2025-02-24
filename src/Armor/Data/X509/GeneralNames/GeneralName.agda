@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.GeneralNames.GeneralName.Eq
 import Armor.Data.X509.GeneralNames.GeneralName.Parser
 import Armor.Data.X509.GeneralNames.GeneralName.Properties

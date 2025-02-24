@@ -1,10 +1,10 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
 open import Armor.Data.X509.Semantic.Cert.Utils
 open import Armor.Data.X690-DER.SequenceOf
 open import Armor.Prelude
-open import Relation.Nullary.Implication
 
 module Armor.Data.X509.Semantic.Cert.R8 where
 

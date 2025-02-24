@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer.Parser
 import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer.TCB
 import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer.Properties

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.IList.TCB
 open import Armor.Prelude
   hiding (module All; All)

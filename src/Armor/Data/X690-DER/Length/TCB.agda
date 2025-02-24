@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Prelude
 import      Armor.Grammar.Definitions.NonMalleable
@@ -63,15 +64,15 @@ getLength : ∀ {@0 bs} → Length bs → ℕ
 getLength {bs} (short (mkShort l l<128 bs≡)) = toℕ l
 getLength {bs} (long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜLen _ bs≡)) = getLengthRaw (lₕ ∷ lₜ)
 
-toLength : (n : Fin 128) → Length ([ Fin.inject≤ n (toWitness{Q = _ ≤? _} tt) ])
+toLength : (n : Fin 128) → Length ([ Fin.inject≤ n (toWitness{a? = _ ≤? _} tt) ])
 toLength n = short (mkShort c c< refl)
   where
   c : UInt8
-  c = Fin.inject≤ n (toWitness{Q = _ ≤? _} tt)
+  c = Fin.inject≤ n (toWitness{a? = _ ≤? _} tt)
 
   c< : toℕ c < 128
   c< = Nat.≤-trans
-         (s≤s (Lemmas.≡⇒≤ (Fin.toℕ-inject≤ n (toWitness{Q = _ ≤? _} tt))))
+         (s≤s (Lemmas.≡⇒≤ (Fin.toℕ-inject≤ n (toWitness{a? = _ ≤? _} tt))))
          (Nat.≤-trans
            (Fin.toℕ<n n)
            Nat.≤-refl)

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary.Bits
 import      Armor.Binary.Base64EncDec.Base64 as Base64
 open import Armor.Prelude
@@ -45,12 +46,12 @@ pad64To256 (Base64.pad1 (
 pad256To64₁ : (Binary 8) → Vec (Binary 6) 2
 pad256To64₁ (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ b₁₇ ∷ b₁₈ ∷ []) =
   (  (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ Vec.[ b₁₆ ])
-   ∷ Vec.[ b₁₇ ∷ b₁₈ ∷ Vec.replicate #0 ])
+   ∷ Vec.[ b₁₇ ∷ b₁₈ ∷ Vec.replicate _ #0 ])
 
 pad256To64₂ : ((Binary 8) × (Binary 8)) → Vec (Binary 6) 3
 pad256To64₂ (  (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ b₁₆ ∷ b₁₇ ∷ b₁₈ ∷ [])
              , (b₂₁ ∷ b₂₂ ∷ b₂₃ ∷ b₂₄ ∷ b₂₅ ∷ b₂₆ ∷ b₂₇ ∷ b₂₈ ∷ []))
   = ( (b₁₁ ∷ b₁₂ ∷ b₁₃ ∷ b₁₄ ∷ b₁₅ ∷ Vec.[ b₁₆ ])
       ∷ (b₁₇ ∷ b₁₈ ∷ b₂₁ ∷ b₂₂ ∷ b₂₃ ∷ Vec.[ b₂₄ ])
-      ∷ Vec.[ b₂₅ ∷ b₂₆ ∷ b₂₇ ∷ b₂₈ ∷ Vec.replicate #0 ])
+      ∷ Vec.[ b₂₅ ∷ b₂₆ ∷ b₂₇ ∷ b₂₈ ∷ Vec.replicate _ #0 ])
 

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.AKI.Eq
 import Armor.Data.X509.Extension.AKI.Parser
 import Armor.Data.X509.Extension.AKI.Properties

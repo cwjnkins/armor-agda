@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X690-DER.TLV
@@ -12,13 +13,13 @@ open Armor.Grammar.Serializer UInt8
 private
   serializeValueRaw : List Bool → UInt8 × List UInt8
   serializeValueRaw [] = # 0 , []
-  serializeValueRaw (x₀ ∷ [])                                = # 7 , [ fromBinary (                              Vec.[ x₀ ] Vec.++ Vec.replicate{n = 7} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ [])                           = # 6 , [ fromBinary (x₀ ∷                          Vec.[ x₁ ] Vec.++ Vec.replicate{n = 6} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ [])                      = # 5 , [ fromBinary (x₀ ∷ x₁ ∷                     Vec.[ x₂ ] Vec.++ Vec.replicate{n = 5} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ [])                 = # 4 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷                Vec.[ x₃ ] Vec.++ Vec.replicate{n = 4} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ [])            = # 3 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷           Vec.[ x₄ ] Vec.++ Vec.replicate{n = 3} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ [])       = # 2 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷      Vec.[ x₅ ] Vec.++ Vec.replicate{n = 2} #0) ]
-  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ [])  = # 1 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ Vec.[ x₆ ] Vec.++ Vec.replicate{n = 1} #0) ]
+  serializeValueRaw (x₀ ∷ [])                                = # 7 , [ fromBinary (                              Vec.[ x₀ ] Vec.++ Vec.replicate 7 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ [])                           = # 6 , [ fromBinary (x₀ ∷                          Vec.[ x₁ ] Vec.++ Vec.replicate 6 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ [])                      = # 5 , [ fromBinary (x₀ ∷ x₁ ∷                     Vec.[ x₂ ] Vec.++ Vec.replicate 5 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ [])                 = # 4 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷                Vec.[ x₃ ] Vec.++ Vec.replicate 4 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ [])            = # 3 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷           Vec.[ x₄ ] Vec.++ Vec.replicate 3 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ [])       = # 2 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷      Vec.[ x₅ ] Vec.++ Vec.replicate 2 #0) ]
+  serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ [])  = # 1 , [ fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ Vec.[ x₆ ] Vec.++ Vec.replicate 1 #0) ]
   serializeValueRaw (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ x₇ ∷ xs) =
     let b         = fromBinary (x₀ ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ x₅ ∷ x₆ ∷ Vec.[ x₇ ])
         (bₕ , bₜ) = serializeValueRaw xs
@@ -82,8 +83,8 @@ private
       (cong [_] (sym (begin
         (x₁ ≡⟨ sym (fromBinary∘toBinary{8} x₁) ⟩
         fromBinary (toBinary{8} x₁)
-          ≡⟨ cong fromBinary (Lemmas.toList-injective (toBinary{8} x₁) (x ∷ Vec.replicate #0) (begin
-               xs ≡⟨ sym (take++drop (8 - toℕ bₕ) xs) ⟩
+          ≡⟨ cong fromBinary (Lemmas.toList-injective (toBinary{8} x₁) (x ∷ Vec.replicate _ #0) (begin
+               xs ≡⟨ sym (take++drop≡id (8 - toℕ bₕ) xs) ⟩
                take (8 - toℕ bₕ) xs ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
                x ∷ replicate (toℕ bₕ) #0 ≡⟨ cong (λ y → x ∷ replicate y #0) bₕ≡7 ⟩
                x ∷ replicate 7 #0 ∎))
@@ -107,11 +108,11 @@ private
       1 ∎)
 
     bₕ≡7 : toℕ bₕ ≡ 7
-    bₕ≡7 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡1
+    bₕ≡7 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡1
 
     xs≡ : xs ≡ x ∷ replicate 7 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 1 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 1 xs) ⟩
       take 1 xs ++ drop 1 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡7) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       x ∷ replicate (toℕ bₕ) #0 ≡⟨ cong (λ y → x ∷ replicate y #0) bₕ≡7 ⟩
@@ -142,9 +143,9 @@ private
       (cong [_] (sym (begin
         (x₂ ≡⟨ sym (fromBinary∘toBinary{8} x₂) ⟩
         fromBinary (toBinary{8} x₂)
-          ≡⟨ cong fromBinary (Lemmas.toList-injective (toBinary{8} x₂) (x ∷ x₁ ∷ Vec.replicate #0)
+          ≡⟨ cong fromBinary (Lemmas.toList-injective (toBinary{8} x₂) (x ∷ x₁ ∷ Vec.replicate _ #0)
                (begin
-                 xs ≡⟨ sym (take++drop (8 - toℕ bₕ) xs) ⟩
+                 xs ≡⟨ sym (take++drop≡id (8 - toℕ bₕ) xs) ⟩
                  take (8 - toℕ bₕ) xs ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
                  x ∷ x₁ ∷ replicate (toℕ bₕ) #0 ≡⟨ cong (λ y → x ∷ x₁ ∷ replicate y #0) bₕ≡6 ⟩
                  x ∷ x₁ ∷ replicate 6 #0 ∎))
@@ -168,11 +169,11 @@ private
       2 ∎)
 
     bₕ≡6 : toℕ bₕ ≡ 6
-    bₕ≡6 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡2
+    bₕ≡6 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡2
 
     xs≡ : xs ≡ x ∷ x₁ ∷ replicate 6 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 2 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 2 xs) ⟩
       take 2 xs ++ drop 2 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡6) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       x ∷ x₁ ∷ replicate (toℕ bₕ) #0 ≡⟨ cong (λ y → x ∷ x₁ ∷ replicate y #0) bₕ≡6 ⟩
@@ -205,7 +206,7 @@ private
           ≡⟨ cong fromBinary
                (Lemmas.toList-injective
                  (toBinary {8} x₃)
-                 (x ∷ x₁ ∷ x₂ ∷ Vec.replicate #0)
+                 (x ∷ x₁ ∷ x₂ ∷ Vec.replicate _ #0)
                  xs≡)
           ⟩
         _ ∎))
@@ -227,11 +228,11 @@ private
       3 ∎)
 
     bₕ≡5 : toℕ bₕ ≡ 5
-    bₕ≡5 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡3
+    bₕ≡5 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡3
 
     xs≡ : xs ≡ x ∷ x₁ ∷ x₂ ∷ replicate 5 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 3 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 3 xs) ⟩
       take 3 xs ++ drop 3 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡5) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       x ∷ x₁ ∷ x₂ ∷ replicate (toℕ bₕ) #0 ≡⟨ cong (λ y → x ∷ x₁ ∷ x₂ ∷ replicate y #0) bₕ≡5 ⟩
@@ -264,7 +265,7 @@ private
           ≡⟨ cong fromBinary
                (Lemmas.toList-injective
                  (toBinary {8} x₄)
-                 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ Vec.replicate #0)
+                 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ Vec.replicate _ #0)
                  xs≡)
           ⟩
         _ ∎))
@@ -287,11 +288,11 @@ private
       4 ∎)
 
     bₕ≡4 : toℕ bₕ ≡ 4
-    bₕ≡4 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡4
+    bₕ≡4 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡4
 
     xs≡ : xs ≡ x ∷ x₁ ∷ x₂ ∷ x₃ ∷ replicate 4 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 4 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 4 xs) ⟩
       take 4 xs ++ drop 4 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡4) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       x ∷ x₁ ∷ x₂ ∷ x₃ ∷ replicate (toℕ bₕ) #0
@@ -307,7 +308,7 @@ private
         length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ x₁ ∷ x₂ ∷ [ x₃ ]) ≤.∎)
-      (toWitnessFalse{Q = _ ≤? _} tt)
+      (toWitnessFalse{a? = _ ≤? _} tt)
     where
     module ≤ = Nat.≤-Reasoning
 
@@ -326,7 +327,7 @@ private
           ≡⟨ cong fromBinary
                (Lemmas.toList-injective
                  (toBinary {8} x₅)
-                 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ Vec.replicate #0)
+                 (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ Vec.replicate _ #0)
                  xs≡)
           ⟩
         _ ∎))
@@ -348,11 +349,11 @@ private
       5 ∎)
 
     bₕ≡3 : toℕ bₕ ≡ 3
-    bₕ≡3 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡3
+    bₕ≡3 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡3
 
     xs≡ : xs ≡ x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ replicate 3 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 5 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 5 xs) ⟩
       take 5 xs ++ drop 5 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡3) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       x ∷ x₁ ∷ x₂ ∷ x₃ ∷ x₄ ∷ replicate (toℕ bₕ) #0
@@ -367,7 +368,7 @@ private
         length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ [ x₄ ]) ≤.∎)
-      (toWitnessFalse{Q = _ ≤? _} tt)
+      (toWitnessFalse{a? = _ ≤? _} tt)
     where
     module ≤ = Nat.≤-Reasoning
 
@@ -386,7 +387,7 @@ private
           ≡⟨ cong fromBinary
                (Lemmas.toList-injective
                  (toBinary {8} x₆)
-                 (Vec.fromList xs“ Vec.++ Vec.replicate #0)
+                 (Vec.fromList xs“ Vec.++ Vec.replicate _ #0)
                  xs≡)
           ⟩
         _ ∎))
@@ -410,11 +411,11 @@ private
       _ ∎)
 
     bₕ≡2 : toℕ bₕ ≡ 2
-    bₕ≡2 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡2
+    bₕ≡2 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡2
 
     xs≡ : xs ≡ xs“ ++ replicate 2 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 6 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 6 xs) ⟩
       take 6 xs ++ drop 6 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡2) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       xs“ ++ replicate (toℕ bₕ) #0
@@ -429,7 +430,7 @@ private
         length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length xs“ ≤.∎)
-      (toWitnessFalse{Q = _ ≤? _} tt)
+      (toWitnessFalse{a? = _ ≤? _} tt)
     where
     module ≤ = Nat.≤-Reasoning
 
@@ -449,7 +450,7 @@ private
           ≡⟨ cong fromBinary
                (Lemmas.toList-injective
                  (toBinary {8} x₇)
-                 (Vec.fromList xs“ Vec.++ Vec.replicate #0)
+                 (Vec.fromList xs“ Vec.++ Vec.replicate _ #0)
                  xs≡)
           ⟩
         _ ∎))
@@ -473,11 +474,11 @@ private
       _ ∎)
 
     bₕ≡1 : toℕ bₕ ≡ 1
-    bₕ≡1 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡1
+    bₕ≡1 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡1
 
     xs≡ : xs ≡ xs“ ++ replicate 1 #0
     xs≡ = begin
-      xs ≡⟨ sym (take++drop 7 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 7 xs) ⟩
       take 7 xs ++ drop 7 xs ≡⟨ cong (λ x → take (8 - x) xs ++ drop (8 - x) xs) (sym bₕ≡1) ⟩
       xs' ++ drop (8 - toℕ bₕ) xs ≡⟨ cong₂ _++_ (sym bits≡) u ⟩
       xs“ ++ replicate (toℕ bₕ) #0
@@ -492,7 +493,7 @@ private
         length xs + length xs' ≤.≡⟨ sym (length-++ xs {xs'}) ⟩
         length (xs ++ xs') ≤.≡⟨ cong length (sym bits≡) ⟩
         length xs“ ≤.∎)
-      (toWitnessFalse{Q = _ ≤? _} tt)
+      (toWitnessFalse{a? = _ ≤? _} tt)
     where
     module ≤ = Nat.≤-Reasoning
 
@@ -544,11 +545,11 @@ private
     8-bₕ≡8 = Nat.≤-antisym 8-bₕ≤8 8-bₕ≥8
 
     bₕ≡0 : toℕ bₕ ≡ 0
-    bₕ≡0 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{Q = _ ≤? _} tt) 8-bₕ≡8
+    bₕ≡0 = Nat.∸-cancelˡ-≡ (Nat.<⇒≤ bₕ<8) (toWitness{a? = _ ≤? _} tt) 8-bₕ≡8
 
     xs≡xs' : xs ≡ xs'
     xs≡xs' = begin
-      xs ≡⟨ sym (take++drop 8 xs) ⟩
+      xs ≡⟨ sym (take++drop≡id 8 xs) ⟩
       take 8 xs ++ drop 8 xs ≡⟨ cong (_++ drop 8 xs) (cong (λ x → take x xs) (sym 8-bₕ≡8)) ⟩
       xs' ++ drop 8 xs ≡⟨ cong (xs' ++_) (cong (λ x → drop x xs) (sym xsLen)) ⟩
       xs' ++ drop (length xs) xs ≡⟨ cong (xs' ++_) (Lemmas.drop-length xs) ⟩

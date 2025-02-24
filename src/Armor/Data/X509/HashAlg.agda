@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.HashAlg.RFC4055
 
 module Armor.Data.X509.HashAlg where

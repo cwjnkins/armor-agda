@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.PEM.CertBoundary
 import Armor.Data.PEM.CertText
 import Armor.Data.PEM.Parser
