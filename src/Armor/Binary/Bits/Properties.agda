@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Binary.Bits.TCB
 open import Armor.Prelude
@@ -70,9 +71,12 @@ fromBinary∘toBinary{n} i = begin
   aux∘aux n@{suc n'} i i' i'≡
     with divmod2 i' | inspect divmod2 i'
   ... | (q , #0) | [ insp ]R = toℕ-injective (begin
-    toℕ (subst Fin (suc[pred[n]]≡n {2 ^ n} (2^n≢0 n)) _) ≡⟨ Lemmas.Fin-toℕ-subst (Fin.inject₁ (Fin.2* (FromBinary.aux (ToBinary.aux n' q)))) ⟩
-    toℕ (Fin.inject₁ (Fin.2* (FromBinary.aux (ToBinary.aux n' q)))) ≡⟨ toℕ-inject₁ _ ⟩
-    toℕ (Fin.2* (FromBinary.aux (ToBinary.aux n' q))) ≡⟨ Lemmas.Fin-toℕ-2* (FromBinary.aux (ToBinary.aux n' q)) ⟩
+    toℕ (subst Fin (suc-pred (2 ^ n) ⦃ ≢-nonZero (2^n≢0 n) ⦄) _)
+      ≡⟨ Lemmas.Fin-toℕ-subst (Fin.inject₁ (Fin.2* (FromBinary.aux (ToBinary.aux n' q)))) ⟩
+    toℕ (Fin.inject₁ (Fin.2* (FromBinary.aux (ToBinary.aux n' q))))
+      ≡⟨ toℕ-inject₁ _ ⟩
+    toℕ (Fin.2* (FromBinary.aux (ToBinary.aux n' q)))
+      ≡⟨ Lemmas.Fin-toℕ-2* (FromBinary.aux (ToBinary.aux n' q)) ⟩
     2 * toℕ (FromBinary.aux (ToBinary.aux n' q)) ≡⟨ cong (λ x → 2 * toℕ x) (aux∘aux{n'} q' q q≡) ⟩
     2 * toℕ q' ≡⟨ cong (2 *_) (sym q≡) ⟩
     2 * q ≡⟨ 2*q≡ ⟩
@@ -102,9 +106,10 @@ fromBinary∘toBinary{n} i = begin
 
     q≡ : q ≡ toℕ q'
     q≡ = sym (Fin.toℕ-fromℕ< q<2^n')
-    
+
   ... | (q , #1) | [ insp ]R = toℕ-injective (begin
-    toℕ (subst Fin (suc[pred[n]]≡n {2 ^ n} (2^n≢0 n)) _) ≡⟨ Lemmas.Fin-toℕ-subst (Fin.fromℕ 1 Fin.+ (Fin.2* FromBinary.aux (ToBinary.aux n' q))) ⟩
+    toℕ (subst Fin (suc-pred (2 ^ n) ⦃ ≢-nonZero (2^n≢0 n) ⦄) _)
+      ≡⟨ Lemmas.Fin-toℕ-subst (Fin.fromℕ 1 Fin.+ (Fin.2* FromBinary.aux (ToBinary.aux n' q))) ⟩
     toℕ (Fin.fromℕ 1 Fin.+ (Fin.2* FromBinary.aux (ToBinary.aux n' q))) ≡⟨⟩
     1 + toℕ (Fin.2* FromBinary.aux (ToBinary.aux n' q))
       ≡⟨ cong (1 +_) (begin

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.SequenceOf
 open import Armor.Data.X690-DER.SetOf.Order.TCB

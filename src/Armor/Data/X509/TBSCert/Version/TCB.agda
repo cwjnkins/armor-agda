@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Int.TCB as Int
   hiding (getVal)
@@ -54,7 +55,7 @@ mkVersion i =
   mkInt : (i : Fin 3) → Int (Tag.Integer ∷ # 1 ∷ [ Fin.inject≤ i _ ])
   mkInt i =
     mkTLV
-      (short (mkShort (# 1) (toWitness{Q = _ <? _} tt) refl))
+      (short (mkShort (# 1) (toWitness{a? = _ <? _} tt) refl))
       (mkIntVal (Fin.inject≤ i (s≤s (s≤s (s≤s z≤n)))) [] tt self refl)
       refl refl
 
@@ -75,7 +76,7 @@ toRawVersion i (there (there (here px))) = v3
 [0]ExplicitVersion = TLV Tag.AA0 Version
 
 v1[0]ExplicitVersion : [0]ExplicitVersion _
-v1[0]ExplicitVersion = mkTLV (short (mkShort (# 3) (toWitness{Q = _ <? _} tt) refl)) v1Version refl refl
+v1[0]ExplicitVersion = mkTLV (short (mkShort (# 3) (toWitness{a? = _ <? _} tt) refl)) v1Version refl refl
 
 Raw[0]ExplicitVersion : Raw [0]ExplicitVersion
 Raw[0]ExplicitVersion = RawTLV _ RawVersion

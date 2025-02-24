@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Seq.Properties
 import      Armor.Grammar.Seq.TCB
@@ -60,7 +61,7 @@ parse&{A} p₁ p₂ noo = mkMaximalParser help
                            (¡ xs≡) (≤-trans (Erased.x bs₁≤) (Lemmas.≡⇒≤ r₁≡))
                  in
                  case noo bs₁ (drop (length bs₁) pre₁) suf₁ bs₂ suffix
-                        (++-cancelˡ bs₁ ∘ begin_ $
+                        (++-cancelˡ bs₁ _ _ ∘ begin_ $
                           bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ≡⟨ sym (++-assoc bs₁ _ suf₁) ⟩
                           (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ cong (_++ suf₁) (sym $ ¡ pre₁≡) ⟩
                           pre₁ ++ suf₁ ≡⟨ (sym $ ¡ xs≡) ⟩
@@ -112,7 +113,7 @@ parse&{A} p₁ p₂ noo = mkMaximalParser help
                uneraseDec
                  (case
                    noo bs₁ (drop (length bs₁) pre₁) suf₁ bs₂ suf'
-                     (++-cancelˡ bs₁ (begin
+                     (++-cancelˡ bs₁ _ _ (begin
                        (bs₁ ++ drop (length bs₁) pre₁ ++ suf₁ ≡⟨ solve (++-monoid Σ) ⟩
                        (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ (cong (_++ suf₁) ∘ sym $ ¡ pre₁≡) ⟩
                        pre₁ ++ suf₁ ≡⟨ sym (¡ xs≡) ⟩
@@ -171,10 +172,10 @@ parse&ᵈ{A}{B} nn ua p₁ p₂ = mkMaximalParser help
                   let
                     xs≡ : Erased (pre₁ ++ suf₁ ≡ bs₁' ++ bs₂' ++ suffix)
                     xs≡ = ─ (begin
-                      (pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩ 
+                      pre₁ ++ suf₁ ≡⟨ ps≡₁ ⟩
                       xs ≡⟨ sym ps≡ ⟩
                       (bs₁' ++ bs₂') ++ suffix ≡⟨ solve (++-monoid Σ) ⟩
-                      bs₁' ++ bs₂' ++ suffix ∎))
+                      bs₁' ++ bs₂' ++ suffix ∎)
 
                     pre₁≡ : Erased (pre₁ ≡ bs₁')
                     pre₁≡ = ─ nn (¡ xs≡) v₁ v₁'
@@ -184,7 +185,9 @@ parse&ᵈ{A}{B} nn ua p₁ p₂ = mkMaximalParser help
                   in
                   case v₁≋ of λ where
                     ≋-refl →
-                      contradiction (success bs₂' _ refl v₂' suffix (++-cancelˡ pre₁ (sym (¡ xs≡)))) ¬p)
+                      contradiction
+                        (success bs₂' _ refl v₂' suffix (++-cancelˡ pre₁ _ _ (sym (¡ xs≡))))
+                        ¬p)
             , tt
           (mkLogged log₂ (yes (success pre₂ r₂ r₂≡ v₂ suf₂ ps≡₂)) , max) →
               mkLogged (log₁ ++ log₂) (yes

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.AIA.AccessDesc
 import Armor.Data.X509.Extension.AIA.Parser
 import Armor.Data.X509.Extension.AIA.TCB

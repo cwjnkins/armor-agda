@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.IList.TCB
 import      Armor.Grammar.Serializer
 open import Armor.Prelude

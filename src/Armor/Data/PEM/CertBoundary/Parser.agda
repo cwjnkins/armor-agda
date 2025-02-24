@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Data.Base64.TCB
 open import Armor.Data.PEM.CertBoundary.Properties
 open import Armor.Data.PEM.CertBoundary.TCB

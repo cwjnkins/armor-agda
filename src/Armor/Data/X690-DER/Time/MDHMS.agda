@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.MDHMS.Ordering
 import Armor.Data.X690-DER.Time.MDHMS.Parser
 import Armor.Data.X690-DER.Time.MDHMS.Properties

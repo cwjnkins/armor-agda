@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.Unicode.UTF8
 open import Armor.Data.Unicode.UTF16

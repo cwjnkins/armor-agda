@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Time.GeneralizedTime.Properties
 open import Armor.Data.X690-DER.Time.GeneralizedTime.TCB
@@ -32,7 +33,7 @@ private
   compare-GeneralizedTimeFields<“ : Trichotomous (Pointwise (Pointwise _≡_ _≡_) _≡_) _GeneralizedTimeFields<'_
   compare-GeneralizedTimeFields<“ =
     ×-compare{_≈₁_ = Pointwise _≡_ _≡_}{_≈₂_ = _≡_}
-      (×-symmetric{_∼₁_ = _≡_}{_∼₂_ = _≡_} sym sym)
+      (×-symmetric{R = _≡_}{S = _≡_} sym sym)
       (×-compare {_≈₁_ = _≡_} {_≈₂_ = _≡_} sym <-cmp MDHMS.compare-MDHMS<')
       λ where tt tt → tri≈ (λ ()) refl (λ ())
 
@@ -44,9 +45,14 @@ compare-GeneralizedTimeFields<' x y =
     (tri> ¬a ¬b c) → tri> ¬a (λ where refl → contradiction ((refl , refl) , refl) ¬b) c
 
 isStrictTotalOrder : IsStrictTotalOrder _≡_ _GeneralizedTimeFields<'_
-IsStrictTotalOrder.isEquivalence isStrictTotalOrder = isEquivalence
-IsStrictTotalOrder.trans isStrictTotalOrder = trans-GeneralizedTimeFields<'
-IsStrictTotalOrder.compare isStrictTotalOrder = compare-GeneralizedTimeFields<'
+isStrictTotalOrder = IsStrictTotalOrderᶜ.isStrictTotalOrderᶜ c
+  where
+  open import Relation.Binary.Structures.Biased
+
+  c : IsStrictTotalOrderᶜ _≡_ _GeneralizedTimeFields<'_
+  c .IsStrictTotalOrderᶜ.isEquivalence = isEquivalence
+  c .IsStrictTotalOrderᶜ.trans = trans-GeneralizedTimeFields<'
+  c .IsStrictTotalOrderᶜ.compare = compare-GeneralizedTimeFields<'
 
 compare-GeneralizedTimeFields<
   : ∀ {@0 bs₁ bs₂} → (g₁ : GeneralizedTimeFields bs₁) (g₂ : GeneralizedTimeFields bs₂)

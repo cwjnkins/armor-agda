@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.CRLDistPoint.DistPoint
 import Armor.Data.X509.Extension.CRLDistPoint.Parser
 import Armor.Data.X509.Extension.CRLDistPoint.TCB

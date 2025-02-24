@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.PublicKey.Val.RSA.Ints
 open import Armor.Data.X509.PublicKey.Val.RSA.Properties

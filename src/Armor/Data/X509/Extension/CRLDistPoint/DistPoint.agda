@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.CRLDistPoint.DistPoint.Eq
 import Armor.Data.X509.Extension.CRLDistPoint.DistPoint.Name
 import Armor.Data.X509.Extension.CRLDistPoint.DistPoint.Parser

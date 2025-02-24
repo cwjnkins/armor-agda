@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.Base64
 open import Armor.Data.PEM.CertBoundary.TCB

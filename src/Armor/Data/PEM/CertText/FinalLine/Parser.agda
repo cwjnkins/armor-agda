@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Data.Base64
 open import Armor.Data.PEM.CertText.FinalLine.Properties
 open import Armor.Data.PEM.CertText.FinalLine.TCB
@@ -82,7 +83,7 @@ parseCertFinalLine =
                                       bs₁'≡ = ─ (Lemmas.drop-length-≤ bs₁ (bs₂ ++ suf₁) _ (bs₂' ++ suffix) (¡ xs≡') (Nat.<⇒≤ bs₁'>))
                                   in
                                   ─ (caseErased RFC5234.EOL.noOverlap bs₁ (drop (length bs₁) bs₁') (bs₂' ++ suffix) bs₂ suf₁
-                                       (++-cancelˡ bs₁ (begin
+                                       (++-cancelˡ bs₁ _ _ (begin
                                          bs₁ ++ drop (length bs₁) bs₁' ++ bs₂' ++ suffix ≡⟨ solve (++-monoid Char) ⟩
                                          (bs₁ ++ drop (length bs₁) bs₁') ++ bs₂' ++ suffix ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
                                          bs₁' ++ bs₂' ++ suffix ≡⟨ (sym $ ¡ xs≡') ⟩
@@ -99,7 +100,7 @@ parseCertFinalLine =
                 in
                 case
                   RFC5234.EOL.noOverlap _ _ (bs₂ ++ suf₁) bs₂' suffix
-                    (++-cancelˡ bs₁' (begin
+                    (++-cancelˡ bs₁' _ _ (begin
                       bs₁' ++ drop (length bs₁') bs₁ ++ bs₂ ++ suf₁ ≡⟨ solve (++-monoid Char) ⟩
                       (bs₁' ++ drop (length bs₁') bs₁) ++ bs₂ ++ suf₁ ≡⟨ cong (_++ _) (sym (¡ bs₁'≡)) ⟩
                       bs₁ ++ bs₂ ++ suf₁ ≡⟨ ¡ xs≡' ⟩

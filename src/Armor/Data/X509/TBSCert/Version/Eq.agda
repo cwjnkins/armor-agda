@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.TBSCert.Version.TCB
 open import Armor.Data.X690-DER.Int
@@ -17,4 +18,4 @@ instance
   eq≋ = Parallel.eq≋Σₚ
           it
           λ a → record { _≟_ = λ where
-            a∈₁ a∈₂ → yes (erased-unique (∈-unique (toWitness{Q = unique? supportedVersions} tt)) a∈₁ a∈₂) }
+            a∈₁ a∈₂ → yes (erased-unique (∈-unique (toWitness{a? = unique? supportedVersions} tt)) a∈₁ a∈₂) }

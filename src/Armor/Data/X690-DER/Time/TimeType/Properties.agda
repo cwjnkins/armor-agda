@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Binary
 open import Armor.Data.X690-DER.Time.TimeType.TCB
@@ -15,18 +16,23 @@ fromℕ?{size}{l}{u} n =
       (mkTimeType charset (singleton _ refl) bsLen range) →
         contradiction
           (subst₀ (λ x → l ≤ x × x ≤ u)
-            (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))
+            (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size) {nz}))
             range)
           ¬p
     (yes l≤n'≤u) →
       yes
         (mkTimeType
           (fromWitness (proj₂ (proj₂ (showFixed' size n'))))
-          (singleton n' (sym (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size)))))
+          (singleton n' (sym (UInt8.asciiNum∘showFixed≗id size n' (Lemmas.m%n<n' n (10 ^ size) {nz}))))
           (proj₁ (proj₂ (showFixed' size n')))
           l≤n'≤u)
   where
+  import Data.Nat.Properties
+
   n' = n mod10^n size
+
+  nz : False (10 ^ size Data.Nat.Properties.≟ 0)
+  nz = nonZero-compat⁻¹ ⦃ >-nonZero (1≤10^n size) ⦄
 
 @0 nosubstrings : ∀ {size l u} → NoSubstrings (TimeType size l u)
 nosubstrings xs₁++ys₁≡xs₂++ys₂ (mkTimeType charset time bsLen range) (mkTimeType charset₁ time₁ bsLen₁ range₁) =

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer
@@ -139,17 +140,17 @@ module Select where
       Sum.noconfusion{ExtensionFields (_≡ OIDS.REASONLit) ReasonCodeFields}
         (noconfusionOIDS λ ())
             (Sum.noconfusion{ExtensionFields (_≡ OIDS.REASONLit) ReasonCodeFields}
-              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
+              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))
 
     noconfusion₂ : NoConfusion (ExtensionFields (_≡ OIDS.INVALIDITYLit) InvalidityDateFields) (Sum _ _)
     noconfusion₂ = 
             (Sum.noconfusion{ExtensionFields (_≡ OIDS.INVALIDITYLit) InvalidityDateFields}
-              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{Q = _ ∈? _} tt)))
+              (noconfusionOIDS λ ()) (noconfusionOIDN (toWitness{a? = _ ∈? _} tt)))
 
     noconfusion₀ : NoConfusion
                      (ExtensionFields (_≡ OIDS.CERTISSUERLit) CertIssuerFields)
                      (Σₚ (ExtensionFields (False ∘ (_∈? supportedExtensions)) _) _)
-    noconfusion₀ = noconfusionOIDN (toWitness{Q = _ ∈? _} tt)
+    noconfusion₀ = noconfusionOIDN (toWitness{a? = _ ∈? _} tt)
 
   @0 nonmalleable : NonMalleable RawSelectEntryExtn
   nonmalleable = Iso.nonmalleable iso RawSelectEntryExtnRep nm

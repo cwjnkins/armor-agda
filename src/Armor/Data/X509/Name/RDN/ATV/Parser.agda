@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.DirectoryString
 open import Armor.Data.X509.Name.RDN.ATV.OIDs

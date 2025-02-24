@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Default.Parser
 import Armor.Data.X690-DER.Default.Properties
 import Armor.Data.X690-DER.Default.TCB

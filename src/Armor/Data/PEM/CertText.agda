@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.PEM.CertText.Exclusions
 import Armor.Data.PEM.CertText.FinalLine
 import Armor.Data.PEM.CertText.FullLine

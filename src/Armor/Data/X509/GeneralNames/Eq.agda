@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.GeneralNames.TCB
 open import Armor.Data.X509.GeneralNames.GeneralName.Eq

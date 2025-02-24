@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.Unicode.UTF8.Properties as UTF8
 open import Armor.Data.Unicode.UTF8.TCB

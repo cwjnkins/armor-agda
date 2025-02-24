@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OctetString.TCB
 open import Armor.Data.X690-DER.Int.TCB
@@ -28,7 +29,6 @@ open import Armor.Prelude
 import      Data.List.Relation.Unary.Any.Properties as Any
 open import Data.Sum.Properties
 open import Relation.Nullary.Negation
-  using (¬?)
 
 open Armor.Grammar.Definitions UInt8
 open Armor.Grammar.Parallel    UInt8

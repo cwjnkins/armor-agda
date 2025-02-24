@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Length
 open import Armor.Data.X690-DER.TLV.TCB
@@ -71,7 +72,7 @@ module parseTLV
                 contradiction
                   (success v _ refl
                     (mk×ₚ val (─ trans (sym len≡) len≡')) suffix
-                    (++-cancelˡ pre₀
+                    (++-cancelˡ pre₀ _ _
                       (begin (pre₀ ++ v ++ suffix ≡⟨ cong (λ x → x ++ v ++ suffix) pre₀≡ ⟩
                               l ++ v ++ suffix    ≡⟨ solve (++-monoid UInt8) ⟩
                               (l ++ v) ++ suffix  ≡⟨ ∷-injectiveʳ ps≡ ⟩

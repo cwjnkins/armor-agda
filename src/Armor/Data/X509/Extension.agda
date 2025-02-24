@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.AIA
 import Armor.Data.X509.Extension.AKI
 import Armor.Data.X509.Extension.BC

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.SKI.Parser
 import Armor.Data.X509.Extension.SKI.TCB
 import Armor.Data.X509.Extension.SKI.Properties

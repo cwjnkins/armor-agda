@@ -1,4 +1,4 @@
-{-# OPTIONS --inversion-max-depth=300 #-}
+{-# OPTIONS --erasure --inversion-max-depth=300 #-}
 
 open import Armor.Prelude
 open import Armor.Binary
@@ -132,7 +132,7 @@ nosubstrings xs₁++ys₁≡xs₂++ys₂ (long (mkLong l l>128 lₕ lₕ≢0 l�
               (trans lₜLen (trans (cong (λ x → toℕ x ∸ 129) l≡) (sym lₜLen₁)))
 
 getLength∘toLength-short : (n : Fin 128) → getLength (toLength n) ≡ toℕ n
-getLength∘toLength-short n = Fin.toℕ-inject≤ n (toWitness{Q = _ ≤? _} tt)
+getLength∘toLength-short n = Fin.toℕ-inject≤ n (toWitness{a? = _ ≤? _} tt)
 
 getLengthRaw>128 : ∀ {lₕ lₜ} → toℕ lₕ > 0 → MinRepLong lₕ lₜ → getLengthRaw (lₕ ∷ lₜ) ≥ 128
 getLengthRaw>128 {lₕ} {[]} lₕ>0 mr =
@@ -145,8 +145,14 @@ getLengthRaw>128 {lₕ} {[]} lₕ>0 mr =
   module ≤ = ≤-Reasoning
 getLengthRaw>128 {lₕ} {x ∷ lₜ} lₕ>0 tt =
   ≤.begin
-    128 ≤.≤⟨ toWitness{Q = 128 ≤? 256} tt ⟩
-    256 ≤.≤⟨ m≤m*n 256 (0 < (256 ^ (length lₜ)) ∋ n≢0⇒n>0 (λ ≡0 → contradiction (m^n≡0⇒m≡0 256 (length lₜ) ≡0) λ ())) ⟩
+    128 ≤.≤⟨ toWitness{a? = 128 ≤? 256} tt ⟩
+    256 ≤.≤⟨ m≤m*n 256 (256 ^ length lₜ)
+             ⦃ ≢-nonZero λ eq →
+                 contradiction
+                   (m^n≡0⇒m≡0 256 (length lₜ) eq)
+                   λ ()
+             ⦄
+           ⟩
     256 ^ (1 + length lₜ) ≤.≡⟨ sym (*-identityˡ _) ⟩
     1 * 256 ^ (1 + length lₜ) ≤.≤⟨ *-monoˡ-≤ (256 ^ (1 + length lₜ)) lₕ>0 ⟩
     toℕ lₕ * 256 ^ (1 + length lₜ) ≤.≤⟨ m≤m+n _ _ ⟩
@@ -189,7 +195,7 @@ nonmalleable{bs₁}{bs₂} len₁@(long (mkLong l l>128 lₕ lₕ≢0 lₜ lₜL
       cong₂ _∷_
         (Fin.toℕ-injective
           (‼ ∸-cancelʳ-≡ l>128 l>129
-            (trans (sym lₜLen) (trans (+-cancelˡ-≡ 2 len≡) lₜLen₁))))
+            (trans (sym lₜLen) (trans (+-cancelˡ-≡ 2 _ _ len≡) lₜLen₁))))
         (‼ UInt8.unsigned-injective _ _ (suc-injective len≡) eq)
     (tri> _ _ (s≤s bs₂<bs₁)) →
       contradiction (UInt8.unsigned-leading-0 {bs₁ = lₕ₁ ∷ lₜ₁} {bs₂ = lₕ ∷ lₜ} (s≤s z≤n) bs₂<bs₁ (sym eq)) (>⇒≢ lₕ≢0)

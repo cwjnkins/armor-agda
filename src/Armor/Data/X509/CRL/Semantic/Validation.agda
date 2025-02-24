@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Data.X509
@@ -19,7 +19,6 @@ import      Armor.Grammar.Option
 open import Armor.Grammar.IList as IList
 import      Armor.Grammar.Parallel.TCB
 open import Armor.Prelude
-open import Relation.Nullary.Implication
 
 module Armor.Data.X509.CRL.Semantic.Validation where
 

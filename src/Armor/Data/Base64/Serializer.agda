@@ -1,4 +1,4 @@
-{-# OPTIONS --inversion-max-depth=100 #-}
+{-# OPTIONS --erasure --inversion-max-depth=100 #-}
 
 open import Armor.Binary
 import      Armor.Data.Base64.TCB as Base64

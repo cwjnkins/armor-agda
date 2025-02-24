@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.NoticeReference
 open import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.Properties
@@ -30,7 +31,7 @@ parseUserNoticeFields : ∀ n → Parser (Logging ∘ Dec) (ExactLength UserNoti
 parseUserNoticeFields n =
   parseEquivalent (Parallel.equivalent₁ equivalentUserNoticeFields)
     (parseOption₂ here' TLV.nosubstrings DisplayText.nosubstrings
-      (DisplayText.noconfusionTLV (toWitnessFalse{Q = _ ∈? _} tt))
+      (DisplayText.noconfusionTLV (toWitnessFalse{a? = _ ∈? _} tt))
       parseNoticeReference parseDisplayText
       n)
 

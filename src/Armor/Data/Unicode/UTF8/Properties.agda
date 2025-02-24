@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.Unicode.UTF8.TCB
 import      Armor.Grammar.Definitions
@@ -37,7 +38,7 @@ module UTF8Char1Props where
     nc₁{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
       contradiction
         (toℕ (UTF8Char2.b₁ x) > 191 ∋ proj₁ (UTF8Char2.b₁range x))
-        (<⇒≱ (subst (λ z → toℕ z < 192) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{Q = 128 ≤? 192} _))))
+        (<⇒≱ (subst (λ z → toℕ z < 192) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{a? = 128 ≤? 192} _))))
       where
       open ≡-Reasoning
 
@@ -56,7 +57,7 @@ module UTF8Char1Props where
     nc₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
       contradiction
         (toℕ (UTF8Char3.b₁ x) > 223 ∋ proj₁ (UTF8Char3.b₁range x))
-        (<⇒≱ (subst (λ z → toℕ z < 224) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{Q = 128 ≤? 224} _))))
+        (<⇒≱ (subst (λ z → toℕ z < 224) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{a? = 128 ≤? 224} _))))
       where
       open ≡-Reasoning
 
@@ -75,7 +76,7 @@ module UTF8Char1Props where
     nc₃{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
       contradiction
         (toℕ (UTF8Char4.b₁ x) > 239 ∋ proj₁ (UTF8Char4.b₁range x))
-        (<⇒≱ (subst (λ z → toℕ z < 240) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{Q = 128 ≤? 240} _))))
+        (<⇒≱ (subst (λ z → toℕ z < 240) b₁≡ (≤-trans (UTF8Char1.b₁range a) (toWitness{a? = 128 ≤? 240} _))))
       where
       open ≡-Reasoning
 
@@ -132,7 +133,7 @@ module UTF8Char2Props where
     nc₂{xs₁}{ys₁}{xs₂}{ys₂} xs₁++ys₁≡xs₂++ys₂ a x =
       contradiction
         (toℕ (UTF8Char4.b₁ x) > 239 ∋ proj₁ (UTF8Char4.b₁range x))
-        (<⇒≱ (subst (λ z → toℕ z < 240) b₁≡ (≤-trans (s≤s (proj₂ (UTF8Char2.b₁range a))) (toWitness{Q = 224 ≤? 240} _))))
+        (<⇒≱ (subst (λ z → toℕ z < 240) b₁≡ (≤-trans (s≤s (proj₂ (UTF8Char2.b₁range a))) (toWitness{a? = 224 ≤? 240} _))))
       where
       open ≡-Reasoning
 

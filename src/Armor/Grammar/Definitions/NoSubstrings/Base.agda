@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 module Armor.Grammar.Definitions.NoSubstrings.Base (Σ : Set) where

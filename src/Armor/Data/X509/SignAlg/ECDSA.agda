@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.SignAlg.ECDSA.Eq
 import Armor.Data.X509.SignAlg.ECDSA.Parser
 import Armor.Data.X509.SignAlg.ECDSA.Properties

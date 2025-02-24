@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID.Parser
 open import Armor.Data.X690-DER.OID.TCB
@@ -16,11 +17,11 @@ OSCPLit : List UInt8
 OSCPLit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 1 ]
 
 OSCP : OIDValue OSCPLit
-OSCP = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length OSCPLit)) OSCPLit)} tt))
+OSCP = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length OSCPLit)) OSCPLit)} tt))
 
 
 CAIssuersLit : List UInt8
 CAIssuersLit = # 43 ∷ # 6 ∷ # 1 ∷ # 5 ∷ # 5 ∷ # 7 ∷ # 48 ∷ [ # 2 ]
 
 CAIssuers : OIDValue CAIssuersLit
-CAIssuers = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length CAIssuersLit)) CAIssuersLit)} tt))
+CAIssuers = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length CAIssuersLit)) CAIssuersLit)} tt))

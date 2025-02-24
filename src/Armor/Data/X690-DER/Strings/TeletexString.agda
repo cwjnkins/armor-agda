@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Strings.TeletexString.Parser
 import Armor.Data.X690-DER.Strings.TeletexString.TCB
 import Armor.Data.X690-DER.Strings.TeletexString.Properties

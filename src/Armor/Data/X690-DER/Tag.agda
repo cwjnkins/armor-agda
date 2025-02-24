@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Prelude
 import      Data.Nat.Properties as Nat
@@ -62,10 +63,10 @@ Enum = # 10
 
 -- 8x
 AppPrim : (n : ℕ) {wit : True (n <? 16)} → UInt8
-AppPrim n {wit} = Fin.fromℕ< ∘ s≤s $ begin
+AppPrim n {wit} = Fin.fromℕ< (s≤s (begin
   128 + n <⟨ Nat.+-monoʳ-< 128 (toWitness wit) ⟩
-  144 ≤⟨ toWitness{Q = 144 ≤? 255} tt ⟩
-  255 ∎
+  144 ≤⟨ toWitness{a? = 144 ≤? 255} tt ⟩
+  255 ∎))
   where open Nat.≤-Reasoning
 
 A80 = AppPrim 0
@@ -80,10 +81,10 @@ A88 = AppPrim 8
 
 -- Ax
 AppCon : (n : ℕ) {wit : True (n <? 16)} → UInt8
-AppCon n {wit} = Fin.fromℕ< ∘ s≤s $ begin
+AppCon n {wit} = Fin.fromℕ< (s≤s (begin
   160 + n <⟨ Nat.+-monoʳ-< 160 (toWitness wit) ⟩
-  176 ≤⟨ toWitness{Q = 176 ≤? 255} tt ⟩
-  255 ∎
+  176 ≤⟨ toWitness{a? = 176 ≤? 255} tt ⟩
+  255 ∎))
   where open Nat.≤-Reasoning
 
 AA0 = AppCon 0

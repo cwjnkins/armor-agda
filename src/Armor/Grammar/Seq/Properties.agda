@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option.TCB
 import      Armor.Grammar.Option.Properties
@@ -76,7 +77,7 @@ nosubstrings nnA nnB {xs₁}{ys₁}{xs₂}{ys₂} xs++ys≡ (mk&ₚ{bs₁₁}{bs
   bs₁≡ = nnA xs++ys≡' a₁ a₂
 
   @0 bs₂≡ : bs₂₁ ≡ bs₂₂
-  bs₂≡ = nnB (++-cancelˡ bs₁₁ (trans xs++ys≡' (cong (_++ bs₂₂ ++ ys₂) (sym bs₁≡)))) b₁ b₂
+  bs₂≡ = nnB (++-cancelˡ bs₁₁ _ _ (trans xs++ys≡' (cong (_++ bs₂₂ ++ ys₂) (sym bs₁≡)))) b₁ b₂
 
 @0 nosubstringsOption₁ : ∀ {A B} → NoSubstrings A → NoSubstrings B → NoConfusion A B
                          → NoSubstrings (&ₚ (Option A) B)
@@ -154,7 +155,7 @@ module ExactLength where
       n ≤.∎
 
     @0 ≡n∸ : length bs₂ ≡ n - length bs₁
-    ≡n∸ = +-cancelˡ-≡ (length bs₁) (begin
+    ≡n∸ = +-cancelˡ-≡ (length bs₁) _ _ (begin
       length bs₁ + length bs₂ ≡⟨ sym (length-++ bs₁) ⟩
       length (bs₁ ++ bs₂) ≡⟨ cong length (sym bs≡) ⟩
       length xs ≡⟨ ¡ abLen ⟩
@@ -173,7 +174,7 @@ unambiguousᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ b
     refl →
       case ‼ ua fstₚ₁ fstₚ₂ ret (const _) of λ where
         refl →
-          case ‼ ++-cancelˡ bs₁₁ bs≡' ret (const _) of λ where
+          case ‼ ++-cancelˡ bs₁₁ _ _ bs≡' ret (const _) of λ where
             refl →
               case ‼ ub fstₚ₁ sndₚ₁ sndₚ₂ ret (const _) of λ where
                 refl →
@@ -184,23 +185,25 @@ unambiguousᵈ{A}{B} ua nna ub (mk&ₚ{bs₁₁}{bs₂₁} fstₚ₁ sndₚ₁ b
   : ∀ {A : @0 List Σ → Set} {B : ∀ {@0 bs} → A bs → @0 List Σ → Set} {ra : Raw A} {rb : Raw₁ ra B}
     → NonMalleable ra → NonMalleable₁ rb → NonMalleable (Raw&ₚᵈ ra rb)
 nonmalleableᵈ nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) eq =
-  case Inverse.f⁻¹ Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
+  case Function.Bundles.Inverse.from Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
     (fst≡ , snd≡) → case (nm₁ fstₚ₁ fstₚ₂ fst≡ ,′ singleton fst≡ refl) ret (const _) of λ where
       (refl , singleton refl refl) → case nm₂ sndₚ₁ sndₚ₂ snd≡ ret (const _) of λ where
         refl → refl
   where
   import Data.Product.Properties as Product
+  import Function.Bundles
 
 @0 nonmalleable
   : ∀ {A B} {ra : Raw A} {rb : Raw B}
     → NonMalleable ra → NonMalleable rb → NonMalleable (Raw&ₚ ra rb)
 nonmalleable nm₁ nm₂ (mk&ₚ fstₚ₁ sndₚ₁ refl) (mk&ₚ fstₚ₂ sndₚ₂ refl) eq =
-  case Inverse.f⁻¹ Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
+  case Function.Bundles.Inverse.from Product.Σ-≡,≡↔≡ eq ret (const _) of λ where
     (fst≡ , snd≡) → case (nm₁ fstₚ₁ fstₚ₂ fst≡ ,′ singleton fst≡ refl) ret (const _) of λ where
       (refl , singleton refl refl) → case nm₂ sndₚ₁ sndₚ₂ snd≡ ret (const _) of λ where
         refl → refl
   where
   import Data.Product.Properties as Product
+  import Function.Bundles
 
 @0 unambiguous : ∀ {A B} → Unambiguous A → NoSubstrings A → Unambiguous B → Unambiguous (&ₚ A B)
 unambiguous ua ns ub = unambiguousᵈ ua ns (λ _ → ub)
@@ -401,7 +404,7 @@ unambiguous₂Option₃{A}{B}{C} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ne₃
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bc₁@(mk&ₚ{bs₁₂}{bs₁₃} ob₁ oc₁ bs≡₁') bs≡₁) (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bc₂@(mk&ₚ{bs₂₂}{bs₂₃} ob₂ oc₂ bs≡₂') bs≡₂) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
-        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ _ _ ++≡') ret (const _) of λ where
           refl → case ‼ unambiguousOption₂ ua₂ ns₂ ne₂ ua₃ ne₃ nc₂₃ bc₁ bc₂ ret (const _) of λ where
             refl → case ‼ ≡-unique bs≡₁ bs≡₂ ret (const _) of λ where
               refl → refl
@@ -443,7 +446,7 @@ unambiguous₂Option₄{A}{B}{C}{D} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃ ns
   help (mk&ₚ{bs₁₁}{bs₁₂'} (some a₁) bcd₁@(mk&ₚ {bs₁₂}{bs₁₃'} ob₁ cd₁@(mk&ₚ {bs₁₃}{bs₁₄} oc₁ od₁ bs≡₁) bs≡₂) bs≡₃) (mk&ₚ {bs₂₁}{bs₂₂'} (some a₂) bcd₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cd₂@(mk&ₚ {bs₂₃}{bs₂₄} oc₂ od₂ bs≡₄) bs≡₅) bs≡₆) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
-        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ _ _ ++≡') ret (const _) of λ where
           refl → case ‼ unambiguous₂Option₃ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ne₄ nc₄ nc₅ nc₆ bcd₁ bcd₂ ret (const _) of λ where
             refl → case ‼ ≡-unique bs≡₃ bs≡₆ ret (const _) of λ where
               refl → refl
@@ -494,7 +497,7 @@ unambiguous₂Option₅{A}{B}{C}{D}{E} ua₁ ns₁ ne₁ ua₂ ns₂ ne₂ ua₃
          (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcde₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cde₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ de₂@(mk&ₚ {bs₂₄}{bs₂₅} od₂ oe₂ bs≡₅) bs≡₆) bs≡₇) bs≡₈) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
-        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ _ _ ++≡') ret (const _) of λ where
           refl → case ‼ unambiguous₂Option₄ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ne₅ nc₅ nc₆ nc₇ nc₈ nc₉ nc₁₀ bcde₁ bcde₂ ret (const _) of λ where
             refl → case ‼ ≡-unique bs≡₄ bs≡₈ ret (const _) of λ where
               refl → refl
@@ -550,7 +553,7 @@ unambiguous₂Option₆{A}{B}{C}{D}{E}{F}
          (mk&ₚ{bs₂₁}{bs₂₂'} (some a₂) bcdef₂@(mk&ₚ {bs₂₂}{bs₂₃'} ob₂ cdef₂@(mk&ₚ {bs₂₃}{bs₂₄'} oc₂ def₂@(mk&ₚ {bs₂₄}{bs₂₅'} od₂ (mk&ₚ{bs₂₅}{bs₂₆} oe₂ of₂ bs≡₆) bs≡₇) bs≡₈) bs≡₉) bs≡₁₀) =
     case ns₁ ++≡ a₁ a₂ ret (const _) of λ where
       refl → case ‼ ua₁ a₁ a₂ ret (const _) of λ where
-        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ ++≡') ret (const _) of λ where
+        refl → case (bs₁₂' ≡ bs₂₂' ∋ ‼ ++-cancelˡ bs₁₁ _ _ ++≡') ret (const _) of λ where
           refl → case ‼ unambiguous₂Option₅ ua₂ ns₂ ne₂ ua₃ ns₃ ne₃ ua₄ ns₄ ne₄ ua₅ ns₅ ne₅ ua₆ ne₆ nc₆ nc₇ nc₈ nc₉ nc₁₀ nc₁₁ nc₁₂ nc₁₃ nc₁₄ nc₁₅ bcdef₁ bcdef₂ ret (const _) of λ where
             refl → case ‼ ≡-unique bs≡₅ bs≡₁₀ ret (const _) of λ where
               refl → refl

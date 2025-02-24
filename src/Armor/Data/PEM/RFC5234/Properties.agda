@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -40,9 +41,9 @@ module EOL where
   proj₂ equiv lf = Sum.inj₂ (Sum.inj₂ (─ refl))
 
   @0 eolLen : ∀ {@0 bs} → EOL bs → InRange 1 2 (length bs)
-  eolLen crlf = toWitness{Q = inRange? 1 2 2} tt
-  eolLen cr = toWitness{Q = inRange? 1 2 1} tt
-  eolLen lf = toWitness{Q = inRange? 1 2 1} tt
+  eolLen crlf = toWitness{a? = inRange? 1 2 2} tt
+  eolLen cr = toWitness{a? = inRange? 1 2 1} tt
+  eolLen lf = toWitness{a? = inRange? 1 2 1} tt
 
   noOverlap : NoOverlap Base64Str EOL
   noOverlap ws [] ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂++ys₂ str₁ str₂ =
@@ -83,15 +84,15 @@ module EOL where
           (char₁ e“)
           λ where
             (inj₁ refl) →
-              contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) λ ()
-            (inj₂ refl) → contradiction₂ x₁'∈ (toWitnessFalse{Q = _ ∈? _} tt) (λ ())
+              contradiction₂ x₁'∈ (toWitnessFalse{a? = _ ∈? _} tt) λ ()
+            (inj₂ refl) → contradiction₂ x₁'∈ (toWitnessFalse{a? = _ ∈? _} tt) (λ ())
 
   noOverlap' : NoOverlap EOL (Length≥ Base64Str 1)
   noOverlap' .('\r' ∷ [ '\n' ]) .[] ys₁ xs₂ ys₂ x crlf crlf = inj₁ refl
   noOverlap' .([ '\r' ]) .([ '\n' ]) ys₁ xs₂ ys₂ ++≡ crlf cr =
     inj₂ λ where
       x₁@(mk×ₚ x₁' x₁'Len) → contradiction₂ (Base64.Str.char∈ ('\n' ∈ xs₂ ∋ n∈ x₁ x₁'Len) x₁')
-        (toWitnessFalse{Q = _ ∈? _} tt)
+        (toWitnessFalse{a? = _ ∈? _} tt)
         (λ ())
     where
     module _ (x₁ : Length≥ Base64Str 1 xs₂) (x₁Len : Erased (length xs₂ > 0)) where

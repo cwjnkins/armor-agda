@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.InvalidityDate
 open import Armor.Data.X509.CRL.RevokedCertificates.EntryExtension.CertIssuer

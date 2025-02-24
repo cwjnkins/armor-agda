@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types --inversion-max-depth=1000 #-}
+{-# OPTIONS --erasure --sized-types --inversion-max-depth=1000 #-}
 
 open import Armor.Binary
 open import Armor.Prelude

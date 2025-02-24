@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.GeneralizedTime.Foreign
 import Armor.Data.X690-DER.Time.GeneralizedTime.Ordering
 import Armor.Data.X690-DER.Time.GeneralizedTime.Parser

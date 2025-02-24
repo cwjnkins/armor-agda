@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Data.X509
 open import Armor.Data.X509.Semantic.Cert.Utils

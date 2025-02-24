@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions.NoSubstrings
 import      Armor.Grammar.Definitions.Unambiguous
 import      Armor.Grammar.Parallel.Properties

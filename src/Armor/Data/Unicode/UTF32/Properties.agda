@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.Unicode.UTF32.TCB
 import      Armor.Grammar.Definitions
@@ -37,9 +38,9 @@ module Char where
   rangeUnique : ∀ {b₂ b₃ b₄} → Unique (UTF32CharRange b₂ b₃ b₄)
   rangeUnique (00000000-0000d7ff x) (00000000-0000d7ff x₁) = cong 00000000-0000d7ff (≤-unique x x₁)
   rangeUnique (00000000-0000d7ff x) (0000e000-0000ffff x₁) =
-    contradiction{P = 224 ≤ 215} (≤-trans x₁ x) (toWitnessFalse{Q = 224 ≤? 215} tt)
+    contradiction{P = 224 ≤ 215} (≤-trans x₁ x) (toWitnessFalse{a? = 224 ≤? 215} tt)
   rangeUnique (0000e000-0000ffff x) (00000000-0000d7ff x₁) =
-    contradiction{P = 224 ≤ 215} (≤-trans x x₁) (toWitnessFalse{Q = 224 ≤? 215} tt)
+    contradiction{P = 224 ≤ 215} (≤-trans x x₁) (toWitnessFalse{a? = 224 ≤? 215} tt)
   rangeUnique (0000e000-0000ffff x) (0000e000-0000ffff x₁) =
     cong 0000e000-0000ffff (≤-unique x x₁)
   rangeUnique (00010000-0010ffff x) (00010000-0010ffff x₁) =

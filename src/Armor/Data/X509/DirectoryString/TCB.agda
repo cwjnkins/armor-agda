@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Strings.BMPString.TCB
 open import Armor.Data.X690-DER.Strings.IA5String.TCB

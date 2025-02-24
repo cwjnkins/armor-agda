@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Strings.IA5String.TCB
 open import Armor.Data.X690-DER.OctetString
@@ -25,7 +26,7 @@ sizeUnique : ∀ {@0 bs} → (a₁ a₂ : IA5StringValue bs) → size a₁ ≡ s
 sizeUnique (mkIA5StringValue self all<128) (mkIA5StringValue self all<129) = refl
 
 Rep : @0 List UInt8 → Set
-Rep = Σₚ OctetStringValue λ _ str → Erased (True (All.all? (Fin._<? (# 128)) (↑ str)))
+Rep = Σₚ OctetStringValue λ _ str → Erased (True (All.all? (λ x → Fin._<?_ {256} {256} x (# 128)) (↑ str)))
 
 equiv : Equivalent Rep IA5StringValue
 proj₁ equiv (mk×ₚ fstₚ₁ (─ sndₚ₁)) = mkIA5StringValue fstₚ₁ sndₚ₁

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Data.X509.Extension.TCB.OIDs as OIDs
@@ -9,7 +10,6 @@ open import Armor.Grammar.IList as IList
 open import Armor.Prelude
 import      Data.List.Membership.Propositional as List
 import      Data.List.Membership.Propositional.Properties as List
-open import Relation.Nullary.Implication
 
 module Armor.Data.X509.Semantic.Cert.R9 where
 
@@ -27,9 +27,10 @@ r9 c =
             (List.lose{xs = allFields} (allFieldsProp bf) asserts)
             ¬asserts
       (yes someAsserts) →
-        let (bf , _ , bfAsserted) = List.find{xs = allFields} someAsserts in
+        let (bf , _ , bfAsserted) = Data.List.Membership.Propositional.find{xs = allFields} someAsserts in
         yes (bf , bfAsserted)
   where
+  import Data.List.Membership.Propositional
   bits : ∀ {@0 bs} → (ku : ExtensionFieldKU bs) → List Bool
   bits ku = ↑ BitStringValue.bits (TLV.val (TLV.val (ExtensionFields.extension ku)))
 

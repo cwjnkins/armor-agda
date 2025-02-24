@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.OID
 import      Armor.Grammar.Definitions
@@ -42,7 +43,7 @@ X520DNQUALIFIER-Lit = ID-AT-Lit ++ [ # 46 ]
 
 X520DNQUALIFIER : OIDValue X520DNQUALIFIER-Lit
 X520DNQUALIFIER =
-  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length X520DNQUALIFIER-Lit)) X520DNQUALIFIER-Lit)} tt))
+  fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length X520DNQUALIFIER-Lit)) X520DNQUALIFIER-Lit)} tt))
 
 {-
 -- -- Naming attributes of type X520countryName (digraph from IS 3166)
@@ -57,7 +58,7 @@ X520COUNTRYNAME-Lit = ID-AT-Lit ++ [ # 6 ]
 
 X520COUNTRYNAME : OIDValue X520COUNTRYNAME-Lit
 X520COUNTRYNAME =
-  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length X520COUNTRYNAME-Lit)) X520COUNTRYNAME-Lit)} tt))
+  fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length X520COUNTRYNAME-Lit)) X520COUNTRYNAME-Lit)} tt))
 
 {-
 -- -- Naming attributes of type X520SerialNumber
@@ -72,7 +73,7 @@ X520SERIALNUMBER-Lit = ID-AT-Lit ++ [ # 5 ]
 
 X520SERIALNUMBER : OIDValue X520SERIALNUMBER-Lit
 X520SERIALNUMBER =
-  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length X520SERIALNUMBER-Lit)) X520SERIALNUMBER-Lit)} tt))
+  fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length X520SERIALNUMBER-Lit)) X520SERIALNUMBER-Lit)} tt))
 
 {-
 -- -- Legacy attributes
@@ -90,7 +91,7 @@ PCKS9-ID-EMAILADDRESS-Lit = # 42 ∷ # 134 ∷ # 72 ∷ # 134 ∷ # 247 ∷ # 13
 
 PCKS9-ID-EMAILADDRESS : OIDValue PCKS9-ID-EMAILADDRESS-Lit
 PCKS9-ID-EMAILADDRESS =
-  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PCKS9-ID-EMAILADDRESS-Lit)) PCKS9-ID-EMAILADDRESS-Lit)} tt))
+  fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length PCKS9-ID-EMAILADDRESS-Lit)) PCKS9-ID-EMAILADDRESS-Lit)} tt))
 
 {-
 -- Naming attributes of type DomainComponent (from RFC 4519)
@@ -105,7 +106,7 @@ DomainComponent-Lit = # 9 ∷ # 146 ∷ # 38 ∷ # 137 ∷ # 147 ∷ # 242 ∷ #
 
 DomainComponent : OIDValue DomainComponent-Lit
 DomainComponent =
-  fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length DomainComponent-Lit)) DomainComponent-Lit)} tt))
+  fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length DomainComponent-Lit)) DomainComponent-Lit)} tt))
 
 -- For now, we assume anything not in the list of "supported" OIDs for ATV has a
 -- AttributeValue type of DirectoryString

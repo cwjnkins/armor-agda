@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Binary.Base64EncDec.Base64           as Base64
 import      Armor.Binary.Base64EncDec.EncDec.Bytes.TCB as Bytes
 open import Armor.Binary.Bits.TCB
@@ -10,8 +11,8 @@ module Armor.Binary.Base64EncDec.EncDec.TCB where
 Valid64Encoding : List UInt6 → Set
 Valid64Encoding [] = ⊤
 Valid64Encoding (x ∷ []) = ⊥
-Valid64Encoding (x ∷ x₁ ∷ []) = Vec.drop 2 {4} (toBinary{6} x₁) ≡ Vec.replicate #0
-Valid64Encoding (x ∷ x₁ ∷ x₂ ∷ []) = Vec.drop 4 {2} (toBinary{6} x₂) ≡ Vec.replicate #0
+Valid64Encoding (x ∷ x₁ ∷ []) = Vec.drop 2 {4} (toBinary{6} x₁) ≡ Vec.replicate _ #0
+Valid64Encoding (x ∷ x₁ ∷ x₂ ∷ []) = Vec.drop 4 {2} (toBinary{6} x₂) ≡ Vec.replicate _ #0
 Valid64Encoding (x ∷ x₁ ∷ x₂ ∷ x₃ ∷ bs) = Valid64Encoding bs
 
 base64To256 : List UInt6 → Maybe (List UInt8)

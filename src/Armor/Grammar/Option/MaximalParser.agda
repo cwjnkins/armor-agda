@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Option.TCB
 import      Armor.Grammar.Parser.Core
@@ -79,7 +80,7 @@ parse&o₂{A}{B} pa pb noo = mkMaximalParser help
                 uneraseDec
                   (≤-Reasoning.begin length pre' ≤-Reasoning.≡⟨ ‼ cong length (trans bs≡ (++-identityʳ bs₁)) ⟩
                                     length bs₁ ≤-Reasoning.≤⟨ max₁ bs₁ suf' (trans (cong (_++ suf') (trans (sym (++-identityʳ bs₁)) (sym bs≡))) ps'≡) fstₚ₁  ⟩
-                                    r₁ ≤-Reasoning.≤⟨ ≤-stepsʳ r₂ ≤-refl ⟩
+                                    r₁ ≤-Reasoning.≤⟨ m≤n⇒m≤n+o r₂ ≤-refl ⟩
                                     r₁ + r₂ ≤-Reasoning.∎)
                   (_ ≤? _)
               pre' suf' ps'≡ (mk&ₚ{bs₁}{bs₂} fstₚ₁ (some sndₚ₁) bs≡) →
@@ -101,7 +102,7 @@ parse&o₂{A}{B} pa pb noo = mkMaximalParser help
                 in
                 uneraseDec
                   (case (noo bs₁ (drop (length bs₁) pre₁) suf₁ _ suf'
-                          ((++-cancelˡ bs₁ (sym (begin
+                          ((++-cancelˡ bs₁ _ _ (sym (begin
                             (bs₁ ++ bs₂ ++ suf' ≡⟨ Erased.x xs≡ ⟩ 
                             pre₁ ++ suf₁ ≡⟨ cong (_++ suf₁) (Erased.x pre₁≡) ⟩
                             (bs₁ ++ drop (length bs₁) pre₁) ++ suf₁ ≡⟨ ++-assoc bs₁ _ suf₁ ⟩
@@ -115,7 +116,7 @@ parse&o₂{A}{B} pa pb noo = mkMaximalParser help
                                             bs₁ ++ [] ≡⟨ ++-identityʳ bs₁ ⟩
                                             bs₁ ∎))
                           suf₁≡ : Erased (suf₁ ≡ bs₂ ++ suf')
-                          suf₁≡ = ─ ++-cancelˡ pre₁ (begin
+                          suf₁≡ = ─ ++-cancelˡ pre₁ _ _ (begin
                                       (pre₁ ++ suf₁ ≡⟨ sym (Erased.x xs≡) ⟩
                                       bs₁ ++ bs₂ ++ suf' ≡⟨ cong (_++ bs₂ ++ suf') (sym (Erased.x pre₁≡')) ⟩
                                       pre₁ ++ bs₂ ++ suf' ∎))

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 module Armor.Grammar.Definitions.NoConfusion (Σ : Set) where

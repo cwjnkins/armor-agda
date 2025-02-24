@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Int
 open import Armor.Data.X690-DER.Length
@@ -61,7 +62,7 @@ module parseSequenceOf
         let @0 suf₀<xs : length suf₀ < length xs
             suf₀<xs = subst (λ i → length suf₀ < length i) ps≡₀ (Lemmas.length-++-< pre₀ suf₀ (ne v₀))
         yes (success pre₁ r₁ r₁≡ (mk×ₚ v₁ (─ r₁≡len-pre₁)) suf₁ ps≡₁)
-          ← runParser (parseSequenceOfWF (n ∸ r₀)) suf₀ (rs _ suf₀<xs)
+          ← runParser (parseSequenceOfWF (n ∸ r₀)) suf₀ (rs suf₀<xs)
           where no ¬parse → do
             return ∘ no $ λ where
               (success prefix read read≡ (mk×ₚ nil (─ ())) suffix ps≡)
@@ -78,7 +79,7 @@ module parseSequenceOf
                 contradiction
                   (success bs₂ _ refl
                     (mk×ₚ t
-                      (─ +-cancelˡ-≡ r₀
+                      (─ +-cancelˡ-≡ r₀ _ _
                          (begin (r₀ + length bs₂         ≡⟨ cong (_+ length bs₂) r₀≡ ⟩
                                 length pre₀ + length bs₂ ≡⟨ cong (λ x → length x + length bs₂) pre₀≡bs₁ ⟩
                                 length bs₁ + length bs₂  ≡⟨ sym (length-++ bs₁) ⟩
@@ -90,7 +91,7 @@ module parseSequenceOf
                                 (r₀ + n) - r₀            ≡⟨ +-∸-assoc r₀ {n} (<⇒≤ r₀<n) ⟩
                                 r₀ + (n - r₀)            ∎))))
                     suffix
-                    (++-cancelˡ bs₁ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
+                    (++-cancelˡ bs₁ _ _ (trans (sym xs≡) (cong (_++ suf₀) pre₀≡bs₁))))
                   ¬parse
         return (yes
           (success (pre₀ ++ pre₁) (r₀ + r₁)

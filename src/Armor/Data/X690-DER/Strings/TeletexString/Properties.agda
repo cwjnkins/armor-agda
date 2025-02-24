@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Strings.TeletexString.TCB
 import      Armor.Data.X690-DER.TLV.Properties as TLV

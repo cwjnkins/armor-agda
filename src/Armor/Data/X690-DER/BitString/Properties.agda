@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.BitString.TCB
 open import Armor.Data.X690-DER.TLV.TCB
@@ -130,12 +131,12 @@ private
   
     @0 xs'≡ : xs₁' ≡ xs₂'
     xs'≡ = begin
-      xs₁' ≡⟨ (sym $ take++drop (8 - toℕ bₕ₁) xs₁') ⟩
+      xs₁' ≡⟨ (sym $ take++drop≡id (8 - toℕ bₕ₁) xs₁') ⟩
       xs₁ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (_++ (drop (8 - toℕ bₕ₁) xs₁')) rep≡ ⟩
       xs₂ ++ drop (8 - toℕ bₕ₁) xs₁' ≡⟨ cong (xs₂ ++_) u₁ ⟩
       xs₂ ++ replicate (toℕ bₕ₁) #0 ≡⟨ cong (λ x → xs₂ ++ replicate x #0) (cong toℕ bₕ≡) ⟩
       xs₂ ++ replicate (toℕ bₕ₂) #0 ≡⟨ cong (xs₂ ++_) (sym u₂) ⟩
-      xs₂ ++ drop (8 - toℕ bₕ₂) xs₂' ≡⟨ take++drop (8 - toℕ bₕ₂) xs₂' ⟩
+      xs₂ ++ drop (8 - toℕ bₕ₂) xs₂' ≡⟨ take++drop≡id (8 - toℕ bₕ₂) xs₂' ⟩
       xs₂' ∎
   
   toBitRep-injectiveWF bₕ₁ bₕ₂ (x ∷ []) (x₁ ∷ x₂ ∷ []) ac bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡ =
@@ -204,7 +205,7 @@ private
   
     xs₂Len : length (xs₂₁ ++ xs₂₂ ++ xs₂₃) > 8
     xs₂Len = ≤.begin
-      8 + 1 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+      8 + 1 ≤.≤⟨ toWitness{a? = _ ≤? _} tt ⟩
       8 + 8 ≤.≡⟨ cong₂ _+_ (sym $ Lemmas.toListLength (toBinary{8} x₁)) (sym $ Lemmas.toListLength (toBinary{8} x₂)) ⟩
       length xs₂₁ + length xs₂₂ ≤.≡⟨ sym (length-++ xs₂₁ {xs₂₂}) ⟩
       length (xs₂₁ ++ xs₂₂) ≤.≤⟨ m≤m+n (length (xs₂₁ ++ xs₂₂)) _ ⟩
@@ -232,7 +233,7 @@ private
   
     toBitRepLen (x ∷ bₜ) bₕ₁<8 =
       ≤.begin
-        1 ≤.≤⟨ toWitness{Q = _ ≤? _} tt ⟩
+        1 ≤.≤⟨ toWitness{a? = _ ≤? _} tt ⟩
         8 ≤.≡⟨ sym xsLen ⟩
         length xs ≤.≤⟨ m≤m+n (length xs) (length (toBitRep bₕ₁ (x ∷ bₜ))) ⟩
         length xs + length (toBitRep bₕ₁ (x ∷ bₜ)) ≤.≡⟨ sym (length-++ xs {toBitRep bₕ₁ (x ∷ bₜ)}) ⟩
@@ -309,7 +310,7 @@ private
         toBitRep bₕ₂ (x₁' ∷ bₜ₂) ∎)
   
       ih : (bₕ₁ ,′ (x₁ ∷ bₜ₁)) ≡ (bₕ₂ ,′ x₁' ∷ bₜ₂)
-      ih = toBitRep-injectiveWF bₕ₁ bₕ₂ bₜ₁' (x₁' ∷ bₜ₂) (rs (length bₜ₁') ≤-refl) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡'
+      ih = toBitRep-injectiveWF bₕ₁ bₕ₂ bₜ₁' (x₁' ∷ bₜ₂) (rs ≤-refl) bₕ₁<8 bₕ₂<8 u₁ u₂ rep≡'
   
       ih₁ = cong proj₁ ih
       ih₂ = cong proj₂ ih

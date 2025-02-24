@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.IList

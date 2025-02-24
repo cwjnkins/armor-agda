@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 import Armor.Grammar.Parser.Lit
 import Armor.Grammar.Parser.Maximal

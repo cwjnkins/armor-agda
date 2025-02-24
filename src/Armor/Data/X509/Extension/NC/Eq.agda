@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X509.Extension.NC.GeneralSubtree
 open import Armor.Data.X509.Extension.NC.Properties

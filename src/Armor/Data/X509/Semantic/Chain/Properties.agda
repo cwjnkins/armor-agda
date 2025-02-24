@@ -1,4 +1,4 @@
-{-# OPTIONS  --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Data.X509
@@ -18,7 +18,7 @@ unique─ : {A : Set} ⦃ _ : Eq A ⦄ {x : A} (xs : List A) → List.Unique _�
 unique─ .(_ ∷ _) (x ∷ unique) (here refl) = unique
 unique─ .(_ ∷ _) (x ∷ unique) (there x∈) = ─-preserves-distinct _ x x∈ ∷ unique─ _ unique x∈
 
-∈xs─⇒∈xs : ∀ {ℓ} {A : Set ℓ} {x} {xs : List A} {i : Fin (length xs)} → x ∈ xs List.─ i → x ∈ xs
+∈xs─⇒∈xs : ∀ {ℓ} {A : Set ℓ} {x} {xs : List A} {i : Fin (length xs)} → x ∈ List.removeAt xs i → x ∈ xs
 ∈xs─⇒∈xs {xs = x ∷ xs} {i = Fin.zero} x∈xs─i = there x∈xs─i
 ∈xs─⇒∈xs {xs = x ∷ xs} {i = Fin.suc i} (here px) = here px
 ∈xs─⇒∈xs {xs = x ∷ xs} {i = Fin.suc i} (there x∈xs─i) = there (∈xs─⇒∈xs{i = i} x∈xs─i)

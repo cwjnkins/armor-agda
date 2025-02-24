@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Length.Properties as Length
 open import Armor.Data.X690-DER.Length.TCB
@@ -110,7 +111,7 @@ window{bs} y = (─ windowByteString y) , help
            1 * 10 ^ (1 + length bs) + 9 * 10 ^ length bs + asciiNum bs ≡⟨ +-assoc (1 * (10 ^ (1 + length bs))) (9 * 10 ^ length bs) _ ⟩
            asciiNum (# '1' ∷ [ # '9' ] ++ bs) ∎)))
       (cong (2 +_) (TimeType.bsLen y))
-      (z≤n , (+-monoʳ-≤ 1900 (≤-trans (proj₂ (TimeType.range y)) (toWitness{Q = 99 ≤? 8099} tt))))
+      (z≤n , (+-monoʳ-≤ 1900 (≤-trans (proj₂ (TimeType.range y)) (toWitness{a? = 99 ≤? 8099} tt))))
   ... | no ¬p =
     mkTimeType
       (fromWitness (((m≤m+n 48 _) , (m≤m+n 50 _)) ∷ (((m≤m+n 48 _) , (m≤n+m _ 9)) ∷ (toWitness (TimeType.charset y)))))
@@ -123,7 +124,7 @@ window{bs} y = (─ windowByteString y) , help
                  (Singleton.x≡ (TimeType.time y)) ⟩
           2 * 10 ^ (1 + length bs) + asciiNum bs ∎ ))
       (cong (2 +_) (TimeType.bsLen y))
-      (z≤n , (+-monoʳ-≤ 2000 (≤-trans (proj₂ (TimeType.range y)) (toWitness{Q = 99 ≤? 7999} tt))))
+      (z≤n , (+-monoʳ-≤ 2000 (≤-trans (proj₂ (TimeType.range y)) (toWitness{a? = 99 ≤? 7999} tt))))
 
 @0 toGeneralizedTimeByteString : ∀ {bs} → Time bs → List UInt8
 toGeneralizedTimeByteString{bs} (generalized x) = bs
@@ -137,7 +138,7 @@ toGeneralizedTime : ∀ {@0 bs} → (t : Time bs) → GeneralizedTime (toGeneral
 toGeneralizedTime (generalized x) = x
 toGeneralizedTime (utc (mkTLV len (mkUTCTime{y}{m} year mdhms refl) len≡ refl)) =
   mkTLV
-    (short (mkShort (# 15) (toWitness{Q = _ ≤? _} tt) refl))
+    (short (mkShort (# 15) (toWitness{a? = _ ≤? _} tt) refl))
     (mkGeneralizedTime (proj₂ (window year)) mdhms refl)
     (cong (2 +_) (sym $ begin
       length (y ++ m ++ [ # 'Z' ]) ≡⟨ length-++ y ⟩

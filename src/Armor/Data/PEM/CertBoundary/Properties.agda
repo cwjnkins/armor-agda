@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Data.Base64.TCB
 open import Armor.Data.PEM.CertBoundary.TCB
 open import Armor.Data.PEM.RFC5234
@@ -29,7 +30,7 @@ proj₂ (proj₂ (iso ctrl)) (mkCertBoundary refl eol bs≡) = refl
         (λ x → Erased (x ≡ (String.toList $ "-----" String.++ ctrl String.++ " CERTIFICATE-----")))
         (λ x → Erased (EOL x))
 noOverlapTextEOL ws xs₁ ys₁ xs₂ ys₂ x x₁ x₂ =
-  inj₁ (++-cancelˡ ws
+  inj₁ (++-cancelˡ ws _ _
     (begin
       (ws ++ xs₁ ≡⟨ (¡ x₁) ⟩
       _ ≡⟨ sym (¡ x₂) ⟩

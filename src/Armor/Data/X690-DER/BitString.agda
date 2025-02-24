@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Data.X690-DER.BitString.Parser
 import      Armor.Data.X690-DER.BitString.Properties
 import      Armor.Data.X690-DER.BitString.Serializer

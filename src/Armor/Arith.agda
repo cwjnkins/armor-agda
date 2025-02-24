@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Prelude
 
 open import Data.Nat.Properties
@@ -24,15 +25,15 @@ divmod2-≤ (suc (suc n))
 
 1≤2^n : ∀ n → 1 ≤ 2 ^ n
 1≤2^n zero = ≤-refl
-1≤2^n (suc n) = ≤-stepsʳ ((2 ^ n) + zero) (1≤2^n n)
+1≤2^n (suc n) = m≤n⇒m≤n+o ((2 ^ n) + 0) (1≤2^n n)
 
 1≤10^n : ∀ n → 1 ≤ 10 ^ n
 1≤10^n zero = ≤-refl
-1≤10^n (suc n) = ≤-stepsʳ _ (1≤10^n n)
+1≤10^n (suc n) = m≤n⇒m≤n+o _ (1≤10^n n)
 
 1<2^n+1 : ∀ n → 1 < 2 ^ (1 + n)
 1<2^n+1 zero = s≤s (s≤s z≤n)
-1<2^n+1 (suc n) = ≤-stepsʳ _ (1<2^n+1 n)
+1<2^n+1 (suc n) = m≤n⇒m≤n+o _ (1<2^n+1 n)
 
 2^n≢0 : ∀ n → 2 ^ n ≢ 0
 2^n≢0 n eq
@@ -157,7 +158,7 @@ divmod2-mono-<' (suc (suc m)) (suc n) (s≤s (s≤s m<2*n)) | .(suc (n + (n + 0)
 infixl 7 _mod10^n_
 
 _mod10^n_ : (m n : ℕ) → ℕ
-m mod10^n n = (m % (10 ^ n)) {fromWitnessFalse (>⇒≢ (1≤10^n n))}
+m mod10^n n = (m % (10 ^ n)) ⦃ nonZero-compat (fromWitnessFalse (>⇒≢ (1≤10^n n))) ⦄
 
 -- divmod2-mono-< : ∀ m n → m < n → proj₁ (divmod2 m) < proj₁ (divmod2 n)
 

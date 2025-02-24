@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.Unicode.UTF32.Parser
 import Armor.Data.Unicode.UTF32.Properties
 import Armor.Data.Unicode.UTF32.TCB

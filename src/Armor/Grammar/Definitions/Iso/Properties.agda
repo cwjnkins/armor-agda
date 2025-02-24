@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions.Eq
 import      Armor.Grammar.Definitions.Iso.Base
 import      Armor.Grammar.Definitions.NoSubstrings
@@ -72,10 +73,12 @@ Raw.to (raw equiv r) b = Raw.to r (proj₂ equiv b)
 @0 nonmalleable : ∀ {A B} → (iso : Iso A B) (r₁ : Raw A) → NonMalleable r₁ → NonMalleable (raw (proj₁ iso) r₁)
 nonmalleable (equiv , isIso) r₁ nm a₁ a₂ eq =
   case
-    Inverse.f⁻¹ Product.Σ-≡,≡↔≡ (nm (proj₂ equiv a₁) (proj₂ equiv a₂) eq)
+    Inverse.from Product.Σ-≡,≡↔≡ (nm (proj₂ equiv a₁) (proj₂ equiv a₂) eq)
   of λ where
     (refl , eq') → case injective₂ (equiv , isIso) eq' of λ where
       refl → refl
+  where
+  import Function.Bundles
 
 isoEq : ∀ {@0 A B} → Iso A B → Eq (Exists─ (List Σ) A) → Eq (Exists─ (List Σ) B)
 Eq._≟_ (isoEq{A}{B} iso eq) (─ bs₁ , x) (─ bs₂ , y) =

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Strings.BMPString
 import Armor.Data.X690-DER.Strings.IA5String
 import Armor.Data.X690-DER.Strings.PrintableString

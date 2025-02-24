@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.TCB.OIDs as OIDs
 open import Armor.Data.X509.Extension.CertPolicy.PolicyInformation.Qualifier.UserNotice.TCB

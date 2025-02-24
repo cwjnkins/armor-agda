@@ -1,4 +1,4 @@
-{-# OPTIONS --guardedness --sized-types #-}
+{-# OPTIONS --guardedness --sized-types --erasure #-}
 
 open import Armor.Binary
 import      Armor.Data.Base64 as Base64
@@ -77,7 +77,7 @@ parseCerts fn input =
                 String.++ show (map toℕ (take 10 suf))
                 String.++ foldl String._++_ "" log₃)
               IO.>> Armor.IO.exitFailure))
-        (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
+        (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
 parseCrls : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
 parseCrls fn contents =
@@ -103,7 +103,7 @@ parseCrls fn contents =
             String.++ show (map toℕ (take 10 suf))
             String.++ foldl String._++_ "" log₃)
           IO.>> Armor.IO.exitFailure))
-    (mkLogged log₂ (yes schain)) → IO.return (_ , schain)
+    (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
 main : IO.Main
 main = IO.run $
@@ -174,7 +174,7 @@ main = IO.run $
     IO.readFiniteFile filename
     IO.>>= (parseCerts filename ∘ String.toList)
     IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
-    IO.return (_ , certs)
+    IO.pure (_ , certs)
 
   readDERCRL : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
   readDERCRL filename =
@@ -183,7 +183,7 @@ main = IO.run $
     IO.>>= λ contents → let bs = Armor.Foreign.ByteString.toUInt8 contents in
     parseCrls filename bs
     IO.>>= λ crlS → let (_ , success pre r r≡ crls suf ps≡) = crlS in
-    IO.return (_ , crls)
+    IO.pure (_ , crls)
 
   record CertOutput : Set where
     field
@@ -318,10 +318,10 @@ main = IO.run $
     with d c
   ... | no ¬p =
     Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
-    IO.return false
+    IO.pure false
   ... | yes p =
     Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
-    IO.return true
+    IO.pure true
 
   runCheck₂ : ∀ {@0 bs} → CRL.CertList bs → String
              → {P : ∀ {@0 bs} → CRL.CertList bs → Set}
@@ -331,10 +331,10 @@ main = IO.run $
     with d c
   ... | no ¬p =
     Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
-    IO.return false
+    IO.pure false
   ... | yes p =
     Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
-    IO.return true
+    IO.pure true
 
   runCheck₃ : ∀ {@0 bs} →  CRL.CertList bs → ℕ → IO.IO Bool
   runCheck₃ crl n =
@@ -348,25 +348,25 @@ main = IO.run $
                         case GeneralizedTime.fromForeignUTC now of λ where
                           (no ¬p) →
                             Armor.IO.putStrLnErr "CRLR6: failed to read time from system" IO.>>
-                              IO.return false
+                              IO.pure false
                           (yes p) →
                             runCheck₂ crl "CRLR6" (λ c₁ → CRLr6 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
                               true → runCheck₂ crl "CRLR7" CRLr7 IO.>>= λ where
-                                true → IO.return true
-                                false → IO.return false
-                              false → IO.return false
-               false → IO.return false
-             false → IO.return false
-           false → IO.return false
-         false → IO.return false
-       false → IO.return false
+                                true → IO.pure true
+                                false → IO.pure false
+                              false → IO.pure false
+               false → IO.pure false
+             false → IO.pure false
+           false → IO.pure false
+         false → IO.pure false
+       false → IO.pure false
 
   runCheck₄ : List (Exists─ _ CRL.CertList) → ℕ → IO.IO Bool
-  runCheck₄ [] n = IO.return true
+  runCheck₄ [] n = IO.pure true
   runCheck₄ (x ∷ x₁) n =
     runCheck₃ (proj₂ x) n IO.>>= λ where
       true → runCheck₄ x₁ (n + 1)
-      false → IO.return false
+      false → IO.pure false
     
   runChainCheck : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → String
     → (issuee : Cert bs) → Chain trustedRoot candidates issuee
@@ -377,10 +377,10 @@ main = IO.run $
     with d i c
   ... | no ¬p =
     Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
-    IO.return false
+    IO.pure false
   ... | yes p =
     Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
-    IO.return true
+    IO.pure true
 
   runChainCheckWithCRLs : ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → {issuee : Cert bs} → String
     → Chain trustedRoot candidates issuee
@@ -392,33 +392,33 @@ main = IO.run $
     with d chain crls
   ... | no ¬p =
     Armor.IO.putStrLnErr (m String.++ ": failed") IO.>>
-    IO.return false
+    IO.pure false
   ... | yes p =
     Armor.IO.putStrLnErr (m String.++ ": passed") IO.>>
-    IO.return true
+    IO.pure true
 
   runCRLCheckSingle :  ∀ {@0 bs} → String
                            → (cert : Cert bs)
                            → List (Exists─ _ CRL.CertList)
                            → IO.IO Bool
-  runCRLCheckSingle m cert [] = IO.return false
+  runCRLCheckSingle m cert [] = IO.pure false
   runCRLCheckSingle m cert (crl ∷ rest) =
     case verifiedCertStateCRLs cert crl rest initState  of λ where
         (crll , st@(validState (REVOKED reasonMask reason)) , pf) →
           runCheck₃ (proj₂ crll) 1 IO.>>= λ where
             true → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                    Armor.IO.putStrLnErr (m String.++ ": REVOKED") IO.>>
-                   IO.return true
-            false → IO.return false
+                   IO.pure true
+            false → IO.pure false
         (crll , st@(validState (UNREVOKED reasonMask)) , pf) → 
           runCheck₃ (proj₂ crll) 1 IO.>>= λ where
             true → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                    Armor.IO.putStrLnErr (m String.++ ": UNREVOKED") IO.>>
-                   IO.return true
-            false → IO.return false
+                   IO.pure true
+            false → IO.pure false
         (crll , st@(undeterminedState) , pf) → Armor.IO.putStrLnErr (crlStsPrinter st) IO.>>
                                                Armor.IO.putStrLnErr (m String.++ ": UNDETERMINED") IO.>>
-                                               IO.return false
+                                               IO.pure false
 
   runSingleCertChecks : ∀ {@0 bs} → Maybe KeyPurpose → Cert bs → Maybe (List (Exists─ _ CRL.CertList)) → ℕ → IO.IO Bool
   runSingleCertChecks kp cert crl n =
@@ -439,7 +439,7 @@ main = IO.run $
                                       case GeneralizedTime.fromForeignUTC now of λ where
                                         (no ¬p) →
                                           Armor.IO.putStrLnErr "R17: failed to read time from system" IO.>>
-                                          IO.return false
+                                          IO.pure false
                                         (yes p) →
                                           runCheck cert "R17" (λ c₁ → r17 c₁ (Validity.generalized (mkTLV (Length.shortₛ (# 15)) p refl refl))) IO.>>= λ where
                                             true → case n ≟ 1  of λ where
@@ -449,49 +449,49 @@ main = IO.run $
                                                            case crl of λ where
                                                              (just x) →
                                                                runCRLCheckSingle "CRL Validation" cert x IO.>>= λ where
-                                                                 true → IO.return true
-                                                                 false → IO.return false
-                                                             nothing → IO.return true
-                                                         false → IO.return false
-                                                     (no ¬q) → IO.return true
-                                            false → IO.return false
-                             false → IO.return false
-                           false → IO.return false
-                         false → IO.return false
-                       false → IO.return false
-                     false → IO.return false
-                   false → IO.return false
-                 false → IO.return false
-               false → IO.return false
-             false → IO.return false
-           false → IO.return false
-         false → IO.return false
-       false → IO.return false
+                                                                 true → IO.pure true
+                                                                 false → IO.pure false
+                                                             nothing → IO.pure true
+                                                         false → IO.pure false
+                                                     (no ¬q) → IO.pure true
+                                            false → IO.pure false
+                             false → IO.pure false
+                           false → IO.pure false
+                         false → IO.pure false
+                       false → IO.pure false
+                     false → IO.pure false
+                   false → IO.pure false
+                 false → IO.pure false
+               false → IO.pure false
+             false → IO.pure false
+           false → IO.pure false
+         false → IO.pure false
+       false → IO.pure false
          
   runChainChecks' :  ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → Maybe KeyPurpose → (issuee : Cert bs) → ℕ → Chain trustedRoot candidates issuee  → IO.IO Bool
   runChainChecks' kp issuee n (root (trustedCA , snd)) =
     runSingleCertChecks kp issuee nothing n IO.>>= λ where
       true → runSingleCertChecks kp (proj₂ trustedCA) nothing (n + 1) IO.>>= λ where
-        true → IO.return true
-        false → IO.return false
-      false → IO.return false
+        true → IO.pure true
+        false → IO.pure false
+      false → IO.pure false
   runChainChecks' kp issuee n (link issuer isIn chain) =
     runSingleCertChecks kp issuee nothing n IO.>>= λ where
       true → runChainChecks' kp issuer (n + 1) chain IO.>>= λ where
-        true → IO.return true
-        false → IO.return false
-      false → IO.return false
+        true → IO.pure true
+        false → IO.pure false
+      false → IO.pure false
 
   runCRLCheckChain :  ∀ {@0 bs} → {trustedRoot candidates : List (Exists─ _ Cert)} → String
                            → (cert : Cert bs) → Chain trustedRoot candidates cert
                            → List (Exists─ _ CRL.CertList)
                            → IO.IO Bool
   runCRLCheckChain m cert chain [] = Armor.IO.putStrLnErr "Error: no CRL given" IO.>>
-                                     IO.return false
+                                     IO.pure false
   runCRLCheckChain m issuee chain (crl ∷ crls) =
     case (take (length (toList chain) - 1) (toList chain)) of λ where
-      [] → IO.return true
+      [] → IO.pure true
       (cert ∷ certs) →
         case verifiedChainStateCRLs crl crls cert certs initState of λ where
           (crll , states , pf) →
@@ -505,9 +505,9 @@ main = IO.run $
                         IO.putStrLn (m String.++ ": REVOKED") IO.>>
                         statePrinter states IO.>>
                         crllPrinter crll IO.>>
-                        IO.return true
-                      false → IO.return false
-                  false → IO.return false
+                        IO.pure true
+                      false → IO.pure false
+                  false → IO.pure false
               UNREVOKED →
                 runCheck₄ crll 1 IO.>>= λ where
                   true →
@@ -517,12 +517,12 @@ main = IO.run $
                         IO.putStrLn (m String.++ ": UNREVOKED") IO.>>
                         statePrinter states IO.>>
                         crllPrinter crll IO.>>
-                        IO.return true
-                      false → IO.return false
-                  false → IO.return false
+                        IO.pure true
+                      false → IO.pure false
+                  false → IO.pure false
               UNDETERMINED → IO.putStrLn (m String.++ ": UNDETERMINED") IO.>>
                              statePrinter states IO.>>
-                             IO.return false
+                             IO.pure false
 
   runChainChecks : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)}
     → Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
@@ -539,16 +539,16 @@ main = IO.run $
                   true → case crl of λ where
                            (just x) → runCRLCheckChain "CRL Validation" issuee chain x IO.>>= λ where
                              true → chainPrinter (toList chain) IO.>>
-                                    IO.return true
-                             false → IO.return false
+                                    IO.pure true
+                             false → IO.pure false
                            nothing → chainPrinter (toList chain) IO.>>
-                                     IO.return true
-                  false → IO.return false
-                false → IO.return false
-              false → IO.return false
-            false → IO.return false
-          false → IO.return false
-        false → IO.return false
+                                     IO.pure true
+                  false → IO.pure false
+                false → IO.pure false
+              false → IO.pure false
+            false → IO.pure false
+          false → IO.pure false
+        false → IO.pure false
 
   runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
   runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
@@ -565,11 +565,11 @@ main = IO.run $
                                     → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
                                     → List (Chain trustedRoot candidates issuee) → IO.IO Bool
     helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
-                              IO.return false
+                              IO.pure false
     helper kp crl issuee (chain ∷ otherChains) =
       runChainChecks kp crl issuee chain IO.>>= λ where
         false →  helper kp crl issuee otherChains
-        true → IO.return true
+        true → IO.pure true
 
   runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
   runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>

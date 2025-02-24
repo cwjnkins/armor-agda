@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Int.Parser
 import Armor.Data.X690-DER.Int.Properties
 -- import Armor.Data.X690-DER.Int.Serializer

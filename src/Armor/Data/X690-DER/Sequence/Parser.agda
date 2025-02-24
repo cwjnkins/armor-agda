@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Default
 open import Armor.Data.X690-DER.Sequence.Properties
@@ -260,7 +261,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   bs₁≡ = ns₁ xs≡₁ a' a
 
                   @0 xs≡₂ : bs₂' ++ bs₃₄₅₆' ++ suffix ≡ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                  xs≡₂ = ++-cancelˡ bs₁'
+                  xs≡₂ = ++-cancelˡ bs₁' _ _
                              (begin
                               bs₁' ++ bs₂' ++ bs₃₄₅₆' ++ suffix
                              ≡⟨ xs≡₁ ⟩
@@ -272,7 +273,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                 case ((singleton ob' refl) ,′e (singleton oc' refl) ,′e (singleton od' refl) ,′e (singleton oe' refl) ,′e (singleton of' refl)) 
                   ret (const _) of λ where
                     (singleton (some b') refl , singleton oc' refl , singleton od' refl , singleton oe' refl , singleton of' refl) →
-                      let                                           
+                      let
                         @0 bs₂≡ : bs₂' ≡ bs₂
                         bs₂≡ = ns₂ xs≡₂ b' (proj₁  b)
                       in
@@ -393,7 +394,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               bs₂≡ = ns₂ xs≡₁ b' b
 
                               @0 xs≡₂ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                              xs≡₂ = ++-cancelˡ bs₂'
+                              xs≡₂ = ++-cancelˡ bs₂' _ _
                                (begin
                                bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                ≡⟨ xs≡₁ ⟩
@@ -493,7 +494,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   bs₁≡ = ns₁ xs≡₁ a' a
 
                   @0 xs≡₂ : bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                  xs≡₂ = ++-cancelˡ bs₁'
+                  xs≡₂ = ++-cancelˡ bs₁' _ _
                              (begin
                               bs₁' ++ bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                              ≡⟨ xs≡₁ ⟩
@@ -513,7 +514,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                               bs₂≡ = ns₂ xs≡₂ b' b
 
                               @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                              xs≡₃ = ++-cancelˡ bs₂'
+                              xs≡₃ = ++-cancelˡ bs₂' _ _
                                (begin
                                bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                ≡⟨ xs≡₂ ⟩
@@ -649,7 +650,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₂≡ = ns₂ xs≡₁ b' b
 
                                   @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₂'
+                                  xs≡₃ = ++-cancelˡ bs₂' _ _
                                            (begin
                                            bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₁ ⟩
@@ -671,7 +672,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₃≡ = ns₃ xs≡₃ c' c
 
                                           @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₃'
+                                          xs≡₄ = ++-cancelˡ bs₃' _ _
                                             (begin
                                             bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -691,7 +692,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₄ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₄ ⟩
@@ -782,7 +783,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -882,7 +883,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₃≡ = ns₃ xs≡₁ c' c
 
                                   @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₃'
+                                  xs≡₃ = ++-cancelˡ bs₃' _ _
                                            (begin
                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₁ ⟩
@@ -901,7 +902,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₄≡ = ns₄ xs≡₃ d' d
 
                                           @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₄'
+                                          xs≡₄ = ++-cancelˡ bs₄' _ _
                                             (begin
                                             bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -994,7 +995,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     bs₄≡ = ns₄ xs≡₁ d' d
 
                                     @0 xs≡₂ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                    xs≡₂ = ++-cancelˡ bs₄'
+                                    xs≡₂ = ++-cancelˡ bs₄' _ _
                                       (begin
                                       bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                       ≡⟨ xs≡₁ ⟩
@@ -1106,7 +1107,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   bs₁≡ = ns₁ xs≡₁ a' a
 
                   @0 xs≡₂ : bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                  xs≡₂ = ++-cancelˡ bs₁'
+                  xs≡₂ = ++-cancelˡ bs₁' _ _
                              (begin
                               bs₁' ++ bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                              ≡⟨ xs≡₁ ⟩
@@ -1132,7 +1133,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₂≡ = ns₂ xs≡₂ b' b
 
                                   @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₂'
+                                  xs≡₃ = ++-cancelˡ bs₂' _ _
                                            (begin
                                            bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₂ ⟩
@@ -1154,7 +1155,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₃≡ = ns₃ xs≡₃ c' c
 
                                           @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₃'
+                                          xs≡₄ = ++-cancelˡ bs₃' _ _
                                             (begin
                                             bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -1174,7 +1175,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₄ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₄ ⟩
@@ -1267,7 +1268,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -1369,7 +1370,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₃≡ = ns₃ xs≡₂ c' c
 
                                   @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₃'
+                                  xs≡₃ = ++-cancelˡ bs₃' _ _
                                            (begin
                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₂ ⟩
@@ -1388,7 +1389,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₄≡ = ns₄ xs≡₃ d' d
 
                                           @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₄'
+                                          xs≡₄ = ++-cancelˡ bs₄' _ _
                                             (begin
                                             bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -1483,7 +1484,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                     bs₄≡ = ns₄ xs≡₂ d' d
 
                                     @0 xs≡₄ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                    xs≡₄ = ++-cancelˡ bs₄'
+                                    xs≡₄ = ++-cancelˡ bs₄' _ _
                                       (begin
                                       bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                       ≡⟨ xs≡₂ ⟩
@@ -1636,7 +1637,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₂≡ = ns₂ xs≡₁ b' b
 
                                   @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₂'
+                                  xs≡₃ = ++-cancelˡ bs₂' _ _
                                            (begin
                                            bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₁ ⟩
@@ -1661,7 +1662,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₃≡ = ns₃ xs≡₃ c' c
 
                                           @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₃'
+                                          xs≡₄ = ++-cancelˡ bs₃' _ _
                                             (begin
                                             bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -1684,7 +1685,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₄ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₄ ⟩
@@ -1703,7 +1704,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -1781,7 +1782,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₄ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₄ ⟩
@@ -1865,7 +1866,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -1884,7 +1885,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -1963,7 +1964,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₃ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₃ ⟩
@@ -2053,7 +2054,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₃≡ = ns₃ xs≡₁ c' c
 
                                   @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₃'
+                                  xs≡₃ = ++-cancelˡ bs₃' _ _
                                            (begin
                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₁ ⟩
@@ -2076,7 +2077,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -2095,7 +2096,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -2171,7 +2172,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₃ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₃ ⟩
@@ -2256,7 +2257,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₁ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₁  ⟩
@@ -2275,7 +2276,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -2355,7 +2356,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₁ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₁ ⟩
@@ -2450,7 +2451,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                   bs₁≡ = ns₁ xs≡₁ a' a
 
                   @0 xs≡₂ : bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₂ ++ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                  xs≡₂ = ++-cancelˡ bs₁'
+                  xs≡₂ = ++-cancelˡ bs₁' _ _
                              (begin
                               bs₁' ++ bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                              ≡⟨ xs≡₁ ⟩
@@ -2479,7 +2480,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₂≡ = ns₂ xs≡₂ b' b
 
                                   @0 xs≡₃ : bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₃ ++ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₂'
+                                  xs≡₃ = ++-cancelˡ bs₂' _ _
                                            (begin
                                            bs₂' ++ bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₂ ⟩
@@ -2504,7 +2505,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                           bs₃≡ = ns₃ xs≡₃ c' c
 
                                           @0 xs≡₄ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                          xs≡₄ = ++-cancelˡ bs₃'
+                                          xs≡₄ = ++-cancelˡ bs₃' _ _
                                             (begin
                                             bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                             ≡⟨ xs≡₃ ⟩
@@ -2527,7 +2528,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₄ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₄ ⟩
@@ -2546,7 +2547,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -2626,7 +2627,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₄ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₄ ⟩
@@ -2712,7 +2713,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -2731,7 +2732,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -2812,7 +2813,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₃ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₃ ⟩
@@ -2904,7 +2905,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                   bs₃≡ = ns₃ xs≡₂ c' c
 
                                   @0 xs≡₃ : bs₄' ++ bs₅' ++ bs₆' ++ suffix ≡ bs₄ ++ bs₅ ++ bs₆ ++ suf₁
-                                  xs≡₃ = ++-cancelˡ bs₃'
+                                  xs≡₃ = ++-cancelˡ bs₃' _ _
                                            (begin
                                            bs₃' ++ bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                            ≡⟨ xs≡₂ ⟩
@@ -2927,7 +2928,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₃ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₃ ⟩
@@ -2946,7 +2947,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -3024,7 +3025,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₃ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₃ ⟩
@@ -3111,7 +3112,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                   bs₄≡ = ns₄ xs≡₂ d' d
 
                                                   @0 xs≡₅ : bs₅' ++ bs₆' ++ suffix ≡ bs₅ ++ bs₆ ++ suf₁
-                                                  xs≡₅ = ++-cancelˡ bs₄'
+                                                  xs≡₅ = ++-cancelˡ bs₄' _ _
                                                     (begin
                                                     bs₄' ++ bs₅' ++ bs₆' ++ suffix
                                                     ≡⟨ xs≡₂  ⟩
@@ -3130,7 +3131,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₅ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₅ ⟩
@@ -3212,7 +3213,7 @@ module _ {B C E F : @0 List UInt8 → Set} ⦃ _ : Eq≋ B ⦄  ⦃ _ : Eq≋ C 
                                                           bs₅≡ = ns₅ xs≡₂ e' e
 
                                                           @0 xs≡₆ : bs₆' ++ suffix ≡ bs₆ ++ suf₁
-                                                          xs≡₆ = ++-cancelˡ bs₅'
+                                                          xs≡₆ = ++-cancelˡ bs₅' _ _
                                                                (begin
                                                                bs₅' ++ bs₆' ++ suffix
                                                                ≡⟨ xs≡₂ ⟩

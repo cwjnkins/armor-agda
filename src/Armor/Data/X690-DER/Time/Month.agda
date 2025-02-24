@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.Month.Parser
 import Armor.Data.X690-DER.Time.Month.Properties
 import Armor.Data.X690-DER.Time.Month.TCB

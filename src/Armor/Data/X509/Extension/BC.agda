@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Extension.BC.Eq
 import Armor.Data.X509.Extension.BC.Parser
 import Armor.Data.X509.Extension.BC.Properties

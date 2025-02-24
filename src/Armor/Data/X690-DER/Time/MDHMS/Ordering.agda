@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.Time.Day
 open import Armor.Data.X690-DER.Time.Hour
@@ -24,7 +25,7 @@ open Armor.Grammar.Definitions UInt8
 trans-MDHMS<' : Transitive _MDHMS<'_
 trans-MDHMS<' =
   ×-transitive{_<₂_ = (×-Lex _≡_ _<_ (×-Lex _≡_ _<_ _<_))}
-    (×-isEquivalence{_≈₁_ = _≡_} isEquivalence isEquivalence)
+    (×-isEquivalence isEquivalence isEquivalence)
     (×-respects₂ isEquivalence <-resp₂-≡ <-resp₂-≡)
     (×-transitive{_<₁_ = _<_}{_<₂_ = _<_} isEquivalence <-resp₂-≡ <-trans <-trans)
     (×-transitive{_<₂_ = ×-Lex _≡_ _<_ _<_}
@@ -34,7 +35,7 @@ trans-MDHMS<' =
 private
   compare-MDHMS<“ : Trichotomous (Pointwise (Pointwise _≡_ _≡_) (Pointwise _≡_ (Pointwise _≡_ _≡_))) _MDHMS<'_
   compare-MDHMS<“ =
-    ×-compare{_≈₁_ = Pointwise _≡_ _≡_} (×-symmetric{_∼₁_ = _≡_}{_∼₂_ = _≡_} sym sym)
+    ×-compare{_≈₁_ = Pointwise _≡_ _≡_} (×-symmetric{R = _≡_}{S = _≡_} sym sym)
       (×-compare sym <-cmp <-cmp)
       (×-compare sym <-cmp
       (×-compare sym <-cmp <-cmp))
@@ -47,9 +48,14 @@ compare-MDHMS<' x y =
     (tri> ¬a ¬b c) → tri> ¬a (λ where refl → contradiction ((refl , refl) , (refl , (refl , refl))) ¬b) c
 
 isStrictTotalOrder : IsStrictTotalOrder _≡_ _MDHMS<'_
-IsStrictTotalOrder.isEquivalence isStrictTotalOrder = isEquivalence
-IsStrictTotalOrder.trans isStrictTotalOrder = trans-MDHMS<'
-IsStrictTotalOrder.compare isStrictTotalOrder = compare-MDHMS<'
+isStrictTotalOrder = IsStrictTotalOrderᶜ.isStrictTotalOrderᶜ c
+  where
+  open import Relation.Binary.Structures.Biased
+
+  c : IsStrictTotalOrderᶜ _≡_ _MDHMS<'_
+  c .IsStrictTotalOrderᶜ.isEquivalence = isEquivalence
+  c .IsStrictTotalOrderᶜ.trans = trans-MDHMS<'
+  c .IsStrictTotalOrderᶜ.compare = compare-MDHMS<'
 
 compare-MDHMS< : ∀ {@0 bs₁ bs₂} → (m₁ : MDHMS bs₁) (m₂ : MDHMS bs₂) → Tri (m₁ MDHMS< m₂) (_≋_{A = MDHMS} m₁ m₂) (m₂ MDHMS< m₁)
 compare-MDHMS< m₁ m₂ = case compare-MDHMS<' (Raw.to RawMDHMS m₁) (Raw.to RawMDHMS m₂) ret (const _) of λ where

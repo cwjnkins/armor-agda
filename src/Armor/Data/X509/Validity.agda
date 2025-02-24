@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.Validity.Parser
 import Armor.Data.X509.Validity.Properties
 import Armor.Data.X509.Validity.TCB

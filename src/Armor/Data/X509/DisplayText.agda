@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.DisplayText.Parser
 import Armor.Data.X509.DisplayText.Properties
 import Armor.Data.X509.DisplayText.TCB

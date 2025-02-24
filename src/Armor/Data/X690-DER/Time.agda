@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.Day
 import Armor.Data.X690-DER.Time.GeneralizedTime
 import Armor.Data.X690-DER.Time.Hour

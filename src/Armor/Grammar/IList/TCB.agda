@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Definitions.NonMalleable
 import      Armor.Grammar.Parallel.TCB

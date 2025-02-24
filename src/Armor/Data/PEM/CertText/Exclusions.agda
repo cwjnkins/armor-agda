@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
@@ -49,8 +50,8 @@ noOverlapLines ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs₂
 
   @0 x₁∉ : x₁ ∉ B64.charset
   x₁∉ = case x₁≡ ret (const _) of λ where
-    (inj₁ refl) → toWitnessFalse{Q = _ ∈? _} tt
-    (inj₂ refl) → toWitnessFalse{Q = _ ∈? _} tt
+    (inj₁ refl) → toWitnessFalse{a? = _ ∈? _} tt
+    (inj₂ refl) → toWitnessFalse{a? = _ ∈? _} tt
 
   @0 x₁≢ : x₁ ≢ '='
   x₁≢ = case x₁≡ ret (const _) of λ where
@@ -148,7 +149,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
            l₁ ++ cₗ ∷ cᵣ ++ e ∎
 
     @0 bs≡ₗ : e₁ ++ xs₁ ≡ cₗ ∷ cᵣ ++ e
-    bs≡ₗ = ++-cancelˡ l₁ bs≡“
+    bs≡ₗ = ++-cancelˡ l₁ _ _ bs≡“
 
     @0 cₗ≡ : cₗ ≡ '\r' ⊎ cₗ ≡ '\n'
     cₗ≡ = caseErased eol₁ ret (const _) of λ where
@@ -159,10 +160,10 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
     @0 cₗ∉ : cₗ ∉ B64.charset × cₗ ≢ '='
     cₗ∉ = caseErased cₗ≡ ret (const _) of λ where
       (inj₁ x) →
-        ─   (subst₀ (_∉ B64.charset) (sym x) (toWitnessFalse{Q = _ ∈? _} tt)
+        ─   (subst₀ (_∉ B64.charset) (sym x) (toWitnessFalse{a? = _ ∈? _} tt)
           , subst₀ (_≢ '=') (sym x) (λ ()))
       (inj₂ y) →
-        ─   (subst₀ (_∉ B64.charset) (sym y) (toWitnessFalse{Q = _ ∈? _} tt)
+        ─   (subst₀ (_∉ B64.charset) (sym y) (toWitnessFalse{a? = _ ∈? _} tt)
           , subst₀ (_≢ '=') (sym y) (λ ()))
 
   module Len> (len> : length l₁ > length l) where
@@ -209,7 +210,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
            l ++ e ∎
 
     @0 bs≡ₗ₁ : cₗ ∷ cᵣ ++ e₁ ++ xs₁ ≡ e
-    bs≡ₗ₁ = ++-cancelˡ l bs≡“
+    bs≡ₗ₁ = ++-cancelˡ l _ _ bs≡“
 
     @0 cₗ≡ : cₗ ≡ '\r' ⊎ cₗ ≡ '\n'
     cₗ≡ = caseErased eol ret (const _) of λ where
@@ -220,10 +221,10 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
     @0 cₗ∉ : cₗ ∉ B64.charset × cₗ ≢ '='
     cₗ∉ = caseErased cₗ≡ ret (const _) of λ where
       (inj₁ x) →
-        ─   (subst₀ (_∉ B64.charset) (sym x) (toWitnessFalse{Q = _ ∈? _} tt)
+        ─   (subst₀ (_∉ B64.charset) (sym x) (toWitnessFalse{a? = _ ∈? _} tt)
           , subst₀ (_≢ '=') (sym x) (λ ()))
       (inj₂ y) →
-        ─   (subst₀ (_∉ B64.charset) (sym y) (toWitnessFalse{Q = _ ∈? _} tt)
+        ─   (subst₀ (_∉ B64.charset) (sym y) (toWitnessFalse{a? = _ ∈? _} tt)
           , subst₀ (_≢ '=') (sym y) (λ ()))
 
   @0 l₁×≡ : l₁ ≡ l × e₁ ++ xs₁ ≡ e
@@ -247,7 +248,7 @@ noOverlapLemma₁ ws xs₁@(x₁ ∷ xs₁') ys₁ xs₂ ys₂ xs₁++ys₁≡xs
   x₁≡ = ‼ ∷-injectiveˡ xs₁≡
 
   x₁∉×≢ : x₁ ∉ B64.charset × x₁ ≢ '='
-  proj₁ x₁∉×≢ = subst (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{Q = _ ∈? _} tt)
+  proj₁ x₁∉×≢ = subst (_∉ B64.charset) (sym x₁≡) (toWitnessFalse{a? = _ ∈? _} tt)
   proj₂ x₁∉×≢ = subst (_≢ '=') (sym x₁≡) λ ()
 
   noway : ¬ &ₚ (IList CertFullLine) CertFinalLine xs₂

@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.TBSCert.UID.Parser
 import Armor.Data.X509.TBSCert.UID.TCB
 

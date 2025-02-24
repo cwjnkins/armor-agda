@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import      Armor.Grammar.Definitions.Eq
 import      Armor.Grammar.Definitions.Iso
 import      Armor.Grammar.Definitions.NoConfusion

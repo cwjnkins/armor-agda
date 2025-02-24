@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.Curve
 import Armor.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.FieldID
 import Armor.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.Parser

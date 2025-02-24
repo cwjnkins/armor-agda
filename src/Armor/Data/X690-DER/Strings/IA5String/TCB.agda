@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 open import Armor.Data.X690-DER.TLV.TCB
 import      Armor.Data.X690-DER.Tag as Tag
@@ -13,7 +14,7 @@ record IA5StringValue (@0 bs : List UInt8) : Set where
   constructor mkIA5StringValue
   field
     str : OctetStringValue bs
-    @0 all<128 : True (All.all? (Fin._<? (# 128)) (↑ str))
+    @0 all<128 : True (All.all? (λ x → Fin._<?_{256}{256} x (# 128)) (↑ str))
 
   size : ℕ
   size = length (Singleton.x str)

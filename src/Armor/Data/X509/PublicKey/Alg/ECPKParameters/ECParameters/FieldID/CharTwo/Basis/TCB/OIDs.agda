@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Binary
 import      Armor.Data.X509.PublicKey.Alg.ECPKParameters.ECParameters.FieldID.TCB.OIDs as FieldID
 open import Armor.Data.X690-DER.OID
@@ -51,13 +52,13 @@ TPBasisLit = BasisTypeArc ++ [ # 2 ]
 PPBasisLit = BasisTypeArc ++ [ # 3 ]
 
 GNBasis : OIDValue GNBasisLit
-GNBasis = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length GNBasisLit)) GNBasisLit)} tt))
+GNBasis = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length GNBasisLit)) GNBasisLit)} tt))
 
 TPBasis : OIDValue TPBasisLit
-TPBasis = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length TPBasisLit)) TPBasisLit)} tt))
+TPBasis = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length TPBasisLit)) TPBasisLit)} tt))
 
 PPBasis : OIDValue PPBasisLit
-PPBasis = fstₚ (Success.value (toWitness{Q = Logging.val (runParser (parseOIDValue (length PPBasisLit)) PPBasisLit)} tt))
+PPBasis = fstₚ (Success.value (toWitness{a? = Logging.val (runParser (parseOIDValue (length PPBasisLit)) PPBasisLit)} tt))
 
 Supported : List (Exists─ (List UInt8) OIDValue)
 Supported = (-, GNBasis) ∷ (-, TPBasis) ∷ [ -, PPBasis ]

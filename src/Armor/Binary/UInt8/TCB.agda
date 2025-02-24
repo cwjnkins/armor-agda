@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 open import Armor.Arith
 open import Armor.Prelude
 import      Data.Nat.Properties as Nat
@@ -53,10 +54,10 @@ showFixed₁ n = c₁“ , ir'
   c₁ : Fin 10
   c₁ = n mod 10
 
-  c₁' = Fin.raise (toℕ '0') c₁
+  c₁' = Fin._↑ʳ_ (toℕ '0') c₁
 
   c₁“ : UInt8
-  c₁“ = Fin.inject≤ c₁' (toWitness{Q = _ Nat.≤? _} tt)
+  c₁“ = Fin.inject≤ c₁' (toWitness{a? = _ Nat.≤? _} tt)
 
   ir : InRange '0' '9' c₁'
   proj₁ ir = ≤.begin
@@ -69,7 +70,7 @@ showFixed₁ n = c₁“ , ir'
     57 ≤.∎
 
   ir' : InRange '0' '9' c₁“
-  ir' = subst₀ (λ x → toℕ '0' ≤ x × x ≤ toℕ '9') (sym (Fin.toℕ-inject≤ c₁' (toWitness{Q = _ Nat.≤? _} tt))) ir
+  ir' = subst₀ (λ x → toℕ '0' ≤ x × x ≤ toℕ '9') (sym (Fin.toℕ-inject≤ c₁' (toWitness{a? = _ Nat.≤? _} tt))) ir
 
 showFixed' : (w n : ℕ) → Σ (List UInt8) λ bs → length bs ≡ w × All (InRange '0' '9') bs
 showFixed' zero n = [] , (refl , All.[])
@@ -77,7 +78,7 @@ showFixed' w@(suc w') n =
   let (c₁ , ir) = showFixed₁ quotient in
   (c₁ ∷ cs) , (cong suc len≡) , (ir ∷ irs)
   where
-  open DivMod ((n divMod 10 ^ w'){fromWitnessFalse (Nat.>⇒≢ (1≤10^n w'))})
+  open DivMod ((n divMod 10 ^ w') ⦃ ≢-nonZero (Nat.>⇒≢ (1≤10^n w')) ⦄)
   ih = showFixed' w' (toℕ remainder)
   cs = proj₁ ih
   len≡ = proj₁ (proj₂ ih)

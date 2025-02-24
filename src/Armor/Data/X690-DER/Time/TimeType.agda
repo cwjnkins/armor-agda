@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.Time.TimeType.Parser
 import Armor.Data.X690-DER.Time.TimeType.Properties
 import Armor.Data.X690-DER.Time.TimeType.Relation

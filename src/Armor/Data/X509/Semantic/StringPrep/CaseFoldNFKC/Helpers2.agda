@@ -1,5 +1,4 @@
-
-{-# OPTIONS --sized-types #-}
+{-# OPTIONS --erasure --sized-types #-}
 
 open import Armor.Binary
 open import Armor.Prelude
@@ -25,7 +24,7 @@ abstract
 
 lookupB2Map₂ : ∀ {@0 bs} → UTF8Char bs → Exists─ (List UInt8) UTF8
 lookupB2Map₂ x 
-  with lookupUTF8Trie (serializeUTF8Char' x) B2Map₂
+  with lookupUTF8Trie B2Map₂ (serializeUTF8Char' x)
 ... | nothing = _ , (cons (mkIListCons x nil refl))
 ... | just x₁
   with x₁
@@ -35,6 +34,6 @@ lookupB2Map₂ x
 
 lookupB2Map₂Flag : ∀ {@0 bs} → UTF8Char bs → Bool
 lookupB2Map₂Flag x
-  with lookupUTF8Trie (serializeUTF8Char' x) B2Map₂
+  with lookupUTF8Trie B2Map₂ (serializeUTF8Char' x)
 ... | just x₁ = true
 ... | nothing = false

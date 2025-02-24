@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X690-DER.OctetString.Parser
 import Armor.Data.X690-DER.OctetString.Properties
 import Armor.Data.X690-DER.OctetString.TCB

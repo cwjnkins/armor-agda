@@ -1,3 +1,4 @@
+{-# OPTIONS --erasure #-}
 import Armor.Data.X509.PublicKey.Val.RSA.Ints.Eq
 import Armor.Data.X509.PublicKey.Val.RSA.Ints.Parser
 import Armor.Data.X509.PublicKey.Val.RSA.Ints.Properties
