@@ -5,7 +5,7 @@ home=~/
 
 git submodule update --init --remote --progress
 cd agda-stdlib
-git checkout v1.7.1
+git checkout v2.2
 cd ..
 cd src/ && make all && cd ..
 
