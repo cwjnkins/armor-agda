@@ -29,10 +29,11 @@ stack upgrade
 echo "PATH=$PATH:/$home/.local/bin" >> /$home/.bashrc
 source /$home/.bashrc
 
+git clone https://github.com/agda/agda.git
 git clone --depth 1 --branch v2.7.0 https://github.com/agda/agda.git
 cd agda
 export AGDAEXECDIR=/$home/.local/bin
-stack install --stack-yaml stack-9.8.2.yaml --local-bin-path $AGDAEXECDIR
+stack install --stack-yaml stack-9.8.4.yaml --local-bin-path $AGDAEXECDIR
 agda --version
 cd $home
 

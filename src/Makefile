@@ -11,7 +11,7 @@ ARMOR_BUILD=MAlonzo
 ARMOR_MAIN=Armor/Main.agda
 ARMOR_MAIN_HS=$(ARMOR_BUILD)/Code/Armor/Main.hs
 
-STACK_GHC_EXE=stack --compiler ghc-8.8.4 exec ghc --
+STACK_GHC_EXE=stack --compiler ghc-9.8.4 exec ghc --
 STACK_GHC_OPTIONS=-O -Werror -fwarn-incomplete-patterns
 
 .PHONY: all
