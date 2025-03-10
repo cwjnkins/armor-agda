@@ -25,7 +25,7 @@ class Certificate:
     signature: str
     public_key: str
     signoid: str
-    eku_purposes: List[str] = field(default_factory=list)
+    # eku_purposes: List[str] = field(default_factory=list)
 
 @dataclass
 class CRL:
@@ -282,13 +282,13 @@ def parse_output(output):
             lines = [line.strip() for line in block.strip().split("\n")]
             tbs, signature, public_key = map(convert_to_hex, lines[:3])
             signoid = sign_oid_map[lines[3]] if lines[3] in sign_oid_map else None
-            eku_purposes = lines[4].rstrip(" @@").split(" @@ ") if len(lines) > 4 and lines[4] else []
+            # eku_purposes = lines[4].rstrip(" @@").split(" @@ ") if len(lines) > 4 and lines[4] else []
             certificates.append(Certificate(
                 tbs=tbs,
                 signature=signature,
                 public_key=public_key,
                 signoid=signoid,
-                eku_purposes=eku_purposes
+                # eku_purposes=eku_purposes
             ))
     
     crl_blocks = re.findall(r"\*{7}Output CRL Start\*{7}\n(.*?)\n\*{7}Output CRL End\*{7}", output, re.DOTALL)
