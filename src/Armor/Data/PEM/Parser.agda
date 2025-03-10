@@ -3,6 +3,7 @@ open import Armor.Binary
   renaming (module Base64 to B64)
 open import Armor.Data.Base64
 open import Armor.Data.PEM.CertBoundary
+open import Armor.Data.PEM.CRLBoundary
 open import Armor.Data.PEM.CertText
 open import Armor.Data.PEM.CertText.FinalLine
 open import Armor.Data.PEM.CertText.FullLine
@@ -45,3 +46,22 @@ parseCertList =
 -- parseCertListWithRootStore = LogDec.equivalent {!!}
 --                                (LogDec.parse& parseCertList (
 --                                  LogDec.parse& {!!} parseCertList {!!}) {!!})
+
+
+parseCRL : LogDec.MaximalParser CRL
+parseCRL =
+  LogDec.equivalent equiv₁
+    (Seq.MaximalParser.parse&
+      (parseCRLBoundary "BEGIN")
+      (Seq.MaximalParser.parse&
+        parseMaxCertText
+        (parseCRLBoundary "END")
+        noOverlapTextFooter₁)
+      noOverlapHeaderText₁)
+
+parseCRLList : LogDec.MaximalParser CRLList
+parseCRLList =
+  parseIListMaxNoOverlap.parseIListMax
+    (tell "PEM: underflow reading cert list")
+    CRL nonempty₁ noOverlap₁
+    parseCRL

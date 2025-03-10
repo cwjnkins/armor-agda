@@ -2,6 +2,7 @@
 open import Armor.Binary
 open import Armor.Data.Base64
 open import Armor.Data.PEM.CertBoundary.TCB
+open import Armor.Data.PEM.CRLBoundary.TCB
 open import Armor.Data.PEM.CertText.TCB
 open import Armor.Data.PEM.CertText.FinalLine.TCB
 open import Armor.Data.PEM.CertText.FullLine.TCB
@@ -61,3 +62,33 @@ extractCerts (consIList c rest refl) =
 --     rootcerts : CertList rl
 --     @0 bs≡ : bs ≡ cl ++ n ++ rl
 --     @0 length≡ : stringToNat n ≡ lengthIList certs
+
+
+
+record CRL (@0 bs : List Char) : Set where
+  constructor mkCert
+  field
+    @0 {h b f} : List Char
+    header : CRLHeader h
+    body   : CertText   b
+    footer : CRLFooter f
+    @0 bs≡ : bs ≡ h ++ b ++ f
+
+CRLList = IList CRL
+
+extractCRL : ∀ {@0 bs} → CRL bs → List UInt8
+extractCRL (mkCert _ (mkCertText body final _) _ _) =
+  eb body ++ ef final
+  where
+  eb : ∀ {@0 bs} → IList CertFullLine bs → List UInt8
+  eb nil = []
+  eb (cons (mkIListCons (mkCertFullLine (mk×ₚ line (─ len≡)) _ _) tail₁ _)) =
+    decodeStr (mk64Str line (subst (λ x → x % 4 ≡ 0) (sym len≡) refl) (pad0 refl) refl) ++ eb tail₁
+
+  ef : ∀ {@0 bs} → CertFinalLine bs → List UInt8
+  ef (mkCertFinalLine line lineLen _ _) = decodeStr line
+
+extractCRLs : ∀ {@0 bs} → CRLList bs → List UInt8
+extractCRLs nil = []
+extractCRLs (consIList c rest refl) =
+  extractCRL c ++ extractCRLs rest

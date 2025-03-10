@@ -1,5 +1,6 @@
 {-# OPTIONS --erasure #-}
 import Armor.Data.PEM.CertBoundary
+import Armor.Data.PEM.CRLBoundary
 import Armor.Data.PEM.CertText
 import Armor.Data.PEM.Parser
 import Armor.Data.PEM.Properties
@@ -14,5 +15,6 @@ open Armor.Data.PEM.TCB     public
 
 module PEM where
   open Armor.Data.PEM.CertBoundary public
+  open Armor.Data.PEM.CRLBoundary public
   open Armor.Data.PEM.CertText     public
   open Armor.Data.PEM.Properties   public
