@@ -605,7 +605,7 @@ main = IO.run $
   runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
                                              Armor.IO.exitFailure
   runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
-    IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
+    -- IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
     helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
       true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
              Armor.IO.exitSuccess

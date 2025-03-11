@@ -73,6 +73,8 @@ INSECURE_ALGORITHMS = {
     '6 9 42 134 72 134 247 13 1 1 3': "md4WithRSAEncryption"
 }
 
+revocation_status = False
+
 def convert_ec_public_key_to_raw(public_key) -> str:
     """
     Converts an ECDSA public key to its raw hex format by merging X and Y coordinates.
@@ -95,7 +97,7 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
     try:
         # Verify if the algorithm is supported and public_key is an RSA key
         if sign_algo in RSA_SIGNATURE_ALGOS and isinstance(public_key, RSAPublicKey):
-            print(sign_algo, " signature checked by Hacl-Star hash and Morpheous verify")
+            # print(sign_algo, " signature checked by Hacl-Star hash and Morpheous verify")
             hash_name, hash_size = RSA_SIGNATURE_ALGOS[sign_algo]
             signature_mod = pow(
                 int.from_bytes(signature, byteorder='big'),
@@ -126,7 +128,7 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
             # Verify signature using external Morpheous library
             cmd2 = ["/{}/.armor/oracle".format(home_dir), signature_mod_hex, str(n_length), tbs_hash, str(hash_size)]
             morpheous_res = subprocess.getoutput(' '.join(cmd2))
-            print(morpheous_res)
+            # print(morpheous_res)
             return morpheous_res
         elif sign_algo in ECDSA_SIGNATURE_ALGOS and isinstance(public_key, EllipticCurvePublicKey):
             hash_name, hash_size = ECDSA_SIGNATURE_ALGOS[sign_algo]
@@ -162,14 +164,14 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
                     text=True
                 )
                 
-                print("ECDSA ", public_key.curve, " signature checked by Hacl-Star hash and verify")
+                # print("ECDSA ", public_key.curve, " signature checked by Hacl-Star hash and verify")
                 output, error = process.communicate()      
                 if process.returncode == 1:
                     return "true"
                 else:
                     return "false"
             else:
-                print("ECDSA ", public_key.curve, " signature checked by Cryptography Library of Python")
+                # print("ECDSA ", public_key.curve, " signature checked by Cryptography Library of Python")
                 if hash_name == "sha256":
                     public_key.verify(signature, tbs_bytes, ECDSA(hashes.SHA256()))
                 if hash_name == "sha384":
@@ -177,10 +179,10 @@ def verify_signature_with_secure_algorithm(signature, sign_algo, tbs_bytes, publ
                 if hash_name == "sha512":
                     public_key.verify(signature, tbs_bytes, ECDSA(hashes.SHA512()))
         else:
-            print(f"Signature algorithm {sign_algo} is not supported - signature verification skipped for certificate {i}.")
+            # print(f"Signature algorithm {sign_algo} is not supported - signature verification skipped for certificate {i}.")
             return "true"
     except Exception as e:
-        print(f"Error during signature verification for certificate {i} : {e}")
+        print(f"0 - Error during signature verification for {i} : {e}")
         return "false"
 
 
@@ -188,7 +190,7 @@ def verifySign(signature, sign_algo, tbs_bytes, public_key, i):
     """Verifies the signature of a certificate using the provided public key and signature algorithm."""
     # Check if the signature algorithm is insecure
     if sign_algo in INSECURE_ALGORITHMS:
-        print(f"Signature algorithm {INSECURE_ALGORITHMS[sign_algo]} is insecure in certificate {i}.")
+        print(f"0 - Signature algorithm {INSECURE_ALGORITHMS[sign_algo]} is insecure in {i}.")
         return "false"
     
     # Handle signature verification based on the algorithm
@@ -208,7 +210,7 @@ def verifySignaturesChain(certificates):
         verification_result = verifySign(signature, sign_algo, tbs_bytes, public_key, i)
         
         if verification_result == "false":
-            print(f"Failed to verify signature of certificate {i}")
+            print(f"0 - Failed to verify signature of certificate {i}")
             res = "false"
             break    
     return res
@@ -228,7 +230,7 @@ def verifySignaturesCRL(certificates, crls):
             verification_result = verifySign(signature, sign_algo, tbs_bytes, public_key, i)
             
             if verification_result == "false":
-                print(f"Failed to verify signature of CRL {i}")
+                print(f"0 - Failed to verify signature of CRL {i}")
                 res = "false"
                 break
     else:
@@ -237,6 +239,8 @@ def verifySignaturesCRL(certificates, crls):
     return res
 
 def run_external_program(executable, purpose, certs, trusted_certs=None, crls=None):
+    global revocation_status
+
     try:
         command = f"{executable}"
         
@@ -253,7 +257,7 @@ def run_external_program(executable, purpose, certs, trusted_certs=None, crls=No
         if crls:
             command += f" --crl {crls}"
 
-        print("Command Executed:", command)
+        # print("Command Executed:", command)
         
         # Run the command as a whole string
         process = subprocess.run(command, 
@@ -264,12 +268,19 @@ def run_external_program(executable, purpose, certs, trusted_certs=None, crls=No
         # Capture the output and error streams
         stdout, stderr = process.stdout, process.stderr
         
-        if stderr:
-            print(f"{stderr}", file=sys.stderr)
-        
-        return stdout
+        # if stderr:
+        #     print(f"{stderr}", file=sys.stderr)
+
+        if "CRL Validation: REVOKED" in stdout:
+            revocation_status = True
+
+        if "Semantic Validation : Success" in stdout:
+            return stdout
+        else:
+            print(f"0 - error transcript ---> {stderr.replace('\n', ' ')}")
+            return None
     except Exception as e:
-        print(f"An error occurred: {e}", file=sys.stderr)
+        print(f"0 - {e}", file=sys.stderr)
         return None
 
 def parse_output(output):
@@ -308,7 +319,7 @@ def parse_output(output):
 def check_file_exists(file_path: str, file_type: str) -> bool:
     """Check if a file exists and is a valid file."""
     if not os.path.isfile(file_path):
-        print(f"Error: {file_type} file '{file_path}' does not exist or is not a file.", file=sys.stderr)
+        print(f"0 - Error: {file_type} file '{file_path}' does not exist or is not a file.", file=sys.stderr)
         return False
     return True
 
@@ -327,16 +338,16 @@ if __name__ == "__main__":
 
     # Perform sanity checks
     if not check_file_exists(args.executable, "Executable"):
-        sys.exit(1)
+        sys.exit(0)
     
     if not check_file_exists(args.chain, "Certificate chain"):
-        sys.exit(1)
+        sys.exit(0)
     
     if args.trust_store and not check_file_exists(args.trust_store, "Trust store"):
-        sys.exit(1)
+        sys.exit(0)
     
     if args.crl and not check_file_exists(args.crl, "CRL"):
-        sys.exit(1)
+        sys.exit(0)
 
     # Run the external program using the provided arguments
     output = run_external_program(args.executable, args.purpose, args.chain, args.trust_store, args.crl)
@@ -348,10 +359,28 @@ if __name__ == "__main__":
             # print("Parsed Certificates:", certificates)
 
             sig_verify_chain = verifySignaturesChain(certificates)
-            print("Certificate Chain Signature Verification:", sig_verify_chain)
+            # print("Certificate Chain Signature Verification:", sig_verify_chain)
+            if sig_verify_chain == "false":
+                sys.exit(0)
 
             if len(crls) >= 1:
               # print("Parsed CRL:", crls)
 
-              sig_verify_crl = verifySignaturesCRL(certificates, crls)
-              print("CRL Signature Verification:", sig_verify_crl)
+                if revocation_status:
+                    print("0 - Revoked Certificate in Chain")
+
+                    sig_verify_crl = verifySignaturesCRL(certificates, crls)
+                    # print("CRL Signature Verification:", sig_verify_crl)
+                    sys.exit(0)
+                else:
+                    sig_verify_crl = verifySignaturesCRL(certificates, crls)
+                    # print("CRL Signature Verification:", sig_verify_crl)
+                    if sig_verify_crl == "false":
+                        sys.exit(0)
+            print("1")
+            sys.exit(1)
+        else:
+            print("1")
+            sys.exit(1)
+    else:
+        sys.exit(0)
