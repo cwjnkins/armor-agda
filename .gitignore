@@ -8,7 +8,7 @@
 /doc/summary.ptb
 /doc/summary.synctex.gz
 /doc/latex/
-/src/Main
+# /src/Main
 /src/libraries
 **/.DS_Store
 **/_build

@@ -79,75 +79,75 @@ parseCerts fn input =
               IO.>> Armor.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
--- parseCrls : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
--- parseCrls fn input =
---   case proj₁ (LogDec.runMaximalParser Char PEM.parseCRLList input) of λ where
---     (mkLogged log₁ (no ¬p)) →
---       Armor.IO.putStrLnErr (foldl String._++_ "" log₁)
---       IO.>> Armor.IO.exitFailure
---     (mkLogged log₁ (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
---       Armor.IO.putStrLnErr 
---         (fn String.++ ": incomplete read\n"
---          String.++ "-- only read " String.++ (showℕ (IList.lengthIList _ chain))
---          String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
---       IO.>> Armor.IO.putStrLnErr "-- attempting to parse remainder"
---       IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCRL suf) of λ where
---         (mkLogged log₂ (yes _)) →
---           Armor.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
---           IO.>> Armor.IO.exitFailure
---         (mkLogged log₂ (no  _)) →
---           Armor.IO.putStrLnErr (foldl String._++_ "-- " log₂)
---           IO.>> Armor.IO.exitFailure)
---     (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
---       case runParser CRL.parseCRLList (PEM.extractCRLs chain) of λ where
---         (mkLogged log₂ (no  _)) →
---           Armor.IO.putStrLnErr
---             (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
---              String.++ (foldl String._++_ "-- " log₂))
---           IO.>> Armor.IO.exitFailure
---         (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
---           Armor.IO.putStrLnErr
---             (fn String.++ " (decoded): incomplete read\n"
---              String.++ "-- only read "
---                String.++ (showℕ (IList.lengthIList _ chainX509))
---                String.++ " certificate(s), but more bytes remain\n"
---              String.++ "-- attempting to parse remainder")
---           IO.>> ((case runParser CRL.parseCertList suf of λ where
---             (mkLogged log₃ (yes _)) →
---               Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
---               IO.>> Armor.IO.exitFailure
---             (mkLogged log₃ (no _)) →
---               Armor.IO.putStrLnErr (fn String.++ " (decoded): "
---                 String.++ show (map toℕ (take 10 suf))
---                 String.++ foldl String._++_ "" log₃)
---               IO.>> Armor.IO.exitFailure))
---         (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
-        
-parseCrls : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
-parseCrls fn contents =
-  case runParser CRL.parseCRLList contents of λ where
-    (mkLogged log₂ (no  _)) →
-      Armor.IO.putStrLnErr
-        (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
-         String.++ (foldl String._++_ "-- " log₂))
+parseCrls : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
+parseCrls fn input =
+  case proj₁ (LogDec.runMaximalParser Char PEM.parseCRLList input) of λ where
+    (mkLogged log₁ (no ¬p)) →
+      Armor.IO.putStrLnErr (foldl String._++_ "" log₁)
       IO.>> Armor.IO.exitFailure
-    (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
-      Armor.IO.putStrLnErr
-        (fn String.++ " (decoded): incomplete read\n"
-         String.++ "-- only read "
-           String.++ (showℕ (IList.lengthIList _ chainX509))
-           String.++ " certificate(s), but more bytes remain\n"
-         String.++ "-- attempting to parse remainder")
-      IO.>> ((case runParser CRL.parseCertList suf of λ where
-        (mkLogged log₃ (yes _)) →
-          Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+    (mkLogged log₁ (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
+      Armor.IO.putStrLnErr 
+        (fn String.++ ": incomplete read\n"
+         String.++ "-- only read " String.++ (showℕ (IList.lengthIList _ chain))
+         String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
+      IO.>> Armor.IO.putStrLnErr "-- attempting to parse remainder"
+      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCRL suf) of λ where
+        (mkLogged log₂ (yes _)) →
+          Armor.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
           IO.>> Armor.IO.exitFailure
-        (mkLogged log₃ (no _)) →
-          Armor.IO.putStrLnErr (fn String.++ " (decoded): "
-            String.++ show (map toℕ (take 10 suf))
-            String.++ foldl String._++_ "" log₃)
-          IO.>> Armor.IO.exitFailure))
-    (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
+        (mkLogged log₂ (no  _)) →
+          Armor.IO.putStrLnErr (foldl String._++_ "-- " log₂)
+          IO.>> Armor.IO.exitFailure)
+    (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
+      case runParser CRL.parseCRLList (PEM.extractCRLs chain) of λ where
+        (mkLogged log₂ (no  _)) →
+          Armor.IO.putStrLnErr
+            (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
+             String.++ (foldl String._++_ "-- " log₂))
+          IO.>> Armor.IO.exitFailure
+        (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+          Armor.IO.putStrLnErr
+            (fn String.++ " (decoded): incomplete read\n"
+             String.++ "-- only read "
+               String.++ (showℕ (IList.lengthIList _ chainX509))
+               String.++ " certificate(s), but more bytes remain\n"
+             String.++ "-- attempting to parse remainder")
+          IO.>> ((case runParser CRL.parseCertList suf of λ where
+            (mkLogged log₃ (yes _)) →
+              Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              IO.>> Armor.IO.exitFailure
+            (mkLogged log₃ (no _)) →
+              Armor.IO.putStrLnErr (fn String.++ " (decoded): "
+                String.++ show (map toℕ (take 10 suf))
+                String.++ foldl String._++_ "" log₃)
+              IO.>> Armor.IO.exitFailure))
+        (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
+        
+-- parseCrls : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
+-- parseCrls fn contents =
+--   case runParser CRL.parseCRLList contents of λ where
+--     (mkLogged log₂ (no  _)) →
+--       Armor.IO.putStrLnErr
+--         (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
+--          String.++ (foldl String._++_ "-- " log₂))
+--       IO.>> Armor.IO.exitFailure
+--     (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+--       Armor.IO.putStrLnErr
+--         (fn String.++ " (decoded): incomplete read\n"
+--          String.++ "-- only read "
+--            String.++ (showℕ (IList.lengthIList _ chainX509))
+--            String.++ " certificate(s), but more bytes remain\n"
+--          String.++ "-- attempting to parse remainder")
+--       IO.>> ((case runParser CRL.parseCertList suf of λ where
+--         (mkLogged log₃ (yes _)) →
+--           Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+--           IO.>> Armor.IO.exitFailure
+--         (mkLogged log₃ (no _)) →
+--           Armor.IO.putStrLnErr (fn String.++ " (decoded): "
+--             String.++ show (map toℕ (take 10 suf))
+--             String.++ foldl String._++_ "" log₃)
+--           IO.>> Armor.IO.exitFailure))
+--     (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
 main : IO.Main
 main = IO.run $
@@ -167,13 +167,13 @@ main = IO.run $
             nothing → runCertChecksChain (CmdArg.purpose cmd) nothing
                         (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
             (just crlName) →
-              readDERCrl crlName
+              readPEMCrl crlName
               IO.>>= λ crl─ → runCertChecksChain (CmdArg.purpose cmd) (just (IList.toList _ (proj₂ crl─)))
                                 (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
         nothing → case (CmdArg.crlname cmd) of λ where
           nothing → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) nothing
           (just crlName) →
-            readDERCrl crlName
+            readPEMCrl crlName
             IO.>>= λ crl─ → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) (just (IList.toList _ (proj₂ crl─)))
 
   where
@@ -220,21 +220,21 @@ main = IO.run $
     IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
     IO.pure (_ , certs)
 
-  -- readPEMCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
-  -- readPEMCrl filename =
-  --   IO.readFiniteFile filename
-  --   IO.>>= (parseCrls filename ∘ String.toList)
-  --   IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
-  --   IO.pure (_ , certs)
+  readPEMCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
+  readPEMCrl filename =
+    IO.readFiniteFile filename
+    IO.>>= (parseCrls filename ∘ String.toList)
+    IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
+    IO.pure (_ , certs)
 
-  readDERCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
-  readDERCrl filename =
-    Armor.IO.openFile filename Armor.IO.Primitive.readMode
-    IO.>>= Armor.IO.hGetByteStringContents
-    IO.>>= λ contents → let bs = Armor.Foreign.ByteString.toUInt8 contents in
-    parseCrls filename bs
-    IO.>>= λ crlS → let (_ , success pre r r≡ crls suf ps≡) = crlS in
-    IO.pure (_ , crls)
+  -- readDERCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
+  -- readDERCrl filename =
+  --   Armor.IO.openFile filename Armor.IO.Primitive.readMode
+  --   IO.>>= Armor.IO.hGetByteStringContents
+  --   IO.>>= λ contents → let bs = Armor.Foreign.ByteString.toUInt8 contents in
+  --   parseCrls filename bs
+  --   IO.>>= λ crlS → let (_ , success pre r r≡ crls suf ps≡) = crlS in
+  --   IO.pure (_ , crls)
 
   record CertOutput : Set where
     field
