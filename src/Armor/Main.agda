@@ -163,7 +163,10 @@ main = IO.run $
           nothing → Armor.IO.exitSuccess
           (just crlName) →
             readPEMCrl crlName
-            IO.>>= λ crl─ → Armor.IO.exitSuccess
+            IO.>>= λ crl─ →
+              IO.putStrLn ("1") IO.>>
+              Armor.IO.exitSuccess
+
 
   where
   record CmdArgTmp : Set where
