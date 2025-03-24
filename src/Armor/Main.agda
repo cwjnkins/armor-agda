@@ -159,22 +159,11 @@ main = IO.run $
       Armor.IO.putStrLnErr ("-- " String.++ msg)
       IO.>> Armor.IO.exitFailure
     (inj₂ cmd) →
-      readPEMCert (CmdArg.certname cmd)
-      IO.>>= λ cert─ → case (CmdArg.rootname cmd) of λ where
-        (just rootName) →
-          readPEMCert rootName
-          IO.>>= λ root─ → case (CmdArg.crlname cmd) of λ where
-            nothing → runCertChecksChain (CmdArg.purpose cmd) nothing
-                        (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
-            (just crlName) →
-              readPEMCrl crlName
-              IO.>>= λ crl─ → runCertChecksChain (CmdArg.purpose cmd) (just (IList.toList _ (proj₂ crl─)))
-                                (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
-        nothing → case (CmdArg.crlname cmd) of λ where
-          nothing → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) nothing
+       case (CmdArg.crlname cmd) of λ where
+          nothing → Armor.IO.exitSuccess
           (just crlName) →
             readPEMCrl crlName
-            IO.>>= λ crl─ → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) (just (IList.toList _ (proj₂ crl─)))
+            IO.>>= λ crl─ → Armor.IO.exitSuccess
 
   where
   record CmdArgTmp : Set where
@@ -601,33 +590,33 @@ main = IO.run $
           false → IO.pure false
         false → IO.pure false
 
-  runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
-  runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
-                                             Armor.IO.exitFailure
-  runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
-    -- IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
-    helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
-      true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
-             Armor.IO.exitSuccess
-      false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
-              Armor.IO.exitFailure
-    where
-    helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
-                                    → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
-                                    → List (Chain trustedRoot candidates issuee) → IO.IO Bool
-    helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
-                              IO.pure false
-    helper kp crl issuee (chain ∷ otherChains) =
-      runChainChecks kp crl issuee chain IO.>>= λ where
-        false →  helper kp crl issuee otherChains
-        true → IO.pure true
+  -- runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
+  -- runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
+  --                                            Armor.IO.exitFailure
+  -- runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
+  --   -- IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
+  --   helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
+  --     true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
+  --            Armor.IO.exitSuccess
+  --     false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
+  --             Armor.IO.exitFailure
+  --   where
+  --   helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
+  --                                   → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
+  --                                   → List (Chain trustedRoot candidates issuee) → IO.IO Bool
+  --   helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
+  --                             IO.pure false
+  --   helper kp crl issuee (chain ∷ otherChains) =
+  --     runChainChecks kp crl issuee chain IO.>>= λ where
+  --       false →  helper kp crl issuee otherChains
+  --       true → IO.pure true
 
-  runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
-  runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>
-                                Armor.IO.exitFailure
-  runCertChecksLeaf kp (leaf ∷ rest)  crl =
-    runSingleCertChecks kp (proj₂ leaf) crl 1 IO.>>= λ where
-      true → IO.putStrLn "Cert Semantic Validation : Success" IO.>>
-             Armor.IO.exitSuccess
-      false → IO.putStrLn "Cert Semantic Validation : Failed" IO.>>
-              Armor.IO.exitFailure
+  -- runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
+  -- runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>
+  --                               Armor.IO.exitFailure
+  -- runCertChecksLeaf kp (leaf ∷ rest)  crl =
+  --   runSingleCertChecks kp (proj₂ leaf) crl 1 IO.>>= λ where
+  --     true → IO.putStrLn "Cert Semantic Validation : Success" IO.>>
+  --            Armor.IO.exitSuccess
+  --     false → IO.putStrLn "Cert Semantic Validation : Failed" IO.>>
+  --             Armor.IO.exitFailure
