@@ -79,75 +79,75 @@ parseCerts fn input =
               IO.>> Armor.IO.exitFailure))
         (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
--- parseCrls : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
--- parseCrls fn input =
---   case proj₁ (LogDec.runMaximalParser Char PEM.parseCRLList input) of λ where
---     (mkLogged log₁ (no ¬p)) →
---       Armor.IO.putStrLnErr (foldl String._++_ "" log₁)
---       IO.>> Armor.IO.exitFailure
---     (mkLogged log₁ (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
---       Armor.IO.putStrLnErr 
---         (fn String.++ ": incomplete read\n"
---          String.++ "-- only read " String.++ (showℕ (IList.lengthIList _ chain))
---          String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
---       IO.>> Armor.IO.putStrLnErr "-- attempting to parse remainder"
---       IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCRL suf) of λ where
---         (mkLogged log₂ (yes _)) →
---           Armor.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
---           IO.>> Armor.IO.exitFailure
---         (mkLogged log₂ (no  _)) →
---           Armor.IO.putStrLnErr (foldl String._++_ "-- " log₂)
---           IO.>> Armor.IO.exitFailure)
---     (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
---       case runParser CRL.parseCRLList (PEM.extractCRLs chain) of λ where
---         (mkLogged log₂ (no  _)) →
---           Armor.IO.putStrLnErr
---             (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
---              String.++ (foldl String._++_ "-- " log₂))
---           IO.>> Armor.IO.exitFailure
---         (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
---           Armor.IO.putStrLnErr
---             (fn String.++ " (decoded): incomplete read\n"
---              String.++ "-- only read "
---                String.++ (showℕ (IList.lengthIList _ chainX509))
---                String.++ " certificate(s), but more bytes remain\n"
---              String.++ "-- attempting to parse remainder")
---           IO.>> ((case runParser CRL.parseCertList suf of λ where
---             (mkLogged log₃ (yes _)) →
---               Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
---               IO.>> Armor.IO.exitFailure
---             (mkLogged log₃ (no _)) →
---               Armor.IO.putStrLnErr (fn String.++ " (decoded): "
---                 String.++ show (map toℕ (take 10 suf))
---                 String.++ foldl String._++_ "" log₃)
---               IO.>> Armor.IO.exitFailure))
---         (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
-        
-parseCrls : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
-parseCrls fn contents =
-  case runParser CRL.parseCRLList contents of λ where
-    (mkLogged log₂ (no  _)) →
-      Armor.IO.putStrLnErr
-        (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
-         String.++ (foldl String._++_ "-- " log₂))
+parseCrls : (fileName : String) (contents : List Char) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
+parseCrls fn input =
+  case proj₁ (LogDec.runMaximalParser Char PEM.parseCRLList input) of λ where
+    (mkLogged log₁ (no ¬p)) →
+      Armor.IO.putStrLnErr (foldl String._++_ "" log₁)
       IO.>> Armor.IO.exitFailure
-    (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
-      Armor.IO.putStrLnErr
-        (fn String.++ " (decoded): incomplete read\n"
-         String.++ "-- only read "
-           String.++ (showℕ (IList.lengthIList _ chainX509))
-           String.++ " certificate(s), but more bytes remain\n"
-         String.++ "-- attempting to parse remainder")
-      IO.>> ((case runParser CRL.parseCertList suf of λ where
-        (mkLogged log₃ (yes _)) →
-          Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+    (mkLogged log₁ (yes (success prefix read read≡ chain suf@(_ ∷ _) ps≡))) →
+      Armor.IO.putStrLnErr 
+        (fn String.++ ": incomplete read\n"
+         String.++ "-- only read " String.++ (showℕ (IList.lengthIList _ chain))
+         String.++ " certificate(s), but " String.++ (showℕ (length suf)) String.++ " byte(s) remain")
+      IO.>> Armor.IO.putStrLnErr "-- attempting to parse remainder"
+      IO.>> (case proj₁ (LogDec.runMaximalParser Char PEM.parseCRL suf) of λ where
+        (mkLogged log₂ (yes _)) →
+          Armor.IO.putStrLnErr "-- parse remainder success (SHOULD NOT HAPPEN!)"
           IO.>> Armor.IO.exitFailure
-        (mkLogged log₃ (no _)) →
-          Armor.IO.putStrLnErr (fn String.++ " (decoded): "
-            String.++ show (map toℕ (take 10 suf))
-            String.++ foldl String._++_ "" log₃)
-          IO.>> Armor.IO.exitFailure))
-    (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
+        (mkLogged log₂ (no  _)) →
+          Armor.IO.putStrLnErr (foldl String._++_ "-- " log₂)
+          IO.>> Armor.IO.exitFailure)
+    (mkLogged log₁ (yes (success prefix read read≡ chain [] ps≡))) →
+      case runParser CRL.parseCRLList (PEM.extractCRLs chain) of λ where
+        (mkLogged log₂ (no  _)) →
+          Armor.IO.putStrLnErr
+            (fn String.++ " (decoded): failed to parse PEM as X.509" String.++ "\n"
+             String.++ (foldl String._++_ "-- " log₂))
+          IO.>> Armor.IO.exitFailure
+        (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+          Armor.IO.putStrLnErr
+            (fn String.++ " (decoded): incomplete read\n"
+             String.++ "-- only read "
+               String.++ (showℕ (IList.lengthIList _ chainX509))
+               String.++ " certificate(s), but more bytes remain\n"
+             String.++ "-- attempting to parse remainder")
+          IO.>> ((case runParser CRL.parseCertList suf of λ where
+            (mkLogged log₃ (yes _)) →
+              Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+              IO.>> Armor.IO.exitFailure
+            (mkLogged log₃ (no _)) →
+              Armor.IO.putStrLnErr (fn String.++ " (decoded): "
+                String.++ show (map toℕ (take 10 suf))
+                String.++ foldl String._++_ "" log₃)
+              IO.>> Armor.IO.exitFailure))
+        (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
+        
+-- parseCrls : (fileName : String) (contents : List UInt8) → IO.IO (Exists─ _ (Success UInt8 CRL.CRLList))
+-- parseCrls fn contents =
+--   case runParser CRL.parseCRLList contents of λ where
+--     (mkLogged log₂ (no  _)) →
+--       Armor.IO.putStrLnErr
+--         (fn String.++ " (decoded): failed to parse bytestring as X.509" String.++ "\n"
+--          String.++ (foldl String._++_ "-- " log₂))
+--       IO.>> Armor.IO.exitFailure
+--     (mkLogged log₂ (yes (success prefix read read≡ chainX509 suf@(_ ∷ _) ps≡))) →
+--       Armor.IO.putStrLnErr
+--         (fn String.++ " (decoded): incomplete read\n"
+--          String.++ "-- only read "
+--            String.++ (showℕ (IList.lengthIList _ chainX509))
+--            String.++ " certificate(s), but more bytes remain\n"
+--          String.++ "-- attempting to parse remainder")
+--       IO.>> ((case runParser CRL.parseCertList suf of λ where
+--         (mkLogged log₃ (yes _)) →
+--           Armor.IO.putStrLnErr (fn String.++ " (decoded): parse remainder success (SHOULD NOT HAPPEN)")
+--           IO.>> Armor.IO.exitFailure
+--         (mkLogged log₃ (no _)) →
+--           Armor.IO.putStrLnErr (fn String.++ " (decoded): "
+--             String.++ show (map toℕ (take 10 suf))
+--             String.++ foldl String._++_ "" log₃)
+--           IO.>> Armor.IO.exitFailure))
+--     (mkLogged log₂ (yes schain)) → IO.pure (_ , schain)
 
 main : IO.Main
 main = IO.run $
@@ -159,14 +159,22 @@ main = IO.run $
       Armor.IO.putStrLnErr ("-- " String.++ msg)
       IO.>> Armor.IO.exitFailure
     (inj₂ cmd) →
-       case (CmdArg.crlname cmd) of λ where
-          nothing → Armor.IO.exitSuccess
+      readPEMCert (CmdArg.certname cmd)
+      IO.>>= λ cert─ → case (CmdArg.rootname cmd) of λ where
+        (just rootName) →
+          readPEMCert rootName
+          IO.>>= λ root─ → case (CmdArg.crlname cmd) of λ where
+            nothing → runCertChecksChain (CmdArg.purpose cmd) nothing
+                        (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
+            (just crlName) →
+              readPEMCrl crlName
+              IO.>>= λ crl─ → runCertChecksChain (CmdArg.purpose cmd) (just (IList.toList _ (proj₂ crl─)))
+                                (IList.toList _ (proj₂ root─)) (IList.toList _ (proj₂ cert─))
+        nothing → case (CmdArg.crlname cmd) of λ where
+          nothing → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) nothing
           (just crlName) →
-            readDERCrl crlName
-            IO.>>= λ crl─ →
-              IO.putStrLn ("1") IO.>>
-              Armor.IO.exitSuccess
-
+            readPEMCrl crlName
+            IO.>>= λ crl─ → runCertChecksLeaf (CmdArg.purpose cmd) (IList.toList _ (proj₂ cert─)) (just (IList.toList _ (proj₂ crl─)))
 
   where
   record CmdArgTmp : Set where
@@ -212,21 +220,21 @@ main = IO.run $
     IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
     IO.pure (_ , certs)
 
-  -- readPEMCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
-  -- readPEMCrl filename =
-  --   IO.readFiniteFile filename
-  --   IO.>>= (parseCrls filename ∘ String.toList)
-  --   IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
-  --   IO.pure (_ , certs)
+  readPEMCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
+  readPEMCrl filename =
+    IO.readFiniteFile filename
+    IO.>>= (parseCrls filename ∘ String.toList)
+    IO.>>= λ certS → let (_ , success pre r r≡ certs suf ps≡) = certS in
+    IO.pure (_ , certs)
 
-  readDERCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
-  readDERCrl filename =
-    Armor.IO.openFile filename Armor.IO.Primitive.readMode
-    IO.>>= Armor.IO.hGetByteStringContents
-    IO.>>= λ contents → let bs = Armor.Foreign.ByteString.toUInt8 contents in
-    parseCrls filename bs
-    IO.>>= λ crlS → let (_ , success pre r r≡ crls suf ps≡) = crlS in
-    IO.pure (_ , crls)
+  -- readDERCrl : (filename : String) → IO.IO (Exists─ _ CRL.CRLList)
+  -- readDERCrl filename =
+  --   Armor.IO.openFile filename Armor.IO.Primitive.readMode
+  --   IO.>>= Armor.IO.hGetByteStringContents
+  --   IO.>>= λ contents → let bs = Armor.Foreign.ByteString.toUInt8 contents in
+  --   parseCrls filename bs
+  --   IO.>>= λ crlS → let (_ , success pre r r≡ crls suf ps≡) = crlS in
+  --   IO.pure (_ , crls)
 
   record CertOutput : Set where
     field
@@ -593,33 +601,33 @@ main = IO.run $
           false → IO.pure false
         false → IO.pure false
 
-  -- runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
-  -- runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
-  --                                            Armor.IO.exitFailure
-  -- runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
-  --   -- IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
-  --   helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
-  --     true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
-  --            Armor.IO.exitSuccess
-  --     false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
-  --             Armor.IO.exitFailure
-  --   where
-  --   helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
-  --                                   → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
-  --                                   → List (Chain trustedRoot candidates issuee) → IO.IO Bool
-  --   helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
-  --                             IO.pure false
-  --   helper kp crl issuee (chain ∷ otherChains) =
-  --     runChainChecks kp crl issuee chain IO.>>= λ where
-  --       false →  helper kp crl issuee otherChains
-  --       true → IO.pure true
+  runCertChecksChain : Maybe KeyPurpose → Maybe (List (Exists─ _ CRL.CertList)) → (trustedRoot candidates : List (Exists─ _ Cert)) → _
+  runCertChecksChain kp crl trustedRoot [] = Armor.IO.putStrLnErr "Error: no candidate certificates" IO.>>
+                                             Armor.IO.exitFailure
+  runCertChecksChain kp crl trustedRoot ((─ _ , end) ∷ restCerts) =
+    -- IO.putStrLn (showℕ (length (buildChains trustedRoot (removeCertFromCerts end restCerts) end))) IO.>>
+    helper kp crl end (buildChains trustedRoot (removeCertFromCerts end restCerts) end) IO.>>= λ where
+      true → IO.putStrLn "Chain Semantic Validation : Success" IO.>>
+             Armor.IO.exitSuccess
+      false → IO.putStrLn "Chain Semantic Validation : Failed" IO.>>
+              Armor.IO.exitFailure
+    where
+    helper : ∀ {@0 bs} {trustedRoot candidates : List (Exists─ _ Cert)} → Maybe KeyPurpose
+                                    → Maybe (List (Exists─ _ CRL.CertList)) → (issuee : Cert bs)
+                                    → List (Chain trustedRoot candidates issuee) → IO.IO Bool
+    helper kp crl issuee [] = Armor.IO.putStrLnErr "Error: no valid chain found" IO.>>
+                              IO.pure false
+    helper kp crl issuee (chain ∷ otherChains) =
+      runChainChecks kp crl issuee chain IO.>>= λ where
+        false →  helper kp crl issuee otherChains
+        true → IO.pure true
 
-  -- runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
-  -- runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>
-  --                               Armor.IO.exitFailure
-  -- runCertChecksLeaf kp (leaf ∷ rest)  crl =
-  --   runSingleCertChecks kp (proj₂ leaf) crl 1 IO.>>= λ where
-  --     true → IO.putStrLn "Cert Semantic Validation : Success" IO.>>
-  --            Armor.IO.exitSuccess
-  --     false → IO.putStrLn "Cert Semantic Validation : Failed" IO.>>
-  --             Armor.IO.exitFailure
+  runCertChecksLeaf : Maybe KeyPurpose → (certs : List (Exists─ _ Cert)) → Maybe (List (Exists─ _ CRL.CertList)) → _
+  runCertChecksLeaf kp [] crl = Armor.IO.putStrLnErr "Error: no parsed leaf certificate" IO.>>
+                                Armor.IO.exitFailure
+  runCertChecksLeaf kp (leaf ∷ rest)  crl =
+    runSingleCertChecks kp (proj₂ leaf) crl 1 IO.>>= λ where
+      true → IO.putStrLn "Cert Semantic Validation : Success" IO.>>
+             Armor.IO.exitSuccess
+      false → IO.putStrLn "Cert Semantic Validation : Failed" IO.>>
+              Armor.IO.exitFailure
