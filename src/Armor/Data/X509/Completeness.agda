@@ -1,3 +1,5 @@
+{-# OPTIONS --erasure #-}
+
 open import Armor.Binary
 open import Armor.Data.X509
 import      Armor.Grammar.Definitions
@@ -25,4 +27,3 @@ weakCompleteness = Generic.weakCompleteness parseCert
 
 @0 strongCompleteness : StronglyComplete parseCert
 strongCompleteness = Generic.strongCompleteness parseCert Cert.unambiguous TLV.nosubstrings
-

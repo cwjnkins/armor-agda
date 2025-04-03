@@ -1,3 +1,5 @@
+{-# OPTIONS --erasure #-}
+
 import      Armor.Grammar.Definitions
 import      Armor.Grammar.Parser.Core
 import      Armor.Grammar.Parser.Maximal as Maximal
@@ -34,7 +36,7 @@ module Proofs (M : Set → Set) (extract : ∀ {G} {@0 bs} → M (Success G bs) 
     trivSuccess{xs = xs} xs∈G = success xs (length xs) refl xs∈G [] (++-identityʳ xs)
 
   @0 weakCompleteness : ∀ {G} (p : Parser M G) → WeaklyComplete p
-  weakCompleteness p xs xsInG = fromWitness {Q = extract (runParser p xs)} (trivSuccess xsInG)
+  weakCompleteness p xs xsInG = fromWitness (trivSuccess xsInG)
 
   @0 strongCompleteness : ∀ {G : @0 List Σ → Set} (p : Parser M G) → Unambiguous G → NoSubstrings G → StronglyComplete p
   strongCompleteness{G} p ua nn xs xs∈G = w , secure xs xs∈G s
